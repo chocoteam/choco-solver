@@ -58,8 +58,8 @@ public class HamiltonianCycleProblem extends AbstractProblem {
 
     @Option(name = "-tl", usage = "time limit.", required = false)
     private long limit = 10000;
-    @Option(name = "-inst", usage = "TSPLIB HCP Instance file path.", required = false)
-    private String instancePath = "/Users/jfages07/Documents/code/ALL_hcp/alb5000.hcp";
+    @Option(name = "-inst", usage = "TSPLIB HCP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/) .", required = true)
+    private String instancePath;
     // graph variable expected to form a Hamiltonian Cycle
     private UndirectedGraphVar graph;
 
@@ -98,7 +98,6 @@ public class HamiltonianCycleProblem extends AbstractProblem {
         // basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
         SearchMonitorFactory.limitTime(solver, limit);
-        SearchMonitorFactory.log(solver, false, false);
     }
 
     @Override

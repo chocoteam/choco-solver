@@ -30,10 +30,11 @@ import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
+import solver.constraints.nary.sum.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.StringUtils;
 
 /**
  * Costas Arrays
@@ -70,7 +71,11 @@ public class CostasArrays extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i != j) {
-                    vectors[idx] = VariableFactory.offset(Sum.var(vars[j], VariableFactory.minus(vars[i])), 2 * n * (j - i));
+
+
+					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
+					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
                     idx++;
                 }
             }

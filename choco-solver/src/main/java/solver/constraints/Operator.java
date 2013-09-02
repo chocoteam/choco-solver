@@ -58,10 +58,35 @@ public enum Operator {
         operators.put("-", Operator.MN);
     }
 
-    ;
-
-
     public static Operator get(String name) {
         return operators.get(name);
     }
+
+	/**
+	 * Flips the direction of an inequality
+	 * @param operator
+	 */
+	public static String getFlip(String operator) {
+		switch (get(operator)){
+			case LT:return ">";
+			case GT:return "<";
+			case LE:return ">=";
+			case GE:return "<=";
+			default:return operator;
+		}
+	}
+
+	public static Operator getOpposite(Operator operator) {
+		switch (operator){
+			case LT:return GE;
+			case GT:return LE;
+			case LE:return GT;
+			case GE:return LT;
+			case NQ:return EQ;
+			case EQ:return NQ;
+			case PL:return MN;
+			case MN:return PL;
+			default:throw new UnsupportedOperationException();
+		}
+	}
 }

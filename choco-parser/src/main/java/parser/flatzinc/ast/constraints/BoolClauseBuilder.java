@@ -27,20 +27,18 @@
 
 package parser.flatzinc.ast.constraints;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
 import java.util.List;
 
 /**
- * (&#8707; i &#8712; 1..nas: as[i]) &#8744; (&#8707; i &#8712; 1..nbs: &not;bs[i]) &#8660; r
+ * (&#8707; i &#8712; 1..nas: as[i]) &#8744; (&#8707; i &#8712; 1..nbs: &not;bs[i])
  * <br/>
  *
  * @author Charles Prud'homme
@@ -48,18 +46,20 @@ import java.util.List;
  */
 public class BoolClauseBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar[] bs = exps.get(1).toBoolVarArray(solver);
 
-        Literal[] lits = new Literal[as.length + bs.length];
+        BoolVar[] lits = new BoolVar[as.length + bs.length];
         for (int i = 0; i < as.length; i++) {
-            lits[i] = Literal.pos(as[i]);
+            lits[i] = as[i];
         }
         int al = as.length;
         for (int i = 0; i < bs.length; i++) {
-            lits[i + al] = Literal.neg(bs[i]);
+            lits[i + al] = bs[i].not();
         }
-        return new Constraint[]{IntConstraintFactory.clauses(Node.or(lits), solver)};
+//        return new Constraint[]{IntConstraintFactory.clauses(LogOp.or(lits), solver)};
+        SatFactory.addClauses(as, bs);
+        return new Constraint[]{};
     }
 }

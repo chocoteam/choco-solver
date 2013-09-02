@@ -66,11 +66,9 @@ public class FastDecision extends Decision<IntVar> {
     }
 
     public void set(IntVar v, int value, DecisionOperator<IntVar> assignment) {
-        branch = 0;
-        this.var = v;
+        super.set(v);
         this.value = value;
         this.assignment = assignment;
-        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override
@@ -85,7 +83,29 @@ public class FastDecision extends Decision<IntVar> {
     }
 
     @Override
+    public Decision<IntVar> duplicate() {
+        FastDecision d = poolManager.getE();
+        if (d == null) {
+            d = new FastDecision(poolManager);
+        }
+        d.set(var, value, assignment);
+        return d;
+    }
+
+    @Override
     public String toString() {
         return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
+    }
+
+    @Override
+    public int compareTo(Decision<IntVar> o) {
+        if (super.compareTo(o) == 0 && o.getClass().isInstance(this)) {
+            FastDecision fd = (FastDecision) o;
+            if (fd.assignment == this.assignment) {
+                return 0;
+            }
+            return 1;
+        }
+        return 1;
     }
 }

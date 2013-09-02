@@ -29,15 +29,16 @@ package samples.pert;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.LogicalConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * <br/>
@@ -48,7 +49,6 @@ import java.util.*;
 public class PertReified extends Pert {
 
     BoolVar[] bvars;
-    List<Propagator> reifieds;
 
     @Override
     public void createSolver() {
@@ -60,11 +60,10 @@ public class PertReified extends Pert {
         setUp();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
-        reifieds = new ArrayList<Propagator>();
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
-                    solver.post(precedence(vars[i], 1, vars[j], solver));
+                    solver.post(precedence(vars[i], 1, vars[j]));
                 }
             }
         }
@@ -81,16 +80,8 @@ public class PertReified extends Pert {
                 for (int m = l + 1; m < _vars.length; m++) {
                     BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
                     lbvars.add(bvar);
-                    Constraint c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m], solver));
-                    Constraint c2 = IntConstraintFactory.implies(VariableFactory.not(bvar), precedence(_vars[m], _durs[m], _vars[l], solver));
+                    Constraint c1 = LogicalConstraintFactory.ifThenElse(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
                     solver.post(c1);
-                    solver.post(c2);
-                    for (int k = 0; k < c1.getPropagators().length; k++) {
-                        reifieds.add(c1.getPropagator(k));
-                    }
-                    for (int k = 0; k < c2.getPropagators().length; k++) {
-                        reifieds.add(c2.getPropagator(k));
-                    }
                 }
             }
         }
@@ -106,50 +97,6 @@ public class PertReified extends Pert {
                         IntStrategyFactory.inputOrder_InDomainMin(vars)
                 )
         );
-
-        int[] rank = new int[n];
-        boolean[] treated = new boolean[n];
-        int i = 0;
-        Deque<Integer> toTreat = new ArrayDeque<Integer>();
-        toTreat.push(i);
-        rank[i] = 0;
-        while (!toTreat.isEmpty()) {
-            i = toTreat.pop();
-            treated[i] = true;
-            for (int j = 0; j < n; j++) {
-                if (graph[i][j] == 1) {
-                    rank[j] = Math.max(rank[i] + 1, rank[j]);
-                    if (!treated[j] && !toTreat.contains(j)) {
-                        toTreat.push(j);
-                    }
-                }
-            }
-        }
-
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.member(reifieds.toArray(new Propagator[reifieds.size()])),
-                        IncrArityP.get(),
-                        Policy.ITERATE
-                ));
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.priority(PropagatorPriority.TERNARY),
-                        new Cond(
-                                Predicates.lhs(),
-                                new MappingV(vars, rank),
-                                new Decr(new MappingV(vars, rank))
-                        ),
-                        Policy.ITERATE
-                ));
-        // default group
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        IncrArityP.get(),
-                        Policy.FIXPOINT
-                ));*/
     }
 
     public static void main(String[] args) {

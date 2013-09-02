@@ -56,7 +56,7 @@ public class ConsistencyChecker {
 
     public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
-
+        System.out.printf("Running %s\n", modeler.name());
         Consistency _consistency = Consistency.valueOf(consistency);
 
         THashMap<int[], IntVar> map = new THashMap<int[], IntVar>();

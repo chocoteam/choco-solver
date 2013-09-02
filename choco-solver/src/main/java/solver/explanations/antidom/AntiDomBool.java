@@ -64,15 +64,40 @@ public class AntiDomBool implements AntiDomain {
     }
 
     @Override
-    public void set(int outsideval) {
-        assert outsideval == 0 || outsideval == 1;
-        notInstanciated.remove(offset);
-        mValue = outsideval;
+    public void add(int outsideval) {
+        if (outsideval == 0 || outsideval == 1) {
+            notInstanciated.remove(offset);
+            mValue = outsideval;
+        }
+    }
+
+    @Override
+    public void updateLowerBound(int oldLB, int newLB) {
+        for (int i = oldLB; i < newLB; i++) {
+            add(i);
+        }
+    }
+
+    @Override
+    public void updateUpperBound(int oldUB, int newUB) {
+        for (int i = oldUB; i > newUB; i--) {
+            add(i);
+        }
     }
 
     @Override
     public boolean get(int outsideval) {
-        return !notInstanciated.contains(offset) && mValue == outsideval;
+        return (!notInstanciated.contains(offset) && mValue == outsideval);
+    }
+
+    @Override
+    public int getKeyValue(int outsideval) {
+        return outsideval;
+    }
+
+    @Override
+    public int size() {
+        return notInstanciated.contains(offset) ? 0 : 1;
     }
 
     @Override
@@ -119,5 +144,10 @@ public class AntiDomBool implements AntiDomain {
         }
         _viterator.bottomUpInit();
         return _viterator;
+    }
+
+    @Override
+    public boolean isEnumerated() {
+        return true;
     }
 }

@@ -31,9 +31,7 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
-import solver.search.solution.ISolutionPool;
-import solver.search.solution.Solution;
-import solver.search.solution.SolutionPoolFactory;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
 import solver.search.strategy.strategy.AssignmentInterval;
@@ -51,7 +49,6 @@ public class CycloHexan extends AbstractProblem {
 
     RealVar[] vars;
     RealVar x, y, z;
-    Ibex ibex;
 
     @Override
     public void printDescription() {
@@ -80,7 +77,6 @@ public class CycloHexan extends AbstractProblem {
 
         vars = new RealVar[]{x, y, z};
         RealConstraint rcons = new RealConstraint(solver);
-        ibex = rcons.ibex;
         /*rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars, Ibex.COMPO);
         rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars, Ibex.COMPO);
         rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars);*/
@@ -100,27 +96,24 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().setSolutionpool(SolutionPoolFactory.ALL.make());
+		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				StringBuilder st = new StringBuilder();
+				st.append("\t");
+				for (int i = 0; i < vars.length; i++) {
+					st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
+				}
+				LoggerFactory.getLogger("bench").info("CycloHexan");
+				LoggerFactory.getLogger("bench").info(st.toString());
+			}
+		});
         solver.findAllSolutions();
+		solver.getIbex().release();
     }
 
     @Override
-    public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("CycloHexan");
-        StringBuilder st = new StringBuilder();
-        ISolutionPool solutions = solver.getSearchLoop().getSolutionpool();
-        for (Solution sol : solutions.asList()) {
-            solver.getEnvironment().worldPush();
-            sol.restore();
-            st.append("\t");
-            for (int i = 0; i < vars.length; i++) {
-                st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
-            }
-            solver.getEnvironment().worldPop();
-        }
-        LoggerFactory.getLogger("bench").info(st.toString());
-        ibex.release();
-    }
+    public void prettyOut() {}
 
     public static void main(String[] args) {
         new CycloHexan().execute(args);

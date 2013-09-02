@@ -1,0 +1,118 @@
+/**
+ *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  All rights reserved.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the Ecole des Mines de Nantes nor the
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package solver.constraints.nary.nogood;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.exception.ContradictionException;
+import solver.propagation.queues.CircularQueue;
+import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.RootDecision;
+import solver.variables.IntVar;
+
+import java.util.Arrays;
+
+/**
+ * A constraint for the specific Nogood store designed to store ONLY positive decisions.
+ * <p/>
+ * Related to "Nogood Recording from Restarts", C. Lecoutre et al.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 20/06/13
+ */
+public class NogoodStoreForRestarts extends Constraint<IntVar, PropNogoodStore> implements IMonitorRestart {
+
+    static final Logger LOGGER = LoggerFactory.getLogger("solver");
+
+    static final String MSG_NGOOD = "unit propagation failure (nogood)";
+
+    CircularQueue<Decision<IntVar>> decisions;
+    CircularQueue<INogood> nogoods;
+
+    public NogoodStoreForRestarts(IntVar[] vars, Solver solver) {
+        super(vars, solver);
+        setPropagators(new PropNogoodStore(vars));
+        decisions = new CircularQueue<Decision<IntVar>>(16);
+        nogoods = new CircularQueue<INogood>(16);
+
+    }
+
+    @Override
+    public void beforeRestart() {
+        extractNogoodFromPath();
+    }
+
+    @Override
+    public void afterRestart() {
+        try {
+            while (!nogoods.isEmpty()) {
+                INogood ng = nogoods.pollFirst();
+                propagators[0].addNogood(ng);
+            }
+            propagators[0].unitPropagation();
+        } catch (ContradictionException e) {
+            solver.getSearchLoop().interrupt(MSG_NGOOD);
+        }
+    }
+
+    private void extractNogoodFromPath() {
+        int d = solver.getSearchLoop().getCurrentDepth();
+        Decision<IntVar> decision = solver.getSearchLoop().decision;
+        while (decision != RootDecision.ROOT) {
+            decisions.addLast(decision);
+            decision = decision.getPrevious();
+        }
+        IntVar[] vars = new IntVar[d];
+        int[] values = new int[d];
+        int i = 0;
+        while (!decisions.isEmpty()) {
+            decision = decisions.pollLast();
+            if (decision.hasNext()) {
+                vars[i] = decision.getDecisionVariable();
+                values[i] = (Integer) decision.getDecisionValue();
+                i++;
+            } else {
+                INogood ng;
+                if (i == 0) {
+                    // value can be removed permanently from var!
+                    // todo: can be improved
+                    ng = new UnitNogood(decision.getDecisionVariable(), (Integer) decision.getDecisionValue());
+                } else {
+                    vars[i] = decision.getDecisionVariable();
+                    values[i] = (Integer) decision.getDecisionValue();
+                    // BEWARE: do not increment i, we use the array to avoid creating a temporary one!!
+                    ng = new Nogood(Arrays.copyOf(vars, i + 1), Arrays.copyOf(values, i + 1));
+                }
+                nogoods.addLast(ng);
+            }
+        }
+    }
+}

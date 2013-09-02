@@ -38,7 +38,7 @@ import solver.variables.delta.NoDelta;
 /**
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 20/07/12
  */
 public class RealView extends AbstractVariable<NoDelta, RealVar>
@@ -49,7 +49,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     protected final double precision;
 
     public RealView(IntVar var, double precision) {
-        super(var.getSolver());
+        super("(real)" + var.getName(), var.getSolver());
         this.var = var;
         this.precision = precision;
         this.var.subscribeView(this);
@@ -77,12 +77,12 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
         var.recordMask(mask);
     }
 
-    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
-
     @Override
-    public boolean reactOnPromotion() {
-        return false;
+    public String toString() {
+        return "(real)" + var.toString();
     }
+
+    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
 
     @Override
     public double getLB() {
@@ -96,17 +96,40 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
-        return var.updateLowerBound((int) value, this);
+        if (var.updateLowerBound((int) Math.ceil(value - precision), this)) {
+            notifyPropagators(EventType.INCLOW, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
-        return var.updateUpperBound((int) value, this);
+        if (var.updateUpperBound((int) Math.floor(value + precision), this)) {
+            notifyPropagators(EventType.INCLOW, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException {
-        return var.updateLowerBound((int) lowerbound, this) & var.updateUpperBound((int) upperbound, this);
+        int c = 0;
+        c += (var.updateLowerBound((int) Math.ceil(lowerbound - precision), this) ? 1 : 0);
+        c += (var.updateUpperBound((int) Math.floor(upperbound + precision), this) ? 2 : 0);
+        switch (c) {
+            case 3:
+                notifyPropagators(EventType.BOUND, cause);
+                return true;
+            case 2:
+                notifyPropagators(EventType.DECUPP, cause);
+                return true;
+            case 1:
+                notifyPropagators(EventType.INCLOW, cause);
+                return true;
+            default: //cas 0;
+                return false;
+        }
     }
 
     @Override
@@ -116,22 +139,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public boolean instantiated() {
-        double lb = var.getLB();
-        double ub = var.getUB();
-        if (ub - lb < precision) return true;
-        return nextValue(lb) >= ub;   // TODO a confirmer aupres de Gilles
-    }
-
-    private double nextValue(double x) {
-        if (x < 0) {
-            return Double.longBitsToDouble(Double.doubleToLongBits(x) - 1);
-        } else if (x == 0) {
-            return Double.longBitsToDouble(1);
-        } else if (x < Double.POSITIVE_INFINITY) {
-            return Double.longBitsToDouble(Double.doubleToLongBits(x) + 1);
-        } else {
-            return x; // nextValue(infty) = infty
-        }
+        return var.instantiated();
     }
 
     @Override
@@ -165,7 +173,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public int getTypeAndKind() {
-        return Variable.VIEW | var.getTypeAndKind();
+        return VIEW | REAL;
     }
 
     @Override

@@ -94,7 +94,7 @@ public final class GraphStrategyFactory {
      * @return a random strategy to instantiate g
      */
     public static <G extends GraphVar> AbstractStrategy graphRandom(G GRAPHVAR, long SEED) {
-        return graphStrategy(GRAPHVAR, new RandomNode(GRAPHVAR, SEED), new RandomArc(GRAPHVAR, SEED), GraphStrategy.NodeArcPriority.ARCS);
+        return graphStrategy(GRAPHVAR, new RandomNode(GRAPHVAR, SEED), new RandomArc(GRAPHVAR, SEED), GraphStrategy.NodeArcPriority.NODES_THEN_ARCS);
     }
 
     /**

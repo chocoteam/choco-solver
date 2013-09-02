@@ -33,10 +33,11 @@ import samples.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -63,8 +64,8 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Option(name = "-tl", usage = "time limit.", required = false)
     private long limit = 60000;
     // instance file path
-    @Option(name = "-inst", usage = "TSPLIB TSP Instance file path.", required = false)
-    private String instancePath = "/Users/jfages07/github/In4Ga/ALL_tsp/eil101.tsp";
+    @Option(name = "-inst", usage = "TSPLIB TSP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/).", required = true)
+    private String instancePath;
     @Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
     private int policy = 1; // the lower bound of the Lagrangian relaxation is pretty good so Bottom-Up is a good choise
 
@@ -118,18 +119,17 @@ public class TravelingSalesmanProblem extends AbstractProblem {
                 System.out.println("classical top-down minimization");
                 break;
             case 1:
-                solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
+                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
                 System.out.println("bottom-up minimization");
                 break;
             case 2:
-                solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
+                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
                 System.out.println("dichotomic minimization");
                 break;
             default:
                 throw new UnsupportedOperationException("policy should be 0, 1 or 2");
         }
         SearchMonitorFactory.limitTime(solver, limit);
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Override
     public void prettyOut() {
         System.out.println("optimum in ["
-                + solver.getSearchLoop().getObjectivemanager().getBestLB() + ","
-                + solver.getSearchLoop().getObjectivemanager().getBestUB() + "]");
+                + ((IntObjectiveManager)solver.getSearchLoop().getObjectivemanager()).getBestLB() + ","
+                + ((IntObjectiveManager)solver.getSearchLoop().getObjectivemanager()).getBestUB() + "]");
     }
 }

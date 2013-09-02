@@ -35,10 +35,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
+import solver.constraints.nary.sum.Sum;
 import solver.variables.VariableFactory;
 
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class T_constraint extends GrammarTest {
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincWalker walker = new FlatzincWalker(nodes);
         walker.mSolver = mSolver;
-        walker.map = map;
+        walker.datas = new Datas();
         walker.constraint();
     }
 

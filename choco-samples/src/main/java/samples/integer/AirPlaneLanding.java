@@ -35,16 +35,11 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.ternary.Max;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationFactory;
-import solver.explanations.RecorderExplanationEngine;
-import solver.explanations.VariableState;
-import solver.search.limits.FailLimit;
-import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
-import solver.search.loop.monitors.IMonitorInitPropagation;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.limits.FailCounter;
+import solver.search.loop.lns.LNSFactory;
+import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -109,7 +104,6 @@ public class AirPlaneLanding extends AbstractProblem {
 
     IntVar[] planes, tardiness, earliness;
     BoolVar[] bVars;
-    TObjectIntHashMap<Constraint> ranking = new TObjectIntHashMap<Constraint>();
     int[] costLAT;
     TObjectIntHashMap<IntVar> maxCost;
     int[] LLTs;
@@ -155,18 +149,8 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                Constraint cr1 = IntConstraintFactory.implies(boolVar, c1);
-                Constraint cr2 = IntConstraintFactory.implies(VariableFactory.not(boolVar), c2);
-                solver.post(cr1);
-                solver.post(cr2);
-                // NOTE: use to be one single reification constraint in "ranking"
-                // not sure that the mapping is still good
-                ranking.put(cr1,
-                        Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
-                                (data[j][LLT] - data[j][TT]) * data[j][PCAT]));
-                ranking.put(cr2,
-                        Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
-                                (data[j][LLT] - data[j][TT]) * data[j][PCAT]));
+                Constraint cr = LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
+                solver.post(cr);
             }
         }
 
@@ -206,7 +190,6 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-//        solver.set(StrategyFactory.domOverWDeg_InDomainMin(planes, solver));
         solver.set(new StrategiesSequencer(solver.getEnvironment(),
                 IntStrategyFactory.random(bVars, seed),
                 IntStrategyFactory.inputOrder_InDomainMin(planes)
@@ -215,14 +198,9 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-        // -----
-        boolean lns = true;
-        SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(solver, 100), 100);
-        if (lns) {
-            solver.getSearchLoop().plugSearchMonitor(new ExplainedLNS(solver, objective));
-        } else {
-            SearchMonitorFactory.log(solver, true, false);
-        }
+        IntVar[] ivars = solver.retrieveIntVars();
+        LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
+        SMF.limitTime(solver, 5000); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
@@ -266,82 +244,6 @@ public class AirPlaneLanding extends AbstractProblem {
         }
         sc.close();
         return data;
-    }
-
-    private static final class ExplainedLNS extends Abstract_LNS_SearchMonitor implements IMonitorInitPropagation {
-
-        private int coeff = 10;
-
-        private IntVar objective;
-
-        private int bestCost;
-
-        private RecorderExplanationEngine explainer;
-
-        public ExplainedLNS(Solver solver, IntVar objective) {
-            super(solver, true);
-            this.objective = objective;
-            this.bestCost = objective.getUB() + 1;
-        }
-
-        @Override
-        public void beforeInitialPropagation() {
-        }
-
-        @Override
-        public void afterInitialPropagation() {
-        }
-
-        @Override
-        protected boolean isSearchComplete() {
-            return coeff == 1;
-        }
-
-        @Override
-        public void afterRestart() {
-            if (solver.getMeasures().getSolutionCount() == 1) {
-                ExplanationFactory.SILENT.plugin(solver, false);
-                explainer = (RecorderExplanationEngine) solver.getExplainer();
-                explainer.beforeInitialPropagation();
-            }
-        }
-
-        @Override
-        protected void recordSolution() {
-            if ((objective.getValue() > bestCost)) {
-                throw new UnsupportedOperationException();
-            }
-            bestCost = objective.getValue();
-            if (solver.getMeasures().getRestartCount() > 0) {
-                try {
-                    objective.updateUpperBound(bestCost - 1, this);
-                    solver.propagate();
-                } catch (ContradictionException cex) {
-                    if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-                        Explanation expl = new Explanation();
-                        if (cex.v != null) {
-                            cex.v.explain(VariableState.DOM, expl);
-                        } else {
-                            cex.c.explain(null, expl);
-                        }
-                        Explanation complete = explainer.flatten(expl);
-                        explainer.onContradiction(cex, complete);
-                    } else {
-                        throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void fixSomeVariables() throws ContradictionException {
-            objective.updateUpperBound(bestCost / coeff - 1, this);
-        }
-
-        @Override
-        protected void restrictLess() {
-            coeff /= 2;
-        }
     }
 
     /////////////////////////////////////////

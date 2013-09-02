@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.limits.NodeLimit;
+import solver.search.limits.NodeCounter;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -67,8 +67,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.geometrical(solver, 2, 1.2,
-                new NodeLimit(solver, 2), 2);
+        SearchMonitorFactory.geometrical(solver, 2, 1.2, new NodeCounter(2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -79,8 +78,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.luby(solver, 2, 2,
-                new NodeLimit(solver, 2), 2);
+        SearchMonitorFactory.luby(solver, 2, 2, new NodeCounter(2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -109,7 +107,7 @@ public class RestartTest {
         Assert.assertEquals(computed, expected);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRestartStrategy() {
         AbstractRestartStrategy r = new LubyRestartStrategy(1, 2);
         checkRestart(r, 2, LUBY_2);

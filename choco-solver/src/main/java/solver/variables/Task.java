@@ -94,10 +94,6 @@ public class Task {
                     throw new SolverException("A task cannot explain itself yet.");
                 }
 
-                @Override
-                public boolean reactOnPromotion() {
-                    return false;
-                }
             };
         } else {
             update = new IVariableMonitor() {
@@ -119,10 +115,6 @@ public class Task {
                     throw new SolverException("A task cannot explain itself yet.");
                 }
 
-                @Override
-                public boolean reactOnPromotion() {
-                    return false;
-                }
             };
         }
         start.addMonitor(update);

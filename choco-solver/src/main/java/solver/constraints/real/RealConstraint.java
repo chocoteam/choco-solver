@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -28,24 +28,20 @@ package solver.constraints.real;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.real.IntToRealPropagator;
-import solver.constraints.propagators.real.RealPropagator;
-import solver.constraints.propagators.real.RealReifiedPropagator;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
 import solver.variables.RealVar;
 
 /**
  * A constraint on real variables, solved using IBEX.
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18/07/12
  */
-public class RealConstraint extends Constraint {
+public class RealConstraint extends Constraint<RealVar,RealPropagator> {
 
-    public final Ibex ibex;
-    public int contractors;
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
     /**
      * Create a constraint on real variables.
@@ -55,9 +51,22 @@ public class RealConstraint extends Constraint {
      */
     public RealConstraint(Solver solver) {
         super(solver);
-        ibex = new Ibex();
-        contractors = 0;
     }
+
+	/**
+	 * Create a constraint on real variables.
+	 * This is propagated using IBEX.
+	 *
+	 * @param vars concerned variables
+	 * @param solver the solver
+	 */
+	public RealConstraint(RealVar[] vars, Solver solver) {
+		super(vars,solver);
+	}
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     /**
      * add one or more functions, separated with semi-colon ";" to <code>this</code>.
@@ -79,7 +88,7 @@ public class RealConstraint extends Constraint {
      * @param rvars     a list of real variables
      */
     public void addFunction(String functions, int option, RealVar... rvars) {
-        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, option));
+        addPropagators(new RealPropagator(functions, rvars, option));
     }
 
     /**
@@ -102,68 +111,12 @@ public class RealConstraint extends Constraint {
      * @param rvars     a list of real variables
      */
     public void addFunction(String functions, RealVar... rvars) {
-        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, Ibex.COMPO));
+        addFunction(functions, Ibex.COMPO, rvars);
     }
 
-    /**
-     * Reified one or more functions, separated with semi-colon ";" to <code>this</code>.
-     * <br/>
-     * A function is a string declared using the following format:
-     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
-     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is available in the documentation of IBEX.
-     * <p/>
-     * The reified variable <code>bvar</code> is valid for the entire list of functions (as a conjunction).
-     * Its value is TRUE if the list of functions is satisfied, FALSE if the list of functions is unsatisfied.
-     * <p/>
-     * <blockquote><pre>
-     * RealConstraint rc = new RealConstraint(solver);
-     * rc.addReifiedFunction(bv, "({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", Ibex.HC4, x,y);
-     * </pre>
-     * </blockquote>
-     *
-     * @param bvar      a boolean variable stating the status of the functions
-     * @param functions list of functions, separated by a semi-colon
-     * @param option    propagation option index (Ibex.COMPO is DEFAULT)
-     * @param rvars     a list of real variables
-     */
-    public void addReifiedFunction(BoolVar bvar, String functions, int option, RealVar... rvars) {
-        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, option));
-    }
-
-    /**
-     * add a function to <code>this</code>.
-     * <br/>
-     * A function is a string declared using the following format:
-     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
-     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is available in the documentation of IBEX.
-     * <p/>
-     * The reified variable <code>bvar</code> is valid for the entire list of functions (as a conjunction).
-     * Its value is TRUE if the list of functions is satisfied, FALSE if the list of functions is unsatisfied.
-     * <p/>
-     * <p/>
-     * <blockquote><pre>
-     * RealConstraint rc = new RealConstraint(solver);
-     * rc.addReifiedFunction(bv, "({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,y);
-     * <p/>
-     * </pre>
-     * </blockquote>
-     *
-     * @param bvar      a boolean variable stating the status of the functions
-     * @param functions list of functions, separated by a semi-colon
-     * @param rvars     a list of real variables
-     */
-    public void addReifiedFunction(String functions, BoolVar bvar, RealVar... rvars) {
-        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, Ibex.COMPO));
-    }
-
-    /**
-     * Add a discretization constraint to Ibex, forcing variable in parameters to be considered as discrete
-     *
-     * @param vars array of variables
-     */
-    public void discretize(IntVar... vars) {
-        addPropagators(new IntToRealPropagator(ibex, contractors++, vars));
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+		solver.getIbex().release();
     }
 }

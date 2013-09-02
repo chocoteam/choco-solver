@@ -35,6 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
+import solver.variables.VF;
 import solver.variables.VariableFactory;
 import util.ESat;
 
@@ -111,10 +112,12 @@ public class Partition extends AbstractProblem {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = VariableFactory.sqr(x[i]);
+            sx[i] = VF.bounded("x^", 0, x[i].getUB() * x[i].getUB(), solver);
             sxy[i] = sx[i];
-            sy[i] = VariableFactory.sqr(y[i]);
+            sy[i] = VF.bounded("y^", 0, y[i].getUB() * y[i].getUB(), solver);
             sxy[size + i] = sy[i];
+            solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
+            solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));
             solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
             solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
         }

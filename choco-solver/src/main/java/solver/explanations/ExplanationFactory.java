@@ -58,6 +58,13 @@ public enum ExplanationFactory {
             plugExpl(solver, flattened);
         }
     },
+
+    LAZY {
+        @Override
+        public void plugin(Solver solver, boolean flattened) {
+            solver.set(new LazyExplanationEngine(solver));
+        }
+    },
     /**
      * add a Conflict-based jumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.

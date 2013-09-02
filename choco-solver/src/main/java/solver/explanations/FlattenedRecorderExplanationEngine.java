@@ -28,6 +28,7 @@
 package solver.explanations;
 
 import solver.Solver;
+import solver.explanations.antidom.AntiDomain;
 import solver.variables.IntVar;
 
 /**
@@ -43,7 +44,8 @@ public class FlattenedRecorderExplanationEngine extends RecorderExplanationEngin
 
     @Override
     public Deduction explain(IntVar var, int val) {
-        return flatten(getValueRemoval(var, val));
+        AntiDomain ad = getRemovedValues(var);
+        return flatten(getValueRemoval(var, ad.getKeyValue(val)));
     }
 
     @Override
@@ -57,12 +59,18 @@ public class FlattenedRecorderExplanationEngine extends RecorderExplanationEngin
 
     @Override
     public Explanation flatten(IntVar var, int val) {
-        return flatten(getValueRemoval(var, val));
+        AntiDomain ad = getRemovedValues(var);
+        return flatten(getValueRemoval(var, ad.getKeyValue(val)));
     }
+
 
     @Override
     public Explanation flatten(Deduction deduction) {
-        return database.get(deduction.id);
+        Explanation e = database.get(deduction.id);
+        if (e == null) {
+            e = Explanation.SYSTEM.get();
+        }
+        return e;
     }
 
 }

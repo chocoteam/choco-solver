@@ -29,7 +29,7 @@ package solver.search.loop.monitors;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.variables.Variable;
 import solver.variables.view.IView;
 

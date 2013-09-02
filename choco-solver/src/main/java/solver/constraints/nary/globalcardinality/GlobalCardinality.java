@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.nary.globalcardinality.PropFastGCC;
+import solver.constraints.LogicalConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -77,8 +77,8 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             IntVar cste = VariableFactory.fixed(i, solver);
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
-                cstrs.add(IntConstraintFactory.implies(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste)));
-                cstrs.add(IntConstraintFactory.implies(VariableFactory.not(bs[j]), IntConstraintFactory.arithm(vars[j], "!=", cste)));
+                Constraint cs = LogicalConstraintFactory.ifThenElse(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste));
+                cstrs.add(cs);
             }
             cstrs.add(IntConstraintFactory.sum(bs, card[i]));
         }

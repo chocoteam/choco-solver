@@ -27,16 +27,15 @@
 
 package samples.sandbox.lns.parallel;
 
-import samples.sandbox.parallelism.AbstractParallelMaster;
-import samples.sandbox.parallelism.AbstractParallelSlave;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.search.solution.SolutionPoolFactory;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
+import solver.thread.AbstractParallelMaster;
+import solver.thread.AbstractParallelSlave;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
@@ -110,10 +109,8 @@ public class TSPslave extends AbstractParallelSlave {
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
         strategy.configure(GraphStrategies.MAX_COST, true);
-        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
-        solver.set(SolutionPoolFactory.LAST_ONE.make());
+        solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-        solver.getSearchLoop().getSolutionpool().getBest().restore();
         //output
         if (solver.getMeasures().getSolutionCount() == 0) {
             throw new UnsupportedOperationException();
@@ -121,7 +118,7 @@ public class TSPslave extends AbstractParallelSlave {
         if (!undi.instantiated()) {
             throw new UnsupportedOperationException();
         }
-        outputCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+        outputCost = totalCost.getValue();
         if (outputCost > ub) {
             throw new UnsupportedOperationException(outputCost + ">" + ub);
         }

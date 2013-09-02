@@ -87,13 +87,18 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
                 if (node != -1) {
                     dec.setNode(g, node, GraphAssignment.graph_enforcer);
                 } else {
+					if(arcStrategy==null){
+						return null;
+					}
                     nextArc();
                     dec.setArc(g, arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
                 }
                 break;
             case ARCS:
             default:
-                nextArc();
+                if(!nextArc()){
+					return null;
+				}
                 dec.setArc(g, arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
                 break;
         }

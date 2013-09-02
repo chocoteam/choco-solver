@@ -29,7 +29,6 @@ package solver.search.strategy.selectors.variables;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateDouble;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -48,7 +47,6 @@ import solver.variables.Variable;
 import util.PoolManager;
 import util.iterators.DisposableValueIterator;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -72,7 +70,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     protected int split; // domains are divided into at most 2^s subdomains
     protected IStateDouble searchSpaceSize;
 
-    protected int currentVar, currentVal;
+    protected int currentVar = -1, currentVal = -1;
 
     TIntList bests = new TIntArrayList();
 
@@ -121,9 +119,13 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         if (variable == null || variable.instantiated()) {
             return null;
         }
-        if (vars[currentVar] != variable) {
+        if (currentVar == -1 || vars[currentVar] != variable) {
             // retrieve indice of the variable in vars
-            currentVar = Arrays.binarySearch(vars, variable);
+			for(int i=0;i<vars.length;i++){
+				if(vars[i]==variable){
+					currentVar = i;
+				}
+			}
             assert vars[currentVar] == variable;
         }
         bests.clear();
@@ -161,7 +163,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     @Override
-    public Decision getDecision() {
+    public Decision<IntVar> getDecision() {
         IntVar best = null;
         // 1. first select the variable with the largest impact
         bests.clear();
@@ -246,7 +248,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                     }
                 } else {
                     if (System.currentTimeMillis() > tl) {
-                        break loop;
+                        break;
                     }
                     // A. choose 3 values in the domain to have an estimation of the impact
                     double i1 = computeImpact(v, v.getLB(), before);
@@ -259,7 +261,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         if (learnsAndFails) {
             // If the initialisation detects a failure, then the problem has no solution!
             learnsAndFails = false;
-            throw solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::init:: detect failures");
+            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
         } else if (System.currentTimeMillis() > tl) {
             LOGGER.debug("ImpactBased Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
@@ -282,14 +284,17 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     @Override
     public void afterDownLeftBranch() {
-        if (asgntFailed) {
-            updateImpact(1.0d, currentVar, currentVal);
-            asgntFailed = false;
-        } else {
-            double sssz = searchSpaceSize();
-            updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
-            searchSpaceSize.set(sssz);
+        if (currentVar > -1) { // if the decision was computed by another strategy
+            if (asgntFailed) {
+                updateImpact(1.0d, currentVar, currentVal);
+            } else {
+                double sssz = searchSpaceSize();
+                updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
+                searchSpaceSize.set(sssz);
+            }
+            currentVar = -1;
         }
+        asgntFailed = false; // to handle cases where a contradiction was thrown, but the decision was computed outside
         reevaluateImpact();
     }
 
@@ -342,7 +347,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         solver.getEnvironment().worldPush();
         double after;
         try {
-            v.instantiateTo(a, Cause.Null);
+            v.instantiateTo(a, this);
             solver.getEngine().propagate();
             after = searchSpaceSize();
             solver.getEnvironment().worldPop();
@@ -352,7 +357,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             solver.getEnvironment().worldPop();
             // if the value leads to fail, then the value can be removed from the domain
             try {
-                v.removeValue(a, Cause.Null);
+                v.removeValue(a, this);
                 solver.getEngine().propagate();
             } catch (ContradictionException ex) {
                 learnsAndFails = true;
@@ -442,6 +447,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             if (learnsAndFails) {
                 learnsAndFails = false;
                 solver.getSearchLoop().moveTo(solver.getSearchLoop().stateAfterFail);
+                //noinspection ThrowableResultOfMethodCallIgnored
                 solver.getSearchLoop().smList.onContradiction(
                         solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
                 );
@@ -458,11 +464,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         for (Variable v : this.vars) {
             v.explain(VariableState.DOM, e);
         }
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
     }
 
     @Override

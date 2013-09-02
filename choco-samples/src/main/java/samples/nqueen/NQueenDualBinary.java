@@ -68,6 +68,6 @@ public class NQueenDualBinary extends AbstractNQueen {
 
 
     public static void main(String[] args) {
-        new NQueenDualBinary().execute("12");
+        new NQueenDualBinary().execute(args);
     }
 }

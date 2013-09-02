@@ -30,6 +30,7 @@ package util.objects.setDataStructures;
 import memory.copy.EnvironmentCopying;
 import memory.copy.RcObject;
 import memory.copy.RecomputableElement;
+import memory.copy.store.StoredObjectCopy;
 
 /**
  * Backtrable set
@@ -41,10 +42,13 @@ public class Set_Copy extends RcObject implements ISet {
 
     private ISet set;// set to be maintained during search (decorator design pattern)
 
+    private StoredObjectCopy copies;
+
     public Set_Copy(EnvironmentCopying environment, ISet set) {
         super(environment, null);
         this.set = set;
-        environment.add(this);
+        copies = environment.getObjectCopy();
+        copies.add(this);
     }
 
     public Object deepCopy() {
@@ -56,7 +60,7 @@ public class Set_Copy extends RcObject implements ISet {
         return vals;
     }
 
-    protected void _set(final Object y, final int wstamp) {
+    public void _set(final Object y, final int wstamp) {
         int[] vals = (int[]) y;
         set.clear();
         for (int i : vals) {

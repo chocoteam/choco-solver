@@ -107,6 +107,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      */
     public boolean removeNode(int x, ICause cause) throws ContradictionException {
         assert cause != null;
+		assert (x>=0 && x<getEnvelopGraph().getNbNodes());
         if (kernel.getActiveNodes().contain(x)) {
             this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
@@ -141,6 +142,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      */
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         assert cause != null;
+		assert (x>=0 && x<getEnvelopGraph().getNbNodes());
         if (envelop.getActiveNodes().contain(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
@@ -251,12 +253,16 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("graph_var " + getName());
-        sb.append("\ninstantiated = " + instantiated() + "\n");
-        sb.append("\nenvelope graph \n");
-        sb.append(envelop.toString());
-        sb.append("\nkernel graph \n");
-        sb.append(kernel.toString());
-        return getName();
+		if(instantiated()){
+			sb.append("\nvalue: \n");
+			sb.append(envelop.toString());
+		}else{
+			sb.append("\nenvelope: \n");
+			sb.append(envelop.toString());
+			sb.append("\nkernel: \n");
+			sb.append(kernel.toString());
+		}
+        return sb.toString();
     }
 
     @Override

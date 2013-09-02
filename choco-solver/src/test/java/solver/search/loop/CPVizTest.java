@@ -233,7 +233,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(IntConstraintFactory.boolean_channeling(bool, var));
+        s.post(IntConstraintFactory.boolean_channeling(bool, var, 0));
 
         Visualization visu = new Visualization("BinaryVector", s, dir + "/out");
 
@@ -346,7 +346,7 @@ public class CPVizTest {
         BoolVar[][] bool = new BoolVar[n][n];
         for (int i = 0; i < n; i++) {
             bool[i] = VariableFactory.boolArray("bool_" + i, n, solver);
-            solver.post(IntConstraintFactory.boolean_channeling(bool[i], var[i]));
+            solver.post(IntConstraintFactory.boolean_channeling(bool[i], var[i], 0));
         }
         solver.post(IntConstraintFactory.alldifferent(var, "BC"));
 
@@ -369,7 +369,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(IntConstraintFactory.boolean_channeling(bool, var));
+        s.post(IntConstraintFactory.boolean_channeling(bool, var, 0));
 
         Visualization visu = new Visualization("BoolChanneling", s, dir + "/out");
 

@@ -32,24 +32,89 @@ import java.io.Serializable;
 /**
  * Describes an search vector with states (describing some history of the data structure).
  */
-public interface IStateIntVector extends Serializable {
+public abstract class IStateIntVector implements Serializable {
 
     /**
      * Minimal capacity of a vector
      */
-    int MIN_CAPACITY = 8;
+    public static final int MIN_CAPACITY = 8;
+
+    /**
+     * Contains the elements of the vector.
+     */
+
+    protected int[] elementData;
+
+    /**
+     * A backtrackable search with the size of the vector.
+     */
+
+    protected IStateInt size;
+
+
+    /**
+     * The current environment.
+     */
+
+    protected final IEnvironment environment;
+
+
+    public IStateIntVector(IEnvironment env, int initialSize, int initialValue) {
+        int initialCapacity = MIN_CAPACITY;
+        int w = env.getWorldIndex();
+
+        if (initialCapacity < initialSize)
+            initialCapacity = initialSize;
+
+        this.environment = env;
+        this.elementData = new int[initialCapacity];
+        for (int i = 0; i < initialSize; i++) {
+            this.elementData[i] = initialValue;
+        }
+        this.size = env.makeInt(initialSize);
+    }
+
+
+    public IStateIntVector(IEnvironment env, int[] entries) {
+        int initialCapacity = MIN_CAPACITY;
+        int w = env.getWorldIndex();
+        int initialSize = entries.length;
+
+        if (initialCapacity < initialSize)
+            initialCapacity = initialSize;
+
+        this.environment = env;
+        this.elementData = new int[initialCapacity];
+        for (int i = 0; i < initialSize; i++) {
+            this.elementData[i] = entries[i]; // could be a System.arrayCopy but since the loop is needed...
+        }
+        this.size = env.makeInt(initialSize);
+    }
+
+    protected IStateIntVector(IEnvironment environment) {
+        this.environment = environment;
+    }
+
+    protected boolean rangeCheck(int index) {
+        return index < size.get() && index >= 0;
+    }
 
     /**
      * Returns the current size of the stored search vector.
      */
 
-    int size();
+    public int size() {
+        return size.get();
+    }
+
 
     /**
      * Checks if the vector is empty.
      */
 
-    boolean isEmpty();
+    public boolean isEmpty() {
+        return (size.get() == 0);
+    }
 
     /**
      * Adds a new search at the end of the vector.
@@ -57,9 +122,16 @@ public interface IStateIntVector extends Serializable {
      * @param i The search to add.
      */
 
-    void add(int i);
+    public abstract void add(int i);
 
-    boolean contains(int val);
+
+    public boolean contains(int val) {
+        int ssize = size.get();
+        for (int i = 0; i < ssize; i++) {
+            if (val == elementData[i]) return true;
+        }
+        return false;
+    }
 
     /**
      * Removes an int.
@@ -67,7 +139,7 @@ public interface IStateIntVector extends Serializable {
      * @param i The search to remove.
      */
 
-    void remove(int i);
+    public abstract void remove(int i);
 
 
     /**
@@ -75,13 +147,18 @@ public interface IStateIntVector extends Serializable {
      * does nothing when called on an empty vector
      */
 
-    void removeLast();
+    public abstract void removeLast();
 
     /**
      * Returns the <code>index</code>th element of the vector.
      */
 
-    int get(int index);
+    public int get(int index) {
+        if (rangeCheck(index)) {
+            return elementData[index];
+        }
+        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
+    }
 
     /**
      * access an element without any bound check
@@ -89,14 +166,17 @@ public interface IStateIntVector extends Serializable {
      * @param index
      * @return
      */
-    int quickGet(int index);
+    public int quickGet(int index) {
+        assert (rangeCheck(index));
+        return elementData[index];
+    }
 
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code> and returns
      * the old value
      */
 
-    int set(int index, int val);
+    public abstract int set(int index, int val);
 
     /**
      * Assigns a new value val to the element indexth and return the old value without bound check
@@ -105,5 +185,11 @@ public interface IStateIntVector extends Serializable {
      * @param val   the new value
      * @return the old value
      */
-    int quickSet(int index, int val);
+    public abstract int quickSet(int index, int val);
+
+    public int[] deepCopy() {
+        int[] ret = new int[size.get()];
+        System.arraycopy(elementData, 0, ret, 0, size.get());
+        return ret;
+    }
 }

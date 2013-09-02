@@ -28,16 +28,15 @@
 package solver.search.loop;
 
 import memory.IEnvironment;
-import solver.ResolutionPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;
-import solver.search.limits.LimitChecker;
+import solver.propagation.NoPropagationEngine;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
-import solver.search.solution.ISolutionPool;
-import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -79,6 +78,8 @@ import util.ESat;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
+    protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
+
     //    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
     public int timeStamp;
 
@@ -90,6 +91,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     static final int UP_BRANCH = 1 << 4;
     static final int RESTART = 1 << 5;
     static final int RESUME = 1 << 6;
+
+    static final String MSG_LIMIT = "a limit has been reached";
+    static final String MSG_ROOT = "the entire search space has been explored";
+    static final String MSG_CUT = "applying the cut leads to a failure";
+    static final String MSG_FIRST_SOL = "stop at first solution";
+    static final String MSG_INIT = "failure encountered during initial propagation";
+    static final String MSG_SEARCH_INIT = "search strategy detects inconsistency";
+
 
     /* Reference to the solver */
     final Solver solver;
@@ -126,14 +135,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    /* factory for limits management */
-    LimitChecker limitchecker;
-
-
-    /**
-     * Solution pool -- way to record solutions. Default object is last solution recorded.
-     */
-    ISolutionPool solutionpool = SolutionPoolFactory.LAST_ONE.make();
+    boolean hasReachedLimit;
 
     public SearchMonitorList smList;
 
@@ -147,23 +149,36 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
-        objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
         smList = new SearchMonitorList();
         smList.add(this.measures);
         this.nextState = INIT;
-        this.limitchecker = new LimitChecker(this);
         rootWorldIndex = -1;
     }
 
-    private void reset() {
-        this.nextState = INIT;
-        restaureRootNode();
-        rootWorldIndex = -1;
-        searchWorldIndex = -1;
-        this.measures.reset();
+    /**
+     * This method enables to solve a problem another time:
+     * <ul>
+     *     <li>It backtracks up to the root node of the search tree,</li>
+     *     <li>it sets the objective manager to null,</li>
+     *     <li>it resets the measures to 0,</li>
+     *     <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
+     * </ul>
+     */
+    public void reset() {
+        // if a resolution has already been done
+        if(rootWorldIndex>-1){
+            this.nextState = INIT;
+            env.worldPopUntil(rootWorldIndex);
+            this.objectivemanager = null;
+            timeStamp++;
+            rootWorldIndex = -1;
+            searchWorldIndex = -1;
+            solver.set(NoPropagationEngine.SINGLETON);
+            this.measures.reset();
+        }
     }
 
     @SuppressWarnings({"unchecked"})
@@ -173,8 +188,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Solves the problem states by the solver.
-     *
-     * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
     public void launch(boolean stopatfirst) {
         if (nextState != INIT) {
@@ -190,8 +203,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Main loop. Flatten representation of recursive tree search.
-     *
-     * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
     void loop() {
         alive = true;
@@ -286,29 +297,24 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public abstract void moveTo(int to);
 
     /**
-     * Close the search
-     *
-     * @return <code>true</code> if at least one more solution has been found, <br/>
-     *         <code>null</code> if a limit has been reached before finding one solution, <br/>
-     *         <code>false</code> otherwise
+     * Close the search, restore the last solution if any,
+     * and set the feasibility and optimality variables.
      */
     public void close() {
         ESat sat = ESat.FALSE;
-        if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {
-            restaureRootNode();
-            solutionpool.getBest().restore();
-        }
-        measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
         if (measures.getSolutionCount() > 0) {
             sat = ESat.TRUE;
-        } else if (limitchecker.isReached()) {
+            if (objectivemanager.isOptimization()) {
+                measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && hasReachedLimit);
+            }
+        } else if (hasReachedLimit) {
             measures.setObjectiveOptimal(false);
             sat = ESat.UNDEFINED;
         }
         solver.setFeasible(sat);
     }
 
-    public void restaureRootNode() {
+    public void restoreRootNode() {
         env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
         timeStamp++; // to force clear delta, on solution recording
         Decision tmp;
@@ -319,10 +325,24 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         }
     }
 
+    public final void reachLimit() {
+        hasReachedLimit = true;
+        interrupt(MSG_LIMIT);
+    }
+
+    public boolean hasReachedLimit() {
+        return hasReachedLimit;
+    }
+
     /**
      * Force the search to stop
+     *
+     * @param message a message to motivate the interruption -- for logging only
      */
-    public final void interrupt() {
+    public final void interrupt(String message) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search interruption: {}", message);
+        }
         nextState = RESUME;
         alive = false;
         smList.afterInterrupt();
@@ -341,17 +361,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Gets the list of limits over the search loop.
-     */
-    public LimitChecker getLimits() {
-        return limitchecker;
-    }
-
-
     @Override
     public void plugSearchMonitor(ISearchMonitor sm) {
-        smList.add(sm);
+        if (!smList.contains(sm)) {
+            smList.add(sm);
+        } else {
+            LOGGER.warn("The search monitor already exists and is ignored");
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -360,28 +376,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
-        if (objectivemanager.isOptimization()) {
-            plugSearchMonitor(objectivemanager);
+        if(objectivemanager.isOptimization()){
+            this.measures.declareObjective();
         }
-        this.measures.declareObjective();
-    }
-
-    /**
-     * Return the set of solution found during resolution.
-     * Depending on the choice made, the set of solution can be empty even if some solutions has been found.
-     */
-    public ISolutionPool getSolutionpool() {
-        return solutionpool;
-    }
-
-    /**
-     * Override the default pool of solutions.
-     *
-     * @param solutionpool a pool of solutions
-     * @see SolutionPoolFactory
-     */
-    public void setSolutionpool(ISolutionPool solutionpool) {
-        this.solutionpool = solutionpool;
     }
 
     public void restartAfterEachSolution(boolean does) {

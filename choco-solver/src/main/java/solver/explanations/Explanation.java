@@ -28,7 +28,8 @@
 package solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
-import solver.constraints.propagators.Propagator;
+import solver.Configuration;
+import solver.constraints.Propagator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,14 @@ import java.util.List;
  */
 
 public class Explanation extends Deduction {
-    public static Explanation SYSTEM = new Explanation();
+    public static ThreadLocal<Explanation> SYSTEM = new ThreadLocal<Explanation>() {
+        @Override
+        protected Explanation initialValue() {
+            return new Explanation();
+        }
+    };
 
-    List<Deduction> deductions;
+    private List<Deduction> deductions;
     private TIntHashSet did;
     private List<Propagator> propagators;
     private TIntHashSet pid;
@@ -75,8 +81,10 @@ public class Explanation extends Deduction {
             }
 
             // 2. add all propagators of expl
-            for (int i = 0; i < nbp; i++) {
-                add(expl.getPropagator(i));
+            if (Configuration.PROP_IN_EXP) {
+                for (int i = 0; i < nbp; i++) {
+                    add(expl.getPropagator(i));
+                }
             }
         }
     }
@@ -87,12 +95,14 @@ public class Explanation extends Deduction {
      * @param p propagator to add
      */
     public void add(Propagator p) {
-        if (this.propagators == null) {
-            this.propagators = new ArrayList<Propagator>(4);
-            this.pid = new TIntHashSet(4);
-        }
-        if (this.pid.add(p.getId())) {
-            this.propagators.add(p);
+        if (Configuration.PROP_IN_EXP) {
+            if (this.propagators == null) {
+                this.propagators = new ArrayList<Propagator>(4);
+                this.pid = new TIntHashSet(4);
+            }
+            if (this.pid.add(p.getId())) {
+                this.propagators.add(p);
+            }
         }
     }
 
@@ -104,8 +114,14 @@ public class Explanation extends Deduction {
     public void add(Deduction d) {
         if (d.mType == Type.Exp) {
             add((Explanation) d);
-            //throw new UnsupportedOperationException("ARG");
         } else {
+            if (d.getmType() == Type.PropAct) {
+                PropagatorActivation pa = (PropagatorActivation) d;
+                if (pa.getPropagator().isReifiedAndSilent()) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
             if (this.deductions == null) {
                 this.deductions = new ArrayList<Deduction>(4);
                 this.did = new TIntHashSet();
@@ -194,7 +210,7 @@ public class Explanation extends Deduction {
 
         bf.append(" D: ");
         if (this.deductions != null && !this.deductions.isEmpty()) {
-            bf.append("(" + this.deductions.size() + ") ");
+            bf.append("(").append(this.deductions.size()).append(") ");
             for (Deduction d : this.deductions) {
                 bf.append(d).append(", ");
             }
@@ -203,14 +219,16 @@ public class Explanation extends Deduction {
             }
         }
 
-        bf.append(" ; P:");
-        if (this.propagators != null) {
-            bf.append("(" + this.propagators.size() + ") ");
-            for (Propagator p : this.propagators) {
-                bf.append(p).append(", ");
-            }
-            if (propagators.size() > 1) {
-                bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+        if (Configuration.PROP_IN_EXP) {
+            bf.append(" ; P:");
+            if (this.propagators != null) {
+                bf.append("(").append(this.propagators.size()).append(") ");
+                for (Propagator p : this.propagators) {
+                    bf.append(p).append(", ");
+                }
+                if (propagators.size() > 1) {
+                    bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+                }
             }
         }
 

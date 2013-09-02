@@ -27,14 +27,12 @@
 
 package parser.flatzinc.ast.constraints;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
 import java.util.List;
@@ -48,18 +46,13 @@ import java.util.List;
  */
 public class ArrayBoolAndBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar r = exps.get(1).boolVarValue(solver);
-        if (as.length == 0) {
-            return new Constraint[]{IntConstraintFactory.clauses(Literal.pos(r), solver)};
-        } else {
-            Literal[] l_as = new Literal[as.length];
-            for (int i = 0; i < as.length; i++) {
-                l_as[i] = Literal.pos(as[i]);
-            }
-            Literal l_r = Literal.pos(r);
-            return new Constraint[]{IntConstraintFactory.clauses(Node.reified(l_r, Node.and(l_as)), solver)};
+        if (as.length > 0) {
+//              return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.and(as)), solver)};
+            SatFactory.addBoolAndArrayEqVar(as, r);
         }
+        return new Constraint[0];
     }
 }

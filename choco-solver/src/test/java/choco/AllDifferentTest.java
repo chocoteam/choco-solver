@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
@@ -285,5 +286,20 @@ public class AllDifferentTest {
         System.out.printf("%s\n", solver.toString());
 
 
+    }
+
+    @Test(groups = "1s")
+    public void testXXX() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] ts = new IntVar[3];
+        ts[0] = VariableFactory.enumerated("t0", 2, 2, solver);
+        ts[1] = VariableFactory.enumerated("t1", 1, 3, solver);
+        ts[2] = VariableFactory.enumerated("t2", 1,3, solver);
+
+        solver.post(ICF.alldifferent(ts, "BC"));
+
+        solver.propagate();
+        Assert.assertEquals(ts[1].getDomainSize(),2);
+        Assert.assertEquals(ts[2].getDomainSize(),2);
     }
 }

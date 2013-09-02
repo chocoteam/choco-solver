@@ -28,6 +28,7 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -36,7 +37,7 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -107,11 +108,7 @@ public class Knapsack extends AbstractProblem {
         power = VariableFactory.bounded("power", 0, 9999, solver);
 
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
-        // capacity restriction constraint
-        solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
-        // objective computation constraint
-        solver.post(IntConstraintFactory.scalar(objects, energies, power));
-        // dedicated constraint to speed up the search
+
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }
 
@@ -119,7 +116,7 @@ public class Knapsack extends AbstractProblem {
     public void configureSearch() {
         AbstractStrategy strat = IntStrategyFactory.inputOrder_InDomainMin(objects);
         // trick : top-down maximization
-        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN), strat));
+        solver.set(new StrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN), strat));
     }
 
     @Override
@@ -129,6 +126,14 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void prettyOut() {
+        LoggerFactory.getLogger("bench").info("Knapsack -- {}", data.name());
+        StringBuilder st = new StringBuilder();
+        st.append("\tItem: Count\n");
+        for (int i = 0; i < objects.length; i++) {
+            st.append(String.format("\t#%d: %d\n", i, objects[i].getValue()));
+        }
+        st.append(String.format("\n\tPower: %d", power.getValue()));
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {

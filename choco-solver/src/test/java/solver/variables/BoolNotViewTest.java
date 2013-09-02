@@ -29,6 +29,7 @@ package solver.variables;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import util.iterators.DisposableRangeIterator;
@@ -99,5 +100,14 @@ public class BoolNotViewTest {
             Assert.assertTrue(o.contains(rit.min()));
             Assert.assertTrue(o.contains(rit.max()));
         }
+    }
+
+    @Test(groups = "1s")
+    public void testPrevNext() {
+        Solver solver = new Solver();
+        BoolVar a = VF.bool("a", solver);
+        BoolVar b = VF.bool("b", solver);
+        solver.post(ICF.arithm(a, "+", VF.not(b), "=", 2));
+        Assert.assertTrue(solver.findSolution());
     }
 }

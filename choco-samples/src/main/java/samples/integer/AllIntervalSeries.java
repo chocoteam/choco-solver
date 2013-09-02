@@ -32,10 +32,11 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
+import solver.constraints.nary.sum.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.StringUtils;
 
 /**
  * CSPLib prob007:<br/>
@@ -82,7 +83,9 @@ public class AllIntervalSeries extends AbstractProblem {
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                dist[i] = VariableFactory.abs(Sum.var(vars[i + 1], VariableFactory.minus(vars[i])));
+				IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[i+1]));
+				dist[i] = VariableFactory.abs(k);
                 solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
             }
         }

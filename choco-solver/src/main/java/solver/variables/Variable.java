@@ -31,7 +31,7 @@ import solver.ICause;
 import solver.Identity;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -110,6 +110,8 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @return number of propagators of this
      */
     int getNbProps();
+
+    int[] getPIndices();
 
     /**
      * Return the position of the variable in the propagator at position pidx

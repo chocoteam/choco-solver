@@ -29,6 +29,7 @@ package solver.explanations.antidom;
 
 import memory.IStateBitSet;
 import solver.variables.IntVar;
+import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
 /**
@@ -39,8 +40,6 @@ import util.iterators.DisposableValueIterator;
  */
 public class AntiDomBitset implements AntiDomain {
     private final int offset;
-    // Lower bound of the current domain -- includes offset
-//    private final IStateInt LB;
 
     IStateBitSet domain;
 
@@ -49,20 +48,55 @@ public class AntiDomBitset implements AntiDomain {
 
     public AntiDomBitset(IntVar A) {
         offset = A.getLB();
-//        this.LB = env.makeInt(Integer.MAX_VALUE);
         domain = A.getSolver().getEnvironment().makeBitSet(A.getUB() - offset + 1);
+        DisposableRangeIterator rin = A.getRangeIterator(true);
+        int p = rin.max();
+        rin.next();
+        while (rin.hasNext()) {
+            int c = rin.min();
+            for (int i = p + 1; i < c; i++) {
+                add(i);
+            }
+            p = rin.max();
+            rin.next();
+        }
+        rin.dispose();
     }
 
 
-    public void set(int outsideval) {
+    @Override
+    public void add(int outsideval) {
         int inside = outsideval - offset;
         domain.set(inside);
-//        if (inside < this.LB.get()) this.LB.set(inside);
+    }
+
+    @Override
+    public void updateLowerBound(int oldLB, int newLB) {
+        for (int i = oldLB; i < newLB; i++) {
+            add(i);
+        }
+    }
+
+    @Override
+    public void updateUpperBound(int oldUB, int newUB) {
+        for (int i = oldUB; i > newUB; i--) {
+            add(i);
+        }
     }
 
     public boolean get(int outsideval) {
         int inside = outsideval - offset;
         return domain.get(inside);
+    }
+
+    @Override
+    public int getKeyValue(int outsideval) {
+        return outsideval;
+    }
+
+    @Override
+    public int size() {
+        return domain.cardinality();
     }
 
     public DisposableValueIterator getValueIterator() {
@@ -114,14 +148,19 @@ public class AntiDomBitset implements AntiDomain {
     @Override
     public String toString() {
 
-        StringBuffer bf = new StringBuffer();
+        StringBuilder bf = new StringBuilder();
         bf.append("[");
         DisposableValueIterator it = getValueIterator();
         while (it.hasNext()) {
-            bf.append(" " + it.next());
+            bf.append(" ").append(it.next());
         }
         it.dispose();
         bf.append("]");
         return bf.toString();
+    }
+
+    @Override
+    public boolean isEnumerated() {
+        return true;
     }
 }

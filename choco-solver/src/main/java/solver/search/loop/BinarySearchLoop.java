@@ -62,7 +62,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             this.env.worldPop();
             solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
-            interrupt();
+            interrupt(MSG_INIT);
             return;
         }
         this.env.worldPush(); // push another wolrd to recover the state after initial propagation
@@ -79,7 +79,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             this.env.worldPop();
             solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
-            interrupt();
+            interrupt(MSG_SEARCH_INIT);
         }
         moveTo(OPEN_NODE);
     }
@@ -108,10 +108,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         //todo: checker d'etat
         solver.setFeasible(ESat.TRUE);
         assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
-        solutionpool.recordSolution(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
-            interrupt();
+            interrupt(MSG_FIRST_SOL);
         } else {
             moveTo(stateAfterSolution);
         }
@@ -177,7 +176,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      * Rolls back the previous state.
      * Then, if it goes back to the base world, stop the search.
-     * Otherwise, gets the oppposite decision, applies it and calls the propagation.
+     * Otherwise, gets the opposite decision, applies it and calls the propagation.
      */
     @Override
     protected void upBranch() {
@@ -185,7 +184,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         //if (env.getWorldIndex() <= searchWorldIndex ){// Issue#55
         if (decision == RootDecision.ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
-            interrupt();
+            interrupt(MSG_ROOT);
         } else {
             jumpTo--;
             if (jumpTo <= 0 && decision.hasNext()) {
@@ -203,14 +202,14 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      */
     @Override
     public void restartSearch() {
-        restaureRootNode();
+        restoreRootNode();
         solver.getEnvironment().worldPush(); //issue#55
         try {
             objectivemanager.postDynamicCut();
             solver.getEngine().propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
-            interrupt();
+            interrupt(MSG_CUT);
         }
     }
 
@@ -221,7 +220,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * <br/>
      * <b>Beware, if this method is called from RESTART case, it leads to an infinite loop!</b>
      *
-     * @param to
+     * @param to STEP to reach
      */
     public void moveTo(int to) {
         if ((nextState & RESTART) == 0) {

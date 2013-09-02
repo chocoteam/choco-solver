@@ -62,11 +62,10 @@ public class FastDecisionSet extends Decision<SetVar> {
     }
 
     public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
-        branch = 0;
+        super.set(v);
         this.var = v;
         this.value = value;
         this.operator = operator;
-        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override

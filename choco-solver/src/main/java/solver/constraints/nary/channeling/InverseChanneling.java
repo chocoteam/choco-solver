@@ -29,10 +29,8 @@ package solver.constraints.nary.channeling;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
-import solver.constraints.propagators.nary.channeling.PropInverseChannelAC;
-import solver.constraints.propagators.nary.channeling.PropInverseChannelBC;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.PropAllDiffBC;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;
@@ -53,7 +51,8 @@ public class InverseChanneling extends IntConstraint<IntVar> {
     /**
      * Make an inverse channeling between X and Y:
      * X[i] = j+Ox <=> Y[j] = i+Oy
-     * Performs AC if domains are enumerated,
+     * Could performs AC if domains are enumerated (but it currently uses the DEFAULT alldifferent
+	 * which is between BC and AC for speed up purpose),
      * If not, then it works on bounds without guaranteeing BC
      * Indeed, it would require to know somehow holes in (bounded) domains
      * (enumerated domains are strongly recommended)
@@ -76,12 +75,12 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         this.minX = minX;
         this.minY = minY;
         if (allEnumerated(X, Y)) {
-            addPropagators(new PropAllDiffAC(this.X));
-            addPropagators(new PropAllDiffAC(this.Y));
+			addPropagators(AllDifferent.createPropagators(this.X, AllDifferent.Type.AC));
+			addPropagators(AllDifferent.createPropagators(this.Y, AllDifferent.Type.AC));
             addPropagators(new PropInverseChannelAC(this.X, this.Y, minX, minY));
         } else {// Beware no BC on the conjunction of those propagators but only separately
-            addPropagators(new PropAllDiffBC(this.X));
-            addPropagators(new PropAllDiffBC(this.Y));
+            addPropagators(new PropAllDiffBC(this.X, false));
+            addPropagators(new PropAllDiffBC(this.Y, false));
             addPropagators(new PropInverseChannelBC(this.X, this.Y, minX, minY));
         }
     }

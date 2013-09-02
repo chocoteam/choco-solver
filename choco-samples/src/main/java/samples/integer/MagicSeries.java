@@ -36,7 +36,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.tools.ArrayUtils;
 
 /**
  * CSPLib prob019:<br/>
@@ -108,6 +107,6 @@ public class MagicSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new MagicSeries().execute(ArrayUtils.append(args, new String[]{"-log", "QUIET"}));
+        new MagicSeries().execute(args);
     }
 }

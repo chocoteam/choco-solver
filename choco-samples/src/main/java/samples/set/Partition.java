@@ -41,7 +41,6 @@ import solver.constraints.set.SetConstraintsFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
-import solver.variables.SetVarImpl;
 import solver.variables.VariableFactory;
 
 /**
@@ -68,37 +67,32 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        x = new SetVarImpl("x", solver);
-        y = new SetVarImpl("y", solver);
-        z = new SetVarImpl("z", solver);
-        universe = new SetVarImpl("universe", solver);
-        sum = VariableFactory.bounded("sum of universe", 12, 19, solver);
+
+		///////////////
+		// VARIABLES //
+		///////////////
+
         // x initial domain
-        x.getEnvelope().add(1);
-        x.getKernel().add(1);
-        x.getEnvelope().add(2);
-        x.getEnvelope().add(3);
-        x.getEnvelope().add(8);
+		int[] x_envelope = new int[]{1,3,2,8}; // not necessarily ordered
+		int[] x_kernel = new int[]{1};
+		x = VariableFactory.set("x", x_envelope, x_kernel, solver);
         // y initial domain
-        y.getEnvelope().add(2);
-        y.getEnvelope().add(6);
-        y.getEnvelope().add(7);
+		int[] y_envelope = new int[]{2,6,7};
+		y = VariableFactory.set("y", y_envelope, solver);
         // z initial domain
-        z.getEnvelope().add(1);
-        z.getEnvelope().add(2);
-        z.getKernel().add(2);
-        z.getEnvelope().add(3);
-        z.getEnvelope().add(5);
-        z.getEnvelope().add(7);
-        z.getEnvelope().add(12);
+		int[] z_envelope = new int[]{2,1,3,5,7,12};
+		int[] z_kernel = new int[]{2};
+		z = VariableFactory.set("z", z_envelope, z_kernel, solver);
         // universe initial domain (note that the universe is a variable)
-        universe.getEnvelope().add(1);
-        universe.getEnvelope().add(2);
-        universe.getEnvelope().add(3);
-        universe.getEnvelope().add(5);
-        universe.getEnvelope().add(7);
-        universe.getEnvelope().add(8);
-        universe.getEnvelope().add(42);
+		int[] universe_envelope = new int[]{1,2,3,5,7,8,42};
+		universe = VariableFactory.set("universe", universe_envelope, solver);
+        // sum variable
+		sum = VariableFactory.bounded("sum of universe", 12, 19, solver);
+
+		/////////////////
+		// CONSTRAINTS //
+		/////////////////
+
         // partition constraint
         solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
         if (noEmptySet) {
@@ -106,7 +100,7 @@ public class Partition extends AbstractProblem {
             solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, VariableFactory.fixed(0, solver)));
         }
         // restricts the sum of elements in universe
-        solver.post(SetConstraintsFactory.sum(universe, sum));
+        solver.post(SetConstraintsFactory.sum(universe, sum, true));
     }
 
     @Override
@@ -122,9 +116,10 @@ public class Partition extends AbstractProblem {
     @Override
     public void prettyOut() {
         System.out.println("best solution found");
-        System.out.println("x : {" + x.getEnvelope() + "}");
-        System.out.println("y : {" + y.getEnvelope() + "}");
-        System.out.println("z : {" + z.getEnvelope() + "}");
-        System.out.println("universe : {" + universe.getEnvelope() + "} " + sum);
+        System.out.println(x);
+        System.out.println(y);
+        System.out.println(z);
+		System.out.println(universe);
+        System.out.println(sum);
     }
 }

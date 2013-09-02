@@ -28,12 +28,12 @@ package samples.nsp;
 
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.SatFactory;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -459,31 +459,31 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         int r = data.getValue("REST");
         for (IntVar[] s : this.shifts) {
             for (int t = 0; t + 2 < data.nbDays(); t++) {
-                //solver.post(Options.E_DECOMP, ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.or(ConstraintFactory.eq(s[t+1], n), ConstraintFactory.and(ConstraintFactory.eq(s[t+1], r), ConstraintFactory.eq(s[t+2], r)))));
+                //solver.post(Options.E_DECOMP, ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.or(ConstraintFactory.eq(s[t+1], n), ConstraintFactory.and(ConstraintFactory.eq(s[t+1], r), ConstraintFactory.eq(s[t+2], r)))));
                 BoolVar[] bvars = VariableFactory.boolArray("b", 4, solver);
-                ALogicTree tree = Node.implies(
-                        Literal.pos(bvars[0]),
-                        Node.or(Literal.pos(bvars[1]), Literal.pos(bvars[2]), Literal.pos(bvars[3]))
+                LogOp tree = LogOp.implies(
+                        bvars[0],
+                        LogOp.or(bvars[1], bvars[2], bvars[3])
                 );
-                solver.post(IntConstraintFactory.clauses(tree, solver));
-                solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", n)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", n)));
-                solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
-                solver.post(IntConstraintFactory.implies(bvars[2], IntConstraintFactory.arithm(s[t + 1], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[2]), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[3], IntConstraintFactory.arithm(s[t + 2], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[3]), IntConstraintFactory.arithm(s[t + 2], "!=", r)));
+                SatFactory.addClauses(tree, solver);
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[0],
+                        IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[1],
+                        IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[2],
+                        IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[3],
+                        IntConstraintFactory.arithm(s[t + 2], "=", r), IntConstraintFactory.arithm(s[t + 2], "!=", r)));
             }
             int t = data.nbDays() - 2;
             BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
-//            solver.post(ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
-            ALogicTree tree = Node.implies(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-            solver.post(IntConstraintFactory.clauses(tree, solver));
-            solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", n)));
-            solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", n)));
-            solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n)));
-            solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
+//            solver.post(ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
+            LogOp tree = LogOp.implies(bvars[0], bvars[1]);
+            SatFactory.addClauses(tree, solver);
+            solver.post(LogicalConstraintFactory.ifThenElse(bvars[0],
+                    IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n)));
+            solver.post(LogicalConstraintFactory.ifThenElse(bvars[1],
+                    IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
         }
     }
 
@@ -496,10 +496,10 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         tuples.add(new int[]{r, r});
         for (IntVar[] s : this.shifts) {
             for (int t = 0; t + 2 < data.nbDays(); t++) {
-                solver.post(ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.feasPairAC(s[t + 1], s[t + 2], tuples)));
+                solver.post(ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.feasPairAC(s[t + 1], s[t + 2], tuples)));
             }
             int t = data.nbDays() - 2;
-            solver.post(ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
+            solver.post(ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
         }
     }*/
 
@@ -509,27 +509,29 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         for (IntVar[] s : this.shifts) {
             for (int t = 5; t + 15 < data.nbDays(); t += 7) {
                 BoolVar[] bvars = VariableFactory.boolArray("b", 6, solver);
-                ALogicTree tree = Node.implies(
-                        Node.and(
-                                Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1])),
-                                Node.or(Literal.pos(bvars[2]), Literal.pos(bvars[3]))),
-                        Node.and(Literal.pos(bvars[4]), Literal.pos(bvars[5]))
+                LogOp tree = LogOp.implies(
+                        LogOp.and(
+                                LogOp.or(bvars[0], bvars[1]),
+                                LogOp.or(bvars[2], bvars[3])),
+                        LogOp.and(bvars[4], bvars[5])
                 );
-                solver.post(IntConstraintFactory.clauses(tree, solver));
-                solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[2], IntConstraintFactory.arithm(s[t + 7], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[2]), IntConstraintFactory.arithm(s[t + 7], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[3], IntConstraintFactory.arithm(s[t + 8], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[3]), IntConstraintFactory.arithm(s[t + 8], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[4], IntConstraintFactory.arithm(s[t + 14], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[4]), IntConstraintFactory.arithm(s[t + 14], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[5], IntConstraintFactory.arithm(s[t + 15], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[5]), IntConstraintFactory.arithm(s[t + 15], "!=", r)));
+                SatFactory.addClauses(tree, solver);
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[0],
+                        IntConstraintFactory.arithm(s[t], "=", r),
+                        IntConstraintFactory.arithm(s[t], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[1],
+                        IntConstraintFactory.arithm(s[t + 1], "=", r),
+                        IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[2],
+                        IntConstraintFactory.arithm(s[t + 7], "=", r), IntConstraintFactory.arithm(s[t + 7], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[3],
+                        IntConstraintFactory.arithm(s[t + 8], "=", r), IntConstraintFactory.arithm(s[t + 8], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[4],
+                        IntConstraintFactory.arithm(s[t + 14], "=", r), IntConstraintFactory.arithm(s[t + 14], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[5],
+                        IntConstraintFactory.arithm(s[t + 15], "=", r), IntConstraintFactory.arithm(s[t + 15], "!=", r)));
 
-                /*solver.post(ConstraintFactory.implies(
+                /*solver.post(ConstraintFactory.ifThenElse(
          ConstraintFactory.and(
                  ConstraintFactory.or(ConstraintFactory.neq(s[t], r),
                          ConstraintFactory.neq(s[t + 1], r)),
@@ -585,12 +587,14 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         for (IntVar[] s : this.shifts) {
             for (int t = 5; t + 1 < data.nbDays(); t += 7) {
                 BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
-                ALogicTree tree = Node.ifOnlyIf(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-                solver.post(IntConstraintFactory.clauses(tree, solver));
-                solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", r)));
-                solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r)));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                LogOp tree = LogOp.ifOnlyIf(bvars[0], bvars[1]);
+                SatFactory.addClauses(tree, solver);
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[0],
+                        IntConstraintFactory.arithm(s[t], "=", r),
+                        IntConstraintFactory.arithm(s[t], "!=", r)));
+                solver.post(LogicalConstraintFactory.ifThenElse(bvars[1],
+                        IntConstraintFactory.arithm(s[t + 1], "=", r),
+                        IntConstraintFactory.arithm(s[t + 1], "!=", r)));
                 //solver.post(ConstraintFactory.ifOnlyIf(ConstraintFactory.eq(s[t], r), ConstraintFactory.eq(s[t + 1], r)));
             }
         }

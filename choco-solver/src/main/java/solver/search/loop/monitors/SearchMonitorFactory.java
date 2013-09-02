@@ -39,8 +39,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public enum SearchMonitorFactory {
-    ;
+public class SearchMonitorFactory {
+    SearchMonitorFactory() {
+    }
 
     private static class DefaultSolutionMessage implements IMessage {
 
@@ -53,10 +54,10 @@ public enum SearchMonitorFactory {
         @Override
         public String print() {
             return String.format("- Solution #%s found. %s \n\t%s.",
-                    new Object[]{solver.getSearchLoop().getMeasures().getSolutionCount(),
-                            solver.getSearchLoop().getMeasures().toOneShortLineString(),
-                            print(solver.getSearchLoop().getStrategy().vars)
-                    });
+                    solver.getSearchLoop().getMeasures().getSolutionCount(),
+                    solver.getSearchLoop().getMeasures().toOneShortLineString(),
+                    print(solver.getSearchLoop().getStrategy().vars)
+            );
         }
 
         private String print(Variable[] vars) {
@@ -80,12 +81,13 @@ public enum SearchMonitorFactory {
 
         @Override
         public String print() {
+            int limit = 120;
             Variable[] vars = solver.getSearchLoop().getStrategy().vars;
             StringBuilder s = new StringBuilder(32);
-            for (int i = 0; i < vars.length && s.length() < 120; i++) {
+            for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');
             }
-            if (s.length() >= 120) {
+            if (s.length() >= limit) {
                 s.append("...");
             }
             return s.toString();
@@ -227,7 +229,7 @@ public enum SearchMonitorFactory {
      * @param restartLimit         restart limits (limit of number of restarts)
      */
     public static void luby(Solver solver, int scaleFactor, int geometricalFactor,
-                            ILimit restartStrategyLimit, int restartLimit) {
+                            ICounter restartStrategyLimit, int restartLimit) {
         solver.getSearchLoop().plugSearchMonitor(new RestartManager(
                 new LubyRestartStrategy(scaleFactor, geometricalFactor),
                 restartStrategyLimit, solver.getSearchLoop(), restartLimit
@@ -244,7 +246,7 @@ public enum SearchMonitorFactory {
      * @param restartLimit         restart limits (limit of number of restarts)
      */
     public static void geometrical(Solver solver, int scaleFactor, double geometricalFactor,
-                                   ILimit restartStrategyLimit, int restartLimit) {
+                                   ICounter restartStrategyLimit, int restartLimit) {
         solver.getSearchLoop().plugSearchMonitor(new RestartManager(
                 new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
                 restartStrategyLimit, solver.getSearchLoop(), restartLimit
@@ -276,7 +278,9 @@ public enum SearchMonitorFactory {
      * @param limit maximal number of nodes to open
      */
     public static void limitNode(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new NodeLimit(solver, limit));
+        NodeCounter counter = new NodeCounter(limit);
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        solver.getSearchLoop().plugSearchMonitor(counter);
     }
 
     /**
@@ -286,7 +290,9 @@ public enum SearchMonitorFactory {
      * @param limit maximal number of solutions
      */
     public static void limitSolution(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new SolutionLimit(solver, limit));
+        SolutionCounter counter = new SolutionCounter(limit);
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        solver.getSearchLoop().plugSearchMonitor(counter);
     }
 
 
@@ -295,13 +301,15 @@ public enum SearchMonitorFactory {
      * When the limit is reached, the resolution is stopped.
      * <br/>
      * <br/>
-     * <b>One must consider also LimitChecker.setThreadTimeLimit(long), that runs the limit in a separated thread.</b>
+     * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
      *
      * @param limit maximal resolution time in millisecond
      * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new TimeLimit(solver, limit));
+        TimeCounter counter = new TimeCounter(solver, limit);
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        solver.getSearchLoop().plugSearchMonitor(counter);
     }
 
 
@@ -312,7 +320,9 @@ public enum SearchMonitorFactory {
      * @param limit maximal resolution time in millisecond
      */
     public static void limitThreadTime(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new ThreadTimeLimit(limit));
+        ThreadTimeCounter counter = new ThreadTimeCounter(solver, limit);
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        solver.getSearchLoop().plugSearchMonitor(counter);
     }
 
     /**
@@ -322,7 +332,9 @@ public enum SearchMonitorFactory {
      * @param limit maximal number of fails
      */
     public static void limitFail(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new FailLimit(solver, limit));
+        FailCounter counter = new FailCounter(limit);
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        solver.getSearchLoop().plugSearchMonitor(counter);
     }
 
     /**
@@ -332,7 +344,9 @@ public enum SearchMonitorFactory {
      * @param limit maximal number of backtracks
      */
     public static void limitBacktrack(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new BacktrackLimit(solver, limit));
+        BacktrackCounter counter = new BacktrackCounter(limit);
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        solver.getSearchLoop().plugSearchMonitor(counter);
     }
 
 

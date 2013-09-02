@@ -35,7 +35,7 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.limits.FailLimit;
+import solver.search.limits.FailCounter;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -70,7 +70,7 @@ public class RLFAP extends AbstractProblem {
     private static String VAR = "var.txt";
     private static String CTR = "ctr.txt";
 
-    @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory.", required = false)
+    @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory (see http://www.inra.fr/mia/T/schiex/Export/FullRLFAP.tgz).", required = true)
     String dir;
 
     @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
@@ -164,7 +164,7 @@ public class RLFAP extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.domOverWDeg_InDomainMin(vars, seed));
-        SearchMonitorFactory.luby(solver, 2, 2, new FailLimit(solver, 2), 25000);
+        SearchMonitorFactory.luby(solver, 2, 2, new FailCounter(2), 25000);
     }
 
     @Override
@@ -207,7 +207,7 @@ public class RLFAP extends AbstractProblem {
     /////////////////////
 
     protected int[][] readDOM(String filename) {
-        FileReader f = null;
+        FileReader f;
         String line;
         TIntHashSet values = new TIntHashSet();
         try {
@@ -238,7 +238,7 @@ public class RLFAP extends AbstractProblem {
     }
 
     protected int[][] readVAR(String filename) {
-        FileReader f = null;
+        FileReader f;
         String line;
         TIntList values = new TIntArrayList();
         try {
@@ -268,7 +268,7 @@ public class RLFAP extends AbstractProblem {
 
 
     protected int[][] readCTR(String filename) {
-        FileReader f = null;
+        FileReader f;
         String line;
         TIntList values = new TIntArrayList();
         try {

@@ -35,6 +35,8 @@ import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.LastConflict;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -46,9 +48,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 5 juil. 2010
  */
-public final class IntStrategyFactory {
+public class IntStrategyFactory {
 
-    private IntStrategyFactory() {
+    IntStrategyFactory() {
     }
 
     /**
@@ -156,7 +158,7 @@ public final class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
-        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMiddle());
+        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMin());
     }
 
     /**
@@ -180,6 +182,21 @@ public final class IntStrategyFactory {
     }
 
     /**
+     * Create an Activity based search strategy.
+     * <p/>
+     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
+     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
+     * <br/>
+     * Uses default parameters (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
+     *
+     * @param VARS collection of variables
+     * @param SEED the seed for random
+     */
+    public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, long SEED) {
+        return new ActivityBased(VARS[0].getSolver(), VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
+    }
+
+    /**
      * Create an Impact-based search strategy.
      * <p/>
      * <b>"Impact-Based Search Strategies for Constraint Programming",
@@ -194,5 +211,55 @@ public final class IntStrategyFactory {
      */
     public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
         return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
+    }
+
+    /**
+     * Create an Impact-based search strategy.
+     * <p/>
+     * <b>"Impact-Based Search Strategies for Constraint Programming",
+     * Philippe Refalo, CP2004.</b>
+     * Uses default parameters (ALPHA=2,SPLIT=3,NODEIMPACT=10,INITONLY=true)
+     *
+     * @param VARS variables of the problem (should be integers)
+     * @param SEED a seed for random
+     */
+    public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, long SEED) {
+        return new ImpactBased(VARS, 2, 3, 10, SEED, true);
+    }
+
+    /**
+     * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
+     *
+     * @param SOLVER
+     * @param STRAT
+     * @return last conflict strategy
+     */
+    public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
+        return new LastConflict(SOLVER, STRAT, 1);
+    }
+
+    /**
+     * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
+     * Considers the K last conflicts
+     *
+     * @param SOLVER
+     * @param STRAT
+     * @return last conflict strategy
+     */
+    public static AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT) {
+        return new LastConflict(SOLVER, STRAT, K);
+    }
+
+    /**
+     * Build a sequence of <code>AbstractStrategy</code>.
+     * The first strategy in parameter is first called to compute a decision, if possible.
+     * Otherwise, the second strategy is called, ...
+     * And so on, until the last one.
+     *
+     * @param strategies a list of strategies
+     * @return a strategy sequencer
+     */
+    public static AbstractStrategy sequencer(AbstractStrategy... strategies) {
+        return new StrategiesSequencer(strategies);
     }
 }

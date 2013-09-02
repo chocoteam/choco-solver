@@ -26,7 +26,7 @@
  */
 package solver.search.strategy.enumerations.sorters.metrics;
 
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.variables.Variable;
 
 /**

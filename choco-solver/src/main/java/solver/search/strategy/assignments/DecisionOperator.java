@@ -196,7 +196,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
         @Override
         public boolean isValid(SetVar var, int element) {
-            return var.getEnvelope().contain(element);
+            return var.envelopeContains(element) && !var.kernelContains(element);
         }
 
         @Override
@@ -224,7 +224,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
         @Override
         public boolean isValid(SetVar var, int element) {
-            return var.contains(element);
+			return var.envelopeContains(element) && !var.kernelContains(element);
         }
 
         @Override

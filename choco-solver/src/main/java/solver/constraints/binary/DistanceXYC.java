@@ -29,7 +29,6 @@ package solver.constraints.binary;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.Operator;
-import solver.constraints.propagators.binary.PropDistanceXYC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import util.ESat;

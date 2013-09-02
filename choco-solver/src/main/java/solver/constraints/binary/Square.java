@@ -28,7 +28,6 @@ package solver.constraints.binary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.binary.PropSquare;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;

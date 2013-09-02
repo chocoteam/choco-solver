@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@ package util.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
-import util.objects.graphs.UndirectedGraph;
+import util.objects.graphs.IGraph;
 import util.objects.setDataStructures.ISet;
 
 /**
@@ -40,277 +40,279 @@ import util.objects.setDataStructures.ISet;
  */
 public class ConnectivityFinder {
 
-    //***********************************************************************************
-    // CONNECTED COMPONENTS ONLY
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONNECTED COMPONENTS ONLY
+	//***********************************************************************************
 
-    private int n;
-    private UndirectedGraph graph;
-    private ISet[] neighbors;
-    private int[] CC_firstNode, CC_nextNode, node_CC, p;
-    private int nbCC;
-    //bonus biconnection
-    private int[] numOfNode, nodeOfNum, inf;
+	private int n;
+	private IGraph graph;
+	private int[] CC_firstNode, CC_nextNode, node_CC, p, fifo;
+	private int nbCC;
+	//bonus biconnection
+	private int[] numOfNode, nodeOfNum, inf;
 
-    /**
-     * Create an object that can compute Connected Components (CC) of a graph g
-     * Can also quickly tell whether g is biconnected or not
-     *
-     * @param g graph
-     */
-    public ConnectivityFinder(UndirectedGraph g) {
-        graph = g;
-        n = g.getNbNodes();
-        neighbors = new ISet[n];
-        p = new int[n];
-        for (int i = graph.getActiveNodes().getFirstElement(); i >= 0; i = graph.getActiveNodes().getNextElement()) {
-            neighbors[i] = graph.getNeighborsOf(i);
-        }
-    }
+	/**
+	 * Create an object that can compute Connected Components (CC) of a graph g
+	 * Can also quickly tell whether g is biconnected or not (only for undirected graph)
+	 *
+	 * @param g graph
+	 */
+	public ConnectivityFinder(IGraph g) {
+		graph = g;
+		n = g.getNbNodes();
+		p = new int[n];
+		fifo = new int[n];
+	}
 
-    /**
-     * get the number of CC in g
-     * Beware you should call method findAllCC() first
-     *
-     * @return nbCC the number of CC in g
-     */
-    public int getNBCC() {
-        return nbCC;
-    }
+	/**
+	 * get the number of CC in g
+	 * Beware you should call method findAllCC() first
+	 *
+	 * @return nbCC the number of CC in g
+	 */
+	public int getNBCC() {
+		return nbCC;
+	}
 
-    public int[] getCC_firstNode() {
-        return CC_firstNode;
-    }
+	public int[] getCC_firstNode() {
+		return CC_firstNode;
+	}
 
-    public int[] getCC_nextNode() {
-        return CC_nextNode;
-    }
+	public int[] getCC_nextNode() {
+		return CC_nextNode;
+	}
 
-    public int[] getNode_CC() {
-        return node_CC;
-    }
+	public int[] getNode_CC() {
+		return node_CC;
+	}
 
-    /**
-     * Find all connected components of graph by performing one dfs
-     * Complexity : O(M+N) light and fast in practice
-     */
-    public void findAllCC() {
-        if (node_CC == null) {
-            CC_firstNode = new int[n];
-            CC_nextNode = new int[n];
-            node_CC = new int[n];
-        }
-        ISet act = graph.getActiveNodes();
-        for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-            p[i] = -1;
-            CC_firstNode[i] = -1;
-            neighbors[i] = graph.getNeighborsOf(i);
-        }
-        int first = act.getFirstElement();
-        int cc = 0;
-        while (first >= 0) {
-            findCC(first, cc);
-            cc++;
-            while (first >= 0 && p[first] != -1) {
-                first = act.getNextElement();
-            }
-        }
-        nbCC = cc;
-    }
+	/**
+	 * Find all connected components of graph by performing one dfs
+	 * Complexity : O(M+N) light and fast in practice
+	 */
+	public void findAllCC() {
+		if (node_CC == null) {
+			CC_firstNode = new int[n];
+			CC_nextNode = new int[n];
+			node_CC = new int[n];
+		}
+		ISet act = graph.getActiveNodes();
+		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+			p[i] = -1;
+		}
+		for(int i=0;i<CC_firstNode.length;i++){
+			CC_firstNode[i] = -1;
+		}
+		int first = act.getFirstElement();
+		int cc = 0;
+		while (first >= 0) {
+			findCC(first, cc);
+			cc++;
+			while (first >= 0 && p[first] != -1) {
+				first = act.getNextElement();
+			}
+		}
+		nbCC = cc;
+	}
 
-    private void findCC(int start, int cc) {
-        int i = start;
-        p[start] = start;
-        add(start, cc);
-        int j;
-        boolean notFinished = true;
-        boolean first = true;
-        while (notFinished) {
-            if (first) {
-                j = neighbors[i].getFirstElement();
-                first = false;
-            } else {
-                j = neighbors[i].getNextElement();
-            }
-            if (j < 0) {
-                if (i == start) {
-                    notFinished = false;
-                    break;
-                }
-                i = p[i];
-            } else {
-                if (p[j] == -1) {
-                    p[j] = i;
-                    i = j;
-                    first = true;
-                    add(i, cc);
-                }
-            }
-        }
-    }
+	private void findCC(int start, int cc) {
+		int first= 0;
+		int last = 0;
+		fifo[last++] = start;
+		p[start] = start;
+		add(start,cc);
+		while(first<last){
+			int i = fifo[first++];
+			ISet s = graph.getSuccsOrNeigh(i);
+			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+				if(p[j]==-1){
+					p[j] = i;
+					add(j,cc);
+					fifo[last++] = j;
+				}
+			}
+			if(graph.isDirected()){
+				s = graph.getPredsOrNeigh(i);
+				for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+					if(p[j]==-1){
+						p[j] = i;
+						add(j,cc);
+						fifo[last++] = j;
+					}
+				}
+			}
+		}
+	}
 
-    private void add(int node, int cc) {
-        node_CC[node] = cc;
-        CC_nextNode[node] = CC_firstNode[cc];
-        CC_firstNode[cc] = node;
-    }
+	private void add(int node, int cc) {
+		node_CC[node] = cc;
+		CC_nextNode[node] = CC_firstNode[cc];
+		CC_firstNode[cc] = node;
+	}
 
-    /**
-     * Test biconnectivity (i.e. connected with no articulation point and no bridge)
-     *
-     * @return true iff g is biconnected
-     */
-    public boolean isBiconnected() {
-        if (nodeOfNum == null) {
-            nodeOfNum = new int[n];
-            numOfNode = new int[n];
-            inf = new int[n];
-        }
-        ISet act = graph.getActiveNodes();
-        for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-            inf[i] = Integer.MAX_VALUE;
-            CC_firstNode[i] = -1;
-            p[i] = -1;
-        }
-        //algo
-        int start = act.getFirstElement();
-        int i = start;
-        int k = 0;
-        numOfNode[start] = k;
-        nodeOfNum[k] = start;
-        p[start] = start;
-        int j, q;
-        int nbRootChildren = 0;
-        boolean first = true;
-        while (true) {
-            if (first) {
-                j = neighbors[i].getFirstElement();
-                first = false;
-            } else {
-                j = neighbors[i].getNextElement();
-            }
-            if (j < 0) {
-                if (i == start) {
-                    if (k < act.getSize() - 1) {
-                        return false;// NOT EVEN CONNECTED
-                    } else {
-                        return true;
-                    }
-                }
-                q = inf[i];
-                i = p[i];
-                inf[i] = Math.min(q, inf[i]);
-                if (q >= numOfNode[i] && i != start) {
-                    return false;
-                } // ARTICULATION POINT DETECTED
-            } else {
-                if (p[j] == -1) {
-                    p[j] = i;
-                    if (i == start) {
-                        nbRootChildren++;
-                        if (nbRootChildren > 1) {
-                            return false;// ARTICULATION POINT DETECTED
-                        }
-                    }
-                    i = j;
-                    first = true;
-                    k++;
-                    numOfNode[i] = k;
-                    nodeOfNum[k] = i;
-                    inf[i] = numOfNode[i];
-                } else if (p[i] != j) {
-                    inf[i] = Math.min(inf[i], numOfNode[j]);
-                }
-            }
-        }
-    }
+	/**
+	 * Test biconnectivity (i.e. connected with no articulation point and no bridge)
+	 * only for undirected graphs
+	 *
+	 * @return true iff g is biconnected
+	 */
+	public boolean isBiconnected() {
+		assert (!graph.isDirected());
+		if (nodeOfNum == null) {
+			nodeOfNum = new int[n];
+			numOfNode = new int[n];
+			inf = new int[n];
+		}
+		ISet act = graph.getActiveNodes();
+		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+			inf[i] = Integer.MAX_VALUE;
+			p[i] = -1;
+		}
+		//algo
+		int start = act.getFirstElement();
+		int i = start;
+		int k = 0;
+		numOfNode[start] = k;
+		nodeOfNum[k] = start;
+		p[start] = start;
+		int j, q;
+		int nbRootChildren = 0;
+		boolean first = true;
+		while (true) {
+			if (first) {
+				j = graph.getSuccsOrNeigh(i).getFirstElement();
+				first = false;
+			} else {
+				j = graph.getSuccsOrNeigh(i).getNextElement();
+			}
+			if (j < 0) {
+				if (i == start) {
+					if (k < act.getSize() - 1) {
+						return false;// NOT EVEN CONNECTED
+					} else {
+						return true;
+					}
+				}
+				q = inf[i];
+				i = p[i];
+				inf[i] = Math.min(q, inf[i]);
+				if (q >= numOfNode[i] && i != start) {
+					return false;
+				} // ARTICULATION POINT DETECTED
+			} else {
+				if (p[j] == -1) {
+					p[j] = i;
+					if (i == start) {
+						nbRootChildren++;
+						if (nbRootChildren > 1) {
+							return false;// ARTICULATION POINT DETECTED
+						}
+					}
+					i = j;
+					first = true;
+					k++;
+					numOfNode[i] = k;
+					nodeOfNum[k] = i;
+					inf[i] = numOfNode[i];
+				} else if (p[i] != j) {
+					inf[i] = Math.min(inf[i], numOfNode[j]);
+				}
+			}
+		}
+	}
 
 
-    public TIntArrayList isthmusFrom, isthmusTo;
-    private int[] ND, L, H;
+	public TIntArrayList isthmusFrom, isthmusTo;
+	private int[] ND, L, H;
 
-    public boolean isConnectedAndFindIsthma() {
-        if (numOfNode == null || CC_firstNode == null) {
-            CC_firstNode = new int[n];
-            CC_nextNode = new int[n];
-            node_CC = new int[n];
-            nodeOfNum = new int[n];
-            numOfNode = new int[n];
-            isthmusFrom = new TIntArrayList();
-            isthmusTo = new TIntArrayList();
-            ND = new int[n];
-            L = new int[n];
-            H = new int[n];
-        }
-        ISet act = graph.getActiveNodes();
-        for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-            p[i] = -1;
-            CC_firstNode[i] = -1;
-        }
-        //algo
-        int start = act.getFirstElement();
-        int i = start;
-        int k = 0;
-        numOfNode[start] = k;
-        nodeOfNum[k] = start;
-        p[start] = start;
-        int j;
-        boolean first = true;
-        while (true) {
-            if (first) {
-                j = neighbors[i].getFirstElement();
-                first = false;
-            } else {
-                j = neighbors[i].getNextElement();
-            }
-            if (j < 0) {
-                if (i == start) {
-                    if (k < act.getSize() - 1) {
-                        return false;
-                    } else {
-                        break;
-                    }
-                }
-                i = p[i];
-            } else {
-                if (p[j] == -1) {
-                    p[j] = i;
-                    i = j;
-                    first = true;
-                    add(i, 0);
-                    k++;
-                    numOfNode[i] = k;
-                    nodeOfNum[k] = i;
-                }
-            }
-        }
-        // POST ORDER PASS FOR FINDING ISTHMUS
-        isthmusFrom.clear();
-        isthmusTo.clear();
-        int currentNode;
-        for (i = k; i >= 0; i--) {
-            currentNode = nodeOfNum[i];
-            ND[currentNode] = 1;
-            L[currentNode] = i;
-            H[currentNode] = i;
-            ISet nei = neighbors[currentNode];
-            for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
-                if (p[s] == currentNode) {
-                    ND[currentNode] += ND[s];
-                    L[currentNode] = Math.min(L[currentNode], L[s]);
-                    H[currentNode] = Math.max(H[currentNode], H[s]);
-                } else if (s != p[currentNode]) {
-                    L[currentNode] = Math.min(L[currentNode], numOfNode[s]);
-                    H[currentNode] = Math.max(H[currentNode], numOfNode[s]);
-                }
-                if (s != currentNode && p[s] == currentNode && L[s] >= numOfNode[s] && H[s] < numOfNode[s] + ND[s]) {
-                    isthmusFrom.add(currentNode);
-                    isthmusTo.add(s);
-                }
-            }
-        }
-        return true;
-    }
+	/**
+	 * Only for undirected graphs
+	 */
+	public boolean isConnectedAndFindIsthma() {
+		assert (!graph.isDirected());
+		if (numOfNode == null || CC_firstNode == null) {
+			CC_firstNode = new int[n];
+			CC_nextNode = new int[n];
+			node_CC = new int[n];
+			nodeOfNum = new int[n];
+			numOfNode = new int[n];
+			isthmusFrom = new TIntArrayList();
+			isthmusTo = new TIntArrayList();
+			ND = new int[n];
+			L = new int[n];
+			H = new int[n];
+		}
+		ISet act = graph.getActiveNodes();
+		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+			p[i] = -1;
+		}
+		for(int i=0;i<CC_firstNode.length;i++){
+			CC_firstNode[i] = -1;
+		}
+		//algo
+		int start = act.getFirstElement();
+		int i = start;
+		int k = 0;
+		numOfNode[start] = k;
+		nodeOfNum[k] = start;
+		p[start] = start;
+		int j;
+		boolean first = true;
+		while (true) {
+			if (first) {
+				j = graph.getSuccsOrNeigh(i).getFirstElement();
+				first = false;
+			} else {
+				j = graph.getSuccsOrNeigh(i).getNextElement();
+			}
+			if (j < 0) {
+				if (i == start) {
+					if (k < act.getSize() - 1) {
+						return false;
+					} else {
+						break;
+					}
+				}
+				i = p[i];
+			} else {
+				if (p[j] == -1) {
+					p[j] = i;
+					i = j;
+					first = true;
+					add(i, 0);
+					k++;
+					numOfNode[i] = k;
+					nodeOfNum[k] = i;
+				}
+			}
+		}
+		// POST ORDER PASS FOR FINDING ISTHMUS
+		isthmusFrom.clear();
+		isthmusTo.clear();
+		int currentNode;
+		for (i = k; i >= 0; i--) {
+			currentNode = nodeOfNum[i];
+			ND[currentNode] = 1;
+			L[currentNode] = i;
+			H[currentNode] = i;
+			ISet nei = graph.getSuccsOrNeigh(currentNode);
+			for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+				if (p[s] == currentNode) {
+					ND[currentNode] += ND[s];
+					L[currentNode] = Math.min(L[currentNode], L[s]);
+					H[currentNode] = Math.max(H[currentNode], H[s]);
+				} else if (s != p[currentNode]) {
+					L[currentNode] = Math.min(L[currentNode], numOfNode[s]);
+					H[currentNode] = Math.max(H[currentNode], numOfNode[s]);
+				}
+				if (s != currentNode && p[s] == currentNode && L[s] >= numOfNode[s] && H[s] < numOfNode[s] + ND[s]) {
+					isthmusFrom.add(currentNode);
+					isthmusTo.add(s);
+				}
+			}
+		}
+		return true;
+	}
 }
 //***********************************************************************************
 // CONNECTED COMPONENTS AND ARTICULATION POINTS IN ONE DFS

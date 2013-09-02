@@ -27,11 +27,11 @@
 package solver.constraints;
 
 import solver.Solver;
-import solver.constraints.propagators.binary.*;
-import solver.constraints.propagators.unary.PropEqualXC;
-import solver.constraints.propagators.unary.PropGreaterOrEqualXC;
-import solver.constraints.propagators.unary.PropLessOrEqualXC;
-import solver.constraints.propagators.unary.PropNotEqualXC;
+import solver.constraints.binary.*;
+import solver.constraints.unary.PropEqualXC;
+import solver.constraints.unary.PropGreaterOrEqualXC;
+import solver.constraints.unary.PropLessOrEqualXC;
+import solver.constraints.unary.PropNotEqualXC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import util.ESat;
@@ -287,4 +287,59 @@ public class Arithmetic extends IntConstraint<IntVar> {
             return vars[0].getName() + " " + op1 + " " + cste;
         }
     }
+
+	@Override
+	public Constraint makeOpposite(){
+		if(vars.length==1){
+			switch (op1) {
+				case EQ:
+					return new Arithmetic(vars[0],Operator.NQ,cste,solver);
+				case NQ:
+					return new Arithmetic(vars[0],Operator.EQ,cste,solver);
+				case GE:
+					return new Arithmetic(vars[0],Operator.LT,cste,solver);
+				case GT:
+					return new Arithmetic(vars[0],Operator.LE,cste,solver);
+				case LE:
+					return new Arithmetic(vars[0],Operator.GT,cste,solver);
+				case LT:
+					return new Arithmetic(vars[0],Operator.GE,cste,solver);
+				default:
+					throw new UnsupportedOperationException();
+			}
+		}else{
+			assert vars.length==2;
+			switch (op1) {
+				case EQ:
+					return new Arithmetic(vars[0],Operator.NQ,vars[1],op2,cste,solver);
+				case NQ:
+					return new Arithmetic(vars[0],Operator.EQ,vars[1],op2,cste,solver);
+				case GE:
+					return new Arithmetic(vars[0],Operator.LT,vars[1],op2,cste,solver);
+				case GT:
+					return new Arithmetic(vars[0],Operator.LE,vars[1],op2,cste,solver);
+				case LE:
+					return new Arithmetic(vars[0],Operator.GT,vars[1],op2,cste,solver);
+				case LT:
+					return new Arithmetic(vars[0],Operator.GE,vars[1],op2,cste,solver);
+				default:
+					switch (op2) {
+						case EQ:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.NQ,cste,solver);
+						case NQ:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.EQ,cste,solver);
+						case GE:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.LT,cste,solver);
+						case GT:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.LE,cste,solver);
+						case LE:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.GT,cste,solver);
+						case LT:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.GE,cste,solver);
+						default:
+							throw new UnsupportedOperationException();
+					}
+			}
+		}
+	}
 }

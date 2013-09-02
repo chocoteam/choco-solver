@@ -32,7 +32,6 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -71,8 +70,6 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, true);
-
         ExplanationFactory.CBJ.plugin(solver, false);
 
         if (solver.findSolution()) {
@@ -96,6 +93,6 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new ExplainedOCProblemSmall().execute(args);
     }
 }

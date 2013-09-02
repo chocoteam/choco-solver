@@ -69,17 +69,7 @@ public class NQueenBinary extends AbstractNQueen {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
-
-        IntVar[] orderedVars = orederIt2();
-        /*IPropagationEngine engine = solver.getEngine();
-        // default group
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        new IncrOrderV(orderedVars),
-                        Policy.FIXPOINT
-                ));*/
-
+//        SearchMonitorFactory.log(solver, true, false);
     }
 
     public static void main(String[] args) {

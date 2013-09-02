@@ -31,7 +31,7 @@ import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationTrigger;
@@ -155,7 +155,6 @@ public class VariableEngine implements IPropagationEngine {
                 evtset.clear(p);
                 mask = lastProp.getMask(vIp);
                 lastProp.clearMask(vIp);
-                lastProp.decNbPendingEvt();
                 // run propagation on the specific evt
                 lastProp.fineERcalls++;
                 lastProp.propagate(lastVar.getIndiceInPropagator(p), mask);
@@ -174,7 +173,6 @@ public class VariableEngine implements IPropagationEngine {
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
                 lastProp = lastVar.getPropagator(p);
                 lastProp.clearMask(lastVar.getIndiceInPropagator(p));
-                lastProp.decNbPendingEvt();
             }
             evtset.clear();
             schedule[id] = false;
@@ -188,7 +186,6 @@ public class VariableEngine implements IPropagationEngine {
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
                 lastProp = lastVar.getPropagator(p);
                 lastProp.clearMask(lastVar.getIndiceInPropagator(p));
-                lastProp.decNbPendingEvt();
             }
             evtset.clear();
             schedule[id] = false;
@@ -212,7 +209,6 @@ public class VariableEngine implements IPropagationEngine {
                     if (Configuration.PRINT_SCHEDULE) {
                         IPropagationEngine.Trace.printSchedule(prop);
                     }
-                    prop.incNbPendingEvt();
                     eventsets[vid].set(p);
                 } else if (Configuration.PRINT_SCHEDULE) {
                     IPropagationEngine.Trace.printAlreadySchedule(prop);

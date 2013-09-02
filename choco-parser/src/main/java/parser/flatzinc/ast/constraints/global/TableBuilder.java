@@ -26,18 +26,18 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
-import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.extension.ExtensionalBinRelation;
-import solver.constraints.propagators.extension.binary.CouplesTable;
-import solver.constraints.propagators.extension.nary.IterTuplesTable;
-import solver.constraints.propagators.extension.nary.LargeRelation;
+import solver.constraints.extension.ExtensionalBinRelation;
+import solver.constraints.extension.binary.CouplesTable;
+import solver.constraints.extension.nary.IterTuplesTable;
+import solver.constraints.extension.nary.LargeRelation;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 
@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class TableBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         // array[int] of var int: x, array[int, int] of int: t
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         int[] f_t = exps.get(1).toIntArray();

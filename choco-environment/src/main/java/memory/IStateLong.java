@@ -30,24 +30,31 @@ package memory;
 import java.io.Serializable;
 
 /**
- * Created by IntelliJ IDEA.
- * User: julien
- * Date: 12 juil. 2007
- * Time: 10:24:12
+ * An abstract class for backtrackable long.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
-public interface IStateLong extends Serializable {
+public abstract class IStateLong implements Serializable {
 
-    /**
-     * Value for an unknown integer.
-     */
+    protected final IEnvironment environment;
+    protected long currentValue;
+    protected int timeStamp;
 
-    long UNKNOWN_LONG = Long.MAX_VALUE;
+
+    public IStateLong(IEnvironment env, long i) {
+        environment = env;
+        currentValue = i;
+        timeStamp = environment.getWorldIndex();
+    }
 
     /**
      * Returns the current value.
      */
-
-    long get();
+    public final long get() {
+        return currentValue;
+    }
 
 
     /**
@@ -55,7 +62,7 @@ public interface IStateLong extends Serializable {
      * trailing stack.
      */
 
-    void set(long y);
+    public abstract void set(long y);
 
     /**
      * modifying a StoredInt by an increment
@@ -63,10 +70,51 @@ public interface IStateLong extends Serializable {
      * @param delta
      * @return the new value
      */
-    long add(long delta);
+    public final long add(long delta) {
+        long res = currentValue + delta;
+        set(res);
+        return res;
+    }
+
+    /**
+     * Modifies the value without storing the former value on the trailing stack.
+     *
+     * @param y      the new value
+     * @param wstamp the stamp of the world in which the update is performed
+     */
+
+    public void _set(final long y, final int wstamp) {
+        currentValue = y;
+        timeStamp = wstamp;
+    }
+
+    /**
+     * Make a deep copy of this.
+     *
+     * @return a long
+     */
+    public final long deepCopy() {
+        return currentValue;
+    }
+
+    public int getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void overrideTimeStamp(int aTimeStamp) {
+        this.timeStamp = aTimeStamp;
+    }
 
     /**
      * Retrieving the environment
      */
-    IEnvironment getEnvironment();
+    public IEnvironment getEnvironment() {
+        return environment;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.valueOf(currentValue);
+    }
 }

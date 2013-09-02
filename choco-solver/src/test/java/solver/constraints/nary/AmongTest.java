@@ -32,6 +32,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -250,8 +251,7 @@ public class AmongTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval)));
-            solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.arithm(vs[i], "!=", vval)));
+            solver.post(LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
         return IntConstraintFactory.sum(bs, occ);
     }
@@ -259,8 +259,7 @@ public class AmongTest {
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.member(vs[i], values)));
-            solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.not_member(vs[i], values)));
+            solver.post(LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values)));
         }
         return IntConstraintFactory.sum(bs, occ);
     }

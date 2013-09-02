@@ -27,15 +27,12 @@
 
 package choco.checker.fmk;
 
-import memory.IEnvironment;
-import solver.ICause;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.nary.sum.PropBoolSum;
+import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.set.SetConstraintsFactory;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -58,16 +55,9 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.set("s_" + i, s);
-                for (int e : domains[i].getSetEnv()) {
-                    vars[i].getEnvelope().add(e);
-                }
-                for (int k : domains[i].getSetKer()) {
-                    vars[i].getKernel().add(k);
-                }
+				vars[i] = VariableFactory.set("s_" + i,domains[i].getSetEnv(),domains[i].getSetKer(), s);
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             SetVar[] sets = new SetVar[n - 1];
@@ -89,16 +79,9 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.set("s_" + i, s);
-                for (int e : domains[i].getSetEnv()) {
-                    vars[i].getEnvelope().add(e);
-                }
-                for (int k : domains[i].getSetKer()) {
-                    vars[i].getKernel().add(k);
-                }
+				vars[i] = VariableFactory.set("s_" + i,domains[i].getSetEnv(),domains[i].getSetKer(), s);
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             SetVar[] sets = new SetVar[n - 1];
@@ -120,16 +103,9 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.set("s_" + i, s);
-                for (int e : domains[i].getSetEnv()) {
-                    vars[i].getEnvelope().add(e);
-                }
-                for (int k : domains[i].getSetKer()) {
-                    vars[i].getKernel().add(k);
-                }
+				vars[i] = VariableFactory.set("s_" + i,domains[i].getSetEnv(),domains[i].getSetKer(), s);
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.all_disjoint(vars);
@@ -149,16 +125,9 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.set("s_" + i, s);
-                for (int e : domains[i].getSetEnv()) {
-                    vars[i].getEnvelope().add(e);
-                }
-                for (int k : domains[i].getSetKer()) {
-                    vars[i].getKernel().add(k);
-                }
+				vars[i] = VariableFactory.set("s_" + i,domains[i].getSetEnv(),domains[i].getSetKer(), s);
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.all_different(vars);
@@ -178,16 +147,9 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.set("s_" + i, s);
-                for (int e : domains[i].getSetEnv()) {
-                    vars[i].getEnvelope().add(e);
-                }
-                for (int k : domains[i].getSetKer()) {
-                    vars[i].getKernel().add(k);
-                }
+				vars[i] = VariableFactory.set("s_" + i,domains[i].getSetEnv(),domains[i].getSetKer(), s);
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.subsetEq(vars);
@@ -207,16 +169,9 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.set("s_" + i, s);
-                for (int e : domains[i].getSetEnv()) {
-                    vars[i].getEnvelope().add(e);
-                }
-                for (int k : domains[i].getSetKer()) {
-                    vars[i].getKernel().add(k);
-                }
+				vars[i] = VariableFactory.set("s_" + i,domains[i].getSetEnv(),domains[i].getSetKer(), s);
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.all_equal(vars);
@@ -236,7 +191,6 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("boolSum_" + n);
-            IEnvironment env = s.getEnvironment();
             IntVar[] vars = new IntVar[n];
             BoolVar[] bools = new BoolVar[n - 1];
             vars[n - 1] = VariableFactory.enumerated("sum", domains[n - 1].getIntDom(), s);
@@ -245,7 +199,7 @@ public interface Model {
                 vars[i] = bools[i] = VariableFactory.bool("v_" + i, s);
                 if (domains[i].getIntDom().length == 1) {
                     try {
-                        bools[i].instantiateTo(domains[i].getIntDom()[0], dummyCause);
+                        bools[i].instantiateTo(domains[i].getIntDom()[0], Cause.Null);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -268,7 +222,6 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("EqAC_" + n);
-            IEnvironment env = s.getEnvironment();
             IntVar[] vars = new IntVar[n];
             try {
                 for (int i = 0; i < vars.length; i++) {
@@ -293,7 +246,6 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("InverseChannelingAC_" + n);
-            IEnvironment env = s.getEnvironment();
             IntVar[] X = new IntVar[n / 2];
             IntVar[] Y = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
@@ -318,7 +270,6 @@ public interface Model {
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
             Solver s = new Solver("modelNValues_AtMostBC_" + n);
-            IEnvironment env = s.getEnvironment();
             IntVar[] vars = new IntVar[n];
             IntVar[] decvars = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
@@ -338,21 +289,4 @@ public interface Model {
     };
 
     public void fillTypes(int[] types);
-
-    final static ICause dummyCause = new ICause() {
-        public Constraint getConstraint() {
-            return null;
-        }
-
-        public void explain(Deduction d, Explanation e) {
-        }
-
-        public boolean reactOnPromotion() {
-            return false;
-        }
-
-        public int getPropagationConditions(int vIdx) {
-            return 0;
-        }
-    };
 }

@@ -31,8 +31,9 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.extension.nary.IterTuplesTable;
-import solver.constraints.propagators.extension.nary.LargeRelation;
+import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.extension.nary.IterTuplesTable;
+import solver.constraints.extension.nary.LargeRelation;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -227,8 +228,7 @@ public class CountTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval)));
-            solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.arithm(vs[i], "!=", vval)));
+            solver.post(LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
         return IntConstraintFactory.sum(bs, occ);
     }

@@ -59,9 +59,6 @@ public class Pert extends AbstractProblem {
     @Option(name = "-d", usage = "Number of layers in disjunction.", required = false)
     int disjunctions = 2;
 
-    @Option(name = "-s", usage = "Random seed.", required = false)
-    long seed = 0;
-
     int horizon;
     IntVar[] vars;
     int[][] graph;
@@ -88,7 +85,7 @@ public class Pert extends AbstractProblem {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
-                    solver.post(precedence(vars[i], 1, vars[j], solver));
+                    solver.post(precedence(vars[i], 1, vars[j]));
                 }
             }
         }
@@ -103,7 +100,7 @@ public class Pert extends AbstractProblem {
         }
     }
 
-    static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
+    static Constraint precedence(IntVar x, int duration, IntVar y) {
         return IntConstraintFactory.arithm(x, "<=", y, "-", duration);
     }
 

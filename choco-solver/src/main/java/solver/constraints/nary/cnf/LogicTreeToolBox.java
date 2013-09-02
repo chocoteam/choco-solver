@@ -27,10 +27,12 @@
 
 package solver.constraints.nary.cnf;
 
+import solver.Solver;
 import solver.variables.BoolVar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 
 /**
@@ -43,32 +45,38 @@ public class LogicTreeToolBox {
     protected LogicTreeToolBox() {
     }
 
-    public static void expandNot(ALogicTree t) {
-        if (!t.isLit()) {
-            if (t.isNot()) {
-                t.flip();
-            }
-            ALogicTree[] children = t.getChildren();
-            for (int i = 0; i < children.length; i++) {
-                if (!children[i].isLit()) {
-                    expandNot(children[i]);
-                }
+    private static ThreadLocal<LogicComparator> comp = new ThreadLocal<LogicComparator>() {
+        @Override
+        protected LogicComparator initialValue() {
+            return new LogicComparator();
+        }
+    };
+
+    public static void expandNot(LogOp n) {
+        if (n.isNot()) {
+            n.flip();
+        }
+        ILogical[] children = n.getChildren();
+        for (int i = 0; i < children.length; i++) {
+            if (!children[i].isLit()) {
+                expandNot((LogOp) children[i]);
             }
         }
     }
 
-    public static void merge(ALogicTree.Operator op, ALogicTree t) {
-        if (!t.isLit()) {
-            if (t.is(op)) {
-                ALogicTree[] children = t.getChildren();
-                for (int i = 0; i < children.length; i++) {
-                    ALogicTree child = children[i];
-                    if (child.is(op)) {
-                        merge(op, child);
-                        ALogicTree[] subchildren = child.getChildren();
-                        t.removeChild(child);
+    public static void merge(LogOp.Operator op, LogOp n) {
+        if (n.is(op)) {
+            ILogical[] children = n.getChildren();
+            for (int i = 0; i < children.length; i++) {
+                ILogical child = children[i];
+                if (!child.isLit()) {
+                    LogOp nc = (LogOp) child;
+                    if (nc.is(op)) {
+                        merge(op, nc);
+                        ILogical[] subchildren = nc.getChildren();
+                        n.removeChild(child);
                         for (int j = 0; j < subchildren.length; j++) {
-                            t.addChild(subchildren[j]);
+                            n.addChild(subchildren[j]);
                         }
                     }
                 }
@@ -76,110 +84,128 @@ public class LogicTreeToolBox {
         }
     }
 
-    public static ALogicTree developOr(ALogicTree t) {
-        ALogicTree t1 = t.getAndChild();
-        ALogicTree t2 = t.getChildBut(t1);
-        ALogicTree tt = Node.and();
-        ALogicTree[] t1cs = t1.getChildren();
-        for (int i = 0; i < t1cs.length; i++) {
-            ALogicTree t1c = t1cs[i];
-            if (t2.isLit()) {
-                tt.addChild(Node.or(t1c, t2));
-            } else {
-                ALogicTree[] t2cs = t2.getChildren();
-                for (int j = 0; j < t2cs.length; j++) {
-                    ALogicTree t2c = t2cs[j];
-                    tt.addChild(Node.or(t1c, t2c));
+    public static LogOp developOr(LogOp n) {
+        ILogical t1 = n.getAndChild();
+        ILogical t2 = n.getChildBut(t1);
+        LogOp tt = LogOp.and();
+        if (!t1.isLit()) {
+            LogOp n1 = (LogOp) t1;
+            ILogical[] t1cs = n1.getChildren();
+            for (int i = 0; i < t1cs.length; i++) {
+                ILogical t1c = t1cs[i];
+                if (t2.isLit()) {
+                    tt.addChild(LogOp.or(t1c, t2));
+                } else {
+                    ILogical[] t2cs = ((LogOp) t2).getChildren();
+                    for (int j = 0; j < t2cs.length; j++) {
+                        ILogical t2c = t2cs[j];
+                        tt.addChild(LogOp.or(t1c, t2c));
+                    }
                 }
             }
         }
-        t.removeChild(t1);
-        t.removeChild(t2);
-        if (t.getNbChildren() == 0) {
+        n.removeChild(t1);
+        n.removeChild(t2);
+        if (n.getNbChildren() == 0) {
             return tt;
         } else {
-            t.addChild(tt);
-            return t;
+            n.addChild(tt);
+            return n;
         }
     }
 
-    public static ALogicTree distribute(ALogicTree t) {
-        if (!t.isLit()) {
-            if (t.is(ALogicTree.Operator.AND)) {
-                ALogicTree[] children = t.getChildren();
-                for (int i = 0; i < children.length; i++) {
-                    children[i] = distribute(children[i]);
-                }
-            } else {
-                if (t.hasOrChild()) {
-                    merge(ALogicTree.Operator.OR, t);
-                }
-                if (t.hasAndChild() && t.getNbChildren() > 1) {
-                    t = distribute(developOr(t));
+    public static LogOp distribute(LogOp n) {
+        if (n.is(LogOp.Operator.AND)) {
+            ILogical[] children = n.getChildren();
+            for (int i = 0; i < children.length; i++) {
+                if (!children[i].isLit()) {
+                    children[i] = distribute((LogOp) children[i]);
                 }
             }
-            merge(ALogicTree.Operator.AND, t);
+        } else {
+            if (n.hasOrChild()) {
+                merge(LogOp.Operator.OR, n);
+            }
+            if (n.hasAndChild() && n.getNbChildren() > 1) {
+                n = distribute(developOr(n));
+            }
         }
-        return t;
+        merge(LogOp.Operator.AND, n);
+        return n;
     }
 
-    public static ALogicTree simplify(ALogicTree t) {
-        if (t.is(ALogicTree.Operator.OR)) {
+    private static BoolVar[] extract(ILogical node) {
+        if (node.isLit()) {
+            return new BoolVar[]{(BoolVar) node};
+        } else {
+            return ((LogOp) node).flattenBoolVar();
+        }
+    }
+
+
+    public static ILogical simplify(ILogical t, Solver solver) {
+        if (t.isLit()) return t;
+        // else
+        LogOp n = (LogOp) t;
+        if (n.is(LogOp.Operator.OR)) {
             // OR with only LITS
-            ALogicTree[] children = t.getChildren();
-            HashMap<BoolVar, ALogicTree> lits = new HashMap<BoolVar, ALogicTree>();
+            ILogical[] children = n.getChildren();
+            HashMap<BoolVar, ILogical> lits = new HashMap<BoolVar, ILogical>();
             for (int i = 0; i < children.length; i++) {
-                BoolVar var = children[i].flattenBoolVar()[0];
+                BoolVar var = extract(children[i])[0];
+                var = var.isNot() ? var.not() : var;
                 if (lits.containsKey(var)) {
-                    ALogicTree prev = lits.get(var);
-                    if (!prev.type.equals(children[i].type)) {
-                        return Singleton.TRUE;
+                    ILogical prev = lits.get(var);
+                    if (prev.isNot() != children[i].isNot()) {
+                        return solver.ONE;
                     }
                 } else {
                     lits.put(var, children[i]);
                 }
             }
-        } else if (!t.hasOrChild()) {
+        } else if (!n.hasOrChild()) {
             // AND with only LITS
-            ALogicTree[] children = t.getChildren();
-            HashMap<BoolVar, ALogicTree> lits = new HashMap<BoolVar, ALogicTree>();
+            ILogical[] children = n.getChildren();
+            HashMap<BoolVar, ILogical> lits = new HashMap<BoolVar, ILogical>();
             for (int i = 0; i < children.length; i++) {
-                BoolVar var = children[i].flattenBoolVar()[0];
+                BoolVar var = extract(children[i])[0];
+                var = var.isNot() ? var.not() : var;
                 if (lits.containsKey(var)) {
-                    ALogicTree prev = lits.get(var);
-                    if (!prev.type.equals(children[i].type)) {
-                        return Singleton.FALSE;
+                    ILogical prev = lits.get(var);
+                    if (prev.isNot() != children[i].isNot()) {
+                        return solver.ZERO;
                     }
                 } else {
                     lits.put(var, children[i]);
                 }
             }
         } else {
-            ALogicTree[] children = t.getChildren();
+            ILogical[] children = n.getChildren();
             for (int i = 0; i < children.length; i++) {
                 if (!children[i].isLit()) {
-                    children[i] = simplify(children[i]);
+                    children[i] = simplify(children[i], solver);
                 }
             }
         }
         return t;
     }
 
-    public static ALogicTree simplifySingleton(ALogicTree t) {
-        if (!(Singleton.TRUE.equals(t) || Singleton.FALSE.equals(t) || t.isLit())) {
-            ALogicTree[] children = t.getChildren();
-            ArrayList<ALogicTree> toRemove = new ArrayList<ALogicTree>();
-            for (int i = 0; i < children.length; i++) {
-                if (Singleton.TRUE.equals(children[i])) {
-                    toRemove.add(children[i]);
-                }
+
+    public static ILogical simplifySingleton(ILogical l, Solver solver) {
+        if (l.isLit()) return l;
+        LogOp t = (LogOp) l;
+        ILogical[] children = t.getChildren();
+        ArrayList<ILogical> toRemove = new ArrayList<ILogical>();
+        for (int i = 0; i < children.length; i++) {
+            if (solver.ONE.equals(children[i])) {
+                toRemove.add(children[i]);
             }
-            for (ALogicTree lt : toRemove) {
-                t.removeChild(lt);
-            }
-            if (t.getNbChildren() == 1) {
-                return t.getChildren()[0];
-            }
+        }
+        for (ILogical lt : toRemove) {
+            t.removeChild(lt);
+        }
+        if (t.getNbChildren() == 1) {
+            return t.getChildren()[0];
         }
         return t;
     }
@@ -189,27 +215,43 @@ public class LogicTreeToolBox {
      * - lit OR lit ... OR lit
      * - (lit OR lit ... OR lit) AND (lit OR lit ... OR lit) ... AND (lit OR lit ... OR lit)
      *
-     * @param t
+     * @param logOp
      * @return
      */
-    public static ALogicTree toCNF(ALogicTree t) {
-        expandNot(t);
-        t = distribute(t);
+    public static ILogical toCNF(LogOp logOp, Solver solver) {
+        expandNot(logOp);
+        logOp = distribute(logOp);
         // sort children of each clause with positive literals first
-        if (t.is(ALogicTree.Operator.OR)) {
-            Arrays.sort(t.getChildren());
+        if (logOp.is(LogOp.Operator.OR)) {
+            Arrays.sort(logOp.getChildren(), comp.get());
         }
-        ALogicTree[] children = t.getChildren();
+        ILogical[] children = logOp.getChildren();
         for (int i = 0; i < children.length; i++) {
-            if (children[i].is(ALogicTree.Operator.OR)) {
-                Arrays.sort(children[i].getChildren());
+            if (!children[i].isLit()) {
+                LogOp nc = (LogOp) children[i];
+                if (nc.is(LogOp.Operator.OR)) {
+                    Arrays.sort(nc.getChildren(), comp.get());
+                }
             }
         }
-        t = simplify(t);
-        t = simplifySingleton(t);
-        t.cleanFlattenBoolVar();
-        return t;
+        ILogical l = simplify(logOp, solver);
+        l = simplifySingleton(l, solver);
+        if (!l.isLit()) ((LogOp) l).cleanFlattenBoolVar();
+        return l;
     }
 
+
+    private static class LogicComparator implements Comparator<ILogical> {
+
+        @Override
+        public int compare(ILogical o1, ILogical o2) {
+            if (o1.isNot() == o2.isNot()) {
+                return 0;
+            } else if (o2.isNot()) {
+                return -1;
+            }
+            return 1;
+        }
+    }
 
 }

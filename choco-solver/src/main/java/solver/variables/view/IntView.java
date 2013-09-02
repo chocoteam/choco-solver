@@ -145,11 +145,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return true;
-    }
-
-    @Override
     public void explain(VariableState what, Explanation to) {
         var.explain(what, to);
     }

@@ -29,24 +29,20 @@ package solver.constraints.nary.alldifferent;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.binary.PropNotEqualX_Y;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_Fast;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
+import solver.constraints.Propagator;
+import solver.constraints.binary.PropNotEqualX_Y;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import util.ESat;
 
 /**
- * Standard alldiff constraint with generalized AC
- * integer valued variables are used only for the left vertex set
- * no explicit variables are used for the right vertex set
- * the right vertex set is the interval (minValue .. maxValue)
+ * Ensures that all variables from VARS take a different value.
+ * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
  */
 public class AllDifferent extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC, BC, NEQS
+        AC, BC, weak_BC, NEQS, DEFAULT
     }
 
     public AllDifferent(IntVar[] vars, Solver solver) {
@@ -55,27 +51,42 @@ public class AllDifferent extends IntConstraint<IntVar> {
 
     public AllDifferent(IntVar[] vars, Solver solver, Type type) {
         super(vars, solver);
-        switch (type) {
+        setPropagators(createPropagators(vars, type));
+    }
+
+    public static Propagator<IntVar>[] createPropagators(IntVar[] VARS, Type consistency) {
+        switch (consistency) {
             case NEQS: {
-                int s = vars.length;
+                int s = VARS.length;
                 int k = 0;
                 Propagator[] props = new Propagator[(s * s - s) / 2];
                 for (int i = 0; i < s - 1; i++) {
                     for (int j = i + 1; j < s; j++) {
-                        props[k++] = new PropNotEqualX_Y(vars[i], vars[j]);
+                        props[k++] = new PropNotEqualX_Y(VARS[i], VARS[j]);
                     }
                 }
-                setPropagators(props);
+                return props;
             }
-            break;
             case AC:
-//                addPropagators(new PropAllDiffAC(this.vars));
-                addPropagators(new PropAllDiffAC_Fast(this.vars));
-                break;
+                return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC_Fast(VARS)};
             case BC:
+                return new Propagator[]{new PropAllDiffBC(VARS, false)};
+            case weak_BC:
+                return new Propagator[]{new PropAllDiffBC(VARS, true)};
+            case DEFAULT:
             default:
-                setPropagators(new PropAllDiffBC(this.vars));
-                break;
+                // adds a Probabilistic AC (only if at least some variables have an enumerated domain)
+                boolean enumDom = false;
+                for (int i = 0; i < VARS.length && !enumDom; i++) {
+                    if (VARS[i].hasEnumeratedDomain()) {
+                        enumDom = true;
+                    }
+                }
+                if (enumDom) {
+                    return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS, false), new PropAllDiffAC_adaptive(VARS, 0)};
+                } else {
+                    return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS, false)};
+                }
         }
     }
 
@@ -98,7 +109,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
     }
 
     @Override
-    public ESat isSatisfied() {
+    public ESat isEntailed() {
         for (IntVar v : vars) {
             if (v.instantiated()) {
                 int vv = v.getValue();

@@ -30,7 +30,6 @@ package solver.constraints.ternary;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.ternary.PropMaxBC;
 import solver.variables.IntVar;
 import solver.variables.fast.IntervalIntVarImpl;
 import util.ESat;

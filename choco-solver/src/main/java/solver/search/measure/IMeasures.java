@@ -44,7 +44,7 @@ public interface IMeasures extends ISearchMonitor, Serializable {
 
     String toCSV();
 
-    double[] toArray();
+    Number[] toArray();
 
     /**
      * Get current world unique id
@@ -136,20 +136,15 @@ public interface IMeasures extends ISearchMonitor, Serializable {
      */
     long getSolutionCount();
 
-    /**
-     * Get the best objective value of a solution.
-     */
-    int getObjectiveValue();
-
-    boolean isObjectiveOptimal();
-
-    boolean hasObjective();
-
-    void setObjectiveValue(int value);
-
-    void setObjectiveOptimal(boolean objectiveOptimal);
-
     void declareObjective();
+
+	boolean hasObjective();
+
+	void setObjectiveOptimal(boolean objectiveOptimal);
+
+	boolean isObjectiveOptimal();
+
+	public Number getBestSolutionValue();
 
     void setReadingTimeCount(long time);
 

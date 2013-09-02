@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
+import solver.constraints.nary.sum.Sum;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 
@@ -52,7 +52,8 @@ public class ViewSumXYTest {
 
         IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
         IntVar Y = VariableFactory.enumerated("Y", 3, 8, solver);
-        IntVar Z = Sum.var(X, Y);
+        IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
+		solver.post(IntConstraintFactory.sum(new IntVar[]{X,Y},Z));
 
         try {
             solver.propagate();
@@ -127,7 +128,8 @@ public class ViewSumXYTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 5, solver);
                 xs[1] = VariableFactory.bounded("y", 1, 5, solver);
-                IntVar sum = Sum.var(xs[0], xs[1]);
+				IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
+				solver.post(IntConstraintFactory.sum(xs,Z));
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random(xs, seed));
             }
@@ -157,7 +159,8 @@ public class ViewSumXYTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 5, solver);
                 xs[1] = VariableFactory.enumerated("y", 1, 5, solver);
-                IntVar sum = Sum.var(xs[0], xs[1]);
+				IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
+				solver.post(IntConstraintFactory.sum(xs,Z));
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random(xs, seed));
             }

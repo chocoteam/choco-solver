@@ -124,7 +124,7 @@ public class Sudoku extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Sudoku().execute();
+        new Sudoku().execute(args);
     }
 
     /////////////////////////////////// DATA //////////////////////////////////////////////////

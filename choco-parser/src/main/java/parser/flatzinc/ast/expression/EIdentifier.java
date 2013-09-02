@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.expression;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.variables.BoolVar;
@@ -48,10 +48,10 @@ public final class EIdentifier extends Expression {
 
     public final Object object;
 
-    public EIdentifier(THashMap<String, Object> map, String s) {
+    public EIdentifier(Datas datas, String s) {
         super(EType.IDE);
         this.value = s;
-        object = map.get(value);
+        object = datas.get(value);
     }
 
     @Override
@@ -114,6 +114,11 @@ public final class EIdentifier extends Expression {
 
     @Override
     public BoolVar boolVarValue(Solver solver) {
+        if (Integer.class.isInstance(object)) {
+            return ((Integer) object == 1) ? solver.ONE : solver.ZERO;
+        } else if (Boolean.class.isInstance(object)) {
+            return ((Boolean) object) ? solver.ONE : solver.ZERO;
+        }
         return (BoolVar) object;
     }
 
@@ -125,14 +130,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = (BoolVar) VariableFactory.fixed(values[i], solver);
+                    vars[i] = ((Integer) object == 1) ? solver.ONE : solver.ZERO;
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = (BoolVar) VariableFactory.fixed(values[i], solver);
+                    vars[i] = ((Boolean) object) ? solver.ONE : solver.ZERO;
                 }
                 return vars;
             }

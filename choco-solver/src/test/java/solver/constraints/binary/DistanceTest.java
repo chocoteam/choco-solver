@@ -32,13 +32,15 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
+import solver.constraints.nary.sum.Sum;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.VariableFactory;
 
 /**
@@ -54,22 +56,42 @@ public class DistanceTest {
         for (int i = 0; i < 100; i++) {
             long nbSol, nbNod;
             {
-                Solver solver = new Solver();
+				final Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
-                IntVar Z = VariableFactory.abs(Sum.var(X, VariableFactory.minus(Y)));
+				IntVar diff = VariableFactory.bounded("X-Y",-9,9,solver);
+				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff},X));
+                IntVar Z = VariableFactory.abs(diff);
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
                 solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
+//				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+//					@Override
+//					public void onSolution() {
+//						System.out.println("REF");
+//						for(Variable v:solver.getVars()){
+//							System.out.println(v+" inst? "+v.instantiated());
+//						}
+//					}
+//				});
                 solver.findAllSolutions();
                 nbSol = solver.getMeasures().getSolutionCount();
                 nbNod = solver.getMeasures().getNodeCount();
             }
             {
-                Solver solver = new Solver();
+                final Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
                 solver.post(IntConstraintFactory.distance(X, Y, "=", 5));
                 solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
+//				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+//					@Override
+//					public void onSolution() {
+//						System.out.println("NO REF");
+//						for(Variable v:solver.getVars()){
+//							System.out.println(v);
+//						}
+//					}
+//				});
                 solver.findAllSolutions();
                 Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
                 Assert.assertTrue(solver.getMeasures().getNodeCount() <= nbNod);

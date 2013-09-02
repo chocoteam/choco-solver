@@ -26,7 +26,7 @@
  */
 package solver.search.loop.monitors;
 
-import solver.search.limits.ILimit;
+import solver.search.limits.ICounter;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.restart.IRestartStrategy;
 
@@ -39,21 +39,22 @@ import solver.search.restart.IRestartStrategy;
 public final class RestartManager implements IMonitorInitialize, IMonitorOpenNode,
         IMonitorSolution, IMonitorRestart {
 
-    final IRestartStrategy restartStrategy; // restart strategy -- how do restarts are applied
+    final IRestartStrategy restartStrategy; // restart strategy -- how restarts are applied
 
-    final ILimit restartStrategyLimit; // restarts trigger
+    final ICounter restartStrategyLimit; // restarts trigger
 
     final AbstractSearchLoop searchLoop;
 
     int restartFromStrategyCount, restartCutoff, restartLimit;
 
     //NB: the initial cutoff is defined by the limit associated to this strategy
-    protected RestartManager(IRestartStrategy restartStrategy, ILimit restartStrategyLimit,
+    protected RestartManager(IRestartStrategy restartStrategy, ICounter restartStrategyLimit,
                              AbstractSearchLoop searchLoop, int restartLimit) {
         this.restartStrategy = restartStrategy;
         this.restartStrategyLimit = restartStrategyLimit;
         this.restartLimit = restartLimit;
         this.searchLoop = searchLoop;
+        this.searchLoop.plugSearchMonitor(restartStrategyLimit);
     }
 
     @Override

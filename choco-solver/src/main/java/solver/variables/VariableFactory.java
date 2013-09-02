@@ -28,14 +28,17 @@
 package solver.variables;
 
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
+import solver.variables.fast.BitsetArrayIntVarImpl;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
-import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
+import util.tools.StringUtils;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).
@@ -46,8 +49,11 @@ import util.objects.setDataStructures.ISet;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18 nov. 2010
  */
-public enum VariableFactory {
-    ;
+public class VariableFactory {
+
+    VariableFactory() {
+    }
+
     private static final String CSTE_NAME = "cste -- ";
 
     //TODO : build domain in Variable
@@ -80,7 +86,7 @@ public enum VariableFactory {
     public static BoolVar[] boolArray(String NAME, int SIZE, Solver SOLVER) {
         BoolVar[] vars = new BoolVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = bool(NAME + "_" + i, SOLVER);
+            vars[i] = bool(NAME + "[" + i + "]", SOLVER);
         }
         return vars;
     }
@@ -97,7 +103,7 @@ public enum VariableFactory {
     public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, Solver SOLVER) {
         BoolVar[][] vars = new BoolVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = boolArray(NAME + "_" + i, DIM2, SOLVER);
+            vars[i] = boolArray(NAME + "[" + i + "]", DIM2, SOLVER);
         }
         return vars;
     }
@@ -138,7 +144,7 @@ public enum VariableFactory {
     public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = bounded(NAME + "_" + i, MIN, MAX, SOLVER);
+            vars[i] = bounded(NAME + "[" + i + "]", MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -156,9 +162,9 @@ public enum VariableFactory {
      * @return an array of integer variables with bounded domains
      */
     public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        IntVar[][] vars = new IntVar[DIM1][DIM2];
+        IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = boundedArray(NAME + "_" + i, DIM2, MIN, MAX, SOLVER);
+            vars[i] = boundedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -197,7 +203,7 @@ public enum VariableFactory {
     public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = enumerated(NAME + "_" + i, MIN, MAX, SOLVER);
+            vars[i] = enumerated(NAME + "[" + i + "]", MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -214,11 +220,9 @@ public enum VariableFactory {
      * @return a matrix of integer variables with enumerated domains
      */
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        IntVar[][] vars = new IntVar[DIM1][DIM2];
+        IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            for (int j = 0; j < DIM2; j++) {
-                vars[i][j] = enumerated(NAME + "_" + i + "_" + j, MIN, MAX, SOLVER);
-            }
+            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -228,7 +232,7 @@ public enum VariableFactory {
      * Its initial domain is VALUES
      *
      * @param NAME   name of the variable
-     * @param VALUES initial domain
+     * @param VALUES initial domain (values must be sorted increasingly)
      * @param SOLVER solver involving the variable
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
@@ -237,9 +241,11 @@ public enum VariableFactory {
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else {
-            BitsetIntVarImpl var = new BitsetIntVarImpl(NAME, VALUES, SOLVER);
-            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
-            return var;
+            if ((VALUES[VALUES.length - 1] - VALUES[0]) / VALUES.length > 5) {
+                return new BitsetArrayIntVarImpl(NAME, VALUES, SOLVER);
+            } else {
+                return new BitsetIntVarImpl(NAME, VALUES, SOLVER);
+            }
         }
     }
 
@@ -256,7 +262,7 @@ public enum VariableFactory {
     public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = enumerated(NAME + "_" + i, VALUES, SOLVER);
+            vars[i] = enumerated(NAME + "[" + i + "]", VALUES, SOLVER);
         }
         return vars;
     }
@@ -275,7 +281,7 @@ public enum VariableFactory {
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = enumeratedArray(NAME + "_" + i, DIM2, VALUES, SOLVER);
+            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, VALUES, SOLVER);
         }
         return vars;
     }
@@ -317,7 +323,7 @@ public enum VariableFactory {
     public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[] vars = new RealVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = real(NAME + "_" + i, MIN, MAX, PRECISION, SOLVER);
+            vars[i] = real(NAME + "[" + i + "]", MIN, MAX, PRECISION, SOLVER);
         }
         return vars;
     }
@@ -336,9 +342,9 @@ public enum VariableFactory {
      * @return a real variable matrix with bounded domains initialized to [MIN,MAX]
      */
     public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, Solver SOLVER) {
-        RealVar[][] vars = new RealVar[DIM1][DIM2];
+        RealVar[][] vars = new RealVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = realArray(NAME + "_" + i, DIM2, MIN, MAX, PRECISION, SOLVER);
+            vars[i] = realArray(NAME + "[" + i + "]", DIM2, MIN, MAX, PRECISION, SOLVER);
         }
         return vars;
     }
@@ -347,39 +353,59 @@ public enum VariableFactory {
     // SET VARIABLES
     //*************************************************************************************
 
-
     /**
-     * Builds a set variable with an empty domain.
-     * The set variable represents a set of positive integers
+     * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
      *
-     * @param NAME   name of the variable
-     * @param SOLVER solver involving the variable
-     * @return a set variable with an empty domain
+     * @param NAME     name of the variable
+     * @param ENVELOPE elements potentially in the set
+     * @param ENV_TYPE type of data structure for storing the envelope
+     * @param KERNEL   elements that must belong to the final set
+     * @param KER_TYPE type of data structure for storing the kernel
+     * @param SOLVER   solver involving the variable
+     * @return a set variable
      */
-    public static SetVar set(String NAME, Solver SOLVER) {
-        return new SetVarImpl(NAME, SOLVER);
+    public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, Solver SOLVER) {
+        return new SetVarImpl(NAME, ENVELOPE, ENV_TYPE, KERNEL, KER_TYPE, SOLVER);
     }
 
     /**
      * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
-     * BEWARE elements must be positive or null
      *
-     * @param NAME    name of the variable
-     * @param ENVELOP elements potentially in the set
-     * @param KERNEL  elements that must belong to the final set
-     * @param SOLVER  solver involving the variable
+     * @param NAME     name of the variable
+     * @param ENVELOPE elements potentially in the set
+     * @param KERNEL   elements that must belong to the final set
+     * @param SOLVER   solver involving the variable
      * @return a set variable
      */
-    public static SetVar set(String NAME, ISet ENVELOP, ISet KERNEL, Solver SOLVER) {
-        SetVar s = set(NAME, SOLVER);
-        for (int i = ENVELOP.getFirstElement(); i >= 0; i = ENVELOP.getNextElement()) {
-            s.getEnvelope().add(i);
-        }
-        if (KERNEL != null)
-            for (int i = KERNEL.getFirstElement(); i >= 0; i = KERNEL.getNextElement()) {
-                s.getKernel().add(i);
-            }
-        return s;
+    public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Solver SOLVER) {
+        return set(NAME, ENVELOPE, SetType.BITSET, KERNEL, SetType.BITSET, SOLVER);
+    }
+
+    /**
+     * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
+     *
+     * @param NAME     name of the variable
+     * @param ENVELOPE elements potentially in the set
+     * @param SOLVER   solver involving the variable
+     * @return a set variable
+     */
+    public static SetVar set(String NAME, int[] ENVELOPE, Solver SOLVER) {
+        return set(NAME, ENVELOPE, SetType.BITSET, new int[]{}, SetType.BITSET, SOLVER);
+    }
+
+    /**
+     * Builds a set variable with an initial domain given by
+     * ENVELOP = [MIN_ELEMENT,MAX_ELEMENT] and an empty KERNEL.
+     * Uses a BitSet representation for both the envelope and the kernel
+     *
+     * @param NAME        name of the variable
+     * @param MIN_ELEMENT
+     * @param MAX_ELEMENT
+     * @param SOLVER      solver involving the variable
+     * @return a set variable
+     */
+    public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
+        return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
     }
 
     //*************************************************************************************
@@ -523,6 +549,27 @@ public enum VariableFactory {
     }
 
     /**
+     * Retrieve the specific zero/false boolvar.
+     * <p/>
+     *
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static BoolVar zero(Solver SOLVER) {
+        return SOLVER.ZERO;
+    }
+
+    /**
+     * Retrieve the specific one/true boolvar.
+     * <p/>
+     *
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static BoolVar one(Solver SOLVER) {
+        return SOLVER.ONE;
+    }
+
+
+    /**
      * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
      * <p/>
      * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
@@ -532,16 +579,11 @@ public enum VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        if (NAME.startsWith(CSTE_NAME) && SOLVER.cachedConstants.containsKey(VALUE)) {
+        if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
-        ConstantView cste;
-        if (VALUE == 0 || VALUE == 1) {
-            cste = new BoolConstantView(NAME, VALUE, SOLVER);
-        } else {
-            cste = new ConstantView(NAME, VALUE, SOLVER);
-        }
-        if (NAME.startsWith(CSTE_NAME)) {
+        ConstantView cste = new ConstantView(NAME, VALUE, SOLVER);
+        if (NAME.equals(Integer.toString(VALUE))) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
         return cste;
@@ -667,27 +709,16 @@ public enum VariableFactory {
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-            return new AbsView(VAR, VAR.getSolver());
+			Solver s = VAR.getSolver();
+            IntVar abs;
+            if(VAR.hasEnumeratedDomain()){
+                abs = enumerated(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            }else{
+                abs = bounded(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            }
+			s.post(IntConstraintFactory.absolute(abs,VAR));
+            return abs;
         }
-    }
-
-    /**
-     * Create a view over VAR such that: VAR<sup>2</sup>.
-     * <p/>
-     * <br/>- if VAR is already instantiated, returns a fixed variable;
-     * <br/>- otherwise, returns an square view;
-     * <p/>
-     * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-     * Any operations on this will transformed to operations on VAR following the "square" rules.
-     *
-     * @param VAR an integer variable.
-     */
-    public static IntVar sqr(IntVar VAR) {
-        if (VAR.instantiated()) {
-            int value = VAR.getValue();
-            return fixed(value * value, VAR.getSolver());
-        }
-        return new SqrView(VAR, VAR.getSolver());
     }
 
     /**

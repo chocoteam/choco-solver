@@ -63,7 +63,7 @@ public class Nonogram extends AbstractProblem {
     @Option(name = "-d", aliases = "--data", usage = "Nonogram data ID.", required = false)
     Data data = Data.bar_code;
     @Option(name = "-f", aliases = "--frame", usage = "open a frame.", required = false)
-    boolean frame = true;
+    boolean frame = false;
 
     BoolVar[][] vars;
 

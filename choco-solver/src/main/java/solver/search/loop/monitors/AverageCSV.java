@@ -26,8 +26,6 @@
  */
 package solver.search.loop.monitors;
 
-import solver.Solver;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,66 +37,20 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 06/09/12
  */
-public class AverageCSV implements IMonitorClose {
-
-    final String fileName;
-
-    Solver currentSolver;
-
-    int nb_probes;
-    double[] mA;
-    double[] sA;
-
-
-    public AverageCSV(String fileName, long nbExecutions) {
-        this.fileName = fileName;
-        this.mA = new double[13];
-        nb_probes = nbExecutions > 1 ? -1 : 0;
-        this.sA = new double[13];
-    }
-
-    public void setSolver(Solver aSolver) {
-        currentSolver = aSolver;
-        aSolver.getSearchLoop().plugSearchMonitor(this);
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
-        nb_probes++;
-        if (nb_probes > 0) {
-            double[] A = currentSolver.getMeasures().toArray();
-            for (int i = 0; i < A.length; i++) {
-                double activity = A[i];
-                double oldmA = mA[i];
-
-                double U = activity - oldmA;
-                mA[i] += (U / nb_probes);
-                sA[i] += (U * (activity - mA[i]));
-            }
-        }
-    }
+public class AverageCSV{
 
     /**
      * Record results
      */
-    public void record(String prefix, String postfix) {
+    public void record(String filename, String prefix, String postfix, Number[] measures) {
         StringBuilder st = new StringBuilder(prefix);
         st.append(";");
-        for (int i = 0; i < mA.length; i++) {
-            st.append(String.format("%.4f;", mA[i]));
-        }
-        if (nb_probes > 1) {
-            for (int i = 0; i < mA.length; i++) {
-                st.append(String.format("%.4f;", Math.sqrt(sA[i] / (nb_probes - 1))));
-            }
+        for (int i = 0; i < measures.length; i++) {
+            st.append(String.format("%.4f;", measures[i].doubleValue()));
         }
         st.append(postfix);
         st.append("\n");
-        writeTextInto(st.toString(), fileName);
+        writeTextInto(st.toString(), filename);
     }
 
     /**
@@ -114,14 +66,8 @@ public class AverageCSV implements IMonitorClose {
             FileWriter out = new FileWriter(aFile, true);
             if (!exist) {
                 out.write(";AVERAGE;;;;;;;;;;;;;");
-                if (nb_probes > 1) {
-                    out.write("STD DEV;;;;;;;;;;;;;");
-                }
                 out.write("\n");
                 out.write("instance;solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
-                if (nb_probes > 1) {
-                    out.write("solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
-                }
                 out.write("\n");
             }
             out.write(text);

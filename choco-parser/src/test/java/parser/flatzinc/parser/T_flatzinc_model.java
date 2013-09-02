@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.parser;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -36,7 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
-import parser.flatzinc.ast.GoalConf;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 
 import java.io.IOException;
@@ -50,13 +49,13 @@ import java.io.IOException;
 public class T_flatzinc_model extends GrammarTest {
 
     Solver mSolver;
-    THashMap<String, Object> map;
+    Datas datas;
     StringBuilder st;
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
-        map = new THashMap<String, Object>();
+        datas = new Datas();
         st = new StringBuilder();
     }
 
@@ -78,9 +77,9 @@ public class T_flatzinc_model extends GrammarTest {
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincWalker walker = new FlatzincWalker(nodes);
         walker.mSolver = mSolver;
-        walker.map = map;
+        walker.datas = datas;
         try {
-            walker.flatzinc_model(mSolver, map, new GoalConf());
+            walker.flatzinc_model(mSolver, datas);
         } catch (RecognitionException e) {
             Assert.fail();
         }

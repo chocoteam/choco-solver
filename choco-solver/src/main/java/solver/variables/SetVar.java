@@ -31,34 +31,108 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
-import util.objects.setDataStructures.ISet;
 
 /**
- * A Set Variable is defined by a domain which is a set interval [S_low,S_up]
- * S_low is the set of elements that must belong to every single solution. It is called the kernel.
- * S_up is the set of elements that may belong to at least one solution. It is called the envelope.
+ * A Set Variable is defined by a domain which is a set interval [kernel,envelope]
+ * The kernel is the set of elements that must belong to every single solution.
+ * The envelope is the set of elements that may belong to at least one solution.
  * <p/>
- * One must notice that in this context, a VALUE of the variable is a set of elements
- * (which are integers here).
+ * One must notice that in this context, a VALUE of the variable is a set of integers.
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 15 nov. 2012
  */
 public interface SetVar extends Variable<SetDelta> {
 
-    /**
-     * Gets the set of elements that belong to every solution
-     *
-     * @return the kernel of the set variable
-     */
-    public ISet getKernel();
+	/**
+	 * Constant used for enumerating elements in the envelope or the kernel of a SetVar.
+	 * This value indicates that the iteration is over:
+	 *
+	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
+	 *     // something
+	 * }</code>
+	 */
+	public final static int END = Integer.MIN_VALUE;
 
-    /**
-     * Gets the set of elements that may belong to a solution
-     *
-     * @return the envelope of the set variable
-     */
-    public ISet getEnvelope();
+	/**
+	 * Get the first element currently in the kernel domain of <code>this</code>.
+	 * Returns <code>END</code> if the set is empty.
+	 * Note that elements are not sorted.
+	 * To iterate over elements that are present in the kernel, do the following loop:
+	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
+	 *     // something
+	 * }</code>
+	 *
+	 * @return the first element in the kernel or <code>END</code> if it is empty.
+	 */
+	public int getKernelFirst();
+
+	/**
+	 * Get the next element in the kernel domain of <code>this</code>.
+	 * Returns <code>END</code> once all elements have been visited.
+	 * To iterate over elements that are present in the kernel, do the following loop:
+	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
+	 *     // something
+	 * }</code>
+	 *
+	 * @return the next element in the kernel, if any, or <code>END</code> otherwise.
+	 */
+	public int getKernelNext();
+
+	/**
+	 * Get the number of elements in the kernel domain of <code>this</code>.
+	 *
+	 * @return the number of elements currently present in the kernel.
+	 */
+	public int getKernelSize();
+
+	/**
+	 * Test whether element is present or not in the kernel
+	 * @param element
+	 * @return true iff element is present in the kernel
+	 */
+	public boolean kernelContains(int element);
+
+	/**
+	 * Get the first element currently in the envelope domain of <code>this</code>.
+	 * Returns <code>END</code> if the set is empty.
+	 * Note that elements are not sorted.
+	 * To iterate over elements that are present in the envelope, do the following loop:
+	 * <code>for(int e=getEnvelopeFirst(); e!=SetVar.END; e=getEnvelopeNext()){
+	 *     // something
+	 * }</code>
+	 *
+	 *
+	 * @return the first element in the envelope or <code>END</code> if it is empty.
+	 */
+	public int getEnvelopeFirst();
+
+	/**
+	 * Get the next element in the envelope domain of <code>this</code>.
+	 * Returns <code>END</code> once all elements have been visited.
+	 * To iterate over elements that are present in the envelope, do the following loop:
+	 * <code>for(int e=getEnvelopeFirst(); e!=SetVar.END; e=getEnvelopeNext()){
+	 *     // something
+	 * }</code>
+	 *
+	 *
+	 * @return the next element in the envelope, if any, or <code>END</code> otherwise.
+	 */
+	public int getEnvelopeNext();
+
+	/**
+	 * Get the number of elements in the envelope domain of <code>this</code>.
+	 *
+	 * @return the number of elements currently present in the envelope.
+	 */
+	public int getEnvelopeSize();
+
+	/**
+	 * Test whether element is present or not in the envelope
+	 * @param element
+	 * @return true iff element is present in the envelope
+	 */
+	public boolean envelopeContains(int element);
 
     /**
      * Adds element to the kernel, i.e. enforces that the set variable
@@ -92,17 +166,9 @@ public interface SetVar extends Variable<SetDelta> {
     boolean instantiateTo(int[] value, ICause cause) throws ContradictionException;
 
     /**
-     * Checks if an element <code>v</code> belongs to the domain of <code>this</code>
+     * Retrieves the current value of the variable if instantiated, otherwise the lower bound (kernel).
      *
-     * @param v the element to check
-     * @return <code>true</code> if the element belongs to the domain of <code>this</code>, <code>false</code> otherwise.
-     */
-    boolean contains(int v);
-
-    /**
-     * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
-     *
-     * @return the current value (or lower bound if not yet instantiated).
+     * @return the current value (or kernel if not yet instantiated).
      */
     int[] getValue();
 

@@ -8,3 +8,8 @@ parser/src/fzn/fzn_choco
 *.jar
 parser/src/lib/*
 *.DS_Store
+
+choco-parser/src/main/resources/mysql.properties
+choco-solver/src/test/resources/logback-test
+
+choco-parser/src/chocofzn/fzn_choco.sh

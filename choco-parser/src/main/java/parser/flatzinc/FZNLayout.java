@@ -27,22 +27,25 @@
 
 package parser.flatzinc;
 
+import database.MySQLAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
+import parser.flatzinc.ast.GoalConf;
 import parser.flatzinc.ast.declaration.DArray;
 import parser.flatzinc.ast.declaration.Declaration;
 import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
-import solver.constraints.Constraint;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.AverageCSV;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
-import util.ESat;
+import solver.variables.Variable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +55,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public final class FZNLayout implements IMonitorSolution, IMonitorClose {
+public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
@@ -72,7 +75,16 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     int nbSolution;
     boolean userinterruption = true;
 
-    public FZNLayout() {
+
+    protected final String instance;
+    protected String csv;
+    protected AverageCSV acsv;
+    protected String dbproperties;
+    protected String dbbenchname;
+    protected MySQLAccess sql;
+    protected GoalConf gc;
+
+    public FZNLayout(final String instance, final String csv, GoalConf gc, String dbproperties, String dbbenchname) {
         super();
         output_vars = new ArrayList<IntVar>();
         output_names = new ArrayList<String>();
@@ -81,14 +93,15 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
         output_arrays_vars = new ArrayList<IntVar[]>();
         output_arrays_types = new ArrayList<Declaration.DType>();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                if (isUserinterruption()) {
-                    beforeClose();
-                    LOGGER.info("% Unexpected resolution interruption!");
-                }
-            }
-        });
+        this.instance = instance;
+        this.csv = csv;
+        this.dbproperties = dbproperties;
+        this.dbbenchname = dbbenchname;
+        this.gc = gc;
+    }
+
+    public FZNLayout() {
+        this("", "", null, "", "");
     }
 
     @Override
@@ -117,6 +130,9 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                     }
                 }
                 LOGGER.info("----------");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("% " + searchLoop.getMeasures().toOneShortLineString());
+                }
             }
         } else {
             LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
@@ -125,13 +141,13 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     }
 
     private boolean check() {
-        Constraint[] cstrs = searchLoop.getSolver().getCstrs();
+        /*Constraint[] cstrs = searchLoop.getSolver().getCstrs();
         for (int c = 0; c < cstrs.length; c++) {
             ESat satC = cstrs[c].isSatisfied();
             if (!ESat.TRUE.equals(satC)) {
                 return false;
             }
-        }
+        }*/
         return true;
     }
 
@@ -154,38 +170,54 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void beforeClose() {
         if (LOGGER.isInfoEnabled()) {
             if (searchLoop.getMeasures().getSolutionCount() == 0) {
-                if ((wrongSolution && nbSolution == 0) || searchLoop.getLimits().isReached()) {
+                if ((wrongSolution && nbSolution == 0) || searchLoop.hasReachedLimit()) {
                     LOGGER.info("=====UNKNOWN=====");
                 } else {
                     LOGGER.info("=====UNSATISFIABLE=====");
                 }
             } else {
-                if (searchLoop.getLimits().isReached()
+                if (searchLoop.hasReachedLimit()
                         && (searchLoop.getObjectivemanager().isOptimization())) {
                     LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");
                 }
             }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("% - Search statistics");
-                LOGGER.info("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("% - Search statistics");
+                LOGGER.debug("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
                 if (searchLoop.getMeasures().hasObjective()) {
-                    LOGGER.info("% \t Objective : {}", searchLoop.getMeasures().getObjectiveValue());
+                    LOGGER.debug("% \t Objective : {}", searchLoop.getMeasures().getBestSolutionValue().intValue());
                 }
-                LOGGER.info("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
-                LOGGER.info("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
-                LOGGER.info("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
-                LOGGER.info("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
-                LOGGER.info("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
-                LOGGER.info("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
-                LOGGER.info("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
-                LOGGER.info("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
-                LOGGER.info("% \t Variables : {}", searchLoop.getSolver().getVars().length);
-                LOGGER.info("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
-                LOGGER.info("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
+                LOGGER.debug("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
+                LOGGER.debug("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
+                LOGGER.debug("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
+                LOGGER.debug("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
+                LOGGER.debug("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
+                LOGGER.debug("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
+                LOGGER.debug("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
+                LOGGER.debug("% \t Max Depth : {}", searchLoop.getMeasures().getMaxDepth());
+                LOGGER.debug("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
+                LOGGER.debug("% \t Variables : {}", searchLoop.getSolver().getVars().length);
+                LOGGER.debug("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
+                LOGGER.debug("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
                         searchLoop.getMeasures().getPropagationsCount());
+            } else {
+                LOGGER.info("% " + searchLoop.getMeasures().toOneShortLineString());
             }
+        }
+        if (sql != null) {
+            // query the database
+            sql.connect();
+            sql.insert(instance, dbbenchname,
+                    searchLoop.getMeasures().toArray(),
+                    searchLoop.getObjectivemanager().getPolicy(),
+                    searchLoop.hasReachedLimit(),
+                    searchLoop.getMeasures().isObjectiveOptimal());
+        }
+        if (!csv.equals("")) {
+            assert acsv != null;
+            acsv.record(csv, instance, gc.getDescription(), searchLoop.getMeasures().toArray());
         }
         userinterruption = false;
     }
@@ -198,10 +230,18 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void afterClose() {
     }
 
+    public void addOutputVar(String name, Variable variable, Declaration type) {
+        Exit.log("Cannot output " + name);
+    }
+
     public void addOutputVar(String name, IntVar variable, Declaration type) {
         output_names.add(name);
         output_vars.add(variable);
         output_types.add(type.typeOf);
+    }
+
+    public void addOutputArrays(String name, Variable[] variables, List<Expression> indices, Declaration type) {
+        Exit.log("Cannot output " + name);
     }
 
     public void addOutputArrays(String name, IntVar[] variables, List<Expression> indices, Declaration type) {
@@ -252,5 +292,25 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void setSearchLoop(AbstractSearchLoop searchLoop) {
         searchLoop.plugSearchMonitor(this);
         this.searchLoop = searchLoop;
+    }
+
+    public void makeup() {
+        if (!csv.equals("")) {
+            acsv = new AverageCSV();
+        }
+        if (dbproperties != "") {
+            sql = new MySQLAccess(new File(dbproperties));
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (isUserinterruption()) {
+                    beforeClose();
+                    LOGGER.info("% Unexpected resolution interruption!");
+                    if (acsv != null) {
+                        acsv.record(csv, instance, ";**ERROR**;", new Number[0]);
+                    }
+                }
+            }
+        });
     }
 }

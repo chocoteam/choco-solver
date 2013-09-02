@@ -29,9 +29,8 @@ package solver.constraints.unary;
 
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.unary.PropNotMemberBound;
-import solver.constraints.propagators.unary.PropNotMemberEnum;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -78,4 +77,13 @@ public class NotMember extends IntConstraint<IntVar> {
     public String toString() {
         return vars[0].toString() + " not in " + (values == null ? "[" + lb + "," + ub + "]" : Arrays.toString(values.toArray()));
     }
+
+	@Override
+	public Constraint makeOpposite(){
+		if(values==null){
+			return new Member(vars[0],lb,ub,solver);
+		}else{
+			return new Member(vars[0],values.toArray(),solver);
+		}
+	}
 }

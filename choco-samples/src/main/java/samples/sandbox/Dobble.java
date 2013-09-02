@@ -37,14 +37,14 @@ package samples.sandbox;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.Propagator;
+import solver.constraints.PropagatorPriority;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.gary.relations.GraphRelation;
-import solver.constraints.gary.relations.GraphRelationFactory;
-import solver.constraints.nary.MaxOfAList;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.channeling.PropGraphRelation;
-import solver.constraints.propagators.gary.channeling.PropRelationGraph;
+import solver.constraints.gary.channeling.PropGraphRelation;
+import solver.constraints.gary.channeling.PropRelationGraph;
+import solver.constraints.gary.channeling.relations.GraphRelation;
+import solver.constraints.gary.channeling.relations.GraphRelationFactory;
+import solver.constraints.nary.min_max.MaxOfAList;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -123,8 +123,6 @@ public class Dobble {
         }
         // search strategy
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(flatVars));
-        // output
-        SearchMonitorFactory.log(solver, true, false);
         // time limit
         SearchMonitorFactory.limitTime(solver, timeLimit);
         // run!
@@ -179,7 +177,7 @@ public class Dobble {
         IntProcedure proc;
 
         protected PropTakeFirstValues(IntVar[] variables, final IntVar max, Solver solver, Constraint c) {
-            super(variables, PropagatorPriority.LINEAR, false);
+            super(variables, PropagatorPriority.LINEAR, true);
             int n = vars.length;
             idms = new IIntDeltaMonitor[n];
             for (int i = 0; i < n; i++) {

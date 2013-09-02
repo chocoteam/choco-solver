@@ -32,12 +32,12 @@ import samples.graph.output.TextWriter;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.Propagator;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.gary.IGraphRelaxation;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.trees.PropTreeCostScalar;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropLagr_DCMST;
+import solver.constraints.gary.IGraphRelaxation;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.trees.PropTreeCostScalar;
+import solver.constraints.gary.trees.lagrangianRelaxation.PropLagr_DCMST;
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
@@ -45,7 +45,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
@@ -172,10 +172,9 @@ public class DCMST extends AbstractProblem {
         AbstractStrategy nextSol = GraphStrategyFactory.graphStrategy(graph, null, new NextSol(graph, dMax, relax), GraphStrategy.NodeArcPriority.ARCS);
         AbstractStrategy strat = new Change(graph, firstSol, nextSol);
         // bottom-up optimization
-        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strat));
+        solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strat));
         SearchMonitorFactory.limitSolution(solver, 2);
         SearchMonitorFactory.limitTime(solver, TIMELIMIT);
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override
@@ -186,10 +185,10 @@ public class DCMST extends AbstractProblem {
                 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
             throw new UnsupportedOperationException();
         }
-        if (solver.getSearchLoop().getObjectivemanager().getBestValue() != optimum
-                && optimum != 100000 // when the optimum is not given in bounds.csv
-                && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-            throw new UnsupportedOperationException("wrong optimum ? " + solver.getSearchLoop().getObjectivemanager().getBestValue() + " != " + optimum);
+        if (solver.getMeasures().getTimeCount() < TIMELIMIT &&
+			totalCost.getValue() != optimum && optimum != 100000 // when the optimum is not given in bounds.csv
+        ) {
+            throw new UnsupportedOperationException("wrong optimum ? " + solver.getSearchLoop().getObjectivemanager().getBestSolutionValue() + " != " + optimum);
         }
         if (solver.getMeasures().getSolutionCount() > 1
                 && (ub == optimum)) {
@@ -199,7 +198,7 @@ public class DCMST extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+        int bestCost = solver.getSearchLoop().getObjectivemanager().getBestSolutionValue().intValue();
         String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
                 + solver.getMeasures().getNodeCount() + ";" + (int) (solver.getMeasures().getTimeCount()) + ";" + bestCost + ";\n";
         TextWriter.writeTextInto(txt, outFile);

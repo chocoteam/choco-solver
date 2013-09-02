@@ -27,10 +27,9 @@
 
 package parser.flatzinc;
 
-import gnu.trove.map.hash.THashMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.ast.GoalConf;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 
 import java.io.ByteArrayInputStream;
@@ -57,7 +56,9 @@ public class FlatzincModelTest {
 
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
-        pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
+        Datas datas = new Datas();
+        datas.setmLayout(new FZNLayout());
+        pas.buildParser(in, solver, datas);
 
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -73,7 +74,9 @@ public class FlatzincModelTest {
 
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
-        pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
+        Datas datas = new Datas();
+        datas.setmLayout(new FZNLayout());
+        pas.buildParser(in, solver, datas);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
@@ -90,7 +93,9 @@ public class FlatzincModelTest {
 
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
-        pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
+        Datas datas = new Datas();
+        datas.setmLayout(new FZNLayout());
+        pas.buildParser(in, solver, datas);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
@@ -159,7 +164,9 @@ public class FlatzincModelTest {
 
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
-        pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
+        Datas datas = new Datas();
+        datas.setmLayout(new FZNLayout());
+        pas.buildParser(in, solver, datas);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }

@@ -30,11 +30,14 @@ package solver.constraints;
 
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.reification.DefaultOpposite;
 import solver.exception.ContradictionException;
 import solver.propagation.IPriority;
+import solver.variables.BoolVar;
+import solver.variables.VF;
 import solver.variables.Variable;
 import util.ESat;
+import util.tools.StringUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -68,9 +71,10 @@ import java.util.Arrays;
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @version 0.01, june 2010
  * @see solver.variables.Variable
- * @see solver.constraints.propagators.Propagator
+ * @see Propagator
  * @see solver.propagation.IPropagationEngine
  * @since 0.01
  */
@@ -84,6 +88,10 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
     protected P[] propagators;
 
     protected int staticPropagationPriority;
+
+    // for reification
+    private BoolVar boolReif;
+    private Constraint opposite;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
@@ -109,11 +117,11 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      *
      * @return an array of {@link Propagator}.
      */
-    public Propagator<V>[] getPropagators() {
+    public P[] getPropagators() {
         return propagators;
     }
 
-    public Propagator<V> getPropagator(int i) {
+    public P getPropagator(int i) {
         return propagators[i];
     }
 
@@ -237,5 +245,74 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
     public String toString() {
         return "Cstr(" + Arrays.toString(propagators) + ")";
+    }
+
+    /**
+     * @return true iff this constraint has been reified
+     */
+    public final boolean isReified() {
+        return boolReif != null;
+    }
+
+    /**
+     * Reifies the constraint with a boolean variable
+     * If the reified boolean variable already exists, an additional (equality) constraint is automatically posted.
+     *
+     * @param bool
+     */
+    public final void reifyWith(BoolVar bool) {
+        //assert (!isReified());
+        if (boolReif == null) {
+            boolReif = bool;
+            getSolver().post(new ReificationConstraint(boolReif, this, getOpposite()));
+        } else {
+            getSolver().post(new Arithmetic(bool, Operator.EQ, boolReif, this.getSolver()));
+        }
+    }
+
+    /**
+     * Get/make the boolean variable indicating whether the constraint is satisfied or not
+     *
+     * @return the boolean reifying the constraint
+     */
+    public final BoolVar reif() {
+        if (boolReif == null) {
+            boolReif = VF.bool(StringUtils.randomName(), getSolver());
+            getSolver().post(new ReificationConstraint(boolReif, this, getOpposite()));
+        }
+        return boolReif;
+    }
+
+    /**
+     * Get/make the opposite constraint of this
+     * The default opposite constraint does not filter domains but fails if this constraint is satisfied
+     *
+     * @return the opposite constraint of this
+     */
+    public final Constraint getOpposite() {
+        reif();
+        if (opposite == null) {
+            opposite = makeOpposite();
+            opposite.opposite = this;
+            opposite.boolReif = boolReif.not();
+        }
+        return opposite;
+    }
+
+    /**
+     * Make the opposite constraint of this
+     * BEWARE: this method should never be called by the user
+     * but it can be overridden to provide better constraint negations
+     */
+    public Constraint makeOpposite() {
+		Variable[] vars = this.vars;
+		int i = 0;
+		while(vars == null || vars.length==0){
+			if(i==propagators.length){
+				throw new UnsupportedOperationException("Cannot reify constraint : No variables in this constraint");
+			}
+			vars = propagators[i++].getVars();
+		}
+        return new DefaultOpposite(vars, solver);
     }
 }

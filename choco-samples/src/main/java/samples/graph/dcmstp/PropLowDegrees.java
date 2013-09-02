@@ -27,8 +27,8 @@
 
 package samples.graph.dcmstp;
 
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.Propagator;
+import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.UndirectedGraphVar;
@@ -61,7 +61,7 @@ public class PropLowDegrees extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropLowDegrees(UndirectedGraphVar vars, int[] maxDegrees) {
-        super(new UndirectedGraphVar[]{vars}, PropagatorPriority.LINEAR);
+        super(new UndirectedGraphVar[]{vars}, PropagatorPriority.LINEAR, true);
         n = maxDegrees.length;
         oneNode = new BitSet(n);
         counter = new int[n];

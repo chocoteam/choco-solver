@@ -33,12 +33,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.SatFactory;
+import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -55,35 +54,34 @@ public class ClauseTest {
 
     Logger log = LoggerFactory.getLogger("test");
 
-    @Test(groups = "1s")
+    @Test(groups = "30s")
     public void test1() {
         int nSol = 1;
-        for (int n = 1; n < 12; n++) {
+        for (int n = 1; n < 20; n++) {
             for (int i = 0; i <= n; i++) {
                 Solver s = new Solver();
 
-                BoolVar[] bs = new BoolVar[n];
+				final BoolVar[] bsource = new BoolVar[n];
+				final BoolVar[] bs = new BoolVar[n];
 
-                Literal[] lits = new Literal[n];
-                for (int j = 0; j < n; j++) {
-                    bs[j] = VariableFactory.bool("b" + j, s);
-                    if (j < i) {
-                        lits[j] = Literal.pos(bs[j]);
-                    } else {
-                        lits[j] = Literal.neg(bs[j]);
-                    }
-                }
+				for (int j = 0; j < n; j++) {
+					bsource[j] = VariableFactory.bool("b" + j, s);
+				}
 
-                ALogicTree or = Node.or(lits);
+				for (int j = 0; j < n; j++) {
+					if (j >= i) {
+						bs[j] = bsource[j].not();
+					}else{
+						bs[j] = bsource[j];
+					}
+				}
 
+                LogOp or = LogOp.or(bs);
                 log.info(or.toString());
-                Constraint cons = IntConstraintFactory.clauses(or, s);
-
-                Constraint[] cstrs = new Constraint[]{cons};
-
-                s.post(cstrs);
+                SatFactory.addClauses(or, s);
                 s.set(IntStrategyFactory.presetI(bs));
-                s.findAllSolutions();
+
+				s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 Assert.assertEquals(sol, nSol);
             }
@@ -98,13 +96,9 @@ public class ClauseTest {
         BoolVar[] bs = new BoolVar[1];
         bs[0] = VariableFactory.bool("to be", s);
 
-        ALogicTree and = Node.and(Literal.pos(bs[0]), Literal.neg(bs[0]));
+        LogOp and = LogOp.and(bs[0], bs[0].not());
 
-        Constraint cons = IntConstraintFactory.clauses(and, s);
-        System.out.printf("%s\n", cons.toString());
-        Constraint[] cstrs = new Constraint[]{cons};
-
-        s.post(cstrs);
+        SatFactory.addClauses(and, s);
         s.set(IntStrategyFactory.presetI(bs));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -117,16 +111,13 @@ public class ClauseTest {
 
         BoolVar b = VariableFactory.bool("to be", s);
 
-        ALogicTree or = Node.or(Literal.pos(b), Literal.neg(b));
+        LogOp or = LogOp.or(b, b.not());
 
-        Constraint cons = IntConstraintFactory.clauses(or, s);
-
-        Constraint[] cstrs = new Constraint[]{cons};
+        SatFactory.addClauses(or, s);
 
         BoolVar[] bs = new BoolVar[]{b};
-
-        s.post(cstrs);
         s.set(IntStrategyFactory.presetI(bs));
+        SMF.log(s, true, true);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);
@@ -137,8 +128,8 @@ public class ClauseTest {
     public void test2() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
-        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-        solver.post(IntConstraintFactory.clauses(tree, solver));
+        LogOp tree = LogOp.or(bvars[0], bvars[1]);
+        SatFactory.addClauses(tree, solver);
 
         try {
             solver.propagate();
@@ -154,8 +145,8 @@ public class ClauseTest {
     public void test30() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
-        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-        solver.post(IntConstraintFactory.clauses(tree, solver));
+        LogOp tree = LogOp.or(bvars[0], bvars[1]);
+        SatFactory.addClauses(tree, solver);
 
         try {
             solver.propagate();
@@ -171,8 +162,8 @@ public class ClauseTest {
     public void test31() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
-        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]));
-        solver.post(IntConstraintFactory.clauses(tree, solver));
+        LogOp tree = LogOp.or(bvars[0], bvars[1].not());
+        SatFactory.addClauses(tree, solver);
 
         try {
             solver.propagate();
@@ -188,8 +179,8 @@ public class ClauseTest {
     public void test32() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
-        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]));
-        solver.post(IntConstraintFactory.clauses(tree, solver));
+        LogOp tree = LogOp.or(bvars[0], bvars[1].not());
+        SatFactory.addClauses(tree, solver);
 
         try {
             solver.propagate();
@@ -205,8 +196,8 @@ public class ClauseTest {
     public void test33() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]), Literal.neg(bvars[2]));
-        solver.post(IntConstraintFactory.clauses(tree, solver));
+        LogOp tree = LogOp.or(bvars[0], bvars[1].not(), bvars[2].not());
+        SatFactory.addClauses(tree, solver);
 
         try {
             solver.propagate();
@@ -226,10 +217,10 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-                ALogicTree tree = Node.ifOnlyIf(
-                        Node.and(Literal.pos(bvars[1]), Literal.pos(bvars[2])),
-                        Literal.pos(bvars[0]));
-                solver.post(IntConstraintFactory.clauses(tree, solver));
+                LogOp tree = LogOp.ifOnlyIf(
+                        LogOp.and(bvars[1], bvars[2]),
+                        bvars[0]);
+                SatFactory.addClauses(tree, solver);
 
                 solver.set(IntStrategyFactory.random(bvars, seed));
                 solver.findAllSolutions();
@@ -265,10 +256,10 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-                ALogicTree tree = Node.ifOnlyIf(
-                        Node.and(Literal.pos(bvars[1]), Literal.pos(bvars[2])),
-                        Literal.pos(bvars[0]));
-                solver.post(IntConstraintFactory.clauses(tree, solver));
+                LogOp tree = LogOp.ifOnlyIf(
+                        LogOp.and(bvars[1], bvars[2]),
+                        bvars[0]);
+                SatFactory.addClauses(tree, solver);
                 try {
                     solver.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);

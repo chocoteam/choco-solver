@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.constraints.global;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -45,13 +45,13 @@ import java.util.List;
 public class DiffNBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         IntVar[] y = exps.get(1).toIntVarArray(solver);
         IntVar[] dx = exps.get(2).toIntVarArray(solver);
         IntVar[] dy = exps.get(3).toIntVarArray(solver);
         if (x.length > 1) {
-            return new Constraint[]{IntConstraintFactory.diffn(x, y, dx, dy)};
+            return IntConstraintFactory.diffn(x, y, dx, dy,true);
         }
         return new Constraint[0];
     }

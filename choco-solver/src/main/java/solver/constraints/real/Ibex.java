@@ -25,6 +25,8 @@ package solver.constraints.real;/*
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import solver.exception.SolverException;
+
 /**
  * A link to Ibex library.
  * The following option should be passed to the VM:
@@ -66,21 +68,29 @@ public class Ibex {
     public static final int TRUE = 1;
     public static final int FALSE_OR_TRUE = 2;
 
+	/* number of contractors handled by ibex */
+	protected int contractorCount = 0;
+
     static {
-        System.loadLibrary("ibex-java");
+        try{
+            System.loadLibrary("ibex-java");
+        }catch (UnsatisfiedLinkError e){
+            throw new SolverException("Ibex is not correctly installed (see http://www.emn.fr/z-info/ibex/).");
+        }
     }
 
-    /**
-     * Create a new IBEX constraint with a default contractor.
-     * <p/>
-     * The default contractor is COMPO.
-     * <p/>
-     * Example: add_ctr(2,{0}={1}) will add the constraint x=y.
-     *
-     * @param nb_var - Number of variables.
-     * @param syntax - The constraint
-     */
-    public native void add_ctr(int nb_var, String syntax);
+	/**
+	 * Add a new Ibex constraint
+	 * Example: add_ctr(2,{0}={1},COMPO) will add the constraint x=y with COMPO contractor
+	 * @param nb_var
+	 * @param syntax
+	 * @param option
+	 * @return the identifier or the newly created contractor
+	 */
+	public int add_contractor(int nb_var, String syntax, int option){
+		add_ctr(nb_var,syntax,option);
+		return contractorCount++;
+	}
 
     /**
      * Same as add_ctr except that a specific contractor is used.
@@ -89,7 +99,7 @@ public class Ibex {
      * @param syntax - The constraint
      * @param option - A value between COMPO, HC4 or HC4_NEWTON.
      */
-    public native void add_ctr(int nb_var, String syntax, int option);
+    private native void add_ctr(int nb_var, String syntax, int option);
 
     /**
      * Constraint nb_var variables to be integer variables.
@@ -98,7 +108,7 @@ public class Ibex {
      *               /////@param mask   - Set whether a variable is integral or not.
      *               /////                mask[i]==true <=> the ith variable is integral.
      */
-    public native void add_int_ctr(int nb_var);
+    private native void add_int_ctr(int nb_var);
 
 
     /**
@@ -193,5 +203,9 @@ public class Ibex {
      * Free IBEX structures from memory
      */
     public native void release();
+
+	public int getContractorCount() {
+		return contractorCount;
+	}
 }
 
