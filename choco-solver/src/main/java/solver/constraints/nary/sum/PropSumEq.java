@@ -30,6 +30,10 @@ package solver.constraints.nary.sum;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ValueRemoval;
+import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -64,35 +68,35 @@ public class PropSumEq extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		boolean again;
-		do{
-			int min = 0;
-			int max = 0;
-			int ampMax = 0;
-			for(int i=0;i<n;i++){
-				min += vars[i].getLB();
-				max += vars[i].getUB();
-				ampMax = Math.max(vars[i].getUB()-vars[i].getLB(),ampMax);
-			}
-			vars[n].updateLowerBound(min,aCause);
-			vars[n].updateUpperBound(max,aCause);
-			int lb = vars[n].getLB();
-			int ub = vars[n].getUB();
-			again = false;
-			if(min+ampMax>ub){
+        boolean again;
+        do {
+            int min = 0;
+            int max = 0;
+            int ampMax = 0;
+            for (int i = 0; i < n; i++) {
+                min += vars[i].getLB();
+                max += vars[i].getUB();
+                ampMax = Math.max(vars[i].getUB() - vars[i].getLB(), ampMax);
+            }
+            vars[n].updateLowerBound(min, aCause);
+            vars[n].updateUpperBound(max, aCause);
+            int lb = vars[n].getLB();
+            int ub = vars[n].getUB();
+            again = false;
+            if (min + ampMax > ub) {
 //				again = true;
-				for(int i=0;i<n;i++){
-                    again |= vars[i].updateUpperBound(ub-min+vars[i].getLB(),aCause);
-				}
-			}
-			if(max-ampMax<lb){
+                for (int i = 0; i < n; i++) {
+                    again |= vars[i].updateUpperBound(ub - min + vars[i].getLB(), aCause);
+                }
+            }
+            if (max - ampMax < lb) {
 //				again = true;
-				for(int i=0;i<n;i++){
-                    again |= vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
-				}
-			}
-		} while (again);
-	}
+                for (int i = 0; i < n; i++) {
+                    again |= vars[i].updateLowerBound(lb - max + vars[i].getUB(), aCause);
+                }
+            }
+        } while (again);
+    }
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
@@ -106,19 +110,19 @@ public class PropSumEq extends Propagator<IntVar> {
 
     @Override
     public final ESat isEntailed() {
-		int min = 0;
-		int max = 0;
-		for(int i=0;i<n;i++){
-			min += vars[i].getLB();
-			max += vars[i].getUB();
-		}
-		if(max<vars[n].getLB() || min>vars[n].getUB()){
-			return ESat.FALSE;
-		}
-		if(min==max && vars[n].instantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
+        int min = 0;
+        int max = 0;
+        for (int i = 0; i < n; i++) {
+            min += vars[i].getLB();
+            max += vars[i].getUB();
+        }
+        if (max < vars[n].getLB() || min > vars[n].getUB()) {
+            return ESat.FALSE;
+        }
+        if (min == max && vars[n].instantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
     }
 
     @Override
@@ -132,5 +136,45 @@ public class PropSumEq extends Propagator<IntVar> {
         linComb.append(" = ");
         linComb.append(vars[n].getName());
         return linComb.toString();
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
+        e.add(this);
+        if (d != null && d.getmType() == Deduction.Type.ValRem) {
+            ValueRemoval vr = (ValueRemoval) d;
+            IntVar var = (IntVar) vr.getVar();
+            int val = vr.getVal();
+            // 1. find the pos of var in vars
+            boolean ispos = vars[n].getId() != var.getId();
+
+            if (val < var.getLB()) { // explain LB
+                for (int i = 0; i < n; i++) { // first the positive coefficients
+                    if (vars[i] != var) {
+                        vars[i].explain(ispos ? VariableState.UB : VariableState.LB, e);
+                    }
+                }
+                // then the negative one
+                if (vars[n] != var) {
+                    vars[n].explain(ispos ? VariableState.LB : VariableState.UB, e);
+                }
+            } else if (val > var.getUB()) { // explain UB
+                for (int i = 0; i < n; i++) { // first the positive coefficients
+                    if (vars[i] != var) {
+                        vars[i].explain(ispos ? VariableState.LB : VariableState.UB, e);
+                    }
+                }
+                // then the negative one
+                if (vars[n] != var) {
+                    vars[n].explain(ispos ? VariableState.UB : VariableState.LB, e);
+                }
+            } else {
+                throw new UnsupportedOperationException("PropSumEq only knows how to explain bounds");
+            }
+
+        } else {
+            super.explain(d, e);
+        }
     }
 }
