@@ -1,0 +1,10 @@
+#!/bin/sh
+stable="$1"
+last="$2"
+new="$3"
+echo "# git tag v${new}"
+echo "git archive --prefix=choco-${new}/ v${new} | gzip -9 > ../choco-${new}.tar.gz"
+echo "git diff v${stable} v${new} | gzip -9 > ../patch-${new}.gz"
+echo "git log --no-merges v${new}^v${last} > ../ChangeLog-${new}"
+echo "git shortlog --no-merges v${new}^v${last} > ../ShortLog"
+echo "git diff --stat --summary -M v${last} v${new} > diffstat-v${new}"
