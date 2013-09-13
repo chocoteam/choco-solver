@@ -31,6 +31,7 @@ import solver.Solver;
 import solver.explanations.strategies.ConflictBasedBackjumping;
 import solver.explanations.strategies.IDecisionJumper;
 import solver.explanations.strategies.PathRepair;
+import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 import solver.explanations.strategies.jumper.RandomDecisionJumper;
 
 /**
@@ -84,6 +85,7 @@ public enum ExplanationFactory {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
+            new PathRepair(solver.getExplainer(), new MostRecentWorldJumper( ));
         }
     };
 

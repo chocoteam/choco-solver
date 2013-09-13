@@ -13,3 +13,4 @@ The CHANGES.md file starts at this version.
 -------------------
 
 * Explain PropSumEq
+* Fix #118
