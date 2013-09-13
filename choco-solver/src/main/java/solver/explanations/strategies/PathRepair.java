@@ -83,6 +83,7 @@ public class PathRepair extends ConflictBasedBackjumping {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
                     dec.rewind();
+                    dec.buildNext();
                     // add it to the decisions to force
                     cobdec.push(dec);
 
