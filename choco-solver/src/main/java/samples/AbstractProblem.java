@@ -45,7 +45,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
  */
 public abstract class AbstractProblem {
 
-    enum Level {
+    public enum Level {
         SILENT(-10), QUIET(0), VERBOSE(10), SOLUTION(20), SEARCH(30);
 
         int level;
@@ -61,7 +61,7 @@ public abstract class AbstractProblem {
     }
 
     @Option(name = "-log", usage = "Quiet resolution", required = false)
-    Level level = Level.SOLUTION;
+    protected Level level = Level.SOLUTION;
 
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
