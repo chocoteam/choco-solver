@@ -32,14 +32,14 @@
  * Time: 22:59
  */
 
-package samples.parallelism;
+package samples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.thread.AbstractParallelMaster;
 
-public class Master extends AbstractParallelMaster<Slave> {
+public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
 
     //***********************************************************************************
     // VARIABLES
@@ -55,11 +55,14 @@ public class Master extends AbstractParallelMaster<Slave> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public Master() {
-        int nbThreads = 3;
-        slaves = new Slave[nbThreads];
+	/**
+	 * @param probClassName	class name of the ParallelizedProblem to solve
+	 * @param nbThreads		number of threads to use
+	 */
+    public MasterProblem(final String probClassName, int nbThreads) {
+        slaves = new SlaveProblem[nbThreads];
         for (int i = 0; i < nbThreads; i++) {
-            slaves[i] = new Slave(this,i);
+            slaves[i] = new SlaveProblem(probClassName, this,i);
             slaves[i].workInParallel();
         }
         wait = true;
@@ -151,8 +154,4 @@ public class Master extends AbstractParallelMaster<Slave> {
     public synchronized void closeWithSuccess() {
         this.closeWithSuccess = true;
     }
-
-	public static void main(String[] args){
-	    new Master();
-	}
 }

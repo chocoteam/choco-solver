@@ -32,9 +32,8 @@
  * Time: 23:06
  */
 
-package samples.parallelism;
+package samples;
 
-import samples.parallelism.examples.AirPlaneLandingModel;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.IntObjectiveManager;
@@ -43,22 +42,34 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.thread.AbstractParallelSlave;
 
-public class Slave extends AbstractParallelSlave<Master> {
+import java.lang.reflect.InvocationTargetException;
+
+public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     Solver solver;
-	Model model;
+	ParallelizedProblem model;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public Slave(final Master master, int id) {
+    public SlaveProblem(final String probClassName, final MasterProblem master, final int id) {
         super(master, id);
-		model = new AirPlaneLandingModel(id);
+		try {
+			model = (ParallelizedProblem) Class.forName(probClassName).getDeclaredConstructors()[0].newInstance(id);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
     }
 
     //***********************************************************************************

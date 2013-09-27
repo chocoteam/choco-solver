@@ -25,11 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.parallelism.examples;
+package samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.slf4j.LoggerFactory;
-import samples.parallelism.Model;
+import samples.MasterProblem;
+import samples.ParallelizedProblem;
 import solver.ResolutionPolicy;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -63,7 +64,7 @@ import java.util.regex.Pattern;
  * @author Charles Prud'homme
  * @since 18/04/11
  */
-public class AirPlaneLandingModel extends Model {
+public class AirPlanePara extends ParallelizedProblem {
 
     private static final String groupSeparator = "\\,";
     private static final String decimalSeparator = "\\.";
@@ -108,7 +109,7 @@ public class AirPlaneLandingModel extends Model {
 
     IntVar objective;
 
-	public AirPlaneLandingModel(int searchIdx){
+	public AirPlanePara(int searchIdx){
 		super(searchIdx);
 	}
 
@@ -195,7 +196,6 @@ public class AirPlaneLandingModel extends Model {
 					IntStrategyFactory.inputOrder_InDomainMin(planes)
 			));
 		}
-		solver.set(ISF.lastConflict(solver,solver.getSearchLoop().getStrategy()));
 		if(searchIdx>=2){
 			IntVar[] ivars = solver.retrieveIntVars();
 			LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
@@ -225,8 +225,7 @@ public class AirPlaneLandingModel extends Model {
     }
 
     public static void main(String[] args) {
-		AirPlaneLandingModel air = new AirPlaneLandingModel(1);
-		air.solve();
+		new MasterProblem(AirPlanePara.class.getCanonicalName(),3);
     }
 
     private int[][] parse(String source) {

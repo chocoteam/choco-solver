@@ -32,18 +32,18 @@
  * Time: 23:52
  */
 
-package samples.parallelism;
+package samples;
 
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
-public abstract class Model extends AbstractProblem {
+public abstract class ParallelizedProblem extends AbstractProblem {
 
 	protected int searchIdx;
 
-	public Model(int searchIdx){
+	public ParallelizedProblem(int searchIdx){
 		super();
 		this.searchIdx = searchIdx;
 		// abstract execution methods

@@ -32,24 +32,22 @@
  * Time: 23:10
  */
 
-package samples.parallelism.examples;
+package samples.integer;
 
-import samples.parallelism.Model;
-import solver.constraints.ICF;
+import samples.MasterProblem;
+import samples.ParallelizedProblem;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.tools.StringUtils;
 
-public class CostasModel extends Model {
+public class CostasPara extends ParallelizedProblem {
 
     private static int n = 12;
     IntVar[] vars, vectors;
 
-	public CostasModel(int searchIdx){
+	public CostasPara(int searchIdx){
 		super(searchIdx);
 	}
 
@@ -79,8 +77,7 @@ public class CostasModel extends Model {
 				solver.set(ISF.force_InputOrder_InDomainMin(vars));
 				break;
 			case 1:
-				solver.set(ISF.force_InputOrder_InDomainMin(vars));
-				solver.set(ISF.lastConflict(solver,solver.getSearchLoop().getStrategy()));
+				solver.set(ISF.firstFail_InDomainMin(vars));
 				break;
 			default:
 					solver.set(ISF.ActivityBased(vars,0));
@@ -111,7 +108,6 @@ public class CostasModel extends Model {
     }
 
 	public static void main(String[] args){
-	    CostasModel cm = new CostasModel(1);
-		cm.solve();
+		new MasterProblem(CostasPara.class.getCanonicalName(),3);
 	}
 }
