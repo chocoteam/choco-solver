@@ -24,43 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 18/09/13
+ * Time: 23:10
+ */
+
 package samples.integer;
 
-import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.Solver;
+import samples.MasterProblem;
+import samples.ParallelizedProblem;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.tools.StringUtils;
 
-/**
- * Costas Arrays
- * "Given n in N, find an array s = [s_1, ..., s_n], such that
- * <ul>
- * <li>s is a permutation of Z_n = {0,1,...,n-1};</li>
- * <li>the vectors v(i,j) = (j-i)x + (s_j-s_i)y are all different </li>
- * </ul>
- * <br/>
- * An array v satisfying these conditions is called a Costas array of size n;
- * the problem of finding such an array is the Costas Array problem of size n."
- * <br/>
- *
- * @author Jean-Guillaume Fages
- * @since 25/01/11
- */
-public class CostasArrays extends AbstractProblem {
+public class CostasPara extends ParallelizedProblem {
 
-    @Option(name = "-o", usage = "Costas array size.", required = false)
-    private static int n = 14;  // should be <15 to be solved quickly
-
+    private static int n = 12;
     IntVar[] vars, vectors;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("CostasArrays");
-    }
+	public CostasPara(int searchIdx){
+		super(searchIdx);
+	}
 
     @Override
     public void buildModel() {
@@ -70,10 +59,8 @@ public class CostasArrays extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i != j) {
-
-
 					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
+					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i], k}, vars[j]));
 					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
                     idx++;
                 }
@@ -85,7 +72,16 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.force_InputOrder_InDomainMin(vars));
+		switch (searchIdx){
+			case 0:
+				solver.set(ISF.force_InputOrder_InDomainMin(vars));
+				break;
+			case 1:
+				solver.set(ISF.firstFail_InDomainMin(vars));
+				break;
+			default:
+					solver.set(ISF.ActivityBased(vars,0));
+		}
     }
 
 
@@ -111,7 +107,7 @@ public class CostasArrays extends AbstractProblem {
         System.out.println(s);
     }
 
-    public static void main(String[] args) {
-        new CostasArrays().execute(args);
-    }
+	public static void main(String[] args){
+		new MasterProblem(CostasPara.class.getCanonicalName(),3);
+	}
 }

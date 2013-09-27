@@ -42,6 +42,8 @@ import util.tools.ArrayUtils;
 /**
  * <br/>
  *
+ * DYLD_LIBRARY_PATH = /Users/gillou/ibex/lib
+ *
  * @author Jean-Guillaume Fages, Charles Prud'homme
  * @since 20/07/12
  */
