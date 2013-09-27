@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@ import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
 import util.tools.StringUtils;
+
+import java.util.Arrays;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).
@@ -237,6 +239,7 @@ public class VariableFactory {
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
     public static IntVar enumerated(String NAME, int[] VALUES, Solver SOLVER) {
+		VALUES = sortIfNot(VALUES);
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
@@ -516,6 +519,51 @@ public class VariableFactory {
             throw new SolverException(NAME + ": wrong domain definition, lower bound > upper bound");
         }
     }
+
+	/**
+	 * Sorts the input array if it is not already sorted,
+	 * and removes multiple occurrences of the same value
+	 * @param values
+	 * @return a sorted array containing each value of values exactly once
+	 */
+	private static int[] sortIfNot(int[] values) {
+		int n = values.length;
+		boolean sorted = true;
+		boolean noDouble = true;
+		for(int i=0;i<n-1 && sorted;i++){
+			if(values[i]>values[i+1]){
+				sorted = false;
+				noDouble = false;// cannot be sure
+			}
+			if(values[i]==values[i+1]){
+				noDouble = false;
+			}
+		}
+		if(!sorted){
+			Arrays.sort(values);
+		}
+		if(!noDouble){
+			int nbVals = 1;
+			for(int i=0;i<n-1;i++){
+				assert values[i]<=values[i+1];
+				if(values[i]<values[i+1]){
+					nbVals++;
+				}
+			}
+			if(nbVals<n){
+				int[] correctValues = new int[nbVals];
+				int idx=0;
+				for(int i=0;i<n-1;i++){
+					if(values[i]<values[i+1]){
+						correctValues[idx++] = values[i];
+					}
+				}
+				correctValues[idx++] = values[n-1];
+				return correctValues;
+			}
+		}
+		return values;
+	}
 
     /**
      * Checks domain range.
