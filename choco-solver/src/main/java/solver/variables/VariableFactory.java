@@ -234,7 +234,7 @@ public class VariableFactory {
      * Its initial domain is VALUES
      *
      * @param NAME   name of the variable
-     * @param VALUES initial domain (values must be sorted increasingly)
+     * @param VALUES initial domain
      * @param SOLVER solver involving the variable
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
