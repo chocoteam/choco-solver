@@ -287,6 +287,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	 * Time-based filtering (compute the profile over every point in time)
 	 */
 	private class TimeBasedFilter extends CumulFilter{
+		int[] time = new int[31];
 		public void filter(ISet tasks) throws ContradictionException{
 			int min = Integer.MAX_VALUE / 2;
 			int max = Integer.MIN_VALUE / 2;
@@ -297,7 +298,12 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 				}
 			}
 			if (min < max) {
-				int[] time = new int[max - min];
+				if(max-min>time.length){
+					time = new int[max-min];
+				}
+				else{
+					Arrays.fill(time,0,max-min,0);
+				}
 				int capaMax = capa.getUB();
 				for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 					int minH = h[i].getUB();
