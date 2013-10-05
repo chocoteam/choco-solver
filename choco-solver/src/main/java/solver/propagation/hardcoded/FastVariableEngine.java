@@ -57,7 +57,6 @@ public class FastVariableEngine implements IPropagationEngine {
 
 	protected final ContradictionException exception; // the exception in case of contradiction
 	protected final IEnvironment environment; // environment of backtrackable objects
-	protected final Variable[] variables;
 	protected final AQueue<Variable> var_queue;
 	protected int lastVarIdx;
 	protected final boolean[] schedule;
@@ -66,6 +65,7 @@ public class FastVariableEngine implements IPropagationEngine {
 	private boolean init;
 	protected final ICause[][] varevtcause;
 
+	protected final ICause[] prop_causes = new ICause[4];
 	private final static ICause NONE = new ICause() {
 		public void explain(Deduction d, Explanation e) {
 			throw new UnsupportedOperationException();
@@ -78,9 +78,10 @@ public class FastVariableEngine implements IPropagationEngine {
 		this.exception = new ContradictionException();
 		this.environment = solver.getEnvironment();
 		this.trigger = new PropagationTrigger(this, solver);
-		variables = solver.getVars();
+		Variable[] variables = solver.getVars();
+		int n = variables.length;
 		int maxID = 0;
-		for (int i = 0; i < variables.length; i++) {
+		for (int i = 0; i < n; i++) {
 			if (maxID == 0 || maxID < variables[i].getId()) {
 				maxID = variables[i].getId();
 			}
@@ -91,14 +92,14 @@ public class FastVariableEngine implements IPropagationEngine {
 			_propagators.addAll(Arrays.asList(constraints[c].getPropagators()));
 		}
 		trigger.addAll(_propagators.toArray(new Propagator[_propagators.size()]));
-		var_queue = new CircularQueue<Variable>(variables.length / 2);
+		var_queue = new CircularQueue<Variable>(n / 2);
 		v2i = new AId2AbId(0, maxID, -1);
-		for (int j = 0; j < variables.length; j++) {
+		for (int j = 0; j < n; j++) {
 			v2i.set(variables[j].getId(), j);
 		}
-		schedule = new boolean[variables.length];
-		varevtcause = new ICause[variables.length][4];
-		for(int i=0;i<variables.length;i++){
+		schedule = new boolean[n];
+		varevtcause = new ICause[n][4];
+		for(int i=0;i<n;i++){
 			for(int j=0;j<4;j++){
 				varevtcause[i][j] = NONE;
 			}
@@ -112,54 +113,51 @@ public class FastVariableEngine implements IPropagationEngine {
 		return init;
 	}
 
-	// method variables (avoid gc)
-	protected final ICause[] prop_causes = new ICause[4];
-	protected Propagator   prop_pr;
-	protected Propagator[] prop_props;
-	protected Variable prop_v;
-	protected int prop_id, prop_idx, prop_mask;
-
 	@SuppressWarnings({"NullableProblems"})
 	@Override
 	public void propagate() throws ContradictionException {
 		if (trigger.needToRun()) {
 			trigger.propagate();
 		}
+		Variable v;
+		Propagator[] props;
+		Propagator pr;
+		int id, idx, mask;
 		while (!var_queue.isEmpty()) {
 			nbPOP++;
-			prop_v = var_queue.pollFirst();
-			prop_id = v2i.get(prop_v.getId());
-			lastVarIdx = prop_id;
-			assert schedule[prop_id];
-			schedule[prop_id] = false;
+			v = var_queue.pollFirst();
+			id = v2i.get(v.getId());
+			lastVarIdx = id;
+			assert schedule[id];
+			schedule[id] = false;
 			for(int i=0;i<4;i++){
-				prop_causes[i] = varevtcause[prop_id][i];
-				varevtcause[prop_id][i] = NONE;
+				prop_causes[i] = varevtcause[id][i];
+				varevtcause[id][i] = NONE;
 			}
-			prop_props = prop_v.getPropagators();
-			int n = prop_props.length;
+			props = v.getPropagators();
+			int n = props.length;
 			for(int i=0;i<n;i++){
-				prop_pr = prop_props[i];
-				if(prop_pr.isActive()){
-					prop_mask = 0;
-					if(prop_causes[0]!=NONE && prop_causes[0]!=prop_pr){
-						prop_mask |= EventType.INSTANTIATE.strengthened_mask;
+				pr = props[i];
+				if(pr.isActive()){
+					mask = 0;
+					if(prop_causes[0]!=NONE && prop_causes[0]!=pr){
+						mask = EventType.INSTANTIATE.strengthened_mask;
 					}
 					else{
-						if(prop_causes[1]!=NONE && prop_causes[1]!=prop_pr){
-							prop_mask |= EventType.INCLOW.strengthened_mask;
+						if(prop_causes[1]!=NONE && prop_causes[1]!=pr){
+							mask = EventType.INCLOW.strengthened_mask;
 						}
-						if(prop_causes[2]!=NONE && prop_causes[2]!=prop_pr){
-							prop_mask |= EventType.DECUPP.strengthened_mask;
+						if(prop_causes[2]!=NONE && prop_causes[2]!=pr){
+							mask |= EventType.DECUPP.strengthened_mask;
 						}
-						else if(prop_causes[3]!=NONE && prop_causes[3]!=prop_pr){
-							prop_mask |= EventType.REMOVE.strengthened_mask;
+						else if(prop_causes[3]!=NONE && prop_causes[3]!=pr){
+							mask |= EventType.REMOVE.strengthened_mask;
 						}
 					}
-					prop_idx = prop_v.getIndiceInPropagator(i);
-					if(prop_mask>0 && prop_pr.advise(prop_idx,prop_mask)){
-						prop_pr.fineERcalls++;
-						prop_pr.propagate(prop_idx, prop_mask);
+					idx = v.getIndiceInPropagator(i);
+					if(mask>0 && pr.advise(idx,mask)){
+						pr.fineERcalls++;
+						pr.propagate(idx, mask);
 					}
 				}
 			}
@@ -198,47 +196,42 @@ public class FastVariableEngine implements IPropagationEngine {
 	@Override
 	public void clear() {}
 
-	// method variables (avoid gc)
-	protected int ovu_vid, ovu_mask;
-	protected ICause[] ovu_causes;
-	protected Propagator[] ovu_props;
-	protected Propagator ovu_p;
-	protected boolean ovu_bool;
 	@Override
 	public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
-		ovu_vid = v2i.get(variable.getId());
-		ovu_mask = type.mask;
-		ovu_causes = varevtcause[ovu_vid];
-		if((ovu_mask & EventType.INSTANTIATE.mask)!=0){
-			ovu_causes[0] = cause;
+		int vid = v2i.get(variable.getId());
+		int mask = type.mask;
+		ICause[] causes = varevtcause[vid];
+		if((mask & EventType.INSTANTIATE.mask)!=0){
+			causes[0] = cause;
 		}
-		if((ovu_mask & EventType.INCLOW.mask)!=0){
-			ovu_causes[1] = cause;
+		if((mask & EventType.INCLOW.mask)!=0){
+			causes[1] = cause;
 		}
-		if((ovu_mask & EventType.DECUPP.mask)!=0){
-			ovu_causes[2] = cause;
+		if((mask & EventType.DECUPP.mask)!=0){
+			causes[2] = cause;
 		}
-		if((ovu_mask & EventType.REMOVE.mask)!=0){
-			ovu_causes[3] = cause;
+		if((mask & EventType.REMOVE.mask)!=0){
+			causes[3] = cause;
 		}
-		if (!schedule[ovu_vid]) {
-			ovu_bool = !FINE_SCHEDULE;
-			ovu_props = variable.getPropagators();
-			for(int i=0;i<ovu_props.length && !ovu_bool;i++){
-				ovu_p = ovu_props[i];
-				if(cause!=ovu_p){
-					if(ovu_p.isActive()){
-						ovu_bool = true;
+		if (!schedule[vid]) {
+			boolean _schedule = !FINE_SCHEDULE;
+			Propagator[] props = variable.getPropagators();
+			Propagator p;
+			for(int i=0;i<props.length && !_schedule;i++){
+				p = props[i];
+				if(cause!=p){
+					if(p.isActive()){
+						_schedule = true;
 					}
 				}
 			}
-			if(ovu_bool){
-//				if(ovu_vid==lastVarIdx){
-//					var_queue.addFirst(variable);
-//				}else{
+			if(_schedule){
+				if(vid==lastVarIdx){
+					var_queue.addFirst(variable);
+				}else{
 					var_queue.addLast(variable);
-//				}
-				schedule[ovu_vid] = true;
+				}
+				schedule[vid] = true;
 			}
 		}
 	}
