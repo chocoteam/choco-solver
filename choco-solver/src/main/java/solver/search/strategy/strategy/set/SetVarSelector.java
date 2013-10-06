@@ -25,68 +25,86 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 18:25
- */
+package solver.search.strategy.strategy.set;
 
-package samples.set;
-
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.set.SetConstraintsFactory;
-import solver.search.strategy.SetStrategyFactory;
 import solver.variables.SetVar;
-import solver.variables.VariableFactory;
 
 /**
- * Small problem to illustrate how to use set variables
- * enumerates sets such that z = union(x,y)
- *
+ * Heuristic to select a SetVar to branch on
  * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class SetUnion extends AbstractProblem {
+public interface SetVarSelector {
 
-    private SetVar x, y, z;
-    private boolean noEmptySet = true;
+	/**
+	 * Selects a non-instantiatied SetVar of vars, to branch on it
+	 * @param vars an array of SetVar
+	 * @return A non-instantiated SetVar to branch on, or null otherwise
+	 */
+	public SetVar selectVar(SetVar[] vars);
 
-    public static void main(String[] args) {
-        new SetUnion().execute(args);
-    }
+	/**
+	 * Eventually perform some computation before the search process starts
+	 */
+	public void init();
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("set union sample");
-    }
+	/**
+	 * Selects the first unfixed variable
+	 */
+	public class FirstVar implements SetVarSelector{
+		@Override
+		public SetVar selectVar(SetVar[] vars) {
+			for (SetVar s : vars) {
+				if(!s.instantiated()){
+					return s;
+				}
+			}
+			return null;
+		}
+		@Override
+		public void init(){}
+	}
 
-    @Override
-    public void buildModel() {
-        // x initial domain
-		x = VariableFactory.set("x",new int[]{1,-2,3},new int[]{1},solver);
-        // y initial domain
-		y = VariableFactory.set("y",new int[]{-6,-2,7},solver);
-        // z initial domain
-		z = VariableFactory.set("z",-2,7,solver);
-        // set-union constraint
-		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
-        if (noEmptySet) {
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
-        }
-    }
+	/**
+	 * Selects the variables minimising envelopeSize-kernelSize
+	 * (quite similar to minDomain, or first-fail)
+	 */
+	public class MinDelta implements SetVarSelector{
+		@Override
+		public SetVar selectVar(SetVar[] vars) {
+			int delta = Integer.MAX_VALUE;
+			SetVar next = null;
+			for (SetVar s : vars) {
+				int d = s.getEnvelopeSize()-s.getKernelSize();
+				if(d>0 && d<delta){
+					delta = d;
+					next = s;
+				}
+			}
+			return next;
+		}
+		@Override
+		public void init(){}
+	}
 
-    @Override
-    public void configureSearch() {
-        solver.set(SetStrategyFactory.remove_first(new SetVar[]{x, y, z}));
-    }
-
-    @Override
-    public void solve() {
-        solver.findAllSolutions();
-    }
-
-    @Override
-    public void prettyOut() {
-    }
+	/**
+	 * Selects the variables maximising envelopeSize-kernelSize
+	 */
+	public class MaxDelta implements SetVarSelector{
+		@Override
+		public SetVar selectVar(SetVar[] vars) {
+			int delta = 0;
+			SetVar next = null;
+			for (SetVar s : vars) {
+				int d = s.getEnvelopeSize()-s.getKernelSize();
+				if(d>delta){
+					delta = d;
+					next = s;
+				}
+			}
+			return next;
+		}
+		@Override
+		public void init(){}
+	}
 }
