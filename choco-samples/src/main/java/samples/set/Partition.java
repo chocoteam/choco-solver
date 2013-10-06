@@ -105,7 +105,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z, universe}));
+        solver.set(SetStrategyFactory.force_first(new SetVar[]{x, y, z, universe}));
     }
 
     @Override

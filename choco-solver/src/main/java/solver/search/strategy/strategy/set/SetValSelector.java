@@ -25,68 +25,44 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 18:25
- */
+package solver.search.strategy.strategy.set;
 
-package samples.set;
-
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.set.SetConstraintsFactory;
-import solver.search.strategy.SetStrategyFactory;
 import solver.variables.SetVar;
-import solver.variables.VariableFactory;
 
 /**
- * Small problem to illustrate how to use set variables
- * enumerates sets such that z = union(x,y)
- *
+ * Heuristic for branching on a given SetVar
  * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class SetUnion extends AbstractProblem {
+public interface SetValSelector {
 
-    private SetVar x, y, z;
-    private boolean noEmptySet = true;
+	/**
+	 * Value selection heuristic
+	 * @param v a non-instantiated SetVar
+	 * @return an integer i of v's envelope, which is not included in v's kernel
+	 * so that a decision (forcing/removing i) can be applied on v
+	 */
+	public int selectValue(SetVar v);
 
-    public static void main(String[] args) {
-        new SetUnion().execute(args);
-    }
+	/**
+	 * Eventually perform some computation before the search process starts
+	 */
+	public void init();
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("set union sample");
-    }
-
-    @Override
-    public void buildModel() {
-        // x initial domain
-		x = VariableFactory.set("x",new int[]{1,-2,3},new int[]{1},solver);
-        // y initial domain
-		y = VariableFactory.set("y",new int[]{-6,-2,7},solver);
-        // z initial domain
-		z = VariableFactory.set("z",-2,7,solver);
-        // set-union constraint
-		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
-        if (noEmptySet) {
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
-        }
-    }
-
-    @Override
-    public void configureSearch() {
-        solver.set(SetStrategyFactory.remove_first(new SetVar[]{x, y, z}));
-    }
-
-    @Override
-    public void solve() {
-        solver.findAllSolutions();
-    }
-
-    @Override
-    public void prettyOut() {
-    }
+	/**
+	 * Selects the first integer in the envelope and not in the kernel
+	 */
+	public class FirstVal implements SetValSelector{
+		@Override
+		public int selectValue(SetVar s) {
+			for (int i=s.getEnvelopeFirst(); i!=SetVar.END; i=s.getEnvelopeNext()) {
+				if (!s.kernelContains(i)) {
+					return i;
+				}
+			}
+			throw new UnsupportedOperationException(s+" is already instantiated. Cannot compute a decision on it");
+		}
+		@Override
+		public void init(){}
+	}
 }
