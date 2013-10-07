@@ -42,6 +42,7 @@ import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
+import solver.propagation.hardcoded.FastVariableEngine;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
@@ -121,7 +122,7 @@ public class ParseAndSolve {
     @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
     protected boolean fexp = false;
 
-    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs", required = false)
+    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs\n4: fast variable", required = false)
     protected byte eng = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,6 +208,9 @@ public class ParseAndSolve {
             case 0:
             case 3:
                 solver.set(new SevenQueuesPropagatorEngine(solver));
+                break;
+            case 4:
+                solver.set(new FastVariableEngine(solver));
                 break;
             case -1:
             default:
