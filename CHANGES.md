@@ -17,3 +17,4 @@ The CHANGES.md file starts at this version.
 * Fix #122: update Database schema
 * Fix #123: Monotonic decreasing for real objective
 * Fix #124: mzn script now handles free search
+* Fix #125: remove shut down hooks when the resolution ends normally
