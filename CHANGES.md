@@ -13,4 +13,7 @@ The CHANGES.md file starts at this version.
 -------------------
 
 * Explain PropSumEq
-* Fix #118
+* Fix #118: activate DBT
+* Fix #122: update Database schema
+* Fix #123: Monotonic decreasing for real objective
+* Fix #124: mzn script now handles free search
