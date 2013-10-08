@@ -6,7 +6,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 3.1.0 - 02 Sep 2013
 -------------------
 
-This the first stable version of Choco3.
+This the first stable version of Choco 3.
 The CHANGES.md file starts at this version.
 
 ????
@@ -14,6 +14,7 @@ The CHANGES.md file starts at this version.
 
 * Explain PropSumEq
 * Fix #118: activate DBT
+* Feat #120: new framework to build set strategies, more built-in set strategies
 * Fix #122: update Database schema
 * Fix #123: Monotonic decreasing for real objective
 * Fix #124: mzn script now handles free search
