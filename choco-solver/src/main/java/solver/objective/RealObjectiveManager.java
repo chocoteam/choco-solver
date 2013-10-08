@@ -46,6 +46,8 @@ public class RealObjectiveManager extends ObjectiveManager {
     final RealVar objective;
     private double bestKnownUpperBound;
     private double bestKnownLowerBound;
+    private final double precision;
+    final boolean strict;
 
     /**
      * Creates an optimization manager
@@ -53,15 +55,32 @@ public class RealObjectiveManager extends ObjectiveManager {
      *
      * @param objective variable (represent the value of a solution)
      * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
-     * @param solver
+     * @param precision the precision, substracted from the cut
+     * @param strict    enables to find same value solutions when set to false
+     * @param solver    the solver
      */
-    public RealObjectiveManager(final RealVar objective, ResolutionPolicy policy, Solver solver) {
+    public RealObjectiveManager(RealVar objective, ResolutionPolicy policy, Solver solver, double precision, boolean strict) {
         super(policy, solver.getMeasures());
         this.objective = objective;
+        this.precision = precision;
+        this.strict = strict;
         if (policy != ResolutionPolicy.SATISFACTION) {
             this.bestKnownLowerBound = objective.getLB();
             this.bestKnownUpperBound = objective.getUB();
         }
+    }
+
+    /**
+     * Creates an optimization manager
+     * Enables to cut "worse" solutions
+     *
+     * @param objective variable (represent the value of a solution)
+     * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
+     * @param precision the precision, substracted from the cut
+     * @param solver    the solver
+     */
+    public RealObjectiveManager(RealVar objective, ResolutionPolicy policy, Solver solver, double precision) {
+        this(objective, policy, solver, precision, true);
     }
 
     /**
@@ -114,12 +133,16 @@ public class RealObjectiveManager extends ObjectiveManager {
      *
      */
     public void postDynamicCut() throws ContradictionException {
+        int offset = 0;
+        if (measures.getSolutionCount() > 0 && strict) {
+            offset = 1;
+        }
         if (policy == ResolutionPolicy.MINIMIZE) {
-            this.objective.updateUpperBound(bestKnownUpperBound, this);
+            this.objective.updateUpperBound(bestKnownUpperBound - (precision * offset), this);
             this.objective.updateLowerBound(bestKnownLowerBound, this);
         } else if (policy == ResolutionPolicy.MAXIMIZE) {
             this.objective.updateUpperBound(bestKnownUpperBound, this);
-            this.objective.updateLowerBound(bestKnownLowerBound, this);
+            this.objective.updateLowerBound(bestKnownLowerBound + (precision * offset), this);
         }
     }
 

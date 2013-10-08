@@ -657,14 +657,14 @@ public class Solver implements Serializable {
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
-    public void findOptimalSolution(ResolutionPolicy policy, RealVar objective) {
+    public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this));
+        this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this, precision));
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
