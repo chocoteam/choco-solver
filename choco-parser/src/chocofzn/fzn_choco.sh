@@ -120,7 +120,8 @@ fi
 if test "$FREE_SEARCH" = "yes"
 then
     echo "%% FREE_SEARCH"
-    ARGS=$ARGS" -f"
+#    ARGS=$ARGS" -f"
+    ARGS=$ARGS" -lf"
 fi
 
 java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}
