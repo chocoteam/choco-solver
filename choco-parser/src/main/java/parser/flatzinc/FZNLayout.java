@@ -83,6 +83,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     protected String dbbenchname;
     protected MySQLAccess sql;
     protected GoalConf gc;
+    private Thread statOnKill;
 
     public FZNLayout(final String instance, final String csv, GoalConf gc, String dbproperties, String dbbenchname) {
         super();
@@ -220,6 +221,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             acsv.record(csv, instance, gc.getDescription(), searchLoop.getMeasures().toArray());
         }
         userinterruption = false;
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
     }
 
     public boolean isUserinterruption() {
@@ -301,7 +303,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         if (dbproperties != "") {
             sql = new MySQLAccess(new File(dbproperties));
         }
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        statOnKill = new Thread() {
             public void run() {
                 if (isUserinterruption()) {
                     beforeClose();
@@ -311,6 +313,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                     }
                 }
             }
-        });
+        };
+        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
 }

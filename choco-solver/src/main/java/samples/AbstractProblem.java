@@ -140,7 +140,7 @@ public abstract class AbstractProblem {
                         level.getLevel() > Level.SOLUTION.getLevel());
             }
 
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+            Thread statOnKill = new Thread() {
                 public void run() {
                     if (userInterruption()) {
                         if (level.getLevel() > Level.SILENT.getLevel()) {
@@ -152,13 +152,16 @@ public abstract class AbstractProblem {
                     }
 
                 }
-            });
+            };
+
+            Runtime.getRuntime().addShutdownHook(statOnKill);
 
             this.solve();
             if (level.getLevel() > Level.QUIET.getLevel()) {
                 prettyOut();
             }
             userInterruption = false;
+            Runtime.getRuntime().removeShutdownHook(statOnKill);
         }
     }
 

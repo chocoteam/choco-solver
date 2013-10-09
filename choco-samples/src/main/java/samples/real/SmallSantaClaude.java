@@ -112,7 +112,7 @@ public class SmallSantaClaude {
             }
         });
 		// find optimal solution (Santa Claus is stingy)
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,average_deviation);
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,average_deviation, precision);
 		// free IBEX structures from memory
 		solver.getIbex().release();
     }

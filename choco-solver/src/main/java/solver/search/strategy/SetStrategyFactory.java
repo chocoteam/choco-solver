@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 package solver.search.strategy;
 
 import solver.search.strategy.strategy.set.SetSearchStrategy;
+import solver.search.strategy.strategy.set.SetValSelector;
+import solver.search.strategy.strategy.set.SetVarSelector;
 import solver.variables.SetVar;
 
 /**
@@ -40,21 +42,58 @@ import solver.variables.SetVar;
  */
 public final class SetStrategyFactory {
 
-    private SetStrategyFactory() {
-    }
+	private SetStrategyFactory() {
+	}
 
-    /**
-     * Lexicographic branching strategy:
-     * <p/> selected variable x : first uninstantiated variable
-     * <p/> decision : let e be the first (integer) element such that
-     * e in envelope(x) and e not in kernel(x).
-     * The decision adds e to the kernel of x
-     * It is fails, then e is removed from the envelope of x
-     *
-     * @param sets set variables to branch on
-     * @return a strategy to instantiate sets
-     */
-    public static SetSearchStrategy setLex(SetVar[] sets) {
-        return new SetSearchStrategy(sets);
-    }
+	/**
+	 * Generic strategy to branch on set variables
+	 * @param sets		SetVar array to branch on
+	 * @param varS			variable selection strategy
+	 * @param valS			integer  selection strategy
+	 * @param enforceFirst	branching order true = enforce first; false = remove first
+	 * @return a strategy to instantiate sets
+	 */
+	public static SetSearchStrategy generic(SetVar[] sets, SetVarSelector varS, SetValSelector valS, boolean enforceFirst){
+		return new SetSearchStrategy(sets,varS,valS, enforceFirst);
+	}
+
+	/**
+	 * strategy to branch on sets by choosing the first unfixed variable and forcing its first unfixed value
+	 * @param sets variables to branch on
+	 * @return a strategy to instantiate sets
+	 */
+	public static SetSearchStrategy force_first(SetVar[] sets){
+		return new SetSearchStrategy(sets,new SetVarSelector.FirstVar(), new SetValSelector.FirstVal(),true);
+	}
+
+	/**
+	 * strategy to branch on sets by choosing the first unfixed variable and removing its first unfixed value
+	 * @param sets variables to branch on
+	 * @return a strategy to instantiate sets
+	 */
+	public static SetSearchStrategy remove_first(SetVar[] sets){
+		return new SetSearchStrategy(sets,new SetVarSelector.FirstVar(), new SetValSelector.FirstVal(),false);
+	}
+
+	/**
+	 * strategy to branch on sets
+	 * by choosing the unfixed variable of minimum delta (envSize-kerSize),
+	 * and forcing its first unfixed value
+	 * @param sets variables to branch on
+	 * @return a strategy to instantiate sets
+	 */
+	public static SetSearchStrategy force_minDelta_first(SetVar[] sets){
+		return new SetSearchStrategy(sets,new SetVarSelector.MinDelta(), new SetValSelector.FirstVal(),true);
+	}
+
+	/**
+	 * strategy to branch on sets
+	 * by choosing the unfixed variable of maximum delta (envSize-kerSize),
+	 * and forcing its first unfixed value
+	 * @param sets variables to branch on
+	 * @return a strategy to instantiate sets
+	 */
+	public static SetSearchStrategy force_maxDelta_first(SetVar[] sets){
+		return new SetSearchStrategy(sets,new SetVarSelector.MaxDelta(), new SetValSelector.FirstVal(),true);
+	}
 }

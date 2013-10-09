@@ -25,13 +25,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 18:46
- */
-
 package solver.search.strategy.strategy.set;
 
 import solver.exception.ContradictionException;
@@ -44,7 +37,8 @@ import util.PoolManager;
 
 /**
  * Strategy for branching on set variables
- * Lexicographic element enforcing by default
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
 public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 
@@ -53,19 +47,26 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
     //***********************************************************************************
 
     protected PoolManager<FastDecisionSet> pool;
+	protected SetVarSelector varSelector;
+	protected SetValSelector valSelector;
+	protected DecisionOperator<SetVar> operator;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Strategy for branching on set variables
-     * Lexicographic element enforcing by default
-     *
-     * @param variables
-     */
-    public SetSearchStrategy(SetVar[] variables) {
+	/**
+	 * Generic strategy to branch on set variables
+	 * @param variables		SetVar array to branch on
+	 * @param varS			variable selection strategy
+	 * @param valS			integer  selection strategy
+	 * @param enforceFirst	branching order true = enforce first; false = remove first
+	 */
+    public SetSearchStrategy(SetVar[] variables, SetVarSelector varS, SetValSelector valS, boolean enforceFirst) {
         super(variables);
+		varSelector = varS;
+		valSelector = valS;
+		operator = enforceFirst?DecisionOperator.set_force:DecisionOperator.set_remove;
         pool = new PoolManager<FastDecisionSet>();
     }
 
@@ -75,31 +76,27 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 
     @Override
     public void init() throws ContradictionException {
+		varSelector.init();
+		valSelector.init();
     }
 
     @Override
     public Decision<SetVar> getDecision() {
-        for (SetVar s : vars) {
-            Decision<SetVar> d = computeDecision(s);
-            if (d != null) return d;
-        }
+		SetVar v = varSelector.selectVar(vars);
+		if(v!=null){
+			return computeDecision(v);
+		}
         return null;
     }
 
     @Override
     public Decision<SetVar> computeDecision(SetVar s) {
-        if (!s.instantiated()) {
-            for (int i=s.getEnvelopeFirst(); i!=SetVar.END; i=s.getEnvelopeNext()) {
-                if (!s.kernelContains(i)) {
-                    FastDecisionSet d = pool.getE();
-                    if (d == null) {
-                        d = new FastDecisionSet(pool);
-                    }
-                    d.set(s, i, DecisionOperator.set_force);
-                    return d;
-                }
-            }
-        }
-        return null;
+		assert !s.instantiated();
+		FastDecisionSet d = pool.getE();
+		if (d == null) {
+			d = new FastDecisionSet(pool);
+		}
+		d.set(s, valSelector.selectValue(s), operator);
+		return d;
     }
 }
