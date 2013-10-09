@@ -39,6 +39,7 @@ import util.objects.setDataStructures.SetType;
 import util.tools.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Graph based cumulative
@@ -145,18 +146,6 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		}
 	}
 
-	@Override
-	public boolean advise(int varIdx, int mask) {
-		if(!super.advise(varIdx,mask)){
-			return false;
-		}
-		if(varIdx>=4*n){
-			return true;
-		}else{
-			return mandPartExists(varIdx%n);
-		}
-	}
-
 	private boolean mandPartExists(int i) {
 		int lastStart = Math.min(s[i].getUB(),e[i].getUB()-d[i].getLB());
 		int earliestEnd = Math.max(s[i].getLB()+d[i].getLB(),e[i].getLB());
@@ -240,15 +229,33 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	}
 
 	/**
-	 * Energy checker
+	 * Energy-based greedy filter
 	 */
 	private class EnergyChecker extends CumulFilter{
+		Integer[] sor_array = new Integer[s.length];
+		Comparator<Integer> comparator = new Comparator<Integer>(){
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				int coef1 = (100*d[o1].getLB()*h[o1].getLB())/(e[o1].getUB()-s[o1].getLB());
+				int coef2 = (100*d[o2].getLB()*h[o2].getLB())/(e[o2].getUB()-s[o2].getLB());
+				return coef2 - coef1;
+			}
+		};
+
 		public void filter(ISet tasks) throws ContradictionException{
+			int idx = 0;
+			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+				if(d[i].getLB()>0 || h[i].getLB()>0){
+					sor_array[idx++] = i;
+				}
+			}
+			Arrays.sort(sor_array,0,idx,comparator);
 			int xMin = Integer.MAX_VALUE / 2;
 			int xMax = Integer.MIN_VALUE / 2;
 			int surface = 0;
 			int camax = capa.getUB();
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+			for(int k=0; k<idx; k++){
+				int i = sor_array[k];
 				xMax = Math.max(xMax, e[i].getUB());
 				xMin = Math.min(xMin, s[i].getLB());
 				if(xMax >= xMin){
