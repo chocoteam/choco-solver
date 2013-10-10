@@ -40,6 +40,7 @@ import util.tools.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Random;
 
 /**
  * Graph based cumulative
@@ -51,16 +52,18 @@ import java.util.Comparator;
  */
 public class PropIncrementalCumulative extends Propagator<IntVar> {
 
-	private int n;
-	private IntVar[] s, d, e, h;
-	private IntVar capa;
-	private UndirectedGraph g;
-	private ISet toCompute, tasks;
+	protected final int n;
+	protected final IntVar[] s, d, e, h;
+	protected final IntVar capa;
+	protected final UndirectedGraph g;
+	protected ISet toCompute, tasks;
 	protected CumulFilter[] filters;
-	private boolean fast;
+	protected final boolean fast;
+	protected final Random rd = new Random(0);
+	protected int maxrd = 10;
 
 	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast) {
-		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.LINEAR, true);
+		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.QUADRATIC, true);
 		this.n = s.length;
 		this.fast = fast;
 		if (!(n == d.length && n == e.length && n == h.length)) {
@@ -130,7 +133,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	public void propagate(int varIdx, int mask) throws ContradictionException {
 		if (varIdx < 4 * n) {
 			int v = varIdx % n;
-			if(mandPartExists(v)){
+			if((!fast) || mandPartExists(v) || rd.nextInt(maxrd)==0){
 				if (!toCompute.contain(v)) {
 					toCompute.add(v);
 				}
@@ -140,9 +143,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 			int capaMax = capa.getUB();
 			for (int i = 0; i < n; i++) {
 				h[i].updateUpperBound(capaMax,aCause);
-				if(mandPartExists(i)){
-					toCompute.add(i);
-				}
+				toCompute.add(i);
 			}
 		}
 		if(toCompute.getSize()>0){
@@ -150,13 +151,13 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		}
 	}
 
-	private boolean mandPartExists(int i) {
+	protected boolean mandPartExists(int i) {
 		int lastStart = Math.min(s[i].getUB(),e[i].getUB()-d[i].getLB());
 		int earliestEnd = Math.max(s[i].getLB()+d[i].getLB(),e[i].getLB());
 		return lastStart<earliestEnd;
 	}
 
-	private boolean disjoint(int i, int j) {
+	protected boolean disjoint(int i, int j) {
 		return s[i].getLB() >= e[j].getUB() || s[j].getLB() >= e[i].getUB();
 	}
 
@@ -235,22 +236,31 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	/**
 	 * Energy-based greedy filter
 	 */
-	private class EnergyChecker extends CumulFilter{
-		Integer[] sor_array = new Integer[s.length];
-		Comparator<Integer> comparator = new Comparator<Integer>(){
+	protected class EnergyChecker extends CumulFilter{
+		protected class MyInt{int val;}
+		protected MyInt[] sor_array;
+		protected Comparator<MyInt> comparator = new Comparator<MyInt>(){
 			@Override
-			public int compare(Integer o1, Integer o2) {
-				int coef1 = (100*d[o1].getLB()*h[o1].getLB())/(e[o1].getUB()-s[o1].getLB());
-				int coef2 = (100*d[o2].getLB()*h[o2].getLB())/(e[o2].getUB()-s[o2].getLB());
+			public int compare(MyInt o1, MyInt o2) {
+				int i1 = o1.val;
+				int i2 = o2.val;
+				int coef1 = (100*d[i1].getLB()*h[i1].getLB())/(e[i1].getUB()-s[i1].getLB());
+				int coef2 = (100*d[i2].getLB()*h[i2].getLB())/(e[i2].getUB()-s[i2].getLB());
 				return coef2 - coef1;
 			}
 		};
+		protected EnergyChecker(){
+			sor_array = new MyInt[s.length];
+			for(int i=0;i<s.length;i++){
+				sor_array[i] = new MyInt();
+			}
+		}
 
 		public void filter(ISet tasks) throws ContradictionException{
 			int idx = 0;
 			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 				if(d[i].getLB()>0 || h[i].getLB()>0){
-					sor_array[idx++] = i;
+					sor_array[idx++].val = i;
 				}
 			}
 			Arrays.sort(sor_array,0,idx,comparator);
@@ -259,7 +269,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 			int surface = 0;
 			int camax = capa.getUB();
 			for(int k=0; k<idx; k++){
-				int i = sor_array[k];
+				int i = sor_array[k].val;
 				xMax = Math.max(xMax, e[i].getUB());
 				xMin = Math.min(xMin, s[i].getLB());
 				if(xMax >= xMin){
@@ -297,8 +307,8 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	/**
 	 * Time-based filtering (compute the profile over every point in time)
 	 */
-	private class TimeBasedFilter extends CumulFilter{
-		int[] time = new int[31];
+	protected class TimeBasedFilter extends CumulFilter{
+		protected int[] time = new int[31];
 		public void filter(ISet tasks) throws ContradictionException{
 			int min = Integer.MAX_VALUE / 2;
 			int max = Integer.MIN_VALUE / 2;
@@ -315,13 +325,16 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 				else{
 					Arrays.fill(time,0,max-min,0);
 				}
+				int minH,maxC,elb,hlb;
 				int capaMax = capa.getUB();
 				for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-					int minH = h[i].getUB();
-					int maxC = 0;
-					for (int t = s[i].getUB(); t < e[i].getLB(); t++) {
+					minH = h[i].getUB();
+					maxC = 0;
+					elb = e[i].getLB();
+					hlb = h[i].getLB();
+					for (int t = s[i].getUB(); t < elb; t++) {
 						minH = Math.min(minH,capaMax-time[t-min]);
-						time[t - min] += h[i].getLB();
+						time[t - min] += hlb;
 						maxC = Math.max(maxC,time[t - min]);
 					}
 					h[i].updateUpperBound(minH,aCause);
@@ -340,12 +353,15 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 				}
 			}
 		}
-		private void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+		protected void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
 			int nbOk = 0;
-			for (int t = s[i].getLB(); t < s[i].getUB(); t++) {
-				if (t < min || t >= max || h[i].getLB() + time[t - min] <= capaMax) {
+			int dlb = d[i].getLB();
+			int hlb = h[i].getLB();
+			int sub = s[i].getUB();
+			for (int t = s[i].getLB(); t < sub; t++) {
+				if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
 					nbOk++;
-					if (nbOk == d[i].getLB()) {
+					if (nbOk == dlb) {
 						return;
 					}
 				} else {
@@ -355,12 +371,15 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 			}
 		}
 
-		private void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+		protected void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
 			int nbOk = 0;
-			for (int t = e[i].getUB(); t > e[i].getLB(); t--) {
-				if (t - 1 < min || t - 1 >= max || h[i].getLB() + time[t - min - 1] <= capaMax) {
+			int dlb = d[i].getLB();
+			int hlb = h[i].getLB();
+			int elb = e[i].getLB();
+			for (int t = e[i].getUB(); t > elb; t--) {
+				if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
 					nbOk++;
-					if (nbOk == d[i].getLB()) {
+					if (nbOk == dlb) {
 						return;
 					}
 				} else {
