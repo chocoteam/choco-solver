@@ -580,8 +580,8 @@ public class IntConstraintFactory {
      *
      * @param X      collection of coordinates in first dimension
      * @param Y      collection of coordinates in second dimension
-     * @param WIDTH  collection of width
-     * @param HEIGHT collection of height
+     * @param WIDTH  collection of width (each duration should be > 0)
+     * @param HEIGHT collection of height (each height should be >= 0)
 	 * @param USE_CUMUL indicates whether or not redundant cumulative constraints should be put on each dimension (advised)
      * @return a non-overlapping constraint
      */

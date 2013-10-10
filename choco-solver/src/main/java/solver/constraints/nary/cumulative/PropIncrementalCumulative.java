@@ -91,9 +91,11 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			toCompute.clear();
+			int capaMax = capa.getUB();
 			for (int i = 0; i < n; i++) {
-				d[i].updateLowerBound(0,aCause);
+				d[i].updateLowerBound(0,aCause); // should even be 1
 				h[i].updateLowerBound(0,aCause);
+				h[i].updateUpperBound(capaMax,aCause);
 				s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), aCause);
 				s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), aCause);
 				e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), aCause);
@@ -135,7 +137,9 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 			}
 		} else {
 			toCompute.clear();
+			int capaMax = capa.getUB();
 			for (int i = 0; i < n; i++) {
+				h[i].updateUpperBound(capaMax,aCause);
 				if(mandPartExists(i)){
 					toCompute.add(i);
 				}
