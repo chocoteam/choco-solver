@@ -154,4 +154,9 @@ public class Set_Trail implements ISet {
             environment.save(this);
         }
     }
+
+	@Override
+	public SetType getSetType(){
+		return set.getSetType();
+	}
 }

@@ -94,4 +94,9 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
         super.clear();
         card.set(0);
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BITSET;
+	}
 }

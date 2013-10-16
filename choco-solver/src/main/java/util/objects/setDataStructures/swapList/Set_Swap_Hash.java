@@ -28,6 +28,7 @@
 package util.objects.setDataStructures.swapList;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+import util.objects.setDataStructures.SetType;
 
 /**
  * List of m elements based on Array int_swaping with an HashMap
@@ -100,4 +101,9 @@ public class Set_Swap_Hash extends Set_Swap {
         }
         return false;
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.SWAP_HASH;
+	}
 }
