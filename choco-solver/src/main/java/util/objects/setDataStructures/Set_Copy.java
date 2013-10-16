@@ -138,4 +138,9 @@ public class Set_Copy extends RcObject implements ISet {
     public String toString() {
         return "set stored by copy " + set.toString();
     }
+
+	@Override
+	public SetType getSetType(){
+		return set.getSetType();
+	}
 }

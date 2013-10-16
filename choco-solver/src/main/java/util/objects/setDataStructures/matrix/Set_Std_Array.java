@@ -38,6 +38,7 @@ import memory.IEnvironment;
 import memory.IStateBool;
 import memory.IStateInt;
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Set represented by an array of backtrable booleans
@@ -141,4 +142,9 @@ public class Set_Std_Array implements ISet {
         }
         return -1;
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BOOL_ARRAY;
+	}
 }

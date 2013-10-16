@@ -28,6 +28,7 @@
 package util.objects.setDataStructures.linkedlist;
 
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * LinkedList of m elements
@@ -200,4 +201,9 @@ public class Set_LinkedList implements ISet {
         nextCell = nextCell.next;
         return el;
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.LINKED_LIST;
+	}
 }
