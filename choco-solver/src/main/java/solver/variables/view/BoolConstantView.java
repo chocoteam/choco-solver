@@ -65,12 +65,12 @@ public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> 
 
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
-        return false;
+        return instantiateTo(1, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
-        return false;
+        return instantiateTo(0, cause);
     }
 
     @Override
