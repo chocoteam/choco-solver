@@ -51,7 +51,7 @@ import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.circuit.*;
 import solver.constraints.nary.count.Count;
-import solver.constraints.nary.cumulative.PropIncrementalCumulative;
+import solver.constraints.nary.cumulative.PropFullCumulative;
 import solver.constraints.nary.element.Element;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
@@ -568,8 +568,10 @@ public class IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, true));
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, false));
+//        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, true));
+//		c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, false));
+		c.addPropagators(new PropFullCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+		c.addPropagators(new PropFullCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
 //		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
