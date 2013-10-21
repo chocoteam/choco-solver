@@ -39,18 +39,18 @@ import util.objects.setDataStructures.SetType;
 import util.tools.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Random;
 
 /**
  * Graph based cumulative
  * Maintains incrementally overlapping tasks
  * Performs energy checking and mandatory part based filtering
+ * BEWARE : not idempotent, use two propagators to get the fix point
  *
  * @author Jean-Guillaume Fages
  * @since 31/01/13
  */
-public class PropIncrementalCumulative extends Propagator<IntVar> {
+public class PropGraphCumulative extends Propagator<IntVar> {
 
 	protected final int n;
 	protected final IntVar[] s, d, e, h;
@@ -62,7 +62,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	protected final Random rd = new Random(0);
 	protected int maxrd = 10;
 
-	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast) {
+	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast) {
 		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.QUADRATIC, true);
 		this.n = s.length;
 		this.fast = fast;
@@ -77,7 +77,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		this.g = new UndirectedGraph(environment, n, SetType.SWAP_ARRAY, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
-		filters = new CumulFilter[]{new EnergyChecker(), new TimeBasedFilter()};
+		filters = new CumulFilter[]{new NRJCumulFilter(s,d,e,h,capa,this), new BasicCumulativeSweep(s,d,e,h,capa,this)};
 	}
 
 	@Override
@@ -220,173 +220,5 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		}
 		sb.append(")");
 		return sb.toString();
-	}
-
-	// ************************************************************************************************************
-	// FILTERING ALGORITHMS
-	// ************************************************************************************************************
-
-	/**
-	 * Class able to filter variables induced by a subset of tasks
-	 */
-	public abstract class CumulFilter{
-		public abstract void filter(ISet tasks) throws ContradictionException;
-	}
-
-	/**
-	 * Energy-based greedy filter
-	 */
-	protected class EnergyChecker extends CumulFilter{
-		protected class MyInt{int val;}
-		protected MyInt[] sor_array;
-		protected Comparator<MyInt> comparator = new Comparator<MyInt>(){
-			@Override
-			public int compare(MyInt o1, MyInt o2) {
-				int i1 = o1.val;
-				int i2 = o2.val;
-				int coef1 = (100*d[i1].getLB()*h[i1].getLB())/(e[i1].getUB()-s[i1].getLB());
-				int coef2 = (100*d[i2].getLB()*h[i2].getLB())/(e[i2].getUB()-s[i2].getLB());
-				return coef2 - coef1;
-			}
-		};
-		protected EnergyChecker(){
-			sor_array = new MyInt[s.length];
-			for(int i=0;i<s.length;i++){
-				sor_array[i] = new MyInt();
-			}
-		}
-
-		public void filter(ISet tasks) throws ContradictionException{
-			int idx = 0;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				if(d[i].getLB()>0 || h[i].getLB()>0){
-					sor_array[idx++].val = i;
-				}
-			}
-			Arrays.sort(sor_array,0,idx,comparator);
-			int xMin = Integer.MAX_VALUE / 2;
-			int xMax = Integer.MIN_VALUE / 2;
-			int surface = 0;
-			int camax = capa.getUB();
-			for(int k=0; k<idx; k++){
-				int i = sor_array[k].val;
-				xMax = Math.max(xMax, e[i].getUB());
-				xMin = Math.min(xMin, s[i].getLB());
-				if(xMax >= xMin){
-					double availSurf = ((xMax-xMin)*camax-surface);
-					if(d[i].getLB()>0)
-						h[i].updateUpperBound((int)Math.floor((availSurf/(double)d[i].getLB())+0.01),aCause);
-					if(h[i].getLB()>0)
-						d[i].updateUpperBound((int)Math.floor((availSurf/(double)h[i].getLB())+0.01),aCause);
-					surface += d[i].getLB() * h[i].getLB();
-					if(xMax>xMin)
-						capa.updateLowerBound((int)Math.ceil((double)surface/(double)(xMax-xMin)-0.01),aCause);
-					if(surface>(xMax-xMin)*camax){
-						contradiction(capa,"");
-					}
-				}
-			}
-		}
-	}
-
-//	/**
-//	 * Sweep-based filtering
-//	 * Currently buggy
-//	 */
-//	private class SweepBasedFilter extends CumulFilter{
-//		TTDynamicSweep sweep;
-//		public void filter(ISet tasks) throws ContradictionException{
-//			if(sweep == null) {
-//				sweep = new TTDynamicSweep(vars,n,1,aCause);
-//			}
-//			sweep.set(tasks);
-//			sweep.mainLoop();
-//		}
-//	}
-
-	/**
-	 * Time-based filtering (compute the profile over every point in time)
-	 */
-	protected class TimeBasedFilter extends CumulFilter{
-		protected int[] time = new int[31];
-		public void filter(ISet tasks) throws ContradictionException{
-			int min = Integer.MAX_VALUE / 2;
-			int max = Integer.MIN_VALUE / 2;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				if (s[i].getUB() < e[i].getLB()) {
-					min = Math.min(min, s[i].getUB());
-					max = Math.max(max, e[i].getLB());
-				}
-			}
-			if (min < max) {
-				if(max-min>time.length){
-					time = new int[max-min];
-				}
-				else{
-					Arrays.fill(time,0,max-min,0);
-				}
-				int minH,maxC,elb,hlb;
-				int capaMax = capa.getUB();
-				for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-					minH = h[i].getUB();
-					maxC = 0;
-					elb = e[i].getLB();
-					hlb = h[i].getLB();
-					for (int t = s[i].getUB(); t < elb; t++) {
-						minH = Math.min(minH,capaMax-time[t-min]);
-						time[t - min] += hlb;
-						maxC = Math.max(maxC,time[t - min]);
-					}
-					h[i].updateUpperBound(minH,aCause);
-					capa.updateLowerBound(maxC, aCause);
-				}
-				for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-					if (d[i].getLB() > 0 && h[i].getLB() > 0) {
-						// filters
-						if (s[i].getLB() + d[i].getLB() > min) {
-							filterInf(i, min, max, time, capaMax);
-						}
-						if (e[i].getUB() - d[i].getLB() < max) {
-							filterSup(i, min, max, time, capaMax);
-						}
-					}
-				}
-			}
-		}
-		protected void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
-			int nbOk = 0;
-			int dlb = d[i].getLB();
-			int hlb = h[i].getLB();
-			int sub = s[i].getUB();
-			for (int t = s[i].getLB(); t < sub; t++) {
-				if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
-					nbOk++;
-					if (nbOk == dlb) {
-						return;
-					}
-				} else {
-					nbOk = 0;
-					s[i].updateLowerBound(t + 1, aCause);
-				}
-			}
-		}
-
-		protected void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
-			int nbOk = 0;
-			int dlb = d[i].getLB();
-			int hlb = h[i].getLB();
-			int elb = e[i].getLB();
-			for (int t = e[i].getUB(); t > elb; t--) {
-				if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
-					nbOk++;
-					if (nbOk == dlb) {
-						return;
-					}
-				} else {
-					nbOk = 0;
-					e[i].updateUpperBound(t - 1, aCause);
-				}
-			}
-		}
 	}
 }
