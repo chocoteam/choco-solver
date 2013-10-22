@@ -51,7 +51,7 @@ import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.circuit.*;
 import solver.constraints.nary.count.Count;
-import solver.constraints.nary.cumulative.PropFullCumulative;
+import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.element.Element;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
@@ -556,24 +556,7 @@ public class IntConstraintFactory {
      * @return a cumulative constraint
      */
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
-        int n = TASKS.length;
-        assert n > 0;
-        Solver solver = TASKS[0].getStart().getSolver();
-        IntVar[] starts = new IntVar[n];
-        IntVar[] durations = new IntVar[n];
-        IntVar[] ends = new IntVar[n];
-        for (int i = 0; i < n; i++) {
-            starts[i] = TASKS[i].getStart();
-            durations[i] = TASKS[i].getDuration();
-            ends[i] = TASKS[i].getEnd();
-        }
-        Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-//        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, true));
-//		c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, false));
-		c.addPropagators(new PropFullCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
-		c.addPropagators(new PropFullCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
-//		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
-        return c;
+		return new Cumulative(TASKS,HEIGHTS,CAPACITY);
     }
 
     /**

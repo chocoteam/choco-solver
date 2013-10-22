@@ -29,7 +29,6 @@ package solver.constraints.nary.cumulative;
 
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
 
@@ -43,7 +42,7 @@ import java.util.PriorityQueue;
  * @author Thierry Petit (refactoring Jean-Guillaume Fages)
  * @since 16/10/13
  */
-public class BasicCumulativeSweep extends CumulFilter {
+public class SweepCumulFilter extends CumulFilter {
 
 	// ---------------
 	// Data structures
@@ -193,7 +192,7 @@ public class BasicCumulativeSweep extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public BasicCumulativeSweep(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
+	public SweepCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
 		super(st,du,en,he,capa,cause);
 		int n = st.length;
 		this.start_lb_copy = new int[n];
@@ -215,18 +214,6 @@ public class BasicCumulativeSweep extends CumulFilter {
 		h_max = new Heap<Integer>(n, new GTComparator(hei_lb_copy));
 
 		// arrays initialization at each node
-		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
-			d[t].updateLowerBound(0, aCause); // should even be 1
-			h[t].updateLowerBound(0, aCause);
-			h[t].updateUpperBound(capamax.getUB(),aCause);
-			s[t].updateLowerBound(e[t].getLB() - d[t].getUB(), aCause);
-			s[t].updateUpperBound(e[t].getUB() - d[t].getLB(), aCause);
-			e[t].updateUpperBound(s[t].getUB() + d[t].getUB(), aCause);
-			e[t].updateLowerBound(s[t].getLB() + d[t].getLB(), aCause);
-			d[t].updateUpperBound(e[t].getUB() - s[t].getLB(), aCause);
-			d[t].updateLowerBound(e[t].getLB() - s[t].getUB(), aCause);
-			s[t].notifyMonitors(EventType.ALL_FINE_EVENTS);
-		}
 		int i = 0;
 		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
 			this.start_lb_copy[i]=this.s[t].getLB();
