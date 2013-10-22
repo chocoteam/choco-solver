@@ -55,21 +55,21 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 
 	/**
 	 * Default cumulative constraint
-	 * uses SWEEP + NRJ filters
+	 * uses TIME + NRJ filters
 	 *
 	 * @param tasks		task variables (embed start, duration and end variables)
-	 * @param heights	height variables (represent the consomation of each task on the resource)
+	 * @param heights	height variables (represent the consumption of each task on the resource)
 	 * @param capacity	maximal capacity of the resource (same at each point in time)
 	 */
 	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
-		this(tasks,heights,capacity, true, Filter.SWEEP, Filter.NRJ);
+		this(tasks,heights,capacity, true, Filter.TIME, Filter.NRJ);
 	}
 
 	/**
 	 * Cumulative constraint
 	 *
 	 * @param tasks			task variables (embed start, duration and end variables)
-	 * @param heights		height variables (represent the consomation of each task on the resource)
+	 * @param heights		height variables (represent the consumption of each task on the resource)
 	 * @param capacity		maximal capacity of the resource (same at each point in time)
 	 * @param graphBased	parameter indicating how to filter:
 	 *                         - TRUE:	applies on subset of overlapping tasks

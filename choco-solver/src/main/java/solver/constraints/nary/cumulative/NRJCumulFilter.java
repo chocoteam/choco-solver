@@ -77,7 +77,7 @@ public class NRJCumulFilter extends CumulFilter{
 	public void filter(ISet tasks) throws ContradictionException {
 		int idx = 0;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-			if(d[i].getLB()>0 || h[i].getLB()>0){
+			if(s[i].getLB()<e[i].getUB() && (d[i].getLB()>0 || h[i].getLB()>0)){
 				sor_array[idx++].val = i;
 			}
 		}

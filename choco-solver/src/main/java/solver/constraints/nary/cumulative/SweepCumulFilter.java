@@ -271,7 +271,6 @@ public class SweepCumulFilter extends CumulFilter {
 				h_events_min.add(new Event(ECP,i,end_lb_copy[i]));
 			}
 		}
-		assert !h_events_min.isEmpty();
 	}
 
 	public void filterminstart(int i, int newbound) throws ContradictionException {
@@ -286,6 +285,7 @@ public class SweepCumulFilter extends CumulFilter {
 		h_max.clear();
 		h_events_min.clear();
 		generateMinEvents(nbT);
+		if(h_events_min.isEmpty())return false;//	assert !h_events_min.isEmpty();
 		int delta = ((Event) h_events_min.getTop()).getDate();
 		int deltap = delta;
 		FirstInOut<Integer> tprune = new FirstInOut<Integer>();
