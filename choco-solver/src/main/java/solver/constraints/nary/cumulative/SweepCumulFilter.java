@@ -179,8 +179,8 @@ public class SweepCumulFilter extends CumulFilter {
 
 	protected int[] start_lb_copy,start_ub_copy;
 	protected int[] end_lb_copy,end_ub_copy;
-	protected int[] dur_lb_copy,dur_ub_copy;
-	protected int[] hei_lb_copy,hei_ub_copy;
+	protected int[] dur_lb_copy;
+	protected int[] hei_lb_copy;
 
 	private Heap<Event> h_events_min;
 	private Heap<Integer> h_max;
@@ -200,9 +200,7 @@ public class SweepCumulFilter extends CumulFilter {
 		this.end_lb_copy = new int[n];
 		this.end_ub_copy = new int[n];
 		this.dur_lb_copy = new int[n];
-		this.dur_ub_copy = new int[n];
 		this.hei_lb_copy = new int[n];
-		this.hei_ub_copy = new int[n];
 	}
 
 	@Override
@@ -221,9 +219,7 @@ public class SweepCumulFilter extends CumulFilter {
 			this.end_lb_copy[i]=this.e[t].getLB();
 			this.end_ub_copy[i]=this.e[t].getUB();
 			this.dur_lb_copy[i]=this.d[t].getLB();
-			this.dur_ub_copy[i]=this.d[t].getUB();
 			this.hei_lb_copy[i]=this.h[t].getLB();
-			this.hei_ub_copy[i]=this.h[t].getUB();
 			i++;
 		}
 		while(filterMin(n));
@@ -236,9 +232,7 @@ public class SweepCumulFilter extends CumulFilter {
 			this.end_ub_copy[i]=-this.s[t].getLB()+1;
 			this.start_ub_copy[i]=-this.e[t].getLB()+1;
 			this.dur_lb_copy[i]=this.d[t].getLB();
-			this.dur_ub_copy[i]=this.d[t].getUB();
 			this.hei_lb_copy[i]=this.h[t].getLB();
-			this.hei_ub_copy[i]=this.h[t].getUB();
 			i++;
 		}
 		while(filterMin(n));
