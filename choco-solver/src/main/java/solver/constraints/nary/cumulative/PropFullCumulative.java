@@ -26,6 +26,7 @@
  */
 package solver.constraints.nary.cumulative;
 
+import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -55,9 +56,10 @@ public class PropFullCumulative extends Propagator<IntVar> {
 	protected final IntVar[] s, d, e, h;
 	protected final IntVar capa;
 	protected CumulFilter[] filters;
-	protected ISet tasks;
+	protected ISet allTasks;
 	protected final boolean fast;
 	protected final int awakeningMask;
+	protected final IStateInt lastCapaMax;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -85,6 +87,8 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		}
 		// awakes on instantiations only when FAST mode is set to true
 		awakeningMask = fast?EventType.INSTANTIATE.mask:EventType.BOUND.mask + EventType.INSTANTIATE.mask;
+		lastCapaMax = environment.makeInt(capa.getUB()+1);
+		allTasks = SetFactory.makeFullSet(n);
 	}
 
 	/**
@@ -102,7 +106,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
 	public PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							  boolean fast, Cumulative.Filter... filters) {
 		this(s,d,e,h,capa,false,fast, filters);
-		this.tasks = SetFactory.makeFullSet(n);
 	}
 
 	//***********************************************************************************
@@ -122,15 +125,19 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			propIni();
 		}
-		filter(tasks);
+		updateMaxCapa();
+		filter(allTasks);
 	}
 
-	public void propIni() throws ContradictionException {
-		int capaMax = capa.getUB();
+	@Override
+	public void propagate(int varIdx, int mask) throws ContradictionException {
+		forcePropagate(EventType.CUSTOM_PROPAGATION);
+	}
+
+	protected void propIni() throws ContradictionException {
 		for (int i = 0; i < n; i++) {
 			d[i].updateLowerBound(0,aCause); // should even be 1
 			h[i].updateLowerBound(0,aCause);
-			h[i].updateUpperBound(capaMax,aCause);
 			s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), aCause);
 			s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), aCause);
 			e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), aCause);
@@ -140,13 +147,14 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		}
 	}
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
-
-	protected boolean disjoint(int i, int j) {
-		return s[i].getLB() >= e[j].getUB() || s[j].getLB() >= e[i].getUB();
+	protected void updateMaxCapa() throws ContradictionException {
+		if(lastCapaMax.get()!=capa.getUB()){
+			int capaMax = capa.getUB();
+			lastCapaMax.set(capaMax);
+			for (int i = 0; i < n; i++) {
+				h[i].updateUpperBound(capaMax,aCause);
+			}
+		}
 	}
 
 	public void filter(ISet tasks) throws ContradictionException{

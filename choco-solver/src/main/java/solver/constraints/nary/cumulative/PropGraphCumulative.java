@@ -51,7 +51,8 @@ public class PropGraphCumulative extends PropFullCumulative {
 	//***********************************************************************************
 
 	protected final UndirectedGraph g;
-	protected ISet toCompute;
+	protected ISet tasks,toCompute;
+	protected long timestamp;
 	// optim (fast mode)
 	protected final Random rd = new Random(0);
 	protected int maxrd = 10;
@@ -87,9 +88,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-			toCompute.clear();
-			propIni();
-			filter(g.getActiveNodes());
+			super.propagate(evtmask);
 			for (int i = 0; i < n; i++) {
 				g.getNeighborsOf(i).clear();
 			}
@@ -102,7 +101,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 			}
 		}else{
 			if(toCompute.getSize()/n>5){
-				filter(g.getActiveNodes());
+				filter(allTasks);
 			}else{
 				for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
 					filterAround(i);
@@ -114,6 +113,10 @@ public class PropGraphCumulative extends PropFullCumulative {
 
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
+		if(timestamp!=environment.getWorldIndex()){
+			timestamp=environment.getWorldIndex();
+			toCompute.clear();
+		}
 		if (varIdx < 4 * n) {
 			int v = varIdx % n;
 			if((!fast) || mandPartExists(v) || rd.nextInt(maxrd)==0){
@@ -122,22 +125,15 @@ public class PropGraphCumulative extends PropFullCumulative {
 				}
 			}
 		} else {
+			updateMaxCapa();
 			toCompute.clear();
-			int capaMax = capa.getUB();
 			for (int i = 0; i < n; i++) {
-				h[i].updateUpperBound(capaMax,aCause);
 				toCompute.add(i);
 			}
 		}
 		if(toCompute.getSize()>0){
 			forcePropagate(EventType.CUSTOM_PROPAGATION);
 		}
-	}
-
-	protected boolean mandPartExists(int i) {
-		int lastStart = Math.min(s[i].getUB(),e[i].getUB()-d[i].getLB());
-		int earliestEnd = Math.max(s[i].getLB()+d[i].getLB(),e[i].getLB());
-		return lastStart<earliestEnd;
 	}
 
 	protected void filterAround(int taskIndex) throws ContradictionException {
@@ -152,5 +148,15 @@ public class PropGraphCumulative extends PropFullCumulative {
 			}
 		}
 		filter(tasks);
+	}
+
+	protected boolean mandPartExists(int i) {
+		int lastStart = Math.min(s[i].getUB(),e[i].getUB()-d[i].getLB());
+		int earliestEnd = Math.max(s[i].getLB()+d[i].getLB(),e[i].getLB());
+		return lastStart<earliestEnd;
+	}
+
+	protected boolean disjoint(int i, int j) {
+		return s[i].getLB() >= e[j].getUB() || s[j].getLB() >= e[i].getUB();
 	}
 }
