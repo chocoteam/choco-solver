@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -151,9 +151,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	}
 
 	protected boolean mandPartExists(int i) {
-		int lastStart = Math.min(s[i].getUB(),e[i].getUB()-d[i].getLB());
-		int earliestEnd = Math.max(s[i].getLB()+d[i].getLB(),e[i].getLB());
-		return lastStart<earliestEnd;
+		return s[i].getUB()<e[i].getLB();
 	}
 
 	protected boolean disjoint(int i, int j) {
