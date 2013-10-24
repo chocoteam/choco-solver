@@ -89,7 +89,6 @@ public class CumulativeTest {
 		test(16,6,2,4,9,0);
 	}
 
-
 	@Test(groups = "1s")
 	public void test5(){
 		test(32,3,2,4,1,0);

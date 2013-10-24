@@ -107,6 +107,7 @@ public class SweepJGCumulFilter extends SweepCumulFilter {
 			if(currentDate<nextDate) {
 				assert currentConso<=capa;
 				for(int i=0; i<nbT; i++) {
+//					int index = i;
 					int index = sortedTasks.get(i);
 					// the compulsory part overlaps the event
 					if((start_ub_copy[index] <= currentDate && currentDate < end_lb_copy[index])){
@@ -116,7 +117,8 @@ public class SweepJGCumulFilter extends SweepCumulFilter {
 						// the current task cannot overlaps the current event
 						if(currentConso+hei_lb_copy[index]>capa) {
 							// the envelope overlaps the event
-							if(start_lb_copy[index]<=currentDate && currentDate < end_ub_copy[index]){
+							if(start_lb_copy[index]<nextDate
+							&& currentDate < start_lb_copy[index]+dur_lb_copy[index]){
 								// filter min start to next event
 								start_lb_copy[index]=nextDate;
 								if(nextDate>start_ub_copy[index]) {// early fail detection
@@ -137,6 +139,7 @@ public class SweepJGCumulFilter extends SweepCumulFilter {
 			Event event = events.poll();
 			currentDate = event.date;
 			if(event.type==SCP){
+				assert (events.peek().date>event.date||events.peek().type==SCP);
 				currentConso += hei_lb_copy[event.index];
 				// filter the capa max LB from the compulsory part consumptions
 				capamax.updateLowerBound(currentConso, aCause);
