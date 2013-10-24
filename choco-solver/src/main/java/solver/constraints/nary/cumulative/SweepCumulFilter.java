@@ -192,7 +192,7 @@ public class SweepCumulFilter extends CumulFilter {
 								temp.add(index);
 							}
 							else {
-								if(nextDate<end_ub_copy[index]) {
+								if(nextDate<start_lb_copy[index]+dur_lb_copy[index]) {
 									temp.add(index);
 								}
 							}
@@ -283,6 +283,7 @@ public class SweepCumulFilter extends CumulFilter {
 	// DEBUG ONLY
 	//***********************************************************************************
 
+	protected final static boolean CRASH_ON_FILTERING = FIXPOINT;
 	protected int[] time = new int[31];
 	public boolean filterTime(ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
@@ -312,9 +313,10 @@ public class SweepCumulFilter extends CumulFilter {
 					maxC = Math.max(maxC,time[t - min]);
 				}
 			}
-			if(capamax.updateLowerBound(maxC, aCause)){
-				if(true)throw new UnsupportedOperationException();
+			if(CRASH_ON_FILTERING && capamax.getLB()<maxC){
+				throw new UnsupportedOperationException();
 			}
+			capamax.updateLowerBound(maxC, aCause);
 			// filter max height
 			int minH;
 			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
@@ -325,16 +327,8 @@ public class SweepCumulFilter extends CumulFilter {
 					for (int t = s[i].getUB(); t < elb; t++) {
 						minH = Math.min(minH,capaMax-(time[t-min]-hlb));
 					}
-					if(h[i].getUB()>minH){
-						System.out.println(capamax);
-						System.out.println(h[i]+" > "+minH);
-						System.out.println(s[i]+" + "+d[i]+" = "+e[i]);
-						System.out.println("profile");
-						for(int j=0;j<start_lb_copy.length;j++){
-							if(d[j].getLB()>0 && h[j].getLB()>0 && s[j].getUB()<e[j].getLB())
-								System.out.println(s[j]+" + "+d[j]+" = "+e[j]+" // "+h[j]);
-						}
-						if(true)throw new UnsupportedOperationException();
+					if(CRASH_ON_FILTERING && h[i].getUB()>minH){
+						throw new UnsupportedOperationException();
 					}
 					h[i].updateUpperBound(minH,aCause);
 				}
@@ -365,7 +359,7 @@ public class SweepCumulFilter extends CumulFilter {
 					return;
 				}
 			} else {
-				if(true)throw new UnsupportedOperationException();
+				if(CRASH_ON_FILTERING)throw new UnsupportedOperationException();
 				nbOk = 0;
 				s[i].updateLowerBound(t + 1, aCause);
 			}
@@ -383,7 +377,7 @@ public class SweepCumulFilter extends CumulFilter {
 					return;
 				}
 			} else {
-				if(true)throw new UnsupportedOperationException();
+				if(CRASH_ON_FILTERING)throw new UnsupportedOperationException();
 				nbOk = 0;
 				e[i].updateUpperBound(t - 1, aCause);
 			}
