@@ -109,7 +109,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     public ID getDelta() {
-        return delta;
+        return var.getDelta();
     }
 
     @Override
