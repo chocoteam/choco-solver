@@ -127,7 +127,7 @@ public class SweepCumulFilter extends CumulFilter {
 			pruneAll(false);
 		}while(FIXPOINT && again);
 		// debug mode : should not be able to filter more with the time-based filter
-		assert filterTime(tasksToUSe);
+		assert filterTime(true, tasksToUSe);
 	}
 
 	protected void removeNullDurations(ISet tasks){
@@ -283,9 +283,8 @@ public class SweepCumulFilter extends CumulFilter {
 	// DEBUG ONLY
 	//***********************************************************************************
 
-	protected final static boolean CRASH_ON_FILTERING = FIXPOINT;
 	protected int[] time = new int[31];
-	public boolean filterTime(ISet tasks) throws ContradictionException {
+	public boolean filterTime(boolean crashOnFiltering, ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
@@ -313,7 +312,7 @@ public class SweepCumulFilter extends CumulFilter {
 					maxC = Math.max(maxC,time[t - min]);
 				}
 			}
-			if(CRASH_ON_FILTERING && capamax.getLB()<maxC){
+			if(crashOnFiltering && capamax.getLB()<maxC){
 				throw new UnsupportedOperationException();
 			}
 			capamax.updateLowerBound(maxC, aCause);
@@ -327,7 +326,7 @@ public class SweepCumulFilter extends CumulFilter {
 					for (int t = s[i].getUB(); t < elb; t++) {
 						minH = Math.min(minH,capaMax-(time[t-min]-hlb));
 					}
-					if(CRASH_ON_FILTERING && h[i].getUB()>minH){
+					if(crashOnFiltering && h[i].getUB()>minH){
 						throw new UnsupportedOperationException();
 					}
 					h[i].updateUpperBound(minH,aCause);
@@ -337,17 +336,17 @@ public class SweepCumulFilter extends CumulFilter {
 				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
 					// filters
 					if (s[i].getLB() + d[i].getLB() > min) {
-						filterInf(i, min, max, time, capaMax);
+						filterInf(crashOnFiltering,i, min, max, time, capaMax);
 					}
 					if (e[i].getUB() - d[i].getLB() < max) {
-						filterSup(i, min, max, time, capaMax);
+						filterSup(crashOnFiltering,i, min, max, time, capaMax);
 					}
 				}
 			}
 		}
 		return true;
 	}
-	protected void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+	protected void filterInf(boolean crashOnFiltering,int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
 		int nbOk = 0;
 		int dlb = d[i].getLB();
 		int hlb = h[i].getLB();
@@ -359,13 +358,13 @@ public class SweepCumulFilter extends CumulFilter {
 					return;
 				}
 			} else {
-				if(CRASH_ON_FILTERING)throw new UnsupportedOperationException();
+				if(crashOnFiltering)throw new UnsupportedOperationException();
 				nbOk = 0;
 				s[i].updateLowerBound(t + 1, aCause);
 			}
 		}
 	}
-	protected void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+	protected void filterSup(boolean crashOnFiltering, int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
 		int nbOk = 0;
 		int dlb = d[i].getLB();
 		int hlb = h[i].getLB();
@@ -377,7 +376,7 @@ public class SweepCumulFilter extends CumulFilter {
 					return;
 				}
 			} else {
-				if(CRASH_ON_FILTERING)throw new UnsupportedOperationException();
+				if(crashOnFiltering)throw new UnsupportedOperationException();
 				nbOk = 0;
 				e[i].updateUpperBound(t - 1, aCause);
 			}
