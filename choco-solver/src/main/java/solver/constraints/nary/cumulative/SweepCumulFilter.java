@@ -27,166 +27,42 @@
 
 package solver.constraints.nary.cumulative;
 
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetFactory;
 
 import java.io.Serializable;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * Basic implementation of Sweep-based Time-Table for cumulative
- * @author Thierry Petit (refactoring Jean-Guillaume Fages)
+ * @author Thierry Petit, Jean-Guillaume Fages
  * @since 16/10/13
  */
 public class SweepCumulFilter extends CumulFilter {
 
-	// ---------------
-	// Data structures
-	// ---------------
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-	class FirstInOut<E> {
-		// TODO: implement my own data structure
-		protected LinkedList<E> l;
-		public FirstInOut() {
-			l = new LinkedList<E>();
-		}
-		public void add(E v) {
-			l.add(v);
-		}
-		public E poll() {
-			return l.removeFirst();
-		}
-		public boolean isEmpty() {
-			return l.isEmpty();
-		}
-		public String toString() {
-			return l.toString();
-		}
-		public int size() {
-			return l.size();
-		}
-	}
-	static class EventLtComparator implements Comparator<Event>, Serializable {
-		@Override
-		public int compare(Event o1, Event o2) {
-			int date1 = o1.getDate();
-			int date2 = o2.getDate();
-			if (date1 < date2) {
-				return -1;
-			} else if (date1 == date2) {
-				return 0;
-			} else {
-				return 1;
-			}
-		}
-	}
-	static class GTComparator implements Comparator<Integer>, Serializable {
-		protected int[] hei_lb;
-		public GTComparator(int[] hei_lb) {
-			this.hei_lb = hei_lb;
-		}
-		@Override
-		public int compare(Integer o1, Integer o2) {
-			int i1 =  o1;
-			int i2 =  o2;
-			if (hei_lb[i1] > hei_lb[i2]) {
-				return -1;
-			} else if (hei_lb[i1] == hei_lb[i2]) {
-				return 0;
-			} else {
-				return 1;
-			}
-		}
-	}
-
-	public class Heap<E> implements Serializable {
-		// TODO: implement my own data structure
-		protected PriorityQueue heap;
-		public Heap(int size, Comparator<E> comp) {
-			heap = new PriorityQueue(size, comp);
-		}
-		public void add(Object e) {
-			heap.add(e);
-		}
-		public Object getTop() {
-			return heap.peek();
-		}
-		public Object poll() {
-			return heap.poll();
-		}
-		public void remove (Object e) {
-			heap.remove(e);
-		}
-		public boolean isEmpty() {
-			return heap.isEmpty();
-		}
-		public void clear(){
-			heap.clear();
-		}
-		public String toString() {
-			return heap.toString();
-		}
-	}
-
-	// ------
-	// Events
-	// ------
-
-	class Event {
-
-		protected int type;
-		protected int index;
-		protected int date;
-
-		public Event(int type, int i, int date) {
-			this.type = type;
-			this.index = i;
-			this.date = date;
-		}
-		public int getType() {
-			return type;
-		}
-		public int getIndex() {
-			return index;
-		}
-		protected int getDate() {
-			return date;
-		}
-		public String toString() {
-			String s = "";
-			switch(type) {
-				case SCP:{
-					s += "SCP";
-				}; break;
-				case ECP:{
-					s += "ECP";
-				}; break;
-				case PRU:{
-					s += "PRU";
-				}; break;
-			}
-			return "<" + s + ", a" + getIndex() + ", date " + getDate() + ">\n";
-		}
-	}
-
-	// ----------
-	// Constraint
-	// ----------
-
-	protected int[] start_lb_copy,start_ub_copy;
-	protected int[] end_lb_copy,end_ub_copy;
-	protected int[] dur_lb_copy;
-	protected int[] hei_lb_copy;
-
-	private Heap<Event> h_events_min;
-	private Heap<Integer> h_max;
-
-	private final static int SCP = 1,ECP = 2,PRU = 3;
-
+	// variable bound copies (for both performance and convenience)
+	protected final int[] start_lb_copy,start_ub_copy;
+	protected final int[] end_lb_copy,end_ub_copy;
+	protected final int[] dur_lb_copy;
+	protected final int[] hei_lb_copy;
+	// sweep events: Prune / StartCompulsoryPart / EndCompulsoryPart
+	protected final static int PRU = 1, SCP = 2,ECP = 3;
+	protected final LinkedList<Event> events;
+	// map to deal with subsets of variables
+	protected final int[] map;
+	// > 0 duration subset
+	protected final ISet tasksToUSe;
+	public final static boolean FIXPOINT = true;
+	private TIntArrayList temp = new TIntArrayList();
+	private TIntArrayList tprune = new TIntArrayList();
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -195,161 +71,322 @@ public class SweepCumulFilter extends CumulFilter {
 	public SweepCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
 		super(st,du,en,he,capa,cause);
 		int n = st.length;
+		this.map = new int[n];
 		this.start_lb_copy = new int[n];
 		this.start_ub_copy = new int[n];
 		this.end_lb_copy = new int[n];
 		this.end_ub_copy = new int[n];
 		this.dur_lb_copy = new int[n];
 		this.hei_lb_copy = new int[n];
+		this.events = new LinkedList<>();
+		this.tasksToUSe = SetFactory.makeSwap(st.length, false);
 	}
+
+	//***********************************************************************************
+	// GENERAL METHODS
+	//***********************************************************************************
 
 	@Override
 	public void filter(ISet tasks) throws ContradictionException {
-		int n = tasks.getSize();
-		// increasing heap of events
-		h_events_min = new Heap<Event>(6*n,new EventLtComparator());
-		// heap of activity indexes (sorted by decreasing heights)
-		h_max = new Heap<Integer>(n, new GTComparator(hei_lb_copy));
+		// removing tasks with a duration lower bound equal to 0
+		removeNullDurations(tasks);
+		int nbT = tasksToUSe.getSize();
+		// filtering start lower bounds
+		boolean again;
+		do{
+			again = false;
+			int i = 0;
+			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
+				this.start_lb_copy[i]=this.s[t].getLB();
+				this.start_ub_copy[i]=this.s[t].getUB();
+				this.end_lb_copy[i]=this.e[t].getLB();
+				this.end_ub_copy[i]=this.e[t].getUB();
+				this.dur_lb_copy[i]=this.d[t].getLB();
+				this.hei_lb_copy[i]=this.h[t].getLB();
+				this.map[i] = t;
+				i++;
+			}
+			while (sweep(nbT)){
+				again = true;
+				if(!FIXPOINT)break;
+			}
+			pruneAll(true);
+			// symmetric approach for the end upper bounds
+			i = 0;
+			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
+				this.start_lb_copy[i]=-this.e[t].getUB()+1;
+				this.start_ub_copy[i]=-this.e[t].getLB()+1;
+				this.end_lb_copy[i]=-this.s[t].getUB()+1;
+				this.end_ub_copy[i]=-this.s[t].getLB()+1;
+				i++;
+			}
+			while (sweep(nbT)){
+				again = true;
+				if(!FIXPOINT)break;
+			}
+			pruneAll(false);
+		}while(FIXPOINT && again);
+		// debug mode : should not be able to filter more with the time-based filter
+		assert filterTime(tasksToUSe);
+	}
 
-		// arrays initialization at each node
+	protected void removeNullDurations(ISet tasks){
+		tasksToUSe.clear();
+		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
+			if(d[t].getLB()>0){
+				tasksToUSe.add(t);
+			}
+		}
+	}
+
+	protected void pruneAll(boolean min) throws ContradictionException {
 		int i = 0;
-		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
-			this.start_lb_copy[i]=this.s[t].getLB();
-			this.start_ub_copy[i]=this.s[t].getUB();
-			this.end_lb_copy[i]=this.e[t].getLB();
-			this.end_ub_copy[i]=this.e[t].getUB();
-			this.dur_lb_copy[i]=this.d[t].getLB();
-			this.hei_lb_copy[i]=this.h[t].getLB();
-			i++;
-		}
-		while(filterMin(n));
-		pruneAll(tasks, true);
-		// upper-bound
-		i = 0;
-		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
-			this.end_lb_copy[i]=-this.s[t].getUB()+1;
-			this.start_lb_copy[i]=-this.e[t].getUB()+1;
-			this.end_ub_copy[i]=-this.s[t].getLB()+1;
-			this.start_ub_copy[i]=-this.e[t].getLB()+1;
-			this.dur_lb_copy[i]=this.d[t].getLB();
-			this.hei_lb_copy[i]=this.h[t].getLB();
-			i++;
-		}
-		while(filterMin(n));
-		pruneAll(tasks, false);
+		if(min)
+			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
+				s[t].updateLowerBound(start_lb_copy[i++], aCause);
+		else
+			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
+				e[t].updateUpperBound(1-start_lb_copy[i++], aCause);
 	}
 
-	public void pruneAll(ISet tasks, boolean min) throws ContradictionException {
-		int i = 0;
-		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
-			if(min) {
-				s[t].updateLowerBound(start_lb_copy[i], aCause);
-			} else {
-				e[t].updateUpperBound((-start_lb_copy[i]+1), aCause);
-			}
-			i++;
-		}
-	}
+	//***********************************************************************************
+	// SWEEP ALGORITHM
+	//***********************************************************************************
 
-	// -------------------
-	// Filtering Algorithm
-	// -------------------
-
-	public void generateMinEvents(int nbT) {
-		for(int i=0; i<nbT; i++) {
-			if(start_lb_copy[i]<start_ub_copy[i]) { // PRU
-				h_events_min.add(new Event(PRU,i,start_lb_copy[i]));
-			}
-			if(start_ub_copy[i] < end_lb_copy[i]) { // SCP and ECP
-				h_events_min.add(new Event(SCP,i,start_ub_copy[i]));
-				h_events_min.add(new Event(ECP,i,end_lb_copy[i]));
-			}
-		}
-	}
-
-	public void filterminstart(int i, int newbound) throws ContradictionException {
-		start_lb_copy[i]=newbound;
-		if(newbound>start_ub_copy[i]) {
-			aCause.contradiction(s[i],"");
-		}
-	}
-
-	public boolean filterMin(int nbT) throws ContradictionException {
-		boolean active = false;
-		h_max.clear();
-		h_events_min.clear();
+	protected boolean sweep(int nbT) throws ContradictionException {
 		generateMinEvents(nbT);
-		if(h_events_min.isEmpty())return false;//	assert !h_events_min.isEmpty();
-		int delta = ((Event) h_events_min.getTop()).getDate();
-		int deltap = delta;
-		FirstInOut<Integer> tprune = new FirstInOut<Integer>();
-		int gap = capamax.getUB();
-		int conso = 0;
-		int consoLB = conso;
-		while(!h_events_min.isEmpty()) {
+		if(events.isEmpty()){
+			return false;// might happen on randomly generated cases
+		}
+		Collections.sort(events, eventComparator);
+		int currentDate = events.peek().date;
+		tprune.resetQuick();
+		int capa = capamax.getUB();
+		int currentConso = 0;
+		boolean active = false;
+		while(!events.isEmpty()) {
+			// see next event
+			int nextDate = events.peek().date;
 			// pruning
-			if(delta<deltap) {
-				if(gap<0) {
-					aCause.contradiction(capamax,"");
-				}
-				FirstInOut<Integer> temp= new FirstInOut<Integer>();
-				while(!tprune.isEmpty()) {
-					int index = tprune.poll();
-					int regret = 0;
-					if((start_ub_copy[index] < end_lb_copy[index]) && (delta==start_ub_copy[index])) {
-						regret = hei_lb_copy[index];
-					}
-					if(hei_lb_copy[index]-regret>gap) {
-						filterminstart(index,deltap);
-						active = true;
-						if(regret>0){
-							h[index].updateUpperBound(gap+regret,aCause);
-						}
-					} else {
-						int po = 0;
-						int endtask = start_lb_copy[index]+dur_lb_copy[index];
-						if(start_ub_copy[index] < end_lb_copy[index]) {
-							po = Math.min(endtask,start_ub_copy[index]+1);
-						} else {
-							po = endtask;
-						}
-						if(deltap<po) {
+			if(currentDate<nextDate) {
+				assert currentConso<=capa;
+				temp.resetQuick();
+				for(int i=tprune.size()-1;i>=0;i--){
+					int index = tprune.get(i);
+					// the envelope overlaps the event
+					if(start_lb_copy[index]<=currentDate && currentDate < end_ub_copy[index]){
+						// the compulsory part overlaps the event
+						if((start_ub_copy[index] <= currentDate && currentDate < end_lb_copy[index])){
+							// filter consumption variable from remaining capacity
+							h[map[index]].updateUpperBound(capa-(currentConso-hei_lb_copy[index]),aCause);
 							temp.add(index);
+						}else{
+							// the current task cannot overlaps the current event
+							if(currentConso+hei_lb_copy[index]>capa) {
+								// filter min start to next event
+								start_lb_copy[index]=nextDate;
+								if(nextDate>start_ub_copy[index]) {// early fail detection
+									aCause.contradiction(s[map[index]],"");
+								}
+								active = true;// perform fix point
+								temp.add(index);
+							}
+							else {
+								if(nextDate<end_ub_copy[index]) {
+									temp.add(index);
+								}
+							}
 						}
 					}
 				}
-				while(!temp.isEmpty()) {
-					tprune.add(temp.poll());
+				tprune.resetQuick();
+				for(int i=temp.size()-1;i>=0;i--){
+					tprune.add(temp.getQuick(i));
 				}
-				// move the sweep line
-				delta = deltap;
 			}
 			// handle the current event
-			Event event = (Event) h_events_min.poll();
-			int type = event.getType();
-			int index = event.getIndex();
-			delta = event.getDate();
-			switch(type) {
-				case(SCP):{
-					gap -= hei_lb_copy[index];
-					conso += hei_lb_copy[index];
-					consoLB = Math.max(consoLB, conso);
-				}; break;
-				case(ECP): {
-					gap += hei_lb_copy[index];
-					conso -= hei_lb_copy[index];
-				}; break;
-				case(PRU): {
-					tprune.add(index);
-				}; break;
-			}
-			// next event
-			if(! h_events_min.isEmpty()) {
-				deltap = ((Event) h_events_min.getTop()).getDate();
+			Event event = events.poll();
+			currentDate = event.date;
+			switch(event.type) {
+				case(SCP):
+					currentConso += hei_lb_copy[event.index];
+					// filter the capa max LB from the compulsory part consumptions
+					capamax.updateLowerBound(currentConso, aCause);
+					break;
+				case(ECP):
+					currentConso -= hei_lb_copy[event.index];
+					break;
+				case(PRU):
+					tprune.add(event.index);
+					break;
 			}
 		}
-		//TODO filter capa max
-//		capamax.updateLowerBound(consoLB, aCause); //does not seem to work...
 		return active;
+	}
+
+	protected void generateMinEvents(int nbT) {
+		events.clear();
+		for(int i=0; i<nbT; i++) {
+			// start min or height max can be filtered
+			if(start_lb_copy[i]<start_ub_copy[i] || !h[map[i]].instantiated()) {
+				events.add(new Event(PRU, i, start_lb_copy[i]));
+			}
+			// a compulsory part exists
+			if(start_ub_copy[i] < end_lb_copy[i]) {
+				events.add(new Event(SCP, i, start_ub_copy[i]));
+				events.add(new Event(ECP, i, end_lb_copy[i]));
+			}
+		}
+	}
+
+	//***********************************************************************************
+	// DATA STRUCTURES
+	//***********************************************************************************
+
+	protected class Event implements Serializable{
+		protected int type;
+		protected int index;
+		protected int date;
+		public Event(int type, int i, int date) {
+			this.type = type;
+			this.index = i;
+			this.date = date;
+		}
+		public String toString(){
+			String st = "";
+			switch (type){
+				case(SCP):
+					st+="SCP";
+					break;
+				case(ECP):
+					st+="ECP";
+					break;
+				case(PRU):
+					st+="PRU";
+					break;
+			}
+			return st+"_"+date;
+		}
+	}
+
+	protected final static Comparator<Event> eventComparator = new Comparator<Event>(){
+		@Override
+		public int compare(Event o1, Event o2) {
+			if(o1.date == o2.date){
+				return o2.type-o1.type;
+			}
+			return o1.date - o2.date;
+		}
+	};
+
+	//***********************************************************************************
+	// DEBUG ONLY
+	//***********************************************************************************
+
+	protected int[] time = new int[31];
+	public boolean filterTime(ISet tasks) throws ContradictionException {
+		int min = Integer.MAX_VALUE / 2;
+		int max = Integer.MIN_VALUE / 2;
+		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+			if (s[i].getUB() < e[i].getLB()) {
+				min = Math.min(min, s[i].getUB());
+				max = Math.max(max, e[i].getLB());
+			}
+		}
+		if (min < max) {
+			if(max-min>time.length){
+				time = new int[max-min];
+			}
+			else{
+				Arrays.fill(time, 0, max - min, 0);
+			}
+			int capaMax = capamax.getUB();
+			// fill mandatory parts and filter capacity
+			int elb,hlb;
+			int maxC=0;
+			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+				elb = e[i].getLB();
+				hlb = h[i].getLB();
+				for (int t = s[i].getUB(); t < elb; t++) {
+					time[t - min] += hlb;
+					maxC = Math.max(maxC,time[t - min]);
+				}
+			}
+			if(capamax.updateLowerBound(maxC, aCause)){
+				if(true)throw new UnsupportedOperationException();
+			}
+			// filter max height
+			int minH;
+			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+				if(!h[i].instantiated()){
+					minH = h[i].getUB();
+					elb = e[i].getLB();
+					hlb = h[i].getLB();
+					for (int t = s[i].getUB(); t < elb; t++) {
+						minH = Math.min(minH,capaMax-(time[t-min]-hlb));
+					}
+					if(h[i].getUB()>minH){
+						System.out.println(capamax);
+						System.out.println(h[i]+" > "+minH);
+						System.out.println(s[i]+" + "+d[i]+" = "+e[i]);
+						System.out.println("profile");
+						for(int j=0;j<start_lb_copy.length;j++){
+							if(d[j].getLB()>0 && h[j].getLB()>0 && s[j].getUB()<e[j].getLB())
+								System.out.println(s[j]+" + "+d[j]+" = "+e[j]+" // "+h[j]);
+						}
+						if(true)throw new UnsupportedOperationException();
+					}
+					h[i].updateUpperBound(minH,aCause);
+				}
+			}
+			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
+					// filters
+					if (s[i].getLB() + d[i].getLB() > min) {
+						filterInf(i, min, max, time, capaMax);
+					}
+					if (e[i].getUB() - d[i].getLB() < max) {
+						filterSup(i, min, max, time, capaMax);
+					}
+				}
+			}
+		}
+		return true;
+	}
+	protected void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+		int nbOk = 0;
+		int dlb = d[i].getLB();
+		int hlb = h[i].getLB();
+		int sub = s[i].getUB();
+		for (int t = s[i].getLB(); t < sub; t++) {
+			if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
+				nbOk++;
+				if (nbOk == dlb) {
+					return;
+				}
+			} else {
+				if(true)throw new UnsupportedOperationException();
+				nbOk = 0;
+				s[i].updateLowerBound(t + 1, aCause);
+			}
+		}
+	}
+	protected void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+		int nbOk = 0;
+		int dlb = d[i].getLB();
+		int hlb = h[i].getLB();
+		int elb = e[i].getLB();
+		for (int t = e[i].getUB(); t > elb; t--) {
+			if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
+				nbOk++;
+				if (nbOk == dlb) {
+					return;
+				}
+			} else {
+				if(true)throw new UnsupportedOperationException();
+				nbOk = 0;
+				e[i].updateUpperBound(t - 1, aCause);
+			}
+		}
 	}
 }
