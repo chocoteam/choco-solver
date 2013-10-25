@@ -138,15 +138,17 @@ public class PropSumOfElements extends Propagator<Variable> {
         int lb = sum.getLB();
         int ub = sum.getUB();
         for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
-            if (sE - get(j) < lb) {
-                if (set.addToKernel(j, aCause)) {
-                    again = true;
-                }
-            } else if (sK + get(j) > ub) {
-                if (set.removeFromEnvelope(j, aCause)) {
-                    again = true;
-                }
-            }
+			if(!set.kernelContains(j)){
+				if (sE - get(j) < lb) {
+					if (set.addToKernel(j, aCause)) {
+						again = true;
+					}
+				} else if (sK + get(j) > ub) {
+					if (set.removeFromEnvelope(j, aCause)) {
+						again = true;
+					}
+				}
+			}
         }
         if (again) {
             propagate(0, 0);
