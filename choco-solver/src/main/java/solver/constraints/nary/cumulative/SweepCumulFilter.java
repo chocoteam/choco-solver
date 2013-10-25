@@ -31,6 +31,7 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.PoolManager;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 
@@ -55,14 +56,16 @@ public class SweepCumulFilter extends CumulFilter {
 	protected final int[] hei_lb_copy;
 	// sweep events: Prune / StartCompulsoryPart / EndCompulsoryPart
 	protected final static int PRU = 1, SCP = 2,ECP = 3;
-	protected final LinkedList<Event> events;
+	protected final Event[] events;
+	protected int nbEvents;
 	// map to deal with subsets of variables
 	protected final int[] map;
 	// > 0 duration subset
 	protected final ISet tasksToUSe;
-	public final static boolean FIXPOINT = true;
-	private TIntArrayList temp = new TIntArrayList();
-	private TIntArrayList tprune = new TIntArrayList();
+	protected boolean FIXPOINT = true;
+	protected TIntArrayList temp = new TIntArrayList();
+	protected TIntArrayList tprune = new TIntArrayList();
+	protected PoolManager<Event> pool = new PoolManager<>();
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -78,7 +81,7 @@ public class SweepCumulFilter extends CumulFilter {
 		this.end_ub_copy = new int[n];
 		this.dur_lb_copy = new int[n];
 		this.hei_lb_copy = new int[n];
-		this.events = new LinkedList<>();
+		this.events = new Event[3*n];
 		this.tasksToUSe = SetFactory.makeSwap(st.length, false);
 	}
 
@@ -110,7 +113,7 @@ public class SweepCumulFilter extends CumulFilter {
 				again = true;
 				if(!FIXPOINT)break;
 			}
-			pruneAll(true);
+			pruneMin(true);
 			// symmetric approach for the end upper bounds
 			i = 0;
 			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
@@ -124,7 +127,7 @@ public class SweepCumulFilter extends CumulFilter {
 				again = true;
 				if(!FIXPOINT)break;
 			}
-			pruneAll(false);
+			pruneMin(false);
 		}while(FIXPOINT && again);
 		// debug mode : should not be able to filter more with the time-based filter
 		assert filterTime(true, tasksToUSe);
@@ -139,7 +142,7 @@ public class SweepCumulFilter extends CumulFilter {
 		}
 	}
 
-	protected void pruneAll(boolean min) throws ContradictionException {
+	protected void pruneMin(boolean min) throws ContradictionException {
 		int i = 0;
 		if(min)
 			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
@@ -155,47 +158,39 @@ public class SweepCumulFilter extends CumulFilter {
 
 	protected boolean sweep(int nbT) throws ContradictionException {
 		generateMinEvents(nbT);
-		if(events.isEmpty()){
+		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
 		}
-		Collections.sort(events, eventComparator);
-		int currentDate = events.peek().date;
+		Arrays.sort(events,0,nbEvents,eventComparator);
+		int timeIndex = 0;
+		int currentDate = events[timeIndex].date;
 		tprune.resetQuick();
 		int capa = capamax.getUB();
 		int currentConso = 0;
 		boolean active = false;
-		while(!events.isEmpty()) {
+		while(timeIndex<nbEvents){
 			// see next event
-			int nextDate = events.peek().date;
+			int nextDate = events[timeIndex].date;
 			// pruning
 			if(currentDate<nextDate) {
 				assert currentConso<=capa;
 				temp.resetQuick();
 				for(int i=tprune.size()-1;i>=0;i--){
 					int index = tprune.get(i);
-					// the envelope overlaps the event
-					if(start_lb_copy[index]<=currentDate && currentDate < end_ub_copy[index]){
-						// the compulsory part overlaps the event
-						if((start_ub_copy[index] <= currentDate && currentDate < end_lb_copy[index])){
-							// filter consumption variable from remaining capacity
-							h[map[index]].updateUpperBound(capa-(currentConso-hei_lb_copy[index]),aCause);
+					// task min start might be filtered
+					if(currentDate<start_ub_copy[index] || start_ub_copy[index]>=end_lb_copy[index]){
+						// the current task should overlap the current event
+						if(currentConso+hei_lb_copy[index]>capa) {
+							// filter min start to next event
+							start_lb_copy[index]=nextDate;
+							if(nextDate>start_ub_copy[index]) {// early fail detection
+								aCause.contradiction(s[map[index]],"");
+							}
+							active = true;// perform fix point
 							temp.add(index);
-						}else{
-							// the current task cannot overlaps the current event
-							if(currentConso+hei_lb_copy[index]>capa) {
-								// filter min start to next event
-								start_lb_copy[index]=nextDate;
-								if(nextDate>start_ub_copy[index]) {// early fail detection
-									aCause.contradiction(s[map[index]],"");
-								}
-								active = true;// perform fix point
-								temp.add(index);
-							}
-							else {
-								if(nextDate<start_lb_copy[index]+dur_lb_copy[index]) {
-									temp.add(index);
-								}
-							}
+						}
+						else if(nextDate<start_lb_copy[index]+dur_lb_copy[index]) {
+							temp.add(index);
 						}
 					}
 				}
@@ -205,7 +200,7 @@ public class SweepCumulFilter extends CumulFilter {
 				}
 			}
 			// handle the current event
-			Event event = events.poll();
+			Event event = events[timeIndex++];
 			currentDate = event.date;
 			switch(event.type) {
 				case(SCP):
@@ -225,16 +220,16 @@ public class SweepCumulFilter extends CumulFilter {
 	}
 
 	protected void generateMinEvents(int nbT) {
-		events.clear();
+		nbEvents = 0;
 		for(int i=0; i<nbT; i++) {
 			// start min or height max can be filtered
-			if(start_lb_copy[i]<start_ub_copy[i] || !h[map[i]].instantiated()) {
-				events.add(new Event(PRU, i, start_lb_copy[i]));
+			if(start_lb_copy[i]<start_ub_copy[i]) {
+				events[nbEvents++] = useEvent(PRU, i, start_lb_copy[i]);
 			}
 			// a compulsory part exists
 			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events.add(new Event(SCP, i, start_ub_copy[i]));
-				events.add(new Event(ECP, i, end_lb_copy[i]));
+				events[nbEvents++] = useEvent(SCP, i, start_ub_copy[i]);
+				events[nbEvents++] = useEvent(ECP, i, end_lb_copy[i]);
 			}
 		}
 	}
@@ -247,26 +242,17 @@ public class SweepCumulFilter extends CumulFilter {
 		protected int type;
 		protected int index;
 		protected int date;
-		public Event(int type, int i, int date) {
-			this.type = type;
-			this.index = i;
-			this.date = date;
+	}
+
+	protected Event useEvent(int type, int i, int date) {
+		Event e = pool.getE();
+		if(e==null){
+			e = new Event();
 		}
-		public String toString(){
-			String st = "";
-			switch (type){
-				case(SCP):
-					st+="SCP";
-					break;
-				case(ECP):
-					st+="ECP";
-					break;
-				case(PRU):
-					st+="PRU";
-					break;
-			}
-			return st+"_"+date;
-		}
+		e.date = date;
+		e.type = type;
+		e.index= i;
+		return e;
 	}
 
 	protected final static Comparator<Event> eventComparator = new Comparator<Event>(){
@@ -284,7 +270,7 @@ public class SweepCumulFilter extends CumulFilter {
 	//***********************************************************************************
 
 	protected int[] time = new int[31];
-	public boolean filterTime(boolean crashOnFiltering, ISet tasks) throws ContradictionException {
+	protected boolean filterTime(boolean crashOnFiltering, ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
@@ -317,21 +303,6 @@ public class SweepCumulFilter extends CumulFilter {
 			}
 			capamax.updateLowerBound(maxC, aCause);
 			// filter max height
-			int minH;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				if(!h[i].instantiated()){
-					minH = h[i].getUB();
-					elb = e[i].getLB();
-					hlb = h[i].getLB();
-					for (int t = s[i].getUB(); t < elb; t++) {
-						minH = Math.min(minH,capaMax-(time[t-min]-hlb));
-					}
-					if(crashOnFiltering && h[i].getUB()>minH){
-						throw new UnsupportedOperationException();
-					}
-					h[i].updateUpperBound(minH,aCause);
-				}
-			}
 			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
 					// filters

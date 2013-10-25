@@ -54,18 +54,6 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 	//***********************************************************************************
 
 	/**
-	 * Default cumulative constraint
-	 * uses TIME + NRJ filters
-	 *
-	 * @param tasks		task variables (embed start, duration and end variables)
-	 * @param heights	height variables (represent the consumption of each task on the resource)
-	 * @param capacity	maximal capacity of the resource (same at each point in time)
-	 */
-	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
-		this(tasks,heights,capacity, true, Filter.TIME, Filter.NRJ);
-	}
-
-	/**
 	 * Cumulative constraint
 	 *
 	 * @param tasks			task variables (embed start, duration and end variables)
@@ -185,6 +173,15 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 	 */
 	public static enum Filter {
 		/**
+		 * filters height variables only (sweep-based algorithm)
+		 * idempotent (on the given set of variables only)
+		 */
+		HEIGHTS{
+			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
+				return new HeightCumulFilter(s,d,e,h,capa,cause);
+			}
+		},
+		/**
 		 * time-table algorithm based on each point in time
 		 * not idempotent
 		 */
@@ -200,6 +197,15 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		SWEEP{
 			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
 				return new SweepCumulFilter(s,d,e,h,capa,cause);
+			}
+		},
+		/**
+		 * time-table algorithm based on a sweep line
+		 * idempotent (on the given set of variables only)
+		 */
+		SWEEP_HEI_SORT {
+			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
+				return new SweepHeiSortCumulFilter(s,d,e,h,capa,cause);
 			}
 		},
 		/**

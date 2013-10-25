@@ -35,11 +35,19 @@ import solver.constraints.ICF;
 import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.cumulative.PropFullCumulative;
 import solver.constraints.nary.cumulative.PropGraphCumulative;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
+import solver.search.strategy.assignments.DecisionOperator;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Task;
 import solver.variables.VF;
+import util.PoolManager;
 
 /**
  * Tests the various filtering algorithms of the cumulative constraint
@@ -94,6 +102,13 @@ public class CumulativeTest {
 		test(32,3,2,4,1,0);
 	}
 
+	@Test(groups = "1s")
+	public void test6(){
+		// this tests raises an exception which is in fact due to the time limit
+		// and unlucky random heuristic
+		test(32,3,2,2,3,0);
+	}
+
 	@Test(groups = "10m")
 	public void testMed(){
 		for(int mode:new int[]{0,1})
@@ -114,36 +129,36 @@ public class CumulativeTest {
 		if(VERBOSE)System.out.println(n+" - "+capamax+" - "+dmin+" - "+hmax+" - "+seed+" - "+mode);
 		Cumulative.Filter[][] filters = new Cumulative.Filter[][]{
 				{Cumulative.Filter.TIME},
-//				{Cumulative.Filter.TIME,Cumulative.Filter.NRJ},
-				{Cumulative.Filter.SWEEP}
-//				{Cumulative.Filter.SWEEP,Cumulative.Filter.NRJ},
-//				{Cumulative.Filter.TIME,Cumulative.Filter.SWEEP,Cumulative.Filter.NRJ}
+				{Cumulative.Filter.TIME,Cumulative.Filter.NRJ},
+				{Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP},
+				{Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP_HEI_SORT},
+				{Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP,Cumulative.Filter.NRJ},
+				{Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ},
+				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP,Cumulative.Filter.NRJ},
+				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ},
+				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ}
 		};
 		long ref = solve(n,capamax,dmin,hmax,seed,true,1, filters[0],mode);
 		if(ref==-1)return;
 		for(boolean g : new boolean[]{true,false})	// graph-based
 			for(int b: new int[]{0})//,1,2})			// fast mode
-				for(int f=0;f<filters.length;f++){
+				for(int f=1;f<filters.length;f++){
 					long val = solve(n,capamax,dmin,hmax,seed,g,b,filters[f],mode);
-					if(val!=ref)System.exit(0);
-					assert ref == val :"filter "+f+" failed";
+					assert ref == val :"filter "+f+" failed (can be due to the heuristic in case of timeout)";
 				}
 	}
 
 	public static long solve(int n, int capamax, int dmin, int hmax, long seed,
 							 boolean graph, int nbFast, Cumulative.Filter[] f, int mode) {
-		Solver solver = new Solver();
+		final Solver solver = new Solver();
 		int dmax = 5+dmin*2;
-		IntVar[] s = VF.enumeratedArray("s",n,0,n*dmax,solver);
-		IntVar[] d = VF.enumeratedArray("d",n,dmin,dmax,solver);
-//		IntVar[] d = VF.enumeratedArray("d",n,dmin,dmin,solver);
-		IntVar[] e = VF.enumeratedArray("e",n,0,n*dmax,solver);
-		IntVar[] h = VF.enumeratedArray("h",n,0,hmax,solver);
-//		IntVar[] h = VF.enumeratedArray("h",n,hmax,hmax,solver);
-		IntVar capa = VF.enumerated("capa", 0, capamax, solver);
-//		IntVar capa = VF.enumerated("capa", capamax, capamax, solver);
+		final IntVar[] s = VF.enumeratedArray("s",n,0,n*dmax,solver);
+		final IntVar[] d = VF.enumeratedArray("d",n,dmin,dmax,solver);
+		final IntVar[] e = VF.enumeratedArray("e",n,0,n*dmax,solver);
+		final IntVar[] h = VF.enumeratedArray("h",n,0,hmax,solver);
+		final IntVar capa = VF.enumerated("capa", 0, capamax, solver);
+		final IntVar last = VF.bounded("last", 0, n * dmax, solver);
 		Task[] t = new Task[n];
-		IntVar last = VF.bounded("last",0,n*dmax,solver);
 		for(int i=0;i<n;i++){
 			t[i] = new Task(s[i],d[i],e[i]);
 			solver.post(ICF.arithm(e[i],"<=",last));
@@ -163,7 +178,6 @@ public class CumulativeTest {
 			);
 		}
 		solver.post(c);
-//		solver.set(ISF.force_InputOrder_InDomainMin(solver.retrieveIntVars()));
 		solver.set(ISF.random(solver.retrieveIntVars(), seed));
 		SMF.limitTime(solver,5000);
 		switch (mode){

@@ -77,15 +77,15 @@ public class NRJCumulFilter extends CumulFilter{
 	public void filter(ISet tasks) throws ContradictionException {
 		int idx = 0;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-			if(s[i].getLB()<e[i].getUB() && (d[i].getLB()>0 || h[i].getLB()>0)){
+			if(d[i].getLB()>0){
 				sor_array[idx++].val = i;
 			}
 		}
 		Arrays.sort(sor_array, 0, idx, comparator);
-		int xMin = Integer.MAX_VALUE / 2;
-		int xMax = Integer.MIN_VALUE / 2;
-		int surface = 0;
-		int camax = capamax.getUB();
+		double xMin = Integer.MAX_VALUE / 2;
+		double xMax = Integer.MIN_VALUE / 2;
+		double surface = 0;
+		double camax = capamax.getUB();
 		for(int k=0; k<idx; k++){
 			int i = sor_array[k].val;
 			xMax = Math.max(xMax, e[i].getUB());
@@ -98,7 +98,7 @@ public class NRJCumulFilter extends CumulFilter{
 					d[i].updateUpperBound((int)Math.floor((availSurf/(double)h[i].getLB())+0.01),aCause);
 				surface += d[i].getLB() * h[i].getLB();
 				if(xMax>xMin)
-					capamax.updateLowerBound((int)Math.ceil((double)surface/(double)(xMax-xMin)-0.01),aCause);
+					capamax.updateLowerBound((int)Math.ceil(surface/(xMax-xMin)-0.01),aCause);
 				if(surface>(xMax-xMin)*camax){
 					aCause.contradiction(capamax,"");
 				}

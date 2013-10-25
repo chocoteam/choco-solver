@@ -556,7 +556,17 @@ public class IntConstraintFactory {
      * @return a cumulative constraint
      */
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
-		return new Cumulative(TASKS,HEIGHTS,CAPACITY);
+		// Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
+		boolean addHeights = false;
+		for(int h=0; h<HEIGHTS.length&&!addHeights;h++){
+			if(!HEIGHTS[h].instantiated()){
+				addHeights = true;
+			}
+		}
+		Cumulative.Filter[] filters = addHeights?
+				new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS, Cumulative.Filter.TIME, Cumulative.Filter.NRJ}
+				:new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
+		return new Cumulative(TASKS,HEIGHTS,CAPACITY,true,filters);
     }
 
     /**
