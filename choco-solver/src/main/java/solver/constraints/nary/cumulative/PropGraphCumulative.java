@@ -131,9 +131,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 				toCompute.add(i);
 			}
 		}
-		if(toCompute.getSize()>0){
-			forcePropagate(EventType.CUSTOM_PROPAGATION);
-		}
+		forcePropagate(EventType.CUSTOM_PROPAGATION);
 	}
 
 	protected void filterAround(int taskIndex) throws ContradictionException {
