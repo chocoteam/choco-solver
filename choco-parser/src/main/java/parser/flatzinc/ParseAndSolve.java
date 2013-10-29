@@ -121,7 +121,7 @@ public class ParseAndSolve {
     @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
     protected boolean fexp = false;
 
-    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs", required = false)
+    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs\n4: fast variable", required = false)
     protected byte eng = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
