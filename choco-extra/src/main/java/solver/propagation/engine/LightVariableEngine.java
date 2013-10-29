@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.hardcoded;
+package solver.propagation.engine;
 
 import memory.IEnvironment;
 import solver.ICause;
@@ -54,7 +54,7 @@ import java.util.List;
  * @author Jean-Guillaume Fages
  * @since 04/10/13
  */
-public class FastVariableEngine implements IPropagationEngine {
+public class LightVariableEngine implements IPropagationEngine {
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
@@ -75,7 +75,7 @@ public class FastVariableEngine implements IPropagationEngine {
 
     public static long nbPOP = 0;
 
-    public FastVariableEngine(Solver solver) {
+    public LightVariableEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);

@@ -42,7 +42,6 @@ import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.hardcoded.FastVariableEngine;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
@@ -208,9 +207,6 @@ public class ParseAndSolve {
             case 0:
             case 3:
                 solver.set(new SevenQueuesPropagatorEngine(solver));
-                break;
-            case 4:
-                solver.set(new FastVariableEngine(solver));
                 break;
             case -1:
             default:
