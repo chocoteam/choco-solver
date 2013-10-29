@@ -28,6 +28,7 @@
 package util.objects.setDataStructures.matrix;
 
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
 
@@ -99,4 +100,9 @@ public class Set_BitSet extends BitSet implements ISet {
         card = 0;
         super.clear();
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BITSET;
+	}
 }

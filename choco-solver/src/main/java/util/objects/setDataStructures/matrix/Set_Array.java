@@ -35,6 +35,7 @@
 package util.objects.setDataStructures.matrix;
 
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Set represented by an array of booleans
@@ -133,4 +134,9 @@ public class Set_Array implements ISet {
         }
         return -1;
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BOOL_ARRAY;
+	}
 }

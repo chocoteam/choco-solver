@@ -51,7 +51,7 @@ import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.circuit.*;
 import solver.constraints.nary.count.Count;
-import solver.constraints.nary.cumulative.PropIncrementalCumulative;
+import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.element.Element;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
@@ -556,22 +556,17 @@ public class IntConstraintFactory {
      * @return a cumulative constraint
      */
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
-        int n = TASKS.length;
-        assert n > 0;
-        Solver solver = TASKS[0].getStart().getSolver();
-        IntVar[] starts = new IntVar[n];
-        IntVar[] durations = new IntVar[n];
-        IntVar[] ends = new IntVar[n];
-        for (int i = 0; i < n; i++) {
-            starts[i] = TASKS[i].getStart();
-            durations[i] = TASKS[i].getDuration();
-            ends[i] = TASKS[i].getEnd();
-        }
-        Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, true));
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, false));
-//		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
-        return c;
+		// Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
+		boolean addHeights = false;
+		for(int h=0; h<HEIGHTS.length&&!addHeights;h++){
+			if(!HEIGHTS[h].instantiated()){
+				addHeights = true;
+			}
+		}
+		Cumulative.Filter[] filters = addHeights?
+				new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP, Cumulative.Filter.NRJ}
+				:new Cumulative.Filter[]{Cumulative.Filter.SWEEP, Cumulative.Filter.NRJ};
+		return new Cumulative(TASKS,HEIGHTS,CAPACITY,true,filters);
     }
 
     /**
@@ -580,8 +575,8 @@ public class IntConstraintFactory {
      *
      * @param X      collection of coordinates in first dimension
      * @param Y      collection of coordinates in second dimension
-     * @param WIDTH  collection of width
-     * @param HEIGHT collection of height
+     * @param WIDTH  collection of width (each duration should be > 0)
+     * @param HEIGHT collection of height (each height should be >= 0)
 	 * @param USE_CUMUL indicates whether or not redundant cumulative constraints should be put on each dimension (advised)
      * @return a non-overlapping constraint
      */

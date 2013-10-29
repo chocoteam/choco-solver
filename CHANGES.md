@@ -19,3 +19,5 @@ The CHANGES.md file starts at this version.
 * Fix #123: Monotonic decreasing for real objective
 * Fix #124: mzn script now handles free search
 * Fix #125: remove shut down hooks when the resolution ends normally
+* Cumulative energy-based greedy filter improvement
+* Fix #130: fix delta for view

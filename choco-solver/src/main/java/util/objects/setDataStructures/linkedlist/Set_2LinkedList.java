@@ -28,6 +28,7 @@
 package util.objects.setDataStructures.linkedlist;
 
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Linked list of m elements with double link (predecessor and successor)
@@ -247,4 +248,9 @@ public class Set_2LinkedList implements ISet {
             }
         }
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.DOUBLE_LINKED_LIST;
+	}
 }

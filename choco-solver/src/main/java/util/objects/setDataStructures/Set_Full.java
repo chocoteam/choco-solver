@@ -100,4 +100,9 @@ public class Set_Full implements ISet {
         else
             return -1;
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BITSET;
+	}
 }

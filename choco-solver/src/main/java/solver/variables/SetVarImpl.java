@@ -38,6 +38,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
+import util.tools.StringUtils;
 
 import java.util.BitSet;
 
@@ -290,7 +291,17 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
     @Override
     public SetVar duplicate() {
-        throw new UnsupportedOperationException("Cannot duplicate SetVar");
+		int[] env = new int[getEnvelopeSize()];
+		int idx=0;
+		for(int i=getEnvelopeFirst();i!=END;i=getEnvelopeNext()){
+			env[idx++] = i;
+		}
+		int[] ker = new int[getKernelSize()];
+		idx=0;
+		for(int i=getKernelFirst();i!=END;i=getKernelNext()){
+			ker[idx++] = i;
+		}
+		return new SetVarImpl(StringUtils.randomName(this.name),env,envelope.getSetType(),ker,kernel.getSetType(),solver);
     }
 
     @Override
