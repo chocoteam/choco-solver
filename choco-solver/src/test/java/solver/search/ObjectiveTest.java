@@ -32,7 +32,12 @@ import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
+import solver.objective.IntObjectiveManager;
+import solver.propagation.NoPropagationEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.monitors.IMonitorSolution;
+import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -168,6 +173,35 @@ public class ObjectiveTest {
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
         System.out.println("Minimum2: " + iv + " : " + solver.isEntailed());
+    }
+
+    @Test(groups = "1s")
+    public void testJL1() {
+        Solver solver = new Solver();
+        BoolVar b1 = VF.bool("b1", solver);
+        BoolVar b2 = VF.bool("b2", solver);
+        solver.post(ICF.arithm(b1, "<=", b2));
+        SMF.log(solver, true, true);
+        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(b1, ResolutionPolicy.MINIMIZE, solver));
+        //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
+        if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
+            solver.set(new SevenQueuesPropagatorEngine(solver));
+        }
+        solver.getSearchLoop().getMeasures().setReadingTimeCount(System.nanoTime());
+        solver.getSearchLoop().launch(false);
+        System.out.println(b1 + " " + b2);
+        int bestvalue = b1.getValue();
+        solver.getSearchLoop().reset();
+        solver.post(ICF.arithm(b1, "=", bestvalue));
+        solver.set(ISF.inputOrder_InDomainMin(new BoolVar[]{b1, b2}));
+        int count = 0;
+        if (solver.findSolution()) {
+            do {
+                count++;
+                System.out.println(b1 + " " + b2);
+            } while (solver.nextSolution());
+        }
+        Assert.assertEquals(count, 2);
     }
 
 }

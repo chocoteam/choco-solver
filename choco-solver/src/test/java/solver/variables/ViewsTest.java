@@ -30,8 +30,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.sum.Sum;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
@@ -90,8 +90,8 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-				IntVar z = VariableFactory.enumerated("Z",0,200,solver);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{x,y},z));
+                IntVar z = VariableFactory.enumerated("Z", 0, 200, solver);
+                solver.post(IntConstraintFactory.sum(new IntVar[]{x, y}, z));
                 solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
@@ -117,8 +117,8 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, solver);
                 IntVar y = VariableFactory.bounded("y", 0, 2, solver);
-				IntVar z = VariableFactory.enumerated("Z",0,200,solver);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{x,y},z));
+                IntVar z = VariableFactory.enumerated("Z", 0, 200, solver);
+                solver.post(IntConstraintFactory.sum(new IntVar[]{x, y}, z));
                 solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
@@ -259,8 +259,8 @@ public class ViewsTest {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, solver);
                 IntVar[] y = new IntVar[seed];
                 for (int i = 0; i < seed; i++) {
-					y[i] = VariableFactory.enumerated("Z",0,200,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{x[i],x[i+seed]},y[i]));
+                    y[i] = VariableFactory.enumerated("Z", 0, 200, solver);
+                    solver.post(IntConstraintFactory.sum(new IntVar[]{x[i], x[i + seed]}, y[i]));
                 }
                 solver.post(IntConstraintFactory.sum(y, VariableFactory.fixed(n, solver)));
 
@@ -312,8 +312,8 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-				IntVar z = VariableFactory.enumerated("Z",-200,200,solver);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{z,y},x));
+                IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
+                solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, x));
                 solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
@@ -339,9 +339,9 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-				IntVar z = VariableFactory.enumerated("Z",-2,2,solver);
-				IntVar az = VariableFactory.abs(z);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{z,y},x));
+                IntVar z = VariableFactory.enumerated("Z", -2, 2, solver);
+                IntVar az = VariableFactory.abs(z);
+                solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, x));
                 solver.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
             }
             check(ref, solver, seed, true, true);
@@ -367,9 +367,9 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-				IntVar diff = VariableFactory.enumerated("diff",-2,2,solver);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{diff,y},x));
-				IntVar z = VariableFactory.abs(diff);
+                IntVar diff = VariableFactory.enumerated("diff", -2, 2, solver);
+                solver.post(IntConstraintFactory.sum(new IntVar[]{diff, y}, x));
+                IntVar z = VariableFactory.abs(diff);
                 solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
                 solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
             }
@@ -402,9 +402,9 @@ public class ViewsTest {
                 IntVar[] x = VariableFactory.enumeratedArray("x", k, 0, k - 1, solver);
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
-					IntVar z = VariableFactory.enumerated("Z",-200,200,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{z,x[i]},x[i+1]));
-					t[i] = VariableFactory.abs(z);
+                    IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
+                    solver.post(IntConstraintFactory.sum(new IntVar[]{z, x[i]}, x[i + 1]));
+                    t[i] = VariableFactory.abs(z);
                 }
                 solver.post(IntConstraintFactory.alldifferent(x, "BC"));
                 solver.post(IntConstraintFactory.alldifferent(t, "BC"));
@@ -442,5 +442,18 @@ public class ViewsTest {
             t += System.nanoTime();
             System.out.printf("%.2fms\n", t / 1000 / 1000f);
         }
+    }
+
+    @Test
+    public void testJL1() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar v1 = VF.enumerated("v1", -2, 2, s);
+        IntVar v2 = VF.minus(VF.minus(VF.enumerated("v2", -2, 2, s)));
+        s.post(ICF.arithm(v1, "=", v2));
+        s.post(ICF.arithm(v2, "!=", 1));
+
+        s.propagate();
+
+        Assert.assertFalse(v1.contains(1));
     }
 }
