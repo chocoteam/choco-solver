@@ -78,6 +78,7 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		IntVar[] d = Arrays.copyOfRange(vars,n,2*n);
 		IntVar[] e = Arrays.copyOfRange(vars,2*n,3*n);
 		IntVar[] h = Arrays.copyOfRange(vars,3*n,4*n);
+		// uses two propagators to ensure constraint satisfaction (fix-point)
 		if(graphBased){
 			setPropagators(
 					new PropGraphCumulative(s,d,e,h,capacity,true, filters),
