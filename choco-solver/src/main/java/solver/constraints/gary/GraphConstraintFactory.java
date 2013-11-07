@@ -30,10 +30,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.arborescences.PropAntiArborescence;
 import solver.constraints.gary.arborescences.PropArborescence;
-import solver.constraints.gary.basic.PropConnected;
-import solver.constraints.gary.basic.PropKCC;
-import solver.constraints.gary.basic.PropKCliques;
-import solver.constraints.gary.basic.PropTransitivity;
+import solver.constraints.gary.basic.*;
 import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.gary.path.PropAllDiffGraphIncremental;
@@ -45,6 +42,7 @@ import solver.constraints.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
+import solver.variables.VF;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
@@ -117,25 +115,40 @@ public class GraphConstraintFactory {
         return gc;
     }
 
-    /**
-     * GRAPHVAR must form a spanning tree, i.e. an acyclic and connected undirected graph
-     * <p/> Incremental degree constraint, runs in O(1) time per force/removed edge
-     * <p/> Connectivity checker and bridge detection in O(n+m) time (Tarjan's algorithm)
-     * <p/> Subtour elimination in O(n) worst case time per enforced edge
-     *
-     * @param GRAPHVAR graph variable forming a tree
-     * @return a constraint ensuring that GRAPHVAR is a spanning tree
-     */
-    public static Constraint spanning_tree(UndirectedGraphVar GRAPHVAR) {
-        Solver solver = GRAPHVAR.getSolver();
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-        gc.setPropagators(
-                new PropNodeDegree_AtLeast(GRAPHVAR, 1),
-                new PropTreeNoSubtour(GRAPHVAR),
-                new PropConnected(GRAPHVAR)
-        );
-        return gc;
-    }
+	/**
+	 * GRAPHVAR must form a spanning tree, i.e. an acyclic and connected undirected graph spanning every vertex
+	 * <p/> Incremental degree constraint, runs in O(1) time per force/removed edge
+	 * <p/> Connectivity checker and bridge detection in O(n+m) time (Tarjan's algorithm)
+	 * <p/> Subtour elimination in O(n) worst case time per enforced edge
+	 *
+	 * @param GRAPHVAR graph variable forming a tree
+	 * @return a constraint ensuring that GRAPHVAR is a spanning tree
+	 */
+	public static Constraint spanning_tree(UndirectedGraphVar GRAPHVAR) {
+		Constraint gc = tree(GRAPHVAR);
+		gc.addPropagators(new PropKNodes(GRAPHVAR, VF.fixed(GRAPHVAR.getEnvelopGraph().getNbNodes(),GRAPHVAR.getSolver())));
+		return gc;
+	}
+
+	/**
+	 * GRAPHVAR must form a tree, i.e. an acyclic and connected undirected graph
+	 * <p/> Incremental degree constraint, runs in O(1) time per force/removed edge
+	 * <p/> Connectivity checker and bridge detection in O(n+m) time (Tarjan's algorithm)
+	 * <p/> Subtour elimination in O(n) worst case time per enforced edge
+	 *
+	 * @param GRAPHVAR graph variable forming a tree
+	 * @return a constraint ensuring that GRAPHVAR is a tree
+	 */
+	public static Constraint tree(UndirectedGraphVar GRAPHVAR) {
+		Solver solver = GRAPHVAR.getSolver();
+		Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
+		gc.setPropagators(
+				new PropNodeDegree_AtLeast(GRAPHVAR, 1),
+				new PropTreeNoSubtour(GRAPHVAR),
+				new PropConnected(GRAPHVAR)
+		);
+		return gc;
+	}
 
     //***********************************************************************************
     // DIRECTED GRAPHS

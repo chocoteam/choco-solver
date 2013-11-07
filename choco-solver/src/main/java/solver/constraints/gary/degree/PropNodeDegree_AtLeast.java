@@ -32,7 +32,6 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
@@ -40,7 +39,6 @@ import util.ESat;
 import util.objects.graphs.IGraph;
 import util.objects.graphs.Orientation;
 import util.objects.setDataStructures.ISet;
-import util.procedure.PairProcedure;
 
 /**
  * Propagator that ensures that a node has at most N successors/predecessors/neighbors
@@ -54,8 +52,6 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     //***********************************************************************************
 
     private GraphVar g;
-    GraphDeltaMonitor gdm;
-    private PairProcedure rem_arc_proc;
     private int[] degrees;
     private IncidentSet target;
 
