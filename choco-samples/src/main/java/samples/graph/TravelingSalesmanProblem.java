@@ -36,6 +36,8 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
+import solver.search.loop.monitors.IMonitorSolution;
+import solver.search.loop.monitors.SMF;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
@@ -62,13 +64,15 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     //***********************************************************************************
 
     @Option(name = "-tl", usage = "time limit.", required = false)
-    private long limit = 60000;
+    private long limit = 600000;
     // instance file path
     @Option(name = "-inst", usage = "TSPLIB TSP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/).", required = true)
     private String instancePath;
     @Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
     private int policy = 1; // the lower bound of the Lagrangian relaxation is pretty good so Bottom-Up is a good choise
 
+
+	public final static int MAX_SIZE = 200;
 
     // input cost matrix
     private int[][] costMatrix;
@@ -88,15 +92,16 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Override
     public void createSolver() {
         solver = new Solver("solving the Traveling Salesman Problem");
+		this.level = Level.QUIET;
     }
 
     @Override
     public void buildModel() {
-        costMatrix = TSP_Utils.parseInstance(instancePath, 200);
+        costMatrix = TSP_Utils.parseInstance(instancePath, MAX_SIZE);
         final int n = costMatrix.length;
         solver = new Solver();
         // variables
-        totalCost = VariableFactory.bounded("obj", 0, 99999, solver);
+        totalCost = VariableFactory.bounded("obj", 0, 9999999, solver);
         // creates a graph containing n nodes
         graph = new UndirectedGraphVar("G", solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
         // adds potential edges
@@ -106,24 +111,32 @@ public class TravelingSalesmanProblem extends AbstractProblem {
             }
         }
         // constraints (TSP basic model + lagrangian relaxation)
-        solver.post(GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 2));
+		solver.post(GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 2));
     }
 
     @Override
     public void configureSearch() {
-        GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
-        strategy.configure(GraphStrategies.MIN_COST, true);
+		final GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
+		strategy.configure(GraphStrategies.MIN_COST, true);
+		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				System.out.println("solution found, cost : "+totalCost.getValue());
+				strategy.configure(GraphStrategies.MIN_DELTA_DEGREE, true);
+			}
+		});
         switch (policy) {
             case 0:
                 solver.set(strategy);
                 System.out.println("classical top-down minimization");
                 break;
             case 1:
-                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
+                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strategy));
+				SMF.limitSolution(solver,2);
                 System.out.println("bottom-up minimization");
                 break;
             case 2:
-                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
+                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC, true), strategy));
                 System.out.println("dichotomic minimization");
                 break;
             default:

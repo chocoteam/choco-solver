@@ -33,10 +33,6 @@ import solver.exception.ContradictionException;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-
 public class KruskalOneTree_GAC extends KruskalMSTFinder {
 
     //***********************************************************************************
@@ -46,6 +42,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
     private int min1, min2;
     private int[][] map;
     private double[][] marginalCosts;
+	private int[] fifo;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -55,6 +52,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         super(nbNodes, propagator);
         map = new int[n][n];
         marginalCosts = new double[n][n];
+		fifo = new int[n];
     }
 
     //***********************************************************************************
@@ -79,18 +77,6 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
     }
 
     protected void sortArcs() {
-        Comparator<Integer> comp = new Comparator<Integer>() {
-            @Override
-            public int compare(Integer i1, Integer i2) {
-                if (costs[i1] < costs[i2]) {
-                    return -1;
-                }
-                if (costs[i1] > costs[i2]) {
-                    return 1;
-                }
-                return 0;
-            }
-        };
         int size = 0;
         Tree.getNeighborsOf(0).clear();
         for (int i = 1; i < n; i++) {
@@ -103,18 +89,15 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
             size += g.getNeighborsOf(i).getSize();
         }
         size -= g.getNeighborsOf(0).getSize();
-        if (size % 2 != 0) {
-            throw new UnsupportedOperationException();
-        }
+        assert size % 2 == 0;
         size /= 2;
         ISet nei;
-        Integer[] integers = new Integer[size];
         int idx = 0;
         for (int i = 1; i < n; i++) {
             nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
-                    integers[idx] = i * n + j;
+                    sortedArcs[idx] = i * n + j;
                     costs[i * n + j] = distMatrix[i][j];
                     idx++;
                 }
@@ -123,13 +106,12 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         for (int i = n; i < ccN; i++) {
             ccTree.desactivateNode(i);
         }
-        Arrays.sort(integers, comp);
+		sorter.sort(sortedArcs,size,comparator);
         int v;
         activeArcs.clear();
         activeArcs.set(0, size);
         for (idx = 0; idx < size; idx++) {
-            v = integers[idx];
-            sortedArcs[idx] = v;
+            v = sortedArcs[idx];
             indexOfArc[v / n][v % n] = idx;
         }
     }
@@ -338,17 +320,18 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         int k = 1;
         useful.set(k);
         ccTp[k] = k;
-        LinkedList<Integer> list = new LinkedList<Integer>();
-        list.add(k);
-        while (!list.isEmpty()) {
-            k = list.removeFirst();
+		int first = 0;
+		int last  = first;
+		fifo[last++] = k;
+        while (first<last) {
+            k = fifo[first++];
             nei = Tree.getNeighborsOf(k);
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 if (ccTp[s] == -1) {
                     ccTp[s] = k;
                     map[s][k] = map[k][s] = -1;
                     if (!useful.get(s)) {
-                        list.addLast(s);
+                        fifo[last++] = s;
                         useful.set(s);
                     }
                 }

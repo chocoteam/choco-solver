@@ -45,11 +45,13 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.FindAndProve;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import util.objects.setDataStructures.SetType;
 
@@ -129,6 +131,7 @@ public class DCMST extends AbstractProblem {
         ub = inst.ub;
         optimum = inst.optimum;
         outFile = output;
+//		this.level = Level.QUIET;
     }
 
     //***********************************************************************************
@@ -169,16 +172,18 @@ public class DCMST extends AbstractProblem {
     public void configureSearch() {
         GraphStrategies firstSol = new GraphStrategies(graph, dist, relax);
         firstSol.configure(GraphStrategies.MIN_COST, true);
-        AbstractStrategy nextSol = GraphStrategyFactory.graphStrategy(graph, null, new NextSol(graph, dMax, relax), GraphStrategy.NodeArcPriority.ARCS);
-        AbstractStrategy strat = new Change(graph, firstSol, nextSol);
+        AbstractStrategy<GraphVar> nextSol = GraphStrategyFactory.graphStrategy(graph, null, new NextSol(graph, dMax, relax), GraphStrategy.NodeArcPriority.ARCS);
+        AbstractStrategy<GraphVar> strat = new FindAndProve<>(new GraphVar[]{graph}, firstSol, nextSol);
         // bottom-up optimization
-        solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strat));
+        solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strat));
         SearchMonitorFactory.limitSolution(solver, 2);
         SearchMonitorFactory.limitTime(solver, TIMELIMIT);
     }
 
     @Override
     public void solve() {
+		for(int i=0;i<n;i++)
+			if(graph.getEnvelopGraph().edgeExists(i,i))throw new UnsupportedOperationException();
         // resolution
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         if (solver.getMeasures().getSolutionCount() == 0
@@ -202,30 +207,5 @@ public class DCMST extends AbstractProblem {
         String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
                 + solver.getMeasures().getNodeCount() + ";" + (int) (solver.getMeasures().getTimeCount()) + ";" + bestCost + ";\n";
         TextWriter.writeTextInto(txt, outFile);
-    }
-
-    private class Change extends AbstractStrategy<UndirectedGraphVar> {
-
-        AbstractStrategy[] strats;
-
-        public Change(UndirectedGraphVar g, AbstractStrategy... strats) {
-            super(new UndirectedGraphVar[]{g});
-            this.strats = strats;
-        }
-
-        @Override
-        public void init() throws ContradictionException {
-            for (int i = 0; i < strats.length; i++) {
-                strats[i].init();
-            }
-        }
-
-        @Override
-        public Decision getDecision() {
-            if (solver.getMeasures().getSolutionCount() == 0) {
-                return strats[0].getDecision();
-            }
-            return strats[1].getDecision();
-        }
     }
 }

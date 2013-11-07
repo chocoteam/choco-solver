@@ -35,11 +35,9 @@ import util.objects.graphs.DirectedGraph;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetType;
-
-import java.util.Arrays;
+import util.sort.ArraySort;
+import util.sort.IntComparator;
 import java.util.BitSet;
-import java.util.Comparator;
-import java.util.LinkedList;
 
 public class KruskalMST_GAC extends AbstractTreeFinder {
 
@@ -65,6 +63,11 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
     protected double minTArc, maxTArc;
     protected int[][] map;
     protected double[][] repCosts;
+	protected int[] fifo;
+
+	//sort
+	protected ArraySort sorter;
+	protected IntComparator comparator;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -87,21 +90,22 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         lca = new LCAGraphManager(ccN);
         map = new int[n][n];
         repCosts = new double[n][n];
+		fifo = new int[n];
+		//sort
+		sorter = new ArraySort(n*n,false,true);
+		comparator = new IntComparator() {
+			@Override
+			public int compare(int i1, int i2) {
+				if (costs[i1] < costs[i2])
+					return -1;
+				else if (costs[i1] > costs[i2])
+					return 1;
+				else return 0;
+			}
+		};
     }
 
     protected void sortArcs(double[][] costMatrix) {
-        Comparator<Integer> comp = new Comparator<Integer>() {
-            @Override
-            public int compare(Integer i1, Integer i2) {
-                if (costs[i1] < costs[i2]) {
-                    return -1;
-                }
-                if (costs[i1] > costs[i2]) {
-                    return 1;
-                }
-                return 0;
-            }
-        };
         int size = 0;
         for (int i = 0; i < n; i++) {
             p[i] = i;
@@ -112,28 +116,27 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
             ccTree.activateNode(i);
             size += g.getNeighborsOf(i).getSize();
         }
-        Integer[] integers = new Integer[size];
+		size /= 2; // recent change
         int idx = 0;
         ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                integers[idx] = i * n + j;
-                costs[i * n + j] = costMatrix[i][j];
-                idx++;
+				assert i!=j;
+				if(i<j){
+					sortedArcs[idx] = i * n + j;
+					costs[i * n + j] = costMatrix[i][j];
+					idx++;
+				}
             }
         }
+		assert idx==size;
         for (int i = n; i < ccN; i++) {
             ccTree.desactivateNode(i);
         }
-        Arrays.sort(integers, comp);
-        int v;
+		sorter.sort(sortedArcs,size,comparator);
         activeArcs.clear();
         activeArcs.set(0, size);
-        for (idx = 0; idx < size; idx++) {
-            v = integers[idx];
-            sortedArcs[idx] = v;
-        }
     }
 
     //***********************************************************************************
@@ -152,9 +155,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 
     public void performPruning(double UB) throws ContradictionException {
         double delta = UB - treeCost;
-        if (delta < 0) {
-            throw new UnsupportedOperationException("mst>ub");
-        }
+        assert delta >= 0;
         prepareMandArcDetection();
         if (selectRelevantArcs(delta)) {
             lca.preprocess(cctRoot, ccTree);
@@ -168,14 +169,15 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         for (int i = 0; i < n; i++) {
             ccTp[i] = -1;
         }
-        int k = 0;
         useful.clear();
         useful.set(0);
         ccTp[0] = 0;
-        LinkedList<Integer> list = new LinkedList<Integer>();
-        list.add(k);
-        while (!list.isEmpty()) {
-            k = list.removeFirst();
+		int first = 0;
+		int last = first;
+        int k = 0;
+		fifo[last++] = k;
+        while (first<last) {
+            k = fifo[first++];
             nei = Tree.getNeighborsOf(k);
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 if (ccTp[s] == -1) {
@@ -183,19 +185,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
                     map[s][k] = -1;
                     map[k][s] = -1;
                     if (!useful.get(s)) {
-                        list.addLast(s);
-                        useful.set(s);
-                    }
-                }
-            }
-            nei = Tree.getNeighborsOf(k);
-            for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
-                if (ccTp[s] == -1) {
-                    ccTp[s] = k;
-                    map[s][k] = -1;
-                    map[k][s] = -1;
-                    if (!useful.get(s)) {
-                        list.addLast(s);
+						fifo[last++] = s;
                         useful.set(s);
                     }
                 }
@@ -295,23 +285,25 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         }
         ISet nei;
         for (i = 0; i < n; i++) {
-            nei = Tree.getNeighborsOf(i);
-            for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (map[i][j] != -1) {
-                    repCosts[i][j] = costs[map[i][j]] - costs[i * n + j];
-                    if (repCosts[i][j] > delta) {
-                        propHK.enforce(i, j);
-                    }
-                } else {
-                    propHK.enforce(i, j);
-                }
+			nei = Tree.getNeighborsOf(i);
+			for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+				if(i<j){
+					if (map[i][j] != -1) {
+						repCosts[i][j] = costs[map[i][j]] - costs[i * n + j];
+						if (repCosts[i][j] > delta) {
+							propHK.enforce(i, j);
+						}
+					} else {
+						propHK.enforce(i, j);
+					}
 
 //					repCost = costs[map[i][j]];
 //					if(repCost-costs[i*n+j]>delta){
 //						propHK.enforce(i,j);
 //					}
 //				}
-            }
+				}
+			}
         }
     }
 
