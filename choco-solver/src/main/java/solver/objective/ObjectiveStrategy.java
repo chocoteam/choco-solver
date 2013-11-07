@@ -66,6 +66,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private OptimizationPolicy optPolicy;
+	private boolean log;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -73,25 +74,30 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
     /**
      * Defines a branching strategy over the objective variable
+	 * BEWARE: only activated after a first solution
      *
      * @param objective variable
      * @param policy    BOTTOM_UP, TOP_TOWN or DICHOTOMIC
+	 * @param logOpt	log the objective bounds if set to true
      */
-    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy) {
-        this(objective, getCoefs(policy), policy);
+    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy, boolean logOpt) {
+        this(objective, getCoefs(policy), policy, logOpt);
     }
 
     /**
      * Defines a parametrized dichotomic branching over the objective variable
+	 * BEWARE: only activated after a first solution
      *
      * @param objective variable
      * @param coefs     [a,b] defines how to split the domain of the objective variable
      *                  [1,1] will halve its domain
      *                  [1,2] will take a value closer to the upper bound than the lower bound
      * @param policy    should be DICHOTOMIC
+	 * @param logOpt	log the objective bounds if set to true
      */
-    public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
+    public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy, boolean logOpt) {
         super(new IntVar[]{objective});
+		this.log = logOpt;
         this.pool = new PoolManager<FastDecision>();
         this.obj = objective;
         this.solver = obj.getSolver();
@@ -172,6 +178,8 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (globalLB > globalUB) {
             return null;
         }
+		if(log)
+			LOGGER.info("% objective in [" + globalLB + ", " + globalUB + "]");
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         FastDecision dec = pool.getE();
