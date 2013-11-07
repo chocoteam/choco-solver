@@ -32,7 +32,6 @@ import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Filtering (sweep-based) algorithm to filter task maximum heights
@@ -62,7 +61,8 @@ public class HeightCumulFilter extends SweepCumulFilter {
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
 		}
-		Arrays.sort(events,0,nbEvents,eventComparator);
+		sort.sort(events,nbEvents,eventComparator);
+		//Arrays.sort(events,0,nbEvents,eventComparator);
 		int timeIndex = 0;
 		int currentDate = events[timeIndex].date;
 		tprune.resetQuick();
@@ -116,8 +116,8 @@ public class HeightCumulFilter extends SweepCumulFilter {
 		for(int i=0; i<nbT; i++) {
 			// a compulsory part exists
 			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events[nbEvents++] = useEvent(SCP, i, start_ub_copy[i]);
-				events[nbEvents++] = useEvent(ECP, i, end_lb_copy[i]);
+				events[nbEvents++].set(SCP, i, start_ub_copy[i]);
+				events[nbEvents++].set(ECP, i, end_lb_copy[i]);
 			}
 		}
 	}

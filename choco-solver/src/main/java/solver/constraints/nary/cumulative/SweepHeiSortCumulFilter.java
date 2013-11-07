@@ -34,7 +34,6 @@ import util.objects.setDataStructures.ISet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -90,7 +89,8 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
 		}
-		Arrays.sort(events,0,nbEvents,eventComparator);
+		sort.sort(events,nbEvents,eventComparator);
+		//		Arrays.sort(events,0,nbEvents,eventComparator);
 		int timeIndex = 0;
 		int currentDate = events[timeIndex].date;
 		int capa = capamax.getUB();
@@ -145,8 +145,8 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		for(int i=0; i<nbT; i++) {
 			// a compulsory part exists
 			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events[nbEvents++] = useEvent(SCP, i, start_ub_copy[i]);
-				events[nbEvents++] = useEvent(ECP, i, end_lb_copy[i]);
+				events[nbEvents++].set(SCP, i, start_ub_copy[i]);
+				events[nbEvents++].set(ECP, i, end_lb_copy[i]);
 			}
 		}
 	}

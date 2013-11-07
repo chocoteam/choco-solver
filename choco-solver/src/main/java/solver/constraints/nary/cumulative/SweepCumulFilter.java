@@ -31,12 +31,12 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-import util.PoolManager;
+import util.sort.ArraySort;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Basic implementation of Sweep-based Time-Table for cumulative
@@ -65,7 +65,8 @@ public class SweepCumulFilter extends CumulFilter {
 	protected boolean FIXPOINT = true;
 	protected TIntArrayList temp = new TIntArrayList();
 	protected TIntArrayList tprune = new TIntArrayList();
-	protected PoolManager<Event> pool = new PoolManager<>();
+	protected ArraySort<Event> sort;
+	protected Comparator<Event> eventComparator;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -82,7 +83,20 @@ public class SweepCumulFilter extends CumulFilter {
 		this.dur_lb_copy = new int[n];
 		this.hei_lb_copy = new int[n];
 		this.events = new Event[3*n];
+		for(int i=0;i<3*n;i++){
+			events[i] = new Event();
+		}
 		this.tasksToUSe = SetFactory.makeSwap(st.length, false);
+		sort = new ArraySort<Event>(events.length,true,false);
+		eventComparator = new Comparator<Event>(){
+			@Override
+			public int compare(Event e1, Event e2) {
+				if(e1.date == e2.date){
+					return e2.type-e1.type;
+				}
+				return e1.date - e2.date;
+			}
+		};
 	}
 
 	//***********************************************************************************
@@ -161,7 +175,7 @@ public class SweepCumulFilter extends CumulFilter {
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
 		}
-		Arrays.sort(events,0,nbEvents,eventComparator);
+		sort.sort(events,nbEvents,eventComparator);
 		int timeIndex = 0;
 		int currentDate = events[timeIndex].date;
 		tprune.resetQuick();
@@ -224,12 +238,12 @@ public class SweepCumulFilter extends CumulFilter {
 		for(int i=0; i<nbT; i++) {
 			// start min or height max can be filtered
 			if(start_lb_copy[i]<start_ub_copy[i]) {
-				events[nbEvents++] = useEvent(PRU, i, start_lb_copy[i]);
+				events[nbEvents++].set(PRU, i, start_lb_copy[i]);
 			}
 			// a compulsory part exists
 			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events[nbEvents++] = useEvent(SCP, i, start_ub_copy[i]);
-				events[nbEvents++] = useEvent(ECP, i, end_lb_copy[i]);
+				events[nbEvents++].set(SCP, i, start_ub_copy[i]);
+				events[nbEvents++].set(ECP, i, end_lb_copy[i]);
 			}
 		}
 	}
@@ -238,32 +252,17 @@ public class SweepCumulFilter extends CumulFilter {
 	// DATA STRUCTURES
 	//***********************************************************************************
 
-	protected class Event implements Serializable{
+	public static class Event implements Serializable{
 		protected int type;
 		protected int index;
 		protected int date;
-	}
 
-	protected Event useEvent(int type, int i, int date) {
-		Event e = pool.getE();
-		if(e==null){
-			e = new Event();
+		protected void set(int t, int i, int d) {
+			date = d;
+			type = t;
+			index= i;
 		}
-		e.date = date;
-		e.type = type;
-		e.index= i;
-		return e;
 	}
-
-	protected final static Comparator<Event> eventComparator = new Comparator<Event>(){
-		@Override
-		public int compare(Event o1, Event o2) {
-			if(o1.date == o2.date){
-				return o2.type-o1.type;
-			}
-			return o1.date - o2.date;
-		}
-	};
 
 	//***********************************************************************************
 	// DEBUG ONLY

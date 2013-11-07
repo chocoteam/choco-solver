@@ -31,8 +31,8 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
-import java.util.Arrays;
-import java.util.Comparator;
+import util.sort.ArraySort;
+import util.sort.IntComparator;
 
 /**
  * Energy based filtering (greedy)
@@ -44,19 +44,9 @@ public class NRJCumulFilter extends CumulFilter{
 	// VARIABLES
 	//***********************************************************************************
 
-	// reimplement Integer class for performance reasons
-	protected class MyInt{int val;}
-	protected MyInt[] sor_array;
-	protected Comparator<MyInt> comparator = new Comparator<MyInt>(){
-		@Override
-		public int compare(MyInt o1, MyInt o2) {
-			int i1 = o1.val;
-			int i2 = o2.val;
-			int coef1 = (100*d[i1].getLB()*h[i1].getLB())/(e[i1].getUB()-s[i1].getLB());
-			int coef2 = (100*d[i2].getLB()*h[i2].getLB())/(e[i2].getUB()-s[i2].getLB());
-			return coef2 - coef1;
-		}
-	};
+	protected int[] sor_array;
+	protected ArraySort sorter;
+	protected IntComparator comparator;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -64,10 +54,16 @@ public class NRJCumulFilter extends CumulFilter{
 
 	public NRJCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
 		super(st,du,en,he,capa,cause);
-		sor_array = new MyInt[s.length];
-		for(int i=0;i<s.length;i++){
-			sor_array[i] = new MyInt();
-		}
+		sor_array = new int[s.length];
+		sorter = new ArraySort(s.length,false,true);
+		comparator = new IntComparator(){
+			@Override
+			public int compare(int i1, int i2) {
+				int coef1 = (100*d[i1].getLB()*h[i1].getLB())/(e[i1].getUB()-s[i1].getLB());
+				int coef2 = (100*d[i2].getLB()*h[i2].getLB())/(e[i2].getUB()-s[i2].getLB());
+				return coef2 - coef1;
+			}
+		};
 	}
 
 	//***********************************************************************************
@@ -78,16 +74,16 @@ public class NRJCumulFilter extends CumulFilter{
 		int idx = 0;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 			if(d[i].getLB()>0){
-				sor_array[idx++].val = i;
+				sor_array[idx++] = i;
 			}
 		}
-		Arrays.sort(sor_array, 0, idx, comparator);
+		sorter.sort(sor_array,idx,comparator);
 		double xMin = Integer.MAX_VALUE / 2;
 		double xMax = Integer.MIN_VALUE / 2;
 		double surface = 0;
 		double camax = capamax.getUB();
 		for(int k=0; k<idx; k++){
-			int i = sor_array[k].val;
+			int i = sor_array[k];
 			xMax = Math.max(xMax, e[i].getUB());
 			xMin = Math.min(xMin, s[i].getLB());
 			if(xMax >= xMin){
