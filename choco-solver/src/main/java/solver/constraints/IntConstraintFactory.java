@@ -564,8 +564,8 @@ public class IntConstraintFactory {
 			}
 		}
 		Cumulative.Filter[] filters = addHeights?
-				new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP, Cumulative.Filter.NRJ}
-				:new Cumulative.Filter[]{Cumulative.Filter.SWEEP, Cumulative.Filter.NRJ};
+				new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS, Cumulative.Filter.TIME, Cumulative.Filter.NRJ}
+				:new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
 		return new Cumulative(TASKS,HEIGHTS,CAPACITY,true,filters);
     }
 

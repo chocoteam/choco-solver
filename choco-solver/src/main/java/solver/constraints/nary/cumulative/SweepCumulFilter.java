@@ -35,7 +35,6 @@ import util.sort.ArraySort;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -50,10 +49,10 @@ public class SweepCumulFilter extends CumulFilter {
 	//***********************************************************************************
 
 	// variable bound copies (for both performance and convenience)
-	protected final int[] start_lb_copy,start_ub_copy;
-	protected final int[] end_lb_copy,end_ub_copy;
-	protected final int[] dur_lb_copy;
-	protected final int[] hei_lb_copy;
+	protected final int[] slb, sub;
+	protected final int[] elb, eub;
+	protected final int[] dlb;
+	protected final int[] hlb;
 	// sweep events: Prune / StartCompulsoryPart / EndCompulsoryPart
 	protected final static int PRU = 1, SCP = 2,ECP = 3;
 	protected final Event[] events;
@@ -72,22 +71,21 @@ public class SweepCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SweepCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
-		super(st,du,en,he,capa,cause);
-		int n = st.length;
-		this.map = new int[n];
-		this.start_lb_copy = new int[n];
-		this.start_ub_copy = new int[n];
-		this.end_lb_copy = new int[n];
-		this.end_ub_copy = new int[n];
-		this.dur_lb_copy = new int[n];
-		this.hei_lb_copy = new int[n];
-		this.events = new Event[3*n];
+	public SweepCumulFilter(int n, Propagator cause){
+		super(n,cause);
+		map = new int[n];
+		slb = new int[n];
+		sub = new int[n];
+		elb = new int[n];
+		eub = new int[n];
+		dlb = new int[n];
+		hlb = new int[n];
+		events = new Event[3*n];
 		for(int i=0;i<3*n;i++){
 			events[i] = new Event();
 		}
-		this.tasksToUSe = SetFactory.makeSwap(st.length, false);
-		sort = new ArraySort<Event>(events.length,true,false);
+		tasksToUSe = SetFactory.makeSwap(n, false);
+		sort = new ArraySort<>(events.length,true,false);
 		eventComparator = new Comparator<Event>(){
 			@Override
 			public int compare(Event e1, Event e2) {
@@ -104,9 +102,9 @@ public class SweepCumulFilter extends CumulFilter {
 	//***********************************************************************************
 
 	@Override
-	public void filter(ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		// removing tasks with a duration lower bound equal to 0
-		removeNullDurations(tasks);
+		removeNullDurations(d, tasks);
 		int nbT = tasksToUSe.getSize();
 		// filtering start lower bounds
 		boolean again;
@@ -114,40 +112,38 @@ public class SweepCumulFilter extends CumulFilter {
 			again = false;
 			int i = 0;
 			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
-				this.start_lb_copy[i]=this.s[t].getLB();
-				this.start_ub_copy[i]=this.s[t].getUB();
-				this.end_lb_copy[i]=this.e[t].getLB();
-				this.end_ub_copy[i]=this.e[t].getUB();
-				this.dur_lb_copy[i]=this.d[t].getLB();
-				this.hei_lb_copy[i]=this.h[t].getLB();
-				this.map[i] = t;
+				slb[i]=s[t].getLB();
+				sub[i]=s[t].getUB();
+				elb[i]=e[t].getLB();
+				eub[i]=e[t].getUB();
+				dlb[i]=d[t].getLB();
+				hlb[i]=h[t].getLB();
+				map[i] = t;
 				i++;
 			}
-			while (sweep(nbT)){
+			while (sweep(capa, h, nbT)){
 				again = true;
 				if(!FIXPOINT)break;
 			}
-			pruneMin(true);
+			pruneMin(s);
 			// symmetric approach for the end upper bounds
 			i = 0;
 			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
-				this.start_lb_copy[i]=-this.e[t].getUB()+1;
-				this.start_ub_copy[i]=-this.e[t].getLB()+1;
-				this.end_lb_copy[i]=-this.s[t].getUB()+1;
-				this.end_ub_copy[i]=-this.s[t].getLB()+1;
+				slb[i]=-e[t].getUB()+1;
+				sub[i]=-e[t].getLB()+1;
+				elb[i]=-s[t].getUB()+1;
+				eub[i]=-s[t].getLB()+1;
 				i++;
 			}
-			while (sweep(nbT)){
+			while (sweep(capa, h, nbT)){
 				again = true;
 				if(!FIXPOINT)break;
 			}
-			pruneMin(false);
+			pruneMax(e);
 		}while(FIXPOINT && again);
-		// debug mode : should not be able to filter more with the time-based filter
-		assert filterTime(true, tasksToUSe);
 	}
 
-	protected void removeNullDurations(ISet tasks){
+	protected void removeNullDurations(IntVar[] d, ISet tasks){
 		tasksToUSe.clear();
 		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
 			if(d[t].getLB()>0){
@@ -156,21 +152,23 @@ public class SweepCumulFilter extends CumulFilter {
 		}
 	}
 
-	protected void pruneMin(boolean min) throws ContradictionException {
+	protected void pruneMin(IntVar[] s) throws ContradictionException {
 		int i = 0;
-		if(min)
-			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
-				s[t].updateLowerBound(start_lb_copy[i++], aCause);
-		else
-			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
-				e[t].updateUpperBound(1-start_lb_copy[i++], aCause);
+		for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
+			s[t].updateLowerBound(slb[i++], aCause);
+	}
+
+	protected void pruneMax(IntVar[] e) throws ContradictionException {
+		int i = 0;
+		for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
+			e[t].updateUpperBound(1- slb[i++], aCause);
 	}
 
 	//***********************************************************************************
 	// SWEEP ALGORITHM
 	//***********************************************************************************
 
-	protected boolean sweep(int nbT) throws ContradictionException {
+	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT) throws ContradictionException {
 		generateMinEvents(nbT);
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
@@ -192,18 +190,18 @@ public class SweepCumulFilter extends CumulFilter {
 				for(int i=tprune.size()-1;i>=0;i--){
 					int index = tprune.get(i);
 					// task min start might be filtered
-					if(currentDate<start_ub_copy[index] || start_ub_copy[index]>=end_lb_copy[index]){
+					if(currentDate< sub[index] || sub[index]>= elb[index]){
 						// the current task should overlap the current event
-						if(currentConso+hei_lb_copy[index]>capa) {
+						if(currentConso+ hlb[index]>capa) {
 							// filter min start to next event
-							start_lb_copy[index]=nextDate;
-							if(nextDate>start_ub_copy[index]) {// early fail detection
-								aCause.contradiction(s[map[index]],"");
+							slb[index]=nextDate;
+							if(nextDate> sub[index]) {// early fail detection
+								aCause.contradiction(capamax,"");
 							}
 							active = true;// perform fix point
 							temp.add(index);
 						}
-						else if(nextDate<start_lb_copy[index]+dur_lb_copy[index]) {
+						else if(nextDate< slb[index]+ dlb[index]) {
 							temp.add(index);
 						}
 					}
@@ -218,12 +216,12 @@ public class SweepCumulFilter extends CumulFilter {
 			currentDate = event.date;
 			switch(event.type) {
 				case(SCP):
-					currentConso += hei_lb_copy[event.index];
+					currentConso += hlb[event.index];
 					// filter the capa max LB from the compulsory part consumptions
 					capamax.updateLowerBound(currentConso, aCause);
 					break;
 				case(ECP):
-					currentConso -= hei_lb_copy[event.index];
+					currentConso -= hlb[event.index];
 					break;
 				case(PRU):
 					tprune.add(event.index);
@@ -237,13 +235,13 @@ public class SweepCumulFilter extends CumulFilter {
 		nbEvents = 0;
 		for(int i=0; i<nbT; i++) {
 			// start min or height max can be filtered
-			if(start_lb_copy[i]<start_ub_copy[i]) {
-				events[nbEvents++].set(PRU, i, start_lb_copy[i]);
+			if(slb[i]< sub[i]) {
+				events[nbEvents++].set(PRU, i, slb[i]);
 			}
 			// a compulsory part exists
-			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events[nbEvents++].set(SCP, i, start_ub_copy[i]);
-				events[nbEvents++].set(ECP, i, end_lb_copy[i]);
+			if(sub[i] < elb[i]) {
+				events[nbEvents++].set(SCP, i, sub[i]);
+				events[nbEvents++].set(ECP, i, elb[i]);
 			}
 		}
 	}
@@ -261,95 +259,6 @@ public class SweepCumulFilter extends CumulFilter {
 			date = d;
 			type = t;
 			index= i;
-		}
-	}
-
-	//***********************************************************************************
-	// DEBUG ONLY
-	//***********************************************************************************
-
-	protected int[] time = new int[31];
-	protected boolean filterTime(boolean crashOnFiltering, ISet tasks) throws ContradictionException {
-		int min = Integer.MAX_VALUE / 2;
-		int max = Integer.MIN_VALUE / 2;
-		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-			if (s[i].getUB() < e[i].getLB()) {
-				min = Math.min(min, s[i].getUB());
-				max = Math.max(max, e[i].getLB());
-			}
-		}
-		if (min < max) {
-			if(max-min>time.length){
-				time = new int[max-min];
-			}
-			else{
-				Arrays.fill(time, 0, max - min, 0);
-			}
-			int capaMax = capamax.getUB();
-			// fill mandatory parts and filter capacity
-			int elb,hlb;
-			int maxC=0;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				elb = e[i].getLB();
-				hlb = h[i].getLB();
-				for (int t = s[i].getUB(); t < elb; t++) {
-					time[t - min] += hlb;
-					maxC = Math.max(maxC,time[t - min]);
-				}
-			}
-			if(crashOnFiltering && capamax.getLB()<maxC){
-				throw new UnsupportedOperationException();
-			}
-			capamax.updateLowerBound(maxC, aCause);
-			// filter max height
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
-					// filters
-					if (s[i].getLB() + d[i].getLB() > min) {
-						filterInf(crashOnFiltering,i, min, max, time, capaMax);
-					}
-					if (e[i].getUB() - d[i].getLB() < max) {
-						filterSup(crashOnFiltering,i, min, max, time, capaMax);
-					}
-				}
-			}
-		}
-		return true;
-	}
-	protected void filterInf(boolean crashOnFiltering,int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
-		int nbOk = 0;
-		int dlb = d[i].getLB();
-		int hlb = h[i].getLB();
-		int sub = s[i].getUB();
-		for (int t = s[i].getLB(); t < sub; t++) {
-			if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
-				nbOk++;
-				if (nbOk == dlb) {
-					return;
-				}
-			} else {
-				if(crashOnFiltering)throw new UnsupportedOperationException();
-				nbOk = 0;
-				s[i].updateLowerBound(t + 1, aCause);
-			}
-		}
-	}
-	protected void filterSup(boolean crashOnFiltering, int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
-		int nbOk = 0;
-		int dlb = d[i].getLB();
-		int hlb = h[i].getLB();
-		int elb = e[i].getLB();
-		for (int t = e[i].getUB(); t > elb; t--) {
-			if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
-				nbOk++;
-				if (nbOk == dlb) {
-					return;
-				}
-			} else {
-				if(crashOnFiltering)throw new UnsupportedOperationException();
-				nbOk = 0;
-				e[i].updateUpperBound(t - 1, aCause);
-			}
 		}
 	}
 }

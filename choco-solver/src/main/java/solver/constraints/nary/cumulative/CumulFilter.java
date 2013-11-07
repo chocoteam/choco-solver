@@ -43,9 +43,8 @@ public abstract class CumulFilter implements Serializable{
 	// VARIABLES
 	//***********************************************************************************
 
-	protected IntVar[] s, e, d, h;	// activities variables
-	protected IntVar capamax;					// capacity
 	protected Propagator aCause;
+	protected int nbMaxTasks;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -53,21 +52,11 @@ public abstract class CumulFilter implements Serializable{
 
 	/**
 	 * An object which can filter subset of tasks for the cumulative constraint
-	 * @param st	start variables
-	 * @param du	duration variables
-	 * @param en	end variables
-	 * @param he	height variables
-	 * @param capa	maximum capacity variable
-	 * @param cause	a cumulative propagator
+	 * @param nbMaxTasks	maximum number of tasks
+	 * @param cause			a cumulative propagator
 	 */
-	public CumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
-		int n = st.length;
-		assert (n==du.length && n==en.length && n==he.length);
-		this.capamax = capa;
-		this.s = st;
-		this.d = du;
-		this.e = en;
-		this.h = he;
+	public CumulFilter(int nbMaxTasks, Propagator cause){
+		this.nbMaxTasks = nbMaxTasks;
 		this.aCause = cause;
 	}
 
@@ -77,8 +66,13 @@ public abstract class CumulFilter implements Serializable{
 
 	/**
 	 * Filters the cumulative constraint over the subset of tasks induced by tasks
-	 * @param tasks
+	 * @param s		start variables
+	 * @param d		duration variables
+	 * @param e		end variables
+	 * @param h		height variables
+	 * @param capa	maximum capacity variable
+	 * @param tasks	subset of tasks to filter
 	 * @throws ContradictionException
 	 */
-	public abstract void filter(ISet tasks) throws ContradictionException;
+	public abstract void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException;
 }

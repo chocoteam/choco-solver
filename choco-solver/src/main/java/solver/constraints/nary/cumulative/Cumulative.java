@@ -178,8 +178,8 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		 * idempotent (on the given set of variables only)
 		 */
 		HEIGHTS{
-			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
-				return new HeightCumulFilter(s,d,e,h,capa,cause);
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new HeightCumulFilter(n,cause);
 			}
 		},
 		/**
@@ -187,8 +187,8 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		 * not idempotent
 		 */
 		TIME{
-			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
-				return new TimeCumulFilter(s,d,e,h,capa,cause);
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new TimeCumulFilter(n,cause);
 			}
 		},
 		/**
@@ -196,8 +196,8 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		 * idempotent (on the given set of variables only)
 		 */
 		SWEEP{
-			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
-				return new SweepCumulFilter(s,d,e,h,capa,cause);
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new SweepCumulFilter(n,cause);
 			}
 		},
 		/**
@@ -205,8 +205,8 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		 * idempotent (on the given set of variables only)
 		 */
 		SWEEP_HEI_SORT {
-			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
-				return new SweepHeiSortCumulFilter(s,d,e,h,capa,cause);
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new SweepHeiSortCumulFilter(n,cause);
 			}
 		},
 		/**
@@ -215,11 +215,17 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		 * not enough to ensure correctness (only an additional filtering)
 		 */
 		NRJ{
-			public CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause){
-				return new NRJCumulFilter(s,d,e,h,capa,cause);
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new NRJCumulFilter(n,cause);
 			}
 		};
 
-		public abstract CumulFilter make(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Propagator<IntVar> cause);
+		/**
+		 * Create an instance of the filtering algorithm
+		 * @param n		maximum number of tasks
+		 * @param cause	cause of filtering
+		 * @return an instance of the filtering algorithm
+		 */
+		public abstract CumulFilter make(int n, Propagator<IntVar> cause);
 	}
 }
