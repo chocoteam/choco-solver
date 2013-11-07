@@ -50,15 +50,15 @@ public class TimeCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public TimeCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
-		super(st,du,en,he,capa,cause);
+	public TimeCumulFilter(int nbMaxTasks, Propagator cause) {
+		super(nbMaxTasks, cause);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
@@ -74,7 +74,7 @@ public class TimeCumulFilter extends CumulFilter {
 			else{
 				Arrays.fill(time, 0, max - min, 0);
 			}
-			int capaMax = capamax.getUB();
+			int capaMax = capa.getUB();
 			// fill mandatory parts and filter capacity
 			int elb,hlb;
 			int maxC=0;
@@ -86,7 +86,7 @@ public class TimeCumulFilter extends CumulFilter {
 					maxC = Math.max(maxC,time[t - min]);
 				}
 			}
-			capamax.updateLowerBound(maxC, aCause);
+			capa.updateLowerBound(maxC, aCause);
 			// filter max height
 			int minH;
 			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
@@ -104,22 +104,20 @@ public class TimeCumulFilter extends CumulFilter {
 				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
 					// filters
 					if (s[i].getLB() + d[i].getLB() > min) {
-						filterInf(i, min, max, time, capaMax);
+						filterInf(s[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax);
 					}
 					if (e[i].getUB() - d[i].getLB() < max) {
-						filterSup(i, min, max, time, capaMax);
+						filterSup(e[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax);
 					}
 				}
 			}
 		}
 	}
 
-	protected void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+	protected void filterInf(IntVar start, int dlb, int hlb, int min, int max, int[] time, int capaMax) throws ContradictionException {
 		int nbOk = 0;
-		int dlb = d[i].getLB();
-		int hlb = h[i].getLB();
-		int sub = s[i].getUB();
-		for (int t = s[i].getLB(); t < sub; t++) {
+		int sub = start.getUB();
+		for (int t = start.getLB(); t < sub; t++) {
 			if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
 				nbOk++;
 				if (nbOk == dlb) {
@@ -127,17 +125,15 @@ public class TimeCumulFilter extends CumulFilter {
 				}
 			} else {
 				nbOk = 0;
-				s[i].updateLowerBound(t + 1, aCause);
+				start.updateLowerBound(t + 1, aCause);
 			}
 		}
 	}
 
-	protected void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+	protected void filterSup(IntVar end, int dlb, int hlb, int min, int max, int[] time, int capaMax) throws ContradictionException {
 		int nbOk = 0;
-		int dlb = d[i].getLB();
-		int hlb = h[i].getLB();
-		int elb = e[i].getLB();
-		for (int t = e[i].getUB(); t > elb; t--) {
+		int elb = end.getLB();
+		for (int t = end.getUB(); t > elb; t--) {
 			if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
 				nbOk++;
 				if (nbOk == dlb) {
@@ -145,7 +141,7 @@ public class TimeCumulFilter extends CumulFilter {
 				}
 			} else {
 				nbOk = 0;
-				e[i].updateUpperBound(t - 1, aCause);
+				end.updateUpperBound(t - 1, aCause);
 			}
 		}
 	}

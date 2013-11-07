@@ -47,20 +47,25 @@ public class NRJCumulFilter extends CumulFilter{
 	protected int[] sor_array;
 	protected ArraySort sorter;
 	protected IntComparator comparator;
+	protected int[] slb, dlb, eub, hlb;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public NRJCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
-		super(st,du,en,he,capa,cause);
-		sor_array = new int[s.length];
-		sorter = new ArraySort(s.length,false,true);
+	public NRJCumulFilter(int n, Propagator cause){
+		super(n,cause);
+		sor_array = new int[n];
+		sorter = new ArraySort(n,false,true);
+		slb = new int[n];
+		dlb = new int[n];
+		eub = new int[n];
+		hlb = new int[n];
 		comparator = new IntComparator(){
 			@Override
 			public int compare(int i1, int i2) {
-				int coef1 = (100*d[i1].getLB()*h[i1].getLB())/(e[i1].getUB()-s[i1].getLB());
-				int coef2 = (100*d[i2].getLB()*h[i2].getLB())/(e[i2].getUB()-s[i2].getLB());
+				int coef1 = (100*dlb[i1]*hlb[i1])/(eub[i1]-slb[i1]);
+				int coef2 = (100*dlb[i2]*hlb[i2])/(eub[i2]-slb[i2]);
 				return coef2 - coef1;
 			}
 		};
@@ -70,10 +75,15 @@ public class NRJCumulFilter extends CumulFilter{
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int idx = 0;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 			if(d[i].getLB()>0){
+				slb[i] = s[i].getLB();
+				dlb[i] = d[i].getLB();
+				eub[i] = e[i].getUB();
+				hlb[i] = h[i].getLB();
+				assert eub[i]>slb[i];
 				sor_array[idx++] = i;
 			}
 		}
@@ -81,22 +91,22 @@ public class NRJCumulFilter extends CumulFilter{
 		double xMin = Integer.MAX_VALUE / 2;
 		double xMax = Integer.MIN_VALUE / 2;
 		double surface = 0;
-		double camax = capamax.getUB();
+		double camax = capa.getUB();
 		for(int k=0; k<idx; k++){
 			int i = sor_array[k];
-			xMax = Math.max(xMax, e[i].getUB());
-			xMin = Math.min(xMin, s[i].getLB());
+			xMax = Math.max(xMax, eub[i]);
+			xMin = Math.min(xMin, slb[i]);
 			if(xMax >= xMin){
 				double availSurf = ((xMax-xMin)*camax-surface);
-				if(d[i].getLB()>0)
-					h[i].updateUpperBound((int)Math.floor((availSurf/(double)d[i].getLB())+0.01),aCause);
-				if(h[i].getLB()>0)
-					d[i].updateUpperBound((int)Math.floor((availSurf/(double)h[i].getLB())+0.01),aCause);
-				surface += d[i].getLB() * h[i].getLB();
+				if(dlb[i]>0)
+					h[i].updateUpperBound((int)Math.floor((availSurf/(double)dlb[i])+0.01),aCause);
+				if(hlb[i]>0)
+					d[i].updateUpperBound((int)Math.floor((availSurf/(double)hlb[i])+0.01),aCause);
+				surface += dlb[i] * hlb[i];
 				if(xMax>xMin)
-					capamax.updateLowerBound((int)Math.ceil(surface/(xMax-xMin)-0.01),aCause);
+					capa.updateLowerBound((int)Math.ceil(surface/(xMax-xMin)-0.01),aCause);
 				if(surface>(xMax-xMin)*camax){
-					aCause.contradiction(capamax,"");
+					aCause.contradiction(capa,"");
 				}
 			}
 		}

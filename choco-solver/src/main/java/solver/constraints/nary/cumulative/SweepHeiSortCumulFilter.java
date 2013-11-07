@@ -31,11 +31,8 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import util.sort.ArraySort;
+import util.sort.IntComparator;
 
 /**
  * Alternative implementation of Sweep-based Time-Table for cumulative
@@ -49,15 +46,24 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected final ArrayList<Integer> sortedTasks;
+	protected final int[] sortedTasks;
+	protected final ArraySort taskSorter;
+	protected final IntComparator comparator;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SweepHeiSortCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
-		super(st,du,en,he,capa,cause);
-		sortedTasks = new ArrayList<>(start_lb_copy.length);
+	public SweepHeiSortCumulFilter(int n, Propagator cause){
+		super(n,cause);
+		sortedTasks = new int[n];
+		taskSorter = new ArraySort(n,false,true);
+		comparator = new IntComparator() {
+			@Override
+			public int compare(int i1, int i2) {
+				return hlb[map[i2]]-hlb[map[i1]];
+			}
+		};
 	}
 
 	//***********************************************************************************
@@ -65,32 +71,31 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	//***********************************************************************************
 
 	@Override
-	public void filter(ISet tasks) throws ContradictionException {
-		int i = 0;
-		sortedTasks.clear();
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+		int size = 0;
 		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
 			if(d[t].getLB()>0){
-				map[i] = t;
-				sortedTasks.add(i++);
+				map[size] = t;
+				sortedTasks[size] = size;
+				hlb[t] = h[t].getLB();
+				size++;
 			}
 		}
-		Collections.sort(sortedTasks, new TaskSorter());
-		assert checkSort();
-		super.filter(tasks);
+		taskSorter.sort(sortedTasks,size,comparator);
+		assert checkSort(h,size);
+		super.filter(s,d,e,h,capa,tasks);
 	}
 
 	//***********************************************************************************
 	// SWEEP ALGORITHM
 	//***********************************************************************************
 
-	protected boolean sweep(int nbT) throws ContradictionException {
-		assert nbT==sortedTasks.size();
+	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT) throws ContradictionException {
 		generateMinEvents(nbT);
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
 		}
 		sort.sort(events,nbEvents,eventComparator);
-		//		Arrays.sort(events,0,nbEvents,eventComparator);
 		int timeIndex = 0;
 		int currentDate = events[timeIndex].date;
 		int capa = capamax.getUB();
@@ -104,16 +109,16 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 			if(currentDate<nextDate) {
 				assert currentConso<=capa;
 				for(int i=0; i<nbT; i++) {
-					int index = sortedTasks.get(i);
+					int index = sortedTasks[i];
 					// the current task cannot overlaps the current event
-					if(currentConso+hei_lb_copy[index]>capa) {
+					if(currentConso+ hlb[index]>capa) {
 						// task min start can be filtered (no mand part, overlaps envelope before smin+dmin
-						if((currentDate<start_ub_copy[index] || start_ub_copy[index]>=end_lb_copy[index])
-						&& start_lb_copy[index]<nextDate && currentDate < start_lb_copy[index]+dur_lb_copy[index]){
+						if((currentDate< sub[index] || sub[index]>= elb[index])
+								&& slb[index]<nextDate && currentDate < slb[index]+ dlb[index]){
 							// filter min start to next event
-							start_lb_copy[index]=nextDate;
-							if(nextDate>start_ub_copy[index]) {// early fail detection
-								aCause.contradiction(s[map[index]],"");
+							slb[index]=nextDate;
+							if(nextDate> sub[index]) {// early fail detection
+								aCause.contradiction(capamax,"");
 							}
 							active = true;// perform fix point
 						}
@@ -128,12 +133,12 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 			currentDate = event.date;
 			if(event.type==SCP){
 				assert (events[timeIndex].date>event.date||events[timeIndex].type==SCP);
-				currentConso += hei_lb_copy[event.index];
+				currentConso += hlb[event.index];
 				// filter the capa max LB from the compulsory part consumptions
 				capamax.updateLowerBound(currentConso, aCause);
 			}else {
 				assert event.type==ECP;
-				currentConso -= hei_lb_copy[event.index];
+				currentConso -= hlb[event.index];
 			}
 		}
 		return active;
@@ -144,27 +149,10 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		nbEvents = 0;
 		for(int i=0; i<nbT; i++) {
 			// a compulsory part exists
-			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events[nbEvents++].set(SCP, i, start_ub_copy[i]);
-				events[nbEvents++].set(ECP, i, end_lb_copy[i]);
+			if(sub[i] < elb[i]) {
+				events[nbEvents++].set(SCP, i, sub[i]);
+				events[nbEvents++].set(ECP, i, elb[i]);
 			}
-		}
-	}
-
-	//***********************************************************************************
-	// DATA STRUCTURES
-	//***********************************************************************************
-
-	/**
-	 * Sorts tasks to reduce sweep algorithm length:
-	 * - first put tasks with an unfixed height,
-	 * - then use a decreasing height ordering
-	 */
-	protected class TaskSorter implements Comparator<Integer>, Serializable {
-		@Override
-		public int compare(Integer o1, Integer o2) {
-			// BEWARE: h[i].getLB() has not been copied into hei_lb_copy yet
-			return h[map[o2]].getLB()-h[map[o1]].getLB();
 		}
 	}
 
@@ -172,12 +160,11 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	// DEBUG ONLY
 	//***********************************************************************************`
 
-	protected boolean checkSort(){
-		int nbT = sortedTasks.size();
+	protected boolean checkSort(IntVar[] h, int nbT){
 		for(int i2=0; i2<nbT; i2++) {
-			int idx1 = sortedTasks.get(i2);
+			int idx1 = sortedTasks[i2];
 			for(int i3=i2+1; i3<nbT; i3++) {
-				int idx2 = sortedTasks.get(i3);
+				int idx2 = sortedTasks[i3];
 				assert h[map[idx1]].getLB()>=h[map[idx2]].getLB();
 			}
 		}

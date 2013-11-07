@@ -76,14 +76,14 @@ public class PropFullCumulative extends Propagator<IntVar> {
 			throw new UnsupportedOperationException();
 		}
 		this.fast = fast;
-		this.s = Arrays.copyOfRange(vars, 0, s.length);
-		this.d = Arrays.copyOfRange(vars, s.length, s.length + d.length);
-		this.e = Arrays.copyOfRange(vars, s.length + d.length, s.length + d.length + e.length);
-		this.h = Arrays.copyOfRange(vars, s.length + d.length + e.length, s.length + d.length + e.length + h.length);
+		this.s = Arrays.copyOfRange(vars, 0, n);
+		this.d = Arrays.copyOfRange(vars, n, n*2);
+		this.e = Arrays.copyOfRange(vars, n*2, n*3);
+		this.h = Arrays.copyOfRange(vars, n*3, n*4);
 		this.capa = this.vars[vars.length - 1];
 		this.filters = new CumulFilter[filters.length];
 		for(int f=0;f<filters.length;f++){
-			this.filters[f] = filters[f].make(s,d,e,h,capa,this);
+			this.filters[f] = filters[f].make(n,this);
 		}
 		// awakes on instantiations only when FAST mode is set to true
 		awakeningMask = fast?EventType.INSTANTIATE.mask:EventType.BOUND.mask + EventType.INSTANTIATE.mask;
@@ -159,7 +159,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
 	public void filter(ISet tasks) throws ContradictionException{
 		for(CumulFilter cf:filters){
-			cf.filter(tasks);
+			cf.filter(s,d,e,h,capa,tasks);
 		}
 	}
 

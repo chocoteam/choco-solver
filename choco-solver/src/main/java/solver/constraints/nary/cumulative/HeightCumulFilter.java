@@ -30,8 +30,6 @@ package solver.constraints.nary.cumulative;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-import util.objects.setDataStructures.ISet;
-import java.util.Arrays;
 
 /**
  * Filtering (sweep-based) algorithm to filter task maximum heights
@@ -44,8 +42,8 @@ public class HeightCumulFilter extends SweepCumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public HeightCumulFilter(IntVar[] st, IntVar[] du, IntVar[] en, IntVar[] he, IntVar capa, Propagator cause){
-		super(st,du,en,he,capa,cause);
+	public HeightCumulFilter(int n, Propagator cause){
+		super(n,cause);
 		FIXPOINT = false;
 	}
 
@@ -54,9 +52,10 @@ public class HeightCumulFilter extends SweepCumulFilter {
 	//***********************************************************************************
 
 	// do not filter min and max (heights only)
-	protected void pruneMin(boolean min) throws ContradictionException {}
+	protected void pruneMin(IntVar[] s) throws ContradictionException {}
+	protected void pruneMax(IntVar[] e) throws ContradictionException {}
 
-	protected boolean sweep(int nbT) throws ContradictionException {
+	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT) throws ContradictionException {
 		generateMinEvents(nbT);
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
@@ -79,10 +78,10 @@ public class HeightCumulFilter extends SweepCumulFilter {
 				for(int i=tprune.size()-1;i>=0;i--){
 					int index = tprune.get(i);
 					// the envelope overlaps the event
-					assert (start_ub_copy[index]<=currentDate && currentDate < end_lb_copy[index]);
+					assert (sub[index]<=currentDate && currentDate < elb[index]);
 					// filter consumption variable from remaining capacity
-					h[map[index]].updateUpperBound(capa-(currentConso-hei_lb_copy[index]),aCause);
-					if(nextDate<end_lb_copy[index]) {
+					h[map[index]].updateUpperBound(capa-(currentConso- hlb[index]),aCause);
+					if(nextDate< elb[index]) {
 						temp.add(index);
 					}
 				}
@@ -96,7 +95,7 @@ public class HeightCumulFilter extends SweepCumulFilter {
 			currentDate = event.date;
 			switch(event.type) {
 				case(SCP):
-					currentConso += hei_lb_copy[event.index];
+					currentConso += hlb[event.index];
 					// filter the capa max LB from the compulsory part consumptions
 					capamax.updateLowerBound(currentConso, aCause);
 					if(!h[map[event.index]].instantiated()){
@@ -104,7 +103,7 @@ public class HeightCumulFilter extends SweepCumulFilter {
 					}
 					break;
 				case(ECP):
-					currentConso -= hei_lb_copy[event.index];
+					currentConso -= hlb[event.index];
 					break;
 			}
 		}
@@ -115,66 +114,10 @@ public class HeightCumulFilter extends SweepCumulFilter {
 		nbEvents = 0;
 		for(int i=0; i<nbT; i++) {
 			// a compulsory part exists
-			if(start_ub_copy[i] < end_lb_copy[i]) {
-				events[nbEvents++].set(SCP, i, start_ub_copy[i]);
-				events[nbEvents++].set(ECP, i, end_lb_copy[i]);
+			if(sub[i] < elb[i]) {
+				events[nbEvents++].set(SCP, i, sub[i]);
+				events[nbEvents++].set(ECP, i, elb[i]);
 			}
 		}
-	}
-
-	//***********************************************************************************
-	// DEBUG ONLY
-	//***********************************************************************************
-
-	protected boolean filterTime(boolean crashOnFiltering, ISet tasks) throws ContradictionException {
-		int min = Integer.MAX_VALUE / 2;
-		int max = Integer.MIN_VALUE / 2;
-		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-			if (s[i].getUB() < e[i].getLB()) {
-				min = Math.min(min, s[i].getUB());
-				max = Math.max(max, e[i].getLB());
-			}
-		}
-		if (min < max) {
-			if(max-min>time.length){
-				time = new int[max-min];
-			}
-			else{
-				Arrays.fill(time, 0, max - min, 0);
-			}
-			int capaMax = capamax.getUB();
-			// fill mandatory parts and filter capacity
-			int elb,hlb;
-			int maxC=0;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				elb = e[i].getLB();
-				hlb = h[i].getLB();
-				for (int t = s[i].getUB(); t < elb; t++) {
-					time[t - min] += hlb;
-					maxC = Math.max(maxC,time[t - min]);
-				}
-			}
-			if(crashOnFiltering && capamax.getLB()<maxC){
-				throw new UnsupportedOperationException();
-			}
-			capamax.updateLowerBound(maxC, aCause);
-			// filter max height
-			int minH;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				if(!h[i].instantiated()){
-					minH = h[i].getUB();
-					elb = e[i].getLB();
-					hlb = h[i].getLB();
-					for (int t = s[i].getUB(); t < elb; t++) {
-						minH = Math.min(minH,capaMax-(time[t-min]-hlb));
-					}
-					if(crashOnFiltering && h[i].getUB()>minH){
-						throw new UnsupportedOperationException();
-					}
-					h[i].updateUpperBound(minH,aCause);
-				}
-			}
-		}
-		return true;
 	}
 }
