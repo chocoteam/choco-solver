@@ -92,8 +92,8 @@ public class PropLagr_DCMST extends Propagator implements GraphLagrangianRelaxat
         this.waitFirstSol = waitFirstSol;
         g = new UndirectedGraph(n, SetType.BITSET, true);
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                g.addEdge(i, j);
+            for (int j = i+1; j < n; j++) {
+				g.addEdge(i, j);
             }
         }
     }

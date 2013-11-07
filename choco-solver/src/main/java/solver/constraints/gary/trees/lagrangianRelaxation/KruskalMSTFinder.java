@@ -35,10 +35,9 @@ import util.objects.graphs.DirectedGraph;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetType;
-
-import java.util.Arrays;
+import util.sort.ArraySort;
+import util.sort.IntComparator;
 import java.util.BitSet;
-import java.util.Comparator;
 
 public class KruskalMSTFinder extends AbstractTreeFinder {
 
@@ -65,6 +64,10 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
     protected double minTArc, maxTArc;
     protected double[][] distMatrix;
 
+	//sort
+	protected ArraySort sorter;
+	protected IntComparator comparator;
+
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
@@ -85,6 +88,18 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         ccTp = new int[n];
         useful = new BitSet(n);
         lca = new LCAGraphManager(ccN);
+		//sort
+		sorter = new ArraySort(n*n,false,true);
+		comparator = new IntComparator() {
+			@Override
+			public int compare(int i1, int i2) {
+				if (costs[i1] < costs[i2])
+					return -1;
+				else if (costs[i1] > costs[i2])
+					return 1;
+				else return 0;
+			}
+		};
     }
 
     //***********************************************************************************
@@ -103,18 +118,6 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
     }
 
     protected void sortArcs() {
-        Comparator<Integer> comp = new Comparator<Integer>() {
-            @Override
-            public int compare(Integer i1, Integer i2) {
-                if (costs[i1] < costs[i2]) {
-                    return -1;
-                }
-                if (costs[i1] > costs[i2]) {
-                    return 1;
-                }
-                return 0;
-            }
-        };
         int size = 0;
         for (int i = 0; i < n; i++) {
             p[i] = i;
@@ -125,18 +128,15 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
             ccTree.activateNode(i);
             size += g.getNeighborsOf(i).getSize();
         }
-        if (size % 2 != 0) {
-            throw new UnsupportedOperationException();
-        }
-        size /= 2;
+        assert size % 2 == 0;
+		size /= 2;
         ISet nei;
-        Integer[] integers = new Integer[size];
         int idx = 0;
         for (int i = 0; i < n; i++) {
             nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
-                    integers[idx] = i * n + j;
+					sortedArcs[idx] = i * n + j;
                     costs[i * n + j] = distMatrix[i][j];
                     idx++;
                 }
@@ -145,13 +145,12 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         for (int i = n; i < ccN; i++) {
             ccTree.desactivateNode(i);
         }
-        Arrays.sort(integers, comp);
+		sorter.sort(sortedArcs,size,comparator);
         int v;
         activeArcs.clear();
         activeArcs.set(0, size);
         for (idx = 0; idx < size; idx++) {
-            v = integers[idx];
-            sortedArcs[idx] = v;
+            v = sortedArcs[idx];
             indexOfArc[v / n][v % n] = idx;
         }
     }
@@ -162,9 +161,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
 
     public void performPruning(double UB) throws ContradictionException {
         double delta = UB - treeCost;
-        if (delta < 0) {
-            throw new UnsupportedOperationException("mst>ub");
-        }
+        assert delta >= 0;
         fromInterest = 0;
         if (selectAndCompress(delta)) {
             lca.preprocess(cctRoot, ccTree);
