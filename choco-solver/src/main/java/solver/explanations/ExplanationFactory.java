@@ -29,7 +29,7 @@ package solver.explanations;
 
 import solver.Solver;
 import solver.explanations.strategies.ConflictBasedBackjumping;
-import solver.explanations.strategies.PathRepair;
+import solver.explanations.strategies.DynamicBacktracking;
 import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 
 /**
@@ -83,7 +83,7 @@ public enum ExplanationFactory {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
-            new PathRepair(solver.getExplainer(), new MostRecentWorldJumper( ));
+            new DynamicBacktracking(solver.getExplainer(), new MostRecentWorldJumper( ));
         }
     };
 
@@ -111,7 +111,7 @@ public enum ExplanationFactory {
 //     */
 //    public static void path_repair(Solver solver, long seed, boolean flattened) {
 //        plugExpl(solver, flattened);
-//        new PathRepair(solver.getExplainer(), new RandomDecisionJumper(seed));
+//        new DynamicBacktracking(solver.getExplainer(), new RandomDecisionJumper(seed));
 //    }
 //
 //    /**
@@ -124,6 +124,6 @@ public enum ExplanationFactory {
 //     */
 //    public static void path_repair(Solver solver, IDecisionJumper decisionJumper, boolean flattened) {
 //        plugExpl(solver, flattened);
-//        new PathRepair(solver.getExplainer(), decisionJumper);
+//        new DynamicBacktracking(solver.getExplainer(), decisionJumper);
 //    }
 }

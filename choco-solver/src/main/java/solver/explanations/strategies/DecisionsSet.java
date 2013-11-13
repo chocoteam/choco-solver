@@ -18,10 +18,10 @@ import java.util.ArrayDeque;
  * on a call to DecisionsSet.apply().
  */
 public class DecisionsSet extends Decision<IntVar> implements Serializable {
-    private final PathRepair dynamicBacktracking;
+    private final DynamicBacktracking dynamicBacktracking;
     private final ArrayDeque<Decision> decision_path; // list of decisions describing the decision path
 
-    public DecisionsSet(PathRepair dynamicBacktracking) {
+    public DecisionsSet(DynamicBacktracking dynamicBacktracking) {
         this.dynamicBacktracking = dynamicBacktracking;
         this.decision_path = new ArrayDeque<Decision>(8);
     }

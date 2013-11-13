@@ -78,7 +78,13 @@ public class PropSumEq extends Propagator<IntVar> {
                 max += vars[i].getUB();
                 ampMax = Math.max(vars[i].getUB() - vars[i].getLB(), ampMax);
             }
+            //if (vars[n].getUB() - min < 0) {
+            //    this.contradiction(null, "b - sumLB < 0");
+            //}
             vars[n].updateLowerBound(min, aCause);
+            //if (vars[n].getLB() - max > 0) {
+            //    this.contradiction(null, "b - sumLB < 0");
+            //}
             vars[n].updateUpperBound(max, aCause);
             int lb = vars[n].getLB();
             int ub = vars[n].getUB();
@@ -170,7 +176,7 @@ public class PropSumEq extends Propagator<IntVar> {
                     vars[n].explain(ispos ? VariableState.UB : VariableState.LB, e);
                 }
             } else {
-                throw new UnsupportedOperationException("PropSumEq only knows how to explain bounds");
+                super.explain(d, e);
             }
 
         } else {
