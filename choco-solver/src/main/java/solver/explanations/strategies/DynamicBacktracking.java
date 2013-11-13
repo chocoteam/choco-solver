@@ -37,7 +37,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
 /**
- * A dynamic backtracking algorithm based on the decision-repair, or path-repair principle.
+ * A dynamic backtracking algorithm.
  * It selects the decision to undo w.r.t. a {@link IDecisionJumper}.
  * Note that by giving {@link solver.explanations.strategies.jumper.MostRecentWorldJumper}, it acts like <code>dbt</code>.
  * <br/>

@@ -296,7 +296,7 @@ public class PropScalarEq extends Propagator<IntVar> {
                     }
                 }
             } else {
-                throw new UnsupportedOperationException("PropSumEq only knows how to explain bounds");
+                super.explain(d, e);
             }
 
         } else {
