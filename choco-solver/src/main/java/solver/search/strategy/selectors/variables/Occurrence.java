@@ -29,6 +29,7 @@ package solver.search.strategy.selectors.variables;
 
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * <b>Occurrence</b> variable selector.
@@ -39,29 +40,29 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Occurrence implements VariableSelector<IntVar> {
+public class Occurrence<V extends Variable> implements VariableSelector<V> {
 
     /* list of variables */
-    IntVar[] variables;
+    V[] variables;
 
     /* index of the smallest domain variable */
     int large_idx;
 
-    public Occurrence(IntVar[] variables) {
+    public Occurrence(V[] variables) {
         this.variables = variables.clone();
         large_idx = 0;
 
     }
 
     @Override
-    public IntVar[] getScope() {
+    public V[] getScope() {
         return variables;
     }
 
     @Override
     public boolean hasNext() {
         int idx = 0;
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
         }
         return idx < variables.length;
     }
@@ -71,9 +72,8 @@ public class Occurrence implements VariableSelector<IntVar> {
         int large_idx = 0;
         int large_nb_cstrs = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
             int nb_cstrs = variables[idx].nbConstraints();
-            if (dsize > 1 && nb_cstrs > large_nb_cstrs) {
+            if (!variables[idx].instantiated() && nb_cstrs > large_nb_cstrs) {
                 large_nb_cstrs = nb_cstrs;
                 large_idx = idx;
             }
@@ -82,7 +82,7 @@ public class Occurrence implements VariableSelector<IntVar> {
     }
 
     @Override
-    public IntVar getVariable() {
+    public V getVariable() {
         return variables[large_idx];
     }
 }

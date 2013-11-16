@@ -27,6 +27,7 @@
 
 package solver.search.strategy.strategy.set;
 
+import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.SetVar;
 
 /**
@@ -34,77 +35,98 @@ import solver.variables.SetVar;
  * @author Jean-Guillaume Fages
  * @since 6/10/13
  */
-public interface SetVarSelector {
+public final class SetVarSelector {
 
-	/**
-	 * Selects a non-instantiatied SetVar of vars, to branch on it
-	 * @param vars an array of SetVar
-	 * @return A non-instantiated SetVar to branch on, or null otherwise
-	 */
-	public SetVar selectVar(SetVar[] vars);
+    /**
+     * Selects the variables minimising envelopeSize-kernelSize (quite similar
+     * to minDomain, or first-fail)
+     */
+    public static class MinDelta implements VariableSelector<SetVar> {
 
-	/**
-	 * Eventually perform some computation before the search process starts
-	 */
-	public void init();
+        SetVar[] variables;
+        int small_idx;
 
-	/**
-	 * Selects the first unfixed variable
-	 */
-	public class FirstVar implements SetVarSelector{
-		@Override
-		public SetVar selectVar(SetVar[] vars) {
-			for (SetVar s : vars) {
-				if(!s.instantiated()){
-					return s;
-				}
-			}
-			return null;
-		}
-		@Override
-		public void init(){}
-	}
+        public MinDelta(SetVar[] variables) {
+            this.variables = variables;
+            this.small_idx = 0;
+        }
 
-	/**
-	 * Selects the variables minimising envelopeSize-kernelSize
-	 * (quite similar to minDomain, or first-fail)
-	 */
-	public class MinDelta implements SetVarSelector{
-		@Override
-		public SetVar selectVar(SetVar[] vars) {
-			int delta = Integer.MAX_VALUE;
-			SetVar next = null;
-			for (SetVar s : vars) {
-				int d = s.getEnvelopeSize()-s.getKernelSize();
-				if(d>0 && d<delta){
-					delta = d;
-					next = s;
-				}
-			}
-			return next;
-		}
-		@Override
-		public void init(){}
-	}
+        @Override
+        public SetVar[] getScope() {
+            return variables;
+        }
 
-	/**
-	 * Selects the variables maximising envelopeSize-kernelSize
-	 */
-	public class MaxDelta implements SetVarSelector{
-		@Override
-		public SetVar selectVar(SetVar[] vars) {
-			int delta = 0;
-			SetVar next = null;
-			for (SetVar s : vars) {
-				int d = s.getEnvelopeSize()-s.getKernelSize();
-				if(d>delta){
-					delta = d;
-					next = s;
-				}
-			}
-			return next;
-		}
-		@Override
-		public void init(){}
-	}
+        @Override
+        public boolean hasNext() {
+            int idx = 0;
+            for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+            }
+            return idx < variables.length;
+        }
+
+        @Override
+        public void advance() {
+            small_idx = 0;
+            int delta = Integer.MAX_VALUE;
+            for (int idx = 0; idx < variables.length; idx++) {
+                SetVar variable = variables[idx];
+                int d = variable.getEnvelopeSize() - variable.getKernelSize();
+                if (d > 0 && d < delta) {
+                    delta = d;
+                    small_idx = idx;
+                }
+            }
+        }
+
+        @Override
+        public SetVar getVariable() {
+            return variables[small_idx];
+        }
+    }
+
+    /**
+     * Selects the variables maximising envelopeSize-kernelSize
+     */
+    public static class MaxDelta implements VariableSelector<SetVar> {
+
+        SetVar[] variables;
+        int small_idx;
+
+        public MaxDelta(SetVar[] variables) {
+            this.variables = variables;
+            this.small_idx = 0;
+        }
+
+        @Override
+        public SetVar[] getScope() {
+            return variables;
+        }
+
+        @Override
+        public boolean hasNext() {
+            int idx = 0;
+            for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+            }
+            return idx < variables.length;
+        }
+
+        @Override
+        public void advance() {
+            small_idx = 0;
+            int delta = 0;
+            for (int idx = 0; idx < variables.length; idx++) {
+                SetVar variable = variables[idx];
+                int d = variable.getEnvelopeSize() - variable.getKernelSize();
+                if (d > delta) {
+                    delta = d;
+                    small_idx = idx;
+                }
+            }
+        }
+
+        @Override
+        public SetVar getVariable() {
+            return variables[small_idx];
+        }
+    }
 }
