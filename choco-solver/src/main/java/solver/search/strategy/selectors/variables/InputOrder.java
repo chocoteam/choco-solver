@@ -29,7 +29,7 @@ package solver.search.strategy.selectors.variables;
 
 import memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * <b>Input order</b> variable selector.
@@ -39,26 +39,26 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class InputOrder implements VariableSelector<IntVar> {
+public class InputOrder<V extends Variable> implements VariableSelector<V> {
 
-    IntVar[] variables;
+    V[] variables;
 
     IStateInt index;
 
-    public InputOrder(IntVar[] variables) {
+    public InputOrder(V[] variables) {
         this.variables = variables.clone();
         this.index = variables[0].getSolver().getEnvironment().makeInt();
     }
 
     @Override
-    public IntVar[] getScope() {
+    public V[] getScope() {
         return variables;
     }
 
     @Override
     public boolean hasNext() {
         int idx = index.get();
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
         }
         return idx < variables.length;
     }
@@ -67,7 +67,7 @@ public class InputOrder implements VariableSelector<IntVar> {
     public void advance() {
         int idx = index.get();
         for (; idx < variables.length; idx++) {
-            if (variables[idx].getDomainSize() > 1) {
+            if (!variables[idx].instantiated()) {
                 return;
             }
             index.add(1);
@@ -75,7 +75,7 @@ public class InputOrder implements VariableSelector<IntVar> {
     }
 
     @Override
-    public IntVar getVariable() {
+    public V getVariable() {
         return variables[index.get()];
     }
 }
