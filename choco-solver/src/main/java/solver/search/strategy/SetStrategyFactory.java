@@ -27,6 +27,8 @@
 
 package solver.search.strategy;
 
+import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.strategy.set.SetSearchStrategy;
 import solver.search.strategy.strategy.set.SetValSelector;
 import solver.search.strategy.strategy.set.SetVarSelector;
@@ -53,8 +55,8 @@ public final class SetStrategyFactory {
 	 * @param enforceFirst	branching order true = enforce first; false = remove first
 	 * @return a strategy to instantiate sets
 	 */
-	public static SetSearchStrategy generic(SetVar[] sets, SetVarSelector varS, SetValSelector valS, boolean enforceFirst){
-		return new SetSearchStrategy(sets,varS,valS, enforceFirst);
+	public static SetSearchStrategy generic(SetVar[] sets, VariableSelector<SetVar> varS, SetValSelector valS, boolean enforceFirst){
+		return new SetSearchStrategy(varS,valS, enforceFirst);
 	}
 
 	/**
@@ -63,7 +65,7 @@ public final class SetStrategyFactory {
 	 * @return a strategy to instantiate sets
 	 */
 	public static SetSearchStrategy force_first(SetVar[] sets){
-		return new SetSearchStrategy(sets,new SetVarSelector.FirstVar(), new SetValSelector.FirstVal(),true);
+		return new SetSearchStrategy(new InputOrder<>(sets), new SetValSelector.FirstVal(),true);
 	}
 
 	/**
@@ -72,7 +74,7 @@ public final class SetStrategyFactory {
 	 * @return a strategy to instantiate sets
 	 */
 	public static SetSearchStrategy remove_first(SetVar[] sets){
-		return new SetSearchStrategy(sets,new SetVarSelector.FirstVar(), new SetValSelector.FirstVal(),false);
+		return new SetSearchStrategy(new InputOrder<>(sets), new SetValSelector.FirstVal(),false);
 	}
 
 	/**
@@ -83,7 +85,7 @@ public final class SetStrategyFactory {
 	 * @return a strategy to instantiate sets
 	 */
 	public static SetSearchStrategy force_minDelta_first(SetVar[] sets){
-		return new SetSearchStrategy(sets,new SetVarSelector.MinDelta(), new SetValSelector.FirstVal(),true);
+		return new SetSearchStrategy(new SetVarSelector.MinDelta(sets), new SetValSelector.FirstVal(),true);
 	}
 
 	/**
@@ -94,6 +96,6 @@ public final class SetStrategyFactory {
 	 * @return a strategy to instantiate sets
 	 */
 	public static SetSearchStrategy force_maxDelta_first(SetVar[] sets){
-		return new SetSearchStrategy(sets,new SetVarSelector.MaxDelta(), new SetValSelector.FirstVal(),true);
+		return new SetSearchStrategy(new SetVarSelector.MaxDelta(sets), new SetValSelector.FirstVal(),true);
 	}
 }
