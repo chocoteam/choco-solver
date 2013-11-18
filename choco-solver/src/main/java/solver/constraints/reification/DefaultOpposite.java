@@ -63,7 +63,7 @@ public class DefaultOpposite extends Constraint {
 
 		@Override
 		public void propagate(int evtmask) throws ContradictionException {
-			ESat op = getOpposite().isSatisfied();
+			ESat op = getOpposite().isEntailed();
 			if(op == ESat.TRUE){
 				contradiction(vars[0],"");
 			}
@@ -79,7 +79,7 @@ public class DefaultOpposite extends Constraint {
 
 		@Override
 		public ESat isEntailed() {
-			ESat op = getOpposite().isSatisfied();
+			ESat op = getOpposite().isEntailed();
 			if(op == ESat.TRUE){
 				return ESat.FALSE;
 			}
