@@ -92,6 +92,11 @@ public class IndexedBipartiteSet extends IStateIntVector {
         }
         buildList(environment, values);
     }
+    
+    public IndexedBipartiteSet(final IEnvironment environment, final int[] values) {
+        super(environment);
+        buildList(environment, values);
+    }
 
     /**
      * Increase the number of value watched.
@@ -168,7 +173,9 @@ public class IndexedBipartiteSet extends IStateIntVector {
     }
 
     public boolean contains(final int object) {
-        return position[object] <= last.get();
+        // The IStateIntVector interface allows for negatives so need to
+        // check for negatives.
+        return object >= 0 && object < position.length && position[object] <= last.get();
     }
 
 
