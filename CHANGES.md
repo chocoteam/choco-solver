@@ -21,3 +21,4 @@ The CHANGES.md file starts at this version.
 * Fix #125: remove shut down hooks when the resolution ends normally
 * Cumulative energy-based greedy filter improvement
 * Fix #130: fix delta for view
+* Fix #142: synchronize nb pending events

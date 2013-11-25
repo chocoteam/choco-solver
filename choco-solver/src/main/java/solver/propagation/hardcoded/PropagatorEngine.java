@@ -150,6 +150,7 @@ public class PropagatorEngine implements IPropagationEngine {
                 evtset.clear(v);
                 mask = lastProp.getMask(v);
                 lastProp.clearMask(v);
+                lastProp.decNbPendingEvt();
                 // run propagation on the specific event
                 lastProp.fineERcalls++;
                 lastProp.propagate(v, mask);
@@ -205,6 +206,7 @@ public class PropagatorEngine implements IPropagationEngine {
                     if (Configuration.PRINT_SCHEDULE) {
                         IPropagationEngine.Trace.printSchedule(prop);
                     }
+                    prop.incNbPendingEvt();
                     eventsets[aid].set(pindice);
                 } else if (Configuration.PRINT_SCHEDULE) {
                     IPropagationEngine.Trace.printAlreadySchedule(prop);
