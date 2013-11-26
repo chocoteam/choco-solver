@@ -29,7 +29,7 @@ package solver.constraints.nary;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.nary.nogood.NogoodStoreForRestarts;
+import solver.constraints.nary.nogood.NogoodStoreFromRestarts;
 import solver.search.limits.BacktrackCounter;
 import solver.search.limits.ICounterAction;
 import solver.search.loop.monitors.SMF;
@@ -49,7 +49,7 @@ public class NogoodTest {
     public void test1() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
-        NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(vars, solver);
+        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars, solver);
         solver.post(ngs);
         solver.set(ISF.random(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(30);
@@ -72,7 +72,7 @@ public class NogoodTest {
     public void test2() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);
-        NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(vars, solver);
+        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars, solver);
         solver.post(ngs);
         solver.set(ISF.random(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(32);

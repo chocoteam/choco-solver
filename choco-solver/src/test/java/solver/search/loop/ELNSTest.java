@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.constraints.nary.nogood.NogoodStoreForRestarts;
+import solver.constraints.nary.nogood.NogoodStoreFromRestarts;
 import solver.explanations.strategies.ExplainingCut;
 import solver.explanations.strategies.ExplainingObjective;
 import solver.explanations.strategies.RandomNeighborhood4Explanation;
@@ -61,7 +61,7 @@ public class ELNSTest {
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));
         solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
 
-        NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(vars, solver);
+        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars, solver);
         solver.getSearchLoop().plugSearchMonitor(
                 new LargeNeighborhoodSearch(solver,
                         new SequenceNeighborhood(

@@ -124,6 +124,9 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
             if (pid2arity.get(pid) > 1) {
                 w += counter.getFails(prop);
             } else {
+                if(pid2ari.get(pid)==null){
+                    pid2ari.putIfAbsent(prop.getId(), v.getSolver().getEnvironment().makeInt(prop.arity()));
+                }
                 int a = pid2ari.get(pid).get();
                 pid2arity.put(pid, a);
                 if (a > 1) {
