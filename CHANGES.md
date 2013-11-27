@@ -23,3 +23,4 @@ The CHANGES.md file starts at this version.
 * Fix #130: fix delta for view
 * Fix #142: synchronize nb pending events
 * Fix #143: Dow/WDeg is now supporting propagator hot addition
+* Fix #144: setObjectiveOptimal(...) in searchLoop.close() is correct

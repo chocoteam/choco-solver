@@ -305,7 +305,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         if (measures.getSolutionCount() > 0) {
             sat = ESat.TRUE;
             if (objectivemanager.isOptimization()) {
-                measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && hasReachedLimit);
+                measures.setObjectiveOptimal(!hasReachedLimit);
             }
         } else if (hasReachedLimit) {
             measures.setObjectiveOptimal(false);
