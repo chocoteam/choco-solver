@@ -76,7 +76,7 @@ public class CumulativeSample extends AbstractProblem{
 		Task[] task = new Task[n];
 		Random rd = new Random(0);
 		for(int i=0;i<n;i++){
-			duration[i] = VF.fixed(rd.nextInt(30)+1,solver);
+			duration[i] = VF.fixed(rd.nextInt(20)+1,solver);
 			height[i] = VF.fixed(rd.nextInt(5)+1,solver);
 			end[i] = VF.offset(start[i],duration[i].getValue());
 			task[i] = new Task(start[i],duration[i],end[i]);

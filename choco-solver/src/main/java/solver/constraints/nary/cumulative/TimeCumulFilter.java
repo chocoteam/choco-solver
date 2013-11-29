@@ -58,7 +58,7 @@ public class TimeCumulFilter extends CumulFilter {
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {

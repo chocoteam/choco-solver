@@ -567,33 +567,7 @@ public class IntConstraintFactory {
 		if(addHeights){
 			filters = ArrayUtils.append(filters,new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
 		}
-		return new Cumulative(TASKS,HEIGHTS,CAPACITY,null,true,filters);
-	}
-
-	/**
-	 * Cumulative constraint: Enforces that at each point in time,
-	 * the cumulated height of the set of tasks that overlap that point
-	 * does not exceed a given limit. Moreover no task can end after MAKESPAN.
-	 *
-	 * @param TASKS    TASK objects containing start, duration and end variables
-	 * @param HEIGHTS  integer variables representing the resource consumption of each task
-	 * @param CAPACITY integer variable representing the resource capacity
-	 * @param MAKESPAN integer variable representing the latest end limit
-	 * @return a cumulative constraint
-	 */
-	public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY, IntVar MAKESPAN) {
-		// Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
-		boolean addHeights = false;
-		for(int i=0; i<HEIGHTS.length&&!addHeights;i++){
-			if(!HEIGHTS[i].instantiated()){
-				addHeights = true;
-			}
-		}
-		Cumulative.Filter[] filters = new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ, Cumulative.Filter.MAKESPAN};
-		if(addHeights){
-			filters = ArrayUtils.append(filters,new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
-		}
-		return new Cumulative(TASKS,HEIGHTS,CAPACITY,MAKESPAN,true,filters);
+		return new Cumulative(TASKS,HEIGHTS,CAPACITY,true,filters);
 	}
 
 	/**
