@@ -73,28 +73,12 @@ public class PropGraphCumulative extends PropFullCumulative {
 	 * @param fast	optimization parameter (reduces the amount of filtering calls, when set to true)
 	 * @param filters	filtering algorithm to use
 	 */
-	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan,
+	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							   boolean fast, Cumulative.Filter... filters) {
-		super(s, d, e, h, capa,makespan,true,fast, filters);
+		super(s, d, e, h, capa,true,fast, filters);
 		this.g = new UndirectedGraph(environment, n, SetType.SWAP_ARRAY, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
-	}
-
-	/**
-	 * Graph-based cumulative propagator:
-	 * - only filters over subsets of overlapping tasks
-	 *
-	 * @param s		start 		variables
-	 * @param d		duration	variables
-	 * @param e		end			variables
-	 * @param h		height		variables
-	 * @param capa	capacity	variable
-	 * @param fast	optimization parameter (reduces the amount of filtering calls, when set to true)
-	 * @param filters	filtering algorithm to use
-	 */
-	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast, Cumulative.Filter... filters){
-		this(s,d,e,h,capa,null,fast,filters);
 	}
 
 	//***********************************************************************************

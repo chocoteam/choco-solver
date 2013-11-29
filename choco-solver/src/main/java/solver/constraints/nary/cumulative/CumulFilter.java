@@ -71,9 +71,8 @@ public abstract class CumulFilter implements Serializable{
 	 * @param e		end variables
 	 * @param h		height variables
 	 * @param capa	maximum capacity variable
-	 * @param makespan	maximal end time
 	 * @param tasks	subset of tasks to filter
 	 * @throws ContradictionException
 	 */
-	public abstract void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan, ISet tasks) throws ContradictionException;
+	public abstract void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException;
 }

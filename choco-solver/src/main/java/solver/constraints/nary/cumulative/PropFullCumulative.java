@@ -54,7 +54,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
 	protected final int n;
 	protected final IntVar[] s, d, e, h;
-	protected final IntVar capa,makespan;
+	protected final IntVar capa;
 	protected CumulFilter[] filters;
 	protected ISet allTasks;
 	protected final boolean fast;
@@ -68,9 +68,9 @@ public class PropFullCumulative extends Propagator<IntVar> {
 	/**
 	 * protected constructor, should not be called by a user
 	 */
-	protected PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan,
+	protected PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 								 boolean reactToFineEvt, boolean fast, Cumulative.Filter... filters) {
-		super(ArrayUtils.append(s, d, e, h, makespan==null?new IntVar[]{capa}:new IntVar[]{capa,makespan}), PropagatorPriority.QUADRATIC, reactToFineEvt);
+		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.QUADRATIC, reactToFineEvt);
 		this.n = s.length;
 		if (!(n == d.length && n == e.length && n == h.length)) {
 			throw new UnsupportedOperationException();
@@ -81,7 +81,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		this.e = Arrays.copyOfRange(vars, n*2, n*3);
 		this.h = Arrays.copyOfRange(vars, n*3, n*4);
 		this.capa = this.vars[4*n];
-		this.makespan = makespan==null?null:vars[4*n+1];
 		this.filters = new CumulFilter[filters.length];
 		for(int f=0;f<filters.length;f++){
 			this.filters[f] = filters[f].make(n,this);
@@ -100,29 +99,13 @@ public class PropFullCumulative extends Propagator<IntVar> {
 	 * @param e		end			variables
 	 * @param h		height		variables
 	 * @param capa	capacity	variable
-	 * @param makespan latest possible end date variable
 	 * @param fast	optimization parameter: reduces the amount of filtering calls when set to true
 	 *              (only reacts to instantiation events)
 	 * @param filters	filtering algorithm to use
 	 */
-	public PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,IntVar makespan,
+	public PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							  boolean fast, Cumulative.Filter... filters) {
-		this(s,d,e,h,capa,makespan,false,fast, filters);
-	}
-
-	/**
-	 * Classical cumulative propagator
-	 *
-	 * @param s		start 		variables
-	 * @param d		duration	variables
-	 * @param e		end			variables
-	 * @param h		height		variables
-	 * @param capa	capacity	variable
-	 * @param fast	optimization parameter (reduces the amount of filtering calls, when set to true)
-	 * @param filters	filtering algorithm to use
-	 */
-	public PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast, Cumulative.Filter... filters){
-		this(s,d,e,h,capa,null,fast,filters);
+		this(s,d,e,h,capa,false,fast, filters);
 	}
 
 	//***********************************************************************************
@@ -176,7 +159,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
 	public void filter(ISet tasks) throws ContradictionException{
 		for(CumulFilter cf:filters){
-			cf.filter(s,d,e,h,capa,makespan,tasks);
+			cf.filter(s,d,e,h,capa,tasks);
 		}
 	}
 
@@ -190,9 +173,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
 			max = Math.max(max, e[i].getLB());
 			if(s[i].getLB()+d[i].getLB()>e[i].getUB()
 					|| s[i].getUB()+d[i].getUB()<e[i].getLB()){
-				return ESat.FALSE;
-			}
-			if(makespan!=null && e[i].getLB()>makespan.getUB()){
 				return ESat.FALSE;
 			}
 		}
@@ -236,9 +216,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
 			sb.append("," + vars[i + 3 * n].toString() + "],");
 		}
 		sb.append(vars[4*n].toString()+")");
-		if(makespan!=null){
-			sb.append(" with makespan "+makespan);
-		}
 		return sb.toString();
 	}
 }
