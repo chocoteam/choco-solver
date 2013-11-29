@@ -31,49 +31,32 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
-import java.io.Serializable;
 
 /**
- * Class able to filter a subset of tasks for the cumulative constraint
+ * Makespan basic filter
  * @author Jean-Guillaume Fages
  */
-public abstract class CumulFilter implements Serializable{
-
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-	protected Propagator aCause;
-	protected int nbMaxTasks;
+public class MakespanCumulFilter extends CumulFilter {
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * An object which can filter subset of tasks for the cumulative constraint
-	 * @param nbMaxTasks	maximum number of tasks
-	 * @param cause			a cumulative propagator
-	 */
-	public CumulFilter(int nbMaxTasks, Propagator cause){
-		this.nbMaxTasks = nbMaxTasks;
-		this.aCause = cause;
+	public MakespanCumulFilter(int n, Propagator cause){
+		super(n,cause);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	/**
-	 * Filters the cumulative constraint over the subset of tasks induced by tasks
-	 * @param s		start variables
-	 * @param d		duration variables
-	 * @param e		end variables
-	 * @param h		height variables
-	 * @param capa	maximum capacity variable
-	 * @param makespan	maximal end time
-	 * @param tasks	subset of tasks to filter
-	 * @throws ContradictionException
-	 */
-	public abstract void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan, ISet tasks) throws ContradictionException;
+	@Override
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan, ISet tasks) throws ContradictionException {
+		assert makespan!=null:"Cannot use MakespanCumulFilter without a makespan in the Cumulative constraint";
+		int ms = makespan.getUB();
+		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+			makespan.updateLowerBound(e[i].getLB(),aCause);
+			e[i].updateUpperBound(ms,aCause);
+		}
+	}
 }

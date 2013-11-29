@@ -48,6 +48,7 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 	//***********************************************************************************
 
 	protected final int n;
+	protected final IntVar makespan;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -59,6 +60,7 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 	 * @param tasks			task variables (embed start, duration and end variables)
 	 * @param heights		height variables (represent the consumption of each task on the resource)
 	 * @param capacity		maximal capacity of the resource (same at each point in time)
+	 * @param makespan		latest date to end a task (can be null)
 	 * @param graphBased	parameter indicating how to filter:
 	 *                         - TRUE:	applies on subset of overlapping tasks
 	 *                         - FALSE:	applies on all tasks
@@ -70,10 +72,11 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 	 *                         BEWARE: should not be used alone, use it in addition to either SWEEP or TIME.
 	 *
 	 */
-	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean graphBased, Filter... filters) {
-		super(extract(tasks,heights,capacity), capacity.getSolver());
+	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, IntVar makespan, boolean graphBased, Filter... filters) {
+		super(extract(tasks, heights, capacity, makespan), capacity.getSolver());
 		this.n = tasks.length;
 		assert n==heights.length && n > 0;
+		this.makespan = makespan; // can be null
 		IntVar[] s = Arrays.copyOfRange(vars,0,n);
 		IntVar[] d = Arrays.copyOfRange(vars,n,2*n);
 		IntVar[] e = Arrays.copyOfRange(vars,2*n,3*n);
@@ -81,13 +84,13 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		// uses two propagators to ensure constraint satisfaction (fix-point)
 		if(graphBased){
 			setPropagators(
-					new PropGraphCumulative(s,d,e,h,capacity,true, filters),
-					new PropGraphCumulative(s,d,e,h,capacity,false, filters)
+					new PropGraphCumulative(s,d,e,h,capacity,makespan,true, filters),
+					new PropGraphCumulative(s,d,e,h,capacity,makespan,false, filters)
 			);
 		}else{
 			setPropagators(
-					new PropFullCumulative(s,d,e,h,capacity,true, filters),
-					new PropFullCumulative(s,d,e,h,capacity,false, filters)
+					new PropFullCumulative(s,d,e,h,capacity,makespan,true, filters),
+					new PropFullCumulative(s,d,e,h,capacity,makespan,false, filters)
 			);
 		}
 	}
@@ -96,7 +99,7 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 	// METHODS
 	//***********************************************************************************
 
-	public static IntVar[] extract(Task[] tasks, IntVar[] heights, IntVar capacity){
+	public static IntVar[] extract(Task[] tasks, IntVar[] heights, IntVar capa, IntVar makespan){
 		int n = tasks.length;
 		IntVar[] starts = new IntVar[n];
 		IntVar[] durations = new IntVar[n];
@@ -106,7 +109,8 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 			durations[i] = tasks[i].getDuration();
 			ends[i] = tasks[i].getEnd();
 		}
-		return ArrayUtils.append(starts,durations,ends,heights,new IntVar[]{capacity});
+		IntVar[] other = makespan==null?new IntVar[]{capa}:new IntVar[]{capa,makespan};
+		return ArrayUtils.append(starts,durations,ends,heights,other);
 	}
 
 	@Override
@@ -119,6 +123,9 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 			max = Math.max(max, vars[i+2*n].getLB());
 			if(vars[i].getLB()+vars[i+n].getLB()>vars[i+2*n].getUB()
 					|| vars[i].getUB()+vars[i+n].getUB()<vars[i+2*n].getLB()){
+				return ESat.FALSE;
+			}
+			if(makespan!=null && vars[i+2*n].getLB()>makespan.getUB()){
 				return ESat.FALSE;
 			}
 		}
@@ -162,6 +169,9 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 			sb.append("," + vars[i + 3 * n].toString() + "],");
 		}
 		sb.append(vars[4*n].toString()+")");
+		if(makespan!=null){
+			sb.append(" with makespan "+makespan);
+		}
 		return sb.toString();
 	}
 
@@ -217,6 +227,14 @@ public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
 		NRJ{
 			public CumulFilter make(int n, Propagator<IntVar> cause){
 				return new NRJCumulFilter(n,cause);
+			}
+		},
+		/**
+		 * Makespan basic filter (only for cumulative with a makespan)
+		 */
+		MAKESPAN{
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new MakespanCumulFilter(n,cause);
 			}
 		};
 
