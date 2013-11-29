@@ -75,7 +75,8 @@ public class NRJCumulFilter extends CumulFilter{
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	@Override
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan, ISet tasks) throws ContradictionException {
 		int idx = 0;
 		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 			if(d[i].getLB()>0){
@@ -103,9 +104,10 @@ public class NRJCumulFilter extends CumulFilter{
 				if(hlb[i]>0)
 					d[i].updateUpperBound((int)Math.floor((availSurf/(double)hlb[i])+0.01),aCause);
 				surface += dlb[i] * hlb[i];
-				if(xMax>xMin)
+				if(xMax>xMin){
 					capa.updateLowerBound((int)Math.ceil(surface/(xMax-xMin)-0.01),aCause);
-				if(surface>(xMax-xMin)*camax){
+					makespan.updateLowerBound((int)(xMin+Math.ceil(surface/camax-0.01)),aCause);
+				}if(surface>(xMax-xMin)*camax){
 					aCause.contradiction(capa,"");
 				}
 			}

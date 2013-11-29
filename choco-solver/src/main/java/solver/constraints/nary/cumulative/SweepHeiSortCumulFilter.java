@@ -71,7 +71,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	//***********************************************************************************
 
 	@Override
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, IntVar makespan, ISet tasks) throws ContradictionException {
 		int size = 0;
 		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
 			if(d[t].getLB()>0){
@@ -83,7 +83,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		}
 		taskSorter.sort(sortedTasks,size,comparator);
 		assert checkSort(h,size);
-		super.filter(s,d,e,h,capa,tasks);
+		super.filter(s,d,e,h,capa,makespan,tasks);
 	}
 
 	//***********************************************************************************
