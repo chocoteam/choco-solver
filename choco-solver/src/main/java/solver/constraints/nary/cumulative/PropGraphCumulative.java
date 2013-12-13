@@ -100,7 +100,11 @@ public class PropGraphCumulative extends PropFullCumulative {
 				}
 			}
 		}else{
-			if(toCompute.getSize()/n>5){
+			int count = 0;
+			for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
+				count += g.getNeighborsOf(i).getSize();
+			}
+			if(count>=2*n){
 				filter(allTasks);
 			}else{
 				for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
