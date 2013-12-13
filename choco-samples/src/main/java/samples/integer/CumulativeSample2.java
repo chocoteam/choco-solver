@@ -25,81 +25,75 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 29/11/13
- * Time: 15:11
- */
-
 package samples.integer;
 
 import samples.AbstractProblem;
-import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.ICF;
-import solver.search.strategy.ISF;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Task;
-import solver.variables.VF;
+import solver.variables.VariableFactory;
+import util.ESat;
 
-import java.util.Random;
+/**
+ * @author Gregy4
+ */
+public class CumulativeSample2 extends AbstractProblem {
 
-public class CumulativeSample extends AbstractProblem{
+	public static int NUM_OF_TASKS = 2000;
+	public static int HORIZON = 20000;
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-	IntVar[] start;
-	IntVar makespan;
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+	IntVar[] starts, ends;
+	IntVar maxEnd;
 
 	@Override
-	public void createSolver() {
-		solver = new Solver("Cumulative example: makespan minimisation");
+	public void createSolver(){
+		solver = new Solver("schedule");
 	}
 
 	@Override
-	public void buildModel() {
-		IntVar capa = VF.fixed(6,solver);
-		int n = 10;
-		int max = 1000;
-		makespan = VF.bounded("makespan",0,max,solver);
-		start = VF.boundedArray("start",n,0,max,solver);
-		IntVar[] end = new IntVar[n];
-		IntVar[] duration = new IntVar[n];
-		IntVar[] height = new IntVar[n];
-		Task[] task = new Task[n];
-		Random rd = new Random(0);
-		for(int i=0;i<n;i++){
-			duration[i] = VF.fixed(rd.nextInt(20)+1,solver);
-			height[i] = VF.fixed(rd.nextInt(5)+1,solver);
-			end[i] = VF.offset(start[i],duration[i].getValue());
-			task[i] = new Task(start[i],duration[i],end[i]);
+	public void buildModel(){
+		starts = new IntVar[NUM_OF_TASKS];
+		ends = new IntVar[NUM_OF_TASKS];
+		IntVar duration = VariableFactory.fixed(10, solver);
+		maxEnd = VariableFactory.bounded("maxEnd", 0, HORIZON, solver);
+
+		IntVar[] res = new IntVar[NUM_OF_TASKS];
+
+		Task[] tasks = new Task[NUM_OF_TASKS];
+
+		for (int iTask=0; iTask < NUM_OF_TASKS; ++iTask) {
+			starts[iTask] = VariableFactory.bounded("start" + iTask, 0, HORIZON, solver);
+			ends[iTask] = VariableFactory.bounded("start" + iTask, 0, HORIZON, solver);
+
+			tasks[iTask] = VariableFactory.task(starts[iTask], duration, ends[iTask]);
+			res[iTask] = VariableFactory.fixed(1 , solver);
 		}
-		solver.post(ICF.cumulative(task,height,capa,true));
-		solver.post(ICF.maximum(makespan,end));
+
+		solver.post(IntConstraintFactory.maximum(maxEnd, ends));
+
+		solver.post(IntConstraintFactory.cumulative(tasks, res, VariableFactory.fixed(1, solver), false));
 	}
 
 	@Override
-	public void configureSearch() {
-		solver.set(ISF.firstFail_InDomainMin(start));
-		solver.set(ISF.lastConflict(solver,solver.getSearchLoop().getStrategy()));
+	public void configureSearch(){
+		solver.set(IntStrategyFactory.inputOrder_InDomainMin(starts));
 	}
 
 	@Override
-	public void solve() {
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,makespan);
+	public void solve(){
+		solver.findSolution();
 	}
 
 	@Override
-	public void prettyOut() {}
+	public void prettyOut(){
+		if (solver.isFeasible() == ESat.TRUE) {
+			System.out.println("solution found");
+		}
+	}
 
 	public static void main(String[] args){
-		new CumulativeSample().execute();
+		new CumulativeSample2().execute(args);
 	}
 }

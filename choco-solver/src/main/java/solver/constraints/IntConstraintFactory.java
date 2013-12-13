@@ -553,9 +553,10 @@ public class IntConstraintFactory {
 	 * @param TASKS    TASK objects containing start, duration and end variables
 	 * @param HEIGHTS  integer variables representing the resource consumption of each task
 	 * @param CAPACITY integer variable representing the resource capacity
+	 * @param INCREMENTAL specifies if an incremental propagation should be applied
 	 * @return a cumulative constraint
 	 */
-	public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
+	public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY, boolean INCREMENTAL) {
 		// Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
 		boolean addHeights = false;
 		for(int h=0; h<HEIGHTS.length&&!addHeights;h++){
@@ -567,7 +568,7 @@ public class IntConstraintFactory {
 		if(addHeights){
 			filters = ArrayUtils.append(filters,new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
 		}
-		return new Cumulative(TASKS,HEIGHTS,CAPACITY,true,filters);
+		return new Cumulative(TASKS,HEIGHTS,CAPACITY,INCREMENTAL,filters);
 	}
 
 	/**
@@ -614,9 +615,9 @@ public class IntConstraintFactory {
 			return new Constraint[]{
 					diffNCons,
 					minimum(minX,X),maximum(maxX,EX),scalar(new IntVar[]{maxX,minX},new int[]{1,-1},diffX),
-					cumulative(TX,HEIGHT,diffY),
+					cumulative(TX,HEIGHT,diffY,true),
 					minimum(minY,Y),maximum(maxY,EY),scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, diffY),
-					cumulative(TY,WIDTH,diffX)
+					cumulative(TY,WIDTH,diffX,true)
 			};
 		}
 		return new Constraint[]{diffNCons};

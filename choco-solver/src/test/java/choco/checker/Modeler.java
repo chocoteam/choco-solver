@@ -807,7 +807,7 @@ public interface Modeler {
                 h[i] = vars[i + 3 * k];
             }
             IntVar capa = vars[vars.length - 1];
-            Constraint ctr = IntConstraintFactory.cumulative(tasks, h, capa);
+            Constraint ctr = IntConstraintFactory.cumulative(tasks, h, capa, true);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             solver.post(ctrs);
