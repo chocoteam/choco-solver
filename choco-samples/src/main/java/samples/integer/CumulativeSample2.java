@@ -41,7 +41,7 @@ import util.ESat;
  */
 public class CumulativeSample2 extends AbstractProblem {
 
-	public static int NUM_OF_TASKS = 2000;
+	public static int NUM_OF_TASKS = 1000;
 	public static int HORIZON = 20000;
 
 	IntVar[] starts, ends;
@@ -54,26 +54,36 @@ public class CumulativeSample2 extends AbstractProblem {
 
 	@Override
 	public void buildModel(){
+		// build variables
 		starts = new IntVar[NUM_OF_TASKS];
 		ends = new IntVar[NUM_OF_TASKS];
 		IntVar duration = VariableFactory.fixed(10, solver);
 		maxEnd = VariableFactory.bounded("maxEnd", 0, HORIZON, solver);
-
 		IntVar[] res = new IntVar[NUM_OF_TASKS];
-
 		Task[] tasks = new Task[NUM_OF_TASKS];
-
 		for (int iTask=0; iTask < NUM_OF_TASKS; ++iTask) {
 			starts[iTask] = VariableFactory.bounded("start" + iTask, 0, HORIZON, solver);
-			ends[iTask] = VariableFactory.bounded("start" + iTask, 0, HORIZON, solver);
-
+			ends[iTask] = VariableFactory.bounded("ends" + iTask, 0, HORIZON, solver);
 			tasks[iTask] = VariableFactory.task(starts[iTask], duration, ends[iTask]);
 			res[iTask] = VariableFactory.fixed(1 , solver);
 		}
 
+		// post a cumulative constraint
+		solver.post(IntConstraintFactory.cumulative(tasks, res, VariableFactory.fixed(1, solver), false));
+
+		// maintain makespan
 		solver.post(IntConstraintFactory.maximum(maxEnd, ends));
 
-		solver.post(IntConstraintFactory.cumulative(tasks, res, VariableFactory.fixed(1, solver), false));
+		// add precedences
+		int prevIdx = -1;
+		for (int iTask=999; iTask >= 0; --iTask) {
+			if (prevIdx != -1) {
+				if (iTask % 2 == 0 || iTask % 3 == 0) {
+					solver.post(IntConstraintFactory.arithm(starts[iTask], ">=", ends[prevIdx]));
+				}
+			}
+			prevIdx = iTask;
+		}
 	}
 
 	@Override

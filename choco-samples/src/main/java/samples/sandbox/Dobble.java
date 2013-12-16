@@ -44,7 +44,7 @@ import solver.constraints.gary.channeling.PropGraphRelation;
 import solver.constraints.gary.channeling.PropRelationGraph;
 import solver.constraints.gary.channeling.relations.GraphRelation;
 import solver.constraints.gary.channeling.relations.GraphRelationFactory;
-import solver.constraints.nary.min_max.MaxOfAList;
+import solver.constraints.nary.min_max.Maximum;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -117,7 +117,7 @@ public class Dobble {
                 addGlobalGraphNValues(solver, flatVars, nbUsedSymbols, nbSymbolsPerCard);
             }
             final IntVar max = VariableFactory.offset(nbUsedSymbols, -1);
-            solver.post(new MaxOfAList(max, flatVars, solver));
+            solver.post(new Maximum(max, flatVars, solver));
             Constraint csym = new Constraint(solver);
             csym.addPropagators(new PropTakeFirstValues(flatVars, max, solver, csym));
         }

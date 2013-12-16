@@ -40,21 +40,28 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 26/07/12
  */
-public class MinOfAList extends IntConstraint<IntVar> {
+public class Minimum extends IntConstraint<IntVar> {
 
-    public MinOfAList(IntVar val, IntVar[] vars, Solver solver) {
-        super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
-        setPropagators(new PropMinOfAList(this.vars));
-    }
+	public Minimum(IntVar val, IntVar[] vars, Solver solver) {
+		super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
+		setPropagators(new PropMin(vars, val));
+		boolean enu = val.hasEnumeratedDomain();
+		for(int i=0; i<vars.length && !enu; i++){
+			enu = vars[i].hasEnumeratedDomain();
+		}
+		if(enu){
+			addPropagators(new PropMin(vars,val));
+		}
+	}
 
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int m = tuple[1];
-        for (int i = 2; i < tuple.length; i++) {
-            if (m > tuple[i]) {
-                m = tuple[i];
-            }
-        }
-        return ESat.eval(tuple[0] == m);
-    }
+	@Override
+	public ESat isSatisfied(int[] tuple) {
+		int m = tuple[1];
+		for (int i = 2; i < tuple.length; i++) {
+			if (m > tuple[i]) {
+				m = tuple[i];
+			}
+		}
+		return ESat.eval(tuple[0] == m);
+	}
 }
