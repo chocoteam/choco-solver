@@ -40,11 +40,18 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/03/12
  */
-public class MaxOfAList extends IntConstraint<IntVar> {
+public class Maximum extends IntConstraint<IntVar> {
 
-    public MaxOfAList(IntVar val, IntVar[] vars, Solver solver) {
+    public Maximum(IntVar val, IntVar[] vars, Solver solver) {
         super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
-        setPropagators(new PropMaxOfAList(this.vars));
+		setPropagators(new PropMax(vars,val));
+		boolean enu = val.hasEnumeratedDomain();
+		for(int i=0; i<vars.length && !enu; i++){
+			enu = vars[i].hasEnumeratedDomain();
+		}
+		if(enu){
+			addPropagators(new PropMax(vars,val));
+		}
     }
 
     @Override

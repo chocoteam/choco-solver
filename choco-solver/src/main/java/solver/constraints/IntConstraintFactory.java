@@ -56,8 +56,8 @@ import solver.constraints.nary.element.Element;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.nary.min_max.MaxOfAList;
-import solver.constraints.nary.min_max.MinOfAList;
+import solver.constraints.nary.min_max.Maximum;
+import solver.constraints.nary.min_max.Minimum;
 import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
 import solver.constraints.nary.sum.PropBoolSum;
@@ -779,8 +779,8 @@ public class IntConstraintFactory {
      * @param MAX  a variable
      * @param VARS a vector of variables
      */
-    public static MaxOfAList maximum(IntVar MAX, IntVar[] VARS) {
-        return new MaxOfAList(MAX, VARS, MAX.getSolver());
+    public static Maximum maximum(IntVar MAX, IntVar[] VARS) {
+        return new Maximum(MAX, VARS, MAX.getSolver());
     }
 
     /**
@@ -789,8 +789,8 @@ public class IntConstraintFactory {
      * @param MIN  a variable
      * @param VARS a vector of variables
      */
-    public static MinOfAList minimum(IntVar MIN, IntVar[] VARS) {
-        return new MinOfAList(MIN, VARS, MIN.getSolver());
+    public static Minimum minimum(IntVar MIN, IntVar[] VARS) {
+        return new Minimum(MIN, VARS, MIN.getSolver());
     }
 
     /**
