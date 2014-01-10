@@ -48,7 +48,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 20/06/13
  */
-public class NogoodStoreForRestarts extends Constraint<IntVar, PropNogoodStore> implements IMonitorRestart {
+public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore> implements IMonitorRestart {
 
     static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
@@ -57,7 +57,7 @@ public class NogoodStoreForRestarts extends Constraint<IntVar, PropNogoodStore> 
     CircularQueue<Decision<IntVar>> decisions;
     CircularQueue<INogood> nogoods;
 
-    public NogoodStoreForRestarts(IntVar[] vars, Solver solver) {
+    public NogoodStoreFromRestarts(IntVar[] vars, Solver solver) {
         super(vars, solver);
         setPropagators(new PropNogoodStore(vars));
         decisions = new CircularQueue<Decision<IntVar>>(16);

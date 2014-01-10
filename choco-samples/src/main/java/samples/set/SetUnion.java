@@ -78,7 +78,7 @@ public class SetUnion extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
+        solver.set(SetStrategyFactory.remove_first(new SetVar[]{x, y, z}));
     }
 
     @Override

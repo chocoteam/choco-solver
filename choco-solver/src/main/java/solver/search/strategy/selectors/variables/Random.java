@@ -29,7 +29,7 @@ package solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * <b>Random</b> variable selector.
@@ -39,9 +39,9 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Random implements VariableSelector<IntVar> {
+public class Random<T extends Variable> implements VariableSelector<T> {
 
-    IntVar[] variables;
+    T[] variables;
 
     int rand_idx;
 
@@ -49,21 +49,21 @@ public class Random implements VariableSelector<IntVar> {
 
     java.util.Random random;
 
-    public Random(IntVar[] variables, long seed) {
+    public Random(T[] variables, long seed) {
         this.variables = variables.clone();
         sets = new TIntArrayList(variables.length);
         random = new java.util.Random(seed);
     }
 
     @Override
-    public IntVar[] getScope() {
+    public T[] getScope() {
         return variables;
     }
 
     @Override
     public boolean hasNext() {
         int idx = 0;
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
         }
         return idx < variables.length;
     }
@@ -73,8 +73,7 @@ public class Random implements VariableSelector<IntVar> {
         sets.clear();
         rand_idx = 0;
         for (int idx = 0; idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
-            if (dsize > 1) {
+            if (!variables[idx].instantiated()) {
                 sets.add(idx);
             }
         }
@@ -82,7 +81,7 @@ public class Random implements VariableSelector<IntVar> {
     }
 
     @Override
-    public IntVar getVariable() {
+    public T getVariable() {
         return variables[rand_idx];
     }
 }

@@ -24,37 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.min_max;
 
-import solver.Solver;
-import solver.constraints.IntConstraint;
-import solver.variables.IntVar;
-import util.ESat;
-import util.tools.ArrayUtils;
+package solver.search.strategy.strategy.set;
+
+import solver.variables.SetVar;
 
 /**
- * VAL = MAX(VARS)
- * <br/>
- * CPRU: not tested yet
- *
- * @author Charles Prud'homme
- * @since 18/03/12
+ * Heuristic for branching on a given SetVar
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class MaxOfAList extends IntConstraint<IntVar> {
+public interface SetValSelector {
 
-    public MaxOfAList(IntVar val, IntVar[] vars, Solver solver) {
-        super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
-        setPropagators(new PropMaxOfAList(this.vars));
-    }
+	/**
+	 * Value selection heuristic
+	 * @param v a non-instantiated SetVar
+	 * @return an integer i of v's envelope, which is not included in v's kernel
+	 * so that a decision (forcing/removing i) can be applied on v
+	 */
+	public int selectValue(SetVar v);
 
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int M = tuple[1];
-        for (int i = 2; i < tuple.length; i++) {
-            if (M < tuple[i]) {
-                M = tuple[i];
-            }
-        }
-        return ESat.eval(tuple[0] == M);
-    }
+	/**
+	 * Eventually perform some computation before the search process starts
+	 */
+	public void init();
+
+	/**
+	 * Selects the first integer in the envelope and not in the kernel
+	 */
+	public class FirstVal implements SetValSelector{
+		@Override
+		public int selectValue(SetVar s) {
+			for (int i=s.getEnvelopeFirst(); i!=SetVar.END; i=s.getEnvelopeNext()) {
+				if (!s.kernelContains(i)) {
+					return i;
+				}
+			}
+			throw new UnsupportedOperationException(s+" is already instantiated. Cannot compute a decision on it");
+		}
+		@Override
+		public void init(){}
+	}
 }

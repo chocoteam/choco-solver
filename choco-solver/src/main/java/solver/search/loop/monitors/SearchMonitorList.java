@@ -268,4 +268,17 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         return false;
     }
 
+    public void reset(){
+        mclos.clear();
+        mcont.clear();
+        mdbra.clear();
+        minit.clear();
+        minte.clear();
+        mipro.clear();
+        mopno.clear();
+        mrest.clear();
+        msolu.clear();
+        mubra.clear();
+    }
+
 }

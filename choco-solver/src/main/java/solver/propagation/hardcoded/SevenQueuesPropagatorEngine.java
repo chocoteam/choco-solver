@@ -164,12 +164,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     // clear event
                     mask = lastProp.getMask(v);
                     lastProp.clearMask(v);
+                    lastProp.decNbPendingEvt();
                     // run propagation on the specific event
                     lastProp.fineERcalls++;
                     lastProp.propagate(v, mask);
                 }
             }
-//            notEmpty.clear(i);
             notEmpty = notEmpty & ~(1 << i);
         }
     }
@@ -227,50 +227,27 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         int[] vindices = variable.getPIndices();
         Propagator prop;
         int pindice;
-        if (cause instanceof Propagator) {
-            for (int p = nbp - 1; p >= 0; p--) {
-                prop = vpropagators[p];
-                pindice = vindices[p];
-                if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
-                    int aid = p2i.get(prop.getId());
-                    if (prop.updateMask(pindice, type)) {
-                        if (Configuration.PRINT_SCHEDULE) {
-                            IPropagationEngine.Trace.printSchedule(prop);
-                        }
-                        eventsets[aid].addLast(pindice);
-                    } else if (Configuration.PRINT_SCHEDULE) {
-                        IPropagationEngine.Trace.printAlreadySchedule(prop);
+
+        for (int p = nbp - 1; p >= 0; p--) {
+            prop = vpropagators[p];
+            pindice = vindices[p];
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
+                int aid = p2i.get(prop.getId());
+                if (prop.updateMask(pindice, type)) {
+                    if (Configuration.PRINT_SCHEDULE) {
+                        IPropagationEngine.Trace.printSchedule(prop);
                     }
-                    if (scheduled[aid] == 0) {
-                        int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
-                        pro_queue[prio].addLast(prop);
-                        scheduled[aid] = (short) (prio + 1);
-//                    notEmpty.set(prio);
-                        notEmpty = notEmpty | (1 << prio);
-                    }
+                    prop.incNbPendingEvt();
+                    eventsets[aid].addLast(pindice);
+                } else if (Configuration.PRINT_SCHEDULE) {
+                    IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
-            }
-        } else {
-            for (int p = nbp - 1; p >= 0; p--) {
-                prop = vpropagators[p];
-                pindice = vindices[p];
-                if (prop.isActive() && prop.advise(pindice, type.mask)) {
-                    int aid = p2i.get(prop.getId());
-                    if (prop.updateMask(pindice, type)) {
-                        if (Configuration.PRINT_SCHEDULE) {
-                            IPropagationEngine.Trace.printSchedule(prop);
-                        }
-                        eventsets[aid].addLast(pindice);
-                    } else if (Configuration.PRINT_SCHEDULE) {
-                        IPropagationEngine.Trace.printAlreadySchedule(prop);
-                    }
-                    if (scheduled[aid] == 0) {
-                        int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
-                        pro_queue[prio].addLast(prop);
-                        scheduled[aid] = (short) (prio + 1);
-                        //                    notEmpty.set(prio);
-                        notEmpty = notEmpty | (1 << prio);
-                    }
+                if (scheduled[aid] == 0) {
+                    int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
+                    pro_queue[prio].addLast(prop);
+                    scheduled[aid] = (short) (prio + 1);
+//                    notEmpty.set(prio);
+                    notEmpty = notEmpty | (1 << prio);
                 }
             }
         }

@@ -42,6 +42,8 @@ import util.tools.ArrayUtils;
 /**
  * <br/>
  *
+ * DYLD_LIBRARY_PATH = /Users/gillou/ibex/lib
+ *
  * @author Jean-Guillaume Fages, Charles Prud'homme
  * @since 20/07/12
  */
@@ -110,7 +112,7 @@ public class SmallSantaClaude {
             }
         });
 		// find optimal solution (Santa Claus is stingy)
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,average_deviation);
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,average_deviation, precision);
 		// free IBEX structures from memory
 		solver.getIbex().release();
     }

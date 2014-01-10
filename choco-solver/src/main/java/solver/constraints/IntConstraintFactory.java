@@ -51,13 +51,13 @@ import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.circuit.*;
 import solver.constraints.nary.count.Count;
-import solver.constraints.nary.cumulative.PropIncrementalCumulative;
+import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.element.Element;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.nary.min_max.MaxOfAList;
-import solver.constraints.nary.min_max.MinOfAList;
+import solver.constraints.nary.min_max.Maximum;
+import solver.constraints.nary.min_max.Minimum;
 import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
 import solver.constraints.nary.sum.PropBoolSum;
@@ -545,43 +545,40 @@ public class IntConstraintFactory {
         return new Count(VALUE, VARS, LIMIT, VARS[0].getSolver());
     }
 
-    /**
-     * Cumulative constraint: Enforces that at each point in time,
-     * the cumulated height of the set of tasks that overlap that point
-     * does not exceed a given limit.
-     *
-     * @param TASKS    TASK objects containing start, duration and end variables
-     * @param HEIGHTS  integer variables representing the resource consumption of each task
-     * @param CAPACITY integer variable representing the resource capacity
-     * @return a cumulative constraint
-     */
-    public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
-        int n = TASKS.length;
-        assert n > 0;
-        Solver solver = TASKS[0].getStart().getSolver();
-        IntVar[] starts = new IntVar[n];
-        IntVar[] durations = new IntVar[n];
-        IntVar[] ends = new IntVar[n];
-        for (int i = 0; i < n; i++) {
-            starts[i] = TASKS[i].getStart();
-            durations[i] = TASKS[i].getDuration();
-            ends[i] = TASKS[i].getEnd();
-        }
-        Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, true));
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, false));
-//		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
-        return c;
-    }
+	/**
+	 * Cumulative constraint: Enforces that at each point in time,
+	 * the cumulated height of the set of tasks that overlap that point
+	 * does not exceed a given limit.
+	 *
+	 * @param TASKS    TASK objects containing start, duration and end variables
+	 * @param HEIGHTS  integer variables representing the resource consumption of each task
+	 * @param CAPACITY integer variable representing the resource capacity
+	 * @param INCREMENTAL specifies if an incremental propagation should be applied
+	 * @return a cumulative constraint
+	 */
+	public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY, boolean INCREMENTAL) {
+		// Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
+		boolean addHeights = false;
+		for(int h=0; h<HEIGHTS.length&&!addHeights;h++){
+			if(!HEIGHTS[h].instantiated()){
+				addHeights = true;
+			}
+		}
+		Cumulative.Filter[] filters = new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
+		if(addHeights){
+			filters = ArrayUtils.append(filters,new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
+		}
+		return new Cumulative(TASKS,HEIGHTS,CAPACITY,INCREMENTAL,filters);
+	}
 
-    /**
+	/**
      * Constrains each rectangle<sub>i</sub>, given by their origins X<sub>i</sub>,Y<sub>i</sub>
      * and sizes WIDTH<sub>i</sub>,HEIGHT<sub>i</sub>, to be non-overlapping.
      *
      * @param X      collection of coordinates in first dimension
      * @param Y      collection of coordinates in second dimension
-     * @param WIDTH  collection of width
-     * @param HEIGHT collection of height
+     * @param WIDTH  collection of width (each duration should be > 0)
+     * @param HEIGHT collection of height (each height should be >= 0)
 	 * @param USE_CUMUL indicates whether or not redundant cumulative constraints should be put on each dimension (advised)
      * @return a non-overlapping constraint
      */
@@ -618,9 +615,9 @@ public class IntConstraintFactory {
 			return new Constraint[]{
 					diffNCons,
 					minimum(minX,X),maximum(maxX,EX),scalar(new IntVar[]{maxX,minX},new int[]{1,-1},diffX),
-					cumulative(TX,HEIGHT,diffY),
+					cumulative(TX,HEIGHT,diffY,true),
 					minimum(minY,Y),maximum(maxY,EY),scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, diffY),
-					cumulative(TY,WIDTH,diffX)
+					cumulative(TY,WIDTH,diffX,true)
 			};
 		}
 		return new Constraint[]{diffNCons};
@@ -782,8 +779,8 @@ public class IntConstraintFactory {
      * @param MAX  a variable
      * @param VARS a vector of variables
      */
-    public static MaxOfAList maximum(IntVar MAX, IntVar[] VARS) {
-        return new MaxOfAList(MAX, VARS, MAX.getSolver());
+    public static Maximum maximum(IntVar MAX, IntVar[] VARS) {
+        return new Maximum(MAX, VARS, MAX.getSolver());
     }
 
     /**
@@ -792,8 +789,8 @@ public class IntConstraintFactory {
      * @param MIN  a variable
      * @param VARS a vector of variables
      */
-    public static MinOfAList minimum(IntVar MIN, IntVar[] VARS) {
-        return new MinOfAList(MIN, VARS, MIN.getSolver());
+    public static Minimum minimum(IntVar MIN, IntVar[] VARS) {
+        return new Minimum(MIN, VARS, MIN.getSolver());
     }
 
     /**

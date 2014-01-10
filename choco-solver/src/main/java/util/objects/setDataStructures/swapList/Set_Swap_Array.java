@@ -27,6 +27,8 @@
 
 package util.objects.setDataStructures.swapList;
 
+import util.objects.setDataStructures.SetType;
+
 /**
  * List of m elements based on Array int_swaping with an additionnal array
  * add : O(1)
@@ -100,4 +102,9 @@ public class Set_Swap_Array extends Set_Swap {
         }
         return false;
     }
+
+	@Override
+	public SetType getSetType(){
+		return SetType.SWAP_ARRAY;
+	}
 }

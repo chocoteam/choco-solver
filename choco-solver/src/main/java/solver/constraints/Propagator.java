@@ -37,15 +37,13 @@ import solver.Configuration;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
+import solver.constraints.set.SCF;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.propagation.IPropagationEngine;
-import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 import util.ESat;
 
 import java.io.Serializable;
@@ -165,9 +163,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                                 vars[i] = (V) v.duplicate();
                                 solver.post(IntConstraintFactory.arithm((IntVar) v, "=", (IntVar) vars[i]));
                             } else {
-                                throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                        "However, this type of variable does not allow to post an EQ constraint over it.");
-                            }
+								if((v.getTypeAndKind() & Variable.SET) != 0) {
+									Solver solver = v.getSolver();
+									vars[i] = (V) v.duplicate();
+									solver.post(SCF.all_equal(new SetVar[]{(SetVar)v,(SetVar)vars[i]}));
+								}else{
+									throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+											"However, this type of variable does not allow to post an EQ constraint over it.");
+								}
+							}
                             break;
                         case silent:
                         default:

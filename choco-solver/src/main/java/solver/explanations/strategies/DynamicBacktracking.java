@@ -37,7 +37,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
 /**
- * A dynamic backtracking algorithm based on the decision-repair, or path-repair principle.
+ * A dynamic backtracking algorithm.
  * It selects the decision to undo w.r.t. a {@link IDecisionJumper}.
  * Note that by giving {@link solver.explanations.strategies.jumper.MostRecentWorldJumper}, it acts like <code>dbt</code>.
  * <br/>
@@ -45,11 +45,11 @@ import solver.search.strategy.decision.RootDecision;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class PathRepair extends ConflictBasedBackjumping {
+public class DynamicBacktracking extends ConflictBasedBackjumping {
 
     DecisionsSet cobdec;
 
-    public PathRepair(ExplanationEngine mExplanationEngine, IDecisionJumper decisionJumper) {
+    public DynamicBacktracking(ExplanationEngine mExplanationEngine, IDecisionJumper decisionJumper) {
         super(mExplanationEngine, decisionJumper);
         cobdec = new DecisionsSet(this);
     }
@@ -83,6 +83,7 @@ public class PathRepair extends ConflictBasedBackjumping {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
                     dec.rewind();
+                    dec.buildNext();
                     // add it to the decisions to force
                     cobdec.push(dec);
 
@@ -102,7 +103,7 @@ public class PathRepair extends ConflictBasedBackjumping {
         }
         if (dec != RootDecision.ROOT) {
             if (!dec.hasNext()) {
-                throw new UnsupportedOperationException("PathRepair.updatVRExplain should get to a POSITIVE decision");
+                throw new UnsupportedOperationException("DynamicBacktracking.updatVRExplain should get to a POSITIVE decision");
             }
             cobdec.setDecisionToRefute(dec);
             Deduction left = dec.getPositiveDeduction();

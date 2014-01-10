@@ -29,9 +29,8 @@ package solver.explanations;
 
 import solver.Solver;
 import solver.explanations.strategies.ConflictBasedBackjumping;
-import solver.explanations.strategies.IDecisionJumper;
-import solver.explanations.strategies.PathRepair;
-import solver.explanations.strategies.jumper.RandomDecisionJumper;
+import solver.explanations.strategies.DynamicBacktracking;
+import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -84,6 +83,7 @@ public enum ExplanationFactory {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
+            new DynamicBacktracking(solver.getExplainer(), new MostRecentWorldJumper( ));
         }
     };
 
@@ -102,28 +102,28 @@ public enum ExplanationFactory {
                 : new RecorderExplanationEngine(solver));
     }
 
-    /**
-     * add a path-repair policy on contradiction to an explained solver.
-     * It backtracks up to a random decision involved in the explanation.
-     *
-     * @param solver    solver which is explained
-     * @param flattened should explanations be flattened?
-     */
-    public static void path_repair(Solver solver, long seed, boolean flattened) {
-        plugExpl(solver, flattened);
-        new PathRepair(solver.getExplainer(), new RandomDecisionJumper(seed));
-    }
-
-    /**
-     * add a path-repair policy on contradiction to an explained solver.
-     * It backtracks up to a decision involved in the explanation, using <code>decisionJumper</code>.
-     *
-     * @param solver         solver which is explained
-     * @param decisionJumper a specific algorithm to decide which decision to jump to.
-     * @param flattened      should explanations be flattened?
-     */
-    public static void path_repair(Solver solver, IDecisionJumper decisionJumper, boolean flattened) {
-        plugExpl(solver, flattened);
-        new PathRepair(solver.getExplainer(), decisionJumper);
-    }
+//    /**
+//     * add a path-repair policy on contradiction to an explained solver.
+//     * It backtracks up to a random decision involved in the explanation.
+//     *
+//     * @param solver    solver which is explained
+//     * @param flattened should explanations be flattened?
+//     */
+//    public static void path_repair(Solver solver, long seed, boolean flattened) {
+//        plugExpl(solver, flattened);
+//        new DynamicBacktracking(solver.getExplainer(), new RandomDecisionJumper(seed));
+//    }
+//
+//    /**
+//     * add a path-repair policy on contradiction to an explained solver.
+//     * It backtracks up to a decision involved in the explanation, using <code>decisionJumper</code>.
+//     *
+//     * @param solver         solver which is explained
+//     * @param decisionJumper a specific algorithm to decide which decision to jump to.
+//     * @param flattened      should explanations be flattened?
+//     */
+//    public static void path_repair(Solver solver, IDecisionJumper decisionJumper, boolean flattened) {
+//        plugExpl(solver, flattened);
+//        new DynamicBacktracking(solver.getExplainer(), decisionJumper);
+//    }
 }

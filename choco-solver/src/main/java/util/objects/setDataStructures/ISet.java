@@ -98,4 +98,9 @@ public interface ISet extends Serializable {
      * @return the next element of the set
      */
     int getNextElement();
+
+	/**
+	 * @return the implementation type of this set
+	 */
+	SetType getSetType();
 }

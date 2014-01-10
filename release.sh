@@ -17,7 +17,9 @@ function getBranch {
 
 case $1 in
 request)
+    echo "Start release with request option on"
     VERSION=$(getVersionToRelease)
+    echo ${VERSION}
     RELEASE_BRANCH="release-$VERSION"
     git checkout -b ${RELEASE_BRANCH} || exit 1
 
@@ -32,6 +34,7 @@ request)
     echo "Branch $RELEASE_BRANCH is ready for the releasing process"
     ;;
 perform)
+    echo "Start release with perform option on"
     if [ ! -f .version ]; then
         echo "Missing .version file"
         exit 1

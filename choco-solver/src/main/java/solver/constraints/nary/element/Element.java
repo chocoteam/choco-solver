@@ -82,7 +82,9 @@ public class Element extends IntConstraint<IntVar> {
     @Override
     public ESat isSatisfied(int[] tuple) {
         if (values.length == 0) {
-            return ESat.eval(tuple[tuple[1] + offset] == tuple[0]);
+            // The values start at tuple[2]
+            int i = tuple[1] - offset + 2;
+            return ESat.eval(i >= 2 && i < tuple.length && tuple[i] == tuple[0]);
         }
         return ESat.eval(
                 !(tuple[1] - this.offset >= values.length || tuple[1] - this.offset < 0)
