@@ -9,7 +9,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 This the first stable version of Choco 3.
 The CHANGES.md file starts at this version.
 
-????
+3.1.1 - 10 Jan 2014
 -------------------
 
 * Explain PropSumEq
