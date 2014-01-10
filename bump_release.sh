@@ -40,6 +40,9 @@ code)
 	d=`LANG=en_US.utf8 date +"%d %b %Y"`
 	REGEX="s%????*%${VERSION} - ${d}%"
 	sedInPlace "${REGEX}" CHANGES.md
+
+    echo -e "\n????\n-------------------\n" >> CHANGES.md
+
 	;;
 	*)
 		echo "Target must be either 'site' or 'code'"

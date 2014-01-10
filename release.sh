@@ -80,6 +80,28 @@ perform)
     git push
     git push origin --tags
     ;;
+zip)
+    echo "Start release with zip option on"
+    VERSION=$(cat .version)
+    mkdir choco-${VERSION}
+    git checkout choco-${VERSION}
+    mvn clean install -DskipTests || exit 1
+    mv ./choco-solver/target/choco-solver-${VERSION}-jar-with-dependencies.jar ./choco-${VERSION}
+    mv ./choco-solver/target/choco-solver-${VERSION}-sources.jar ./choco-${VERSION}
+    mv ./choco-samples/target/choco-samples-${VERSION}-sources.jar ./choco-${VERSION}
+    mv ./choco-parser/target/choco-parser-${VERSION}-jar-with-dependencies.jar ./choco-${VERSION}
+
+    mvn javadoc:aggregate  || exit 1
+    cd target/site/
+    zip apidocs-${VERSION}.zip ./apidocs/*
+    mv apidocs-${VERSION}.zip ../../choco-${VERSION}
+    cd ../../
+
+    zip choco-${VERSION}.zip ./choco-${VERSION}/*
+
+    git checkout develop
+    rmdir choco-${VERSION}
+    ;;
     *)
         echo "Unsupported operation '$1'"
         exit 1
