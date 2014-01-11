@@ -52,7 +52,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class SqrView extends IntView<IntVar> {
+public final class SqrView extends IntView {
 
     public SqrView(IntVar var, Solver solver) {
         super("(" + var.getName() + "^2)", var, solver);
