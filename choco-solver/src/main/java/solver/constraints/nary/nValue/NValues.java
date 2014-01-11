@@ -43,12 +43,12 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class NValues extends IntConstraint<IntVar> {
+public class NValues extends IntConstraint {
 
     public enum Type {
         at_most_BC {
             @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver) {
                 cons.addPropagators(new PropAtMostNValues_BC(vars, nValues));
                 boolean enumDom = false;
                 for (IntVar v : vars) {
@@ -63,7 +63,7 @@ public class NValues extends IntConstraint<IntVar> {
         },
         at_most_greedy {
             @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver) {
 				cons.addPropagators(
 						new AMNV_Gci_MD_R13(vars,nValues,Differences.NONE),
 						new AMNV_Gci_R_R13(vars,nValues,Differences.NONE,30));
@@ -71,12 +71,12 @@ public class NValues extends IntConstraint<IntVar> {
         },
         at_least_AC {
             @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver) {
                 cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues));
             }
         };
 
-        public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver);
+        public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver);
     }
 
     /**

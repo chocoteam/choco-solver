@@ -47,7 +47,7 @@ import java.util.List;
  * @author Hadrien Cambazard, Charles Prud'homme, Jean-Guillaume Fages
  * @since 16/06/11
  */
-public class GlobalCardinality extends IntConstraint<IntVar> {
+public class GlobalCardinality extends IntConstraint {
 
     private final int nbvars;
     private final int[] values;

@@ -38,7 +38,7 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 21/07/13
  */
-public class Sum extends IntConstraint<IntVar> {
+public class Sum extends IntConstraint {
 
     public Sum(IntVar[] x, IntVar y) {
         super(ArrayUtils.append(x,new IntVar[]{y}), y.getSolver());

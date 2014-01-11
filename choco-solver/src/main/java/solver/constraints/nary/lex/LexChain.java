@@ -38,7 +38,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public class LexChain extends IntConstraint<IntVar> {
+public class LexChain extends IntConstraint {
 
     private final boolean strict;
     private final int n, x;

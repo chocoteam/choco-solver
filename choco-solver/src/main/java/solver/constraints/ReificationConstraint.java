@@ -46,7 +46,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @since 02/2013
  */
-public class ReificationConstraint extends Constraint<Variable, Propagator<Variable>> {
+public class ReificationConstraint extends Constraint<Variable> {
 
     // boolean variable of the reification
     private final BoolVar bool;

@@ -45,7 +45,7 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 04/08/11
  */
-public class DomainChanneling extends IntConstraint<IntVar> {
+public class DomainChanneling extends IntConstraint {
 
 	private final int offSet, n;
 

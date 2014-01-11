@@ -39,7 +39,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-public class Absolute extends IntConstraint<IntVar> {
+public class Absolute extends IntConstraint {
 
     public Absolute(IntVar X, IntVar Y, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);

@@ -37,7 +37,7 @@ import util.ESat;
  * No well defined level of consistency (yet)
  * @author Jean-Guillaume Fages
  */
-public class ConditionnalAllDifferent extends IntConstraint<IntVar> {
+public class ConditionnalAllDifferent extends IntConstraint {
 
     //***********************************************************************************
     // VARIABLES

@@ -49,7 +49,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class Among extends IntConstraint<IntVar> {
+public class Among extends IntConstraint {
 
     private final int[] values;
 

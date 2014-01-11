@@ -42,7 +42,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 20 sept. 2010
  */
-public class Element extends IntConstraint<IntVar> {
+public class Element extends IntConstraint {
 
     final int[] values;
     final int offset;

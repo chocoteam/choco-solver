@@ -39,7 +39,7 @@ import util.ESat;
  * Ensures that all variables from VARS take a different value.
  * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
  */
-public class AllDifferent extends IntConstraint<IntVar> {
+public class AllDifferent extends IntConstraint {
 
     public static enum Type {
         AC, BC, weak_BC, NEQS, DEFAULT

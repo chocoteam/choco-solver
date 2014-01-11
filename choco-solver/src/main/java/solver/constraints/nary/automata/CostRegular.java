@@ -54,7 +54,7 @@ import java.util.*;
  * @author Julien Menana, Charles Prud'homme
  * @since 06/06/11
  */
-public class CostRegular extends IntConstraint<IntVar> {
+public class CostRegular extends IntConstraint {
 
     final StoredValuedDirectedMultiGraph graph;
     final ICostAutomaton cautomaton;

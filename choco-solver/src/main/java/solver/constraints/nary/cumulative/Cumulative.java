@@ -41,7 +41,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @since 22/10/13
  */
-public class Cumulative extends Constraint<IntVar,Propagator<IntVar>> {
+public class Cumulative extends Constraint<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLE

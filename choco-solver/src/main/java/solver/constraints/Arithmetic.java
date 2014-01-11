@@ -50,7 +50,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 21/06/12
  */
-public class Arithmetic extends IntConstraint<IntVar> {
+public class Arithmetic extends IntConstraint {
 
     protected final Operator op1, op2; // operators.
     protected final int cste;

@@ -45,12 +45,12 @@ public class Belong<V extends Variable> implements IMetric<V> {
 
     final THashSet<V> set;
 
-    private Belong(Constraint<V, ? extends Propagator<V>> constraint) {
+    private Belong(Constraint<V> constraint) {
         this.set = new THashSet<V>();
         this.set.addAll(Arrays.asList(constraint.getVariables()));
     }
 
-    public static <V extends Variable> Belong build(Constraint<V, ? extends Propagator<V>> constraint) {
+    public static <V extends Variable> Belong build(Constraint<V> constraint) {
         return new Belong<V>(constraint);
     }
 

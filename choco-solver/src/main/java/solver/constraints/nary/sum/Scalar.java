@@ -41,7 +41,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class Scalar extends IntConstraint<IntVar> {
+public class Scalar extends IntConstraint {
 
     final int[] coeffs;
     final int b;
