@@ -40,6 +40,7 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IDelta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeBoundIterator;
@@ -59,12 +60,12 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extends AbstractVariable<ID, IntView<ID, IV>>
-        implements IView<ID>, IntVar<ID> {
+public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntView<IV>>
+        implements IView, IntVar {
 
     protected final IV var;
 
-    protected ID delta;
+    protected IntDelta delta;
 
     protected DisposableValueIterator _viterator;
 
@@ -73,7 +74,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     public IntView(String name, IV var, Solver solver) {
         super(name, solver);
         this.var = var;
-        this.delta = (ID) NoDelta.singleton;
+        this.delta = NoDelta.singleton;
         this.var.subscribeView(this);
         this.solver.associates(this);
     }
@@ -108,7 +109,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
         return var.instantiated();
     }
 
-    public ID getDelta() {
+    public IDelta getDelta() {
         return var.getDelta();
     }
 

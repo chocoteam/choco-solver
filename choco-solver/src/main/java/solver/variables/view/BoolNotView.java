@@ -46,7 +46,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
-public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
+public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
 
     public BoolNotView(BoolVar var, Solver solver) {
         super("not(" + var.getName() + ")", var, solver);
@@ -208,12 +208,12 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     }
 
     @Override
-    public BoolVar<IEnumDelta> not() {
+    public BoolVar not() {
         return var;
     }
 
     @Override
-    public void _setNot(BoolVar<IEnumDelta> not) {
+    public void _setNot(BoolVar not) {
         assert not == var;
     }
 

@@ -43,7 +43,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements RealVar {
+public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
 
     private static final long serialVersionUID = 1L;
 

@@ -53,7 +53,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class AbsView extends IntView<IntVar> {
 
     public AbsView(IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);

@@ -52,7 +52,7 @@ import util.tools.MathUtils;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class ScaleView extends IntView<IntVar> {
 
     public final int cste;
 

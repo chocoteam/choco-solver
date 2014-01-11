@@ -60,7 +60,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class ConstantView implements IntVar<IntDelta> {
+public class ConstantView implements IntVar {
 
     protected final int constante;
     protected final String name;

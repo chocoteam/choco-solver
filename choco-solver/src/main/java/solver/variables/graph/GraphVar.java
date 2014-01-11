@@ -49,8 +49,8 @@ import util.objects.setDataStructures.ISet;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 feb. 2011
  */
-public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, GraphVar<E>>
-        implements Variable<IGraphDelta> {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<GraphVar<E>>
+        implements Variable {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************

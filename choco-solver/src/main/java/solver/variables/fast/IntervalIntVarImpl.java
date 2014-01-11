@@ -57,7 +57,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, IntVar<IIntervalDelta>> implements IntVar<IIntervalDelta> {
+public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 

@@ -41,8 +41,8 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 20/07/12
  */
-public class RealView extends AbstractVariable<NoDelta, RealVar>
-        implements IView<NoDelta>, RealVar {
+public class RealView extends AbstractVariable<RealVar>
+        implements IView, RealVar {
 
     protected final IntVar var;
 

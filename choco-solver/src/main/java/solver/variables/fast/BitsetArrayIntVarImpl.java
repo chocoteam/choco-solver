@@ -56,7 +56,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 14/05/2013
  */
-public final class BitsetArrayIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<IEnumDelta>> implements IntVar<IEnumDelta> {
+public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 

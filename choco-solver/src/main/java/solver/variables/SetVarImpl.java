@@ -48,7 +48,7 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements SetVar {
+public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************

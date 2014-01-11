@@ -37,7 +37,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public interface RealVar extends Variable<NoDelta> {
+public interface RealVar extends Variable {
 
     /**
      * Retrieves the lower bound of the variable

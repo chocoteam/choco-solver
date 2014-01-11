@@ -31,7 +31,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -46,7 +45,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar<ID extends IntDelta> extends Variable<ID> {
+public interface IntVar extends Variable {
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.

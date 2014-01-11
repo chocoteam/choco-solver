@@ -54,7 +54,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class OffsetView extends IntView<IntVar> {
 
     public final int cste;
 

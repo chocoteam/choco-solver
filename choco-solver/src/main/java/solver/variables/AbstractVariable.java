@@ -48,7 +48,7 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<D extends IDelta, V extends Variable<D>>
+public abstract class AbstractVariable<V extends Variable>
         implements Serializable {
 
     private static final long serialVersionUID = 1L;
