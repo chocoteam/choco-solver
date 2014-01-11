@@ -33,7 +33,6 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.VF;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import util.ESat;
 
 /**

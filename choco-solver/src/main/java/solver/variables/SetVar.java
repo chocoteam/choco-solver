@@ -29,7 +29,6 @@ package solver.variables;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**

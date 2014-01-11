@@ -31,7 +31,6 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.BoolVar;
-import solver.variables.delta.IEnumDelta;
 import util.ESat;
 
 /**

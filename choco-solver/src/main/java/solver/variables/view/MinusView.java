@@ -35,7 +35,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;

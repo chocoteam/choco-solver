@@ -43,7 +43,6 @@ import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;

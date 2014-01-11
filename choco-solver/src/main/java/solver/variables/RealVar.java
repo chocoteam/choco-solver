@@ -28,7 +28,6 @@ package solver.variables;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.delta.NoDelta;
 
 /**
  * An interface to declare variable for continuous constraints (solved using IBEX).

@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
