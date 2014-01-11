@@ -42,7 +42,7 @@ import util.tools.ArrayUtils;
  * @author Julien Menana, Charles Prud'homme
  * @since 18/07/11
  */
-public class MultiCostRegular extends IntConstraint<IntVar> {
+public class MultiCostRegular extends IntConstraint {
 
     /**
      * The finite automaton which defines the regular language the variable sequence must belong

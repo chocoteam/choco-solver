@@ -37,7 +37,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class LargeCSP extends IntConstraint<IntVar> {
+public class LargeCSP extends IntConstraint {
 
     public static enum Type {
         AC32, AC2001, FC

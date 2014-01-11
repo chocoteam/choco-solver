@@ -39,7 +39,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 06/04/12
  */
-public class DistanceXYZ extends IntConstraint<IntVar> {
+public class DistanceXYZ extends IntConstraint {
 
     Operator operator;
 

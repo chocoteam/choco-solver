@@ -35,19 +35,11 @@ import solver.constraints.ICF;
 import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.cumulative.PropFullCumulative;
 import solver.constraints.nary.cumulative.PropGraphCumulative;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Task;
 import solver.variables.VF;
-import util.PoolManager;
 
 /**
  * Tests the various filtering algorithms of the cumulative constraint

@@ -39,7 +39,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-public class Square extends IntConstraint<IntVar> {
+public class Square extends IntConstraint {
 
     public Square(IntVar X, IntVar Y, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);

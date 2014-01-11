@@ -39,7 +39,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 06/06/11
  */
-public class Regular extends IntConstraint<IntVar> {
+public class Regular extends IntConstraint {
 
     final IAutomaton automaton;
 

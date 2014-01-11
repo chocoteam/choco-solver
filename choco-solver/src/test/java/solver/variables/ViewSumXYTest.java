@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.sum.Sum;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 

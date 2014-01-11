@@ -34,9 +34,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -53,7 +51,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class AbsView extends IntView {
 
     public AbsView(IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);

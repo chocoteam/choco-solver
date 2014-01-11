@@ -35,7 +35,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -51,7 +50,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
+public class MinusView extends IntView {
 
 
     public MinusView(final IntVar var, Solver solver) {

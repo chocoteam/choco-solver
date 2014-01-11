@@ -48,7 +48,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 20/06/13
  */
-public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore> implements IMonitorRestart {
+public class NogoodStoreFromRestarts extends Constraint<IntVar> implements IMonitorRestart {
 
     static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
@@ -57,9 +57,12 @@ public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore>
     CircularQueue<Decision<IntVar>> decisions;
     CircularQueue<INogood> nogoods;
 
+	final PropNogoodStore png;
+
     public NogoodStoreFromRestarts(IntVar[] vars, Solver solver) {
         super(vars, solver);
-        setPropagators(new PropNogoodStore(vars));
+		png = new PropNogoodStore(vars);
+        setPropagators(png);
         decisions = new CircularQueue<Decision<IntVar>>(16);
         nogoods = new CircularQueue<INogood>(16);
 
@@ -75,9 +78,9 @@ public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore>
         try {
             while (!nogoods.isEmpty()) {
                 INogood ng = nogoods.pollFirst();
-                propagators[0].addNogood(ng);
+				png.addNogood(ng);
             }
-            propagators[0].unitPropagation();
+			png.unitPropagation();
         } catch (ContradictionException e) {
             solver.getSearchLoop().interrupt(MSG_NGOOD);
         }

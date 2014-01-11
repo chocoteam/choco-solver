@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;

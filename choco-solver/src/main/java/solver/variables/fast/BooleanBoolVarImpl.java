@@ -55,7 +55,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
+public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -86,7 +86,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
 
     private DisposableRangeIterator _riterator;
 
-    private BoolVar<IEnumDelta> not;
+    private BoolVar not;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -480,7 +480,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     }
 
     @Override
-    public BoolVar<IEnumDelta> not() {
+    public BoolVar not() {
         if (not == null) {
             not = VF.not(this);
             not._setNot(this);

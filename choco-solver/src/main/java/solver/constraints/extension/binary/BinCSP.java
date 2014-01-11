@@ -36,7 +36,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 26/07/12
  */
-public class BinCSP extends IntConstraint<IntVar> {
+public class BinCSP extends IntConstraint {
 
     public enum Algorithm {
         AC2001

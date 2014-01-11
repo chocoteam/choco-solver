@@ -31,9 +31,10 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-import util.sort.ArraySort;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
+import util.sort.ArraySort;
+
 import java.io.Serializable;
 import java.util.Comparator;
 

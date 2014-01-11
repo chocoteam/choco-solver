@@ -35,7 +35,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -46,9 +45,9 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<ID, IV> {
+public class EqView extends IntView {
 
-    public EqView(IV var, Solver solver) {
+    public EqView(IntVar var, Solver solver) {
         super("eq(" + var.getName() + ")", var, solver);
     }
 

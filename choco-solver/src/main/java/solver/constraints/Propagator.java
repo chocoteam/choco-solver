@@ -120,7 +120,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Declaring constraint
      */
-    protected Constraint<V, Propagator<V>> constraint;
+    protected Constraint constraint;
     protected final PropagatorPriority priority;
     protected final boolean reactToFineEvt;
     protected final Solver solver;

@@ -42,7 +42,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class Max extends IntConstraint<IntVar> {
+public class Max extends IntConstraint {
 
     IntVar X, Y, Z;
 

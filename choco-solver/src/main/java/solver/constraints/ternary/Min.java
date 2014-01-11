@@ -42,7 +42,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class Min extends IntConstraint<IntVar> {
+public class Min extends IntConstraint {
 
     IntVar X, Y, Z;
 

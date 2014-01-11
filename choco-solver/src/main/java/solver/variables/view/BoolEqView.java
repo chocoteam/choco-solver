@@ -31,7 +31,6 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.BoolVar;
-import solver.variables.delta.IEnumDelta;
 import util.ESat;
 
 /**
@@ -41,10 +40,13 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
+public final class BoolEqView extends EqView implements BoolVar {
 
-    public BoolEqView(BoolVar<IEnumDelta> var, Solver solver) {
+	protected final BoolVar var;
+
+    public BoolEqView(BoolVar var, Solver solver) {
         super(var, solver);
+		this.var = var;
     }
 
     @Override
@@ -68,12 +70,12 @@ public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> im
     }
 
     @Override
-    public BoolVar<IEnumDelta> not() {
+    public BoolVar not() {
         return var.not();
     }
 
     @Override
-    public void _setNot(BoolVar<IEnumDelta> not) {
+    public void _setNot(BoolVar not) {
         throw new SolverException("Unexpected call to BoolEqView._setNot()");
     }
 

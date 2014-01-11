@@ -41,7 +41,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
-public class Lex extends IntConstraint<IntVar> {
+public class Lex extends IntConstraint {
 
     public final int n;
     public final boolean strict;

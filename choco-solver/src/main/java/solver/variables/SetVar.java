@@ -29,7 +29,6 @@ package solver.variables;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
@@ -42,7 +41,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 15 nov. 2012
  */
-public interface SetVar extends Variable<SetDelta> {
+public interface SetVar extends Variable {
 
 	/**
 	 * Constant used for enumerating elements in the envelope or the kernel of a SetVar.

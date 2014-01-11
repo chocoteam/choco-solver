@@ -43,7 +43,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 30 sept. 2010
  */
-public class InverseChanneling extends IntConstraint<IntVar> {
+public class InverseChanneling extends IntConstraint {
 
     protected IntVar[] X, Y;
     protected final int n, minX, minY;

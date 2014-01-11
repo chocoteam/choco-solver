@@ -37,9 +37,9 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Propagator<I>> {
+public abstract class IntConstraint extends Constraint<IntVar> {
 
-    public IntConstraint(I[] vars, Solver solver) {
+    public IntConstraint(IntVar[] vars, Solver solver) {
         super(vars, solver);
     }
 
@@ -53,11 +53,6 @@ public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Prop
             }
         }
         return isSatisfied(tuple);
-    }
-
-    @Override
-    public I[] getVariables() {
-        return vars;
     }
 
     /**

@@ -36,7 +36,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -52,7 +51,7 @@ import util.tools.MathUtils;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class ScaleView extends IntView {
 
     public final int cste;
 

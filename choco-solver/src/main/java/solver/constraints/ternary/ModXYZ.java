@@ -42,7 +42,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class ModXYZ extends IntConstraint<IntVar> {
+public class ModXYZ extends IntConstraint {
 
     public ModXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
         super(new IntVar[]{X, Y, Z}, solver);

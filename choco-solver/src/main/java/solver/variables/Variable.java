@@ -44,7 +44,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends Identity, Serializable, Comparable<Variable> {
+public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -159,7 +159,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      *
      * @return the delta domain of the variable
      */
-    D getDelta();
+    IDelta getDelta();
 
     /**
      * Create a delta, if necessary, in order to observe removed values of a this.

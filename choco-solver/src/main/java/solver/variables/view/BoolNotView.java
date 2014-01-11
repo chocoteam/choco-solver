@@ -34,7 +34,6 @@ import solver.explanations.VariableState;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.VariableFactory;
-import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import util.ESat;
@@ -46,10 +45,13 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
-public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
+public final class BoolNotView extends IntView implements BoolVar {
+
+	protected final BoolVar var;
 
     public BoolNotView(BoolVar var, Solver solver) {
         super("not(" + var.getName() + ")", var, solver);
+		this.var = var;
     }
 
     @Override
@@ -208,12 +210,12 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     }
 
     @Override
-    public BoolVar<IEnumDelta> not() {
+    public BoolVar not() {
         return var;
     }
 
     @Override
-    public void _setNot(BoolVar<IEnumDelta> not) {
+    public void _setNot(BoolVar not) {
         assert not == var;
     }
 

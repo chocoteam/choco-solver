@@ -28,32 +28,7 @@ package parser.flatzinc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gnu.trove.list.array.TIntArrayList;
-
-import parser.flatzinc.ast.declaration.*;
-import parser.flatzinc.ast.expression.*;
-import parser.flatzinc.FZNException;
-import parser.flatzinc.FZNLayout;
-import parser.flatzinc.ast.FConstraint;
-import parser.flatzinc.ast.FGoal;
-import parser.flatzinc.ast.FParameter;
-import parser.flatzinc.ast.FVariable;
-import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.FGoal;
-
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.ResolutionPolicy;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import org.antlr.v4.runtime.tree.*;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 public interface Flatzinc4ParserListener extends ParseTreeListener {
 	void enterId_expr(Flatzinc4Parser.Id_exprContext ctx);

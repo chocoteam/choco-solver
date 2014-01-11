@@ -42,7 +42,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-public class Member extends IntConstraint<IntVar> {
+public class Member extends IntConstraint {
 
     final TIntHashSet values;
     final int lb, ub;

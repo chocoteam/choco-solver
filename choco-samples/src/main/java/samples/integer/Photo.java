@@ -32,7 +32,6 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.sum.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;

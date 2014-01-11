@@ -43,7 +43,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class Count extends IntConstraint<IntVar> {
+public class Count extends IntConstraint {
 
     private final int occval;
 

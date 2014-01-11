@@ -43,7 +43,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 21/03/12
  */
-public class DistanceXYC extends IntConstraint<IntVar> {
+public class DistanceXYC extends IntConstraint {
 
     final int cste;
     final Operator operator;

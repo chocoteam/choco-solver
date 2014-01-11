@@ -2,7 +2,6 @@ package solver.variables.view;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.Arrays;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -16,6 +15,8 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
+
+import java.util.Arrays;
 
 /**
  *

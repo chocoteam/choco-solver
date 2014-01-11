@@ -37,7 +37,7 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18/07/12
  */
-public class RealConstraint extends Constraint<RealVar,RealPropagator> {
+public class RealConstraint extends Constraint<RealVar> {
 
     //***********************************************************************************
     // CONSTRUCTORS

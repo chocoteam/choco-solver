@@ -40,7 +40,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/03/12
  */
-public class Maximum extends IntConstraint<IntVar> {
+public class Maximum extends IntConstraint {
 
     public Maximum(IntVar val, IntVar[] vars, Solver solver) {
         super(ArrayUtils.append(new IntVar[]{val}, vars), solver);

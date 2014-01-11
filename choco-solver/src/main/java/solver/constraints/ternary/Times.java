@@ -40,7 +40,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class Times extends IntConstraint<IntVar> {
+public class Times extends IntConstraint {
 
     IntVar X, Y, Z;
 

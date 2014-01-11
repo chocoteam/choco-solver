@@ -40,7 +40,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 26/07/12
  */
-public class Minimum extends IntConstraint<IntVar> {
+public class Minimum extends IntConstraint {
 
 	public Minimum(IntVar val, IntVar[] vars, Solver solver) {
 		super(ArrayUtils.append(new IntVar[]{val}, vars), solver);

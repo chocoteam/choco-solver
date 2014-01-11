@@ -78,14 +78,14 @@ import java.util.Arrays;
  * @see solver.propagation.IPropagationEngine
  * @since 0.01
  */
-public class Constraint<V extends Variable, P extends Propagator<V>> implements Serializable, IPriority {
+public class Constraint<V extends Variable> implements Serializable, IPriority {
 
     private static final long serialVersionUID = 1L;
 
     protected final Solver solver;
 
     protected V[] vars;
-    protected P[] propagators;
+    protected Propagator[] propagators;
 
     protected int staticPropagationPriority;
 
@@ -117,11 +117,11 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      *
      * @return an array of {@link Propagator}.
      */
-    public P[] getPropagators() {
+    public Propagator[] getPropagators() {
         return propagators;
     }
 
-    public P getPropagator(int i) {
+    public Propagator getPropagator(int i) {
         return propagators[i];
     }
 
@@ -181,7 +181,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      *
      * @param propagators list of <code>Propagator</code> objects.
      */
-    public final void setPropagators(P... propagators) {
+    public final void setPropagators(Propagator... propagators) {
         this.propagators = propagators;
         for (int i = 0; i < propagators.length; i++) {
             propagators[i].defineIn(this);
@@ -194,13 +194,13 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      * @param mPropagators list of <code>Propagator</code> objects to add.
      */
     @SuppressWarnings({"unchecked"})
-    public final void addPropagators(P... mPropagators) {
+    public final void addPropagators(Propagator... mPropagators) {
         if (propagators == null) {
             setPropagators(mPropagators);
         } else {
             // add the new propagators at the end of the current array
-            P[] tmp = this.propagators;
-            this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
+			Propagator[] tmp = this.propagators;
+            this.propagators = new Propagator[tmp.length + mPropagators.length];
             System.arraycopy(tmp, 0, propagators, 0, tmp.length);
             System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
             for (int i = tmp.length; i < tmp.length + mPropagators.length; i++) {

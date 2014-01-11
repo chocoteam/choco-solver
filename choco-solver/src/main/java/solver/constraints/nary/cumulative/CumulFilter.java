@@ -31,6 +31,7 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
+
 import java.io.Serializable;
 
 /**

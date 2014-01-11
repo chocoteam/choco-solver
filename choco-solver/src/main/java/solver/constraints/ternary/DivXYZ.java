@@ -37,7 +37,7 @@ import util.ESat;
  * User: chameau
  * Date: 28/06/12
  */
-public class DivXYZ extends IntConstraint<IntVar> {
+public class DivXYZ extends IntConstraint {
 
     IntVar X, Y, Z;
 

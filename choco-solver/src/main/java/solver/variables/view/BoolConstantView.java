@@ -33,7 +33,6 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.VF;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import util.ESat;
 
 /**
@@ -45,7 +44,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> {
+public class BoolConstantView extends ConstantView implements BoolVar {
 
     private BoolVar not;
 
@@ -74,7 +73,7 @@ public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> 
     }
 
     @Override
-    public BoolVar<IntDelta> not() {
+    public BoolVar not() {
         if (not == null) {
             not = VF.not(this);
             not._setNot(this);
@@ -83,7 +82,7 @@ public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> 
     }
 
     @Override
-    public void _setNot(BoolVar<IntDelta> not) {
+    public void _setNot(BoolVar not) {
         this.not = not;
     }
 
