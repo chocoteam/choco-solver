@@ -34,7 +34,6 @@
 
 package samples;
 
-import samples.AbstractProblem;
 import solver.Solver;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;

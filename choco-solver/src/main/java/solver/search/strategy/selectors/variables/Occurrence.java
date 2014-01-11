@@ -28,7 +28,6 @@
 package solver.search.strategy.selectors.variables;
 
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
 import solver.variables.Variable;
 
 /**

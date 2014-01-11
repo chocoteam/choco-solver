@@ -33,14 +33,11 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Propagator;
-import solver.constraints.nary.sum.Sum;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.VariableFactory;
 
 /**
