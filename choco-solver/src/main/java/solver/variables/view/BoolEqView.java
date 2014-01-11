@@ -41,10 +41,13 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public final class BoolEqView extends EqView<BoolVar> implements BoolVar {
+public final class BoolEqView extends EqView implements BoolVar {
+
+	protected final BoolVar var;
 
     public BoolEqView(BoolVar var, Solver solver) {
         super(var, solver);
+		this.var = var;
     }
 
     @Override

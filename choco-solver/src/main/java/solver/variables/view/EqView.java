@@ -46,9 +46,9 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public class EqView<IV extends IntVar> extends IntView<IV> {
+public class EqView extends IntView {
 
-    public EqView(IV var, Solver solver) {
+    public EqView(IntVar var, Solver solver) {
         super("eq(" + var.getName() + ")", var, solver);
     }
 

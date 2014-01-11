@@ -60,10 +60,10 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntView<IV>>
+public abstract class IntView extends AbstractVariable<IntView>
         implements IView, IntVar {
 
-    protected final IV var;
+    protected final IntVar var;
 
     protected IntDelta delta;
 
@@ -71,7 +71,7 @@ public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntVie
 
     protected DisposableRangeIterator _riterator;
 
-    public IntView(String name, IV var, Solver solver) {
+    public IntView(String name, IntVar var, Solver solver) {
         super(name, solver);
         this.var = var;
         this.delta = NoDelta.singleton;

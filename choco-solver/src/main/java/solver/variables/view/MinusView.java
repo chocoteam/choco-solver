@@ -51,7 +51,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView<IntVar> {
+public class MinusView extends IntView {
 
 
     public MinusView(final IntVar var, Solver solver) {
