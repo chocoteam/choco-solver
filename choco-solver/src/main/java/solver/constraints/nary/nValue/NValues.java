@@ -29,13 +29,10 @@ package solver.constraints.nary.nValue;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import util.ESat;
 import util.tools.ArrayUtils;
-
-import java.util.BitSet;
 
 /**
  * NValues constraint
@@ -43,12 +40,12 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class NValues extends IntConstraint {
+public class NValues extends Constraint<IntVar> {
 
     public enum Type {
         at_most_BC {
             @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver) {
+            public void addProp(IntVar[] vars, IntVar nValues, Constraint<IntVar> cons, Solver solver) {
                 cons.addPropagators(new PropAtMostNValues_BC(vars, nValues));
                 boolean enumDom = false;
                 for (IntVar v : vars) {
@@ -63,7 +60,7 @@ public class NValues extends IntConstraint {
         },
         at_most_greedy {
             @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver) {
+            public void addProp(IntVar[] vars, IntVar nValues, Constraint<IntVar> cons, Solver solver) {
 				cons.addPropagators(
 						new AMNV_Gci_MD_R13(vars,nValues,Differences.NONE),
 						new AMNV_Gci_R_R13(vars,nValues,Differences.NONE,30));
@@ -71,12 +68,12 @@ public class NValues extends IntConstraint {
         },
         at_least_AC {
             @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver) {
+            public void addProp(IntVar[] vars, IntVar nValues, Constraint<IntVar> cons, Solver solver) {
                 cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues));
             }
         };
 
-        public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver solver);
+        public abstract void addProp(IntVar[] vars, IntVar nValues, Constraint<IntVar> cons, Solver solver);
     }
 
     /**
@@ -139,29 +136,6 @@ public class NValues extends IntConstraint {
             }
         }
         return values;
-    }
-
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int minval = tuple[0];
-        for (int i = 0; i < tuple.length - 1; i++) {
-            if (minval > tuple[i])
-                minval = tuple[i];
-        }
-        BitSet values = new BitSet(tuple.length - 1);
-        for (int i = 0; i < tuple.length - 1; i++) {
-            values.set(tuple[i] - minval);
-        }
-        if (values.cardinality() == tuple[tuple.length - 1]) {
-            return ESat.TRUE;
-        }
-        return ESat.FALSE;
     }
 
     public String toString() {

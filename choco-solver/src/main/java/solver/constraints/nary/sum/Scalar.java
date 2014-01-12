@@ -29,9 +29,8 @@ package solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * <br/>
@@ -41,7 +40,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class Scalar extends IntConstraint {
+public class Scalar extends Constraint<IntVar> {
 
     final int[] coeffs;
     final int b;
@@ -106,15 +105,6 @@ public class Scalar extends IntConstraint {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int sum = 0;
-        for (int i = 0; i < tuple.length; i++) {
-            sum += coeffs[i] * tuple[i];
-        }
-        return ESat.eval(sum == b);
-    }
 
     @Override
     public String toString() {

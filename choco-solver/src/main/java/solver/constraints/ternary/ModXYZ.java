@@ -28,11 +28,10 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.ESat;
 import util.tools.StringUtils;
 
 /**
@@ -42,7 +41,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class ModXYZ extends IntConstraint {
+public class ModXYZ extends Constraint<IntVar> {
 
     public ModXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
         super(new IntVar[]{X, Y, Z}, solver);
@@ -57,14 +56,6 @@ public class ModXYZ extends IntConstraint {
                 new PropTimesZ(t1, Y, t2),
                 new PropSumEq(new IntVar[]{Z, t2}, X)
         );
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (tuple[1] == 0) {
-            return ESat.eval(tuple[0] == tuple[2]);
-        }
-        return ESat.eval(tuple[0] % tuple[1] == tuple[2]);
     }
 
     @Override

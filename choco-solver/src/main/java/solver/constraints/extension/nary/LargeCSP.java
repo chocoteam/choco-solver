@@ -27,9 +27,8 @@
 package solver.constraints.extension.nary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * <br/>
@@ -37,7 +36,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class LargeCSP extends IntConstraint {
+public class LargeCSP extends Constraint<IntVar> {
 
     public static enum Type {
         AC32, AC2001, FC
@@ -60,11 +59,5 @@ public class LargeCSP extends IntConstraint {
                 setPropagators(new PropLargeGAC3rmPositive(vars, (IterTuplesTable) relation));
                 break;
         }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        //return ESat.eval(relation.isConsistent(tuple));
-        return propagators[0].isEntailed();
     }
 }

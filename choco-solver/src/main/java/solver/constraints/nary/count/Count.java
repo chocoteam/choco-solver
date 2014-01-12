@@ -27,9 +27,8 @@
 package solver.constraints.nary.count;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -43,7 +42,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class Count extends IntConstraint {
+public class Count extends Constraint<IntVar> {
 
     private final int occval;
 
@@ -51,17 +50,6 @@ public class Count extends IntConstraint {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
         this.occval = value;
         setPropagators(new PropCount_AC(vars, value, limit));
-    }
-
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int nbVars = vars.length - 1;
-        int cptVal = 0;
-        for (int i = 0; i < nbVars; i++) {
-            if (tuple[i] == occval) cptVal++;
-        }
-        return ESat.eval(cptVal == tuple[nbVars]);
     }
 
     @Override

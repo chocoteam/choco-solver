@@ -30,9 +30,7 @@ package solver.constraints.unary;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraint;
 import solver.variables.IntVar;
-import util.ESat;
 
 import java.util.Arrays;
 
@@ -42,7 +40,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-public class NotMember extends IntConstraint {
+public class NotMember extends Constraint<IntVar> {
 
     final TIntHashSet values;
     final int lb, ub;
@@ -62,16 +60,6 @@ public class NotMember extends IntConstraint {
         this.ub = upperbound;
         setPropagators(new PropNotMemberBound(var, lowerbound, upperbound, false));
     }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (values != null) {
-            return ESat.eval(!values.contains(tuple[0]));
-        } else {
-            return ESat.eval(tuple[0] < lb || tuple[0] > ub);
-        }
-    }
-
 
     @Override
     public String toString() {

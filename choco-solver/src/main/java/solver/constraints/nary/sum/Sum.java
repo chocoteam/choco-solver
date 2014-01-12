@@ -27,9 +27,8 @@
 
 package solver.constraints.nary.sum;
 
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -38,7 +37,7 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 21/07/13
  */
-public class Sum extends IntConstraint {
+public class Sum extends Constraint<IntVar> {
 
     public Sum(IntVar[] x, IntVar y) {
         super(ArrayUtils.append(x,new IntVar[]{y}), y.getSolver());
@@ -46,16 +45,6 @@ public class Sum extends IntConstraint {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int sum = 0;
-		int n = tuple.length-1;
-        for (int i = 0; i < n; i++) {
-            sum += tuple[i];
-        }
-		return ESat.eval(sum == tuple[n]);
-    }
 
     @Override
     public String toString() {

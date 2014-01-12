@@ -32,3 +32,4 @@ The CHANGES.md file starts at this version.
 - Remove Delta type from Variable 
 - Remove Propagator type from Constraints
 - Remove Variable type from views
+* Remove IntConstraint

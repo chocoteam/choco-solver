@@ -27,9 +27,8 @@
 package solver.constraints.binary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -39,16 +38,11 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-public class Absolute extends IntConstraint {
+public class Absolute extends Constraint<IntVar> {
 
     public Absolute(IntVar X, IntVar Y, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);
         setPropagators(new PropAbsolute(X, Y));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(Math.abs(tuple[1]) == tuple[0]);
     }
 
     @Override

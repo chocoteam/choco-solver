@@ -26,12 +26,10 @@
  */
 package solver.constraints.nary.among;
 
-import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 import java.util.Arrays;
@@ -49,7 +47,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class Among extends IntConstraint {
+public class Among extends Constraint<IntVar> {
 
     private final int[] values;
 
@@ -59,18 +57,6 @@ public class Among extends IntConstraint {
         this.values = setValues.toArray();
         Arrays.sort(this.values);
         setPropagators(new PropAmongGAC(this.vars, values));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        TIntSet _values = new TIntHashSet(values);
-        int nb = 0;
-        for (int i = 0; i < tuple.length - 1; i++) {
-            if (_values.contains(tuple[i])) {
-                nb++;
-            }
-        }
-        return ESat.eval(nb == tuple[tuple.length - 1]);
     }
 
     @Override

@@ -29,13 +29,11 @@ package solver.constraints.nary.globalcardinality;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 import java.util.ArrayList;
@@ -47,7 +45,7 @@ import java.util.List;
  * @author Hadrien Cambazard, Charles Prud'homme, Jean-Guillaume Fages
  * @since 16/06/11
  */
-public class GlobalCardinality extends IntConstraint {
+public class GlobalCardinality extends Constraint<IntVar> {
 
     private final int nbvars;
     private final int[] values;
@@ -100,23 +98,6 @@ public class GlobalCardinality extends IntConstraint {
         }
         buf.append(">)");
         return new String(buf);
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int n2 = values.length;
-        int[] occ = new int[n2];
-        for (int i = 0; i < nbvars; i++) {
-            if (map.containsKey(tuple[i])) {
-                occ[map.get(tuple[i])]++;
-            }
-        }
-        for (int i = 0; i < n2; i++) {
-            if (tuple[i + nbvars] != occ[i]) {
-                return ESat.FALSE;
-            }
-        }
-        return ESat.TRUE;
     }
 
     //	// need to fix propagators before using this

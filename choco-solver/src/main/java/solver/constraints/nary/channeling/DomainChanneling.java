@@ -27,10 +27,9 @@
 package solver.constraints.nary.channeling;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -45,37 +44,12 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 04/08/11
  */
-public class DomainChanneling extends IntConstraint {
-
-	private final int offSet, n;
+public class DomainChanneling extends Constraint<IntVar> {
 
     public DomainChanneling(BoolVar[] bs, IntVar x, int offSet, Solver solver) {
         super(ArrayUtils.append(bs, new IntVar[]{x}), solver);
 		assert x.hasEnumeratedDomain();
 		setPropagators(new PropEnumDomainChanneling(bs, x, offSet));
-		this.offSet = offSet;
-		this.n = bs.length;
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-		if(tuple[tuple.length - 1]<offSet || tuple[tuple.length - 1]>offSet+n-1){
-			return ESat.FALSE;
-		}
-		if(tuple[tuple[tuple.length - 1]-offSet]!=1){
-			return ESat.FALSE;
-		}
-		int bit1 = -1;
-        for (int i = 0; i < tuple.length - 1; i++) {
-			if(tuple[i]==1){
-				if(bit1==-1){
-					bit1 = i;
-				}else {
-					return ESat.FALSE;
-				}
-			}
-        }
-        return ESat.TRUE;
     }
 
     @Override

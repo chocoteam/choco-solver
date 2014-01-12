@@ -28,11 +28,10 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.fast.IntervalIntVarImpl;
-import util.ESat;
 import util.tools.StringUtils;
 
 /**
@@ -42,7 +41,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class Min extends IntConstraint {
+public class Min extends Constraint<IntVar> {
 
     IntVar X, Y, Z;
 
@@ -66,11 +65,6 @@ public class Min extends IntConstraint {
             solver.post(IntConstraintFactory.minimum(z, a, b));
             return z;
         }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] == Math.min(tuple[1], tuple[2]));
     }
 
     @Override

@@ -26,14 +26,11 @@
  */
 package solver.constraints.nary.automata;
 
-import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.variables.IntVar;
-import util.ESat;
-import util.iterators.DisposableIntIterator;
 import util.tools.ArrayUtils;
 
 /**
@@ -42,7 +39,7 @@ import util.tools.ArrayUtils;
  * @author Julien Menana, Charles Prud'homme
  * @since 18/07/11
  */
-public class MultiCostRegular extends IntConstraint {
+public class MultiCostRegular extends Constraint<IntVar> {
 
     /**
      * The finite automaton which defines the regular language the variable sequence must belong
@@ -54,8 +51,6 @@ public class MultiCostRegular extends IntConstraint {
      */
     protected StoredDirectedMultiGraph graph;
 
-    private final int offset;
-
     /**
      * Constructs a multi-cost-regular constraint propagator
      *
@@ -66,56 +61,11 @@ public class MultiCostRegular extends IntConstraint {
      */
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
         super(ArrayUtils.append(vars, CR), solver);
-        this.offset = vars.length;
         this.pi = pi;
         setPropagators(new PropMultiCostRegular(vars, CR, pi));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int word[] = new int[offset];
-        System.arraycopy(tuple, 0, word, 0, word.length);
-        if (!pi.run(word)) {
-            System.err.println("Word is not accepted by the automaton");
-            System.err.print("{" + word[0]);
-            for (int i = 1; i < word.length; i++)
-                System.err.print("," + word[i]);
-            System.err.println("}");
-
-            return ESat.FALSE;
-        }
-        int coffset = vars.length - offset;
-        int[] gcost = new int[coffset];
-        for (int l = 0; l < graph.layers.length - 2; l++) {
-            DisposableIntIterator it = graph.layers[l].getIterator();
-            while (it.hasNext()) {
-                int orig = it.next();
-                DisposableIntIterator arcIter = graph.GNodes.outArcs[orig].getIterator();
-                while (arcIter.hasNext()) {
-                    int arc = arcIter.next();
-                    for (int i = 0; i < coffset; i++)
-                        gcost[i] += graph.GArcs.originalCost[arc][i];
-                }
-                arcIter.dispose();
-
-            }
-            it.dispose();
-        }
-        for (int i = 0; i < gcost.length; i++) {
-            if (!vars[coffset + i].instantiated()) {
-                LoggerFactory.getLogger("solver").error("z[" + i + "] in MCR should be instantiated : " + vars[coffset + i]);
-                return ESat.FALSE;
-            } else if (vars[coffset + i].getValue() != gcost[i]) {
-                LoggerFactory.getLogger("solver").error("cost: " + gcost[i] + " != z:" + vars[coffset + i].getValue());
-                return ESat.FALSE;
-            }
-
-        }
-        return ESat.TRUE;
     }
 
     public void setGraph(StoredDirectedMultiGraph graph) {
         this.graph = graph;
     }
-
 }

@@ -26,9 +26,8 @@
  */
 package solver.constraints.extension.binary;
 
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * <br/>
@@ -36,7 +35,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 26/07/12
  */
-public class BinCSP extends IntConstraint {
+public class BinCSP extends Constraint<IntVar> {
 
     public enum Algorithm {
         AC2001
@@ -50,11 +49,5 @@ public class BinCSP extends IntConstraint {
             default:
                 setPropagators(new PropBinAC2001(x, y, relation));
         }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        //return ESat.eval(relation.isConsistent(tuple));
-        return propagators[0].isEntailed();
     }
 }

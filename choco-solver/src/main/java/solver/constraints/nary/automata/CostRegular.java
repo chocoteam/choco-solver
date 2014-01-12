@@ -32,7 +32,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.costregular.Arc;
@@ -40,9 +40,6 @@ import solver.constraints.nary.automata.structure.costregular.StoredValuedDirect
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import util.ESat;
-import util.iterators.DisposableIntIterator;
-import util.objects.StoredIndexedBipartiteSet;
 import util.tools.ArrayUtils;
 
 import java.util.*;
@@ -54,7 +51,7 @@ import java.util.*;
  * @author Julien Menana, Charles Prud'homme
  * @since 06/06/11
  */
-public class CostRegular extends IntConstraint {
+public class CostRegular extends Constraint<IntVar> {
 
     final StoredValuedDirectedMultiGraph graph;
     final ICostAutomaton cautomaton;
@@ -68,31 +65,6 @@ public class CostRegular extends IntConstraint {
         this.cautomaton = cautomaton;
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
         setPropagators(new PropCostRegular(vars, cautomaton, graph));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int first = this.graph.sourceIndex;
-        boolean found;
-        double cost = 0.0;
-        for (int i = 0; i < tuple.length - 1; i++) {
-            found = false;
-            StoredIndexedBipartiteSet bs = this.graph.GNodes.outArcs[first];
-            DisposableIntIterator it = bs.getIterator();
-            while (!found && it.hasNext()) {
-                int idx = it.next();
-                if (this.graph.GArcs.values[idx] == tuple[i]) {
-                    found = true;
-                    first = this.graph.GArcs.dests[idx];
-                    cost += this.graph.GArcs.costs[idx];
-                }
-            }
-            if (!found)
-                return ESat.FALSE;
-
-        }
-        int intCost = tuple[tuple.length - 1];
-        return ESat.eval(cost == intCost && cautomaton.run(Arrays.copyOf(tuple, tuple.length - 1)));
     }
 
     @Override

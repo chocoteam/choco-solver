@@ -28,7 +28,7 @@
 package solver.constraints.nary.channeling;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.PropAllDiffBC;
 import solver.variables.IntVar;
@@ -43,7 +43,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 30 sept. 2010
  */
-public class InverseChanneling extends IntConstraint {
+public class InverseChanneling extends Constraint<IntVar> {
 
     protected IntVar[] X, Y;
     protected final int n, minX, minY;
@@ -92,23 +92,6 @@ public class InverseChanneling extends IntConstraint {
             }
         }
         return true;
-    }
-
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < n; i++) {
-            int j = tuple[i] - minX;
-            if (tuple[j] != (i + minY)) {
-                return ESat.FALSE;
-            }
-        }
-        return ESat.TRUE;
     }
 
     @Override
