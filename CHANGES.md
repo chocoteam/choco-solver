@@ -28,3 +28,7 @@ The CHANGES.md file starts at this version.
 ????
 -------------------
 * Fix #148: update release script
+* Less Java Genericity:
+- Remove Delta type from Variable 
+- Remove Propagator type from Constraints
+- Remove Variable type from views
