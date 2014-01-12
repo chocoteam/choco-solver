@@ -27,11 +27,10 @@
 package solver.constraints.binary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -43,7 +42,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 21/03/12
  */
-public class DistanceXYC extends IntConstraint {
+public class DistanceXYC extends Constraint<IntVar> {
 
     final int cste;
     final Operator operator;
@@ -57,21 +56,6 @@ public class DistanceXYC extends IntConstraint {
         this.cste = cste;
         this.operator = operator;
         setPropagators(new PropDistanceXYC(vars, operator, cste));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (operator == Operator.EQ) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) == cste);
-        } else if (operator == Operator.LT) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) < cste);
-        } else if (operator == Operator.GT) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) > cste);
-        } else if (operator == Operator.NQ) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) != cste);
-        } else {
-            throw new SolverException("operator not known");
-        }
     }
 
     @Override

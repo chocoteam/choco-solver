@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.alldifferent.conditions;
 
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import util.ESat;
@@ -37,7 +37,7 @@ import util.ESat;
  * No well defined level of consistency (yet)
  * @author Jean-Guillaume Fages
  */
-public class ConditionnalAllDifferent extends IntConstraint {
+public class ConditionnalAllDifferent extends Constraint<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -69,20 +69,6 @@ public class ConditionnalAllDifferent extends IntConstraint {
 	//***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < vars.length; i++) {
-			if(condition.holdOnVar(vars[i]))
-				for (int j = 0; j < i; j++) {
-					if(condition.holdOnVar(vars[j]))
-						if (tuple[i] == tuple[j]) {
-							return ESat.FALSE;
-						}
-				}
-		}
-        return ESat.TRUE;
-    }
 
     @Override
     public ESat isEntailed() {

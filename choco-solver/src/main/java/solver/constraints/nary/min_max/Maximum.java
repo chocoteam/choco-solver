@@ -27,9 +27,8 @@
 package solver.constraints.nary.min_max;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -40,7 +39,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/03/12
  */
-public class Maximum extends IntConstraint {
+public class Maximum extends Constraint<IntVar> {
 
     public Maximum(IntVar val, IntVar[] vars, Solver solver) {
         super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
@@ -52,16 +51,5 @@ public class Maximum extends IntConstraint {
 		if(enu){
 			addPropagators(new PropMax(vars,val));
 		}
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int M = tuple[1];
-        for (int i = 2; i < tuple.length; i++) {
-            if (M < tuple[i]) {
-                M = tuple[i];
-            }
-        }
-        return ESat.eval(tuple[0] == M);
     }
 }

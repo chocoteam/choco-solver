@@ -34,7 +34,6 @@ import solver.constraints.unary.PropLessOrEqualXC;
 import solver.constraints.unary.PropNotEqualXC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * A constraint dedicated to arithmetic operations.
@@ -50,7 +49,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 21/06/12
  */
-public class Arithmetic extends IntConstraint {
+public class Arithmetic extends Constraint<IntVar> {
 
     protected final Operator op1, op2; // operators.
     protected final int cste;
@@ -198,83 +197,6 @@ public class Arithmetic extends IntConstraint {
                     break;
                 default:
                     throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-            }
-        }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (!isBinary) {
-            switch (op1) {
-                case EQ:
-                    return ESat.eval(tuple[0] == cste);
-                case NQ:
-                    return ESat.eval(tuple[0] != cste);
-                case GE:
-                    return ESat.eval(tuple[0] >= cste);
-                case GT:
-                    return ESat.eval(tuple[0] > cste);
-                case LE:
-                    return ESat.eval(tuple[0] <= cste);
-                case LT:
-                    return ESat.eval(tuple[0] < cste);
-                default:
-                    return ESat.UNDEFINED;
-
-            }
-        } else {
-            if (op1 == Operator.PL) {
-                switch (op2) {
-                    case EQ:
-                        return ESat.eval(tuple[0] + tuple[1] == cste);
-                    case NQ:
-                        return ESat.eval(tuple[0] + tuple[1] != cste);
-                    case GE:
-                        return ESat.eval(tuple[0] + tuple[1] >= cste);
-                    case GT:
-                        return ESat.eval(tuple[0] + tuple[1] > cste);
-                    case LE:
-                        return ESat.eval(tuple[0] + tuple[1] <= cste);
-                    case LT:
-                        return ESat.eval(tuple[0] + tuple[1] < cste);
-                    default:
-                        return ESat.UNDEFINED;
-                }
-            } else if (op1 == Operator.MN) {
-                switch (op2) {
-                    case EQ:
-                        return ESat.eval(tuple[0] == tuple[1] + cste);
-                    case NQ:
-                        return ESat.eval(tuple[0] != tuple[1] + cste);
-                    case GE:
-                        return ESat.eval(tuple[0] >= tuple[1] + cste);
-                    case GT:
-                        return ESat.eval(tuple[0] > tuple[1] + cste);
-                    case LE:
-                        return ESat.eval(tuple[0] <= tuple[1] + cste);
-                    case LT:
-                        return ESat.eval(tuple[0] < tuple[1] + cste);
-                    default:
-                        return ESat.UNDEFINED;
-                }
-            } else {
-                int _cste = cste * (op2 == Operator.PL ? 1 : -1);
-                switch (op1) {
-                    case EQ:
-                        return ESat.eval(tuple[0] == tuple[1] + _cste);
-                    case NQ:
-                        return ESat.eval(tuple[0] != tuple[1] + _cste);
-                    case GE:
-                        return ESat.eval(tuple[0] >= tuple[1] + _cste);
-                    case GT:
-                        return ESat.eval(tuple[0] > tuple[1] + _cste);
-                    case LE:
-                        return ESat.eval(tuple[0] <= tuple[1] + _cste);
-                    case LT:
-                        return ESat.eval(tuple[0] < tuple[1] + _cste);
-                    default:
-                        return ESat.UNDEFINED;
-                }
             }
         }
     }

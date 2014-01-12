@@ -28,7 +28,7 @@
 package solver.constraints.nary.alldifferent;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.binary.PropNotEqualX_Y;
 import solver.variables.IntVar;
@@ -39,7 +39,7 @@ import util.ESat;
  * Ensures that all variables from VARS take a different value.
  * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
  */
-public class AllDifferent extends IntConstraint {
+public class AllDifferent extends Constraint<IntVar> {
 
     public static enum Type {
         AC, BC, weak_BC, NEQS, DEFAULT
@@ -90,45 +90,26 @@ public class AllDifferent extends IntConstraint {
         }
     }
 
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < vars.length; i++) {
-            for (int j = 0; j < i; j++) {
-                if (tuple[i] == tuple[j]) {
-                    return ESat.FALSE;
-                }
-            }
-        }
-        return ESat.TRUE;
-    }
-
     @Override
     public ESat isEntailed() {
+		boolean allInst = true;
         for (IntVar v : vars) {
             if (v.instantiated()) {
                 int vv = v.getValue();
                 for (IntVar w : vars) {
-                    if (w != v) {
-                        if (w.instantiated()) {
-                            if (vv == w.getValue()) {
-                                return ESat.FALSE;
-                            }
-                        } else {
-                            return ESat.UNDEFINED;
-                        }
+                    if (w != v && w.instantiated() && vv == w.getValue()) {
+						return ESat.FALSE;
                     }
                 }
             } else {
-                return ESat.UNDEFINED;
+				allInst = false;
             }
         }
-        return ESat.TRUE;
+		if(allInst){
+			return ESat.TRUE;
+		}else{
+			return ESat.UNDEFINED;
+		}
     }
 
     public String toString() {

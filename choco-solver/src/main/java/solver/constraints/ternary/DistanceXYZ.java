@@ -27,11 +27,10 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * <br/>
@@ -39,7 +38,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 06/04/12
  */
-public class DistanceXYZ extends IntConstraint {
+public class DistanceXYZ extends Constraint<IntVar> {
 
     Operator operator;
 
@@ -51,18 +50,5 @@ public class DistanceXYZ extends IntConstraint {
         }
         this.operator = op;
         setPropagators(new PropDistanceXYZ(vars, op));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (operator == Operator.EQ) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) == tuple[2]);
-        } else if (operator == Operator.LT) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) < tuple[2]);
-        } else if (operator == Operator.GT) {
-            return ESat.eval(Math.abs(tuple[0] - tuple[1]) > tuple[2]);
-        } else {
-            throw new SolverException("operator not known");
-        }
     }
 }

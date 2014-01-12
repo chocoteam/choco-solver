@@ -27,9 +27,8 @@
 package solver.constraints.nary.lex;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -41,7 +40,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
-public class Lex extends IntConstraint {
+public class Lex extends Constraint<IntVar> {
 
     public final int n;
     public final boolean strict;
@@ -51,24 +50,6 @@ public class Lex extends IntConstraint {
         this.strict = strict;
         this.n = X.length;
         setPropagators(new PropLex(X, Y, strict));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < n; i++) {
-            int xi = tuple[i];
-            int yi = tuple[i + n];
-            if (xi < yi) {
-                return ESat.TRUE;
-            } else if (xi > yi) {
-                return ESat.FALSE;
-            }//else xi == yi
-        }
-        if (strict) {
-            return ESat.FALSE;
-        } else {
-            return ESat.eval(tuple[n - 1] == tuple[n - 1 + n]);
-        }
     }
 
     @Override

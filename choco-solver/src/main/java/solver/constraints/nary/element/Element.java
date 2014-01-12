@@ -28,10 +28,9 @@
 package solver.constraints.nary.element;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.binary.PropElement;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -42,7 +41,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 20 sept. 2010
  */
-public class Element extends IntConstraint {
+public class Element extends Constraint<IntVar> {
 
     final int[] values;
     final int offset;
@@ -76,20 +75,6 @@ public class Element extends IntConstraint {
 				new PropElementV_fast(value,values,index,offset,true),
 				new PropElementV_fast(value,values,index,offset,true)
 		);
-    }
-
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (values.length == 0) {
-            // The values start at tuple[2]
-            int i = tuple[1] - offset + 2;
-            return ESat.eval(i >= 2 && i < tuple.length && tuple[i] == tuple[0]);
-        }
-        return ESat.eval(
-                !(tuple[1] - this.offset >= values.length || tuple[1] - this.offset < 0)
-                        && this.values[tuple[1] - this.offset] == tuple[0]
-        );
     }
 
     public String toString() {

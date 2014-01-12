@@ -27,11 +27,10 @@
 package solver.constraints.nary.automata;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import util.ESat;
 
 /**
  * <br/>
@@ -39,7 +38,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 06/06/11
  */
-public class Regular extends IntConstraint {
+public class Regular extends Constraint<IntVar> {
 
     final IAutomaton automaton;
 
@@ -47,11 +46,6 @@ public class Regular extends IntConstraint {
         super(vars, solver);
         this.automaton = automaton;
         setPropagators(new PropRegular(vars, automaton));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(automaton.run(tuple));
     }
 
     @Override

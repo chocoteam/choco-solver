@@ -27,9 +27,8 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * Z = X/Y
@@ -37,7 +36,7 @@ import util.ESat;
  * User: chameau
  * Date: 28/06/12
  */
-public class DivXYZ extends IntConstraint {
+public class DivXYZ extends Constraint<IntVar> {
 
     IntVar X, Y, Z;
 
@@ -47,11 +46,5 @@ public class DivXYZ extends IntConstraint {
         this.Y = y;
         this.Z = z;
         setPropagators(new PropDivXYZ(x, y, z));
-    }
-
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] / tuple[1] == tuple[2]);
     }
 }

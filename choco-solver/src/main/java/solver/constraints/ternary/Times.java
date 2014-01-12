@@ -28,10 +28,9 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * X*Y = Z
@@ -40,7 +39,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class Times extends IntConstraint {
+public class Times extends Constraint<IntVar> {
 
     IntVar X, Y, Z;
 
@@ -72,11 +71,6 @@ public class Times extends IntConstraint {
             throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
 //            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
         }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] * tuple[1] == tuple[2]);
     }
 
     @Override

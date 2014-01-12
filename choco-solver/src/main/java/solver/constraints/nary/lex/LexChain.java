@@ -27,9 +27,8 @@
 package solver.constraints.nary.lex;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
@@ -38,7 +37,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public class LexChain extends IntConstraint {
+public class LexChain extends Constraint<IntVar> {
 
     private final boolean strict;
     private final int n, x;
@@ -57,11 +56,6 @@ public class LexChain extends IntConstraint {
         this.n = vars[0].length;
         this.x = vars.length;
         setPropagators(new PropLexChain(vars, strict));
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(checkTuple(0, tuple));
     }
 
     /**
