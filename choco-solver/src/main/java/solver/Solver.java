@@ -416,7 +416,7 @@ public class Solver implements Serializable {
 	 * @param strategies the search strategy to use.
 	 */
 	public void set(AbstractStrategy... strategies) {
-		this.search.set(ISF.sequencer(strategies));
+		this.set(ISF.sequencer(strategies));
 	}
 
     /**
