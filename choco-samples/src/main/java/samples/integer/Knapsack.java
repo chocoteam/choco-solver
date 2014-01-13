@@ -37,7 +37,6 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -116,7 +115,7 @@ public class Knapsack extends AbstractProblem {
     public void configureSearch() {
         AbstractStrategy strat = IntStrategyFactory.inputOrder_InDomainMin(objects);
         // trick : top-down maximization
-        solver.set(new StrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN, true), strat));
+        solver.set(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN, true), strat);
     }
 
     @Override

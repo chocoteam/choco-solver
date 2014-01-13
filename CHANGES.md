@@ -28,8 +28,10 @@ The CHANGES.md file starts at this version.
 ????
 -------------------
 * Fix #148: update release script
+* Refactoring  #149
 * Less Java Genericity:
 - Remove Delta type from Variable 
 - Remove Propagator type from Constraints
 - Remove Variable type from views
 * Remove IntConstraint
+* StrategySequencer now created automatically

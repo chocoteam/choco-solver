@@ -49,6 +49,7 @@ import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
+import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 import solver.variables.graph.GraphVar;
@@ -396,16 +397,29 @@ public class Solver implements Serializable {
         this.search = searchLoop;
     }
 
-    /**
-     * Override the default search strategy to use in <code>this</code>.
-     * <p/>
-     * <b>BEWARE:</b> the default strategy requires variables to be integer.
-     *
-     * @param strategies the search strategy to use.
-     */
-    public void set(AbstractStrategy strategies) {
-        this.search.set(strategies);
-    }
+	/**
+	 * Override the default search strategies to use in <code>this</code>.
+	 * In case many strategies are given, they will be called in sequence:
+	 * The first strategy in parameter is first called to compute a decision, if possible.
+	 * If it cannot provide a new decision, the second strategy is called ...
+	 * and so on, until the last strategy.
+	 *
+	 * <p/>
+	 * <b>BEWARE:</b> the default strategy requires variables to be integer.
+	 *
+	 * @param strategies the search strategies to use.
+	 */
+	public void set(AbstractStrategy... strategies) {
+		if(strategies==null || strategies.length==0){
+			throw new UnsupportedOperationException("no search strategy has been specified");
+		}
+		if(strategies.length==1){
+			search.set(strategies[0]);
+		}else{
+			search.set(ISF.sequencer(strategies));
+		}
+
+	}
 
     /**
      * Attach a propagation engine <code>this</code>.

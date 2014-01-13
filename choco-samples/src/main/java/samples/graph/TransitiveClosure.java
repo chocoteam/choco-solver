@@ -35,7 +35,6 @@ import solver.constraints.gary.basic.PropKArcs;
 import solver.constraints.gary.basic.PropTransitivity;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.ISF;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
@@ -99,10 +98,8 @@ public class TransitiveClosure extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		// tries to find the smallest graph first
-		solver.set(new StrategiesSequencer(
-				ISF.inputOrder_InDomainMin(new IntVar[]{nbArcs}),
-				GraphStrategyFactory.graphLexico(tc)
-		));
+		solver.set(ISF.inputOrder_InDomainMin(new IntVar[]{nbArcs}),
+				GraphStrategyFactory.graphLexico(tc));
 	}
 
 	@Override

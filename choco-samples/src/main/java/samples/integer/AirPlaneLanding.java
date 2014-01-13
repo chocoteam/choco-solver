@@ -41,7 +41,6 @@ import solver.search.limits.FailCounter;
 import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -190,10 +189,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-        solver.set(new StrategiesSequencer(solver.getEnvironment(),
+        solver.set(
                 IntStrategyFactory.random(bVars, seed),
                 IntStrategyFactory.inputOrder_InDomainMin(planes)
-        ));
+        );
     }
 
     @Override

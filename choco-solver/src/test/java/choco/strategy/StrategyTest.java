@@ -32,10 +32,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.search.strategy.ISF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -112,7 +112,7 @@ public class StrategyTest {
             asgs[i] = IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{variables[i]});
         }
 
-        StrategiesSequencer sts = new StrategiesSequencer(env, asgs);
+        AbstractStrategy sts = ISF.sequencer(asgs);
 
         s.set(sts);
 
