@@ -397,26 +397,28 @@ public class Solver implements Serializable {
         this.search = searchLoop;
     }
 
-    /**
-     * Override the default search strategy to use in <code>this</code>.
-     * <p/>
-     * <b>BEWARE:</b> the default strategy requires variables to be integer.
-     *
-     * @param strategy the search strategy to use.
-     */
-    public void set(AbstractStrategy strategy) {
-        this.search.set(strategy);
-    }
-
 	/**
 	 * Override the default search strategies to use in <code>this</code>.
+	 * In case many strategies are given, they will be called in sequence:
+	 * The first strategy in parameter is first called to compute a decision, if possible.
+	 * If it cannot provide a new decision, the second strategy is called ...
+	 * and so on, until the last strategy.
+	 *
 	 * <p/>
 	 * <b>BEWARE:</b> the default strategy requires variables to be integer.
 	 *
-	 * @param strategies the search strategy to use.
+	 * @param strategies the search strategies to use.
 	 */
 	public void set(AbstractStrategy... strategies) {
-		this.set(ISF.sequencer(strategies));
+		if(strategies==null || strategies.length==0){
+			throw new UnsupportedOperationException("no search strategy has been specified");
+		}
+		if(strategies.length==1){
+			search.set(strategies[0]);
+		}else{
+			search.set(ISF.sequencer(strategies));
+		}
+
 	}
 
     /**
