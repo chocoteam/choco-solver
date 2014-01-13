@@ -49,6 +49,7 @@ import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
+import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 import solver.variables.graph.GraphVar;
@@ -401,11 +402,22 @@ public class Solver implements Serializable {
      * <p/>
      * <b>BEWARE:</b> the default strategy requires variables to be integer.
      *
-     * @param strategies the search strategy to use.
+     * @param strategy the search strategy to use.
      */
-    public void set(AbstractStrategy strategies) {
-        this.search.set(strategies);
+    public void set(AbstractStrategy strategy) {
+        this.search.set(strategy);
     }
+
+	/**
+	 * Override the default search strategies to use in <code>this</code>.
+	 * <p/>
+	 * <b>BEWARE:</b> the default strategy requires variables to be integer.
+	 *
+	 * @param strategies the search strategy to use.
+	 */
+	public void set(AbstractStrategy... strategies) {
+		this.search.set(ISF.sequencer(strategies));
+	}
 
     /**
      * Attach a propagation engine <code>this</code>.

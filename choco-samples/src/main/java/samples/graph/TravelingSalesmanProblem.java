@@ -39,7 +39,6 @@ import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SMF;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -131,12 +130,12 @@ public class TravelingSalesmanProblem extends AbstractProblem {
                 System.out.println("classical top-down minimization");
                 break;
             case 1:
-                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strategy));
+                solver.set(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strategy);
 				SMF.limitSolution(solver,2);
                 System.out.println("bottom-up minimization");
                 break;
             case 2:
-                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC, true), strategy));
+                solver.set(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC, true), strategy);
                 System.out.println("dichotomic minimization");
                 break;
             default:

@@ -31,7 +31,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.LogicalConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -91,11 +90,8 @@ public class PertReified extends Pert {
     @Override
     public void configureSearch() {
         solver.set(
-                new StrategiesSequencer(
-                        solver.getEnvironment(),
-                        IntStrategyFactory.inputOrder_InDomainMin(bvars),
-                        IntStrategyFactory.inputOrder_InDomainMin(vars)
-                )
+				IntStrategyFactory.inputOrder_InDomainMin(bvars),
+				IntStrategyFactory.inputOrder_InDomainMin(vars)
         );
     }
 
