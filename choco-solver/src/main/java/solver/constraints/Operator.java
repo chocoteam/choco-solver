@@ -58,9 +58,24 @@ public enum Operator {
         operators.put("-", Operator.MN);
     }
 
-    public static Operator get(String name) {
-        return operators.get(name);
-    }
+	public static Operator get(String name) {
+		return operators.get(name);
+	}
+
+	@Override
+	public String toString() {
+		switch (this){
+			case LT:return "<";
+			case GT:return ">";
+			case LE:return "<=";
+			case GE:return ">=";
+			case NQ:return "!=";
+			case EQ:return "=";
+			case PL:return "+";
+			case MN:return "-";
+			default:throw new UnsupportedOperationException();
+		}
+	}
 
 	/**
 	 * Flips the direction of an inequality

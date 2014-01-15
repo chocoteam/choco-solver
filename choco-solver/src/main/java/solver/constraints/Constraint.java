@@ -76,7 +76,7 @@ public class Constraint implements Serializable {
 	 */
     public Constraint(String name, Propagator... propagators) {
 		if(propagators==null || propagators.length==0){
-			throw new UnsupportedOperationException("cannot create a constraint without propagators");
+			throw new UnsupportedOperationException("cannot create a constraint without propagators ");
 		}
 		this.name = name;
         this.propagators = propagators;
