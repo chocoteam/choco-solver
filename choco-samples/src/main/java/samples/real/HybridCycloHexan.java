@@ -82,12 +82,14 @@ public class HybridCycloHexan extends AbstractProblem {
 		z = VariableFactory.real("z", -1.0e8, 1.0e8, precision, solver);
 
 		vars = new RealVar[]{x, y, z};
-		RealConstraint rcons = new RealConstraint(solver);
-		rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
-				"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
-				"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
-				Ibex.HC4_NEWTON, vars);
-		solver.post(rcons);
+		solver.post(new RealConstraint(
+				"CycloHexan",
+				"{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
+						"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
+						"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
+				Ibex.HC4_NEWTON,
+				vars)
+		);
 	}
 
 	@Override

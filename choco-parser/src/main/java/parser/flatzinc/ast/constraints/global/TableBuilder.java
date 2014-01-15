@@ -33,6 +33,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.extension.ExtensionalBinRelation;
 import solver.constraints.extension.binary.CouplesTable;
@@ -88,7 +89,7 @@ public class TableBuilder implements IBuilder {
                             new int[]{couple[0], min[0], max[0], couple[1], min[1], max[1]});
                 }
             }
-            return new Constraint[]{IntConstraintFactory.table(x[0], x[1], relation, "AC2001")};
+            return new Constraint[]{ICF.table(x[0], x[1], relation)};
         } else {
             int[] o = new int[x.length];
             int[] d = new int[x.length];

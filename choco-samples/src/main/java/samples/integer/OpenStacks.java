@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.SatFactory;
@@ -125,7 +126,7 @@ public class OpenStacks extends AbstractProblem {
 
 
         objective = VariableFactory.bounded("OBJ", 0, nc * np, solver);
-        solver.post(new Maximum(objective, open, solver));
+        solver.post(ICF.maximum(objective, open));
     }
 
     @Override

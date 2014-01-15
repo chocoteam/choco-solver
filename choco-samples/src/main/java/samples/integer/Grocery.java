@@ -83,9 +83,7 @@ public class Grocery extends AbstractProblem {
         // is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
         // which uses a long to handle such a product
 
-        Constraint large = new Constraint(tmp, solver);
-        large.addPropagators(new PropLargeProduct(tmp, 711000000));
-        solver.post(large);
+        solver.post(new Constraint("LargeProduct",new PropLargeProduct(tmp, 711000000)));
 
         // symmetry breaking
         solver.post(IntConstraintFactory.arithm(itemCost[0], "<=", itemCost[1]));

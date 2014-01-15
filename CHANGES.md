@@ -33,5 +33,11 @@ The CHANGES.md file starts at this version.
 - Remove Delta type from Variable 
 - Remove Propagator type from Constraints
 - Remove Variable type from views
-* Remove IntConstraint
 * StrategySequencer now created automatically
+* Strong constraints refactoring: A Constraint is defined as a set of propagators which can be reified
+- propagators must all be given to the super constructor
+- Remove IntConstraint
+- Remove many constraint classes
+- Remove isEntailed() from Constraint (isSatisfied does the job)
+- RealConstraint slightly changes
+* Move obsolete code to extra modume

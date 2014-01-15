@@ -109,7 +109,8 @@ public enum Attribute implements IAttribute<Arc> {
     }, CARITY {
         @Override
         public int eval(Arc p) {
-            return p.prop.getConstraint().getVariables().length;
+			throw new UnsupportedOperationException("no longer available (since CHOCO-3-2-0 refactoring)");
+//            return p.prop.getConstraint().getVariables().length;
         }
 
         @Override
