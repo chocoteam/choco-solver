@@ -49,7 +49,7 @@ public class NogoodTest {
     public void test1() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
-        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars, solver);
+        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
         solver.post(ngs);
         solver.set(ISF.random(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(30);
@@ -72,7 +72,7 @@ public class NogoodTest {
     public void test2() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);
-        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars, solver);
+        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
         solver.post(ngs);
         solver.set(ISF.random(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(32);

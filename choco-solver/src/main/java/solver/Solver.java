@@ -168,16 +168,8 @@ public class Solver implements Serializable {
         ONE = new BoolConstantView("1", 1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
-        TRUE = new Constraint(this) {
-            {
-                setPropagators(new PropTrue(this.getSolver()));
-            }
-        };
-        FALSE = new Constraint(this) {
-            {
-                setPropagators(new PropFalse(this.getSolver()));
-            }
-        };
+        TRUE = new Constraint("TRUE cstr",new PropTrue(ONE));
+        FALSE = new Constraint("FALSE cstr",new PropFalse(ZERO));
     }
 
     /**
@@ -527,7 +519,6 @@ public class Solver implements Serializable {
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            cs[i].declare();
             if (dynAdd) {
                 engine.dynamicAddition(cs[i], cut);
             }
@@ -701,52 +692,26 @@ public class Solver implements Serializable {
      * @throws ContradictionException
      */
     public void propagate() throws ContradictionException {
-//        assert isValid();
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(new SevenQueuesPropagatorEngine(this));
         }
         engine.propagate();
     }
 
-    /**
-     * Return, whether or not, the current CSP is satisfied.
-     * <p/>
-     * Pre-requisite: this method assumes that all variables are instantiated.
-     * <p/>
-     * Otherwise, consider calling {@link Solver#isEntailed()}.
-     * <p/>
-     * Given the current assignments, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     */
+	/**
+	 * Return the current state of the CSP.
+	 * <p/>
+	 * Given the current domains, it can return a value among:
+	 * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
+	 * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
+	 * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
+	 * <p/>
+	 * Presumably, not all variables are instantiated.
+	 */
     public ESat isSatisfied() {
-        ESat check = ESat.TRUE;
-        for (int c = 0; c < cIdx; c++) {
-            ESat satC = cstrs[c].isSatisfied();
-            if (!ESat.TRUE.equals(satC)) {
-                if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
-                    LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
-                }
-                check = ESat.FALSE;
-            }
-        }
-        return check;
-    }
-
-    /**
-     * Return the current state of the CSP.
-     * <p/>
-     * Given the current domains, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-     * <p/>
-     * Presumably, not all variables are instantiated.
-     */
-    public ESat isEntailed() {
         int OK = 0;
         for (int c = 0; c < cIdx; c++) {
-            ESat satC = cstrs[c].isEntailed();
+            ESat satC = cstrs[c].isSatisfied();
             if (ESat.FALSE == satC) {
                 if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
                     LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);

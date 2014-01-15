@@ -41,17 +41,10 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class Max extends Constraint<IntVar> {
+public class Max extends Constraint {
 
-    IntVar X, Y, Z;
-
-    public Max(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
-//        setPropagators(new PropMax(X, Y, Z, solver, this));
-        setPropagators(new PropMaxBC(X, Y, Z));
+    public Max(IntVar X, IntVar Y, IntVar Z) {
+        super("Max",new PropMaxBC(X, Y, Z));
     }
 
     public static IntVar var(IntVar a, IntVar b) {
@@ -66,10 +59,5 @@ public class Max extends Constraint<IntVar> {
             solver.post(IntConstraintFactory.maximum(z, a, b));
             return z;
         }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s = MAX(%s, %s)", X.getName(), Y.getName(), Z.getName());
     }
 }

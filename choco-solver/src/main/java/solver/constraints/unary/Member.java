@@ -27,12 +27,8 @@
 
 package solver.constraints.unary;
 
-import gnu.trove.set.hash.TIntHashSet;
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.variables.IntVar;
-
-import java.util.Arrays;
 
 /**
  * <br/>
@@ -40,38 +36,34 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-public class Member extends Constraint<IntVar> {
+public class Member extends Constraint {
 
-    final TIntHashSet values;
+	final IntVar var;
+    final int[] values;
     final int lb, ub;
 
-    public Member(IntVar var, int[] values, Solver solver) {
-        super(new IntVar[]{var}, solver);
-        this.values = new TIntHashSet(values);
+    public Member(IntVar var, int[] values) {
+        super("Member",new PropMemberEnum(var, values));
+		this.var = var;
+        this.values = values;
         lb = 0;
         ub = 0;
-        setPropagators(new PropMemberEnum(var, this.values, false));
     }
 
-    public Member(IntVar var, int lowerbound, int upperbound, Solver solver) {
-        super(new IntVar[]{var}, solver);
+    public Member(IntVar var, int lowerbound, int upperbound) {
+        super("Member",new PropMemberBound(var, lowerbound, upperbound, false));
         this.values = null;
+		this.var = var;
         this.lb = lowerbound;
         this.ub = upperbound;
-        setPropagators(new PropMemberBound(var, lowerbound, upperbound, false));
-    }
-
-    @Override
-    public String toString() {
-        return vars[0].toString() + " in " + (values == null ? "[" + lb + "," + ub + "]" : Arrays.toString(values.toArray()));
     }
 
 	@Override
 	public Constraint makeOpposite(){
 		if(values==null){
-			return new NotMember(vars[0],lb,ub,solver);
+			return new NotMember(var,lb,ub);
 		}else{
-			return new NotMember(vars[0],values.toArray(),solver);
+			return new NotMember(var,values);
 		}
 	}
 }

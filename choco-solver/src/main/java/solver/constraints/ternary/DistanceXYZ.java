@@ -26,29 +26,39 @@
  */
 package solver.constraints.ternary;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>
+ * |X-Y| OP Z
  *
  * @author Charles Prud'homme
  * @since 06/04/12
  */
-public class DistanceXYZ extends Constraint<IntVar> {
-
-    Operator operator;
+public class DistanceXYZ extends Constraint {
 
 
-    public DistanceXYZ(IntVar x, IntVar y, Operator op, IntVar z, Solver solver) {
-        super(new IntVar[]{x, y, z}, solver);
-        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
-            throw new SolverException("Unexpected operator for distance");
-        }
-        this.operator = op;
-        setPropagators(new PropDistanceXYZ(vars, op));
-    }
+	final IntVar X,Y,Z;
+	final Operator OP;
+
+
+	public DistanceXYZ(IntVar x, IntVar y, Operator op, IntVar z) {
+		super("DistanceXYZ "+op.name(),new PropDistanceXYZ(ArrayUtils.toArray(x,y,z), op));
+		if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
+			throw new SolverException("Unexpected operator for distance");
+		}
+		this.X=x;
+		this.Y=y;
+		this.Z=z;
+		this.OP = op;
+	}
+
+//  will be ok once every operator is be supported
+//	public Constraint makeOpposite(){
+//		return new DistanceXYZ(X,Y,Operator.getOpposite(OP),Z);
+//	}
 }

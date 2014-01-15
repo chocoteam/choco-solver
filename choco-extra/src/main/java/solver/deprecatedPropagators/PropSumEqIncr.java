@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.deprecatedPropagators;
+package solver.deprecatedPropagators;
 
 import memory.IStateInt;
 import solver.constraints.Propagator;

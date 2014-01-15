@@ -84,17 +84,16 @@ public class SantaClaude extends AbstractProblem {
         }
         solver.post(IntConstraintFactory.sum(kid_price, total_cost));
 
-        RealConstraint ave_cons = new RealConstraint(solver);
-        StringBuilder function = new StringBuilder("(");
+        StringBuilder funBuilder = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {
-            function.append("+{").append(i).append('}');
+			funBuilder.append("+{").append(i).append('}');
         }
-        function.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
+		funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
         RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
+		String function = funBuilder.toString();
 
-        ave_cons.addFunction(function.toString(), all_vars);
-        solver.post(ave_cons);
+        solver.post(new RealConstraint(function, all_vars));
     }
 
     @Override

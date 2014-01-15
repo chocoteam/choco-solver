@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.exception.SolverException;
@@ -42,41 +41,26 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 21/03/12
  */
-public class DistanceXYC extends Constraint<IntVar> {
+public class DistanceXYC extends Constraint {
 
-    final int cste;
+	final IntVar X,Y;
+    final int C;
     final Operator operator;
 
 
-    public DistanceXYC(IntVar X, IntVar Y, Operator operator, int cste, Solver solver) {
-        super(ArrayUtils.toArray(X, Y), solver);
+    public DistanceXYC(IntVar X, IntVar Y, Operator operator, int C) {
+        super("DistanceXYC "+ operator.name(),new PropDistanceXYC(ArrayUtils.toArray(X, Y), operator, C));
         if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
             throw new SolverException("Unexpected operator for distance");
         }
-        this.cste = cste;
+		this.X = X;
+		this.Y = Y;
+        this.C = C;
         this.operator = operator;
-        setPropagators(new PropDistanceXYC(vars, operator, cste));
     }
 
-    @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append("|").append(vars[0].getName()).append(" - ").append(vars[1].getName()).append("|");
-        switch (operator) {
-            case EQ:
-                st.append("=");
-                break;
-            case GT:
-                st.append(">");
-                break;
-            case LT:
-                st.append("<");
-                break;
-            case NQ:
-                st.append("=/=");
-                break;
-        }
-        st.append(cste);
-        return st.toString();
-    }
+//	will be ok once every operator is supported
+//	public Constraint makeOpposite(){
+//		return new DistanceXYC(X,Y,Operator.getOpposite(operator),C);
+//	}
 }

@@ -35,16 +35,12 @@
 package samples.sandbox;
 
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
+import solver.constraints.*;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.channeling.PropGraphRelation;
 import solver.constraints.gary.channeling.PropRelationGraph;
 import solver.constraints.gary.channeling.relations.GraphRelation;
 import solver.constraints.gary.channeling.relations.GraphRelationFactory;
-import solver.constraints.nary.min_max.Maximum;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -117,9 +113,8 @@ public class Dobble {
                 addGlobalGraphNValues(solver, flatVars, nbUsedSymbols, nbSymbolsPerCard);
             }
             final IntVar max = VariableFactory.offset(nbUsedSymbols, -1);
-            solver.post(new Maximum(max, flatVars, solver));
-            Constraint csym = new Constraint(solver);
-            csym.addPropagators(new PropTakeFirstValues(flatVars, max, solver, csym));
+            solver.post(ICF.maximum(max, flatVars));
+			solver.post(new Constraint("Sym",new PropTakeFirstValues(flatVars, max)));
         }
         // search strategy
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(flatVars));
@@ -142,11 +137,13 @@ public class Dobble {
                 }
             }
         }
-        Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal);
+
+		solver.post(GraphConstraintFactory.nCliques(g, nValTotal));
         GraphRelation rel = GraphRelationFactory.equivalence(flatJeu);
-        gc.addPropagators(new PropRelationGraph(flatJeu, g, rel));
-        gc.addPropagators(new PropGraphRelation(flatJeu, g, rel));
-        solver.post(gc);
+		solver.post(new Constraint("GraphRelation",
+				new PropRelationGraph(flatJeu, g, rel),
+				new PropGraphRelation(flatJeu, g, rel)
+		));
     }
 
     // NValue which considers the allDifferent on each card
@@ -164,11 +161,12 @@ public class Dobble {
                 gpair.getEnvelopGraph().addEdge(k1, k2);
             }
         }
-        Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues);
+		solver.post(GraphConstraintFactory.nCliques(gpair, nValues));
         GraphRelation rel = GraphRelationFactory.equivalence(flatIJ);
-        gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, rel));
-        gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, rel));
-        solver.post(gcpair);
+		solver.post(new Constraint("GraphRelation",
+				new PropRelationGraph(flatIJ, gpair, rel),
+				new PropGraphRelation(flatIJ, gpair, rel)
+		));
     }
 
     private static class PropTakeFirstValues extends Propagator<IntVar> {
@@ -176,7 +174,7 @@ public class Dobble {
         IIntDeltaMonitor[] idms;
         IntProcedure proc;
 
-        protected PropTakeFirstValues(IntVar[] variables, final IntVar max, Solver solver, Constraint c) {
+        protected PropTakeFirstValues(IntVar[] variables, final IntVar max) {
             super(variables, PropagatorPriority.LINEAR, true);
             int n = vars.length;
             idms = new IIntDeltaMonitor[n];

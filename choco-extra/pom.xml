@@ -14,7 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>choco</groupId>
-            <artifactId>choco-solver</artifactId>
+            <artifactId>choco-parser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>choco</groupId>
+            <artifactId>choco-samples</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

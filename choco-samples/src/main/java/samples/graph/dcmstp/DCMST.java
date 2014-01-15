@@ -153,16 +153,19 @@ public class DCMST extends AbstractProblem {
             }
         }
         // tree constraint
-        Constraint gc = new GraphConstraintFactory().spanning_tree(graph);
-        // cost constraint
-        gc.addPropagators(new PropTreeCostScalar(graph, totalCost, dist));
+		solver.post(new GraphConstraintFactory().spanning_tree(graph));
         // max degree constraint
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, dMax));
-        gc.addPropagators(new PropLowDegrees(graph, dMax));
-        // redundant lagrangian constraint
+		solver.post(new Constraint("Graph_deg",
+				new PropNodeDegree_AtMost(graph, dMax),
+				new PropLowDegrees(graph, dMax))
+		);
+        // (redundant) lagrangian propagator
         relax = new PropLagr_DCMST(graph, totalCost, dMax, dist, ub != optimum);
-        gc.addPropagators((Propagator) relax);
-        solver.post(gc);
+        // cost constraint
+		solver.post(new Constraint("Graph_cost",
+				new PropTreeCostScalar(graph, totalCost, dist),
+				(Propagator) relax)
+		);
     }
 
     @Override

@@ -27,21 +27,14 @@
 
 package solver.constraints.gary;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Constraint;
 import solver.constraints.gary.arborescences.PropNTree;
 import solver.constraints.gary.basic.PropKLoops;
 import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
-import util.ESat;
-import util.graphOperations.GraphTools;
-import util.graphOperations.connectivity.StrongConnectivityFinder;
-import util.objects.graphs.DirectedGraph;
 import util.objects.graphs.Orientation;
-import util.objects.setDataStructures.ISet;
 
 /**
  * Constraint for tree partitioning an anti-arborscence
@@ -56,14 +49,6 @@ import util.objects.setDataStructures.ISet;
 public class NTree extends Constraint {
 
     //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    DirectedGraphVar g;
-    IntVar nTree;
-    StrongConnectivityFinder SCCfinder;
-
-    //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
@@ -74,102 +59,11 @@ public class NTree extends Constraint {
      * @param nTree the expected number of trees (IntVar)
      */
     public NTree(DirectedGraphVar graph, IntVar nTree) {
-        super(new Variable[]{graph, nTree}, graph.getSolver());
-        setPropagators(
+        super("Graph_NTree",
                 new PropNodeDegree_AtLeast(graph, Orientation.SUCCESSORS, 1),
                 new PropNodeDegree_AtMost(graph, Orientation.SUCCESSORS, 1),
                 new PropKLoops(graph, nTree),
-                new PropNTree(graph, nTree));
-        this.g = graph;
-        this.nTree = nTree;
-    }
-
-
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    @Override
-    public ESat isSatisfied() {
-        DirectedGraphVar g = (DirectedGraphVar) vars[0];
-        int n = g.getEnvelopGraph().getNbNodes();
-        IntVar nTree = (IntVar) vars[1];
-        int MINTREE = calcMinTree();
-        int MAXTREE = calcMaxTree();
-        ISet nei;
-        if (nTree.getLB() <= MAXTREE && nTree.getUB() >= MINTREE) {
-            ISet act = g.getEnvelopGraph().getActiveNodes();
-            DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(), false);
-            for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
-                if (g.getEnvelopGraph().getSuccessorsOf(node).getSize() < 1 || g.getKernelGraph().getSuccessorsOf(node).getSize() > 1) {
-                    return ESat.FALSE;
-                }
-                nei = g.getEnvelopGraph().getSuccessorsOf(node);
-                for (int suc = nei.getFirstElement(); suc >= 0; suc = nei.getNextElement()) {
-                    Grs.addArc(suc, node);
-                    if (suc == node) {
-                        Grs.addArc(node, n);
-                        Grs.addArc(n, node);
-                    }
-                }
-            }
-            int[] numDFS = GraphTools.performDFS(n, Grs);
-            boolean rootFound = false;
-            for (int i : numDFS) {
-                if (rootFound && i == 0) return ESat.FALSE;
-                if (i == 0) rootFound = true;
-            }
-        } else {
-            return ESat.FALSE;
-        }
-        if (g.instantiated()) {
-            return ESat.TRUE;
-        } else {
-            return ESat.UNDEFINED;
-        }
-    }
-
-    private int calcMaxTree() {
-        int ct = 0;
-        ISet act = g.getEnvelopGraph().getActiveNodes();
-        for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
-            if (g.getEnvelopGraph().arcExists(node, node)) {
-                ct++;
-            }
-        }
-        return ct;
-    }
-
-    private int calcMinTree() {
-        int n = g.getEnvelopGraph().getNbNodes();
-        if (SCCfinder == null) {
-            SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
-        }
-        int[] sccOf = SCCfinder.getNodesSCC();
-        int node;
-        TIntArrayList sinks = new TIntArrayList();
-        boolean looksSink;
-        ISet nei;
-        for (int scc = SCCfinder.getNbSCC() - 1; scc >= 0; scc--) {
-            looksSink = true;
-            node = SCCfinder.getSCCFirstNode(scc);
-            while (node != -1) {
-                nei = g.getEnvelopGraph().getSuccessorsOf(node);
-                for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
-                    if (sccOf[suc] != sccOf[node]) {
-                        looksSink = false;
-                    }
-                }
-                if (!looksSink) {
-                    node = -1;
-                } else {
-                    node = SCCfinder.getNextNode(node);
-                }
-            }
-            if (looksSink) {
-                sinks.add(scc);
-            }
-        }
-        return sinks.size();
+                new PropNTree(graph, nTree)
+		);
     }
 }

@@ -32,7 +32,7 @@
  * Time: 18:32
  */
 
-package solver.constraints.deprecatedPropagators;
+package solver.deprecatedPropagators;
 
 import memory.IStateInt;
 import solver.constraints.Propagator;

@@ -89,10 +89,7 @@ public class TransitiveClosure extends AbstractProblem{
 		}
 
 		// CONSTRAINTS
-		Constraint shell = new Constraint(solver);
-		shell.addPropagators(new PropTransitivity(tc));	// transitivity
-		shell.addPropagators(new PropKArcs(tc,nbArcs));	// arc count
-		solver.post(shell);
+		solver.post(new Constraint("Graph_TC",new PropTransitivity(tc),new PropKArcs(tc,nbArcs)));
 	}
 
 	@Override

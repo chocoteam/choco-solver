@@ -52,10 +52,9 @@ public class PropMemberEnum extends Propagator<IntVar> {
     final TIntHashSet values;
 
 
-    public PropMemberEnum(IntVar var, TIntHashSet values,
-                          boolean reactOnPromotion) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
-        this.values = values;
+    public PropMemberEnum(IntVar var, int[] values) {
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+		this.values = new TIntHashSet(values);
     }
 
     @Override

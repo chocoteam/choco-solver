@@ -28,24 +28,38 @@ package parser.flatzinc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNSimulator;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
-import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.flatzinc.ast.*;
+
+import gnu.trove.list.array.TIntArrayList;
+
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
-import solver.ResolutionPolicy;
-import solver.Solver;
+import parser.flatzinc.FZNException;
+import parser.flatzinc.FZNLayout;
+import parser.flatzinc.ast.FConstraint;
+import parser.flatzinc.ast.FGoal;
+import parser.flatzinc.ast.FParameter;
+import parser.flatzinc.ast.FVariable;
+import parser.flatzinc.ast.Datas;
+import parser.flatzinc.ast.FGoal;
 
-import java.util.ArrayList;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.ResolutionPolicy;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Parser extends Parser {

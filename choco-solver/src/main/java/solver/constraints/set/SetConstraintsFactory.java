@@ -28,9 +28,12 @@
 
 package solver.constraints.set;
 
-import solver.Solver;
 import solver.constraints.Constraint;
-import solver.variables.*;
+import solver.constraints.Propagator;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.SetVar;
+import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import util.tools.ArrayUtils;
@@ -57,9 +60,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that the union of SET_VARS is equal to SET_UNION
      */
     public static Constraint union(SetVar[] SETS, SetVar UNION) {
-        Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{UNION}), UNION.getSolver());
-        c.setPropagators(new PropUnion(SETS, UNION), new PropUnion(SETS, UNION));
-        return c;
+        return new Constraint("SetUnion",new PropUnion(SETS, UNION), new PropUnion(SETS, UNION));
     }
 
     /**
@@ -70,9 +71,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that the intersection of sets is equal to set intersection
      */
     public static Constraint intersection(SetVar[] SETS, SetVar INTERSECTION) {
-        Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{INTERSECTION}), INTERSECTION.getSolver());
-        c.setPropagators(new PropIntersection(SETS, INTERSECTION), new PropIntersection(SETS, INTERSECTION));
-        return c;
+        return new Constraint("SetIntersection",new PropIntersection(SETS, INTERSECTION), new PropIntersection(SETS, INTERSECTION));
     }
 
     /**
@@ -82,11 +81,11 @@ public class SetConstraintsFactory {
      * @return A constraint which ensures that i<j <=> SET_VARS[i] subseteq SET_VARS[j]
      */
     public static Constraint subsetEq(SetVar[] SETS) {
-        Constraint c = new Constraint(SETS, SETS[0].getSolver());
+		Propagator[] props = new Propagator[SETS.length-1];
         for (int i = 0; i < SETS.length - 1; i++) {
-            c.addPropagators(new PropSubsetEq(SETS[i], SETS[i + 1]));
+            props[i] = new PropSubsetEq(SETS[i], SETS[i + 1]);
         }
-        return c;
+        return new Constraint("SetSubsetEq",props);
     }
 
     /**
@@ -98,9 +97,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that |SET_VAR| = CARD
      */
     public static Constraint cardinality(SetVar SET, IntVar CARD) {
-        Constraint c = new Constraint(new Variable[]{SET, CARD}, CARD.getSolver());
-        c.setPropagators(new PropCardinality(SET, CARD));
-        return c;
+		return new Constraint("SetCard",new PropCardinality(SET, CARD));
     }
 
     /**
@@ -112,9 +109,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that |{s in SETS such that |s|=0}| = NB_EMPTY_SETS
      */
     public static Constraint nbEmpty(SetVar[] SETS, IntVar NB_EMPTY_SETS) {
-        Constraint c = new Constraint(ArrayUtils.append(SETS, new Variable[]{NB_EMPTY_SETS}), NB_EMPTY_SETS.getSolver());
-        c.setPropagators(new PropNbEmpty(SETS, NB_EMPTY_SETS));
-        return c;
+		return new Constraint("SetNbEmpty",new PropNbEmpty(SETS, NB_EMPTY_SETS));
     }
 
     /**
@@ -127,9 +122,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SET_1 <=> x+offSet in SET_2
      */
     public static Constraint offSet(SetVar SET_1, SetVar SET_2, int OFFSET) {
-        Constraint c = new Constraint(new SetVar[]{SET_1, SET_2}, SET_1.getSolver());
-        c.setPropagators(new PropOffSet(SET_1, SET_2, OFFSET));
-        return c;
+		return new Constraint("SetOffset",new PropOffSet(SET_1, SET_2, OFFSET));
     }
 
 	/**
@@ -138,9 +131,7 @@ public class SetConstraintsFactory {
 	 * @return a constraint ensuring that SET is not empty
 	 */
 	public static Constraint notEmpty(SetVar SET){
-		Constraint c = new Constraint(new SetVar[]{SET}, SET.getSolver());
-		c.setPropagators(new PropNotEmpty(SET));
-		return c;
+		return new Constraint("SetNotEmpty",new PropNotEmpty(SET));
 	}
 
     //***********************************************************************************
@@ -176,12 +167,11 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that sum{WEIGHTS[i-OFFSET] | i in INDEXES} = SUM
      */
     public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM, boolean NOT_EMPTY) {
-        Constraint c = new Constraint(new Variable[]{INDEXES, SUM}, SUM.getSolver());
-        c.setPropagators(new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, NOT_EMPTY));
-		if(NOT_EMPTY){
-			c.addPropagators(new PropNotEmpty(INDEXES));
+		if (NOT_EMPTY) {
+			return new Constraint("SetSum_NotEmpty",new PropNotEmpty(INDEXES),new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, NOT_EMPTY));
+		}else{
+			return new Constraint("SetSum",new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, NOT_EMPTY));
 		}
-        return c;
     }
 
     /**
@@ -213,12 +203,11 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that max{WEIGHTS[i-OFFSET] | i in INDEXES} = MAX_ELEMENT_VALUE
      */
     public static Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY) {
-        Constraint c = new Constraint(new Variable[]{INDEXES, MAX_ELEMENT_VALUE}, INDEXES.getSolver());
-        c.setPropagators(new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, NOT_EMPTY));
-		if(NOT_EMPTY){
-			c.addPropagators(new PropNotEmpty(INDEXES));
+		if (NOT_EMPTY) {
+			return new Constraint("SetMax_NotEmpty",new PropNotEmpty(INDEXES),new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, NOT_EMPTY));
+		}else{
+			return new Constraint("SetMax",new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, NOT_EMPTY));
 		}
-        return c;
     }
 
     /**
@@ -250,12 +239,11 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that min{WEIGHTS[i-OFFSET] | i in INDEXES} = MIN_ELEMENT_VALUE
      */
     public static Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY) {
-        Constraint c = new Constraint(new Variable[]{INDEXES, MIN_ELEMENT_VALUE}, INDEXES.getSolver());
-        c.setPropagators(new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, NOT_EMPTY));
-		if(NOT_EMPTY){
-			c.addPropagators(new PropNotEmpty(INDEXES));
+		if (NOT_EMPTY) {
+			return new Constraint("SetMin_NotEmpty",new PropNotEmpty(INDEXES),new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, NOT_EMPTY));
+		}else{
+			return new Constraint("SetMin",new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, NOT_EMPTY));
 		}
-        return c;
     }
 
     //***********************************************************************************
@@ -274,9 +262,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that i in SET <=> BOOLEANS[i-OFFSET] = TRUE
      */
     public static Constraint bool_channel(BoolVar[] BOOLEANS, SetVar SET, int OFFSET) {
-        Constraint c = new Constraint(ArrayUtils.append(BOOLEANS, new Variable[]{SET}), SET.getSolver());
-        c.setPropagators(new PropBoolChannel(SET, BOOLEANS, OFFSET));
-        return c;
+		return new Constraint("SetBoolChanneling",new PropBoolChannel(SET, BOOLEANS, OFFSET));
     }
 
     /**
@@ -294,11 +280,10 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SETS[y-OFFSET_1] <=> INTEGERS[x-OFFSET_2] = y
      */
     public static Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2) {
-        Constraint c = new Constraint(ArrayUtils.append(SETS, INTEGERS), SETS[0].getSolver());
-        c.setPropagators(new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),
-                new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2));
-        c.addPropagators(new PropAllDisjoint(SETS));
-        return c;
+		return new Constraint("SetIntChanneling",
+				new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),
+                new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),new PropAllDisjoint(SETS)
+		);
     }
 
     /**
@@ -311,12 +296,11 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SETS[i]
      */
     public static Constraint graph_channel(SetVar[] SETS, GraphVar GRAPH) {
-        Constraint c = new Constraint(ArrayUtils.append(SETS, new Variable[]{GRAPH}), GRAPH.getSolver());
-        c.setPropagators(new PropGraphChannel(SETS, GRAPH));
-        if (!GRAPH.isDirected()) {
-            c.addPropagators(new PropSymmetric(SETS, 0));
-        }
-        return c;
+        if (GRAPH.isDirected()) {
+			return new Constraint("SetUndirectedGraphChannel",new PropSymmetric(SETS, 0),new PropGraphChannel(SETS, GRAPH));
+        }else{
+			return new Constraint("SetDirectedGraphChannel",new PropGraphChannel(SETS, GRAPH));
+		}
     }
 
     /**
@@ -330,9 +314,10 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
      */
     public static Constraint graph_channel(SetVar[] SUCCESSORS, SetVar[] PREDECESSORS, DirectedGraphVar GRAPH) {
-        Constraint c = graph_channel(SUCCESSORS, GRAPH);
-        c.addPropagators(new PropInverse(SUCCESSORS, PREDECESSORS, 0, 0));
-        return c;
+		return new Constraint("SetPartition",ArrayUtils.append(
+				graph_channel(SUCCESSORS, GRAPH).getPropagators(),
+				new Propagator[]{new PropInverse(SUCCESSORS, PREDECESSORS, 0, 0)})
+		);
     }
 
     //***********************************************************************************
@@ -359,9 +344,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that non-empty sets are all disjoint
      */
     public static Constraint all_disjoint(SetVar[] SETS) {
-        Constraint c = new Constraint(SETS, SETS[0].getSolver());
-        c.setPropagators(new PropAllDisjoint(SETS));
-        return c;
+		return new Constraint("SetAllDisjoint",new PropAllDisjoint(SETS));
     }
 
     /**
@@ -372,11 +355,9 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that SETS are all different
      */
     public static Constraint all_different(SetVar[] SETS) {
-        Solver solver = SETS[0].getSolver();
-        Constraint c = new Constraint(SETS, solver);
-        c.setPropagators(new PropAllDiff(SETS), new PropAllDiff(SETS),
-                new PropAtMost1Empty(SETS));
-        return c;
+		return new Constraint("SetAllDifferent",new PropAllDiff(SETS),
+				new PropAllDiff(SETS),new PropAtMost1Empty(SETS)
+		);
     }
 
     /**
@@ -386,10 +367,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that all sets in SETS are equal
      */
     public static Constraint all_equal(SetVar[] SETS) {
-        Solver solver = SETS[0].getSolver();
-        Constraint c = new Constraint(SETS, solver);
-        c.setPropagators(new PropAllEqual(SETS));
-        return c;
+		return new Constraint("SetAllEqual",new PropAllEqual(SETS));
     }
 
     /**
@@ -400,9 +378,10 @@ public class SetConstraintsFactory {
      * @return a constraint which ensures that SETS form a partition of UNIVERSE
      */
     public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
-        Constraint c = all_disjoint(SETS);
-        c.addPropagators(new PropUnion(SETS, UNIVERSE), new PropUnion(SETS, UNIVERSE));
-        return c;
+        return new Constraint("SetPartition",ArrayUtils.append(
+				all_disjoint(SETS).getPropagators(),
+				new Propagator[]{new PropUnion(SETS, UNIVERSE), new PropUnion(SETS, UNIVERSE)}
+		));
     }
 
     /**
@@ -420,10 +399,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SETS[y-OFFSET_1] <=> y in INVERSE_SETS[x-OFFSET_2]
      */
     public static Constraint inverse_set(SetVar[] SETS, SetVar[] INVERSE_SETS, int OFFSET_1, int OFFSET_2) {
-        Solver solver = SETS[0].getSolver();
-        Constraint c = new Constraint(ArrayUtils.append(SETS, INVERSE_SETS), solver);
-        c.setPropagators(new PropInverse(SETS, INVERSE_SETS, OFFSET_1, OFFSET_2));
-        return c;
+		return new Constraint("SetInverse",new PropInverse(SETS, INVERSE_SETS, OFFSET_1, OFFSET_2));
     }
 
     /**
@@ -437,10 +413,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SETS[y-OFFSET] <=> y in SETS[x-OFFSET]
      */
     public static Constraint symmetric(SetVar[] SETS, int OFFSET) {
-        Solver solver = SETS[0].getSolver();
-        Constraint c = new Constraint(solver);
-        c.setPropagators(new PropSymmetric(SETS, OFFSET));
-        return c;
+		return new Constraint("SetSymmetric",new PropSymmetric(SETS, OFFSET));
     }
 
     /**
@@ -456,10 +429,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that SETS[INDEX-OFFSET] = SET
      */
     public static Constraint element(IntVar INDEX, SetVar[] SETS, int OFFSET, SetVar SET) {
-        Solver solver = INDEX.getSolver();
-        Constraint c = new Constraint(solver);
-        c.setPropagators(new PropElement(INDEX, SETS, OFFSET, SET), new PropElement(INDEX, SETS, OFFSET, SET));
-        return c;
+		return new Constraint("SetElement",new PropElement(INDEX, SETS, OFFSET, SET), new PropElement(INDEX, SETS, OFFSET, SET));
     }
 
     /**
@@ -484,8 +454,6 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that INTEGER belongs to SET
      */
     public static Constraint member(IntVar INTEGER, SetVar SET) {
-        Constraint c = new Constraint(new Variable[]{SET, INTEGER}, INTEGER.getSolver());
-        c.setPropagators(new PropIntMemberSet(SET, INTEGER));
-        return c;
+		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER));
     }
 }

@@ -134,7 +134,7 @@ public class Explore {
 
     private boolean checkSolution(Constraint[] constraints) {
         for (int c = 0; c < constraints.length; c++) {
-            ESat satC = constraints[c].isEntailed();
+            ESat satC = constraints[c].isSatisfied();
             if (!ESat.TRUE.equals(satC)) {
                 return false;
             }

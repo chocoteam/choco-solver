@@ -26,7 +26,6 @@
  */
 package solver.constraints;
 
-import solver.Solver;
 import solver.constraints.binary.*;
 import solver.constraints.unary.PropEqualXC;
 import solver.constraints.unary.PropGreaterOrEqualXC;
@@ -49,218 +48,151 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 21/06/12
  */
-public class Arithmetic extends Constraint<IntVar> {
+public class Arithmetic extends Constraint {
 
-    protected final Operator op1, op2; // operators.
-    protected final int cste;
-    protected final boolean isBinary; // to distinct unary and binary formula
+	protected final Operator op1, op2; // operators.
+	protected final int cste;
+	protected final IntVar[] vars;
 
-    private static boolean isOperation(Operator operator) {
-        return operator.equals(Operator.PL) || operator.equals(Operator.MN);
-    }
+	private static boolean isOperation(Operator operator) {
+		return operator.equals(Operator.PL) || operator.equals(Operator.MN);
+	}
 
-    public Arithmetic(IntVar var, Operator op, int cste, Solver solver) {
-        super(new IntVar[]{var}, solver);
-        this.op1 = op;
-        this.op2 = Operator.NONE;
-        this.cste = cste;
-        this.isBinary = false;
-        switch (op1) {
-            case EQ: // X = C
-                setPropagators(new PropEqualXC(var, cste));
-                break;
-            case NQ: // X =/= C
-                setPropagators(new PropNotEqualXC(var, cste));
-                break;
-            case GE: // X >= C
-                setPropagators(new PropGreaterOrEqualXC(var, cste));
-                break;
-            case GT: // X > C -->  X >= C + 1
-                setPropagators(new PropGreaterOrEqualXC(var, cste + 1));
-                break;
-            case LE: // X <= C
-                setPropagators(new PropLessOrEqualXC(var, cste));
-                break;
-            case LT: // X < C --> X <= C - 1
-                setPropagators(new PropLessOrEqualXC(var, cste - 1));
-                break;
-            default:
-                throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-        }
-    }
+	public Arithmetic(IntVar var, Operator op, int cste) {
+		super("ArithmeticUnary",createProp(var,op,cste));
+		this.vars = new IntVar[]{var};
+		this.op1 = op;
+		this.op2 = Operator.NONE;
+		this.cste = cste;
+	}
 
-    public Arithmetic(IntVar var1, Operator op, IntVar var2, Solver solver) {
-        super(new IntVar[]{var1, var2}, solver);
-        this.op1 = op;
-        this.op2 = Operator.PL;
-        this.cste = 0;
-        this.isBinary = true;
-        switch (op1) {
-            case EQ: // X = Y
-                setPropagators(new PropEqualX_Y(var1, var2));
-                break;
-            case NQ: // X =/= Y
-                setPropagators(new PropNotEqualX_Y(var1, var2));
-                break;
-            case GE: //  X >= Y
-                setPropagators(new PropGreaterOrEqualX_Y(vars));
-                break;
-            case GT: //  X > Y --> X >= Y + 1
-                setPropagators(new PropGreaterOrEqualX_YC(vars, 1));
-                break;
-            case LE: //  X <= Y --> Y >= X
-                setPropagators(new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1}));
-                break;
-            case LT: //  X < Y --> Y >= X + 1
-                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1));
-                break;
-            default:
-                throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-        }
-    }
+	private static Propagator createProp(IntVar var, Operator op, int cste) {
+		switch (op) {
+			case EQ: // X = C
+				return new PropEqualXC(var, cste);
+			case NQ: // X =/= C
+				return new PropNotEqualXC(var, cste);
+			case GE: // X >= C
+				return new PropGreaterOrEqualXC(var, cste);
+			case GT: // X > C -->  X >= C + 1
+				return new PropGreaterOrEqualXC(var, cste + 1);
+			case LE: // X <= C
+				return new PropLessOrEqualXC(var, cste);
+			case LT: // X < C --> X <= C - 1
+				return new PropLessOrEqualXC(var, cste - 1);
+			default:
+				throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
+		}
+	}
 
-    public Arithmetic(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste, Solver solver) {
-        super(new IntVar[]{var1, var2}, solver);
-        this.op1 = op1;
-        this.op2 = op2;
-        if (isOperation(op1) == isOperation(op2)) {
-            throw new SolverException("Incorrect formula; operators must be different!");
-        }
-        this.cste = cste;
-        this.isBinary = true;
-        if (op1 == Operator.PL) {
-            switch (op2) {
-                case EQ: // X+Y = C
-                    setPropagators(new PropEqualXY_C(vars, cste));
-                    break;
-                case NQ: // X+Y != C
-                    setPropagators(new PropNotEqualXY_C(vars, cste));
-                    break;
-                case GE: // X+Y >= C
-                    setPropagators(new PropGreaterOrEqualXY_C(vars, cste));
-                    break;
-                case GT: // X+Y > C --> X+Y >= C+1
-                    setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1));
-                    break;
-                case LE: // X+Y <= C
-                    setPropagators(new PropLessOrEqualXY_C(vars, cste));
-                    break;
-                case LT: // X+Y < C --> X+Y <= C-1
-                    setPropagators(new PropLessOrEqualXY_C(vars, cste - 1));
-                    break;
-                default:
-                    throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-            }
-        } else if (op1 == Operator.MN) {
-            switch (op2) {
-                case EQ: // X-Y = C --> X = Y+C
-                    setPropagators(new PropEqualX_YC(vars, cste));
-                    break;
-                case NQ: // X-Y != C --> X != Y+C
-                    setPropagators(new PropNotEqualX_YC(vars, cste));
-                    break;
-                case GE: // X-Y >= C --> X >= Y+C
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste));
-                    break;
-                case GT: // X-Y > C --> X >= Y+C+1
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste + 1));
-                    break;
-                case LE:// X-Y <= C --> Y >= X-C
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste));
-                    break;
-                case LT:// X-Y < C --> Y >= X-C+1
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1));
-                    break;
-                default:
-                    throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-            }
-        } else {
-            int _cste = cste * (op2 == Operator.PL ? 1 : -1);
-            switch (op1) {
-                case EQ:// X = Y + C
-                    setPropagators(new PropEqualX_YC(vars, _cste));
-                    break;
-                case NQ:// X =/= Y + C
-                    setPropagators(new PropNotEqualX_YC(vars, _cste));
-                    break;
-                case GE:// X >= Y + C
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste));
-                    break;
-                case GT:// X > Y + C --> X >= Y + C + 1
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste + 1));
-                    break;
-                case LE:// X <= Y + C --> Y >= X - C
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste));
-                    break;
-                case LT:// X < Y + C --> Y > X - C + 1
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1));
-                    break;
-                default:
-                    throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-            }
-        }
-    }
+	public Arithmetic(IntVar var1, Operator op, IntVar var2) {
+		super("ArithmeticBinary",createProp(var1,op,var2));
+		this.vars = new IntVar[]{var1,var2};
+		this.op1 = op;
+		this.op2 = Operator.PL;
+		this.cste = 0;
+	}
 
-    @Override
-    public String toString() {
-        if (isBinary) {
-            return vars[0].getName() + " " + op1 + " " + vars[1].getName() + " " + op2 + " " + cste;
-        } else {
-            return vars[0].getName() + " " + op1 + " " + cste;
-        }
-    }
+	private static Propagator createProp(IntVar var1, Operator op, IntVar var2) {
+		switch (op) {
+			case EQ: // X = Y
+				return new PropEqualX_Y(var1, var2);
+			case NQ: // X =/= Y
+				return new PropNotEqualX_Y(var1, var2);
+			case GE: //  X >= Y
+				return new PropGreaterOrEqualX_Y(new IntVar[]{var1,var2});
+			case GT: //  X > Y --> X >= Y + 1
+				return new PropGreaterOrEqualX_YC(new IntVar[]{var1,var2}, 1);
+			case LE: //  X <= Y --> Y >= X
+				return new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1});
+			case LT: //  X < Y --> Y >= X + 1
+				return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1);
+			default:
+				throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
+		}
+	}
+
+	public Arithmetic(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
+		super("ArithmeticBinary",createProp(var1,op1,var2,op2,cste));
+		this.vars = new IntVar[]{var1,var2};
+		this.op1 = op1;
+		this.op2 = op2;
+		if (isOperation(op1) == isOperation(op2)) {
+			throw new SolverException("Incorrect formula; operators must be different!");
+		}
+		this.cste = cste;
+	}
+
+	private static Propagator createProp(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
+		if (isOperation(op1) == isOperation(op2)) {
+			throw new SolverException("Incorrect formula; operators must be different!");
+		}
+		IntVar[] vars = new IntVar[]{var1,var2};
+		if (op1 == Operator.PL) {
+			switch (op2) {
+				case EQ: // X+Y = C
+					return new PropEqualXY_C(vars, cste);
+				case NQ: // X+Y != C
+					return new PropNotEqualXY_C(vars, cste);
+				case GE: // X+Y >= C
+					return new PropGreaterOrEqualXY_C(vars, cste);
+				case GT: // X+Y > C --> X+Y >= C+1
+					return new PropGreaterOrEqualXY_C(vars, cste + 1);
+				case LE: // X+Y <= C
+					return new PropLessOrEqualXY_C(vars, cste);
+				case LT: // X+Y < C --> X+Y <= C-1
+					return new PropLessOrEqualXY_C(vars, cste - 1);
+				default:
+					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
+			}
+		} else if (op1 == Operator.MN) {
+			switch (op2) {
+				case EQ: // X-Y = C --> X = Y+C
+					return new PropEqualX_YC(vars, cste);
+				case NQ: // X-Y != C --> X != Y+C
+					return new PropNotEqualX_YC(vars, cste);
+				case GE: // X-Y >= C --> X >= Y+C
+					return new PropGreaterOrEqualX_YC(vars, cste);
+				case GT: // X-Y > C --> X >= Y+C+1
+					return new PropGreaterOrEqualX_YC(vars, cste + 1);
+				case LE:// X-Y <= C --> Y >= X-C
+					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste);
+				case LT:// X-Y < C --> Y >= X-C+1
+					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1);
+				default:
+					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
+			}
+		} else {
+			int _cste = cste * (op2 == Operator.PL ? 1 : -1);
+			switch (op1) {
+				case EQ:// X = Y + C
+					return new PropEqualX_YC(vars, _cste);
+				case NQ:// X =/= Y + C
+					return new PropNotEqualX_YC(vars, _cste);
+				case GE:// X >= Y + C
+					return new PropGreaterOrEqualX_YC(vars, _cste);
+				case GT:// X > Y + C --> X >= Y + C + 1
+					return new PropGreaterOrEqualX_YC(vars, _cste + 1);
+				case LE:// X <= Y + C --> Y >= X - C
+					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste);
+				case LT:// X < Y + C --> Y > X - C + 1
+					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1);
+				default:
+					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
+			}
+		}
+	}
 
 	@Override
 	public Constraint makeOpposite(){
 		if(vars.length==1){
-			switch (op1) {
-				case EQ:
-					return new Arithmetic(vars[0],Operator.NQ,cste,solver);
-				case NQ:
-					return new Arithmetic(vars[0],Operator.EQ,cste,solver);
-				case GE:
-					return new Arithmetic(vars[0],Operator.LT,cste,solver);
-				case GT:
-					return new Arithmetic(vars[0],Operator.LE,cste,solver);
-				case LE:
-					return new Arithmetic(vars[0],Operator.GT,cste,solver);
-				case LT:
-					return new Arithmetic(vars[0],Operator.GE,cste,solver);
-				default:
-					throw new UnsupportedOperationException();
-			}
+			return ICF.arithm(vars[0],Operator.getOpposite(op1).name(),cste);
 		}else{
 			assert vars.length==2;
-			switch (op1) {
-				case EQ:
-					return new Arithmetic(vars[0],Operator.NQ,vars[1],op2,cste,solver);
-				case NQ:
-					return new Arithmetic(vars[0],Operator.EQ,vars[1],op2,cste,solver);
-				case GE:
-					return new Arithmetic(vars[0],Operator.LT,vars[1],op2,cste,solver);
-				case GT:
-					return new Arithmetic(vars[0],Operator.LE,vars[1],op2,cste,solver);
-				case LE:
-					return new Arithmetic(vars[0],Operator.GT,vars[1],op2,cste,solver);
-				case LT:
-					return new Arithmetic(vars[0],Operator.GE,vars[1],op2,cste,solver);
-				default:
-					switch (op2) {
-						case EQ:
-							return new Arithmetic(vars[0],op1,vars[1],Operator.NQ,cste,solver);
-						case NQ:
-							return new Arithmetic(vars[0],op1,vars[1],Operator.EQ,cste,solver);
-						case GE:
-							return new Arithmetic(vars[0],op1,vars[1],Operator.LT,cste,solver);
-						case GT:
-							return new Arithmetic(vars[0],op1,vars[1],Operator.LE,cste,solver);
-						case LE:
-							return new Arithmetic(vars[0],op1,vars[1],Operator.GT,cste,solver);
-						case LT:
-							return new Arithmetic(vars[0],op1,vars[1],Operator.GE,cste,solver);
-						default:
-							throw new UnsupportedOperationException();
-					}
+			if(op1==Operator.PL || op1==Operator.MN){
+				return ICF.arithm(vars[0],op1.name(),vars[1],Operator.getOpposite(op2).name(),cste);
+			}else{
+				return ICF.arithm(vars[0],Operator.getOpposite(op1).name(),vars[1],op2.name(),cste);
 			}
 		}
 	}

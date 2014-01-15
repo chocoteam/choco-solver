@@ -24,43 +24,67 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.count;
 
-import solver.Solver;
+package solver.constraints.reification;
+
 import solver.constraints.Constraint;
-import solver.variables.IntVar;
-import util.tools.ArrayUtils;
+import solver.constraints.Propagator;
+import solver.constraints.PropagatorPriority;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
+import solver.variables.Variable;
+import util.ESat;
 
 /**
- * count(VALUE,VARIABLES,RELOP,LIMIT)
- * <br/>syn.: occurencemax, occurencemin, occurrence
- * <p/>
- * <br/>Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
- * <br/>Enforce condition NRELOPLIMIT to hold.
- * <br/><a href="http://www.emn.fr/z-info/sdemasse/gccat/Ccount.html">count in GCCAT</a>
+ * Constraint representing the negation of a given constraint
+ * does not filter but fails if the given constraint is satisfied
+ * Can be used within any constraint
  *
- * @author Charles Prud'homme
- * @since 08/06/11
+ * Should not be called by the user
+ *
+ * @author Jean-Guillaume Fages
+ * @since 15/05/2013
  */
-public class Count extends Constraint<IntVar> {
+public class PropOpposite extends Propagator {
 
-    private final int occval;
+	// constraint to negate
+	Constraint original;
 
-    public Count(int value, IntVar[] vars, IntVar limit, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
-        this.occval = value;
-        setPropagators(new PropCount_AC(vars, value, limit));
-    }
+	public PropOpposite(Constraint original, Variable[] vars) {
+		super(vars, PropagatorPriority.LINEAR, false);
+		this.original = original;
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder("occur([");
-        for (int i = 0; i < vars.length - 2; i++) {
-            s.append(vars[i]).append(",");
-        }
-        s.append(vars[vars.length - 2]).append("], ").append(occval).append(")");
-        s.append(" = ");
-        s.append(vars[vars.length - 1]);
-        return s.toString();
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.ALL_FINE_EVENTS.mask;
+	}
+
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		ESat op = original.isSatisfied();
+		if(op == ESat.TRUE){
+			contradiction(vars[0],"");
+		}
+		if(op == ESat.FALSE){
+			setPassive();
+		}
+	}
+
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		forcePropagate(EventType.CUSTOM_PROPAGATION);
+	}
+
+	@Override
+	public ESat isEntailed() {
+		ESat op = original.isSatisfied();
+		if(op == ESat.TRUE){
+			return ESat.FALSE;
+		}
+		if(op == ESat.FALSE){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
 }

@@ -30,8 +30,8 @@ package choco.checker.fmk;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;
@@ -206,8 +206,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = new Constraint(s);
-            ctr.addPropagators(new PropBoolSum(bools, vars[n - 1]));
+            Constraint ctr = ICF.sum(bools, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);

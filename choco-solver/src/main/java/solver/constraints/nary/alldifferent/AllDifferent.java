@@ -27,35 +27,27 @@
 
 package solver.constraints.nary.alldifferent;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.binary.PropNotEqualX_Y;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.ESat;
 
 /**
  * Ensures that all variables from VARS take a different value.
  * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
  */
-public class AllDifferent extends Constraint<IntVar> {
+public class AllDifferent extends Constraint {
 
     public static enum Type {
         AC, BC, weak_BC, NEQS, DEFAULT
     }
 
-    public AllDifferent(IntVar[] vars, Solver solver) {
-        this(vars, solver, Type.BC);
+    public AllDifferent(IntVar[] vars, String type) {
+        super("AllDifferent",createPropagators(vars, type));
     }
 
-    public AllDifferent(IntVar[] vars, Solver solver, Type type) {
-        super(vars, solver);
-        setPropagators(createPropagators(vars, type));
-    }
-
-    public static Propagator<IntVar>[] createPropagators(IntVar[] VARS, Type consistency) {
-        switch (consistency) {
+	private static Propagator<IntVar>[] createPropagators(IntVar[] VARS, String consistency) {
+        switch (AllDifferent.Type.valueOf(consistency)) {
             case NEQS: {
                 int s = VARS.length;
                 int k = 0;
@@ -88,39 +80,5 @@ public class AllDifferent extends Constraint<IntVar> {
                     return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS, false)};
                 }
         }
-    }
-
-    @Override
-    public ESat isEntailed() {
-		boolean allInst = true;
-        for (IntVar v : vars) {
-            if (v.instantiated()) {
-                int vv = v.getValue();
-                for (IntVar w : vars) {
-                    if (w != v && w.instantiated() && vv == w.getValue()) {
-						return ESat.FALSE;
-                    }
-                }
-            } else {
-				allInst = false;
-            }
-        }
-		if(allInst){
-			return ESat.TRUE;
-		}else{
-			return ESat.UNDEFINED;
-		}
-    }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("AllDifferent({");
-        for (int i = 0; i < vars.length; i++) {
-            if (i > 0) sb.append(", ");
-            Variable var = vars[i];
-            sb.append(var);
-        }
-        sb.append("})");
-        return sb.toString();
     }
 }

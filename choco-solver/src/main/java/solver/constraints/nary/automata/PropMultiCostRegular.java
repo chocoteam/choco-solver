@@ -479,7 +479,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (intLayer[0].length > 0) {
             this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
             this.graph.makePathFinder();
-            ((MultiCostRegular) this.constraint).setGraph(this.graph);
         }
     }
 
