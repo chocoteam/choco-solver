@@ -86,18 +86,21 @@ public class ReificationConstraint extends Constraint {
 
 	private static Propagator[] createProps(BoolVar bVar, Constraint trueCons, Constraint falseCons) {
 		Set<Variable> setOfVars = new HashSet<>();
-		setOfVars.add(bVar);
 		for(Propagator p:trueCons.getPropagators()){
 			for(Variable v:p.getVars()){
-				setOfVars.add(v);
+				if(v!=bVar){
+					setOfVars.add(v);
+				}
 			}
 		}
 		for(Propagator p:falseCons.getPropagators()){
 			for(Variable v:p.getVars()){
-				setOfVars.add(v);
+				if(v!=bVar){
+					setOfVars.add(v);
+				}
 			}
 		}
-		Variable[] allVars = setOfVars.toArray(new Variable[0]);
+		Variable[] allVars = ArrayUtils.append(new Variable[]{bVar}, setOfVars.toArray(new Variable[0]));
 		PropReif reifProp = new PropReif(allVars, trueCons, falseCons);
 		return ArrayUtils.append(new Propagator[]{reifProp},
 						trueCons.getPropagators().clone(),

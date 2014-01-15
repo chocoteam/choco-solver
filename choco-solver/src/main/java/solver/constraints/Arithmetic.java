@@ -124,6 +124,8 @@ public class Arithmetic extends Constraint {
 	}
 
 	private static Propagator createProp(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
+		if(op1==null)throw new UnsupportedOperationException();
+		if(op2==null)throw new UnsupportedOperationException();
 		if (isOperation(op1) == isOperation(op2)) {
 			throw new SolverException("Incorrect formula; operators must be different!");
 		}
@@ -186,13 +188,13 @@ public class Arithmetic extends Constraint {
 	@Override
 	public Constraint makeOpposite(){
 		if(vars.length==1){
-			return ICF.arithm(vars[0],Operator.getOpposite(op1).name(),cste);
+			return ICF.arithm(vars[0],Operator.getOpposite(op1).toString(),cste);
 		}else{
 			assert vars.length==2;
 			if(op1==Operator.PL || op1==Operator.MN){
-				return ICF.arithm(vars[0],op1.name(),vars[1],Operator.getOpposite(op2).name(),cste);
+				return ICF.arithm(vars[0],op1.toString(),vars[1],Operator.getOpposite(op2).toString(),cste);
 			}else{
-				return ICF.arithm(vars[0],Operator.getOpposite(op1).name(),vars[1],op2.name(),cste);
+				return ICF.arithm(vars[0],Operator.getOpposite(op1).toString(),vars[1],op2.toString(),cste);
 			}
 		}
 	}

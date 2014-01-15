@@ -30,6 +30,7 @@ package solver.constraints.nary.alldifferent;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.binary.PropNotEqualX_Y;
+import solver.constraints.nary.cnf.PropTrue;
 import solver.variables.IntVar;
 
 /**
@@ -47,6 +48,9 @@ public class AllDifferent extends Constraint {
     }
 
 	private static Propagator<IntVar>[] createPropagators(IntVar[] VARS, String consistency) {
+		if(VARS.length<=1){
+			return new Propagator[]{new PropTrue(VARS[0].getSolver().ONE)};
+		}
         switch (AllDifferent.Type.valueOf(consistency)) {
             case NEQS: {
                 int s = VARS.length;
