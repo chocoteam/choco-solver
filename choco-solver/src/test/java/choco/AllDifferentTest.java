@@ -37,7 +37,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -243,13 +242,13 @@ public class AllDifferentTest {
                 }
                 break;
             case 1:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.NEQS));
+                lcstrs.add(ICF.alldifferent(vars, "NEQS"));
                 break;
             case 2:
-                lcstrs.add(IntConstraintFactory.alldifferent(vars, "BC"));
+                lcstrs.add(ICF.alldifferent(vars, "BC"));
                 break;
             case 3:
-                lcstrs.add(IntConstraintFactory.alldifferent(vars, "AC"));
+                lcstrs.add(ICF.alldifferent(vars, "AC"));
                 break;
         }
 

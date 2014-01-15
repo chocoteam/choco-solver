@@ -61,7 +61,7 @@ public class ELNSTest {
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));
         solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
 
-        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars, solver);
+        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
         solver.getSearchLoop().plugSearchMonitor(
                 new LargeNeighborhoodSearch(solver,
                         new SequenceNeighborhood(

@@ -26,8 +26,8 @@
  */
 package solver.constraints.gary;
 
-import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.Propagator;
 import solver.constraints.gary.arborescences.PropAntiArborescence;
 import solver.constraints.gary.arborescences.PropArborescence;
 import solver.constraints.gary.basic.*;
@@ -43,10 +43,10 @@ import solver.constraints.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
 import solver.variables.VF;
-import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import util.objects.graphs.Orientation;
+import util.tools.ArrayUtils;
 
 /**
  * Some usual graph constraints
@@ -67,12 +67,11 @@ public class GraphConstraintFactory {
      * @return a constraint which partitions GRAPHVAR into NB_CLIQUES cliques
      */
     public static Constraint nCliques(UndirectedGraphVar GRAPHVAR, IntVar NB_CLIQUES) {
-        Solver solver = GRAPHVAR.getSolver();
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR, NB_CLIQUES}, solver);
-        gc.addPropagators(new PropTransitivity(GRAPHVAR));
-        gc.addPropagators(new PropKCliques(GRAPHVAR, NB_CLIQUES));
-        gc.addPropagators(new PropKCC(GRAPHVAR, NB_CLIQUES));
-        return gc;
+		return new Constraint("NCliques",
+				new PropTransitivity(GRAPHVAR),
+				new PropKCliques(GRAPHVAR, NB_CLIQUES),
+				new PropKCC(GRAPHVAR, NB_CLIQUES)
+		);
     }
 
     /**
@@ -87,14 +86,14 @@ public class GraphConstraintFactory {
      * @return a tsp constraint
      */
     public static Constraint tsp(UndirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] EDGE_COSTS, int HELD_KARP) {
-        Constraint gc = hamiltonianCycle(GRAPHVAR);
-        gc.addPropagators(new PropCycleEvalObj(GRAPHVAR, COSTVAR, EDGE_COSTS));
+		Propagator[] props = ArrayUtils.append(hamiltonianCycle(GRAPHVAR).getPropagators(),
+				new Propagator[]{new PropCycleEvalObj(GRAPHVAR, COSTVAR, EDGE_COSTS)});
         if (HELD_KARP > 0) {
             PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(GRAPHVAR, COSTVAR, EDGE_COSTS);
             hk.waitFirstSolution(HELD_KARP == 2);
-            gc.addPropagators(hk);
+			props = ArrayUtils.append(props,new Propagator[]{hk});
         }
-        return gc;
+        return new Constraint("Graph_TSP",props);
     }
 
     /**
@@ -107,12 +106,11 @@ public class GraphConstraintFactory {
      * @return a hamiltonian cycle constraint
      */
     public static Constraint hamiltonianCycle(UndirectedGraphVar GRAPHVAR) {
-        Solver solver = GRAPHVAR.getSolver();
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, 2));
-        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, 2));
-        gc.addPropagators(new PropCycleNoSubtour(GRAPHVAR));
-        return gc;
+		return new Constraint("Graph_HamiltonianCycle",
+				new PropNodeDegree_AtLeast(GRAPHVAR, 2),
+				new PropNodeDegree_AtMost(GRAPHVAR, 2),
+				new PropCycleNoSubtour(GRAPHVAR)
+		);
     }
 
 	/**
@@ -125,9 +123,11 @@ public class GraphConstraintFactory {
 	 * @return a constraint ensuring that GRAPHVAR is a spanning tree
 	 */
 	public static Constraint spanning_tree(UndirectedGraphVar GRAPHVAR) {
-		Constraint gc = tree(GRAPHVAR);
-		gc.addPropagators(new PropKNodes(GRAPHVAR, VF.fixed(GRAPHVAR.getEnvelopGraph().getNbNodes(),GRAPHVAR.getSolver())));
-		return gc;
+		IntVar nbNodes = VF.fixed(GRAPHVAR.getEnvelopGraph().getNbNodes(),GRAPHVAR.getSolver());
+		return new Constraint("Graph_SpanningTree",ArrayUtils.append(
+				tree(GRAPHVAR).getPropagators(),
+				new Propagator[]{new PropKNodes(GRAPHVAR, nbNodes)}
+		));
 	}
 
 	/**
@@ -140,14 +140,11 @@ public class GraphConstraintFactory {
 	 * @return a constraint ensuring that GRAPHVAR is a tree
 	 */
 	public static Constraint tree(UndirectedGraphVar GRAPHVAR) {
-		Solver solver = GRAPHVAR.getSolver();
-		Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-		gc.setPropagators(
+		return new Constraint("Graph_Tree",
 				new PropNodeDegree_AtLeast(GRAPHVAR, 1),
 				new PropTreeNoSubtour(GRAPHVAR),
 				new PropConnected(GRAPHVAR)
 		);
-		return gc;
 	}
 
     //***********************************************************************************
@@ -170,7 +167,6 @@ public class GraphConstraintFactory {
      * @return a hamiltonian path constraint
      */
     public static Constraint hamiltonianPath(DirectedGraphVar GRAPHVAR, int ORIGIN, int DESTINATION, boolean STRONG_FILTER) {
-        Solver solver = GRAPHVAR.getSolver();
         int n = GRAPHVAR.getEnvelopGraph().getNbNodes();
         int[] succs = new int[n];
         int[] preds = new int[n];
@@ -178,22 +174,22 @@ public class GraphConstraintFactory {
             succs[i] = preds[i] = 1;
         }
         succs[DESTINATION] = preds[ORIGIN] = 0;
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-        gc.setPropagators(
-                new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.SUCCESSORS, succs),
-                new PropNodeDegree_AtMost(GRAPHVAR, Orientation.SUCCESSORS, succs),
-                new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.PREDECESSORS, preds),
-                new PropNodeDegree_AtMost(GRAPHVAR, Orientation.PREDECESSORS, preds),
-                new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION));
-        if (STRONG_FILTER) {
-            PropReducedPath red = new PropReducedPath(GRAPHVAR);
-            PropSCCDoorsRules rules = new PropSCCDoorsRules(GRAPHVAR, red);
-            PropArborescence arbo = new PropArborescence(GRAPHVAR, ORIGIN, true);
-            PropAntiArborescence aa = new PropAntiArborescence(GRAPHVAR, DESTINATION, true);
-            PropAllDiffGraphIncremental ad = new PropAllDiffGraphIncremental(GRAPHVAR, n - 1);
-            gc.addPropagators(red, rules, arbo, aa, ad);
-        }
-        return gc;
+		Propagator[] props = new Propagator[]{
+				new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtMost(GRAPHVAR, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost(GRAPHVAR, Orientation.PREDECESSORS, preds),
+				new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION)
+		};
+		if (STRONG_FILTER) {
+			PropReducedPath red = new PropReducedPath(GRAPHVAR);
+			PropSCCDoorsRules rules = new PropSCCDoorsRules(GRAPHVAR, red);
+			PropArborescence arbo = new PropArborescence(GRAPHVAR, ORIGIN, true);
+			PropAntiArborescence aa = new PropAntiArborescence(GRAPHVAR, DESTINATION, true);
+			PropAllDiffGraphIncremental ad = new PropAllDiffGraphIncremental(GRAPHVAR, n - 1);
+			props = ArrayUtils.append(props,ArrayUtils.toArray(red, rules, arbo, aa, ad));
+		}
+        return new Constraint("Graph_HamiltonianPath",props);
     }
 
     /**

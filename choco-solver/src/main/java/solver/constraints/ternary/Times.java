@@ -27,7 +27,6 @@
 
 package solver.constraints.ternary;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
@@ -39,9 +38,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class Times extends Constraint<IntVar> {
-
-    IntVar X, Y, Z;
+public class Times extends Constraint {
 
     private static boolean inIntBounds(IntVar x, IntVar y) {
         boolean l1 = inIntBounds((long) x.getLB() * (long) y.getLB());
@@ -55,26 +52,10 @@ public class Times extends Constraint<IntVar> {
         return l1 > Integer.MIN_VALUE && l1 < Integer.MAX_VALUE;
     }
 
-    public Times(IntVar v1, IntVar v2, IntVar result, Solver solver) {
-        super(new IntVar[]{v1, v2, result}, solver);
-        this.X = v1;
-        this.Y = v2;
-        this.Z = result;
-        if (inIntBounds(X, Y)) {
-//            setPropagators(new Propagator[]{
-//                    new PropTimesXY(v1, v2, result),
-//                    new PropTimesZ(v1, v2, result)
-//            });
-            setPropagators(new PropTimesNaive(v1,v2,result));
-
-        } else {
+    public Times(IntVar v1, IntVar v2, IntVar result) {
+        super("Times",new PropTimesNaive(v1,v2,result));
+        if (!inIntBounds(v1, v2)) {
             throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
-//            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
         }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s * %s = %s", X.getName(), Y.getName(), Z.getName());
     }
 }

@@ -44,7 +44,6 @@ import solver.constraints.gary.channeling.PropGraphRelation;
 import solver.constraints.gary.channeling.PropRelationGraph;
 import solver.constraints.gary.channeling.relations.GraphRelation;
 import solver.constraints.gary.channeling.relations.GraphRelationFactory;
-import solver.constraints.nary.min_max.Maximum;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;

@@ -31,7 +31,6 @@ import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.variables.IntVar;
 import solver.variables.Task;
-import util.ESat;
 import util.tools.ArrayUtils;
 
 import java.util.Arrays;
@@ -41,13 +40,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @since 22/10/13
  */
-public class Cumulative extends Constraint<IntVar> {
-
-	//***********************************************************************************
-	// VARIABLE
-	//***********************************************************************************
-
-	protected final int n;
+public class Cumulative extends Constraint {
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -71,30 +64,33 @@ public class Cumulative extends Constraint<IntVar> {
 	 *
 	 */
 	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean graphBased, Filter... filters) {
-		super(extract(tasks, heights, capacity), capacity.getSolver());
-		this.n = tasks.length;
-		assert n==heights.length && n > 0;
-		IntVar[] s = Arrays.copyOfRange(vars,0,n);
-		IntVar[] d = Arrays.copyOfRange(vars,n,2*n);
-		IntVar[] e = Arrays.copyOfRange(vars,2*n,3*n);
-		IntVar[] h = Arrays.copyOfRange(vars,3*n,4*n);
-		// uses two propagators to ensure constraint satisfaction (fix-point)
-		if(graphBased){
-			setPropagators(
-					new PropGraphCumulative(s,d,e,h,capacity,true, filters),
-					new PropGraphCumulative(s,d,e,h,capacity,false, filters)
-			);
-		}else{
-			setPropagators(
-					new PropFullCumulative(s,d,e,h,capacity,true, filters),
-					new PropFullCumulative(s,d,e,h,capacity,false, filters)
-			);
-		}
+		super("Cumulative",createPropagators(tasks, heights, capacity, graphBased, filters));
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	private static Propagator[] createPropagators(Task[] tasks, IntVar[] heights, IntVar capa, boolean graphBased, Filter... filters){
+		int n = tasks.length;
+		assert n==heights.length && n > 0;
+		IntVar[] vars = extract(tasks,heights,capa);
+		IntVar[] s = Arrays.copyOfRange(vars,0,n);
+		IntVar[] d = Arrays.copyOfRange(vars,n,2*n);
+		IntVar[] e = Arrays.copyOfRange(vars,2*n,3*n);
+		IntVar[] h = Arrays.copyOfRange(vars,3*n,4*n);
+		if(graphBased){
+			return new Propagator[]{
+					new PropGraphCumulative(s,d,e,h,capa,true, filters),
+					new PropGraphCumulative(s,d,e,h,capa,false, filters)
+			};
+		}else{
+			return new Propagator[]{
+					new PropFullCumulative(s,d,e,h,capa,true, filters),
+					new PropFullCumulative(s,d,e,h,capa,false, filters)
+			};
+		}
+	}
 
 	public static IntVar[] extract(Task[] tasks, IntVar[] heights, IntVar capa){
 		int n = tasks.length;
@@ -107,62 +103,6 @@ public class Cumulative extends Constraint<IntVar> {
 			ends[i] = tasks[i].getEnd();
 		}
 		return ArrayUtils.append(starts,durations,ends,heights,new IntVar[]{capa});
-	}
-
-	@Override
-	public ESat isEntailed() {
-		int min = vars[0].getUB();
-		int max = vars[2*n].getLB();
-		// check start + duration = end
-		for (int i = 0; i < n; i++) {
-			min = Math.min(min, vars[i].getUB());
-			max = Math.max(max, vars[i+2*n].getLB());
-			if(vars[i].getLB()+vars[i+n].getLB()>vars[i+2*n].getUB()
-					|| vars[i].getUB()+vars[i+n].getUB()<vars[i+2*n].getLB()){
-				return ESat.FALSE;
-			}
-		}
-		// check capacity
-		int maxLoad = 0;
-		if(min <= max){
-			int capamax = vars[4*n].getUB();
-			int[] consoMin = new int[max - min];
-			for (int i = 0; i < n; i++) {
-				for (int t = vars[i].getUB(); t < vars[i+2*n].getLB(); t++) {
-					consoMin[t - min] += vars[i+3*n].getLB();
-					if (consoMin[t - min] > capamax) {
-						return ESat.FALSE;
-					}
-					maxLoad = Math.max(maxLoad,consoMin[t-min]);
-				}
-			}
-		}
-		// check variables are instantiated
-		for (int i = 0; i < vars.length-1; i++) {
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		assert min<=max;
-		// capacity check entailed
-		if(maxLoad<=vars[4*n].getLB()){
-			return ESat.TRUE;
-		}
-		// capacity not instantiated
-		return ESat.UNDEFINED;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("Cumulative(");
-		for (int i = 0; i < n; i++) {
-			sb.append("[" + vars[i].toString());
-			sb.append("," + vars[i + n].toString());
-			sb.append("," + vars[i + 2 * n].toString());
-			sb.append("," + vars[i + 3 * n].toString() + "],");
-		}
-		sb.append(vars[4*n].toString()+")");
-		return sb.toString();
 	}
 
 	//***********************************************************************************

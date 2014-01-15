@@ -29,12 +29,12 @@ package solver.constraints.nary.globalcardinality;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.ICF;
+import solver.constraints.LCF;
+import solver.constraints.Propagator;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.ArrayUtils;
+import solver.variables.VF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,132 +45,38 @@ import java.util.List;
  * @author Hadrien Cambazard, Charles Prud'homme, Jean-Guillaume Fages
  * @since 16/06/11
  */
-public class GlobalCardinality extends Constraint<IntVar> {
+public class GlobalCardinality extends Constraint {
 
-    private final int nbvars;
-    private final int[] values;
-    private final TIntIntHashMap map;
-
-    public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards, Solver solver) {
-        super(ArrayUtils.append(vars, cards), solver);
-        assert values.length == cards.length;
-        this.nbvars = vars.length;
-        this.map = new TIntIntHashMap();
-        this.values = values;
-        int idx = 0;
-        for (int v : values) {
-            if (!map.containsKey(v)) {
-                map.put(v, idx);
-                idx++;
-            } else {
-                throw new UnsupportedOperationException("ERROR: multiple occurrences of value: " + v);
-            }
-        }
-        this.setPropagators(new PropFastGCC(vars, values, map, cards));
+    public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards) {
+        super("GCC", createProp(vars, values, cards));
     }
+
+	private static Propagator createProp(IntVar[] vars, int[] values, IntVar[] cards) {
+		assert values.length == cards.length;
+		TIntIntHashMap map = new TIntIntHashMap();
+		int idx = 0;
+		for (int v : values) {
+			if (!map.containsKey(v)) {
+				map.put(v, idx);
+				idx++;
+			} else {
+				throw new UnsupportedOperationException("ERROR: multiple occurrences of value: " + v);
+			}
+		}
+		return new PropFastGCC(vars, values, map, cards);
+	}
 
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
         List<Constraint> cstrs = new ArrayList<Constraint>();
         for (int i = 0; i < card.length; i++) {
-            IntVar cste = VariableFactory.fixed(i, solver);
-            BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
+            IntVar cste = VF.fixed(i, solver);
+            BoolVar[] bs = VF.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
-                Constraint cs = LogicalConstraintFactory.ifThenElse(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste));
+                Constraint cs = LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
                 cstrs.add(cs);
             }
-            cstrs.add(IntConstraintFactory.sum(bs, card[i]));
+            cstrs.add(ICF.sum(bs, card[i]));
         }
         return cstrs.toArray(new Constraint[cstrs.size()]);
     }
-
-
-    @Override
-    public String toString() {
-        StringBuffer buf = new StringBuffer("GlobalCardinality(<");
-        buf.append(vars[0]);
-        for (int i = 1; i < nbvars; i++) {
-            buf.append(',').append(vars[i]);
-        }
-        buf.append(">,<");
-        buf.append(":").append(vars[nbvars]);
-        for (int i = 1; i < vars.length - nbvars; i++) {
-            buf.append(',').append(i).append(":").append(vars[nbvars + i]);
-        }
-        buf.append(">)");
-        return new String(buf);
-    }
-
-    //	// need to fix propagators before using this
-    //	public static enum Consistency {
-    //		AC, AC_ON_CARDS, BC
-    //	}
-    //		switch (consistency) {
-    //			case AC:
-    //				setPropagators(new PropGCC_AC_Cards_Fast(vars, values, cards, this, solver));
-    //				return;
-    //			case AC_ON_CARDS:
-    //				setPropagators(new PropGCC_AC_Cards_AC(vars, values, cards, this, solver));
-    //				return;
-    //			case BC:
-    //			default:
-    //				//CPRU  double to simulate idempotency
-    //				setPropagators(new PropBoundGlobalCardinality(vars, cards, values[0], values[values.length - 1], solver, this),
-    //						new PropBoundGlobalCardinality(vars, cards, values[0], values[values.length - 1], solver, this));
-    //
-    //		}
-    //	/**
-    //	 * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
-    //	 * <br/>
-    //	 * The level of consistency should be chosen among BC and AC.
-    //	 * <p/>
-    //	 * <b>BC</b>: ensures Bound Consistency,
-    //	 * <br/><b>AC</b>: ensures Arc Consistency.
-    //	 *
-    //	 * @param VARS        collection of variables
-    //	 * @param VALUES      collection of constrained values
-    //	 * @param OCCURRENCES collection of cardinality variables
-    //	 * @param CLOSED      restricts domains of VARS to VALUES if set to true
-    //	 * @param CONSISTENCY consistency level, among {"BC", "AC"}
-    //	 */
-    //	public static GlobalCardinality global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED,
-    //													   String CONSISTENCY) {
-    //		Solver solver = VARS[0].getSolver();
-    //
-    //		TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
-    //		for (int i = 0; i < VALUES.length; i++) {
-    //			map.put(VALUES[i], OCCURRENCES[i]);
-    //		}
-    //
-    //		int n = VARS.length;
-    //		Arrays.sort(VALUES);
-    //		int min = VALUES[0];
-    //		int max = VALUES[VALUES.length - 1];
-    //
-    //		for (int v = 0; v < VARS.length; v++) {
-    //			IntVar var = VARS[v];
-    //			if (min > var.getLB()) {
-    //				min = var.getLB();
-    //			}
-    //			if (max < var.getUB()) {
-    //				max = var.getUB();
-    //			}
-    //		}
-    //
-    //		IntVar[] cards = new IntVar[max - min + 1];
-    //		int[] values = new int[max - min + 1];
-    //		for (int i = min; i <= max; i++) {
-    //			values[i - min] = i;
-    //			if (map.containsKey(i)) {
-    //				cards[i - min] = map.get(i);
-    //			} else {
-    //				if (CLOSED) {
-    //					cards[i - min] = VariableFactory.fixed(0, solver);
-    //				} else {
-    //					cards[i - min] = VariableFactory.bounded(StringUtils.randomName(), 0, n, solver);
-    //				}
-    //			}
-    //		}
-    //		return new GlobalCardinality(VARS, values, cards, GlobalCardinality.Consistency.valueOf(CONSISTENCY), solver);
-    //
-    //	}
 }

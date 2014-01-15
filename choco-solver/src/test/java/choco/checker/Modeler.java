@@ -32,9 +32,8 @@ import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.lex.Lex;
-import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -471,7 +470,7 @@ public interface Modeler {
                 Y[i - n / 2] = VariableFactory.enumerated("Y_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
-            Constraint ctr = new Lex(X, Y, (Boolean) parameters, s);
+            Constraint ctr = (Boolean) parameters?ICF.lex_less(X,Y):ICF.lex_less_eq(X,Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y));
@@ -506,7 +505,7 @@ public interface Modeler {
                 Z[i - 2 * n / 3] = VariableFactory.enumerated("Z_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Z[i - 2 * n / 3]);
             }
-            Constraint ctr = new LexChain((Boolean) parameters, s, X, Y, Z);
+            Constraint ctr = (Boolean) parameters?ICF.lex_chain_less(X,Y,Z):ICF.lex_chain_less_eq(X,Y,Z);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y, Z));

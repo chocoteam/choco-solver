@@ -26,7 +26,6 @@
  */
 package solver.constraints.real;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.variables.RealVar;
 
@@ -37,31 +36,20 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18/07/12
  */
-public class RealConstraint extends Constraint<RealVar> {
+public class RealConstraint extends Constraint {
 
-    //***********************************************************************************
+	//***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Create a constraint on real variables.
-     * This is propagated using IBEX.
-     *
-     * @param solver the solver
-     */
-    public RealConstraint(Solver solver) {
-        super(solver);
-    }
-
 	/**
-	 * Create a constraint on real variables.
-	 * This is propagated using IBEX.
+	 * Make a new RealConstraint defined as a set of RealPropagators
 	 *
-	 * @param vars concerned variables
-	 * @param solver the solver
+	 * @param name        name of the constraint
+	 * @param propagators set of propagators defining the constraint
 	 */
-	public RealConstraint(RealVar[] vars, Solver solver) {
-		super(vars,solver);
+	public RealConstraint(String name, RealPropagator... propagators) {
+		super(name, propagators);
 	}
 
     //***********************************************************************************
@@ -69,7 +57,7 @@ public class RealConstraint extends Constraint<RealVar> {
     //***********************************************************************************
 
     /**
-     * add one or more functions, separated with semi-colon ";" to <code>this</code>.
+     * Creates a RealPropagator to propagate one or more continuous functions, separated with semi-colon ";"
      * <br/>
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
@@ -86,13 +74,14 @@ public class RealConstraint extends Constraint<RealVar> {
      * @param functions list of functions, separated by a semi-colon
      * @param option    propagation option index (Ibex.COMPO is DEFAULT)
      * @param rvars     a list of real variables
+	 * @return a RealPropagator to propagate the given functions over given variable domains
      */
-    public void addFunction(String functions, int option, RealVar... rvars) {
-        addPropagators(new RealPropagator(functions, rvars, option));
+    public static RealPropagator createPropagator(String functions, int option, RealVar... rvars) {
+    	return new RealPropagator(functions, rvars, option);
     }
 
     /**
-     * add one or more functions, separated with semi-colon ";" to <code>this</code>.
+     * Creates a RealPropagator to propagate one or more continuous functions, separated with semi-colon ";"
      * <br/>
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
@@ -109,14 +98,16 @@ public class RealConstraint extends Constraint<RealVar> {
      *
      * @param functions list of functions, separated by a semi-colon
      * @param rvars     a list of real variables
+	 * @return a RealPropagator to propagate the given functions over given variable domains
      */
-    public void addFunction(String functions, RealVar... rvars) {
-        addFunction(functions, Ibex.COMPO, rvars);
+    public static RealPropagator createPropagator(String functions, RealVar... rvars) {
+        return createPropagator(functions, Ibex.COMPO, rvars);
     }
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-		solver.getIbex().release();
+		if(propagators==null || propagators.length==0)throw new UnsupportedOperationException("Empty RealConstraint");
+		propagators[0].getSolver().getIbex().release();
     }
 }

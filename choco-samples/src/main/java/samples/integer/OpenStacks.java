@@ -35,7 +35,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
-import solver.constraints.nary.min_max.Maximum;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;

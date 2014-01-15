@@ -167,12 +167,12 @@ public class ObjectiveTest {
         BoolVar v = ICF.arithm(iv, "<=", 2).reif();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        System.out.println("Minimum1: " + iv + " : " + solver.isEntailed());
+        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
 
         solver.getSearchLoop().reset();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        System.out.println("Minimum2: " + iv + " : " + solver.isEntailed());
+        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
     @Test(groups = "1s")

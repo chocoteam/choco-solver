@@ -29,7 +29,6 @@ package solver.constraints.nary.cnf;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.variables.BoolVar;
 import util.ESat;
 
 /**
@@ -38,15 +37,13 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 22 nov. 2010
  */
-public class SatConstraint extends Constraint<BoolVar> {
+public class SatConstraint extends Constraint {
 
 	final PropSat miniSat;
 
 	public SatConstraint(Solver solver) {
-		super(solver);
-		miniSat = new PropSat(solver);
-		setPropagators(miniSat);
-
+		super("SatConstraint",new PropSat(solver));
+		miniSat = (PropSat) propagators[0];
 	}
 
 	@Override
@@ -59,17 +56,6 @@ public class SatConstraint extends Constraint<BoolVar> {
 			}
 		}
 		return so;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder();
-		st.append('(');
-		for (int p = 0; p < propagators.length; p++) {
-			st.append(propagators[p].toString()).append(") and (");
-		}
-		st.replace(st.length() - 6, st.length(), "");
-		return st.toString();
 	}
 
 	public SatSolver getSatSolver() {

@@ -39,7 +39,6 @@ import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.nary.sum.Sum;
 import solver.variables.VariableFactory;
 
 import java.io.IOException;

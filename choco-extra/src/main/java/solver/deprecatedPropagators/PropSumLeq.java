@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.deprecatedPropagators;
+package solver.deprecatedPropagators;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -36,13 +36,13 @@ import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
- * A propagator for SUM(x_i) >= y
+ * A propagator for SUM(x_i) <= y
  *
  * @author Jean-Guillaume Fages
  * @since 21/07/13
  */
 @Deprecated
-public class PropSumGeq extends Propagator<IntVar> {
+public class PropSumLeq extends Propagator<IntVar> {
 
     final int n; // number of variables
 
@@ -58,28 +58,25 @@ public class PropSumGeq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumGeq(IntVar[] variables, IntVar sum) {
+    public PropSumLeq(IntVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), computePriority(variables.length), false);
         n = variables.length;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		int max = 0;
+		int min = 0;
 		int ampMax = 0;
 		for(int i=0;i<n;i++){
-			max += vars[i].getUB();
+			min += vars[i].getLB();
 			ampMax = Math.max(vars[i].getUB()-vars[i].getLB(),ampMax);
 		}
-		vars[n].updateUpperBound(max,aCause);
-		int lb = vars[n].getLB();
-		if(max-ampMax<lb){
+		vars[n].updateLowerBound(min,aCause);
+		int ub = vars[n].getUB();
+		if(min+ampMax>ub){
 			for(int i=0;i<n;i++){
-				vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
+				vars[i].updateUpperBound(ub-min+vars[i].getLB(),aCause);
 			}
-		}
-		if(max-(ampMax*n)>=lb){
-			setPassive();
 		}
     }
 
@@ -90,8 +87,8 @@ public class PropSumGeq extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask +
-				(vIdx<n?EventType.DECUPP.mask:EventType.INCLOW.mask);
+		return EventType.INSTANTIATE.mask +
+				(vIdx<n?EventType.INCLOW.mask:EventType.DECUPP.mask);
     }
 
     @Override
@@ -102,10 +99,10 @@ public class PropSumGeq extends Propagator<IntVar> {
 			min += vars[i].getLB();
 			max += vars[i].getUB();
 		}
-		if(max<vars[n].getLB()){
+		if(min>vars[n].getUB()){
 			return ESat.FALSE;
 		}
-		if(min>=vars[n].getUB()){
+		if(max<=vars[n].getLB()){
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
@@ -119,7 +116,7 @@ public class PropSumGeq extends Propagator<IntVar> {
         for (; i < n; i++) {
             linComb.append(" + ").append(vars[i].getName());
         }
-		linComb.append(" >= ");
+        linComb.append(" <= ");
         linComb.append(vars[n].getName());
         return linComb.toString();
     }

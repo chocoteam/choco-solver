@@ -50,23 +50,38 @@ import util.ESat;
  */
 public class PropReif extends Propagator<Variable> {
 
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
     // boolean variable of the reification
     private final BoolVar bVar;
     // constraint to apply if bVar = true
     private final Constraint trueCons;
-    // constraint of this propagator
     // constraint to apply if bVar = false
     private final Constraint falseCons;
+	// constraint in charge of the reification process (constraint of this propagator)
+    private ReificationConstraint reifCons;
 
-    private final ReificationConstraint reifCons;
+    //***********************************************************************************
+    // CONSTRUCTION
+    //***********************************************************************************
 
-    public PropReif(ReificationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(reifCons.getVariables(), PropagatorPriority.LINEAR, false);
+    public PropReif(Variable[] allVars, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+        super(allVars, PropagatorPriority.LINEAR, false);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;
-        this.reifCons = reifCons;
     }
+
+	public void setReifCons(ReificationConstraint reifCons){
+		assert this.reifCons==null:"cannot change the ReificationConstraint of a PropReif";
+		this.reifCons = reifCons;
+	}
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -78,13 +93,13 @@ public class PropReif extends Propagator<Variable> {
             }
             setPassive();
         } else {
-            ESat sat = trueCons.isEntailed();
+            ESat sat = trueCons.isSatisfied();
             if (sat == ESat.FALSE) {
                 bVar.setToFalse(aCause);
                 reifCons.activate(1);
                 setPassive();
             }
-            sat = falseCons.isEntailed();
+            sat = falseCons.isSatisfied();
             if (sat == ESat.FALSE) {
                 bVar.setToTrue(aCause);
                 reifCons.activate(0);
@@ -108,11 +123,20 @@ public class PropReif extends Propagator<Variable> {
     public ESat isEntailed() {
         if (bVar.instantiated()) {
             if (bVar.getValue() == 1) {
-                return trueCons.isEntailed();
+                return trueCons.isSatisfied();
             } else {
-                return falseCons.isEntailed();
+                return falseCons.isSatisfied();
             }
-        }
+        }else{
+			// a constraint an its opposite can neither be both true nor both false
+			ESat tie = trueCons.isSatisfied();
+			if(tie!=ESat.UNDEFINED){
+				ESat fie = falseCons.isSatisfied();
+				if(tie==fie){
+					return ESat.FALSE;
+				}
+			}
+		}
         return ESat.UNDEFINED;
     }
 
@@ -122,7 +146,7 @@ public class PropReif extends Propagator<Variable> {
         e.add(this);
         if (d.getVar() == bVar) {
             // the current deduction is due to the current domain of the involved variables
-            for (Variable v : reifCons.getVariables()) {
+            for (Variable v : vars) {
                 v.explain(VariableState.DOM, e);
             }
         } else {

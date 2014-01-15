@@ -28,7 +28,6 @@ package solver.constraints.nary.nogood;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.propagation.queues.CircularQueue;
@@ -48,21 +47,17 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 20/06/13
  */
-public class NogoodStoreFromRestarts extends Constraint<IntVar> implements IMonitorRestart {
+public class NogoodStoreFromRestarts extends Constraint implements IMonitorRestart {
 
     static final Logger LOGGER = LoggerFactory.getLogger("solver");
-
     static final String MSG_NGOOD = "unit propagation failure (nogood)";
-
     CircularQueue<Decision<IntVar>> decisions;
     CircularQueue<INogood> nogoods;
-
 	final PropNogoodStore png;
 
-    public NogoodStoreFromRestarts(IntVar[] vars, Solver solver) {
-        super(vars, solver);
-		png = new PropNogoodStore(vars);
-        setPropagators(png);
+    public NogoodStoreFromRestarts(IntVar[] vars) {
+        super("NogoodStoreFromRestarts",new PropNogoodStore(vars));
+		png = (PropNogoodStore) propagators[0];
         decisions = new CircularQueue<Decision<IntVar>>(16);
         nogoods = new CircularQueue<INogood>(16);
 
@@ -82,13 +77,13 @@ public class NogoodStoreFromRestarts extends Constraint<IntVar> implements IMoni
             }
 			png.unitPropagation();
         } catch (ContradictionException e) {
-            solver.getSearchLoop().interrupt(MSG_NGOOD);
+			png.getSolver().getSearchLoop().interrupt(MSG_NGOOD);
         }
     }
 
     private void extractNogoodFromPath() {
-        int d = solver.getSearchLoop().getCurrentDepth();
-        Decision<IntVar> decision = solver.getSearchLoop().decision;
+        int d = png.getSolver().getSearchLoop().getCurrentDepth();
+        Decision<IntVar> decision = png.getSolver().getSearchLoop().decision;
         while (decision != RootDecision.ROOT) {
             decisions.addLast(decision);
             decision = decision.getPrevious();

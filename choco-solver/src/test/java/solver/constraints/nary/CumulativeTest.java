@@ -33,8 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.nary.cumulative.Cumulative;
-import solver.constraints.nary.cumulative.PropFullCumulative;
-import solver.constraints.nary.cumulative.PropGraphCumulative;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
@@ -131,18 +129,17 @@ public class CumulativeTest {
 				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ},
 				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ}
 		};
-		long ref = solve(n,capamax,dmin,hmax,seed,true,1, filters[0],mode);
+		long ref = solve(n,capamax,dmin,hmax,seed,true, filters[0],mode);
 		if(ref==-1)return;
 		for(boolean g : new boolean[]{true,false})	// graph-based
-			for(int b: new int[]{0})//,1,2})			// fast mode
-				for(int f=1;f<filters.length;f++){
-					long val = solve(n,capamax,dmin,hmax,seed,g,b,filters[f],mode);
-					assert ref == val || val==-1 :"filter "+f+" failed (can be due to the heuristic in case of timeout)";
-				}
+			for(int f=1;f<filters.length;f++){
+				long val = solve(n,capamax,dmin,hmax,seed,g,filters[f],mode);
+				assert ref == val || val==-1 :"filter "+f+" failed (can be due to the heuristic in case of timeout)";
+			}
 	}
 
 	public static long solve(int n, int capamax, int dmin, int hmax, long seed,
-							 boolean graph, int nbFast, Cumulative.Filter[] f, int mode) {
+							 boolean graph, Cumulative.Filter[] f, int mode) {
 		final Solver solver = new Solver();
 		int dmax = 5+dmin*2;
 		final IntVar[] s = VF.enumeratedArray("s",n,0,n*dmax,solver);
@@ -156,42 +153,29 @@ public class CumulativeTest {
 			t[i] = new Task(s[i],d[i],e[i]);
 			solver.post(ICF.arithm(e[i],"<=",last));
 		}
-		Constraint c = new Constraint(solver);
-		boolean b1 = nbFast>0;
-		boolean b2 = nbFast>1;
-		if(graph) {
-			c.setPropagators(
-					new PropGraphCumulative(s,d,e,h,capa,b1, f),
-					new PropGraphCumulative(s,d,e,h,capa,b2, f)
-			);
-		}else{
-			c.setPropagators(
-					new PropFullCumulative(s,d,e,h,capa,b1, f),
-					new PropFullCumulative(s,d,e,h,capa,b2, f)
-			);
-		}
+		Constraint c = ICF.cumulative(t,h,capa,graph);
 		solver.post(c);
 		solver.set(ISF.random(solver.retrieveIntVars(), seed));
 		solver.set(ISF.lastConflict(solver,solver.getSearchLoop().getStrategy()));
 		SMF.limitTime(solver,5000);
 		switch (mode){
 			case 0:	solver.findSolution();
-				print(solver,last,nbFast,graph,f);
+				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			case 1:	solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,last);
-				print(solver,last,nbFast,graph,f);
+				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getBestSolutionValue().longValue();
 			case 2:	solver.findAllSolutions();// too many solutions to be used
-				print(solver,last,nbFast,graph,f);
+				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			default:throw new UnsupportedOperationException();
 		}
 	}
 
-	private static void print(Solver solver, IntVar obj, int nbFast, boolean graph, Cumulative.Filter[] f){
+	private static void print(Solver solver, IntVar obj, boolean graph, Cumulative.Filter[] f){
 		if(VERBOSE){
 			String st = "";
 			for(Cumulative.Filter fi:f){
@@ -203,7 +187,6 @@ public class CumulativeTest {
 					+"\t"+(int)solver.getMeasures().getFailCount()+" fs"
 					+"\t"+nbSol+" ss"
 					+"\t"+(nbSol>0?obj.getValue()+" obj":"")
-					+"\t"+st+" // "+nbFast
 			);
 		}
 	}
