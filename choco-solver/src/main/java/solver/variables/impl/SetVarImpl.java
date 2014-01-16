@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package solver.variables.impl;
 
 import memory.IEnvironment;
 import solver.ICause;
@@ -33,6 +33,8 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.EventType;
+import solver.variables.SetVar;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.objects.setDataStructures.ISet;
@@ -48,7 +50,7 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
+public class SetVarImpl extends AbstractVariable implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -76,7 +78,7 @@ public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
 	 * @param kerType	data structure of the kernel
 	 * @param solver	solver of the variable.
 	 */
-	protected SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
+	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
 		super(name, solver);
 		solver.associates(this);
 		int min = Integer.MAX_VALUE;
@@ -111,7 +113,7 @@ public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
 	 * @param max		last envelope value
 	 * @param solver	solver of the variable.
 	 */
-	protected SetVarImpl(String name, int min, int max, Solver solver) {
+	public SetVarImpl(String name, int min, int max, Solver solver) {
 		super(name, solver);
 		solver.associates(this);
 		this.environment = solver.getEnvironment();
@@ -344,6 +346,7 @@ public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
         return new SetDeltaMonitor(delta, propagator);
     }
 
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -354,6 +357,7 @@ public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

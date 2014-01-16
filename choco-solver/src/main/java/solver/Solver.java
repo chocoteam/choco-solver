@@ -53,8 +53,8 @@ import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 import solver.variables.graph.GraphVar;
-import solver.variables.view.BoolConstantView;
-import solver.variables.view.ConstantView;
+import solver.variables.impl.FixedBoolVarImpl;
+import solver.variables.impl.FixedIntVarImpl;
 import sun.reflect.Reflection;
 import util.ESat;
 
@@ -94,7 +94,7 @@ public class Solver implements Serializable {
     Constraint[] cstrs;
     int cIdx;
 
-    public TIntObjectHashMap<ConstantView> cachedConstants;
+    public TIntObjectHashMap<FixedIntVarImpl> cachedConstants;
 
     /**
      * Environment, based of the search tree (trailing or copying)
@@ -138,7 +138,7 @@ public class Solver implements Serializable {
     /**
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
-    public final BoolConstantView ZERO, ONE;
+    public final FixedBoolVarImpl ZERO, ONE;
 
 
     protected SatConstraint minisat;
@@ -162,10 +162,10 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this);
         solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
-        this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
+        this.cachedConstants = new TIntObjectHashMap<FixedIntVarImpl>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = new BoolConstantView("0", 0, this);
-        ONE = new BoolConstantView("1", 1, this);
+        ZERO = new FixedBoolVarImpl("0", 0, this);
+        ONE = new FixedBoolVarImpl("1", 1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr",new PropTrue(ONE));

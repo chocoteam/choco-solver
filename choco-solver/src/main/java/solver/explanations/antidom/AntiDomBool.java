@@ -27,7 +27,7 @@
 package solver.explanations.antidom;
 
 import memory.structure.IndexedBipartiteSet;
-import solver.variables.fast.BooleanBoolVarImpl;
+import solver.variables.impl.BoolVarImpl;
 import util.iterators.DisposableValueIterator;
 
 /**
@@ -57,7 +57,7 @@ public class AntiDomBool implements AntiDomain {
 
     private DisposableValueIterator _viterator;
 
-    public AntiDomBool(BooleanBoolVarImpl var) {
+    public AntiDomBool(BoolVarImpl var) {
         notInstanciated = var.getSolver().getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = var.getSolver().getEnvironment().getNextOffset();
         mValue = 0;

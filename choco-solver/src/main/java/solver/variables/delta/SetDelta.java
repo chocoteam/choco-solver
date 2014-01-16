@@ -35,14 +35,11 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetDelta implements IDelta {
+public class SetDelta implements ISetDelta {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    public final static int KERNEL = 0;
-    public final static int ENVELOP = 1;
     private IEnumDelta[] delta;
     private long timestamp;
     private final AbstractSearchLoop loop;
@@ -79,10 +76,12 @@ public class SetDelta implements IDelta {
         timestamp = loop.timeStamp;
     }
 
+	@Override
     public int getSize(int kerOrEnv) {
         return delta[kerOrEnv].size();
     }
 
+	@Override
     public void add(int element, int kerOrEnv, ICause cause) {
         if (Configuration.LAZY_UPDATE) {
             lazyClear();
@@ -90,16 +89,19 @@ public class SetDelta implements IDelta {
         delta[kerOrEnv].add(element, cause);
     }
 
+	@Override
     public void lazyClear() {
         if (timestamp != loop.timeStamp) {
             clear();
         }
     }
 
+	@Override
     public int get(int index, int kerOrEnv) {
         return delta[kerOrEnv].get(index);
     }
 
+	@Override
     public ICause getCause(int index, int kerOrEnv) {
         return delta[kerOrEnv].getCause(index);
     }

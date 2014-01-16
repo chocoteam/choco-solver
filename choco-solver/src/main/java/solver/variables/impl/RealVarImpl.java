@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
+package solver.variables.impl;
 
 import memory.IStateDouble;
 import solver.ICause;
@@ -33,6 +33,8 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.EventType;
+import solver.variables.RealVar;
 import solver.variables.delta.NoDelta;
 import util.tools.StringUtils;
 
@@ -43,14 +45,14 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
+public class RealVarImpl extends AbstractVariable implements RealVar {
 
     private static final long serialVersionUID = 1L;
 
     IStateDouble LB, UB;
     double precision;
 
-    protected RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
+    public RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
         super(name, solver);
         solver.associates(this);
         this.LB = solver.getEnvironment().makeFloat(lb);
@@ -160,6 +162,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         }
     }
 
+	@Override
     public void explain(VariableState what, Explanation to) {
     }
 
@@ -177,6 +180,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         throw new SolverException("Unable to create delta for RealVar!");
     }
 
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -186,6 +190,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -208,6 +213,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
     }
 
+	@Override
     public String toString() {
         return String.format("%s = [%.16f,%.16f]", name, getLB(), getUB());
     }

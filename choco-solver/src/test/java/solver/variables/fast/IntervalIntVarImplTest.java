@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.variables.Variable;
+import solver.variables.impl.IntervalIntVarImpl;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 

@@ -25,16 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package solver.variables.impl;
 
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
+import solver.variables.Variable;
 import solver.variables.view.IView;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -46,25 +48,19 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<V extends Variable>
-        implements Serializable {
+public abstract class AbstractVariable implements Variable {
 
     private static final long serialVersionUID = 1L;
-    public static final String
-            MSG_REMOVE = "remove last value";
+    public static final String MSG_REMOVE = "remove last value";
     public static final String MSG_EMPTY = "empty domain";
     public static final String MSG_INST = "already instantiated";
     public static final String MSG_UNKNOWN = "unknown value";
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
     public static final String MSG_BOUND = "new bounds are incorrect";
-    protected static final String NO_NAME = "";
-
 
     private final int ID; // unique id of this
     protected final Solver solver; // Reference to the solver containing this variable.
-
-    private int cLast = 0;
 
     protected final String name;
 
@@ -75,31 +71,29 @@ public abstract class AbstractVariable<V extends Variable>
     private IView[] views; // views to inform of domain modification
     private int vIdx; // index of the last view not null in views -- not backtrable
 
-    protected IVariableMonitor<V>[] monitors; // monitors to inform of domain modification
+    protected IVariableMonitor[] monitors; // monitors to inform of domain modification
     protected int mIdx; // index of the last view not null in views -- not backtrable
 
     protected int modificationEvents;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    protected AbstractVariable(Solver solver) {
-        this(NO_NAME, solver);
-    }
-
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
         views = new IView[2];
-        monitors = (IVariableMonitor<V>[]) new IVariableMonitor[2];
+        monitors = new IVariableMonitor[2];
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
     }
 
+	@Override
     public int getId() {
         return ID;
     }
 
+	@Override
     public int link(Propagator propagator, int idxInProp) {
         //ensure capacity
         if (pIdx == propagators.length) {
@@ -117,10 +111,12 @@ public abstract class AbstractVariable<V extends Variable>
         return pIdx - 1;
     }
 
+	@Override
     public void recordMask(int mask) {
         modificationEvents |= mask;
     }
 
+	@Override
     public void unlink(Propagator propagator, int idxInProp) {
 //        int i = 0;
 //        while (i < pIdx && propagators[i] != propagator) {
@@ -143,6 +139,7 @@ public abstract class AbstractVariable<V extends Variable>
 
     }
 
+	@Override
     public Propagator[] getPropagators() {
         if (propagators.length > pIdx) {
             propagators = Arrays.copyOf(propagators, pIdx);
@@ -150,14 +147,17 @@ public abstract class AbstractVariable<V extends Variable>
         return propagators;
     }
 
+	@Override
     public Propagator getPropagator(int idx) {
         return propagators[idx];
     }
 
+	@Override
     public int getNbProps() {
         return pIdx;
     }
 
+	@Override
     public int[] getPIndices() {
         if (pindices.length > pIdx) {
             pindices = Arrays.copyOf(pindices, pIdx);
@@ -165,10 +165,12 @@ public abstract class AbstractVariable<V extends Variable>
         return pindices;
     }
 
+	@Override
     public int getIndiceInPropagator(int pidx) {
         return pindices[pidx];
     }
 
+	@Override
     public String getName() {
         return this.name;
     }
@@ -177,6 +179,7 @@ public abstract class AbstractVariable<V extends Variable>
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
 
+	@Override
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         if (cause == Cause.Null) {
@@ -192,6 +195,7 @@ public abstract class AbstractVariable<V extends Variable>
         }
     }
 
+	@Override
     public void addMonitor(IVariableMonitor monitor) {
         // 1. check the non redundancy of a monitor
         for (int i = 0; i < mIdx; i++) {
@@ -199,17 +203,19 @@ public abstract class AbstractVariable<V extends Variable>
         }
         // 2. then add the monitor
         if (mIdx == monitors.length) {
-            IVariableMonitor<V>[] tmp = monitors;
-            monitors = (IVariableMonitor<V>[]) new IVariableMonitor[tmp.length * 3 / 2 + 1];
+            IVariableMonitor[] tmp = monitors;
+            monitors = new IVariableMonitor[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, monitors, 0, mIdx);
         }
         monitors[mIdx++] = monitor;
     }
 
+	@Override
     public void removeMonitor(IVariableMonitor monitor) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
+	@Override
     public void subscribeView(IView view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
@@ -219,19 +225,23 @@ public abstract class AbstractVariable<V extends Variable>
         views[vIdx++] = view;
     }
 
-    public int nbConstraints() {
-        return pIdx;
-    }
-
+	@Override
     public Solver getSolver() {
         return solver;
     }
 
+	@Override
     public IView[] getViews() {
         return Arrays.copyOfRange(views, 0, vIdx);
     }
 
+	@Override
     public int compareTo(Variable o) {
         return this.getId() - o.getId();
     }
+
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

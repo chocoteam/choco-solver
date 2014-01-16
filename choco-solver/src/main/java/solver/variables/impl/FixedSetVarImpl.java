@@ -1,10 +1,9 @@
-package solver.variables.view;
+package solver.variables.impl;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -12,8 +11,9 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.delta.SetDelta;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.delta.NoDelta;
+import solver.variables.view.IView;
 
 import java.util.Arrays;
 
@@ -21,24 +21,19 @@ import java.util.Arrays;
  *
  * @author jimmy
  */
-public class SetConstantView implements SetVar {
+public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
-    private final Solver solver;
-    private final int ID;
-    protected final String name;
     private final int[] value;
     private int kerIndex;
     private int envIndex;
 
-    public SetConstantView(String name, TIntSet value, Solver solver) {
-        this.name = name;
+    public FixedSetVarImpl(String name, TIntSet value, Solver solver) {
+		super(name,solver);
         this.value = value.toArray();
         Arrays.sort(this.value);
-        this.solver = solver;
-        this.ID = solver.nextId();
     }
 
-    public SetConstantView(String name, int[] value, Solver solver) {
+    public FixedSetVarImpl(String name, int[] value, Solver solver) {
         // Remove duplicates
         this(name, new TIntHashSet(value), solver);
     }
@@ -124,34 +119,18 @@ public class SetConstantView implements SetVar {
     public int[] getValue() {
         return value;
     }
-    /*
-     * Unforunately, unlike IIntDeltaMonitor and IntDelta, there isn't a "None"
-     * delta for sets.
-     */
-    private SetDelta delta;
-    private SetDeltaMonitor deltaMonitor;
-    private boolean reactOnModification;
 
     @Override
-    public SetDelta getDelta() {
-        return delta;
+    public NoDelta getDelta() {
+        return NoDelta.singleton;
     }
 
     @Override
-    public void createDelta() {
-        if (!reactOnModification) {
-            reactOnModification = true;
-            delta = new SetDelta(solver.getSearchLoop());
-        }
-    }
+    public void createDelta() {}
 
     @Override
-    public SetDeltaMonitor monitorDelta(ICause propagator) {
-        createDelta();
-        if (deltaMonitor == null) {
-            deltaMonitor = new SetDeltaMonitor(delta, propagator);;
-        }
-        return deltaMonitor;
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+		return ISetDeltaMonitor.Default.NONE;
     }
 
     @Override
@@ -159,50 +138,14 @@ public class SetConstantView implements SetVar {
         return true;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+    @Override//void (a constant receives no event)
+    public void addMonitor(IVariableMonitor monitor) {}
 
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[0];
-    }
+    @Override//void (a constant receives no event)
+    public void removeMonitor(IVariableMonitor monitor) {}
 
-    @Override
-    public Propagator getPropagator(int idx) {
-        return null;
-    }
-
-    @Override
-    public int getNbProps() {
-        return 0;
-    }
-
-    @Override
-    public int[] getPIndices() {
-        return new int[0];
-    }
-
-    @Override
-    public int getIndiceInPropagator(int pidx) {
-        return 0;
-    }
-
-    @Override
-    public void addMonitor(IVariableMonitor monitor) {
-        //void
-    }
-
-    @Override
-    public void removeMonitor(IVariableMonitor monitor) {
-        //void
-    }
-
-    @Override
-    public void subscribeView(IView view) {
-        //void
-    }
+    @Override//void (a constant receives no event)
+    public void subscribeView(IView view) {}
 
     @Override
     public void explain(VariableState what, Explanation to) {
@@ -214,44 +157,21 @@ public class SetConstantView implements SetVar {
         throw new UnsupportedOperationException("SetConstantView does not (yet) implement method explain(...)");
     }
 
-    @Override
-    public int link(Propagator propagator, int idxInProp) {
-        return -1;
-    }
+    @Override//void (a constant receives no event)
+    public void recordMask(int mask) {}
 
-    @Override
-    public void recordMask(int mask) {
-        //void
-    }
+    @Override//void (a constant receives no event)
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {}
 
-    @Override
-    public void unlink(Propagator propagator, int idxInProp) {
-        //void
-    }
+    @Override//void (a constant receives no event)
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {}
 
-    @Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        //void
-    }
-
-    @Override
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
-        //void
-    }
-
-    @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
-        //void
-    }
+    @Override//void (a constant receives no event)
+    public void notifyMonitors(EventType event) throws ContradictionException {}
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         solver.getEngine().fails(cause, this, message);
-    }
-
-    @Override
-    public Solver getSolver() {
-        return solver;
     }
 
     @Override
@@ -262,20 +182,5 @@ public class SetConstantView implements SetVar {
     @Override
     public <V extends Variable> V duplicate() {
         throw new UnsupportedOperationException("Cannot duplicate a constant view");
-    }
-
-    @Override
-    public int getId() {
-        return ID;
-    }
-
-    @Override
-    public int compareTo(Variable o) {
-        return this.getId() - o.getId();
-    }
-
-    @Override
-    public String toString() {
-        return getName();
     }
 }

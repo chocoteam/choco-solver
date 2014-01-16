@@ -24,26 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables.delta;
 
-package choco.solver.search.enumerations.values;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
+import util.procedure.IntProcedure;
 
-public class Id extends ValueIterator<Integer> {
+/**
+ * @author Jean-Guillaume Fages
+ * @since Oct 2012
+ */
+public interface ISetDeltaMonitor extends IDeltaMonitor {
 
-    int length;
+	void lazyClear();
 
-    public Id(int l) {
-        length = l;
-    }
+	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException;
 
-    public Integer get(int i) {
-        return i;
-    }
-
-    public int length() {
-        return length;
-    }
-
-    public String toString() {
-        return "Id(" + length + ")";
-    }
+	public static enum Default implements ISetDeltaMonitor {
+		NONE() {
+			@Override
+			public void freeze() {}
+			@Override
+			public void unfreeze() {}
+			@Override
+			public void clear() {}
+			@Override
+			public void lazyClear() {}
+			@Override
+			public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {}
+		}
+	}
 }

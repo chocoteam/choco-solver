@@ -30,12 +30,9 @@ package solver.variables;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
-import solver.variables.fast.BitsetArrayIntVarImpl;
-import solver.variables.fast.BitsetIntVarImpl;
-import solver.variables.fast.BooleanBoolVarImpl;
-import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.impl.*;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
 import util.tools.StringUtils;
@@ -53,8 +50,7 @@ import java.util.Arrays;
  */
 public class VariableFactory {
 
-    VariableFactory() {
-    }
+    VariableFactory() {}
 
     private static final String CSTE_NAME = "cste -- ";
 
@@ -72,7 +68,7 @@ public class VariableFactory {
      * @return a BoolVar
      */
     public static BoolVar bool(String NAME, Solver SOLVER) {
-        BooleanBoolVarImpl var = new BooleanBoolVarImpl(NAME, SOLVER);
+        BoolVarImpl var = new BoolVarImpl(NAME, SOLVER);
         //var.setHeuristicVal(HeuristicValFactory.presetI(var));
         return var;
     }
@@ -126,7 +122,7 @@ public class VariableFactory {
         if (MIN == MAX) {
             return fixed(NAME, MIN, SOLVER);
         } else if (MIN == 0 && MAX == 1) {
-            return new BooleanBoolVarImpl(NAME, SOLVER);
+            return new BoolVarImpl(NAME, SOLVER);
         } else {
             return new IntervalIntVarImpl(NAME, MIN, MAX, SOLVER);
         }
@@ -186,7 +182,7 @@ public class VariableFactory {
         if (MIN == MAX) {
             return fixed(NAME, MIN, SOLVER);
         } else if (MIN == 0 && MAX == 1) {
-            return new BooleanBoolVarImpl(NAME, SOLVER);
+            return new BoolVarImpl(NAME, SOLVER);
         } else {
             return new BitsetIntVarImpl(NAME, MIN, MAX, SOLVER);
         }
@@ -292,7 +288,6 @@ public class VariableFactory {
     //*************************************************************************************
     // REAL VARIABLES
     //*************************************************************************************
-
 
     /**
      * Build a real variable with a bounded domain initialized to [MIN,MAX]
@@ -616,26 +611,59 @@ public class VariableFactory {
         return SOLVER.ONE;
     }
 
+    //*************************************************************************************
+    // CONSTANTS
+    //*************************************************************************************
 
-    /**
-     * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
-     * <p/>
-     * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
-     *
-     * @param NAME   name of the constant
-     * @param VALUE  its value
-     * @param SOLVER the solver to build the integer variable in.
-     */
-    public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
-            return SOLVER.cachedConstants.get(VALUE);
-        }
-        ConstantView cste = new ConstantView(NAME, VALUE, SOLVER);
-        if (NAME.equals(Integer.toString(VALUE))) {
-            SOLVER.cachedConstants.put(VALUE, cste);
-        }
-        return cste;
-    }
+	/**
+	 * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
+	 * <p/>
+	 * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
+	 *
+	 * @param NAME   name of the constant
+	 * @param VALUE  its value
+	 * @param SOLVER the solver to build the integer variable in.
+	 */
+	public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
+		if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
+			return SOLVER.cachedConstants.get(VALUE);
+		}
+		FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+		if (NAME.equals(Integer.toString(VALUE))) {
+			SOLVER.cachedConstants.put(VALUE, cste);
+		}
+		return cste;
+	}
+
+	/**
+	 * get a specific boolean variable, whom domain is reduced to the singleton {VALUE}.
+	 * This variable is unnamed as it is actually a solver constant
+	 *
+	 * @param VALUE  its value
+	 * @param SOLVER the solver to build the integer variable in.
+	 */
+	public static IntVar fixed(boolean VALUE, Solver SOLVER) {
+		if(VALUE) {
+			return SOLVER.ONE;
+		}else{
+			return SOLVER.ZERO;
+		}
+	}
+
+	/**
+	 * Create a specific set variable, named NAME whom domain is reduced to the singleton {VALUE}.
+	 *
+	 * @param NAME   name of the constant
+	 * @param VALUE  its value, a set of integers (duplicates will be removed)
+	 * @param SOLVER the solver to build the integer variable in.
+	 */
+	public static SetVar fixed(String NAME, int[] VALUE, Solver SOLVER) {
+		return new FixedSetVarImpl(NAME,VALUE,SOLVER);
+	}
+
+    //*************************************************************************************
+    // VIEWS
+    //*************************************************************************************
 
     /**
      * Create an offset view based on VAR, such that, the resulting view is defined on VAR + CSTE.

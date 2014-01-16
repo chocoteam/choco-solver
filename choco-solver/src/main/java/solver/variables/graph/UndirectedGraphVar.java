@@ -63,6 +63,7 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     // METHODS
     //***********************************************************************************
 
+	@Override
     public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
         if (kernel.edgeExists(x, y)) {
@@ -81,6 +82,7 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
         return false;
     }
 
+	@Override
     public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
         enforceNode(x, cause);

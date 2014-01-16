@@ -42,7 +42,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -59,7 +59,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     private IntVar iv;
     private SetVar set;
-    private SetDeltaMonitor sdm;
+    private ISetDeltaMonitor sdm;
     private IntProcedure elemRem;
 	private IStateInt watchLit1, watchLit2;
 

@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -61,7 +62,7 @@ public class PropInverse extends Propagator<SetVar> {
     private int n, n2, idx;
     private SetVar[] sets, invsets, toFilter;
     private int offSet1, offSet2, offSet;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure elementForced, elementRemoved;
 
     //***********************************************************************************

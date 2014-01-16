@@ -25,24 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.fast;
+package solver.variables.impl;
 
-import memory.structure.IndexedBipartiteSet;
+import memory.IEnvironment;
+import memory.IStateInt;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.explanations.antidom.AntiDomBool;
+import solver.explanations.antidom.AntiDomInterval;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.*;
-import solver.variables.delta.IEnumDelta;
+import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IIntervalDelta;
+import solver.variables.delta.IntervalDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.OneValueDelta;
-import solver.variables.delta.monitor.OneValueDeltaMonitor;
-import util.ESat;
+import solver.variables.delta.monitor.IntervalDeltaMonitor;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueBoundIterator;
@@ -55,47 +56,29 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implements BoolVar {
+public final class IntervalIntVarImpl extends AbstractVariable implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * The offset, that is the minimal value of the domain (stored at index 0).
-     * Thus the entry at index i corresponds to x=i+offset).
-     */
-    protected final int offset;
-
-
-    /**
-     * indicate the value of the domain : false = 0, true = 1
-     */
-    protected int mValue;
-
-    /**
-     * A bi partite set indicating for each value whether it is present or not.
-     * If the set contains the domain, the variable is not instanciated.
-     */
-
-    protected final IndexedBipartiteSet notInstanciated;
-
-    IEnumDelta delta = NoDelta.singleton;
-
     protected boolean reactOnRemoval = false;
+
+    private final IStateInt LB, UB, SIZE;
+
+    IIntervalDelta delta = NoDelta.singleton;
 
     private DisposableValueIterator _viterator;
 
     private DisposableRangeIterator _riterator;
 
-    private BoolVar not;
-
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BooleanBoolVarImpl(String name, Solver solver) {
+    public IntervalIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
         solver.associates(this);
-        notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
-        this.offset = solver.getEnvironment().getNextOffset();
-        mValue = 0;
+        IEnvironment env = solver.getEnvironment();
+        this.LB = env.makeInt(min);
+        this.UB = env.makeInt(max);
+        this.SIZE = env.makeInt(max - min + 1);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,12 +101,50 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (value == 0)
-            return instantiateTo(1, cause);
-        else if (value == 1)
-            return instantiateTo(0, cause);
+//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        int inf = getLB();
+        int sup = getUB();
+        if (value == inf && value == sup) {
+            if (Configuration.PLUG_EXPLANATION) {
+                solver.getExplainer().removeValue(this, value, cause);
+            }
+            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+        } else if (inf == value || value == sup) {
+            EventType e;
+            if (value == inf) {
+                if (reactOnRemoval) {
+                    delta.add(value, value, cause);
+                }
+                SIZE.add(-1);
+                LB.set(value + 1);
+                e = EventType.INCLOW;
+            } else {
+                if (reactOnRemoval) {
+                    delta.add(value, value, cause);
+                }
+                SIZE.add(-1);
+                UB.set(value - 1);
+                e = EventType.DECUPP;
+            }
+            if (SIZE.get() > 0) {
+                if (this.instantiated()) {
+                    e = EventType.INSTANTIATE;
+                }
+                this.notifyPropagators(e, cause);
+            } else if (SIZE.get() == 0) {
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().removeValue(this, value, cause);
+                }
+                this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
+            }
+            if (Configuration.PLUG_EXPLANATION) {
+                solver.getExplainer().removeValue(this, value, cause);
+            }
+            return true;
+        }
         return false;
     }
 
@@ -137,15 +158,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
-            }
-            return anyChange;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -162,12 +175,10 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @param value instantiation value (int)
      * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
+	@Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
         if (this.instantiated()) {
             int cvalue = this.getValue();
@@ -178,27 +189,35 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
-        } else {
-            if (value == 0 || value == 1) {
-                EventType e = EventType.INSTANTIATE;
-                assert notInstanciated.contains(offset);
-                notInstanciated.remove(offset);
-                if (reactOnRemoval) {
-                    delta.add(1 - value, cause);
-                }
-                mValue = value;
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
-                }
-                this.notifyPropagators(e, cause);
-                return true;
-            } else {
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
-                }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
-                return false;
+        } else if (contains(value)) {
+            EventType e = EventType.INSTANTIATE;
+
+            int lb = 0;
+            int ub = 0;
+            if (reactOnRemoval) {
+                lb = this.LB.get();
+                ub = this.UB.get();
+                if (lb <= value - 1) delta.add(lb, value - 1, cause);
+                if (value + 1 <= ub) delta.add(value + 1, ub, cause);
+            } else if (Configuration.PLUG_EXPLANATION) {
+                lb = LB.get();
+                ub = UB.get();
             }
+            this.LB.set(value);
+            this.UB.set(value);
+            this.SIZE.set(1);
+
+            if (Configuration.PLUG_EXPLANATION) {
+                solver.getExplainer().instantiateTo(this, value, cause, lb, ub);
+            }
+            this.notifyPropagators(e, cause);
+            return true;
+        } else {
+            if (Configuration.PLUG_EXPLANATION) {
+                solver.getExplainer().instantiateTo(this, value, cause, LB.get(), UB.get());
+            }
+            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+            return false;
         }
     }
 
@@ -217,12 +236,40 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @param value new lower bound (included)
      * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
+	@Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        return value > 0 && instantiateTo(value, cause);
+        int old = this.getLB();
+        if (old < value) {
+            int oub = this.getUB();
+            if (oub < value) {
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateLowerBound(this, old, oub+1, cause);
+                }
+                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+            } else {
+                EventType e = EventType.INCLOW;
+
+                if (reactOnRemoval) {
+                    if (old <= value - 1) delta.add(old, value - 1, cause);
+                }
+                SIZE.add(old - value);
+                LB.set(value);
+                if (instantiated()) {
+                    e = EventType.INSTANTIATE;
+                }
+                this.notifyPropagators(e, cause);
+
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                }
+                return true;
+
+            }
+        }
+        return false;
     }
 
     /**
@@ -240,47 +287,61 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @param value new upper bound (included)
      * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
+	@Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        return value < 1 && instantiateTo(value, cause);
+        int old = this.getUB();
+        if (old > value) {
+            int olb = this.getLB();
+            if (olb > value) {
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateUpperBound(this, old, olb-1, cause);
+                }
+                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+            } else {
+                EventType e = EventType.DECUPP;
+
+                if (reactOnRemoval) {
+                    if (value + 1 <= old) delta.add(value + 1, old, cause);
+                }
+                SIZE.add(value - old);
+                UB.set(value);
+
+                if (instantiated()) {
+                    e = EventType.INSTANTIATE;
+                }
+                this.notifyPropagators(e, cause);
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateUpperBound(this, old, value, cause);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
 
     @Override
     public void wipeOut(ICause cause) throws ContradictionException {
         assert cause != null;
-        removeInterval(0, 1, cause);
+        removeInterval(this.getLB(), this.getUB(), cause);
     }
 
-    @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(1, cause);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(0, cause);
-    }
-
+	@Override
     public boolean instantiated() {
-        return !notInstanciated.contains(offset);
+        return SIZE.get() == 1;
     }
 
     @Override
-    public boolean instantiatedTo(int aValue) {
-        return !notInstanciated.contains(offset) && mValue == aValue;
+    public boolean instantiatedTo(int value) {
+        return instantiated() && contains(value);
     }
 
+	@Override
     public boolean contains(int aValue) {
-        if (!notInstanciated.contains(offset)) {
-            return mValue == aValue;
-        }
-        return aValue == 0 || aValue == 1;
+        return ((aValue >= LB.get()) && (aValue <= UB.get()));
     }
 
     /**
@@ -288,16 +349,10 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @return the current value (or lower bound if not yet instantiated).
      */
+	@Override
     public int getValue() {
+        assert instantiated() : name + " not instantiated";
         return getLB();
-    }
-
-    @Override
-    public ESat getBooleanValue() {
-        if (instantiated()) {
-            return ESat.eval(getLB() != 0);
-        }
-        return ESat.UNDEFINED;
     }
 
     /**
@@ -305,11 +360,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @return the lower bound
      */
+	@Override
     public int getLB() {
-        if (!notInstanciated.contains(offset)) {
-            return mValue;
-        }
-        return 0;
+        return this.LB.get();
     }
 
     /**
@@ -317,61 +370,67 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @return the upper bound
      */
+	@Override
     public int getUB() {
-        if (!notInstanciated.contains(offset)) {
-            return mValue;
-        }
-        return 1;
+        return this.UB.get();
     }
 
+	@Override
     public int getDomainSize() {
-        return (notInstanciated.contains(offset) ? 2 : 1);
+        return SIZE.get();
     }
 
-    public int nextValue(int v) {
-        if (!notInstanciated.contains(offset)) {
-            final int val = mValue;
-            return (val > v) ? val : Integer.MAX_VALUE;
+	@Override
+    public int nextValue(int aValue) {
+        int lb = LB.get();
+        if (aValue < lb) {
+            return lb;
+        } else if (aValue < UB.get()) {
+            return aValue + 1;
         } else {
-            if (v < 0) return 0;
-            if (v == 0) return 1;
             return Integer.MAX_VALUE;
         }
     }
 
     @Override
-    public int previousValue(int v) {
-        if (v > getUB()) return getUB();
-        if (v > getLB()) return getLB();
-        return Integer.MIN_VALUE;
+    public int previousValue(int aValue) {
+        int ub = UB.get();
+        if (aValue > ub) {
+            return ub;
+        } else if (aValue > LB.get()) {
+            return aValue - 1;
+        } else {
+            return Integer.MIN_VALUE;
+        }
     }
 
     @Override
     public boolean hasEnumeratedDomain() {
-        return true;
+        return false;
     }
 
     @Override
-    public IEnumDelta getDelta() {
+    public IIntervalDelta getDelta() {
         return delta;
     }
 
+	@Override
     public String toString() {
-        if (!notInstanciated.contains(offset)) {
-            return this.name + " = " + Integer.toString(mValue);
-        } else {
-            return this.name + " = " + "[0,1]";
+        if (SIZE.get() == 1) {
+            return String.format("%s = %d", name, getLB());
         }
+        return String.format("%s = [%d,%d]", name, getLB(), getUB());
     }
 
     ////////////////////////////////////////////////////////////////
     ///// methode liees au fait qu'une variable est observable /////
     ////////////////////////////////////////////////////////////////
 
+
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new OneValueDelta(solver.getSearchLoop());
+            delta = new IntervalDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
@@ -379,38 +438,35 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new OneValueDeltaMonitor(delta, propagator);
+        return new IntervalDeltaMonitor(delta, propagator);
     }
 
-
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
+            //solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public AntiDomain antiDomain() {
-        return new AntiDomBool(this);
+        return new AntiDomInterval(this);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param what
-     * @param to
-     */
-    @Override
+	@Override
     public void explain(VariableState what, Explanation to) {
         AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
@@ -419,6 +475,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
             if ((what == VariableState.LB && val < this.getLB())
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
+//                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
                 to.add(solver.getExplainer().explain(this, val));
             }
         }
@@ -439,13 +496,14 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
 
     @Override
     public int getTypeAndKind() {
-        return VAR | BOOL;
+        return VAR | INT;
     }
 
     @Override
-    public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), this.getSolver());
+    public IntVar duplicate() {
+        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.getSolver());
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -462,6 +520,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return _viterator;
     }
 
+	@Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);
@@ -472,29 +531,5 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    @Override
-    public void _setNot(BoolVar neg) {
-        this.not = neg;
-    }
-
-    @Override
-    public BoolVar not() {
-        if (not == null) {
-            not = VF.not(this);
-            not._setNot(this);
-        }
-        return not;
-    }
-
-    @Override
-    public boolean isLit() {
-        return true;
-    }
-
-    @Override
-    public boolean isNot() {
-        return false;
     }
 }

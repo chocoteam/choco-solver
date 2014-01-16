@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.fast;
+package solver.variables.impl;
 
 import memory.IEnvironment;
 import memory.IStateBitSet;
@@ -38,7 +38,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.EnumDelta;
@@ -51,28 +50,26 @@ import util.iterators.DisposableValueIterator;
 import util.tools.StringUtils;
 
 /**
- * <br/>IntVar implementation for quite small domains bit with very distant values e.g. {-51900,42,235923}
+ * <br/>
  *
- * @author Charles Prud'homme, Jean-Guillaume Fages
- * @since 14/05/2013
+ * @author Charles Prud'homme
+ * @since 18 nov. 2010
  */
-public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
+public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
     protected boolean reactOnRemoval = false;
 
-    //  values
-    private final int[] values;
-    //  Bitset of indexes
-    private final IStateBitSet indexes;
-    // Lower bound of the current domain
+    //  Bitset of available values -- includes offset
+    private final IStateBitSet VALUES;
+    // Lower bound of the current domain -- includes offset
     private final IStateInt LB;
-    // Upper bound of the current domain
+    // Upper bound of the current domain -- includes offset
     private final IStateInt UB;
-    // Size of the current domain
     private final IStateInt SIZE;
     //offset of the lower bound and the first value in the domain
+    private final int OFFSET;
     private final int LENGTH;
 
     private IEnumDelta delta = NoDelta.singleton;
@@ -82,17 +79,49 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BitsetArrayIntVarImpl(String name, int[] sortedValues, Solver solver) {
+    public BitsetIntVarImpl(String name, int[] sortedValues, Solver solver) {
         super(name, solver);
         solver.associates(this);
         IEnvironment env = solver.getEnvironment();
-        this.LENGTH = sortedValues.length;
-        this.values = sortedValues.clone();
-        this.indexes = env.makeBitSet(LENGTH);
-        this.indexes.set(0, LENGTH);
+        OFFSET = sortedValues[0];
+        int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
+        this.VALUES = env.makeBitSet(capacity);
+        for (int i = 0; i < sortedValues.length; i++) {
+            this.VALUES.set(sortedValues[i] - OFFSET);
+        }
         this.LB = env.makeInt(0);
-        this.UB = env.makeInt(LENGTH - 1);
-        this.SIZE = env.makeInt(LENGTH);
+        this.UB = env.makeInt(capacity - 1);
+        this.SIZE = env.makeInt(VALUES.cardinality());
+        LENGTH = capacity;
+    }
+
+    public BitsetIntVarImpl(String name, int offset, IStateBitSet values, Solver solver) {
+        super(name, solver);
+        solver.associates(this);
+        IEnvironment env = solver.getEnvironment();
+        OFFSET = offset;
+        int cardinality = values.cardinality();
+        this.VALUES = values.copy();
+        this.LB = env.makeInt(0);
+        this.UB = env.makeInt(values.prevSetBit(values.size()));
+        this.SIZE = env.makeInt(cardinality);
+        LENGTH = this.UB.get();
+    }
+
+    public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
+        super(name, solver);
+        solver.associates(this);
+        IEnvironment env = solver.getEnvironment();
+        this.OFFSET = min;
+        int capacity = max - min + 1;
+        this.VALUES = env.makeBitSet(capacity);
+        for (int i = 0; i <= max - min; i++) {
+            this.VALUES.set(i);
+        }
+        this.LB = env.makeInt(0);
+        this.UB = env.makeInt(max - min);
+        this.SIZE = env.makeInt(capacity);
+        LENGTH = capacity;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,54 +144,45 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         assert cause != null;
-        ICause antipromo = cause;
-        if (value < values[LB.get()] || value > values[UB.get()]) {
-            return false;
-        }
-        int index = -1;
-        for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= value; i = indexes.nextSetBit(i + 1)) {
-            if (values[i] == value) {
-                index = i;
-                break;
-            }
-        }
-        if (index != -1) {
+        int aValue = value - OFFSET;
+        boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
+        if (change) {
             if (SIZE.get() == 1) {
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().removeValue(this, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().removeValue(this, value, cause);
                 }
-                //            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
+//            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
             }
             EventType e = EventType.REMOVE;
-            this.indexes.clear(index);
+            this.VALUES.clear(aValue);
             this.SIZE.add(-1);
             if (reactOnRemoval) {
-                delta.add(value, cause);
+                delta.add(aValue + OFFSET, cause);
             }
+
             if (value == getLB()) {
-                LB.set(indexes.nextSetBit(LB.get()));
+                LB.set(VALUES.nextSetBit(aValue));
                 e = EventType.INCLOW;
             } else if (value == getUB()) {
-                UB.set(indexes.prevSetBit(UB.get()));
+                UB.set(VALUES.prevSetBit(aValue));
                 e = EventType.DECUPP;
             }
-            assert !indexes.isEmpty();
+            assert !VALUES.isEmpty();
             if (this.instantiated()) {
                 e = EventType.INSTANTIATE;
             }
             this.notifyPropagators(e, cause);
-            if (Configuration.PLUG_EXPLANATION) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+            if (Configuration.PLUG_EXPLANATION){
+                solver.getExplainer().removeValue(this, value, cause);
             }
-            return true;
-        } else {
-            return false;
         }
+        return change;
     }
 
     /**
@@ -201,62 +221,58 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (this.instantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (Configuration.PLUG_EXPLANATION){
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
+        } else if (contains(value)) {
+            int aValue = value - OFFSET;
+            if (reactOnRemoval) {
+                int i = VALUES.nextSetBit(this.LB.get());
+                for (; i < aValue; i = VALUES.nextSetBit(i + 1)) {
+                    delta.add(i + OFFSET, cause);
+                }
+                i = VALUES.nextSetBit(aValue + 1);
+                for (; i >= 0; i = VALUES.nextSetBit(i + 1)) {
+                    delta.add(i + OFFSET, cause);
+                }
+            }
+            int oldLB = 0;
+            int oldUB = 0;
+            if (Configuration.PLUG_EXPLANATION) {
+                oldLB = getLB(); // call getter to avoid adding OFFSET..
+                oldUB = getUB();
+            }
+
+            this.VALUES.clear();
+            this.VALUES.set(aValue);
+            this.LB.set(aValue);
+            this.UB.set(aValue);
+            this.SIZE.set(1);
+
+            if (VALUES.isEmpty()) {
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
+            }
+            if (Configuration.PLUG_EXPLANATION){
+                solver.getExplainer().instantiateTo(this, value, cause, oldLB, oldUB);
+            }
+            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
         } else {
-            int index = -1;
-            for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= value; i = indexes.nextSetBit(i + 1)) {
-                if (values[i] == value) {
-                    index = i;
-                    break;
-                }
+            if (Configuration.PLUG_EXPLANATION){
+                solver.getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             }
-            if (index != -1) {
-                if (reactOnRemoval) {
-                    for (int i = indexes.nextSetBit(LB.get()); i >= 0; i = indexes.nextSetBit(i + 1)) {
-                        if (i != index) {
-                            delta.add(values[i], cause);
-                        }
-                    }
-                }
-                int oldLB = 0;
-                int oldUB = 0;
-                if (Configuration.PLUG_EXPLANATION) {
-                    oldLB = getLB(); // call getter to avoid adding OFFSET..
-                    oldUB = getUB();
-                }
-
-                this.indexes.clear();
-                this.indexes.set(index);
-                this.LB.set(index);
-                this.UB.set(index);
-                this.SIZE.set(1);
-
-                if (indexes.isEmpty()) {
-                    this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
-                }
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().instantiateTo(this, value, cause, oldLB, oldUB);
-                }
-                this.notifyPropagators(EventType.INSTANTIATE, cause);
-                return true;
-            } else {
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
-                }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
-                return false;
-            }
+            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+            return false;
         }
     }
 
@@ -278,41 +294,40 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
             if (oub < value) {
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().updateLowerBound(this, old, oub + 1, antipromo);
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateLowerBound(this, old, oub+1, cause);
                 }
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
-                int index;
-                for (index = indexes.nextSetBit(LB.get()); index >= 0 && values[index] < value; index = indexes.nextSetBit(index + 1)) {
-                }
-                assert index >= 0 && values[index] >= value;
+
+                int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = LB.get(); i >= 0 && i < index; i = indexes.nextSetBit(i + 1)) {
-                        delta.add(values[i], cause);
+                    for (int i = old - OFFSET; i < aValue; i = VALUES.nextSetBit(i + 1)) {
+                        delta.add(i + OFFSET, cause);
                     }
                 }
-                indexes.clear(LB.get(), index);
-                LB.set(index);
-                assert SIZE.get() > indexes.cardinality();
-                SIZE.set(indexes.cardinality());
+                VALUES.clear(old - OFFSET, aValue);
+                LB.set(VALUES.nextSetBit(aValue));
+				assert SIZE.get()>VALUES.cardinality();
+                SIZE.set(VALUES.cardinality());
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 }
                 return true;
+
             }
         }
         return false;
@@ -336,37 +351,35 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
             int olb = this.getLB();
             if (olb > value) {
-                if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
+                if (Configuration.PLUG_EXPLANATION){
+                    solver.getExplainer().updateUpperBound(this, old, olb-1, cause);
                 }
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
-                int index;
-                for (index = indexes.prevSetBit(UB.get()); index >= 0 && values[index] > value; index = indexes.prevSetBit(index - 1)) {
-                }
-                assert index >= 0 && values[index] <= value;
+                int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = UB.get(); i > index; i = indexes.prevSetBit(i - 1)) {
-                        delta.add(values[i], cause);
+                    for (int i = old - OFFSET; i > aValue; i = VALUES.prevSetBit(i - 1)) {
+                        delta.add(i + OFFSET, cause);
                     }
                 }
-                indexes.clear(index + 1, UB.get() + 1);
-                UB.set(index);
-                assert SIZE.get() > indexes.cardinality();
-                SIZE.set(indexes.cardinality());
+                VALUES.clear(aValue + 1, old - OFFSET + 1);
+                UB.set(VALUES.prevSetBit(aValue));
+				assert SIZE.get()>VALUES.cardinality();
+                SIZE.set(VALUES.cardinality());
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (Configuration.PLUG_EXPLANATION) {
+                if (Configuration.PLUG_EXPLANATION){
                     solver.getExplainer().updateUpperBound(this, old, value, cause);
                 }
                 return true;
@@ -381,6 +394,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         removeInterval(this.getLB(), this.getUB(), cause);
     }
 
+	@Override
     public boolean instantiated() {
         return SIZE.get() == 1;
     }
@@ -390,15 +404,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         return instantiated() && contains(value);
     }
 
+	@Override
     public boolean contains(int aValue) {
-        if (aValue >= getLB() && aValue <= getUB()) {
-            for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= aValue; i = indexes.nextSetBit(i + 1)) {
-                if (values[i] == aValue) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        aValue -= OFFSET;
+        return aValue >= 0 && this.VALUES.get(aValue);
     }
 
     /**
@@ -406,6 +415,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      *
      * @return the current value (or lower bound if not yet instantiated).
      */
+	@Override
     public int getValue() {
         assert instantiated() : name + " not instantiated";
         return getLB();
@@ -416,9 +426,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      *
      * @return the lower bound
      */
+	@Override
     public int getLB() {
-        assert LB.get() >= 0 && LB.get() < LENGTH;
-        return values[LB.get()];
+        return this.LB.get() + OFFSET;
     }
 
     /**
@@ -426,34 +436,34 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
      *
      * @return the upper bound
      */
+	@Override
     public int getUB() {
-        assert UB.get() >= 0 && UB.get() < LENGTH;
-        return values[UB.get()];
+        return this.UB.get() + OFFSET;
     }
 
+	@Override
     public int getDomainSize() {
         return SIZE.get();
     }
 
+	@Override
     public int nextValue(int aValue) {
-        int lb = getLB();
-        if (aValue < lb) return lb;
-        if (aValue >= getUB()) return Integer.MAX_VALUE;
-        int i;
-        for (i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= aValue; i = indexes.nextSetBit(i + 1)) {
-        }
-        return (i >= 0) ? values[i] : Integer.MAX_VALUE;
+        aValue -= OFFSET;
+        int lb = LB.get();
+        if (aValue < 0 || aValue < lb) return lb + OFFSET;
+        aValue = VALUES.nextSetBit(aValue + 1);
+        if (aValue > -1) return aValue + OFFSET;
+        return Integer.MAX_VALUE;
     }
 
     @Override
     public int previousValue(int aValue) {
-        int ub = getUB();
-        if (aValue > ub) return ub;
-        if (aValue <= getLB()) return Integer.MIN_VALUE;
-        int i;
-        for (i = indexes.prevSetBit(UB.get()); i >= 0 && values[i] >= aValue; i = indexes.prevSetBit(i - 1)) {
-        }
-        return (i >= 0) ? values[i] : Integer.MIN_VALUE;
+        aValue -= OFFSET;
+        int ub = UB.get();
+        if (aValue > ub) return ub + OFFSET;
+        aValue = VALUES.prevSetBit(aValue - 1);
+        if (aValue > -1) return aValue + OFFSET;
+        return Integer.MIN_VALUE;
     }
 
     @Override
@@ -466,6 +476,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         return delta;
     }
 
+	@Override
     public String toString() {
         StringBuilder s = new StringBuilder(20);
         s.append(name).append(" = ");
@@ -499,12 +510,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         }
     }
 
+	@Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
     }
 
-
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -516,7 +528,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         notifyViews(event, cause);
     }
 
-
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -528,10 +540,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
 
     @Override
     public AntiDomain antiDomain() {
-        // TODO
         return new AntiDomBitset(this);
     }
 
+	@Override
     public void explain(VariableState what, Explanation to) {
         AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
@@ -548,7 +560,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
 //        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
     }
 
-
     @Override
     public void explain(VariableState what, int val, Explanation to) {
         to.add(solver.getExplainer().explain(this, val));
@@ -561,7 +572,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         solver.getEngine().fails(cause, this, message);
     }
 
-
     @Override
     public int getTypeAndKind() {
         return VAR | INT;
@@ -569,7 +579,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
 
     @Override
     public IntVar duplicate() {
-        return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.values.clone(), this.getSolver());
+        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copy(), this.getSolver());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -579,42 +589,42 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {
 
-                int index;
+                int value;
 
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    index = indexes.nextSetBit(LB.get());
+                    this.value = LB.get();
                 }
 
                 @Override
                 public void topDownInit() {
                     super.topDownInit();
-                    index = indexes.prevSetBit(UB.get());
+                    this.value = UB.get();
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return index != -1;
+                    return this.value != -1;
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    return index != -1;
+                    return this.value != -1;
                 }
 
                 @Override
                 public int next() {
-                    int old = values[index];
-                    index = indexes.nextSetBit(index + 1);
-                    return old;
+                    int old = this.value;
+                    this.value = VALUES.nextSetBit(this.value + 1);
+                    return old + OFFSET;
                 }
 
                 @Override
                 public int previous() {
-                    int old = values[index];
-                    index = indexes.prevSetBit(index - 1);
-                    return old;
+                    int old = this.value;
+                    this.value = VALUES.prevSetBit(this.value - 1);
+                    return old + OFFSET;
                 }
             };
         }
@@ -637,24 +647,15 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    this.from = indexes.nextSetBit(LB.get());
-//					this.to = indexes.nextClearBit(from + 1) - 1;
-                    this.to = from;
-                    while (indexes.get(to + 1)
-                            && (values[to] == values[to + 1] - 1)) {
-                        to++;
-                    }
+                    this.from = VALUES.nextSetBit(0);
+                    this.to = VALUES.nextClearBit(from + 1) - 1;
                 }
 
                 @Override
                 public void topDownInit() {
                     super.topDownInit();
-                    this.to = indexes.prevSetBit(UB.get());
-                    this.from = to;
-                    while (indexes.get(from - 1)
-                            && (values[from - 1] == values[from] - 1)) {
-                        from--;
-                    }
+                    this.to = VALUES.prevSetBit(VALUES.size() - 1);
+                    this.from = VALUES.prevClearBit(to) + 1;
                 }
 
                 public boolean hasNext() {
@@ -667,32 +668,24 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IntVar> implem
                 }
 
                 public void next() {
-                    this.from = indexes.nextSetBit(this.to + 1);
-                    this.to = from;
-                    while (indexes.get(to + 1)
-                            && (values[to] == values[to + 1] - 1)) {
-                        to++;
-                    }
+                    this.from = VALUES.nextSetBit(this.to + 1);
+                    this.to = VALUES.nextClearBit(this.from) - 1;
                 }
 
                 @Override
                 public void previous() {
-                    this.to = indexes.prevSetBit(this.from - 1);
-                    this.from = to;
-                    while (indexes.get(from - 1)
-                            && (values[from - 1] == values[from] - 1)) {
-                        from--;
-                    }
+                    this.to = VALUES.prevSetBit(this.from - 1);
+                    this.from = VALUES.prevClearBit(this.to) + 1;
                 }
 
                 @Override
                 public int min() {
-                    return values[from];
+                    return from + OFFSET;
                 }
 
                 @Override
                 public int max() {
-                    return values[to];
+                    return to + OFFSET;
                 }
             };
         }
