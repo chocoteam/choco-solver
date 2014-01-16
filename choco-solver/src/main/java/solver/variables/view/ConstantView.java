@@ -43,8 +43,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
-import solver.variables.domain.CsteDomain;
-import solver.variables.domain.IIntDomain;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -62,7 +60,6 @@ public class ConstantView implements IntVar {
 
     protected final int constante;
     protected final String name;
-    protected final IIntDomain domain;
     protected final Solver solver;
 
     protected int ID;
@@ -77,7 +74,6 @@ public class ConstantView implements IntVar {
         this.name = name;
         this.solver = solver;
         this.constante = constante;
-        this.domain = new CsteDomain(constante);
         this.empty = solver.getEnvironment().makeBool(false);
         ID = solver.nextId();
     }

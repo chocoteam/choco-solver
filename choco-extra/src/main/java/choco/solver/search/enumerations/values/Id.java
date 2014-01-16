@@ -27,12 +27,7 @@
 
 package choco.solver.search.enumerations.values;
 
-
-import solver.variables.domain.IIntDomain;
-
 public class Id extends ValueIterator<Integer> {
-
-    IIntDomain domain;
 
     int length;
 
