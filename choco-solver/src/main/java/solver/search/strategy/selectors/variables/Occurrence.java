@@ -32,9 +32,9 @@ import solver.variables.Variable;
 
 /**
  * <b>Occurrence</b> variable selector.
- * It chooses the variable with the largest number of attached constraints (instantiated variables are ignored).
+ * It chooses the variable with the largest number of attached propagators (instantiated variables are ignored).
  * <br/>
- * TODO: could be based on the number of not entailed constraints
+ * TODO: could be based on the number of not entailed propagators
  *
  * @author Charles Prud'homme
  * @since 2 juil. 2010
@@ -71,7 +71,7 @@ public class Occurrence<V extends Variable> implements VariableSelector<V> {
         int large_idx = 0;
         int large_nb_cstrs = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
-            int nb_cstrs = variables[idx].nbConstraints();
+            int nb_cstrs = variables[idx].getNbProps();
             if (!variables[idx].instantiated() && nb_cstrs > large_nb_cstrs) {
                 large_nb_cstrs = nb_cstrs;
                 large_idx = idx;

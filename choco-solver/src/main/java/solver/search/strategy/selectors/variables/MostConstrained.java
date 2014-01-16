@@ -32,7 +32,7 @@ import solver.variables.IntVar;
 
 /**
  * <b>Most constrained</b> variable selector.
- * It chooses the variable with the smallest value in its domain, breaking ties using the number of constraints
+ * It chooses the variable with the smallest value in its domain, breaking ties using the number of propagators
  * (instantiated variables are ignored).
  * <br/>
  *
@@ -75,7 +75,7 @@ public class MostConstrained implements VariableSelector<IntVar> {
             int lower = variables[idx].getLB();
             if (dsize > 1 &&
                     (lower < small_value
-                            || (lower == small_value && variables[idx].nbConstraints() < variables[small_idx].nbConstraints()))) {
+                            || (lower == small_value && variables[idx].getNbProps() < variables[small_idx].getNbProps()))) {
                 small_value = lower;
                 small_idx = idx;
             }

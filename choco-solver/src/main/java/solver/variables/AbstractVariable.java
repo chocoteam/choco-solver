@@ -30,7 +30,6 @@ package solver.variables;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.view.IView;
@@ -65,7 +64,6 @@ public abstract class AbstractVariable<V extends Variable>
     private final int ID; // unique id of this
     protected final Solver solver; // Reference to the solver containing this variable.
 
-    protected Constraint[] constraints = new Constraint[8];
     private int cLast = 0;
 
     protected final String name;
@@ -100,32 +98,6 @@ public abstract class AbstractVariable<V extends Variable>
 
     public int getId() {
         return ID;
-    }
-
-    /**
-     * Returns the array of constraints <code>this</code> appears in.
-     *
-     * @return array of constraints
-     */
-    public Constraint[] getConstraints() {
-        if (cLast < constraints.length) {
-            constraints = Arrays.copyOfRange(constraints, 0, cLast);
-        }
-        return constraints;
-    }
-
-    /**
-     * Link a constraint within a variable
-     *
-     * @param constraint a constraint
-     */
-    public void declareIn(Constraint constraint) {
-        if (cLast >= constraints.length) {
-            Constraint[] tmp = constraints;
-            constraints = new Constraint[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, constraints, 0, cLast);
-        }
-        constraints[cLast++] = constraint;
     }
 
     public int link(Propagator propagator, int idxInProp) {

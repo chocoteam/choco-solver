@@ -4,7 +4,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -166,16 +165,6 @@ public class SetConstantView implements SetVar {
     }
 
     @Override
-    public Constraint[] getConstraints() {
-        return new Constraint[0];
-    }
-
-    @Override
-    public void declareIn(Constraint constraint) {
-        // void
-    }
-
-    @Override
     public Propagator[] getPropagators() {
         return new Propagator[0];
     }
@@ -213,11 +202,6 @@ public class SetConstantView implements SetVar {
     @Override
     public void subscribeView(IView view) {
         //void
-    }
-
-    @Override
-    public int nbConstraints() {
-        return 0;
     }
 
     @Override

@@ -31,7 +31,6 @@ import memory.IStateBool;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -81,13 +80,6 @@ public class ConstantView implements IntVar {
         this.domain = new CsteDomain(constante);
         this.empty = solver.getEnvironment().makeBool(false);
         ID = solver.nextId();
-    }
-
-    public Constraint[] getConstraints() {
-        return new Constraint[0];
-    }
-
-    public void declareIn(Constraint constraint) {
     }
 
     @Override
@@ -252,12 +244,6 @@ public class ConstantView implements IntVar {
     @Override
     public void removeMonitor(IVariableMonitor monitor) {
         //useless
-    }
-
-    @Override
-    public int nbConstraints() {
-        //who cares?
-        return 0;
     }
 
     @Override
