@@ -134,7 +134,7 @@ public class IntConstraintFactory {
      * @param OP   an operator
      * @param CSTE a constant
      */
-    public static Arithmetic arithm(IntVar VAR, String OP, int CSTE) {
+    public static Constraint arithm(IntVar VAR, String OP, int CSTE) {
         Operator op = Operator.get(OP);
         return new Arithmetic(VAR, op, CSTE);
     }
@@ -145,7 +145,7 @@ public class IntConstraintFactory {
      * @param VAR   an integer variable
      * @param TABLE an array of values
      */
-    public static Member member(IntVar VAR, int[] TABLE) {
+    public static Constraint member(IntVar VAR, int[] TABLE) {
         return new Member(VAR, TABLE);
     }
 
@@ -156,7 +156,7 @@ public class IntConstraintFactory {
      * @param LB  the lower bound of the interval
      * @param UB  the upper bound of the interval
      */
-    public static Member member(IntVar VAR, int LB, int UB) {
+    public static Constraint member(IntVar VAR, int LB, int UB) {
         return new Member(VAR, LB, UB);
     }
 
@@ -166,7 +166,7 @@ public class IntConstraintFactory {
      * @param VAR   an integer variable
      * @param TABLE an array of values
      */
-    public static NotMember not_member(IntVar VAR, int[] TABLE) {
+    public static Constraint not_member(IntVar VAR, int[] TABLE) {
         return new NotMember(VAR, TABLE);
     }
 
@@ -177,7 +177,7 @@ public class IntConstraintFactory {
      * @param LB  the lower bound of the interval
      * @param UB  the upper bound of the interval
      */
-    public static NotMember not_member(IntVar VAR, int LB, int UB) {
+    public static Constraint not_member(IntVar VAR, int LB, int UB) {
         return new NotMember(VAR, LB, UB);
     }
 
@@ -200,7 +200,7 @@ public class IntConstraintFactory {
      * @param OP   an operator
      * @param VAR2 second variable
      */
-    public static Arithmetic arithm(IntVar VAR1, String OP, IntVar VAR2) {
+    public static Constraint arithm(IntVar VAR1, String OP, IntVar VAR2) {
         return new Arithmetic(VAR1, Operator.get(OP), VAR2);
     }
 
@@ -213,7 +213,7 @@ public class IntConstraintFactory {
      * @param OP2  another operator
      * @param CSTE an operator
      */
-    public static Arithmetic arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
+    public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
         Operator op1 = Operator.get(OP1);
         Operator op2 = Operator.get(OP2);
         return new Arithmetic(VAR1, op1, VAR2, op2, CSTE);
@@ -225,7 +225,7 @@ public class IntConstraintFactory {
      * <br/>
      * where OP can take its value among {"=", ">", "<", "!="}
      */
-    public static DistanceXYC distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE) {
+    public static Constraint distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE) {
         assert VAR1.getSolver() == VAR2.getSolver();
         return new DistanceXYC(VAR1, VAR2, Operator.get(OP), CSTE);
     }
@@ -293,7 +293,7 @@ public class IntConstraintFactory {
      * @param OP   an operator
      * @param VAR3 resulting variable
      */
-    public static DistanceXYZ distance(IntVar VAR1, IntVar VAR2, String OP, IntVar VAR3) {
+    public static Constraint distance(IntVar VAR1, IntVar VAR2, String OP, IntVar VAR3) {
         return new DistanceXYZ(VAR1, VAR2, Operator.get(OP), VAR3);
     }
 
@@ -367,7 +367,7 @@ public class IntConstraintFactory {
      * @param Y second variable
      * @param Z result
      */
-    public static Times times(IntVar X, IntVar Y, IntVar Z) {
+    public static Constraint times(IntVar X, IntVar Y, IntVar Z) {
         return new Times(X, Y, Z);
 	}
 
@@ -381,7 +381,7 @@ public class IntConstraintFactory {
 	 *
 	 * @param VARS        list of variables
 	 */
-	public static AllDifferent alldifferent(IntVar[] VARS) {
+	public static Constraint alldifferent(IntVar[] VARS) {
 		return alldifferent(VARS, "DEFAULT");
 	}
 
@@ -420,7 +420,7 @@ public class IntConstraintFactory {
 	 *                    <br/>
 	 *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
 	 */
-	public static AllDifferent alldifferent(IntVar[] VARS, String CONSISTENCY) {
+	public static Constraint alldifferent(IntVar[] VARS, String CONSISTENCY) {
 		return new AllDifferent(VARS, CONSISTENCY);
 	}
 
@@ -570,7 +570,7 @@ public class IntConstraintFactory {
      * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
      *                   Can be built with method CostAutomaton.makeSingleResource(...)
      */
-    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
+    public static Constraint cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
         return new CostRegular(VARS, COST, CAUTOMATON);
     }
 
@@ -709,7 +709,7 @@ public class IntConstraintFactory {
      * @param OCCURRENCES collection of cardinality variables
      * @param CLOSED      restricts domains of VARS to VALUES if set to true
      */
-    public static GlobalCardinality global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
+    public static Constraint global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
         assert VALUES.length == OCCURRENCES.length;
         if (!CLOSED) {
             return new GlobalCardinality(VARS, VALUES, OCCURRENCES);
@@ -908,7 +908,7 @@ public class IntConstraintFactory {
      * @param NVALUES limit variable
      * @param ALGOS   additional filtering algorithms, among {"at_most_BC","at_least_AC","at_most_greedy"}
      */
-    public static NValues nvalues(IntVar[] VARS, IntVar NVALUES, String... ALGOS) {
+    public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES, String... ALGOS) {
         return new NValues(VARS, NVALUES, ALGOS);
     }
 
@@ -921,7 +921,7 @@ public class IntConstraintFactory {
 	 * @param DIFF		set of difference constraints
 	 * @return a NValue constraint
 	 */
-	public static NValues nvalues(IntVar[] VARS, IntVar NVALUES, Differences DIFF) {
+	public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES, Differences DIFF) {
 		return new NValues(VARS,NVALUES,DIFF);
 	}
 
