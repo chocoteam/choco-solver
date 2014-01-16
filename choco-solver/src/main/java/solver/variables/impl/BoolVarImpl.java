@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.fast;
+package solver.variables.impl;
 
 import memory.structure.IndexedBipartiteSet;
 import solver.Configuration;
@@ -36,7 +36,10 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBool;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.*;
+import solver.variables.BoolVar;
+import solver.variables.EventType;
+import solver.variables.VF;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
@@ -55,7 +58,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVar {
+public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -64,7 +67,6 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      * Thus the entry at index i corresponds to x=i+offset).
      */
     protected final int offset;
-
 
     /**
      * indicate the value of the domain : false = 0, true = 1
@@ -90,7 +92,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BooleanBoolVarImpl(String name, Solver solver) {
+    public BoolVarImpl(String name, Solver solver) {
         super(name, solver);
         solver.associates(this);
         notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();

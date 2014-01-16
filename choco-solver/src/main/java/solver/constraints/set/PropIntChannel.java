@@ -42,6 +42,7 @@ import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -63,7 +64,7 @@ public class PropIntChannel extends Propagator<Variable> {
     private SetVar[] sets;
     private IntVar[] ints;
     private int offSet1, offSet2;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IIntDeltaMonitor[] idm;
     private IntProcedure elementForced, elementRemoved, valRem;
 

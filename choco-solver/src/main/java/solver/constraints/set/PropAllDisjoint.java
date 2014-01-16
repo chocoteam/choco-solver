@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -56,7 +57,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
     //***********************************************************************************
 
     private int n, currentSet;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure elementForced;
 
     //***********************************************************************************

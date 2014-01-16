@@ -41,7 +41,7 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -61,7 +61,7 @@ public class PropBoolChannel extends Propagator<Variable> {
     private int offSet;
     private BoolVar[] bools;
     private SetVar set;
-    private SetDeltaMonitor sdm;
+    private ISetDeltaMonitor sdm;
     private IntProcedure setForced, setRemoved;
 
     //***********************************************************************************

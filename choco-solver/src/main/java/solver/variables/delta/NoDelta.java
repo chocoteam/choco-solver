@@ -37,20 +37,17 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 10/02/11
  */
-public enum NoDelta implements IEnumDelta, IIntervalDelta {
+public enum NoDelta implements IEnumDelta, IIntervalDelta, ISetDelta {
     singleton;
 
     @Override
-    public void add(int value, ICause cause) {
-    }
+    public void add(int value, ICause cause) {}
 
     @Override
-    public void clear() {
-    }
+    public void clear() {}
 
     @Override
-    public void lazyClear() {
-    }
+    public void lazyClear() {}
 
     @Override
     public AbstractSearchLoop getSearchLoop() {
@@ -63,8 +60,7 @@ public enum NoDelta implements IEnumDelta, IIntervalDelta {
     }
 
     @Override
-    public void add(int lb, int ub, ICause cause) {
-    }
+    public void add(int lb, int ub, ICause cause) {}
 
     @Override
     public int getLB(int idx) throws IndexOutOfBoundsException {
@@ -76,7 +72,6 @@ public enum NoDelta implements IEnumDelta, IIntervalDelta {
         throw new IndexOutOfBoundsException("NoDelta#getUB(): fordidden call, size must be checked before!");
     }
 
-
     @Override
     public int get(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
@@ -84,11 +79,26 @@ public enum NoDelta implements IEnumDelta, IIntervalDelta {
 
     @Override
     public ICause getCause(int idx) {
-        throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
+        throw new IndexOutOfBoundsException("NoDelta#getCause(): fordidden call, size must be checked before!");
     }
 
     @Override
     public int size() {
         return 0;
     }
+
+	@Override
+	public int getSize(int kerOrEnv) {
+		return 0;
+	}
+
+	@Override
+	public int get(int index, int kerOrEnv) {
+		throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
+	}
+
+	@Override
+	public ICause getCause(int index, int kerOrEnv) {
+		throw new IndexOutOfBoundsException("NoDelta#getCause(): fordidden call, size must be checked before!");
+	}
 }

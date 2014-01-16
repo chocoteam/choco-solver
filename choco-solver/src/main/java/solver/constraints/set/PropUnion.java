@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -51,7 +52,7 @@ public class PropUnion extends Propagator<SetVar> {
     //***********************************************************************************
 
     private int k;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure unionForced, unionRemoved, setForced, setRemoved;
 
     //***********************************************************************************

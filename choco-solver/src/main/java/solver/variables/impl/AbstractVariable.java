@@ -25,14 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package solver.variables.impl;
 
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
+import solver.variables.Variable;
 import solver.variables.view.IView;
+
 import java.util.Arrays;
 
 /**
@@ -44,7 +48,7 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable implements Variable{
+public abstract class AbstractVariable implements Variable {
 
     private static final long serialVersionUID = 1L;
     public static final String MSG_REMOVE = "remove last value";
@@ -143,18 +147,15 @@ public abstract class AbstractVariable implements Variable{
         return propagators;
     }
 
-
 	@Override
     public Propagator getPropagator(int idx) {
         return propagators[idx];
     }
 
-
 	@Override
     public int getNbProps() {
         return pIdx;
     }
-
 
 	@Override
     public int[] getPIndices() {
@@ -164,12 +165,10 @@ public abstract class AbstractVariable implements Variable{
         return pindices;
     }
 
-
 	@Override
     public int getIndiceInPropagator(int pidx) {
         return pindices[pidx];
     }
-
 
 	@Override
     public String getName() {
@@ -240,4 +239,9 @@ public abstract class AbstractVariable implements Variable{
     public int compareTo(Variable o) {
         return this.getId() - o.getId();
     }
+
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

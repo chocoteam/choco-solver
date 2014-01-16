@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.view;
+package solver.variables.impl;
 
 import solver.ICause;
 import solver.Solver;
@@ -44,12 +44,14 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class BoolConstantView extends ConstantView implements BoolVar {
+public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
+	private static final long serialVersionUID = 1L;
     private BoolVar not;
 
-    public BoolConstantView(String name, int constant, Solver solver) {
+    public FixedBoolVarImpl(String name, int constant, Solver solver) {
         super(name, constant, solver);
+		assert constant==0||constant==1:"FixedBoolVarImpl value should be taken in {0,1}";
     }
 
     @Override

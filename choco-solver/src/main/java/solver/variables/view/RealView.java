@@ -32,8 +32,12 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.*;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.RealVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.NoDelta;
+import solver.variables.impl.AbstractVariable;
 
 /**
  * <br/>

@@ -29,7 +29,7 @@ package solver.variables;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 
 /**
  * A Set Variable is defined by a domain which is a set interval [kernel,envelope]
@@ -177,5 +177,5 @@ public interface SetVar extends Variable {
      * @param propagator
      * @return a new SetDeltaMonitor
      */
-    public SetDeltaMonitor monitorDelta(ICause propagator);
+    public ISetDeltaMonitor monitorDelta(ICause propagator);
 }

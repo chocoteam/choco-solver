@@ -33,12 +33,12 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.impl.AbstractVariable;
 import util.objects.graphs.IGraph;
 import util.objects.setDataStructures.ISet;
 

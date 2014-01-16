@@ -25,13 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.view;
+package solver.variables.impl;
 
 import memory.IStateBool;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -43,6 +42,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.view.IView;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -56,58 +56,19 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class ConstantView implements IntVar {
+public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
+	private static final long serialVersionUID = 1L;
     protected final int constante;
-    protected final String name;
-    protected final Solver solver;
-
-    protected int ID;
-
     protected IStateBool empty;
-
     private DisposableValueIterator _viterator;
-
     private DisposableRangeIterator _riterator;
 
-    public ConstantView(String name, int constante, Solver solver) {
-        this.name = name;
-        this.solver = solver;
+    public FixedIntVarImpl(String name, int constante, Solver solver) {
+		super(name,solver);
         this.constante = constante;
         this.empty = solver.getEnvironment().makeBool(false);
-        ID = solver.nextId();
     }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[0];
-    }
-
-    @Override
-    public int getNbProps() {
-        return 0;
-    }
-
-    @Override
-    public int[] getPIndices() {
-        return new int[0];
-    }
-
-    @Override
-    public Propagator getPropagator(int idx) {
-        return null;
-    }
-
-    @Override
-    public int getIndiceInPropagator(int pidx) {
-        return 0;
-    }
-
-    @Override
-    public int getId() {
-        return ID;
-    }
-
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
@@ -227,20 +188,8 @@ public class ConstantView implements IntVar {
         return true;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void addMonitor(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
-    public void removeMonitor(IVariableMonitor monitor) {
-        //useless
-    }
+    @Override//void (a constant receives no event)
+    public void addMonitor(IVariableMonitor monitor) {}
 
     @Override
     public AntiDomain antiDomain() {
@@ -261,18 +210,11 @@ public class ConstantView implements IntVar {
         }
     }
 
-    @Override
-    public void subscribeView(IView view) {
-    }
+    @Override//void (a constant receives no event)
+    public void subscribeView(IView view) {}
 
-    @Override
-    public int link(Propagator propagator, int idxInProp) {
-        return -1;
-    }
-
-    @Override
-    public void recordMask(int mask) {
-    }
+    @Override//void (a constant receives no event)
+    public void recordMask(int mask) {}
 
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
@@ -280,26 +222,16 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void createDelta() {
-    }
+    public void createDelta() {}
 
-    @Override
-    public void unlink(Propagator propagator, int idx) {
-    }
+    @Override//void (a constant receives no event)
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {}
 
-    @Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        //void
-    }
+    @Override//void (a constant receives no event)
+    public void notifyMonitors(EventType event) throws ContradictionException {}
 
-    @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
-    }
-
-    @Override
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
-        //void
-    }
+    @Override//void (a constant receives no event)
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {}
 
     @Override
     public String toString() {
@@ -313,23 +245,13 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public Solver getSolver() {
-        return solver;
-    }
-
-    @Override
     public int getTypeAndKind() {
         return Variable.INT | Variable.CSTE;
     }
 
     @Override
     public IntVar duplicate() {
-        throw new UnsupportedOperationException("Cannot duplicate a constant view");
-    }
-
-    @Override
-    public int compareTo(Variable o) {
-        return this.getId() - o.getId();
+        throw new UnsupportedOperationException("Cannot duplicate a constant");
     }
 
     @Override

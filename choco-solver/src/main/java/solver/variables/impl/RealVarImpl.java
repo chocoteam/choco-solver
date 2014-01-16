@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
+package solver.variables.impl;
 
 import memory.IStateDouble;
 import solver.ICause;
@@ -33,6 +33,8 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.EventType;
+import solver.variables.RealVar;
 import solver.variables.delta.NoDelta;
 import util.tools.StringUtils;
 
@@ -50,7 +52,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     IStateDouble LB, UB;
     double precision;
 
-    protected RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
+    public RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
         super(name, solver);
         solver.associates(this);
         this.LB = solver.getEnvironment().makeFloat(lb);

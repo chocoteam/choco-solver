@@ -25,39 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.ternary;
+package solver.variables.delta;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.variables.IntVar;
-import solver.variables.impl.IntervalIntVarImpl;
-import util.tools.StringUtils;
+import solver.ICause;
 
 /**
- * X = MAX(Y,Z)
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 19/04/11
+ * @author Jean-Guillaume Fages
+ * @since Oct 2012
  */
-public class Max extends Constraint {
+public interface ISetDelta extends IDelta {
 
-    public Max(IntVar X, IntVar Y, IntVar Z) {
-        super("Max",new PropMaxBC(X, Y, Z));
-    }
+	public final static int KERNEL = 0;
+	public final static int ENVELOP = 1;
 
-    public static IntVar var(IntVar a, IntVar b) {
-        if (a.getLB() >= b.getUB()) {
-            return a;
-        } else if (b.getLB() >= a.getUB()) {
-            return b;
-        } else {
-            Solver solver = a.getSolver();
-            IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
-                    Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
-            solver.post(IntConstraintFactory.maximum(z, a, b));
-            return z;
-        }
-    }
+	int getSize(int kerOrEnv);
+
+	void add(int element, int kerOrEnv, ICause cause);
+
+	int get(int index, int kerOrEnv);
+
+	ICause getCause(int index, int kerOrEnv);
 }

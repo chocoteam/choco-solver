@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.fast.IntervalIntVarImpl;
+import solver.variables.impl.IntervalIntVarImpl;
 import util.tools.StringUtils;
 
 /**
