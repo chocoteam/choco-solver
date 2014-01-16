@@ -73,17 +73,17 @@ public class Explore {
         boolean isSat = false;
 
         int n = vars.length;
-        Set<Constraint> cons_set = new LinkedHashSet<Constraint>();
+        Set<Propagator> cons_set = new LinkedHashSet<Propagator>();
         for (int i = 0; i < n; i++) {
             if (vars[i].instantiated()) {
                 solution[i] = ubs[i] = vars[i].getValue();
             } else {
                 solution[i] = vars[i].getLB();
                 ubs[i] = vars[i].getUB();
-                cons_set.addAll(Arrays.asList(vars[i].getConstraints()));
+                cons_set.addAll(Arrays.asList(vars[i].getPropagators()));
             }
         }
-        Constraint[] constraints = cons_set.toArray(new Constraint[1]);
+		Propagator[] constraints = cons_set.toArray(new Propagator[0]);
         if (checkSolution(constraints)) {
             isSat = true;
         } else {
@@ -132,9 +132,9 @@ public class Explore {
     }
 
 
-    private boolean checkSolution(Constraint[] constraints) {
+    private boolean checkSolution(Propagator[] constraints) {
         for (int c = 0; c < constraints.length; c++) {
-            ESat satC = constraints[c].isSatisfied();
+            ESat satC = constraints[c].isEntailed();
             if (!ESat.TRUE.equals(satC)) {
                 return false;
             }

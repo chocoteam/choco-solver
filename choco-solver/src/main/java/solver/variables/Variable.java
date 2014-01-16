@@ -76,20 +76,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     String getName();
 
     /**
-     * Returns the array of constraints <code>this</code> appears in.
-     *
-     * @return array of constraints
-     */
-    Constraint[] getConstraints();
-
-    /**
-     * Link a constraint within a variable
-     *
-     * @param constraint a constraint
-     */
-    void declareIn(Constraint constraint);
-
-    /**
      * Return the array of propagators this
      *
      * @return the array of proapgators of this
@@ -133,15 +119,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     void removeMonitor(IVariableMonitor monitor);
 
     void subscribeView(IView view);
-
-    /**
-     * Returns the number of constraints involving <code>this</code>
-     * TODO: MostConstrained: count monitors instead of constraints
-     *
-     * @return the number of constraints of <code>this</code>
-     */
-    int nbConstraints();
-
 
     /**
      * returns an explanation of the current state of the Variable
