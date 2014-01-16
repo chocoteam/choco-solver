@@ -114,22 +114,16 @@ public class Constraint implements Serializable {
     public ESat isSatisfied() {
         int sat = 0;
         for (int i = 0; i < propagators.length; i++) {
-            if (!propagators[i].isStateLess()) { // we only count constraints with active propagator
-                ESat entail = propagators[i].isEntailed();
-                if (entail.equals(ESat.FALSE)) {
-                    return entail;
-                } else if (entail.equals(ESat.TRUE)) {
-                    sat++;
-                }
-            } else {
-                sat++;
-            }
+			ESat entail = propagators[i].isEntailed();
+			if (entail.equals(ESat.FALSE)) {
+				return entail;
+			} else if (entail.equals(ESat.TRUE)) {
+				sat++;
+			}
         }
         if (sat == propagators.length) {
             return ESat.TRUE;
-        }
-        // No need to check if FALSE, must have been returned before
-        else {
+        }else {// No need to check if FALSE, must have been returned before
             return ESat.UNDEFINED;
         }
     }
