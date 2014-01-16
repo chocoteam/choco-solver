@@ -55,7 +55,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -118,6 +118,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (value == 0)
@@ -165,6 +166,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
@@ -220,6 +222,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         return value > 0 && instantiateTo(value, cause);
@@ -243,11 +246,11 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         return value < 1 && instantiateTo(value, cause);
     }
-
 
     @Override
     public void wipeOut(ICause cause) throws ContradictionException {
@@ -267,6 +270,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return instantiateTo(0, cause);
     }
 
+	@Override
     public boolean instantiated() {
         return !notInstanciated.contains(offset);
     }
@@ -276,6 +280,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return !notInstanciated.contains(offset) && mValue == aValue;
     }
 
+	@Override
     public boolean contains(int aValue) {
         if (!notInstanciated.contains(offset)) {
             return mValue == aValue;
@@ -288,6 +293,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @return the current value (or lower bound if not yet instantiated).
      */
+	@Override
     public int getValue() {
         return getLB();
     }
@@ -305,6 +311,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @return the lower bound
      */
+	@Override
     public int getLB() {
         if (!notInstanciated.contains(offset)) {
             return mValue;
@@ -317,6 +324,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @return the upper bound
      */
+	@Override
     public int getUB() {
         if (!notInstanciated.contains(offset)) {
             return mValue;
@@ -324,10 +332,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return 1;
     }
 
+	@Override
     public int getDomainSize() {
         return (notInstanciated.contains(offset) ? 2 : 1);
     }
 
+	@Override
     public int nextValue(int v) {
         if (!notInstanciated.contains(offset)) {
             final int val = mValue;
@@ -356,6 +366,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return delta;
     }
 
+	@Override
     public String toString() {
         if (!notInstanciated.contains(offset)) {
             return this.name + " = " + Integer.toString(mValue);
@@ -382,7 +393,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return new OneValueDeltaMonitor(delta, propagator);
     }
 
-
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -393,6 +404,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -462,6 +474,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         return _viterator;
     }
 
+	@Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);

@@ -56,7 +56,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
+public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -145,6 +145,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
@@ -221,6 +222,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
@@ -293,6 +295,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
@@ -349,6 +352,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
+	@Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
@@ -391,6 +395,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         removeInterval(this.getLB(), this.getUB(), cause);
     }
 
+	@Override
     public boolean instantiated() {
         return SIZE.get() == 1;
     }
@@ -400,6 +405,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         return instantiated() && contains(value);
     }
 
+	@Override
     public boolean contains(int aValue) {
         aValue -= OFFSET;
         return aValue >= 0 && this.VALUES.get(aValue);
@@ -410,6 +416,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @return the current value (or lower bound if not yet instantiated).
      */
+	@Override
     public int getValue() {
         assert instantiated() : name + " not instantiated";
         return getLB();
@@ -420,6 +427,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @return the lower bound
      */
+	@Override
     public int getLB() {
         return this.LB.get() + OFFSET;
     }
@@ -429,14 +437,17 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @return the upper bound
      */
+	@Override
     public int getUB() {
         return this.UB.get() + OFFSET;
     }
 
+	@Override
     public int getDomainSize() {
         return SIZE.get();
     }
 
+	@Override
     public int nextValue(int aValue) {
         aValue -= OFFSET;
         int lb = LB.get();
@@ -466,6 +477,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         return delta;
     }
 
+	@Override
     public String toString() {
         StringBuilder s = new StringBuilder(20);
         s.append(name).append(" = ");
@@ -499,12 +511,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         }
     }
 
+	@Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
     }
 
-
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -516,7 +529,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         notifyViews(event, cause);
     }
 
-
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -531,6 +544,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         return new AntiDomBitset(this);
     }
 
+	@Override
     public void explain(VariableState what, Explanation to) {
         AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
@@ -547,7 +561,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
 //        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
     }
 
-
     @Override
     public void explain(VariableState what, int val, Explanation to) {
         to.add(solver.getExplainer().explain(this, val));
@@ -559,7 +572,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
-
 
     @Override
     public int getTypeAndKind() {

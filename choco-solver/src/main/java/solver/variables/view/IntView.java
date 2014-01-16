@@ -60,8 +60,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView extends AbstractVariable<IntView>
-        implements IView, IntVar {
+public abstract class IntView extends AbstractVariable implements IView, IntVar {
 
     protected final IntVar var;
 
@@ -90,6 +89,7 @@ public abstract class IntView extends AbstractVariable<IntView>
         return Variable.VIEW | var.getTypeAndKind();
     }
 
+	@Override
     public IntVar getVariable() {
         return var;
     }
@@ -109,6 +109,7 @@ public abstract class IntView extends AbstractVariable<IntView>
         return var.instantiated();
     }
 
+	@Override
     public IDelta getDelta() {
         return var.getDelta();
     }
@@ -134,6 +135,7 @@ public abstract class IntView extends AbstractVariable<IntView>
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -181,6 +183,7 @@ public abstract class IntView extends AbstractVariable<IntView>
         return _viterator;
     }
 
+	@Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);

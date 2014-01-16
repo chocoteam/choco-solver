@@ -30,7 +30,6 @@ package solver.variables;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -186,6 +185,12 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @throws ContradictionException
      */
     void notifyViews(EventType event, ICause cause) throws ContradictionException;
+
+	/**
+	 * Get the views observing this variables
+	 * @return views observing this variables
+	 */
+	IView[] getViews();
 
     /**
      * Notify monitors of observed variable modifications

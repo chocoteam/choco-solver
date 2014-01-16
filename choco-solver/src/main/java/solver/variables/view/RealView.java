@@ -41,8 +41,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 20/07/12
  */
-public class RealView extends AbstractVariable<RealVar>
-        implements IView, RealVar {
+public class RealView extends AbstractVariable implements IView, RealVar {
 
     protected final IntVar var;
 
@@ -151,6 +150,7 @@ public class RealView extends AbstractVariable<RealVar>
     public void createDelta() {
     }
 
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -160,6 +160,7 @@ public class RealView extends AbstractVariable<RealVar>
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

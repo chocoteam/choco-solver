@@ -43,7 +43,7 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
+public class RealVarImpl extends AbstractVariable implements RealVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -160,6 +160,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         }
     }
 
+	@Override
     public void explain(VariableState what, Explanation to) {
     }
 
@@ -177,6 +178,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         throw new SolverException("Unable to create delta for RealVar!");
     }
 
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -186,6 +188,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -208,6 +211,7 @@ public class RealVarImpl extends AbstractVariable<RealVar> implements RealVar {
         return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
     }
 
+	@Override
     public String toString() {
         return String.format("%s = [%.16f,%.16f]", name, getLB(), getUB());
     }

@@ -35,7 +35,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
@@ -43,14 +42,12 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
 import util.objects.graphs.IGraph;
 import util.objects.setDataStructures.ISet;
 
-
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 feb. 2011
  */
-public abstract class GraphVar<E extends IGraph> extends AbstractVariable<GraphVar<E>>
-        implements Variable {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -278,6 +275,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<GraphV
         return new GraphDeltaMonitor(delta, propagator);
     }
 
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -287,6 +285,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<GraphV
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

@@ -48,7 +48,7 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
+public class SetVarImpl extends AbstractVariable implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -344,6 +344,7 @@ public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
         return new SetDeltaMonitor(delta, propagator);
     }
 
+	@Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -354,6 +355,7 @@ public class SetVarImpl extends AbstractVariable<SetVar> implements SetVar {
         notifyViews(event, cause);
     }
 
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
