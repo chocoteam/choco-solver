@@ -94,7 +94,7 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
 
     public void findBetterThan(int val, ResolutionPolicy policy) {
         if (solver == null) return;// can happen if a solution is found before this thread is fully ready
-        ObjectiveManager iom = solver.getSearchLoop().getObjectivemanager();
+        ObjectiveManager iom = solver.getObjectiveManager();
         if (iom == null) return;// can happen if a solution is found before this thread is fully ready
         switch (policy) {
             case MAXIMIZE:

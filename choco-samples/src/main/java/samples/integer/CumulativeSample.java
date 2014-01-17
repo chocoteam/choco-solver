@@ -88,7 +88,7 @@ public class CumulativeSample extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		solver.set(ISF.firstFail_InDomainMin(start));
-		solver.set(ISF.lastConflict(solver,solver.getSearchLoop().getStrategy()));
+		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
 	}
 
 	@Override

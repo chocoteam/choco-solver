@@ -77,7 +77,7 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
         this.all = new TreeMap<Integer, Integer>();
         this.candidate = new TreeMap<Integer, Integer>();
         this.fragment = new BitSet(n);
-        solver.getSearchLoop().plugSearchMonitor(this);
+        solver.plugMonitor(this);
     }
 
     @Override

@@ -73,7 +73,7 @@ enum ExplanationToolbox {
      */
     protected static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
         IEnvironment environment = aSolver.getEnvironment();
-        ObjectiveManager objectiveManager = aSolver.getSearchLoop().getObjectivemanager();
+        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
         // 1. simulates open node
         Decision current = aSolver.getSearchLoop().decision;
         decision.setPrevious(current);

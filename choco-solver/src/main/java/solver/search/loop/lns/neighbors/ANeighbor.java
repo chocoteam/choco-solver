@@ -63,7 +63,7 @@ public abstract class ANeighbor implements INeighbor {
                             counter.reset();
                         }
                     });
-            mSolver.getSearchLoop().plugSearchMonitor(counter);
+            mSolver.plugMonitor(counter);
         }
     }
 

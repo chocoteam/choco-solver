@@ -46,7 +46,7 @@ public class FailPerPropagator implements IMonitorContradiction {
     public FailPerPropagator(Constraint[] constraints, Solver solver) {
         p2w = new TIntIntHashMap();
         init(constraints);
-        solver.getSearchLoop().plugSearchMonitor(this);
+        solver.plugMonitor(this);
     }
 
     private void init(Constraint[] constraints) {

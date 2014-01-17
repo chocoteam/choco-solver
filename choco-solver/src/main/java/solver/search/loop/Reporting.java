@@ -57,7 +57,7 @@ public enum Reporting {
         while (!stack.isEmpty()) {
             sb.append(stack.removeFirst().toString()).append(" & ");
         }
-        sb.append("\n").append(solver.getSearchLoop().getObjectivemanager().toString());
+        sb.append("\n").append(solver.getObjectiveManager().toString());
         return sb.toString();
     }
 

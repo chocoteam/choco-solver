@@ -170,13 +170,13 @@ public class ParseAndSolve {
             }
         }
         datas.clear();
-        solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        solver.getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
     }
 
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
         if(ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
-        solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
+        solver.getSearchLoop().launch((!solver.getObjectiveManager().isOptimization()) && !gc.all);
     }
 
     public void buildParser(InputStream is, Solver mSolver, Datas datas) {

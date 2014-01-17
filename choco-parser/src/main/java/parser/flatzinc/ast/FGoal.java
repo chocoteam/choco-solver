@@ -194,7 +194,7 @@ public class FGoal {
         }
         plugLNS(aSolver, ivars, defdecvars != null ? defdecvars : ivars, gc);
         if (gc.lastConflict) {
-            aSolver.set(ISF.lastConflict(aSolver, aSolver.getSearchLoop().getStrategy()));
+            aSolver.set(ISF.lastConflict(aSolver, aSolver.getStrategy()));
         }
         gc.setDescription(description.toString());
     }
@@ -206,7 +206,7 @@ public class FGoal {
         for (int i = 0; i < dvars.length; i++) {
             dvars[i] = (IntVar) ddvars[i];
         }
-		ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
+		ObjectiveManager om = solver.getObjectiveManager();
         ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
         switch (gc.lns) {
             case RLNS:

@@ -187,7 +187,7 @@ public class ObjectiveTest {
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
             solver.set(new SevenQueuesPropagatorEngine(solver));
         }
-        solver.getSearchLoop().getMeasures().setReadingTimeCount(System.nanoTime());
+        solver.getMeasures().setReadingTimeCount(System.nanoTime());
         solver.getSearchLoop().launch(false);
         System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();

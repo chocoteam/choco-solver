@@ -51,7 +51,7 @@ public class RandomNeighborhood4Explanation extends RandomNeighborhood implement
 
     public RandomNeighborhood4Explanation(Solver aSolver, IntVar[] vars, int level, long seed) {
         super(aSolver, vars, level, seed);
-        mSolver.getSearchLoop().plugSearchMonitor(this);
+        mSolver.plugMonitor(this);
     }
 
     @Override

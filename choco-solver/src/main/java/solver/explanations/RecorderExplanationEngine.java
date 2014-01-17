@@ -82,7 +82,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         database = new TIntObjectHashMap<Explanation>();
         leftbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
         rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
-        solver.getSearchLoop().plugSearchMonitor(this);
+		solver.plugMonitor(this);
     }
 
     @Override

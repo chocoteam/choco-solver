@@ -178,7 +178,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                 }
             } else {
                 if (searchLoop.hasReachedLimit()
-                        && (searchLoop.getObjectivemanager().isOptimization())) {
+                        && (searchLoop.getObjectiveManager().isOptimization())) {
                     LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");
@@ -212,7 +212,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             sql.connect();
             sql.insert(instance, dbbenchname,
                     searchLoop.getMeasures().toArray(),
-                    searchLoop.getObjectivemanager().getPolicy(),
+                    searchLoop.getObjectiveManager().getPolicy(),
                     searchLoop.hasReachedLimit(),
                     searchLoop.getMeasures().isObjectiveOptimal());
         }

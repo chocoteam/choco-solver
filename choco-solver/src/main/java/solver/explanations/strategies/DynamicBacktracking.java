@@ -55,7 +55,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
     }
 
     protected void updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
-        if (cause == mSolver.getSearchLoop().getObjectivemanager()) {
+        if (cause == mSolver.getObjectiveManager()) {
             super.updateVRExplainUponbacktracking(nworld, expl, cause);
         }
         cobdec.clearDecisionPath();
