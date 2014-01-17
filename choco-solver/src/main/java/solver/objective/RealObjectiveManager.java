@@ -30,9 +30,6 @@ package solver.objective;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
 import solver.variables.RealVar;
 
 /**
@@ -41,128 +38,111 @@ import solver.variables.RealVar;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class RealObjectiveManager extends ObjectiveManager {
+public class RealObjectiveManager extends ObjectiveManager<RealVar> {
 
-    final RealVar objective;
-    private double bestKnownUpperBound;
-    private double bestKnownLowerBound;
-    private final double precision;
-    final boolean strict;
+	private double bestKnownUpperBound;
+	private double bestKnownLowerBound;
+	private final double precision;
 
-    /**
-     * Creates an optimization manager
-     * Enables to cut "worse" solutions
-     *
-     * @param objective variable (represent the value of a solution)
-     * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
-     * @param precision the precision, substracted from the cut
-     * @param strict    enables to find same value solutions when set to false
-     * @param solver    the solver
-     */
-    public RealObjectiveManager(RealVar objective, ResolutionPolicy policy, Solver solver, double precision, boolean strict) {
-        super(policy, solver.getMeasures());
-        this.objective = objective;
-        this.precision = precision;
-        this.strict = strict;
-        if (policy != ResolutionPolicy.SATISFACTION) {
-            this.bestKnownLowerBound = objective.getLB();
-            this.bestKnownUpperBound = objective.getUB();
-        }
-    }
+	/**
+	 * Creates an optimization manager
+	 * Enables to cut "worse" solutions
+	 *
+	 * @param objective variable (represent the value of a solution)
+	 * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
+	 * @param precision the precision, substracted from the cut
+	 * @param strict    enables to find same value solutions when set to false
+	 * @param solver    the solver
+	 */
+	public RealObjectiveManager(RealVar objective, ResolutionPolicy policy, Solver solver, double precision, boolean strict) {
+		super(objective, policy, solver.getMeasures(), strict);
+		this.precision = precision;
+		if (policy != ResolutionPolicy.SATISFACTION) {
+			this.bestKnownLowerBound = objective.getLB();
+			this.bestKnownUpperBound = objective.getUB();
+		}
+	}
 
-    /**
-     * Creates an optimization manager
-     * Enables to cut "worse" solutions
-     *
-     * @param objective variable (represent the value of a solution)
-     * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
-     * @param precision the precision, substracted from the cut
-     * @param solver    the solver
-     */
-    public RealObjectiveManager(RealVar objective, ResolutionPolicy policy, Solver solver, double precision) {
-        this(objective, policy, solver, precision, true);
-    }
+	/**
+	 * Creates an optimization manager
+	 * Enables to cut "worse" solutions
+	 *
+	 * @param objective variable (represent the value of a solution)
+	 * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
+	 * @param precision the precision, substracted from the cut
+	 * @param solver    the solver
+	 */
+	public RealObjectiveManager(RealVar objective, ResolutionPolicy policy, Solver solver, double precision) {
+		this(objective, policy, solver, precision, true);
+	}
 
-    /**
-     * @return the best objective value found so far (returns the initial bound if no solution has been found yet)
-     */
-    @Override
-    public Double getBestSolutionValue() {
-        if (policy == ResolutionPolicy.MINIMIZE) {
-            return bestKnownUpperBound;
-        }
-        if (policy == ResolutionPolicy.MAXIMIZE) {
-            return bestKnownLowerBound;
-        }
-        throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
-    }
+	@Override
+	public Double getBestSolutionValue() {
+		if (policy == ResolutionPolicy.MINIMIZE) {
+			return bestKnownUpperBound;
+		}
+		if (policy == ResolutionPolicy.MAXIMIZE) {
+			return bestKnownLowerBound;
+		}
+		throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
+	}
 
-    public RealVar getObjective() {
-        return objective;
-    }
+	/**
+	 * @return the best lower bound computed so far
+	 */
+	public double getBestLB() {
+		return bestKnownLowerBound;
+	}
 
-    /**
-     * @return the best lower bound computed so far
-     */
-    public double getBestLB() {
-        return bestKnownLowerBound;
-    }
+	/**
+	 * @return the best upper bound computed so far
+	 */
+	public double getBestUB() {
+		return bestKnownUpperBound;
+	}
 
-    /**
-     * @return the best upper bound computed so far
-     */
-    public double getBestUB() {
-        return bestKnownUpperBound;
-    }
+	/**
+	 * Informs the manager that a new solution has been found
+	 */
+	public void update() {
+		if (policy == ResolutionPolicy.MINIMIZE) {
+			this.bestKnownUpperBound = objective.getUB();
+		} else if (policy == ResolutionPolicy.MAXIMIZE) {
+			this.bestKnownLowerBound = objective.getLB();
+		}
+	}
 
-    /**
-     * Informs the manager that a new solution has been found
-     */
-    public void update() {
-        if (policy == ResolutionPolicy.MINIMIZE) {
-            this.bestKnownUpperBound = objective.getUB();
-        } else if (policy == ResolutionPolicy.MAXIMIZE) {
-            this.bestKnownLowerBound = objective.getLB();
-        }
-    }
+	/**
+	 * Prevent the solver from computing worse quality solutions
+	 *
+	 * @throws solver.exception.ContradictionException
+	 *
+	 */
+	public void postDynamicCut() throws ContradictionException {
+		int offset = 0;
+		if (measures.getSolutionCount() > 0 && strict) {
+			offset = 1;
+		}
+		if (policy == ResolutionPolicy.MINIMIZE) {
+			this.objective.updateUpperBound(bestKnownUpperBound - (precision * offset), this);
+			this.objective.updateLowerBound(bestKnownLowerBound, this);
+		} else if (policy == ResolutionPolicy.MAXIMIZE) {
+			this.objective.updateUpperBound(bestKnownUpperBound, this);
+			this.objective.updateLowerBound(bestKnownLowerBound + (precision * offset), this);
+		}
+	}
 
-    /**
-     * Prevent the solver from computing worse quality solutions
-     *
-     * @throws solver.exception.ContradictionException
-     *
-     */
-    public void postDynamicCut() throws ContradictionException {
-        int offset = 0;
-        if (measures.getSolutionCount() > 0 && strict) {
-            offset = 1;
-        }
-        if (policy == ResolutionPolicy.MINIMIZE) {
-            this.objective.updateUpperBound(bestKnownUpperBound - (precision * offset), this);
-            this.objective.updateLowerBound(bestKnownLowerBound, this);
-        } else if (policy == ResolutionPolicy.MAXIMIZE) {
-            this.objective.updateUpperBound(bestKnownUpperBound, this);
-            this.objective.updateLowerBound(bestKnownLowerBound + (precision * offset), this);
-        }
-    }
-
-    @Override
-    public String toString() {
-        switch (policy) {
-            case MINIMIZE:
-                return String.format("Minimize %s = %e", this.objective.getName(), bestKnownUpperBound);
-            case MAXIMIZE:
-                return String.format("Maximize %s = %e", this.objective.getName(), bestKnownLowerBound);
-            case SATISFACTION:
-                return "SAT";
-            default:
-                throw new UnsupportedOperationException("no objective manager");
-        }
-    }
-
-    public void explain(Deduction val, Explanation e) {
-        if (policy != ResolutionPolicy.SATISFACTION) {
-            objective.explain(VariableState.DOM, e);
-        }
-    }
+	@Override
+	public String toString() {
+		switch (policy) {
+			case MINIMIZE:
+				return String.format("Minimize %s = %e", this.objective.getName(), bestKnownUpperBound);
+			case MAXIMIZE:
+				return String.format("Maximize %s = %e", this.objective.getName(), bestKnownLowerBound);
+			case SATISFACTION:
+				return "SAT";
+			default:
+				throw new UnsupportedOperationException("no objective manager");
+		}
+	}
 }

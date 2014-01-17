@@ -30,8 +30,12 @@ package solver.objective;
 import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.decision.Decision;
+import solver.variables.Variable;
 
 /**
  * interface to monitor the objective function and avoid exploring "worse" solutions
@@ -39,56 +43,73 @@ import solver.search.strategy.decision.Decision;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public abstract class ObjectiveManager implements ICause {
+public abstract class ObjectiveManager<V extends Variable> implements ICause {
 
 	final protected ResolutionPolicy policy;
 	final protected IMeasures measures;
+	final protected boolean strict;
+	final protected V objective;
 
 
-	public ObjectiveManager(ResolutionPolicy policy, IMeasures measures) {
+	public ObjectiveManager(V objective, ResolutionPolicy policy, IMeasures measures, boolean strict) {
 		this.policy = policy;
 		this.measures = measures;
+		this.strict = strict;
+		this.objective = objective;
 	}
 
-    /**
-     * Updates the lower (or upper) bound of the objective variable, considering its best know value.
-     *
-     * @param decision
-     * @throws solver.exception.ContradictionException if this application leads to a contradiction  @param decision
-     */
-    public void apply(Decision decision) throws ContradictionException {
-        decision.apply();
-    }
+	/**
+	 * Updates the lower (or upper) bound of the objective variable, considering its best know value.
+	 *
+	 * @param decision
+	 * @throws solver.exception.ContradictionException if this application leads to a contradiction  @param decision
+	 */
+	public void apply(Decision decision) throws ContradictionException {
+		decision.apply();
+	}
 
-    /**
-     * Informs the manager that a new solution has been found
-     */
-    public abstract void update();
+	/**
+	 * @return true iff the problem is an optimization problem
+	 */
+	public boolean isOptimization() {
+		return policy != ResolutionPolicy.SATISFACTION;
+	}
 
-    /**
-     * Prevent the solver from computing worse quality solutions
-     *
-     * @throws solver.exception.ContradictionException
-     */
-    public abstract void postDynamicCut() throws ContradictionException;
+	/**
+	 * @return the ResolutionPolicy of the problem
+	 */
+	public ResolutionPolicy getPolicy() {
+		return policy;
+	}
 
-    /**
-     * @return true iff the problem is an optimization problem
-     */
-    public boolean isOptimization() {
-        return policy != ResolutionPolicy.SATISFACTION;
-    }
+	/**
+	 * @return the objective variable
+	 */
+	public V getObjective() {
+		return objective;
+	}
 
-    /**
-     * @return the ResolutionPolicy of the problem
-     */
-    public ResolutionPolicy getPolicy() {
-        return policy;
-    }
+	@Override
+	public void explain(Deduction val, Explanation e) {
+		if (policy != ResolutionPolicy.SATISFACTION) {
+			objective.explain(VariableState.DOM, e);
+		}
+	}
 
 	/**
 	 * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
 	 */
 	public abstract Number getBestSolutionValue();
 
+	/**
+	 * Informs the manager that a new solution has been found
+	 */
+	public abstract void update();
+
+	/**
+	 * Prevent the solver from computing worse quality solutions
+	 *
+	 * @throws solver.exception.ContradictionException
+	 */
+	public abstract void postDynamicCut() throws ContradictionException;
 }
