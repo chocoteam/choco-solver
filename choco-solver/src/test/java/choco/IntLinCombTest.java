@@ -215,13 +215,14 @@ public class IntLinCombTest {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
         PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
-        ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
-        ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);
+		int offSet = 2;// ZERO and ONE constants
+        ((IntVar) vars[0+offSet]).instantiateTo(-2, Cause.Null);
+        ((IntVar) vars[1+offSet]).instantiateTo(-1, Cause.Null);
         sum.propagate();
         sum.getSearchLoop().timeStamp++;
-        ((IntVar) vars[2]).removeValue(-2, Cause.Null);
+        ((IntVar) vars[2+offSet]).removeValue(-2, Cause.Null);
         sum.propagate();
-        Assert.assertTrue(vars[2].instantiated());
+        Assert.assertTrue(vars[2+offSet].instantiated());
     }
 
 }

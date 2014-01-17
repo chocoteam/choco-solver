@@ -86,16 +86,17 @@ public class MagicSquareTest {
         Solver solver = modeler(4);
         Variable[] vars = solver.getVars();
         solver.propagate();
-        ((IntVar) vars[0]).instantiateTo(3, Cause.Null);
-        ((IntVar) vars[15]).instantiateTo(4, Cause.Null);
-        ((IntVar) vars[5]).removeInterval(11, 15, Cause.Null);
-        ((IntVar) vars[1]).removeValue(2, Cause.Null);
-        ((IntVar) vars[9]).removeInterval(1, 2, Cause.Null);
-        ((IntVar) vars[13]).removeInterval(1, 2, Cause.Null);
-        ((IntVar) vars[1]).instantiateTo(6, Cause.Null);
+		int offset = 2;
+        ((IntVar) vars[0+offset]).instantiateTo(3, Cause.Null);
+        ((IntVar) vars[15+offset]).instantiateTo(4, Cause.Null);
+        ((IntVar) vars[5+offset]).removeInterval(11, 15, Cause.Null);
+        ((IntVar) vars[1+offset]).removeValue(2, Cause.Null);
+        ((IntVar) vars[9+offset]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[13+offset]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[1+offset]).instantiateTo(6, Cause.Null);
         solver.propagate();
         LoggerFactory.getLogger("test").error("************************");
-        ((IntVar) vars[2]).instantiateTo(12, Cause.Null);
+        ((IntVar) vars[2+offset]).instantiateTo(12, Cause.Null);
         try {
             solver.propagate();
             LoggerFactory.getLogger("test").error("************************");
@@ -114,21 +115,22 @@ public class MagicSquareTest {
         //[R]!square3,0  ==  14 (1)
         Solver solver = modeler(4);
         solver.propagate();
+		int offset = 2;
         Variable[] vars = solver.getVars();
-        ((IntVar) vars[0]).instantiateTo(2, Cause.Null);
+        ((IntVar) vars[0+offset]).instantiateTo(2, Cause.Null);
         solver.propagate();
-        ((IntVar) vars[3]).instantiateTo(3, Cause.Null);
+        ((IntVar) vars[3+offset]).instantiateTo(3, Cause.Null);
         solver.propagate();
-        ((IntVar) vars[1]).instantiateTo(13, Cause.Null);
+        ((IntVar) vars[1+offset]).instantiateTo(13, Cause.Null);
         solver.propagate();
 
-        ((IntVar) vars[6]).removeValue(1, Cause.Null);
+        ((IntVar) vars[6+offset]).removeValue(1, Cause.Null);
         solver.propagate();
-        ((IntVar) vars[14]).removeValue(1, Cause.Null);
+        ((IntVar) vars[14+offset]).removeValue(1, Cause.Null);
         solver.propagate();
-        ((IntVar) vars[12]).removeInterval(9, 14, Cause.Null);
+        ((IntVar) vars[12+offset]).removeInterval(9, 14, Cause.Null);
         solver.propagate();
-        Assert.assertTrue(((IntVar) vars[13]).instantiatedTo(1));
+        Assert.assertTrue(((IntVar) vars[13+offset]).instantiatedTo(1));
 
     }
 }
