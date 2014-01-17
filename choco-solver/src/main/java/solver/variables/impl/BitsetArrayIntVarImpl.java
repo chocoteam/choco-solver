@@ -83,7 +83,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     public BitsetArrayIntVarImpl(String name, int[] sortedValues, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         IEnvironment env = solver.getEnvironment();
         this.LENGTH = sortedValues.length;
         this.values = sortedValues.clone();

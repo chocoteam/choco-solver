@@ -71,7 +71,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
      */
     public GraphVar(String name, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         this.environment = solver.getEnvironment();
     }
 

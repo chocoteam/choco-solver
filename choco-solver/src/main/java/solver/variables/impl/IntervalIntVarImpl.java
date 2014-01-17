@@ -74,7 +74,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     public IntervalIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         IEnvironment env = solver.getEnvironment();
         this.LB = env.makeInt(min);
         this.UB = env.makeInt(max);
