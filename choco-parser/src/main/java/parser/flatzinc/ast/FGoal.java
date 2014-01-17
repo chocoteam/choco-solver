@@ -39,7 +39,6 @@ import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
@@ -95,7 +94,7 @@ public class FGoal {
 		if(type!=ResolutionPolicy.SATISFACTION){
 			obj = expr.intVarValue(aSolver);
 		}
-		search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
+		search.setObjectivemanager(new ObjectiveManager<IntVar,Integer>(obj, type, true));//                solver.setRestart(true);
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }

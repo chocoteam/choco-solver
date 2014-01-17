@@ -39,8 +39,7 @@ import solver.constraints.real.Ibex;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
-import solver.objective.IntObjectiveManager;
-import solver.objective.RealObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
@@ -605,7 +604,7 @@ public class Solver implements Serializable {
      * @return <code>true</code> if and only if a solution has been found.
      */
     public boolean findSolution() {
-        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
+        this.search.setObjectivemanager(new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, false));
         solve(true);
         return measures.getSolutionCount() > 0;
     }
@@ -630,7 +629,7 @@ public class Solver implements Serializable {
      * @return the number of found solutions.
      */
     public long findAllSolutions() {
-        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
+        this.search.setObjectivemanager(new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, false));
         solve(false);
         return measures.getSolutionCount();
     }
@@ -649,7 +648,7 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new IntObjectiveManager(objective, policy, this));
+        this.search.setObjectivemanager(new ObjectiveManager<IntVar,Integer>(objective, policy, true));
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
@@ -669,7 +668,7 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this, precision));
+        this.search.setObjectivemanager(new ObjectiveManager<RealVar,Double>(objective, policy, precision, true));
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
