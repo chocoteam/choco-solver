@@ -182,7 +182,7 @@ public class ObjectiveTest {
         BoolVar b2 = VF.bool("b2", solver);
         solver.post(ICF.arithm(b1, "<=", b2));
         SMF.log(solver, true, true);
-        solver.getSearchLoop().setObjectivemanager(new ObjectiveManager<IntVar,Integer>(b1, ResolutionPolicy.MINIMIZE, true));
+        solver.set(new ObjectiveManager<IntVar,Integer>(b1, ResolutionPolicy.MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
             solver.set(new SevenQueuesPropagatorEngine(solver));

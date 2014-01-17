@@ -68,13 +68,13 @@ public class ThreadSolver extends Thread {
     }
 
     public void findSolution() {
-        solver.getSearchLoop().setObjectivemanager(new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, false));
+		solver.set(ObjectiveManager.SAT());
         this.saf = true;
         start();
     }
 
     public void findAllSolutions() {
-        solver.getSearchLoop().setObjectivemanager(new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, false));
+        solver.set(ObjectiveManager.SAT());
         this.saf = false;
         start();
     }
@@ -84,7 +84,7 @@ public class ThreadSolver extends Thread {
             throw new UnsupportedOperationException("cannot optimize a satisfaction problem!");
         }
         this.saf = false;
-        solver.getSearchLoop().setObjectivemanager(new ObjectiveManager(objective, policy, true));
+        solver.set(new ObjectiveManager<IntVar,Integer>(objective, policy, true));
         start();
     }
 

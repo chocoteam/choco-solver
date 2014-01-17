@@ -94,7 +94,7 @@ public class FGoal {
 		if(type!=ResolutionPolicy.SATISFACTION){
 			obj = expr.intVarValue(aSolver);
 		}
-		search.setObjectivemanager(new ObjectiveManager<IntVar,Integer>(obj, type, true));//                solver.setRestart(true);
+		aSolver.set(new ObjectiveManager<IntVar,Integer>(obj, type, true));//                solver.setRestart(true);
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }

@@ -100,10 +100,6 @@ public class CumulativeSample extends AbstractProblem{
 	public void prettyOut() {}
 
 	public static void main(String[] args){
-//		new CumulativeSample().execute();
-		Integer a = (int) 3;
-		Number b = a;
-		System.out.println(a+" and "+b);
-		System.out.println(b.intValue()+" ??? "+b.doubleValue());
+		new CumulativeSample().execute();
 	}
 }

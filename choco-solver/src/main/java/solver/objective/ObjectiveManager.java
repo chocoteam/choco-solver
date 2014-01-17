@@ -59,16 +59,21 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 
 	protected N bestProvedLB, bestProvedUB; // best bounds found so far
 
+	// creates an objective manager for satisfaction problems
+	public static final ObjectiveManager SAT(){
+		return new ObjectiveManager(null,ResolutionPolicy.SATISFACTION,false);
+	}
+
 	//***********************************************************************************
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean strict) {
+	private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean strict, boolean intOrReal) {
 		this.policy = policy;
 		this.strict = strict;
 		this.objective = objective;
 		this.precision = precision;
-		this.intOrReal = false;
+		this.intOrReal = intOrReal;
 		if (policy != ResolutionPolicy.SATISFACTION) {
 			this.bestProvedLB = getObjLB();
 			this.bestProvedUB = getObjUB();
@@ -85,7 +90,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 *                  Enables to enumerate better or equal solutions when set to false.
 	 */
 	public ObjectiveManager(IntVar objective, ResolutionPolicy policy, boolean strict){
-		this((V)objective,policy,0,strict);
+		this((V)objective,policy,0,strict,true);
 	}
 
 	/**
@@ -100,7 +105,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 *                  Enables to enumerate better or equal solutions when set to false.
 	 */
 	public ObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision, boolean strict) {
-		this((V)objective,policy,precision,strict);
+		this((V)objective,policy,precision,strict,false);
 	}
 
 	//***********************************************************************************
