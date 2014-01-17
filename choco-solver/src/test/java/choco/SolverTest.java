@@ -31,17 +31,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <br/>
@@ -51,162 +46,142 @@ import java.util.List;
  */
 public class SolverTest {
 
-    final static int[] capacites = {0, 34};
-    final static int[] energies = {6, 4, 3};
-    final static int[] volumes = {7, 5, 2};
-    final static int[] nbOmax = {4, 6, 17};
-    final static int n = 3;
+	final static int[] capacites = {0, 34};
+	final static int[] energies = {6, 4, 3};
+	final static int[] volumes = {7, 5, 2};
+	final static int[] nbOmax = {4, 6, 17};
+	final static int n = 3;
 
-    //static IntVar power; // remove static for parallel solving
+	public static Solver knapsack() {
+		Solver s = new Solver();
+		IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
+		IntVar[] objects = new IntVar[n];
+		for (int i = 0; i < n; i++) {
+			objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
+		}
+		s.post(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
+		s.post(IntConstraintFactory.scalar(objects, energies, power));
+		s.set(IntStrategyFactory.inputOrder_InDomainMin(objects));
+		return s;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static Solver knapsack() {
-        Solver s = new Solver();
-        memory.IEnvironment env = s.getEnvironment();
+	private static final int ONE = 0, NEXT = 1, ALL = 2, OPT = 3;
 
-        IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
+	public static void conf(Solver s, int... is) throws SolverException {
+		for (int i : is) {
+			switch (i) {
+				case ONE:
+					s.findSolution();
+					break;
+				case NEXT:
+					s.nextSolution();
+					break;
+				case ALL:
+					s.findAllSolutions();
+					break;
+				case OPT:
+					s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, (IntVar) s.getVar(0));
+					break;
+				default:
+					Assert.fail("unknonw case");
+					break;
+			}
+		}
+	}
 
-        IntVar[] objects = new IntVar[n];
-        for (int i = 0; i < n; i++) {
-            objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
-        }
+	@Test(groups = "10s")
+	public void testRight() {
+		boolean alive = true;
+		int cas = 0;
+		while (alive) {
+			cas++;
+			Solver s = knapsack();
+			try {
+				switch (cas) {
+					case 1:
+						conf(s, ONE);
+						break;
+					case 2:
+						conf(s, ONE, NEXT);
+						break;
+					case 3:
+						conf(s, ONE, NEXT, NEXT);
+						break;
+					case 4:
+						conf(s, ALL);
+						break;
+					case 5:
+						conf(s, OPT);
+						break;
+					case 6:
+						conf(s, ALL, NEXT);
+						break;
+					case 7:
+						conf(s, OPT, NEXT);
+						break;
+					default:
+						alive = false;
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(3);
+				}
+			} catch (SolverException ingored) {
+				Assert.fail(MessageFormat.format("Fail on {0}", cas));
+			}
 
-        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
-        lcstrs.add(IntConstraintFactory.scalar(objects, energies, power));
+		}
+	}
 
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+	@Test(groups = "10s")
+	public void testWrong() {
+		boolean alive = true;
+		int cas = 0;
+		while (alive) {
+			cas++;
+			Solver s = knapsack();
+			try {
+				switch (cas) {
+					case 1:
+						conf(s, ONE, ONE);
+						break;
+					case 2:
+						conf(s, ONE, ALL);
+						break;
+					case 3:
+						conf(s, ONE, OPT);
+						break;
+					case 4:
+						conf(s, NEXT);
+						break;
+					case 5:
+						conf(s, ALL, ONE);
+						break;
+					case 6:
+						conf(s, ALL, ALL);
+						break;
+					case 7:
+						conf(s, ALL, OPT);
+						break;
+					case 8:
+						conf(s, OPT, ONE);
+						break;
+					case 9:
+						conf(s, OPT, ALL);
+						break;
+					case 10:
+						conf(s, OPT, OPT);
+						break;
+					default:
+						alive = false;
+						throw new SolverException("to stop ^^");
 
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(objects);
+				}
+				Assert.fail("Fail on " + cas);
 
+			} catch (SolverException ignored) {
+			}
 
-        s.post(cstrs);
-        s.set(strategy);
-
-        if (s.getVar(0) != power) {
-            throw new UnsupportedOperationException();
-        }
-
-        return s;
-    }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private static final int ONE = 0, NEXT = 1, ALL = 2, OPT = 3;
-
-    public static void conf(Solver s, int... is) throws SolverException {
-        for (int i : is) {
-            switch (i) {
-                case ONE:
-                    s.findSolution();
-                    break;
-                case NEXT:
-                    s.nextSolution();
-                    break;
-                case ALL:
-                    s.findAllSolutions();
-                    break;
-                case OPT:
-                    s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, (IntVar) s.getVar(0));
-                    break;
-                default:
-                    Assert.fail("unknonw case");
-                    break;
-            }
-        }
-    }
-
-    @Test(groups = "10s")
-    public void testRight() {
-        boolean alive = true;
-        int cas = 0;
-        while (alive) {
-            cas++;
-            Solver s = knapsack();
-            try {
-                switch (cas) {
-                    case 1:
-                        conf(s, ONE);
-                        break;
-                    case 2:
-                        conf(s, ONE, NEXT);
-                        break;
-                    case 3:
-                        conf(s, ONE, NEXT, NEXT);
-                        break;
-                    case 4:
-                        conf(s, ALL);
-                        break;
-                    case 5:
-                        conf(s, OPT);
-                        break;
-                    case 6:
-                        conf(s, ALL, NEXT);
-                        break;
-                    case 7:
-                        conf(s, OPT, NEXT);
-                        break;
-                    default:
-                        alive = false;
-
-                }
-            } catch (SolverException ingored) {
-                Assert.fail(MessageFormat.format("Fail on {0}", cas));
-            }
-
-        }
-    }
-
-    @Test(groups = "10s")
-    public void testWrong() {
-        boolean alive = true;
-        int cas = 0;
-        while (alive) {
-            cas++;
-            Solver s = knapsack();
-            try {
-                switch (cas) {
-                    case 1:
-                        conf(s, ONE, ONE);
-                        break;
-                    case 2:
-                        conf(s, ONE, ALL);
-                        break;
-                    case 3:
-                        conf(s, ONE, OPT);
-                        break;
-                    case 4:
-                        conf(s, NEXT);
-                        break;
-                    case 5:
-                        conf(s, ALL, ONE);
-                        break;
-                    case 6:
-                        conf(s, ALL, ALL);
-                        break;
-                    case 7:
-                        conf(s, ALL, OPT);
-                        break;
-                    case 8:
-                        conf(s, OPT, ONE);
-                        break;
-                    case 9:
-                        conf(s, OPT, ALL);
-                        break;
-                    case 10:
-                        conf(s, OPT, OPT);
-                        break;
-                    default:
-                        alive = false;
-                        throw new SolverException("to stop ^^");
-
-                }
-                Assert.fail("Fail on " + cas);
-
-            } catch (SolverException ignored) {
-            }
-
-        }
-    }
+		}
+	}
 
 }
