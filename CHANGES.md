@@ -40,4 +40,5 @@ The CHANGES.md file starts at this version.
 - Remove many constraint classes
 - Remove isEntailed() from Constraint (isSatisfied does the job)
 - RealConstraint slightly changes
-* Move obsolete code to extra modume
+* Move obsolete code to extra module
+* Associate variables with the solver in AbstractVariable super constructor

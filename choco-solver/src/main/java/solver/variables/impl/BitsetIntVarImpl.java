@@ -81,7 +81,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     public BitsetIntVarImpl(String name, int[] sortedValues, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         IEnvironment env = solver.getEnvironment();
         OFFSET = sortedValues[0];
         int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
@@ -97,7 +96,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     public BitsetIntVarImpl(String name, int offset, IStateBitSet values, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         IEnvironment env = solver.getEnvironment();
         OFFSET = offset;
         int cardinality = values.cardinality();
@@ -110,7 +108,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         IEnvironment env = solver.getEnvironment();
         this.OFFSET = min;
         int capacity = max - min + 1;

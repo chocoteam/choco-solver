@@ -86,6 +86,7 @@ public abstract class AbstractVariable implements Variable {
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
+		solver.associates(this);
     }
 
 	@Override

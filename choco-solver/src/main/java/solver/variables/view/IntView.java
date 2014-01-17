@@ -75,7 +75,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         this.var = var;
         this.delta = NoDelta.singleton;
         this.var.subscribeView(this);
-        this.solver.associates(this);
     }
 
     @Override

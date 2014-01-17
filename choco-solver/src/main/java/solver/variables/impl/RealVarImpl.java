@@ -54,7 +54,6 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     public RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         this.LB = solver.getEnvironment().makeFloat(lb);
         this.UB = solver.getEnvironment().makeFloat(ub);
         this.precision = precision;

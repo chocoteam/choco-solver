@@ -56,7 +56,6 @@ public class RealView extends AbstractVariable implements IView, RealVar {
         this.var = var;
         this.precision = precision;
         this.var.subscribeView(this);
-        this.solver.associates(this);
     }
 
     @Override

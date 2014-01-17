@@ -58,7 +58,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     //***********************************************************************************
 
     protected ISet envelope, kernel;
-    protected IEnvironment environment;
     protected SetDelta delta;
 	protected int min, max;
     ///////////// Attributes related to Variable ////////////
@@ -80,7 +79,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 */
 	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
 		super(name, solver);
-		solver.associates(this);
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		for(int i:env){
@@ -92,7 +90,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 			max = Math.max(max,i);
 		}
 		check(env,ker,max,min);
-		this.environment = solver.getEnvironment();
+		IEnvironment environment = solver.getEnvironment();
 		envelope = SetFactory.makeStoredSet(envType, max-min+1, environment);
 		kernel = SetFactory.makeStoredSet(kerType, max-min+1, environment);
 		for(int i:env){
@@ -115,8 +113,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 */
 	public SetVarImpl(String name, int min, int max, Solver solver) {
 		super(name, solver);
-		solver.associates(this);
-		this.environment = solver.getEnvironment();
+		IEnvironment environment = solver.getEnvironment();
 		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
 		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
 		for(int i=min; i<=max; i++){
