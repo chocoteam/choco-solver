@@ -39,7 +39,7 @@ import parser.flatzinc.ParseAndSolve;
 import parser.flatzinc.ast.Datas;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.thread.AbstractParallelSlave;
 
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
 
     public void findBetterThan(int val, ResolutionPolicy policy) {
         if (solver == null) return;// can happen if a solution is found before this thread is fully ready
-        IntObjectiveManager iom = (IntObjectiveManager) solver.getSearchLoop().getObjectivemanager();
+        ObjectiveManager iom = solver.getSearchLoop().getObjectivemanager();
         if (iom == null) return;// can happen if a solution is found before this thread is fully ready
         switch (policy) {
             case MAXIMIZE:

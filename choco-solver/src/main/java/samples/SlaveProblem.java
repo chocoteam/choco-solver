@@ -36,7 +36,6 @@ package samples;
 
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -104,7 +103,7 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
 
     public void findBetterThan(int val, ResolutionPolicy policy) {
         if (solver == null) return;// can happen if a solution is found before this thread is fully ready
-        IntObjectiveManager iom = (IntObjectiveManager) solver.getSearchLoop().getObjectivemanager();
+        ObjectiveManager iom = solver.getSearchLoop().getObjectivemanager();
         if (iom == null) return;// can happen if a solution is found before this thread is fully ready
         switch (policy) {
             case MAXIMIZE:

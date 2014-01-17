@@ -29,7 +29,7 @@ package solver.thread;
 
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.variables.IntVar;
@@ -68,13 +68,13 @@ public class ThreadSolver extends Thread {
     }
 
     public void findSolution() {
-        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver));
+		solver.set(ObjectiveManager.SAT());
         this.saf = true;
         start();
     }
 
     public void findAllSolutions() {
-        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver));
+        solver.set(ObjectiveManager.SAT());
         this.saf = false;
         start();
     }
@@ -84,7 +84,7 @@ public class ThreadSolver extends Thread {
             throw new UnsupportedOperationException("cannot optimize a satisfaction problem!");
         }
         this.saf = false;
-        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(objective, policy, solver));
+        solver.set(new ObjectiveManager<IntVar,Integer>(objective, policy, true));
         start();
     }
 

@@ -42,3 +42,4 @@ The CHANGES.md file starts at this version.
 - RealConstraint slightly changes
 * Move obsolete code to extra module
 * Associate variables with the solver in AbstractVariable super constructor
+* Unique ObjectiveManager (merge of IntObjectiveManager and RealObjectiveManager)

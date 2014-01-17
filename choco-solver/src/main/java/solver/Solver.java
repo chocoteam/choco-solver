@@ -39,8 +39,7 @@ import solver.constraints.real.Ibex;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
-import solver.objective.IntObjectiveManager;
-import solver.objective.RealObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
@@ -170,6 +169,7 @@ public class Solver implements Serializable {
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr",new PropTrue(ONE));
         FALSE = new Constraint("FALSE cstr",new PropFalse(ZERO));
+		set(ObjectiveManager.SAT());
     }
 
     /**
@@ -189,7 +189,6 @@ public class Solver implements Serializable {
     public Solver(String name) {
         this(Environments.DEFAULT.make(), name, SolverProperties.DEFAULT);
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
@@ -430,6 +429,19 @@ public class Solver implements Serializable {
         this.explainer = explainer;
     }
 
+	/**
+	 * Override the objective manager
+	 */
+	public void set(ObjectiveManager om) {
+		this.search.setObjectivemanager(om);
+	}
+	/**
+	 * Get the objective manager
+	 */
+	public ObjectiveManager getObjectiveManager() {
+		return this.search.getObjectivemanager();
+	}
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -605,11 +617,9 @@ public class Solver implements Serializable {
      * @return <code>true</code> if and only if a solution has been found.
      */
     public boolean findSolution() {
-        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(true);
         return measures.getSolutionCount() > 0;
     }
-
 
     /**
      * Once {@link Solver#findSolution()} has been called once, other solutions can be found using this method.
@@ -630,7 +640,6 @@ public class Solver implements Serializable {
      * @return the number of found solutions.
      */
     public long findAllSolutions() {
-        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(false);
         return measures.getSolutionCount();
     }
@@ -649,7 +658,9 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new IntObjectiveManager(objective, policy, this));
+		if(!getObjectiveManager().isOptimization()){
+			set(new ObjectiveManager<IntVar,Integer>(objective, policy, true));
+		}
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
@@ -669,7 +680,9 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this, precision));
+		if(!getObjectiveManager().isOptimization()){
+			set(new ObjectiveManager<RealVar,Double>(objective,policy,precision,true));
+		}
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }

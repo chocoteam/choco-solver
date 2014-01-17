@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -182,7 +182,7 @@ public class ObjectiveTest {
         BoolVar b2 = VF.bool("b2", solver);
         solver.post(ICF.arithm(b1, "<=", b2));
         SMF.log(solver, true, true);
-        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(b1, ResolutionPolicy.MINIMIZE, solver));
+        solver.set(new ObjectiveManager<IntVar,Integer>(b1, ResolutionPolicy.MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
             solver.set(new SevenQueuesPropagatorEngine(solver));
