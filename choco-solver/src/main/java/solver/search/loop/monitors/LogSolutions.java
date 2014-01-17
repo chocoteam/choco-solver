@@ -41,16 +41,11 @@ import solver.search.loop.AbstractSearchLoop;
 public final class LogSolutions implements IMonitorSolution {
 
     private static Logger LOGGER = LoggerFactory.getLogger("solver");
-
-    final AbstractSearchLoop searchLoop;
-
     final IMessage message;
 
-    public LogSolutions(AbstractSearchLoop searchLoop, IMessage message) {
-        this.searchLoop = searchLoop;
+    public LogSolutions(IMessage message) {
         this.message = message;
     }
-
 
     @Override
     public void onSolution() {
@@ -58,6 +53,4 @@ public final class LogSolutions implements IMonitorSolution {
             LOGGER.info(message.print());
         }
     }
-
-
 }

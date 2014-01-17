@@ -63,7 +63,7 @@ public class ThreadSolver extends Thread {
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
             solver.set(new PropagatorEngine(solver));
         }
-        solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        solver.getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
         solver.getSearchLoop().launch(saf);
     }
 

@@ -44,6 +44,7 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
 import solver.search.solution.LastSolutionRecorder;
@@ -196,13 +197,24 @@ public class Solver implements Serializable {
 
 
     /**
-     * Returns the unique and internal seach loop.
-     *
-     * @return the unique and internal <code>AbstractSearchLoop</code> object.
-     */
-    public AbstractSearchLoop getSearchLoop() {
-        return search;
-    }
+	 * Returns the unique and internal seach loop.
+	 *
+	 * @return the unique and internal <code>AbstractSearchLoop</code> object.
+	 */
+	public AbstractSearchLoop getSearchLoop() {
+		return search;
+	}
+
+	/**
+	 * Get the objective manager
+	 */
+	public ObjectiveManager getObjectiveManager() {
+		return this.search.getObjectiveManager();
+	}
+
+	public AbstractStrategy getStrategy(){
+		return search.getStrategy();
+	}
 
     /**
      * Returns the propagation engine used in <code>this</code>.
@@ -367,7 +379,6 @@ public class Solver implements Serializable {
         return measures;
     }
 
-
     /**
      * Return the explanation engine plugged into <code>this</code>.
      */
@@ -433,13 +444,15 @@ public class Solver implements Serializable {
 	 * Override the objective manager
 	 */
 	public void set(ObjectiveManager om) {
-		this.search.setObjectivemanager(om);
+		this.search.setObjectiveManager(om);
 	}
+
 	/**
-	 * Get the objective manager
+	 * Put a search monitor to react on search events (solutions, decisions, fails, ...)
+	 * @param sm a search monitor to be plugged in the solver
 	 */
-	public ObjectiveManager getObjectiveManager() {
-		return this.search.getObjectivemanager();
+	public void plugMonitor(ISearchMonitor sm){
+		search.plugSearchMonitor(sm);
 	}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

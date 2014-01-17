@@ -172,7 +172,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         if(rootWorldIndex>-1){
             this.nextState = INIT;
             env.worldPopUntil(rootWorldIndex);
-            this.objectivemanager = null;
+            this.objectivemanager = ObjectiveManager.SAT();
             timeStamp++;
             rootWorldIndex = -1;
             searchWorldIndex = -1;
@@ -374,7 +374,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setObjectivemanager(ObjectiveManager objectivemanager) {
+    public void setObjectiveManager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
         if(objectivemanager.isOptimization()){
             this.measures.declareObjective();
@@ -401,7 +401,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         return measures;
     }
 
-    public ObjectiveManager getObjectivemanager() {
+    public ObjectiveManager getObjectiveManager() {
         return objectivemanager;
     }
 

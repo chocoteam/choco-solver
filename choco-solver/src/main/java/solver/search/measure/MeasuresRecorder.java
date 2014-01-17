@@ -211,7 +211,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public Number getBestSolutionValue() {
-        return solver.getSearchLoop().getObjectivemanager().getBestSolutionValue();
+        return solver.getObjectiveManager().getBestSolutionValue();
     }
 
     @Override
@@ -382,7 +382,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(solver.getSearchLoop().getObjectivemanager() + ", ");
+            st.append(solver.getObjectiveManager() + ", ");
         }
         st.append(String.format("Building time : %.3fms, Initialisation : %.3fms, Initial propagation : %.3fms, " +
                 "Resolution %.3fs (%.6fms), Total %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d + %d Propagations",
@@ -406,7 +406,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(solver.getSearchLoop().getObjectivemanager() + ", ");
+            st.append(solver.getObjectiveManager() + ", ");
         }
         st.append(String.format("Resolution %.3fs (%.6fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts",
                 (timeCount - initialPropagationTimeCount) / IN_SEC,
@@ -424,7 +424,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         st.append("- Search statistics\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
-            st.append("\t" + solver.getSearchLoop().getObjectivemanager() + ",\n");
+            st.append("\t" + solver.getObjectiveManager() + ",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +

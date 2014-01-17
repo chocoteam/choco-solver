@@ -29,6 +29,7 @@ package solver.search.loop.monitors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
@@ -44,7 +45,7 @@ class LogStatEveryXXms implements IMonitorInitPropagation {
 
     Thread printer;
 
-    public LogStatEveryXXms(final AbstractSearchLoop searchloop, final long duration) {
+    public LogStatEveryXXms(final Solver solver, final long duration) {
 
         printer = new Thread() {
 
@@ -54,10 +55,10 @@ class LogStatEveryXXms implements IMonitorInitPropagation {
                     long sleep = duration;
                     Thread.sleep(sleep);
                     do {
-                        searchloop.getMeasures().updateTimeCount();
-                        searchloop.getMeasures().updatePropagationCount();
+                        solver.getMeasures().updateTimeCount();
+                        solver.getMeasures().updatePropagationCount();
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info(">> {}", searchloop.getMeasures().toOneShortLineString());
+                            LOGGER.info(">> {}", solver.getMeasures().toOneShortLineString());
                         }
                         Thread.sleep(sleep);
                     } while (true);

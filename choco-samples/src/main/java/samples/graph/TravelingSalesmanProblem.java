@@ -151,7 +151,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Override
     public void prettyOut() {
         System.out.println("optimum in ["
-                + (solver.getSearchLoop().getObjectivemanager()).getBestLB() + ","
-                + (solver.getSearchLoop().getObjectivemanager()).getBestUB() + "]");
+                + (solver.getObjectiveManager()).getBestLB() + ","
+                + (solver.getObjectiveManager()).getBestUB() + "]");
     }
 }

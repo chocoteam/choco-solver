@@ -121,10 +121,10 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         tmpValueDeductions = new HashSet<Deduction>(16);
 
 
-        aSolver.getSearchLoop().plugSearchMonitor(this);
+		aSolver.plugMonitor(this);
         notFrozen = new BitSet(16);
         geo4cluster = new GeometricalRestartStrategy(1, 1.2);
-        mSolver.getSearchLoop().plugSearchMonitor(this);
+        mSolver.plugMonitor(this);
     }
 
 
@@ -226,7 +226,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
 
     @Override
     public void afterInitialPropagation() {
-        om = mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager();
+        om = mExplanationEngine.getSolver().getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();

@@ -251,7 +251,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             Decision previous = mSolver.getSearchLoop().decision;
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
-            mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager().postDynamicCut();
+            mExplanationEngine.getSolver().getObjectiveManager().postDynamicCut();
             for (int i = 0; i < path.size(); i++) {
                 d = path.get(i);
                 d.setPrevious(previous);

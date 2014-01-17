@@ -74,7 +74,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 		this.objective = objective;
 		this.precision = precision;
 		this.intOrReal = intOrReal;
-		if (policy != ResolutionPolicy.SATISFACTION) {
+		if (isOptimization()) {
 			this.bestProvedLB = getObjLB();
 			this.bestProvedUB = getObjUB();
 		}
@@ -131,7 +131,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 
 	@Override
 	public void explain(Deduction val, Explanation e) {
-		if (policy != ResolutionPolicy.SATISFACTION) {
+		if (isOptimization()) {
 			objective.explain(VariableState.DOM, e);
 		}
 	}
@@ -154,11 +154,13 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 * Informs the manager that a new solution has been found
 	 */
 	public void update() {
-		assert objective.instantiated();
-		if (policy == ResolutionPolicy.MINIMIZE) {
-			this.bestProvedUB = getObjUB();
-		} else if (policy == ResolutionPolicy.MAXIMIZE) {
-			this.bestProvedLB = getObjLB();
+		if(isOptimization()){
+			assert objective.instantiated();
+			if (policy == ResolutionPolicy.MINIMIZE) {
+				this.bestProvedUB = getObjUB();
+			} else {
+				this.bestProvedLB = getObjLB();
+			}
 		}
 	}
 
@@ -168,31 +170,33 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 * @throws solver.exception.ContradictionException
 	 */
 	public void postDynamicCut() throws ContradictionException {
-		if(intOrReal){
-			int offset = 0;
-			if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
-				offset = 1;
-			}
-			IntVar io = (IntVar) objective;
-			if (policy == ResolutionPolicy.MINIMIZE) {
-				io.updateUpperBound(bestProvedUB.intValue() - offset, this);
-				io.updateLowerBound(bestProvedLB.intValue(), this);
-			} else if (policy == ResolutionPolicy.MAXIMIZE) {
-				io.updateUpperBound(bestProvedUB.intValue(), this);
-				io.updateLowerBound(bestProvedLB.intValue() + offset, this);
-			}
-		}else{
-			double offset = 0;
-			if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
-				offset = precision;
-			}
-			RealVar io = (RealVar) objective;
-			if (policy == ResolutionPolicy.MINIMIZE) {
-				io.updateUpperBound(bestProvedUB.doubleValue() - offset, this);
-				io.updateLowerBound(bestProvedLB.doubleValue(), this);
-			} else if (policy == ResolutionPolicy.MAXIMIZE) {
-				io.updateUpperBound(bestProvedUB.doubleValue(), this);
-				io.updateLowerBound(bestProvedLB.doubleValue() + offset, this);
+		if(isOptimization()){
+			if(intOrReal){
+				int offset = 0;
+				if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
+					offset = 1;
+				}
+				IntVar io = (IntVar) objective;
+				if (policy == ResolutionPolicy.MINIMIZE) {
+					io.updateUpperBound(bestProvedUB.intValue() - offset, this);
+					io.updateLowerBound(bestProvedLB.intValue(), this);
+				} else {
+					io.updateUpperBound(bestProvedUB.intValue(), this);
+					io.updateLowerBound(bestProvedLB.intValue() + offset, this);
+				}
+			} else {
+				double offset = 0;
+				if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
+					offset = precision;
+				}
+				RealVar io = (RealVar) objective;
+				if (policy == ResolutionPolicy.MINIMIZE) {
+					io.updateUpperBound(bestProvedUB.doubleValue() - offset, this);
+					io.updateLowerBound(bestProvedLB.doubleValue(), this);
+				} else {
+					io.updateUpperBound(bestProvedUB.doubleValue(), this);
+					io.updateLowerBound(bestProvedLB.doubleValue() + offset, this);
+				}
 			}
 		}
 	}
@@ -216,6 +220,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 * @param lb lower bound
 	 */
 	public void updateBestLB(N lb) {
+		assert isOptimization();
 		if(lb.doubleValue()> bestProvedLB.doubleValue()){
 			bestProvedLB = lb;
 		}
@@ -227,12 +232,14 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 * @param ub upper bound
 	 */
 	public void updateBestUB(N ub) {
+		assert isOptimization();
 		if(ub.doubleValue()< bestProvedUB.doubleValue()){
 			bestProvedUB = ub;
 		}
 	}
 
 	private N getObjLB(){
+		assert isOptimization();
 		if(intOrReal){
 			return (N) new Integer(((IntVar)objective).getLB());
 		}else{
@@ -241,6 +248,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	}
 
 	private N getObjUB(){
+		assert isOptimization();
 		if(intOrReal){
 			return (N) new Integer(((IntVar)objective).getUB());
 		}else{

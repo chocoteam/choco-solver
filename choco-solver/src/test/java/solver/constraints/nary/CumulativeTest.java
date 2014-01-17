@@ -156,7 +156,7 @@ public class CumulativeTest {
 		Constraint c = ICF.cumulative(t,h,capa,graph);
 		solver.post(c);
 		solver.set(ISF.random(solver.retrieveIntVars(), seed));
-		solver.set(ISF.lastConflict(solver,solver.getSearchLoop().getStrategy()));
+		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
 		SMF.limitTime(solver,5000);
 		switch (mode){
 			case 0:	solver.findSolution();

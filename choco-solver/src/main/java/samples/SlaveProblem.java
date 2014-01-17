@@ -86,7 +86,7 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
 			searchLoop.plugSearchMonitor(new IMonitorSolution() {
 				@Override
 				public void onSolution() {
-					ObjectiveManager om = searchLoop.getObjectivemanager();
+					ObjectiveManager om = searchLoop.getObjectiveManager();
 					int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
 					master.newSol(val, om.getPolicy());
 				}
@@ -103,7 +103,7 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
 
     public void findBetterThan(int val, ResolutionPolicy policy) {
         if (solver == null) return;// can happen if a solution is found before this thread is fully ready
-        ObjectiveManager iom = solver.getSearchLoop().getObjectivemanager();
+        ObjectiveManager iom = solver.getSearchLoop().getObjectiveManager();
         if (iom == null) return;// can happen if a solution is found before this thread is fully ready
         switch (policy) {
             case MAXIMIZE:
