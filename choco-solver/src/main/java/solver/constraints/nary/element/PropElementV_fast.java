@@ -71,11 +71,6 @@ public class PropElementV_fast extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         index.updateLowerBound(offset, aCause);
         index.updateUpperBound(vars.length + offset - 3, aCause);

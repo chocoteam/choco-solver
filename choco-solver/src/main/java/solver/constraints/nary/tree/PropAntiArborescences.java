@@ -139,11 +139,6 @@ public class PropAntiArborescences extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         if (!isCompletelyInstantiated()) {
             return ESat.UNDEFINED;

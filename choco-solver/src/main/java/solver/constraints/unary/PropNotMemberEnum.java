@@ -85,14 +85,6 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-    }
-
-    @Override
     public ESat isEntailed() {
         int ub = this.vars[0].getUB();
         int nb = 0;

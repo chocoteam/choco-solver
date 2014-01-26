@@ -73,11 +73,6 @@ public class PropAllDiff extends Propagator<SetVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
             if (vars[i].instantiated()) {

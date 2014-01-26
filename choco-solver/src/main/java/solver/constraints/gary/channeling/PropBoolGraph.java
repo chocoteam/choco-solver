@@ -86,11 +86,6 @@ public class PropBoolGraph extends Propagator<BoolVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {

@@ -114,12 +114,6 @@ public class PropReif extends Propagator<Variable> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        // we do not known which kind of variables are involved in the target constraint
-        return EventType.ALL_FINE_EVENTS.mask;
-    }
-
-    @Override
     public ESat isEntailed() {
         if (bVar.instantiated()) {
             if (bVar.getValue() == 1) {

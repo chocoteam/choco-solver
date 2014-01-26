@@ -297,12 +297,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
+	 * Reacts to any kind of event by default.
      *
      * @param vIdx index of the variable within the propagator
      * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
      *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
-    protected abstract int getPropagationConditions(int vIdx);
+    protected int getPropagationConditions(int vIdx){
+		return EventType.ALL_FINE_EVENTS.mask;
+	}
 
     /**
      * Call the main filtering algorithm to apply to the <code>Domain</code> of the <code>Variable</code> objects.

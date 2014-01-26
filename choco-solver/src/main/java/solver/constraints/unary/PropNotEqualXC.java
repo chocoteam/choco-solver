@@ -55,14 +55,6 @@ public class PropNotEqualXC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[0].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (vars[0].removeValue(constant, aCause) || !vars[0].contains(constant)) {
             this.setPassive();

@@ -148,11 +148,6 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         return card[i].getLB();
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
     /**
      * Build internal structure of the propagator, if necessary
      *

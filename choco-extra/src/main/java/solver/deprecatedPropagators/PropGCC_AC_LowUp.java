@@ -410,11 +410,6 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         int[] f = new int[n2];
         if (isCompletelyInstantiated()) {

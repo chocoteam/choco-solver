@@ -137,11 +137,6 @@ public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         // redundant filtering
         if (!isCompletelyInstantiated()) {

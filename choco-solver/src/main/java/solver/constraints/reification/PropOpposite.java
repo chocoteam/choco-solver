@@ -56,11 +56,6 @@ public class PropOpposite extends Propagator {
 	}
 
 	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ALL_FINE_EVENTS.mask;
-	}
-
-	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		ESat op = original.isSatisfied();
 		if(op == ESat.TRUE){

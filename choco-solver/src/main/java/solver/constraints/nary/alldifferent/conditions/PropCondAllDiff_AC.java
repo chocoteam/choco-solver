@@ -62,11 +62,6 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
 		this.condition = condition;
 	}
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
-
 	//***********************************************************************************
 	// PROPAGATION
 	//***********************************************************************************

@@ -58,11 +58,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
         this.absZ = VariableFactory.abs(Z);
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
     /**
      * The main propagation method that filters according to the constraint defintion
      *
