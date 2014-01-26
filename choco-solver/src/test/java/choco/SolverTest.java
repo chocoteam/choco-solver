@@ -36,6 +36,7 @@ import solver.exception.SolverException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
 import java.text.MessageFormat;
 
 /**
