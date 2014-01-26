@@ -82,11 +82,6 @@ public class PropElement extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         this.vars[1].updateLowerBound(cste, aCause);
         this.vars[1].updateUpperBound(lval.length - 1 + cste, aCause);

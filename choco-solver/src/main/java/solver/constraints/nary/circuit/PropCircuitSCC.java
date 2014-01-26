@@ -94,11 +94,6 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	//***********************************************************************************
 
 	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
-
-	@Override
 	public ESat isEntailed() {
 		return ESat.TRUE;// redundant propagator
 	}

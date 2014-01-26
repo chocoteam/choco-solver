@@ -54,7 +54,6 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     protected IntVar[] X, Y;
     protected RemProc rem_proc;
     protected IIntDeltaMonitor[] idms;
-    private final static int AWAKENING_MASK = EventType.INT_ALL_MASK();
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);
@@ -73,11 +72,6 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return AWAKENING_MASK;
     }
 
     @Override

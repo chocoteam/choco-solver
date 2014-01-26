@@ -77,11 +77,6 @@ public class PropRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         if ((EventType.FULL_PROPAGATION.mask & evtmask) != 0) {
             graph = initGraph(solver.getEnvironment(), vars, automaton);

@@ -64,15 +64,6 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        } else {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-        }
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         // Filter on X from Y
         updateLowerBoundofX();

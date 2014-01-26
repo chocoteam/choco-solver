@@ -120,13 +120,6 @@ public class PropIntChannel extends Propagator<Variable> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vIdx < nSets)
-            return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-        else return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < nInts; i++) {
             ints[i].updateLowerBound(offSet1, aCause);

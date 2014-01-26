@@ -150,11 +150,6 @@ public class PropIndexValue extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         int min = 0;
         int max = 0;

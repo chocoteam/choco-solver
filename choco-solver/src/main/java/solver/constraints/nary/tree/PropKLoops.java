@@ -141,11 +141,6 @@ public class PropKLoops extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         int nbMax = 0;
         int nbMin = 0;

@@ -117,11 +117,6 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int indexVar = 0; indexVar < arity; indexVar++) {
             reviseVar(indexVar);

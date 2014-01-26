@@ -43,3 +43,4 @@ The CHANGES.md file starts at this version.
 * Move obsolete code to extra module
 * Associate variables with the solver in AbstractVariable super constructor
 * Unique ObjectiveManager (merge of IntObjectiveManager and RealObjectiveManager)
+* Default implementation of Propagator.getPropagationConditions(int vIdx) which reacts to all kinds of fine event.

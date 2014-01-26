@@ -111,11 +111,6 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
         SCCfinder = new StrongConnectivityFinder(digraph);
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************

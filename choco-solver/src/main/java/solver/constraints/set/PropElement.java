@@ -94,15 +94,6 @@ public class PropElement extends Propagator<Variable> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vIdx <= array.length) {
-            return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-        } else {
-            return EventType.INT_ALL_MASK();
-        }
-    }
-
-    @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         forcePropagate(EventType.FULL_PROPAGATION);
     }

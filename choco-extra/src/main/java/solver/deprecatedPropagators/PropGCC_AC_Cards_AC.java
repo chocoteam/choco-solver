@@ -452,11 +452,6 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         int[] f = new int[n2];
         int idx;

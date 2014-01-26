@@ -167,11 +167,6 @@ public class PropNValues_Light extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         int count = 0;
         int countMax = 0;

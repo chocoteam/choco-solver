@@ -61,12 +61,6 @@ public class PropBinAC2001 extends PropBinCSP {
         }
     }
 
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         int support = 0;

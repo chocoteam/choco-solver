@@ -120,11 +120,6 @@ public class PropKCC extends Propagator {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVENODE.mask + EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         env_CC_finder.findAllCC();
         int ee = env_CC_finder.getNBCC();

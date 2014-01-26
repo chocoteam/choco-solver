@@ -58,7 +58,7 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+        return EventType.INSTANTIATE.mask;// TODO shouldn't it react to everythink (in case of views...)
     }
 
     @Override
