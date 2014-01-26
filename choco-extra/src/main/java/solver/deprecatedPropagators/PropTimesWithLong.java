@@ -78,17 +78,17 @@ public class PropTimesWithLong extends PropTimes {
      */
     @Override
     protected void awakeOnX() throws ContradictionException {
-        if (v0.instantiatedTo(0)) {
+        if (v0.isInstantiatedTo(0)) {
             v2.instantiateTo(0, aCause);
         }
-        if ((v2.instantiatedTo(0)) && (!v0.contains(0))) {
+        if ((v2.isInstantiatedTo(0)) && (!v0.contains(0))) {
             v1.instantiateTo(0, aCause);
         } else if (!v2.contains(0)) {
             updateYandX();
-        } else if (!(v2.instantiatedTo(0))) {
+        } else if (!(v2.isInstantiatedTo(0))) {
             shaveOnYandX();
         }
-        if (!(v2.instantiatedTo(0))) {
+        if (!(v2.isInstantiatedTo(0))) {
             int r = (int) Math.max(getZmin(), MIN);
             v2.updateLowerBound(r, aCause);
             r = (int) Math.min(getZmax(), MAX);
@@ -98,17 +98,17 @@ public class PropTimesWithLong extends PropTimes {
 
     @Override
     protected void awakeOnY() throws ContradictionException {
-        if (v1.instantiatedTo(0)) {
+        if (v1.isInstantiatedTo(0)) {
             v2.instantiateTo(0, aCause);
         }
-        if ((v2.instantiatedTo(0)) && (!v1.contains(0))) {
+        if ((v2.isInstantiatedTo(0)) && (!v1.contains(0))) {
             v0.instantiateTo(0, aCause);
         } else if (!v2.contains(0)) {
             updateXandY();
-        } else if (!(v2.instantiatedTo(0))) {
+        } else if (!(v2.isInstantiatedTo(0))) {
             shaveOnXandY();
         }
-        if (!(v2.instantiatedTo(0))) {
+        if (!(v2.isInstantiatedTo(0))) {
             int r = (int) Math.max(getZmin(), MIN);
             v2.updateLowerBound(r, aCause);
             r = (int) Math.min(getZmax(), MAX);
@@ -123,13 +123,13 @@ public class PropTimesWithLong extends PropTimes {
             if (updateY()) {
                 updateXandY();
             }
-        } else if (!(v2.instantiatedTo(0))) {
+        } else if (!(v2.isInstantiatedTo(0))) {
             shaveOnX();
             if (shaveOnY()) {
                 shaveOnXandY();
             }
         }
-        if (v2.instantiatedTo(0)) {
+        if (v2.isInstantiatedTo(0)) {
             propagateZero();
         }
     }

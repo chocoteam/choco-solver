@@ -130,7 +130,7 @@ public class MagicSquareTest {
         solver.propagate();
         ((IntVar) vars[12+offset]).removeInterval(9, 14, Cause.Null);
         solver.propagate();
-        Assert.assertTrue(((IntVar) vars[13+offset]).instantiatedTo(1));
+        Assert.assertTrue(((IntVar) vars[13+offset]).isInstantiatedTo(1));
 
     }
 }

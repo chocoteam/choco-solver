@@ -179,6 +179,26 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
     // ACCESSORS
     //***********************************************************************************
 
+	/**
+	 * Checks whether or not a node may belong to a solution or not
+	 * (i.e. if it is present in the envelop graph)
+	 * @param node the id of a node
+	 * @return true iff node belongs to the envelop graph
+	 */
+	public boolean isNodePossible(int node){
+		return envelop.getActiveNodes().contain(node);
+	}
+
+	/**
+	 * Checks whether or not a node must belong to every solution or not
+	 * (i.e. if it is present in the kernel graph)
+	 * @param node the id of a node
+	 * @return true iff node belongs to the kernel graph
+	 */
+	public boolean isNodeMandatory(int node){
+		return kernel.getActiveNodes().contain(node);
+	}
+
     /**
      * Compute the order of the graph in its current state (ie the number of nodes that may belong to an instantiation)
      *

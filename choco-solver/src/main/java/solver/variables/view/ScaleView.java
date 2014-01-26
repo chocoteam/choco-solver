@@ -172,8 +172,8 @@ public final class ScaleView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return value % cste == 0 && var.instantiatedTo(value / cste);
+    public boolean isInstantiatedTo(int value) {
+        return value % cste == 0 && var.isInstantiatedTo(value / cste);
     }
 
     @Override

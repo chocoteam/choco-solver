@@ -187,7 +187,7 @@ public class PropCount_AC extends Propagator<IntVar> {
         IntVar v;
         for (int i = 0; i < n; i++) {
             v = vars[i];
-            if (v.instantiatedTo(value)) {
+            if (v.isInstantiatedTo(value)) {
                 min++;
                 max++;
             } else {

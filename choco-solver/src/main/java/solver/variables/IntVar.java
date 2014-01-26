@@ -183,7 +183,7 @@ public interface IntVar extends Variable {
      * @param value int
      * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
      */
-    boolean instantiatedTo(int value);
+    boolean isInstantiatedTo(int value);
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwier the lower bound.

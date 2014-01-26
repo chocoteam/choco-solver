@@ -122,7 +122,7 @@ public class PropElementV extends Propagator<IntVar> {
             int ub = idxVar.getUB();
             for (int val = idxVar.getLB(); val <= ub; val = idxVar.nextValue(val)) {
                 int feasibleIndex = val + this.offset;
-                if (!vars[feasibleIndex].instantiatedTo(valVar.getValue())) {
+                if (!vars[feasibleIndex].isInstantiatedTo(valVar.getValue())) {
                     allEqualToValVar = false;
                 }
             }

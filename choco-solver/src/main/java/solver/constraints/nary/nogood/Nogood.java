@@ -92,11 +92,11 @@ public class Nogood implements INogood {
 //            pngs.silent(this);
             return -1;
         }
-        if (vars[wl[0]].instantiatedTo(values[wl[0]])) {
+        if (vars[wl[0]].isInstantiatedTo(values[wl[0]])) {
             pngs.contradiction(null, "Inconsistent");
         }
         findLiteral(1);
-        if (vars[wl[1]].instantiatedTo(values[wl[1]])) {
+        if (vars[wl[1]].isInstantiatedTo(values[wl[1]])) {
             int k = wl[0];
             if (vars[k].removeValue(values[k], pngs)) {
                 return vars[k].isInstantiated() ? k : -1;

@@ -172,8 +172,8 @@ public final class OffsetView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value - cste);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(value - cste);
     }
 
     @Override

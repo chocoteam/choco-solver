@@ -172,7 +172,7 @@ public class ClauseTest {
         } catch (ContradictionException ex) {
             Assert.fail();
         }
-        Assert.assertTrue(bvars[1].instantiatedTo(0));
+        Assert.assertTrue(bvars[1].isInstantiatedTo(0));
     }
 
     @Test(groups = "1s")
@@ -189,7 +189,7 @@ public class ClauseTest {
         } catch (ContradictionException ex) {
             Assert.fail();
         }
-        Assert.assertTrue(bvars[0].instantiatedTo(1));
+        Assert.assertTrue(bvars[0].isInstantiatedTo(1));
     }
 
     @Test(groups = "1s")

@@ -225,7 +225,7 @@ public final class SqrView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
+    public boolean isInstantiatedTo(int value) {
         value = floor_sqrt(value);
         if (var.contains(value) || var.contains(-value)) {
             return var.isInstantiated() ||

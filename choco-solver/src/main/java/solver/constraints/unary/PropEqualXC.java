@@ -75,7 +75,7 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (vars[0].instantiatedTo(constant)) {
+        if (vars[0].isInstantiatedTo(constant)) {
             return ESat.TRUE;
         } else if (vars[0].contains(constant)) {
             return ESat.UNDEFINED;

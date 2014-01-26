@@ -102,7 +102,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
         int left = Integer.MIN_VALUE;
         int right = left;
         for (int i = 0; i < dsize; i++) {
-            if (vars[i].instantiatedTo(0)) {
+            if (vars[i].isInstantiatedTo(0)) {
                 if (i == right + 1) {
                     right = i;
                 } else {
@@ -111,7 +111,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                     right = i;
                 }
 //                vars[dsize].removeVal(i, this, false);
-            } else if (vars[i].instantiatedTo(1)) {
+            } else if (vars[i].isInstantiatedTo(1)) {
                 vars[dsize].instantiateTo(i, aCause);
                 clearBooleanExcept(i);
             } else if (!vars[dsize].contains(i)) {

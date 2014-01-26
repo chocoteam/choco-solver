@@ -202,7 +202,7 @@ public final class AbsView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
+    public boolean isInstantiatedTo(int value) {
         if (var.contains(value) || var.contains(-value)) {
             return var.isInstantiated() ||
                     (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed ABS bug

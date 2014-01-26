@@ -87,7 +87,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 1: // X is instanciated
                     hasChanged |= updateAbsY();
                     hasChanged |= updateAbsZ();
-                    if (X.instantiatedTo(0)) {
+                    if (X.isInstantiatedTo(0)) {
                         // sY!=0 && sX=0 => sZ=0
                         hasChanged |= Z.instantiateTo(0, aCause);
                     }
@@ -108,7 +108,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsY();
                     // sZ = 0 && sX!=0 => |x| < |y|
-                    if (Z.instantiatedTo(0) && !X.contains(0)) {
+                    if (Z.isInstantiatedTo(0) && !X.contains(0)) {
                         hasChanged |= absX.updateUpperBound(absY.getUB() - 1, aCause);
                     }
                     break;
@@ -179,7 +179,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
         if (isCompletelyInstantiated()) {
             return ESat.eval(X.getValue() / Y.getValue() == Z.getValue());
         }
-        if (Y.isInstantiated() && Z.instantiatedTo(0)) {
+        if (Y.isInstantiated() && Z.isInstantiatedTo(0)) {
             int xx = Math.max(Math.abs(X.getLB()), Math.abs(X.getUB()));
             int yy = Math.abs(Y.getValue());
             return ESat.eval(xx < yy);

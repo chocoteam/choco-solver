@@ -152,8 +152,8 @@ public class EqView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(value);
     }
 
     @Override

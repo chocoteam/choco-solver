@@ -277,7 +277,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public boolean instantiatedTo(int aValue) {
+    public boolean isInstantiatedTo(int aValue) {
         return !notInstanciated.contains(offset) && mValue == aValue;
     }
 
