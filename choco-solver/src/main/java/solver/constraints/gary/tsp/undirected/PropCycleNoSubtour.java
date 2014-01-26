@@ -136,7 +136,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         if (!cf.isBiconnected()) {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

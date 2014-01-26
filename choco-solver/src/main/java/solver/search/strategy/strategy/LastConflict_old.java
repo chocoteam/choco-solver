@@ -80,7 +80,7 @@ public class LastConflict_old extends AbstractStrategy<Variable> implements IMon
     public Decision getDecision() {
         Variable decVar = firstNotInst(testingSet, 0, cIdx);
         if (decVar == null) {
-            if (candidate != null && !candidate.instantiated()) {
+            if (candidate != null && !candidate.isInstantiated()) {
                 testingSet[cIdx++] = candidate;
                 decVar = candidate;
             } else {
@@ -136,7 +136,7 @@ public class LastConflict_old extends AbstractStrategy<Variable> implements IMon
 
     private static Variable firstNotInst(Variable[] a, int fromIndex, int toIndex) {
         for (int i = fromIndex; i < toIndex; i++) {
-            if (!a[i].instantiated()) {
+            if (!a[i].isInstantiated()) {
                 return a[i];
             }
         }

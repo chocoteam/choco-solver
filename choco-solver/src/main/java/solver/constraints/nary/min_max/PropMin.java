@@ -100,7 +100,7 @@ public class PropMin extends Propagator<IntVar> {
 				return ESat.UNDEFINED;
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			for(int i=0; i<n; i++){
 				if(vars[i].instantiatedTo(lb)){
 					return ESat.TRUE;

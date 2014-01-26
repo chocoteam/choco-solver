@@ -131,7 +131,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
                 }
             }
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

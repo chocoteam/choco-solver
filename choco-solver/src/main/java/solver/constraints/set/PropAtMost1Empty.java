@@ -115,7 +115,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
                     return ESat.FALSE;
                 }
                 none = false;
-            } else if (!vars[i].instantiated()) {
+            } else if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
         }

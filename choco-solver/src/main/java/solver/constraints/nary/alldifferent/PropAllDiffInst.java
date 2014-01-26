@@ -92,7 +92,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         toCheck.clear();
         for (int v = 0; v < n; v++) {
-            if (vars[v].instantiated()) {
+            if (vars[v].isInstantiated()) {
                 toCheck.push(v);
             }
         }
@@ -114,7 +114,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
                 for (int i = 0; i < n; i++) {
                     if (i != vidx) {
                         if (vars[i].removeValue(val, aCause)) {
-                            if (vars[i].instantiated()) {
+                            if (vars[i].isInstantiated()) {
                                 toCheck.push(i);
                             }
                         }

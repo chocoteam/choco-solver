@@ -79,7 +79,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
     //***********************************************************************************
 
     @Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         if (getEnvelopOrder() != getKernelOrder()) {
             return false;
         }
@@ -249,7 +249,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("graph_var " + getName());
-		if(instantiated()){
+		if(isInstantiated()){
 			sb.append("\nvalue: \n");
 			sb.append(envelop.toString());
 		}else{

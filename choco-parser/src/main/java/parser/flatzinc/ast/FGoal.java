@@ -312,7 +312,7 @@ public class FGoal {
                 @Override
                 public void apply() throws ContradictionException {
                     for (int i = 0; i < ivars.length; i++) {
-                        if (!ivars[i].instantiated()) {
+                        if (!ivars[i].isInstantiated()) {
                             ivars[i].instantiateTo(ivars[i].getLB(), this);
                             ivars[i].getSolver().propagate();
                         }

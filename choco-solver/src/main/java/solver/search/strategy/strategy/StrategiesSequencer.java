@@ -82,7 +82,7 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
 
     @Override
     public Decision<Variable> computeDecision(Variable variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         int idx = (index==null)?0:index.get();

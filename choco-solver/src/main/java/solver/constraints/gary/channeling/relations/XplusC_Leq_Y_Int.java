@@ -65,7 +65,7 @@ public class XplusC_Leq_Y_Int extends GraphRelation<IntVar> {
         if (x.getLB() + distanceMatrix[var1][var2] > y.getUB()) {
             return ESat.FALSE;
         }
-        if (x.instantiated() && y.instantiated() && x.getValue() + distanceMatrix[var1][var2] <= y.getValue()) {
+        if (x.isInstantiated() && y.isInstantiated() && x.getValue() + distanceMatrix[var1][var2] <= y.getValue()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

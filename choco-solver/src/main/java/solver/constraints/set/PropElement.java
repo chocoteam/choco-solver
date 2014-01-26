@@ -102,7 +102,7 @@ public class PropElement extends Propagator<Variable> {
     public void propagate(int evtmask) throws ContradictionException {
         index.updateLowerBound(offSet, aCause);
         index.updateUpperBound(array.length - 1 + offSet, aCause);
-        if (index.instantiated()) {
+        if (index.isInstantiated()) {
             // filter set and array
             setEq(set, array[index.getValue() - offSet]);
             setEq(array[index.getValue() - offSet], set);
@@ -143,7 +143,7 @@ public class PropElement extends Propagator<Variable> {
                     set.addToKernel(j, aCause);
                 }
             }
-            if (!set.instantiated()) {// from env
+            if (!set.isInstantiated()) {// from env
                 for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
@@ -182,11 +182,11 @@ public class PropElement extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        if (index.instantiated()) {
+        if (index.isInstantiated()) {
             if (disjoint(set, array[index.getValue() - offSet]) || disjoint(array[index.getValue() - offSet], set)) {
                 return ESat.FALSE;
             } else {
-                if (set.instantiated() && array[index.getValue() - offSet].instantiated()) {
+                if (set.isInstantiated() && array[index.getValue() - offSet].isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;

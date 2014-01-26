@@ -133,7 +133,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     private Variable firstNotInst() {
 		for(int i=nbCV-1;i>=0;i--){
-			if(!conflictingVariables[i].instantiated()){
+			if(!conflictingVariables[i].isInstantiated()){
 				return conflictingVariables[i];
 			}
 		}

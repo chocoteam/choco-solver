@@ -92,7 +92,7 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
 
     @Override
     public ESat isEntailed() {
-        if (!g.instantiated()) {
+        if (!g.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         for (int i = 0; i < n; i++) {

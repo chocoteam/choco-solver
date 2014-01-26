@@ -114,7 +114,7 @@ public class PropLex extends Propagator<IntVar> {
 
     /////////////////////
     public boolean groundEq(IntVar x1, IntVar y1) {
-        return x1.instantiated() && y1.instantiated() && x1.getValue() == y1.getValue();
+        return x1.isInstantiated() && y1.isInstantiated() && x1.getValue() == y1.getValue();
     }
 
     public boolean leq(IntVar x1, IntVar y1) {

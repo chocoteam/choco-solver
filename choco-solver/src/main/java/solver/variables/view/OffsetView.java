@@ -91,7 +91,7 @@ public final class OffsetView extends IntView {
                 } else if (value == sup) {
                     e = EventType.DECUPP;
                 }
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -136,7 +136,7 @@ public final class OffsetView extends IntView {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(value - cste, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -155,7 +155,7 @@ public final class OffsetView extends IntView {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(value - cste, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {

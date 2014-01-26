@@ -184,7 +184,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            if (v.instantiated()) {
+            if (v.isInstantiated()) {
                 j = map.get(ub);
                 if (flow[j].get() < this.ub[j]) {
                     digraph.addArc(j, i);

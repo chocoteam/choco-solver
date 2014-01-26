@@ -82,7 +82,7 @@ public class PropKLoops extends Propagator {
         k.updateUpperBound(max, aCause);
         if (min == max) {
             setPassive();
-        } else if (k.instantiated()) {
+        } else if (k.isInstantiated()) {
             if (k.getValue() == max) {
                 for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
                     if (g.getEnvelopGraph().isArcOrEdge(i, i)) {

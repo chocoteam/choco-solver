@@ -129,7 +129,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 e = EventType.DECUPP;
             }
             if (SIZE.get() > 0) {
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -179,7 +179,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 	@Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (this.instantiated()) {
+        if (this.isInstantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (Configuration.PLUG_EXPLANATION) {
@@ -256,7 +256,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 SIZE.add(old - value);
                 LB.set(value);
-                if (instantiated()) {
+                if (isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -308,7 +308,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(value - old);
                 UB.set(value);
 
-                if (instantiated()) {
+                if (isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -329,13 +329,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
 	@Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         return SIZE.get() == 1;
     }
 
     @Override
     public boolean instantiatedTo(int value) {
-        return instantiated() && contains(value);
+        return isInstantiated() && contains(value);
     }
 
 	@Override
@@ -350,7 +350,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      */
 	@Override
     public int getValue() {
-        assert instantiated() : name + " not instantiated";
+        assert isInstantiated() : name + " not instantiated";
         return getLB();
     }
 

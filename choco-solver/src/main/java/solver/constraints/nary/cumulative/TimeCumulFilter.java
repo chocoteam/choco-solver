@@ -90,7 +90,7 @@ public class TimeCumulFilter extends CumulFilter {
 			// filter max height
 			int minH;
 			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				if(!h[i].instantiated()){
+				if(!h[i].isInstantiated()){
 					minH = h[i].getUB();
 					elb = e[i].getLB();
 					hlb = h[i].getLB();

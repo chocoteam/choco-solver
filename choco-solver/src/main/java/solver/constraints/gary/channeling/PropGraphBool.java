@@ -111,12 +111,12 @@ public class PropGraphBool extends Propagator<GraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!graph.instantiated()) {
+        if (!graph.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                if (relations[i][j].instantiated()) {
+                if (relations[i][j].isInstantiated()) {
                     if (graph.getEnvelopGraph().isArcOrEdge(i, j) != (relations[i][j].getValue() == 1)) {
                         return ESat.FALSE;
                     }

@@ -327,7 +327,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            if (v.instantiated()) {
+            if (v.isInstantiated()) {
                 mandatoryValues.set(map.get(ub));
             }
             for (int j = v.getLB(); j <= ub; j++) {

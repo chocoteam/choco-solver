@@ -489,7 +489,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public boolean isCompletelyInstantiated() {
         for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 return false;
             }
         }
@@ -528,7 +528,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public int arity() {
         int arity = 0;
         for (int i = 0; i < vars.length; i++) {
-            arity += vars[i].instantiated() ? 0 : 1;
+            arity += vars[i].isInstantiated() ? 0 : 1;
         }
         return arity;
     }
@@ -536,7 +536,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public int dynPriority() {
         int arity = 0;
         for (int i = 0; i < vars.length && arity <= 3; i++) {
-            arity += vars[i].instantiated() ? 0 : 1;
+            arity += vars[i].isInstantiated() ? 0 : 1;
         }
         if (arity > 3) {
             return priority.priority;

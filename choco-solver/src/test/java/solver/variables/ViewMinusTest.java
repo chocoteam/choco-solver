@@ -57,7 +57,7 @@ public class ViewMinusTest {
 
         try {
 //            solver.propagate();
-            Assert.assertFalse(Y.instantiated());
+            Assert.assertFalse(Y.isInstantiated());
             Assert.assertEquals(Y.getLB(), -10);
             Assert.assertEquals(Y.getUB(), -1);
             Assert.assertTrue(Y.contains(-5));
@@ -92,8 +92,8 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Cause.Null);
-            Assert.assertTrue(X.instantiated());
-            Assert.assertTrue(Y.instantiated());
+            Assert.assertTrue(X.isInstantiated());
+            Assert.assertTrue(Y.isInstantiated());
             Assert.assertEquals(X.getValue(), 5);
             Assert.assertEquals(Y.getValue(), -5);
 

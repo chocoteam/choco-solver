@@ -617,7 +617,7 @@ public class IntConstraintFactory {
 		// Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
 		boolean addHeights = false;
 		for(int h=0; h<HEIGHTS.length&&!addHeights;h++){
-			if(!HEIGHTS[h].instantiated()){
+			if(!HEIGHTS[h].isInstantiated()){
 				addHeights = true;
 			}
 		}
@@ -961,7 +961,7 @@ public class IntConstraintFactory {
 		if(VARS.length==0){
 			return arithm(VF.fixed(0,SCALAR.getSolver()),OPERATOR,SCALAR);
 		}
-		if (COEFFS.length == 2 && SCALAR.instantiated()) {
+		if (COEFFS.length == 2 && SCALAR.isInstantiated()) {
 			int c = SCALAR.getValue();
 			if (COEFFS[0] == 1 && COEFFS[1] == 1) {
 				return ICF.arithm(VARS[0], "+", VARS[1], OPERATOR, c);
@@ -1006,7 +1006,7 @@ public class IntConstraintFactory {
 				return sum(VARS,OPERATOR,SCALAR);
 			}else if(nbMinusOne==n){
 				return sum(VARS,Operator.getFlip(OPERATOR),VF.minus(SCALAR));
-			}else if(SCALAR.instantiated()){
+			}else if(SCALAR.isInstantiated()){
 				if(nbMinusOne==1){
 					IntVar[] v2 = new IntVar[n-1];
 					IntVar s2 = null;
@@ -1100,12 +1100,12 @@ public class IntConstraintFactory {
 	 */
 	public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
 		if (VARS.length==1){
-			if(SUM.instantiated()){
+			if(SUM.isInstantiated()){
 				return arithm(VARS[0],OPERATOR,SUM.getValue());
 			}else{
 				return arithm(VARS[0],OPERATOR,SUM);
 			}
-		}else if (VARS.length == 2 && SUM.instantiated()) {
+		}else if (VARS.length == 2 && SUM.isInstantiated()) {
 			return arithm(VARS[0],"+",VARS[1],OPERATOR,SUM.getValue());
 		}else{
 			if(OPERATOR.equals("=")){

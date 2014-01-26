@@ -154,7 +154,7 @@ public class LightVariableEngine implements IPropagationEngine {
                             mask |= EventType.REMOVE.strengthened_mask;
                         }
                     }
-                    idx = v.getIndiceInPropagator(i);
+                    idx = v.getIndexInPropagator(i);
                     if (mask > 0 && pr.advise(idx, mask)) {
                         pr.fineERcalls++;
                         pr.propagate(idx, mask);

@@ -100,7 +100,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (iv.instantiated()) {
+        if (iv.isInstantiated()) {
             set.addToKernel(iv.getValue(), aCause);
             setPassive();
             return;
@@ -125,7 +125,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
                 iv.removeValue(i, aCause);
             }
         }
-        if (iv.instantiated()) {
+        if (iv.isInstantiated()) {
             set.addToKernel(iv.getValue(), aCause);
             setPassive();
         }
@@ -135,7 +135,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 1) {
-			if(iv.instantiated()){
+			if(iv.isInstantiated()){
 				set.addToKernel(iv.getValue(), aCause);
 				setPassive();
 			}else{
@@ -145,7 +145,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
             sdm.freeze();
             sdm.forEach(elemRem, EventType.REMOVE_FROM_ENVELOPE);
             sdm.unfreeze();
-            if (iv.instantiated()) {
+            if (iv.isInstantiated()) {
                 set.addToKernel(iv.getValue(), aCause);
                 setPassive();
             }else{
@@ -183,11 +183,11 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
 	@Override
     public ESat isEntailed() {
-        if (iv.instantiated()) {
+        if (iv.isInstantiated()) {
             if (!set.envelopeContains(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.instantiated()) {
+                if (set.isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;

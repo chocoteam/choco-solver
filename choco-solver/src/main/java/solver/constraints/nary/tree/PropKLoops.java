@@ -90,7 +90,7 @@ public class PropKLoops extends Propagator<IntVar> {
             nbMinLoops.set(0);
             for (int i = 0; i < n; i++) {
                 if (vars[i].contains(i + offSet)) {
-                    if (vars[i].instantiated()) {
+                    if (vars[i].isInstantiated()) {
                         nbMinLoops.add(1);
                     } else {
                         possibleLoops.add(i);
@@ -102,7 +102,7 @@ public class PropKLoops extends Propagator<IntVar> {
         int nbMax = nbMin + possibleLoops.getSize();
         vars[n].updateLowerBound(nbMin, aCause);
         vars[n].updateUpperBound(nbMax, aCause);
-        if (vars[n].instantiated() && nbMin != nbMax) {
+        if (vars[n].isInstantiated() && nbMin != nbMax) {
             if (vars[n].getValue() == nbMax) {
                 for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
                     vars[i].instantiateTo(i + offSet, aCause);
@@ -123,7 +123,7 @@ public class PropKLoops extends Propagator<IntVar> {
         if (idxVarInProp < n) {
             if (possibleLoops.contain(idxVarInProp)) {
                 if (vars[idxVarInProp].contains(idxVarInProp + offSet)) {
-                    if (vars[idxVarInProp].instantiated()) {
+                    if (vars[idxVarInProp].isInstantiated()) {
                         nbMinLoops.add(1);
                         possibleLoops.remove(idxVarInProp);
                         vars[n].updateLowerBound(nbMinLoops.get(), aCause);
@@ -147,7 +147,7 @@ public class PropKLoops extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             if (vars[i].contains(i + offSet)) {
                 nbMax++;
-                if (vars[i].instantiated()) {
+                if (vars[i].isInstantiated()) {
                     nbMin++;
                 }
             }
@@ -155,7 +155,7 @@ public class PropKLoops extends Propagator<IntVar> {
         if (vars[n].getLB() > nbMax || vars[n].getUB() < nbMin) {
             return ESat.FALSE;
         }
-        if (nbMin == nbMax && vars[n].instantiated()) {
+        if (nbMin == nbMax && vars[n].isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

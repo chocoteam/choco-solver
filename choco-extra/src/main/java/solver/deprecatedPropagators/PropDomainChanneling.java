@@ -119,7 +119,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
             }
         }
         vars[dsize].removeInterval(left, right, aCause);
-        if (vars[dsize].instantiated()) {
+        if (vars[dsize].isInstantiated()) {
             final int value = vars[dsize].getValue();
             clearBooleanExcept(value);
             vars[value].instantiateTo(1, aCause);
@@ -153,7 +153,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                     clearBooleanExcept(varIdx);
                 } else {
                     vars[dsize].removeValue(varIdx, aCause);
-                    if (vars[dsize].instantiated()) {
+                    if (vars[dsize].isInstantiated()) {
                         vars[vars[dsize].getValue()].instantiateTo(1, aCause);
                     }
                 }

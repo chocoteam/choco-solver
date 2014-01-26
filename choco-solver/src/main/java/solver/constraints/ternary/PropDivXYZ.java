@@ -70,9 +70,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
         int mask;
         do {
             mask = 0;
-            mask += X.instantiated() ? 1 : 0;
-            mask += Y.instantiated() ? 2 : 0;
-            mask += Z.instantiated() ? 4 : 0;
+            mask += X.isInstantiated() ? 1 : 0;
+            mask += Y.isInstantiated() ? 2 : 0;
+            mask += Z.isInstantiated() ? 4 : 0;
 
             hasChanged = Y.removeValue(0, aCause);
             if (outInterval(Y, 0, 0)) return;
@@ -179,7 +179,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
         if (isCompletelyInstantiated()) {
             return ESat.eval(X.getValue() / Y.getValue() == Z.getValue());
         }
-        if (Y.instantiated() && Z.instantiatedTo(0)) {
+        if (Y.isInstantiated() && Z.instantiatedTo(0)) {
             int xx = Math.max(Math.abs(X.getLB()), Math.abs(X.getUB()));
             int yy = Math.abs(Y.getValue());
             return ESat.eval(xx < yy);

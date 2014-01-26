@@ -113,7 +113,7 @@ public class PropKArcs extends Propagator {
     private void filter(int nbK, int nbE) throws ContradictionException {
         k.updateLowerBound(nbK, aCause);
         k.updateUpperBound(nbE, aCause);
-        if (nbK != nbE && k.instantiated()) {
+        if (nbK != nbE && k.isInstantiated()) {
             ISet nei;
             ISet env = g.getEnvelopGraph().getActiveNodes();
             if (k.getValue() == nbE) {
@@ -167,7 +167,7 @@ public class PropKArcs extends Propagator {
         if (nbK > k.getUB() || nbE < k.getLB()) {
             return ESat.FALSE;
         }
-        if (k.instantiated() && g.instantiated()) {
+        if (k.isInstantiated() && g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

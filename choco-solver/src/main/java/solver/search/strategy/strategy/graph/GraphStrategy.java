@@ -74,7 +74,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
     @Override
     public Decision getDecision() {
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return null;
         }
         GraphDecision dec = pool.getE();

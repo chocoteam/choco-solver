@@ -73,7 +73,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         int value = valueIterator.selectValue(variable);

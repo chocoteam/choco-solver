@@ -96,7 +96,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             vars[i].removeValue(i + offset, aCause);
             vars[i].updateLowerBound(offset, aCause);
             vars[i].updateUpperBound(n - 1 + offset, aCause);
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 fixedVar.add(i);
             }
         }
@@ -142,7 +142,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             boolean isInst = false;
             if (size[start].get() < n) {
                 if (vars[last].removeValue(start + offset, aCause)) {
-                    isInst = vars[last].instantiated();
+                    isInst = vars[last].isInstantiated();
                 }
             }
             origin[last].set(start);
@@ -161,7 +161,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 return ESat.UNDEFINED;
             }
         }

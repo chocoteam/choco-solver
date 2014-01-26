@@ -116,7 +116,7 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         // test on first selection of the variable

@@ -108,7 +108,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
                 }
             }
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

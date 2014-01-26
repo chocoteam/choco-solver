@@ -198,7 +198,7 @@ public class PropKCliques extends Propagator {
         if (findMIS() > k.getUB()) {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
             cf.findAllCC();
             if (cf.getNBCC() <= k.getLB()) {

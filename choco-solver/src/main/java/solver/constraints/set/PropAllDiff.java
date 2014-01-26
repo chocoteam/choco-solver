@@ -37,7 +37,6 @@ package solver.constraints.set;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import util.ESat;
 
@@ -75,7 +74,7 @@ public class PropAllDiff extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 propagate(i, 0);
             }
         }
@@ -83,7 +82,7 @@ public class PropAllDiff extends Propagator<SetVar> {
 
     @Override
     public void propagate(int idx, int mask) throws ContradictionException {
-        if (vars[idx].instantiated()) {
+        if (vars[idx].isInstantiated()) {
             int s = vars[idx].getEnvelopeSize();
             for (int i = 0; i < n; i++) {
                 if (i != idx) {
@@ -119,7 +118,7 @@ public class PropAllDiff extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 return ESat.UNDEFINED;
             }
             for (int i2 = i + 1; i2 < n; i2++) {
@@ -134,7 +133,7 @@ public class PropAllDiff extends Propagator<SetVar> {
     private boolean same(int i, int i2) {
         if (vars[i].getEnvelopeSize() < vars[i2].getKernelSize()) return false;
         if (vars[i2].getEnvelopeSize() < vars[i].getKernelSize()) return false;
-        if (vars[i].instantiated() && vars[i2].instantiated()) {
+        if (vars[i].isInstantiated() && vars[i2].isInstantiated()) {
             for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
                 if (!vars[i2].envelopeContains(j)) {
                     return false;

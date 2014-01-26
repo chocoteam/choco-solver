@@ -128,7 +128,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!g.instantiated()) {
+        if (!g.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         int x;

@@ -152,14 +152,14 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int getLB() {
-        if (var.instantiated()) {
+        if (var.isInstantiated()) {
             return getValue();
         } else return 0;
     }
 
     @Override
     public int getUB() {
-        if (var.instantiated()) {
+        if (var.isInstantiated()) {
             return getValue();
         } else return 1;
     }

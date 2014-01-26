@@ -65,7 +65,7 @@ public enum Reporting {
         Variable[] variables = solver.getVars();
         StringBuilder sb = new StringBuilder();
         for (int c = 0; c < variables.length; c++) {
-            boolean insV = variables[c].instantiated();
+            boolean insV = variables[c].isInstantiated();
             if (!insV) {
                 sb.append("FAILURE >> ").append(variables[c].toString()).append("\n");
             }

@@ -75,7 +75,7 @@ public class Explore {
         int n = vars.length;
         Set<Propagator> cons_set = new LinkedHashSet<Propagator>();
         for (int i = 0; i < n; i++) {
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 solution[i] = ubs[i] = vars[i].getValue();
             } else {
                 solution[i] = vars[i].getLB();

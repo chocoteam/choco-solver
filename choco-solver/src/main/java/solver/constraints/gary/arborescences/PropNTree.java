@@ -226,7 +226,7 @@ public class PropNTree extends Propagator {
         } else {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         } else {
             return ESat.UNDEFINED;

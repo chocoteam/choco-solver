@@ -142,7 +142,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         double lb = LB.get();
         double ub = UB.get();
         if (ub - lb < precision) return true;

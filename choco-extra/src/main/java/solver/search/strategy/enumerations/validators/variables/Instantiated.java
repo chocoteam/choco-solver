@@ -36,9 +36,9 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 17/12/10
  */
-public class Instanciated implements IValid<IntVar> {
+public class Instantiated implements IValid<IntVar> {
     @Override
     public boolean valid(IntVar anElement) {
-        return !anElement.instantiated();
+        return !anElement.isInstantiated();
     }
 }

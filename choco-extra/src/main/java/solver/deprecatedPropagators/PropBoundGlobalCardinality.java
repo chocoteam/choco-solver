@@ -168,7 +168,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         initCard();
         for (int i = 0; i < vars.length; i++) {
             IntVar var = vars[i];
-            if (var.instantiated()) {
+            if (var.isInstantiated()) {
                 // if a value has been instantiated to its max number of occurrences
                 // remove it from all variables
                 if (i < nbVars) {

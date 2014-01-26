@@ -48,7 +48,7 @@ public class OccursAtMostOnce implements IValid<IntVal> {
     @Override
     public boolean valid(IntVal anElement) {
         for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated() && vars[i].contains(anElement.getValue())) {
+            if (!vars[i].isInstantiated() && vars[i].contains(anElement.getValue())) {
                 return true;
             }
         }

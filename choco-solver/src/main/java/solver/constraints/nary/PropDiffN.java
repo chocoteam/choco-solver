@@ -202,8 +202,8 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     private boolean boxInstantiated(int i) {
-        return vars[i].instantiated() && vars[i + n].instantiated()
-                && vars[i + 2 * n].instantiated() && vars[i + 3 * n].instantiated();
+        return vars[i].isInstantiated() && vars[i + n].isInstantiated()
+                && vars[i + 2 * n].isInstantiated() && vars[i + 3 * n].isInstantiated();
     }
 
     @Override

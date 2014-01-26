@@ -125,7 +125,7 @@ public class PropSumEq extends Propagator<IntVar> {
         if (max < vars[n].getLB() || min > vars[n].getUB()) {
             return ESat.FALSE;
         }
-        if (min == max && vars[n].instantiated()) {
+        if (min == max && vars[n].isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

@@ -183,7 +183,7 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            if (v.instantiated()) {
+            if (v.isInstantiated()) {
                 j = map.get(v.getValue());
                 if (flow[j] < this.ub[j]) {
                     digraph.addArc(j, i);

@@ -74,9 +74,9 @@ public class PropTimesXY extends Propagator<IntVar> {
             Z.updateUpperBound(Math.max(a, b), aCause);
         }
         // instantiation reasoning
-        if (X.instantiated()) {
+        if (X.isInstantiated()) {
             instantiated(X, Y);
-        } else if (Y.instantiated()) {
+        } else if (Y.isInstantiated()) {
             instantiated(Y, X);
         }
     }
@@ -88,7 +88,7 @@ public class PropTimesXY extends Propagator<IntVar> {
 
     @Override
     public final ESat isEntailed() {
-        if (X.instantiated() && Y.instantiated() && Z.instantiated()) {
+        if (X.isInstantiated() && Y.isInstantiated() && Z.isInstantiated()) {
             return ESat.eval(X.getValue() * Y.getValue() == Z.getValue());
         } // TODO can be improved if necessary (reification)
         return ESat.UNDEFINED;
@@ -102,10 +102,10 @@ public class PropTimesXY extends Propagator<IntVar> {
         if (X.getValue() == 0) {
             Z.instantiateTo(0, aCause);
             setPassive();
-        } else if (Y.instantiated()) {
+        } else if (Y.isInstantiated()) {
             Z.instantiateTo(X.getValue() * Y.getValue(), aCause);    // fix Z
             setPassive();
-        } else if (Z.instantiated()) {
+        } else if (Z.isInstantiated()) {
             if (X.getValue() != 0) {
                 double a = (double) Z.getValue() / (double) X.getValue();
                 if (Math.abs(a - Math.round(a)) > 0.001) {

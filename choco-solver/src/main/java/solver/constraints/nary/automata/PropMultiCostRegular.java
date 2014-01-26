@@ -899,7 +899,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     public boolean isSatisfied() {
         for (IntVar var : this.vars) {
-            if (!var.instantiated())
+            if (!var.isInstantiated())
                 return false;
         }
         return check();
@@ -938,7 +938,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             it.dispose();
         }
         for (int i = 0; i < gcost.length; i++) {
-            if (!z[i].instantiated()) {
+            if (!z[i].isInstantiated()) {
                 LoggerFactory.getLogger("solver").error("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
@@ -959,12 +959,12 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public boolean check() {
         int[] word = new int[offset];
         for (int i = 0; i < offset; i++) {
-            if (!vs[i].instantiated())
+            if (!vs[i].isInstantiated())
                 return true;
             word[i] = vs[i].getValue();
         }
         for (IntVar aZ : z) {
-            if (!aZ.instantiated()) return true;
+            if (!aZ.isInstantiated()) return true;
         }
         return check(word);
     }

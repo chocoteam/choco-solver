@@ -112,7 +112,7 @@ public class PropBoolChannel extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            if (bools[i].instantiated()) {
+            if (bools[i].isInstantiated()) {
                 if (bools[i].getValue() == 0) {
                     set.removeFromEnvelope(i + offSet, aCause);
                 } else {

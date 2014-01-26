@@ -71,7 +71,7 @@ public class EqView extends IntView {
                 } else if (value == sup) {
                     e = EventType.DECUPP;
                 }
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -116,7 +116,7 @@ public class EqView extends IntView {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -135,7 +135,7 @@ public class EqView extends IntView {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {

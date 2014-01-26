@@ -95,7 +95,7 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
                 if (s == null) {
                     return null;
                 }
-                assert !s.instantiated();
+                assert !s.isInstantiated();
 		FastDecisionSet d = pool.getE();
 		if (d == null) {
 			d = new FastDecisionSet(pool);

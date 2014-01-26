@@ -61,7 +61,7 @@ public class Occurrence<V extends Variable> implements VariableSelector<V> {
     @Override
     public boolean hasNext() {
         int idx = 0;
-        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+        for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
         }
         return idx < variables.length;
     }
@@ -72,7 +72,7 @@ public class Occurrence<V extends Variable> implements VariableSelector<V> {
         int large_nb_cstrs = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
             int nb_cstrs = variables[idx].getNbProps();
-            if (!variables[idx].instantiated() && nb_cstrs > large_nb_cstrs) {
+            if (!variables[idx].isInstantiated() && nb_cstrs > large_nb_cstrs) {
                 large_nb_cstrs = nb_cstrs;
                 large_idx = idx;
             }

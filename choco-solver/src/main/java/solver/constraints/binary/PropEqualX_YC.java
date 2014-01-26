@@ -105,8 +105,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             idms[0].unfreeze();
             idms[1].unfreeze();
         }
-        if (x.instantiated()) {
-            assert (y.instantiated());
+        if (x.isInstantiated()) {
+            assert (y.isInstantiated());
             setPassive();
         }
     }
@@ -114,8 +114,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         updateBounds();
-        if (x.instantiated()) {
-            assert (y.instantiated());
+        if (x.isInstantiated()) {
+            assert (y.isInstantiated());
             setPassive();
         } else if (bothEnumerated) {
             if (varIdx == 0) {
@@ -142,8 +142,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                 (x.getLB() > y.getUB() + cste) ||
                 x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && !match())
             return ESat.FALSE;
-        else if (x.instantiated() &&
-                y.instantiated() &&
+        else if (x.isInstantiated() &&
+                y.isInstantiated() &&
                 (x.getValue() == y.getValue() + cste))
             return ESat.TRUE;
         else

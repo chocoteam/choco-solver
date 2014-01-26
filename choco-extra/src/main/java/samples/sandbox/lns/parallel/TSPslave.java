@@ -114,7 +114,7 @@ public class TSPslave extends AbstractParallelSlave {
         if (solver.getMeasures().getSolutionCount() == 0) {
             throw new UnsupportedOperationException();
         }
-        if (!undi.instantiated()) {
+        if (!undi.isInstantiated()) {
             throw new UnsupportedOperationException();
         }
         outputCost = totalCost.getValue();

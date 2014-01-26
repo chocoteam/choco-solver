@@ -116,7 +116,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         if (currentVar == -1 || vars[currentVar] != variable) {
@@ -169,7 +169,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         bests.clear();
         double bestImpact = -Double.MAX_VALUE;
         for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 double imp = computeImpact(i);
                 if (imp > bestImpact) {
                     bests.clear();
@@ -210,7 +210,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             int offset = v.getLB();
             int UB = v.getUB();
             int dsz = UB - offset + 1;//v.getDomainSize();
-            if (!v.instantiated()) { // if the variable is not instantiated
+            if (!v.isInstantiated()) { // if the variable is not instantiated
                 Ilabel[i] = new double[v.hasEnumeratedDomain() ? dsz : 1];
                 offsets[i] = offset;
 
@@ -269,7 +269,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 int offset = v.getLB();
                 int UB = v.getUB();
                 int dsz = UB - offset + 1;//v.getDomainSize();
-                if (!v.instantiated() && Ilabel[i] == null) {
+                if (!v.isInstantiated() && Ilabel[i] == null) {
                     Ilabel[i] = new double[v.hasEnumeratedDomain() ? dsz : 1];
                     offsets[i] = offset;
                 }
@@ -407,7 +407,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             for (int i = 0; i < vars.length; i++) {
                 IntVar v = vars[i];
                 int dsz = v.getDomainSize();
-                if (!v.instantiated()) { // if the variable is not instantiated
+                if (!v.isInstantiated()) { // if the variable is not instantiated
                     int offset = v.getLB();
                     if (v.hasEnumeratedDomain()) {
                         if (v.getDomainSize() < split) { // try each value

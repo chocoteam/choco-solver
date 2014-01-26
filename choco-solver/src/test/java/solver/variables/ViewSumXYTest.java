@@ -56,7 +56,7 @@ public class ViewSumXYTest {
 
         try {
             solver.propagate();
-            Assert.assertFalse(Z.instantiated());
+            Assert.assertFalse(Z.isInstantiated());
             Assert.assertEquals(Z.getLB(), 4);
             Assert.assertEquals(Z.getUB(), 18);
             Assert.assertTrue(Z.contains(10));
@@ -98,8 +98,8 @@ public class ViewSumXYTest {
 
             Y.instantiateTo(-5, Cause.Null);
             solver.propagate();
-            Assert.assertTrue(X.instantiated());
-            Assert.assertTrue(Y.instantiated());
+            Assert.assertTrue(X.isInstantiated());
+            Assert.assertTrue(Y.isInstantiated());
             Assert.assertEquals(X.getValue(), 5);
             Assert.assertEquals(Y.getValue(), -5);
 
