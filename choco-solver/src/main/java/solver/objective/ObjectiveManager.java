@@ -155,7 +155,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 */
 	public void update() {
 		if(isOptimization()){
-			assert objective.instantiated();
+			assert objective.isInstantiated();
 			if (policy == ResolutionPolicy.MINIMIZE) {
 				this.bestProvedUB = getObjUB();
 			} else {

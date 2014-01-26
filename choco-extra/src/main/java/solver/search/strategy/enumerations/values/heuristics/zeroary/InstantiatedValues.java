@@ -64,7 +64,7 @@ public class InstantiatedValues extends HeuristicVal {
 
     private void init() {
         for (int i = 0; i < variables.length; i++) {
-            if (variables[i].instantiated()) {
+            if (variables[i].isInstantiated()) {
                 _hs.add(variables[i].getValue());
             }
         }

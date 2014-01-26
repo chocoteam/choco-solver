@@ -87,7 +87,7 @@ public class MinusView extends IntView {
                 e = EventType.DECUPP;
             }
             if (done) {
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -129,7 +129,7 @@ public class MinusView extends IntView {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateUpperBound(-value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -146,7 +146,7 @@ public class MinusView extends IntView {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateLowerBound(-value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -164,8 +164,8 @@ public class MinusView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(-value);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(-value);
     }
 
     @Override

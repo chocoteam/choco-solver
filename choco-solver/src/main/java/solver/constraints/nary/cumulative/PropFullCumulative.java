@@ -194,7 +194,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		}
 		// check variables are instantiated
 		for (int i = 0; i < vars.length-1; i++) {
-			if(!vars[i].instantiated()){
+			if(!vars[i].isInstantiated()){
 				return ESat.UNDEFINED;
 			}
 		}

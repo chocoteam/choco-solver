@@ -59,7 +59,7 @@ public final class SetVarSelector {
         @Override
         public boolean hasNext() {
             int idx = 0;
-            for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+            for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
             }
             return idx < variables.length;
         }
@@ -105,7 +105,7 @@ public final class SetVarSelector {
         @Override
         public boolean hasNext() {
             int idx = 0;
-            for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+            for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
             }
             return idx < variables.length;
         }

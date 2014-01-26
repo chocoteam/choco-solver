@@ -71,7 +71,7 @@ public class Solution implements ICause {
         Variable[] vars = solver.getVars();
         for (int i = 0; i < vars.length; i++) {
             int kind = vars[i].getTypeAndKind() & Variable.KIND;
-			assert (vars[i].instantiated()) :
+			assert (vars[i].isInstantiated()) :
 					vars[i] + " is not instantiated when recording a solution.";
             switch (kind) {
                 case Variable.INT:

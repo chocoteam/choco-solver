@@ -105,7 +105,7 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
         // resolution
         solver.findSolution();
         //output
-        if (!undi.instantiated()) {
+        if (!undi.isInstantiated()) {
             throw new UnsupportedOperationException();
         }
         System.out.println("first solution");

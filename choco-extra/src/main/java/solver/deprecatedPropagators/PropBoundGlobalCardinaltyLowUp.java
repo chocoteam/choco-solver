@@ -70,7 +70,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
     public void initialize() throws ContradictionException {
         initBackDataStruct();
         for (int i = 0; i < vars.length; i++) {
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 filterBCOnInst(vars[i].getValue());
             }
         }

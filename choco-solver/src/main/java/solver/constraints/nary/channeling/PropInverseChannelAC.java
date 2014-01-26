@@ -143,13 +143,13 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     public ESat isEntailed() {
         boolean allInst = true;
         for (int i = 0; i < n; i++) {
-            if (!(vars[i].instantiated() && vars[i + n].instantiated())) {
+            if (!(vars[i].isInstantiated() && vars[i + n].isInstantiated())) {
                 allInst = false;
             }
-            if (X[i].instantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
+            if (X[i].isInstantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
                 return ESat.FALSE;
             }
-            if (Y[i].instantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
+            if (Y[i].isInstantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
                 return ESat.FALSE;
             }
         }

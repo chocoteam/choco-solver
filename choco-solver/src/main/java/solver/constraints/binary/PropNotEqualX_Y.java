@@ -83,9 +83,9 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (x.instantiated()) {
+        if (x.isInstantiated()) {
             removeValV1();
-        } else if (y.instantiated()) {
+        } else if (y.isInstantiated()) {
             removeValV0();
         } else if (x.getUB() < (y.getLB()) || (y.getUB()) < x.getLB()) {
             setPassive();
@@ -119,8 +119,8 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         if ((x.getUB() < y.getLB()) ||
                 (y.getUB() < x.getLB()))
             return ESat.TRUE;
-        else if (x.instantiated()
-                && y.instantiated()
+        else if (x.isInstantiated()
+                && y.isInstantiated()
                 && x.getValue() == y.getValue())
             return ESat.FALSE;
         else

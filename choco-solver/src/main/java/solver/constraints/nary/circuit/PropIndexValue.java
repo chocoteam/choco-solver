@@ -39,7 +39,6 @@ import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;
@@ -94,7 +93,7 @@ public class PropIndexValue extends Propagator<IntVar> {
             possible[i].set(b);
             if (b) {
                 max++;
-                if (vars[i].instantiated()) {
+                if (vars[i].isInstantiated()) {
                     min++;
                 }
             }
@@ -109,10 +108,10 @@ public class PropIndexValue extends Propagator<IntVar> {
         int max = maxLoops.get();
         nb.updateLowerBound(min, aCause);
         nb.updateUpperBound(max, aCause);
-        if (min != max && nb.instantiated()) {
+        if (min != max && nb.isInstantiated()) {
             if (min == nb.getValue()) {
                 for (int i = 0; i < n; i++) {
-                    if (!vars[i].instantiated()) {
+                    if (!vars[i].isInstantiated()) {
                         vars[i].removeValue(i + offset, aCause);
                     }
                 }
@@ -136,7 +135,7 @@ public class PropIndexValue extends Propagator<IntVar> {
             // il avait une boucle avant
             if (possible[idxVarInProp].get()) {
                 IntVar v = vars[idxVarInProp];
-                if (v.instantiated() && v.getValue() == idxVarInProp + offset) {
+                if (v.isInstantiated() && v.getValue() == idxVarInProp + offset) {
                     minLoops.add(1);
                 }
                 boolean b = v.contains(idxVarInProp + offset);
@@ -156,7 +155,7 @@ public class PropIndexValue extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             if (vars[i].contains(i + offset)) {
                 max++;
-                if (vars[i].instantiated()) {
+                if (vars[i].isInstantiated()) {
                     min++;
                 }
             }

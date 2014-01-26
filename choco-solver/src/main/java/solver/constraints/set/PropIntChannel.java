@@ -132,7 +132,7 @@ public class PropIntChannel extends Propagator<Variable> {
                     ints[i].removeValue(j, aCause);
                 }
             }
-            if (ints[i].instantiated()) {
+            if (ints[i].isInstantiated()) {
                 sets[ints[i].getValue() - offSet1].addToKernel(i + offSet2, aCause);
             }
         }
@@ -165,7 +165,7 @@ public class PropIntChannel extends Propagator<Variable> {
             sdm[idxVarInProp].unfreeze();
         } else {
             idx -= nSets;
-            if (ints[idx].instantiated()) {
+            if (ints[idx].isInstantiated()) {
                 sets[ints[idx].getValue() - offSet1].addToKernel(idx + offSet2, aCause);
             }
             idx += offSet2;
@@ -178,7 +178,7 @@ public class PropIntChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < nInts; i++) {
-            if (ints[i].instantiated()) {
+            if (ints[i].isInstantiated()) {
                 int val = ints[i].getValue();
                 if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].envelopeContains(i + offSet2)) {
                     return ESat.FALSE;

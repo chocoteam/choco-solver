@@ -65,7 +65,7 @@ public class Dist_Int extends GraphRelation<IntVar> {
         if (x.getLB() + distanceMatrix[var1][var2] > y.getUB() || x.getUB() + distanceMatrix[var1][var2] < y.getLB()) {
             return ESat.FALSE;
         }
-        if (x.instantiated() && y.instantiated()) {
+        if (x.isInstantiated() && y.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
@@ -88,9 +88,9 @@ public class Dist_Int extends GraphRelation<IntVar> {
         if (var1 != var2) {
             IntVar x = vars[var1];
             IntVar y = vars[var2];
-            if (x.instantiated()) {
+            if (x.isInstantiated()) {
                 y.removeValue(x.getValue() + distanceMatrix[var1][var2], cause);
-            } else if (y.instantiated()) {
+            } else if (y.isInstantiated()) {
                 x.removeValue(y.getValue() - distanceMatrix[var1][var2], cause);
             }
         } else if (distanceMatrix[var1][var2] == 0) {

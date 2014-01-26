@@ -778,7 +778,7 @@ public class VariableFactory {
      * @param VAR an integer variable.
      */
     public static IntVar abs(IntVar VAR) {
-        if (VAR.instantiated()) {
+        if (VAR.isInstantiated()) {
             return fixed(Math.abs(VAR.getValue()), VAR.getSolver());
         } else if (VAR.getLB() >= 0) {
             return VAR;

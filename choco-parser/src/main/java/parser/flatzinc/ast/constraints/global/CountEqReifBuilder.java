@@ -57,7 +57,7 @@ public class CountEqReifBuilder implements IBuilder {
         }
         IntVar y = exps.get(1).intVarValue(solver);
 		BoolVar b = exps.get(3).boolVarValue(solver);
-        if (y.instantiated()) {
+        if (y.isInstantiated()) {
 			Constraint cstr = IntConstraintFactory.count(y.getValue(), x, c);
 			cstr.reifyWith(b);
             return new Constraint[]{};

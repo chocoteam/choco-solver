@@ -100,9 +100,9 @@ public class PropMax extends Propagator<IntVar> {
 				return ESat.UNDEFINED;
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			for(int i=0; i<n; i++){
-				if(vars[i].instantiatedTo(ub)){
+				if(vars[i].isInstantiatedTo(ub)){
 					return ESat.TRUE;
 				}
 			}

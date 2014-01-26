@@ -71,7 +71,7 @@ public class StrategyTest {
             } catch (ContradictionException e) {
                 e.printStackTrace();
             }
-            Assert.assertTrue(variables[i].instantiated());
+            Assert.assertTrue(variables[i].isInstantiated());
             Assert.assertEquals(variables[i].getValue(), i);
             Decision tmp = decision;
             decision = asg.getDecision();
@@ -91,7 +91,7 @@ public class StrategyTest {
             } catch (ContradictionException e) {
                 e.printStackTrace();
             }
-            Assert.assertFalse(variables[i].instantiated());
+            Assert.assertFalse(variables[i].isInstantiated());
             Assert.assertFalse(variables[i].contains(i));
             decision = decision.getPrevious();
         }
@@ -125,7 +125,7 @@ public class StrategyTest {
             } catch (ContradictionException e) {
                 e.printStackTrace();
             }
-            Assert.assertTrue(variables[i].instantiated());
+            Assert.assertTrue(variables[i].isInstantiated());
             Assert.assertEquals(variables[i].getValue(), i);
             Decision tmp = decision;
             decision = sts.getDecision();
@@ -145,7 +145,7 @@ public class StrategyTest {
             } catch (ContradictionException e) {
                 e.printStackTrace();
             }
-            Assert.assertFalse(variables[i].instantiated());
+            Assert.assertFalse(variables[i].isInstantiated());
             Assert.assertFalse(variables[i].contains(i));
             decision = decision.getPrevious();
         }

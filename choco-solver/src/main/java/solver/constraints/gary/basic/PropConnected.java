@@ -122,7 +122,7 @@ public class PropConnected extends Propagator<UndirectedGraphVar> {
         if (!fastCheck()) {
             return ESat.FALSE;
         }
-        if (!g.instantiated()) {
+        if (!g.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;

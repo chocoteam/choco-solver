@@ -84,8 +84,8 @@ public class PropAbsolute extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (vars[0].getUB() < 0) {
             return ESat.FALSE;
-        } else if (vars[0].instantiated()) {
-            if (vars[1].instantiated()) {
+        } else if (vars[0].isInstantiated()) {
+            if (vars[1].isInstantiated()) {
                 return ESat.eval(vars[0].getValue() == Math.abs(vars[1].getValue()));
             } else if (vars[1].getDomainSize() == 2 &&
                     vars[1].contains(vars[0].getValue()) &&

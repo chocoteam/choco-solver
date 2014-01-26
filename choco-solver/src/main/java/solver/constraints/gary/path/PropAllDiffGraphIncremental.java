@@ -263,7 +263,7 @@ public class PropAllDiffGraphIncremental extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!g.instantiated()) {
+        if (!g.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         BitSet b = new BitSet(n);

@@ -255,7 +255,7 @@ public class PropReducedPath extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (G.instantiated()) {
+        if (G.isInstantiated()) {
             int nr = 0;
             for (int i = 0; i < n_R.get(); i++) {
                 nr += G_R.getSuccessorsOf(i).getSize();

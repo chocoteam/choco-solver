@@ -154,7 +154,7 @@ public class PropNbEmpty extends Propagator<Variable> {
         nbEmpty.updateLowerBound(nbMin, aCause);
         nbEmpty.updateUpperBound(nbMax, aCause);
         ///////////////////////////////////////
-        if (nbEmpty.instantiated() && nbMin < nbMax) {
+        if (nbEmpty.isInstantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {

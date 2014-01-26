@@ -167,7 +167,7 @@ public abstract class AbstractVariable implements Variable {
     }
 
 	@Override
-    public int getIndiceInPropagator(int pidx) {
+    public int getIndexInPropagator(int pidx) {
         return pindices[pidx];
     }
 

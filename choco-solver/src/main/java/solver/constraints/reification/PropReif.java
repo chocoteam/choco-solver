@@ -36,7 +36,6 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.Variable;
 import util.ESat;
 
@@ -85,7 +84,7 @@ public class PropReif extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (bVar.instantiated()) {
+        if (bVar.isInstantiated()) {
             if (bVar.getBooleanValue() == ESat.TRUE) {
                 reifCons.activate(0);
             } else {
@@ -115,7 +114,7 @@ public class PropReif extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        if (bVar.instantiated()) {
+        if (bVar.isInstantiated()) {
             if (bVar.getValue() == 1) {
                 return trueCons.isSatisfied();
             } else {

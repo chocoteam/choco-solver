@@ -146,7 +146,7 @@ public class VariableEngine implements IPropagationEngine {
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
                 lastProp = lastVar.getPropagator(p);
-                vIp = lastVar.getIndiceInPropagator(p);
+                vIp = lastVar.getIndexInPropagator(p);
                 assert lastProp.isActive() : "propagator is not active:" + lastProp;
                 if (Configuration.PRINT_PROPAGATION) {
                     IPropagationEngine.Trace.printPropagation(lastVar, lastProp);
@@ -158,7 +158,7 @@ public class VariableEngine implements IPropagationEngine {
                 lastProp.decNbPendingEvt();
                 // run propagation on the specific evt
                 lastProp.fineERcalls++;
-                lastProp.propagate(lastVar.getIndiceInPropagator(p), mask);
+                lastProp.propagate(lastVar.getIndexInPropagator(p), mask);
             }
         }
     }
@@ -173,7 +173,7 @@ public class VariableEngine implements IPropagationEngine {
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
                 lastProp = lastVar.getPropagator(p);
-                lastProp.clearMask(lastVar.getIndiceInPropagator(p));
+                lastProp.clearMask(lastVar.getIndexInPropagator(p));
                 lastProp.decNbPendingEvt();
             }
             evtset.clear();
@@ -187,7 +187,7 @@ public class VariableEngine implements IPropagationEngine {
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
                 lastProp = lastVar.getPropagator(p);
-                lastProp.clearMask(lastVar.getIndiceInPropagator(p));
+                lastProp.clearMask(lastVar.getIndexInPropagator(p));
                 lastProp.decNbPendingEvt();
             }
             evtset.clear();
@@ -205,7 +205,7 @@ public class VariableEngine implements IPropagationEngine {
         int nbp = variable.getNbProps();
         for (int p = 0; p < nbp; p++) {
             Propagator prop = variable.getPropagator(p);
-            int pindice = variable.getIndiceInPropagator(p);
+            int pindice = variable.getIndexInPropagator(p);
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 if (prop.updateMask(pindice, type)) {
                     assert !eventsets[vid].get(p);

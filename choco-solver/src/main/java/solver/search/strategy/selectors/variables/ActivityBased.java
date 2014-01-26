@@ -195,7 +195,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         if (currentVar==-1 || vars[currentVar] != variable) {
@@ -408,7 +408,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
      * @return true if the confidence interval is small enough, false otherwise
      */
     private boolean checkInterval(int idx) {
-        if (!vars[idx].instantiated()) {
+        if (!vars[idx].isInstantiated()) {
             double stdev = Math.sqrt(sA[idx] / (nb_probes - 1));
             double a = distribution(nb_probes) * stdev / Math.sqrt(nb_probes);
 //            logger.info("m: {}, v: {}, et: {} => {}", new Object[]{mA[idx], sA[idx], stdev, (a / mA[idx])});

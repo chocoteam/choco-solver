@@ -44,7 +44,7 @@ public class IndexOf extends GraphRelation<IntVar> {
         if (!x.contains(var2)) {
             return ESat.FALSE;
         }
-        if (x.instantiated()) {
+        if (x.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

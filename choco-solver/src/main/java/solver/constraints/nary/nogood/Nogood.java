@@ -74,7 +74,7 @@ public class Nogood implements INogood {
         for (int i = start; i < nbvars; i++) {
             int k = wl[i];
             if (vars[k].contains(values[k])) {
-                if (!vars[k].instantiated()) {
+                if (!vars[k].isInstantiated()) {
                     int lwl = wl[start];
                     wl[start] = wl[i];
                     wl[i] = lwl;
@@ -92,14 +92,14 @@ public class Nogood implements INogood {
 //            pngs.silent(this);
             return -1;
         }
-        if (vars[wl[0]].instantiatedTo(values[wl[0]])) {
+        if (vars[wl[0]].isInstantiatedTo(values[wl[0]])) {
             pngs.contradiction(null, "Inconsistent");
         }
         findLiteral(1);
-        if (vars[wl[1]].instantiatedTo(values[wl[1]])) {
+        if (vars[wl[1]].isInstantiatedTo(values[wl[1]])) {
             int k = wl[0];
             if (vars[k].removeValue(values[k], pngs)) {
-                return vars[k].instantiated() ? k : -1;
+                return vars[k].isInstantiated() ? k : -1;
             }
             pngs.watch(vars[k], this, k);
         } else {
@@ -110,7 +110,7 @@ public class Nogood implements INogood {
     }
 
     public int awakeOnInst(int idx, PropNogoodStore pngs) throws ContradictionException {
-        assert vars[idx].instantiated();
+        assert vars[idx].isInstantiated();
         if (!vars[idx].contains(values[idx])) {
 //            pngs.silent(this);
             return -1;
@@ -129,7 +129,7 @@ public class Nogood implements INogood {
         for (int i = 2; i < wl.length; i++) {
             k = wl[i];
             if (vars[k].contains(values[k])) {
-                if (!vars[k].instantiated()) {
+                if (!vars[k].isInstantiated()) {
                     wl[1] = wl[i];
                     wl[i] = idx;
                     pngs.unwatch(vars[idx], this);
@@ -144,7 +144,7 @@ public class Nogood implements INogood {
         // unit nogood
         if (vars[wl[0]].removeValue(values[wl[0]], pngs)) {
 //            pngs.silent(this);
-            return vars[wl[0]].instantiated() ? wl[0] : -1;
+            return vars[wl[0]].isInstantiated() ? wl[0] : -1;
         }
         return -1;
     }
@@ -158,7 +158,7 @@ public class Nogood implements INogood {
         int c = 0;
         for (int i = 0; i < vars.length; i++) {
             if (vars[i].contains(values[i])) {
-                if (!vars[i].instantiated()) {
+                if (!vars[i].isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     c++;

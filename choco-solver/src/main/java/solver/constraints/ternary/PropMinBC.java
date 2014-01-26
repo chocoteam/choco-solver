@@ -71,9 +71,9 @@ public class PropMinBC extends Propagator<IntVar> {
 
     private void filter() throws ContradictionException {
         int c = 0;
-        c += (vars[0].instantiated() ? 1 : 0);
-        c += (vars[1].instantiated() ? 2 : 0);
-        c += (vars[2].instantiated() ? 4 : 0);
+        c += (vars[0].isInstantiated() ? 1 : 0);
+        c += (vars[1].isInstantiated() ? 2 : 0);
+        c += (vars[2].isInstantiated() ? 4 : 0);
         switch (c) {
             case 7: // everything is instantiated
             case 6:// Z and Y are instantiated

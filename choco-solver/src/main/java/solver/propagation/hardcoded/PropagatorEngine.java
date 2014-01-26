@@ -198,7 +198,7 @@ public class PropagatorEngine implements IPropagationEngine {
         int nbp = variable.getNbProps();
         for (int p = 0; p < nbp; p++) {
             Propagator prop = variable.getPropagator(p);
-            int pindice = variable.getIndiceInPropagator(p);
+            int pindice = variable.getIndexInPropagator(p);
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
                 if (prop.updateMask(pindice, type)) { // not scheduled yet

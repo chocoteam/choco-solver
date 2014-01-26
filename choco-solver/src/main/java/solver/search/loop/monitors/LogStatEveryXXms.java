@@ -30,7 +30,6 @@ package solver.search.loop.monitors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.search.loop.AbstractSearchLoop;
 
 /**
  * A search monitor logger which prints statistics every XX ms.

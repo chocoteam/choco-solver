@@ -75,7 +75,7 @@ public class PropSat extends Propagator<BoolVar> {
             applyEarlyDeductions();
             for (int i = 0; i < vars.length; ++i) {
                 BoolVar var = vars[i];
-                if (var.instantiated()) {
+                if (var.isInstantiated()) {
                     VariableBound(i);
                 }
             }

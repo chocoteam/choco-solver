@@ -143,7 +143,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     //***********************************************************************************
 
     @Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         return envelope.getSize() == kernel.getSize();
     }
 
@@ -187,7 +187,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
-        boolean changed = !instantiated();
+        boolean changed = !isInstantiated();
         for (int i : value) {
             addToKernel(i, cause);
         }

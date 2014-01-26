@@ -105,7 +105,7 @@ public class PropLargeCSP extends Propagator<IntVar> {
         int nbUnassigned = 0;
         int index = -1, i = 0;
         while (!stop && i < vars.length) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 nbUnassigned++;
                 index = i;
             } else {

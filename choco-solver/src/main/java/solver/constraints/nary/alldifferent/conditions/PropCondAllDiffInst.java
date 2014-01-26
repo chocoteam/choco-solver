@@ -90,7 +90,7 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
 					for (int i = 0; i < n; i++) {
 						if (i != vidx) {
 							if (vars[i].removeValue(val, aCause)) {
-								if (vars[i].instantiated()) {
+								if (vars[i].isInstantiated()) {
 									toCheck.push(i);
 								}
 							}
@@ -109,12 +109,12 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
     public ESat isEntailed() {
 		int nbInst = 0;
 		for (int i = 0; i < vars.length; i++) {
-			if (vars[i].instantiated()) {
+			if (vars[i].isInstantiated()) {
 				nbInst++;
 				if(condition.holdOnVar(vars[i])){
 					for (int j = i + 1; j < vars.length; j++) {
 						if(condition.holdOnVar(vars[j]))
-							if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
+							if (vars[j].isInstantiated() && vars[i].getValue() == vars[j].getValue()) {
 								return ESat.FALSE;
 							}
 					}

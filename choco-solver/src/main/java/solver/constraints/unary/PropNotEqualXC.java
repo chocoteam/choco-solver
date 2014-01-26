@@ -32,7 +32,6 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -68,7 +67,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (vars[0].instantiatedTo(constant)) {
+        if (vars[0].isInstantiatedTo(constant)) {
             return ESat.FALSE;
         } else if (vars[0].contains(constant)) {
             return ESat.UNDEFINED;

@@ -364,11 +364,11 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     public void filterNeq() throws ContradictionException {
         if (cste >= 0) {
-            if (vars[0].instantiated()) {
+            if (vars[0].isInstantiated()) {
                 vars[1].removeValue(vars[0].getValue() + cste, aCause);
                 vars[1].removeValue(vars[0].getValue() - cste, aCause);
             }
-            if (vars[1].instantiated()) {
+            if (vars[1].isInstantiated()) {
                 vars[0].removeValue(vars[1].getValue() + cste, aCause);
                 vars[0].removeValue(vars[1].getValue() - cste, aCause);
             }

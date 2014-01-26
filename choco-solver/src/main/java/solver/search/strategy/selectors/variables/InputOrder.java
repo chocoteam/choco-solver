@@ -58,7 +58,7 @@ public class InputOrder<V extends Variable> implements VariableSelector<V> {
     @Override
     public boolean hasNext() {
         int idx = index.get();
-        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+        for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
         }
         return idx < variables.length;
     }
@@ -67,7 +67,7 @@ public class InputOrder<V extends Variable> implements VariableSelector<V> {
     public void advance() {
         int idx = index.get();
         for (; idx < variables.length; idx++) {
-            if (!variables[idx].instantiated()) {
+            if (!variables[idx].isInstantiated()) {
                 return;
             }
             index.add(1);

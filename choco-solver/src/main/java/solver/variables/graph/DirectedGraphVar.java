@@ -111,4 +111,26 @@ public class DirectedGraphVar extends GraphVar<DirectedGraph> {
     public boolean isDirected() {
         return true;
     }
+
+	/**
+	 * Checks whether or not the arc (from,to) may belong to a solution or not
+	 * (i.e. if it is present in the envelop graph)
+	 * @param from the id of a node
+	 * @param to the id of a node
+	 * @return true iff arc (from,to) belongs to the envelop graph
+	 */
+	public boolean isArcPossible(int from, int to){
+		return envelop.arcExists(from,to);
+	}
+
+	/**
+	 * Checks whether or not the arc (from,to) must belong to every solution or not
+	 * (i.e. if it is present in the kernel graph)
+	 * @param from the id of a node
+	 * @param to the id of a node
+	 * @return true iff arc (from,to) belongs to the kernel graph
+	 */
+	public boolean isArcMandatory(int from, int to){
+		return kernel.arcExists(from,to);
+	}
 }

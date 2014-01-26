@@ -63,7 +63,7 @@ public class Random<T extends Variable> implements VariableSelector<T> {
     @Override
     public boolean hasNext() {
         int idx = 0;
-        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
+        for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
         }
         return idx < variables.length;
     }
@@ -73,7 +73,7 @@ public class Random<T extends Variable> implements VariableSelector<T> {
         sets.clear();
         rand_idx = 0;
         for (int idx = 0; idx < variables.length; idx++) {
-            if (!variables[idx].instantiated()) {
+            if (!variables[idx].isInstantiated()) {
                 sets.add(idx);
             }
         }

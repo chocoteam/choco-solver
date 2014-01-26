@@ -47,7 +47,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 1 juil. 2010
  */
-public abstract class AbstractStrategy<V extends Variable> implements Serializable, IDecisionComputer<V> {
+public abstract class AbstractStrategy<V extends Variable> implements Serializable {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 

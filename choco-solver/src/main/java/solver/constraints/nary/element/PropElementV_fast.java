@@ -98,12 +98,12 @@ public class PropElementV_fast extends Propagator<IntVar> {
         }
         var.updateLowerBound(min, aCause);
         var.updateUpperBound(max, aCause);
-        if (index.instantiated()) {
+        if (index.isInstantiated()) {
             equals(var, vars[2 + index.getValue() - offset]);
         }
-        if (var.instantiated() && index.instantiated()) {
+        if (var.isInstantiated() && index.isInstantiated()) {
             IntVar v = vars[2 + index.getValue() - offset];
-            if (v.instantiated() && v.getValue() == var.getValue()) {
+            if (v.isInstantiated() && v.getValue() == var.getValue()) {
                 setPassive();
             }
         }
@@ -181,10 +181,10 @@ public class PropElementV_fast extends Propagator<IntVar> {
         if (min > var.getUB() || max < var.getLB()) {
             return ESat.FALSE;
         }
-        if (var.instantiated() && !exists) {
+        if (var.isInstantiated() && !exists) {
             return ESat.FALSE;
         }
-        if (var.instantiated() && min == max) {
+        if (var.isInstantiated() && min == max) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

@@ -133,7 +133,7 @@ public class AMNV_Gci_MD_R13 extends Propagator<IntVar> {
 		}
 		int min = 0;
 		for (int i = 0; i < n; i++) {
-			if (vars[i].instantiated() && !in.get(i)) {
+			if (vars[i].isInstantiated() && !in.get(i)) {
 				addToMIS(i);
 				min++;
 			}

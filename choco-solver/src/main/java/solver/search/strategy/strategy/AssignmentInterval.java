@@ -61,7 +61,7 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
 
     @Override
     public Decision<RealVar> computeDecision(RealVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         double value = valueIterator.selectValue(variable);

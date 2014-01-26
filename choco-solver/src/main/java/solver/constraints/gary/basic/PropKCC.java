@@ -30,7 +30,6 @@ package solver.constraints.gary.basic;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
@@ -126,9 +125,9 @@ public class PropKCC extends Propagator {
         if (k.getUB() < ee) {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             if (k.contains(ee)) {
-                if (k.instantiated()) {
+                if (k.isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;

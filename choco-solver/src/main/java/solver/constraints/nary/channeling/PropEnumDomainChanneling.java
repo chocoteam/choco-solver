@@ -71,7 +71,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
 		vars[n].updateLowerBound(offSet,aCause);
 		vars[n].updateUpperBound(n-1+offSet,aCause);
 		for(int i=0;i<n;i++){
-			if(vars[i].instantiated()){
+			if(vars[i].isInstantiated()){
 				if(vars[i].getValue()==0){
 					vars[n].removeValue(i+offSet,aCause);
 				}else{
@@ -81,7 +81,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
 				vars[i].instantiateTo(0,aCause);
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			int v = vars[n].getValue()-offSet;
 			vars[v].instantiateTo(1, aCause);
 			for(int i=0;i<n;i++){
@@ -111,7 +111,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
 				vars[n].removeValue(varIdx+offSet,aCause);
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			vars[vars[n].getValue()-offSet].instantiateTo(1,aCause);
 		}
     }
@@ -122,13 +122,13 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
 			return ESat.FALSE;
 		}
 		for(int i=0;i<n;i++){
-			if(vars[i].instantiated()){
+			if(vars[i].isInstantiated()){
 				if(vars[i].getValue()==1 && !vars[n].contains(i+offSet)){
 					return ESat.FALSE;
 				}
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			int v = vars[n].getValue()-offSet;
 			if(!vars[v].contains(1)){
 				return ESat.FALSE;

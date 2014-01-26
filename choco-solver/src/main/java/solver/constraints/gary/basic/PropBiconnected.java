@@ -98,7 +98,7 @@ public class PropBiconnected extends Propagator<UndirectedGraphVar> {
         if (!env_CC_finder.isBiconnected()) {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

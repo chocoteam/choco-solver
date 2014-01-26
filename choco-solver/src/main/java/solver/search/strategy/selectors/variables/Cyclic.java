@@ -57,11 +57,11 @@ public class Cyclic implements VariableSelector<RealVar> {
         int nbvars = vars.length;
         int start = current == -1 ? nbvars - 1 : current;
         int n = (current + 1) % nbvars;
-        while (n != start && vars[n].instantiated()) {
+        while (n != start && vars[n].isInstantiated()) {
             n = (n + 1) % nbvars;
         }
         current = n;
-        return !vars[current].instantiated();
+        return !vars[current].isInstantiated();
     }
 
     @Override

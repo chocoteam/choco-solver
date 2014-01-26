@@ -126,7 +126,7 @@ public class PropFastGCC extends Propagator<IntVar> {
             for (int i = 0; i < n; i++) {
                 IntVar v = vars[i];
                 int ub = v.getUB();
-                if (v.instantiated()) {
+                if (v.isInstantiated()) {
                     if (map.containsKey(v.getValue())) {
                         int j = map.get(v.getValue());
                         mandatories[j].add(i);
@@ -145,7 +145,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
                     if (!vars[var].contains(values[i])) {
                         possibles[i].remove(var);
-                    } else if (vars[var].instantiated()) {
+                    } else if (vars[var].isInstantiated()) {
                         possibles[i].remove(var);
                         mandatories[i].add(var);
                     }
@@ -166,7 +166,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
             again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
             again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
-            if (vars[n+i].instantiated()) {
+            if (vars[n+i].isInstantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
@@ -196,7 +196,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         boolean useful = false;
         for (int i = 0; i < boundVar.size(); i++) {
             int var = boundVar.get(i);
-            if (!vars[var].instantiated()) {
+            if (!vars[var].isInstantiated()) {
                 int lb = vars[var].getLB();
                 int index = -1;
                 if (map.containsKey(lb)) {
@@ -263,7 +263,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            if (v.instantiated()) {
+            if (v.isInstantiated()) {
                 if (map.containsKey(v.getValue())) {
                     j = map.get(v.getValue());
                     min[j]++;
@@ -284,7 +284,7 @@ public class PropFastGCC extends Propagator<IntVar> {
             }
         }
         for (int i = 0; i < n2; i++) {
-            if (!(vars[n + i].instantiated() && max[i] == min[i])) {
+            if (!(vars[n + i].isInstantiated() && max[i] == min[i])) {
                 return ESat.UNDEFINED;
             }
         }

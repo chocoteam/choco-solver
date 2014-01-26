@@ -78,8 +78,8 @@ public class PropTimes extends Propagator<IntVar> {
     public final ESat isEntailed() {
         if (isCompletelyInstantiated()) {
             return ESat.eval(v0.getValue() * v1.getValue() == v2.getValue());
-        } else if (v2.instantiatedTo(0)) {
-            if (v0.instantiatedTo(0) || v1.instantiatedTo(0)) {
+        } else if (v2.isInstantiatedTo(0)) {
+            if (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(0)) {
                 return ESat.TRUE;
             } else if (!(v0.contains(0)) && !(v1.contains(0))) {
                 return ESat.FALSE;
@@ -138,17 +138,17 @@ public class PropTimes extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     protected void awakeOnX() throws ContradictionException {
-        if (v0.instantiatedTo(0)) {
+        if (v0.isInstantiatedTo(0)) {
             v2.instantiateTo(0, aCause);
         }
-        if ((v2.instantiatedTo(0)) && (!v0.contains(0))) {
+        if ((v2.isInstantiatedTo(0)) && (!v0.contains(0))) {
             v1.instantiateTo(0, aCause);
         } else if (!v2.contains(0)) {
             updateYandX();
-        } else if (!(v2.instantiatedTo(0))) {
+        } else if (!(v2.isInstantiatedTo(0))) {
             shaveOnYandX();
         }
-        if (!(v2.instantiatedTo(0))) {
+        if (!(v2.isInstantiatedTo(0))) {
             int r = Math.max(getZmin(), MIN);
             v2.updateLowerBound(r, aCause);
             r = Math.min(getZmax(), MAX);
@@ -157,17 +157,17 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
     protected void awakeOnY() throws ContradictionException {
-        if (v1.instantiatedTo(0)) {
+        if (v1.isInstantiatedTo(0)) {
             v2.instantiateTo(0, aCause);
         }
-        if ((v2.instantiatedTo(0)) && (!v1.contains(0))) {
+        if ((v2.isInstantiatedTo(0)) && (!v1.contains(0))) {
             v0.instantiateTo(0, aCause);
         } else if (!v2.contains(0)) {
             updateXandY();
-        } else if (!(v2.instantiatedTo(0))) {
+        } else if (!(v2.isInstantiatedTo(0))) {
             shaveOnXandY();
         }
-        if (!(v2.instantiatedTo(0))) {
+        if (!(v2.isInstantiatedTo(0))) {
             int r = Math.max(getZmin(), MIN);
             v2.updateLowerBound(r, aCause);
             r = Math.min(getZmax(), MAX);
@@ -181,13 +181,13 @@ public class PropTimes extends Propagator<IntVar> {
             if (updateY()) {
                 updateXandY();
             }
-        } else if (!(v2.instantiatedTo(0))) {
+        } else if (!(v2.isInstantiatedTo(0))) {
             shaveOnX();
             if (shaveOnY()) {
                 shaveOnXandY();
             }
         }
-        if (v2.instantiatedTo(0)) {
+        if (v2.isInstantiatedTo(0)) {
             propagateZero();
         }
     }

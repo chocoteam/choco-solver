@@ -114,7 +114,7 @@ public class ReificationConstraint extends Constraint {
 
 	public void activate(int idx) throws ContradictionException {
 		Solver solver = propagators[0].getSolver();
-		assert bool.instantiatedTo(1 - idx);
+		assert bool.isInstantiatedTo(1 - idx);
 		for (int p = indices[idx]; p < indices[idx + 1]; p++) {
 			assert (propagators[p].isReifiedAndSilent());
 			propagators[p].setReifiedTrue();

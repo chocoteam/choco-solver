@@ -140,8 +140,8 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public boolean instantiated() {
-        return var.instantiated();
+    public boolean isInstantiated() {
+        return var.isInstantiated();
     }
 
     @Override

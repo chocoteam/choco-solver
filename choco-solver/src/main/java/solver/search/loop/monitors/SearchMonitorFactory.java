@@ -28,7 +28,6 @@ package solver.search.loop.monitors;
 
 import solver.Solver;
 import solver.search.limits.*;
-import solver.search.loop.AbstractSearchLoop;
 import solver.search.restart.GeometricalRestartStrategy;
 import solver.search.restart.LubyRestartStrategy;
 import solver.variables.Variable;

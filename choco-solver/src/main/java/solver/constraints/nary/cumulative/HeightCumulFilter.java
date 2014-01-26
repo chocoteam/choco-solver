@@ -98,7 +98,7 @@ public class HeightCumulFilter extends SweepCumulFilter {
 					currentConso += hlb[event.index];
 					// filter the capa max LB from the compulsory part consumptions
 					capamax.updateLowerBound(currentConso, aCause);
-					if(!h[map[event.index]].instantiated()){
+					if(!h[map[event.index]].isInstantiated()){
 						tprune.add(event.index);
 					}
 					break;

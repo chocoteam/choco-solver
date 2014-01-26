@@ -104,8 +104,8 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public boolean instantiated() {
-        return var.instantiated();
+    public boolean isInstantiated() {
+        return var.isInstantiated();
     }
 
 	@Override

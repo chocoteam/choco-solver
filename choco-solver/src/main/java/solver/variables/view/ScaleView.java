@@ -92,7 +92,7 @@ public final class ScaleView extends IntView {
                     } else if (value == sup) {
                         e = EventType.DECUPP;
                     }
-                    if (this.instantiated()) {
+                    if (this.isInstantiated()) {
                         e = EventType.INSTANTIATE;
                     }
                     this.notifyPropagators(e, cause);
@@ -137,7 +137,7 @@ public final class ScaleView extends IntView {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -155,7 +155,7 @@ public final class ScaleView extends IntView {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -172,8 +172,8 @@ public final class ScaleView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return value % cste == 0 && var.instantiatedTo(value / cste);
+    public boolean isInstantiatedTo(int value) {
+        return value % cste == 0 && var.isInstantiatedTo(value / cste);
     }
 
     @Override

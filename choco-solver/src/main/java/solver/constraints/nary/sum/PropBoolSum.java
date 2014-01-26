@@ -99,17 +99,17 @@ public class PropBoolSum extends Propagator<IntVar> {
         int ub = max.get();
         sum.updateLowerBound(lb, aCause);
         sum.updateUpperBound(ub, aCause);
-        if (lb != ub && sum.instantiated()) {
+        if (lb != ub && sum.isInstantiated()) {
             if (sum.getValue() == lb) {
                 for (int i = 0; i < n; i++) {
-                    if (!vars[i].instantiated()) {
+                    if (!vars[i].isInstantiated()) {
                         vars[i].instantiateTo(0, aCause);
                     }
                 }
             }
             if (sum.getValue() == ub) {
                 for (int i = 0; i < n; i++) {
-                    if (!vars[i].instantiated()) {
+                    if (!vars[i].isInstantiated()) {
                         vars[i].instantiateTo(1, aCause);
                     }
                 }
@@ -150,7 +150,7 @@ public class PropBoolSum extends Propagator<IntVar> {
         if (lb > sum.getUB() || ub < sum.getLB()) {
             return ESat.FALSE;
         }
-        if (lb==ub && sum.instantiated()) {
+        if (lb==ub && sum.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

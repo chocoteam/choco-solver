@@ -33,7 +33,6 @@ import solver.constraints.extension.FastBooleanValidityChecker;
 import solver.constraints.extension.FastValidityChecker;
 import solver.constraints.extension.ValidityChecker;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 import util.iterators.DisposableValueIterator;

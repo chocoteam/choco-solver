@@ -25,25 +25,20 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package solver.search.strategy.enumerations.validators.variables;
 
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+import solver.search.strategy.enumerations.validators.IValid;
+import solver.variables.IntVar;
 
 /**
- * Interface for search strategies:
- * given a variable, compute a decision to be applied to it
+ * <br/>
  *
- * @param <V>
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @since 17/12/10
  */
-public interface IDecisionComputer<V extends Variable> {
-
-    /**
-     * Computes a decision to be applied to variable var
-     *
-     * @param variable
-     * @return a decision to be applied to variable var
-     */
-    public Decision<V> computeDecision(V variable);
+public class Instantiated implements IValid<IntVar> {
+    @Override
+    public boolean valid(IntVar anElement) {
+        return !anElement.isInstantiated();
+    }
 }

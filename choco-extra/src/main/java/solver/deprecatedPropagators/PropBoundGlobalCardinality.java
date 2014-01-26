@@ -168,7 +168,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         initCard();
         for (int i = 0; i < vars.length; i++) {
             IntVar var = vars[i];
-            if (var.instantiated()) {
+            if (var.isInstantiated()) {
                 // if a value has been instantiated to its max number of occurrences
                 // remove it from all variables
                 if (i < nbVars) {
@@ -680,7 +680,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
                 if (vars[j].contains(i + offset)) {
                     val_maxOcc[i].add(1);
                 }
-                if (vars[j].instantiatedTo(i + offset)) {
+                if (vars[j].isInstantiatedTo(i + offset)) {
                     val_minOcc[i].add(1);
                 }
             }
@@ -719,7 +719,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     final void filterBCOnInf(int i) throws ContradictionException {
         int inf = vars[i].getLB();
         int nbInf = val_minOcc[inf - offset].get();
-        if (vars[i].instantiatedTo(inf)) {
+        if (vars[i].isInstantiatedTo(inf)) {
             nbInf--;
         }
         if (nbInf == getMaxOcc(inf - offset)) {
@@ -731,7 +731,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     final void filterBCOnSup(int i) throws ContradictionException {
         int sup = vars[i].getUB();
         int nbSup = val_minOcc[sup - offset].get();
-        if (vars[i].instantiatedTo(sup)) {
+        if (vars[i].isInstantiatedTo(sup)) {
             nbSup--;
         }
         if (nbSup == getMaxOcc(sup - offset)) {
@@ -753,7 +753,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             this.contradiction(null, "inconsistent");
         } else if (nbvalsure == getMaxOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
-                if (!vars[j].instantiatedTo(val)) {
+                if (!vars[j].isInstantiatedTo(val)) {
                     vars[j].removeValue(val, aCause);//CPRU not idempotent because data structure is maintained in awakeOnX methods
                 }
             }

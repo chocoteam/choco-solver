@@ -94,8 +94,8 @@ public final class SqrView extends IntView {
     }
 
     @Override
-    public boolean instantiated() {
-        if (var.instantiated()) {
+    public boolean isInstantiated() {
+        if (var.isInstantiated()) {
             return true;
         } else {
             if (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB()) {
@@ -129,7 +129,7 @@ public final class SqrView extends IntView {
             }
             boolean done = var.removeValue(-rootV, this);
             done |= var.removeValue(rootV, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 evt = EventType.INSTANTIATE;
             }
             if (done) {
@@ -191,7 +191,7 @@ public final class SqrView extends IntView {
         boolean done = var.removeInterval(-floorV + 1, floorV - 1, this);
         if (done) {
             EventType evt = EventType.INCLOW;
-            if (instantiated()) {
+            if (isInstantiated()) {
                 evt = EventType.INSTANTIATE;
             }
             notifyPropagators(evt, cause);
@@ -210,7 +210,7 @@ public final class SqrView extends IntView {
         done |= var.updateUpperBound(floorV, this);
         if (done) {
             EventType evt = EventType.DECUPP;
-            if (instantiated()) {
+            if (isInstantiated()) {
                 evt = EventType.INSTANTIATE;
             }
             notifyPropagators(evt, cause);
@@ -225,10 +225,10 @@ public final class SqrView extends IntView {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
+    public boolean isInstantiatedTo(int value) {
         value = floor_sqrt(value);
         if (var.contains(value) || var.contains(-value)) {
-            return var.instantiated() ||
+            return var.isInstantiated() ||
                     (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed SQR bug
         }
         return false;
@@ -550,7 +550,7 @@ public final class SqrView extends IntView {
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
-            if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
+            if (isInstantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
                 notifyPropagators(EventType.INSTANTIATE, this);
             } else { // otherwise, we do not know the previous values, so its hard to tell whether it is LB or UB mod
                 notifyPropagators(EventType.BOUND, this);

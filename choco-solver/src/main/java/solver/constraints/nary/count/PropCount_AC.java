@@ -104,7 +104,7 @@ public class PropCount_AC extends Propagator<IntVar> {
                     if (!vars[varIdx].contains(value)) {
                         possibles.remove(varIdx);
                         return true;
-                    } else if (vars[varIdx].instantiated()) {
+                    } else if (vars[varIdx].isInstantiated()) {
                         possibles.remove(varIdx);
                         mandatories.add(varIdx);
                         return true;
@@ -125,7 +125,7 @@ public class PropCount_AC extends Propagator<IntVar> {
             for (int i = 0; i < n; i++) {
                 IntVar v = vars[i];
                 int ub = v.getUB();
-                if (v.instantiated()) {
+                if (v.isInstantiated()) {
                     if (ub == value) {
                         mandatories.add(i);
                     }
@@ -147,7 +147,7 @@ public class PropCount_AC extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         vars[n].updateLowerBound(mandatories.getSize(), aCause);
         vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), aCause);
-        if (vars[n].instantiated()) {
+        if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
@@ -187,7 +187,7 @@ public class PropCount_AC extends Propagator<IntVar> {
         IntVar v;
         for (int i = 0; i < n; i++) {
             v = vars[i];
-            if (v.instantiatedTo(value)) {
+            if (v.isInstantiatedTo(value)) {
                 min++;
                 max++;
             } else {
@@ -199,7 +199,7 @@ public class PropCount_AC extends Propagator<IntVar> {
         if (vars[n].getLB() > max || vars[n].getUB() < min) {
             return ESat.FALSE;
         }
-        if (!(vars[n].instantiated() && max == min)) {
+        if (!(vars[n].isInstantiated() && max == min)) {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;

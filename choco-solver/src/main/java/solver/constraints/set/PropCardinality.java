@@ -89,7 +89,7 @@ public class PropCardinality extends Propagator<Variable> {
         card.updateLowerBound(k, aCause);
         int e = set.getEnvelopeSize();
         card.updateUpperBound(e, aCause);
-        if (card.instantiated()) {
+        if (card.isInstantiated()) {
             int c = card.getValue();
             if (c == k) {
                 for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {

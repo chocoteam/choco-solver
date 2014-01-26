@@ -79,7 +79,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
     //***********************************************************************************
 
     @Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         if (getEnvelopOrder() != getKernelOrder()) {
             return false;
         }
@@ -179,6 +179,26 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
     // ACCESSORS
     //***********************************************************************************
 
+	/**
+	 * Checks whether or not a node may belong to a solution or not
+	 * (i.e. if it is present in the envelop graph)
+	 * @param node the id of a node
+	 * @return true iff node belongs to the envelop graph
+	 */
+	public boolean isNodePossible(int node){
+		return envelop.getActiveNodes().contain(node);
+	}
+
+	/**
+	 * Checks whether or not a node must belong to every solution or not
+	 * (i.e. if it is present in the kernel graph)
+	 * @param node the id of a node
+	 * @return true iff node belongs to the kernel graph
+	 */
+	public boolean isNodeMandatory(int node){
+		return kernel.getActiveNodes().contain(node);
+	}
+
     /**
      * Compute the order of the graph in its current state (ie the number of nodes that may belong to an instantiation)
      *
@@ -249,7 +269,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("graph_var " + getName());
-		if(instantiated()){
+		if(isInstantiated()){
 			sb.append("\nvalue: \n");
 			sb.append(envelop.toString());
 		}else{

@@ -73,7 +73,7 @@ public class PropKNodes extends Propagator {
         k.updateUpperBound(env, aCause);
         if (ker == env) {
             setPassive();
-        } else if (k.instantiated()) {
+        } else if (k.isInstantiated()) {
             int v = k.getValue();
             ISet envNodes = g.getEnvelopGraph().getActiveNodes();
             if (v == env) {

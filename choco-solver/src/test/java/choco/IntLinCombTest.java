@@ -222,7 +222,7 @@ public class IntLinCombTest {
         sum.getSearchLoop().timeStamp++;
         ((IntVar) vars[2+offSet]).removeValue(-2, Cause.Null);
         sum.propagate();
-        Assert.assertTrue(vars[2+offSet].instantiated());
+        Assert.assertTrue(vars[2+offSet].isInstantiated());
     }
 
 }

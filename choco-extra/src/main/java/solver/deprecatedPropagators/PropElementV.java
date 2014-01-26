@@ -82,7 +82,7 @@ public class PropElementV extends Propagator<IntVar> {
         if (indexUpdateNeeded.get()) {
             updateIndexFromValue();
         }
-        if (getIndexVar().instantiated()) {
+        if (getIndexVar().isInstantiated()) {
             equalityBehaviour();
         } else if (valueUpdateNeeded.get()) {
             updateValueFromIndex();
@@ -115,14 +115,14 @@ public class PropElementV extends Propagator<IntVar> {
         ESat isEntailed = ESat.UNDEFINED;
         IntVar idxVar = getIndexVar();
         IntVar valVar = getValueVar();
-        if ((valVar.instantiated()) &&
+        if ((valVar.isInstantiated()) &&
                 (idxVar.getLB() + this.offset >= 0) &&
                 (idxVar.getUB() + this.offset < vars.length - 2)) {
             boolean allEqualToValVar = true;
             int ub = idxVar.getUB();
             for (int val = idxVar.getLB(); val <= ub; val = idxVar.nextValue(val)) {
                 int feasibleIndex = val + this.offset;
-                if (!vars[feasibleIndex].instantiatedTo(valVar.getValue())) {
+                if (!vars[feasibleIndex].isInstantiatedTo(valVar.getValue())) {
                     allEqualToValVar = false;
                 }
             }
@@ -218,7 +218,7 @@ public class PropElementV extends Propagator<IntVar> {
             }
         }
         // if the domain of idxVar has been reduced to one element, then it behaves like an equality
-        if (idxVar.instantiated()) {
+        if (idxVar.isInstantiated()) {
             equalityBehaviour();
         }
         indexUpdateNeeded.set(false);
@@ -227,7 +227,7 @@ public class PropElementV extends Propagator<IntVar> {
     // Once the index is known, the constraints behaves like an equality : valVar == c.vars[idxVar.value]
 // This method must only be called when the value of idxVar is known.
     private void equalityBehaviour() throws ContradictionException {
-        assert (getIndexVar().instantiated());
+        assert (getIndexVar().isInstantiated());
         int indexVal = getIndexVar().getValue();
         IntVar valVar = getValueVar();
         IntVar targetVar = vars[indexVal + offset];
@@ -278,20 +278,20 @@ public class PropElementV extends Propagator<IntVar> {
         IntVar idxVar = getIndexVar();
         IntVar valVar = getValueVar();
         if (idx == vars.length - 2) {        // the event concerns idxVar
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 equalityBehaviour();
             } else {
                 updateValueFromIndex();
             }
         } else if (idx == vars.length - 1) { // the event concerns valVar
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 vars[idxVal + offset].updateLowerBound(valVar.getLB(), aCause);
             } else {
                 updateIndexFromValue();
             }
         } else {                            // the event concerns a variable from the array
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
                     valVar.updateLowerBound(vars[idx].getLB(), aCause);
@@ -321,20 +321,20 @@ public class PropElementV extends Propagator<IntVar> {
         IntVar idxVar = getIndexVar();
         IntVar valVar = getValueVar();
         if (idx == vars.length - 2) {        // the event concerns idxVar
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 equalityBehaviour();
             } else {
                 updateValueFromIndex();
             }
         } else if (idx == vars.length - 1) {  // the event concerns valVar
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 vars[idxVal + offset].updateUpperBound(valVar.getUB(), aCause);
             } else {
                 updateIndexFromValue();
             }
         } else {                            // the event concerns a variable from the array
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
                     valVar.updateUpperBound(vars[idx].getUB(), aCause);
@@ -366,14 +366,14 @@ public class PropElementV extends Propagator<IntVar> {
         if (idx == vars.length - 2) {        // the event concerns idxVar
             equalityBehaviour();
         } else if (idx == vars.length - 1) {  // the event concerns valVar
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 vars[idxVal + offset].instantiateTo(valVar.getValue(), aCause);
             } else {
                 updateIndexFromValue();
             }
         } else {                            // the event concerns a variable from the array
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
                     valVar.instantiateTo(vars[idx].getValue(), aCause);
@@ -396,14 +396,14 @@ public class PropElementV extends Propagator<IntVar> {
         if (idx == vars.length - 2) {        // the event concerns idxVar
             updateValueFromIndex();
         } else if (idx == vars.length - 1) {  // the event concerns valVar
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 vars[idxVal + offset].removeValue(x, aCause);
             } else {
                 updateIndexFromValue();
             }
         } else {                            // the event concerns a variable from the array
-            if (idxVar.instantiated()) {
+            if (idxVar.isInstantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
                     valVar.removeValue(x, aCause);

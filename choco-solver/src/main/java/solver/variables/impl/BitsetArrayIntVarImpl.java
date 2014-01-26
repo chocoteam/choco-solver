@@ -151,7 +151,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 e = EventType.DECUPP;
             }
             assert !indexes.isEmpty();
-            if (this.instantiated()) {
+            if (this.isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             this.notifyPropagators(e, cause);
@@ -204,7 +204,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
-        if (this.instantiated()) {
+        if (this.isInstantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (Configuration.PLUG_EXPLANATION) {
@@ -306,7 +306,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 LB.set(index);
                 assert SIZE.get() > indexes.cardinality();
                 SIZE.set(indexes.cardinality());
-                if (instantiated()) {
+                if (isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -364,7 +364,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 UB.set(index);
                 assert SIZE.get() > indexes.cardinality();
                 SIZE.set(indexes.cardinality());
-                if (instantiated()) {
+                if (isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -384,13 +384,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     }
 
 	@Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         return SIZE.get() == 1;
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return instantiated() && contains(value);
+    public boolean isInstantiatedTo(int value) {
+        return isInstantiated() && contains(value);
     }
 
 	@Override
@@ -412,7 +412,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
      */
 	@Override
     public int getValue() {
-        assert instantiated() : name + " not instantiated";
+        assert isInstantiated() : name + " not instantiated";
         return getLB();
     }
 

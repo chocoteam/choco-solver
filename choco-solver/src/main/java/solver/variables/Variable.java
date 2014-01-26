@@ -65,7 +65,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      *
      * @return <code>true</code> if <code>this</code> is instantiated
      */
-    boolean instantiated();
+    boolean isInstantiated();
 
     /**
      * Returns the name of <code>this</code>
@@ -104,7 +104,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @param pidx index of the propagator within the list of propagators of this
      * @return position of this in the propagator pidx
      */
-    int getIndiceInPropagator(int pidx);
+    int getIndexInPropagator(int pidx);
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.

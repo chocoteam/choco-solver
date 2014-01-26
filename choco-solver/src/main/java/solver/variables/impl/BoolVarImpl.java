@@ -172,7 +172,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
-        if (this.instantiated()) {
+        if (this.isInstantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (Configuration.PLUG_EXPLANATION) {
@@ -272,12 +272,12 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
 	@Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         return !notInstanciated.contains(offset);
     }
 
     @Override
-    public boolean instantiatedTo(int aValue) {
+    public boolean isInstantiatedTo(int aValue) {
         return !notInstanciated.contains(offset) && mValue == aValue;
     }
 
@@ -301,7 +301,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public ESat getBooleanValue() {
-        if (instantiated()) {
+        if (isInstantiated()) {
             return ESat.eval(getLB() != 0);
         }
         return ESat.UNDEFINED;

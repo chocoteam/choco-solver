@@ -115,7 +115,7 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (this.vars[0].instantiated()) {
+        if (this.vars[0].isInstantiated()) {
             boolean allVal = true;
             boolean oneVal = false;
             int ub = this.vars[1].getUB();

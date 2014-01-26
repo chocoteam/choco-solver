@@ -185,7 +185,7 @@ public class TSP_Sequential_LNS {
 
         @Override
         public void recordSolution() {
-            if ((cost.getValue() > bestCost && bestCost != -1) || !g.instantiated()) {
+            if ((cost.getValue() > bestCost && bestCost != -1) || !g.isInstantiated()) {
                 throw new UnsupportedOperationException();
             }
 //			System.out.println("old objective : "+bestCost+" | new objective : "+cost.getValue());

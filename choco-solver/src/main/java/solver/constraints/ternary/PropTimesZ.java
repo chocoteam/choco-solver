@@ -71,14 +71,14 @@ public class PropTimesZ extends Propagator<IntVar> {
             negativeStrict();
         }
         // instantiation reasoning
-        if (Z.instantiated()) {
+        if (Z.isInstantiated()) {
             instantiated(X, Y);
             instantiated(Y, X);
         }
-        if (X.instantiated()) {
+        if (X.isInstantiated()) {
             instantiatedFromXY(X, Y);
         }
-        if (Y.instantiated()) {
+        if (Y.isInstantiated()) {
             instantiatedFromXY(Y, X);
         }
     }
@@ -90,7 +90,7 @@ public class PropTimesZ extends Propagator<IntVar> {
 
     @Override
     public final ESat isEntailed() {
-        if (X.instantiated() && Y.instantiated() && Z.instantiated()) {
+        if (X.isInstantiated() && Y.isInstantiated() && Z.isInstantiated()) {
             return ESat.eval(X.getValue() * Y.getValue() == Z.getValue());
         } // TODO can be improved
         return ESat.UNDEFINED;
@@ -165,11 +165,11 @@ public class PropTimesZ extends Propagator<IntVar> {
     //****************************************************************************************************************//
 
     private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
-        if (X.instantiated() && Y.instantiated()) {
+        if (X.isInstantiated() && Y.isInstantiated()) {
             if (X.getValue() * Y.getValue() != Z.getValue()) {
                 contradiction(Z, "");                             // checker
             }
-        } else if (X.instantiated()) {
+        } else if (X.isInstantiated()) {
             if (X.getValue() != 0) {
                 double a = (double) Z.getValue() / (double) X.getValue();
                 if (Math.abs(a - Math.round(a)) > 0.001) {

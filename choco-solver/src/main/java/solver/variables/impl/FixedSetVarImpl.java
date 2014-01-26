@@ -134,7 +134,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         return true;
     }
 
