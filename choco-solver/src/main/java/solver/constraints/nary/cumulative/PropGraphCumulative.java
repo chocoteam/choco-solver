@@ -77,7 +77,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							   boolean fast, Cumulative.Filter... filters) {
 		super(s, d, e, h, capa,true,fast, filters);
-		this.g = new UndirectedGraph(environment, n, SetType.SWAP_ARRAY, true);
+		this.g = new UndirectedGraph(solver.getEnvironment(), n, SetType.SWAP_ARRAY, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
 	}
@@ -118,8 +118,8 @@ public class PropGraphCumulative extends PropFullCumulative {
 
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
-		if(timestamp!=environment.getWorldIndex()){
-			timestamp=environment.getWorldIndex();
+		if(timestamp!=solver.getEnvironment().getWorldIndex()){
+			timestamp=solver.getEnvironment().getWorldIndex();
 			toCompute.clear();
 		}
 		if (varIdx < 4 * n) {

@@ -35,6 +35,7 @@
 package solver.constraints.nary.circuit;
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -72,6 +73,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);

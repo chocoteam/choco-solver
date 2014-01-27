@@ -27,6 +27,7 @@
 
 package solver.constraints.set;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -74,6 +75,7 @@ public class PropNbEmpty extends Propagator<Variable> {
             this.sets[i] = (SetVar) vars[i];
         }
         this.nbEmpty = (IntVar) vars[n];
+		IEnvironment environment = solver.getEnvironment();
         this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
         this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
         this.nbAlreadyEmpty = environment.makeInt();

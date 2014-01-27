@@ -234,6 +234,11 @@ public final class SqrView extends IntView {
         return false;
     }
 
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
+
     @Override
     public int getValue() {
         return getLB();

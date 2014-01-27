@@ -35,6 +35,7 @@
 package solver.constraints.gary.path;
 
 import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -84,6 +85,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
         origin = new IStateInt[n];
         size = new IStateInt[n];
         end = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);

@@ -26,6 +26,7 @@
  */
 package solver.deprecatedPropagators;
 
+import memory.IEnvironment;
 import memory.IStateBool;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -68,6 +69,7 @@ public class PropElementV extends Propagator<IntVar> {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         this.offset = -offset;
+		IEnvironment environment = solver.getEnvironment();
         valueUpdateNeeded = environment.makeBool(true);
         indexUpdateNeeded = environment.makeBool(true);
         rem_proc = new RemProc(this);

@@ -245,4 +245,9 @@ public abstract class AbstractVariable implements Variable {
 	public String toString() {
 		return getName();
 	}
+
+	@Override
+	public boolean instantiated(){
+		return isInstantiated();
+	}
 }

@@ -28,6 +28,7 @@ package solver.constraints.nary.globalcardinality;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IEnvironment;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -82,6 +83,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.possibles = new ISet[n2];
         this.mandatories = new ISet[n2];
         this.map = map;
+		IEnvironment environment = solver.getEnvironment();
         for (int idx = 0; idx < n2; idx++) {
             mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
             possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);

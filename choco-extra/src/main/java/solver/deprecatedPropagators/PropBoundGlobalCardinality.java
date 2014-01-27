@@ -26,6 +26,7 @@
  */
 package solver.deprecatedPropagators;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -127,6 +128,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         this.firstValue = firstCardValue;
         val_maxOcc = new IStateInt[range];
         val_minOcc = new IStateInt[range];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < range; i++) {
             val_maxOcc[i] = environment.makeInt(0);
             val_minOcc[i] = environment.makeInt(0);

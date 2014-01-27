@@ -27,6 +27,7 @@
 package solver.constraints.nary.alldifferent;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -85,6 +86,7 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
         super(variables, PropagatorPriority.QUADRATIC, false);
         n = vars.length;
         matching = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             matching[i] = environment.makeInt(-1);
         }

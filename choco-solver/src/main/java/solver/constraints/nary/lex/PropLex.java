@@ -27,6 +27,7 @@
 package solver.constraints.nary.lex;
 
 import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -66,6 +67,7 @@ public class PropLex extends Propagator<IntVar> {
 
         this.strict = strict;
         this.n = X.length;
+		IEnvironment environment = solver.getEnvironment();
         alpha = environment.makeInt(0);
         beta = environment.makeInt(0);
         entailed = false;

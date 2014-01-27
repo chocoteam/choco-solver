@@ -35,6 +35,7 @@
 package solver.constraints.gary.path;
 
 import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -97,6 +98,7 @@ public class PropReducedPath extends Propagator<DirectedGraphVar> {
         G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);
         n = G.getEnvelopGraph().getNbNodes();
+		IEnvironment environment = solver.getEnvironment();
         n_R = environment.makeInt(0);
         G_R = new DirectedGraph(environment, n, SetType.DOUBLE_LINKED_LIST, false);
         sccOf = new IStateInt[n];

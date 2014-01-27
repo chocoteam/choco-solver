@@ -143,26 +143,6 @@ public interface IntVar extends Variable {
     boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
 
     /**
-     * Updates the lower bound and the upper bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
-     * <ul>
-     * <li>If the interval defined by [<code>lowerbound</code>,<code>upperbound</code>] includes the domain of this, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the domain leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the domain be done safely,
-     * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
-     * </ul>
-     *
-     * @param lowerbound new lower bound (included)
-     * @param upperbound new upper bound (included)
-     * @param cause      update releaser
-     * @throws ContradictionException if the domain become empty due to this action
-     */
-//    boolean updateBounds(int lowerbound, int upperbound, ICause cause) throws ContradictionException;
-
-
-    /**
      * Force <code>this</code> to fail
      * @param cause
      * @throws ContradictionException
@@ -177,13 +157,24 @@ public interface IntVar extends Variable {
      */
     boolean contains(int value);
 
-    /**
-     * Checks wether <code>this</code> is instantiated to <code>val</code>
-     *
-     * @param value int
-     * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
-     */
-    boolean isInstantiatedTo(int value);
+	/**
+	 * Checks wether <code>this</code> is instantiated to <code>val</code>
+	 *
+	 * @param value int
+	 * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
+	 */
+	boolean isInstantiatedTo(int value);
+
+	/**
+	 * Checks wether <code>this</code> is instantiated to <code>val</code>
+	 * Deprecated : use isInstantiatedTo instead.
+	 * This method will be removed in the next release.
+	 *
+	 * @param value int
+	 * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
+	 */
+	@Deprecated
+	boolean instantiatedTo(int value);
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwier the lower bound.

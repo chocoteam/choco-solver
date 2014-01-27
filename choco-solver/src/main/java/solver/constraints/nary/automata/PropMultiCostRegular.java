@@ -32,6 +32,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.IEnvironment;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
@@ -477,6 +478,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         intLayer[n + 1] = new int[]{tink.id};
 
         if (intLayer[0].length > 0) {
+			IEnvironment environment = solver.getEnvironment();
             this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
             this.graph.makePathFinder();
         }
@@ -726,7 +728,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     protected void checkWorld() throws ContradictionException {
-        int currentworld = environment.getWorldIndex();
+        int currentworld = solver.getEnvironment().getWorldIndex();
         long currentbt = solver.getMeasures().getBackTrackCount();
         long currentrestart = solver.getMeasures().getRestartCount();
         //System.err.println("TIME STAMP : "+currentbt+"   BT COUNT : "+solver.getBackTrackCount());
@@ -848,7 +850,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     public final boolean needPropagation() {
-        int currentworld = environment.getWorldIndex();
+        int currentworld = solver.getEnvironment().getWorldIndex();
         long currentbt = solver.getMeasures().getBackTrackCount();
         long currentrestart = solver.getMeasures().getRestartCount();
 
