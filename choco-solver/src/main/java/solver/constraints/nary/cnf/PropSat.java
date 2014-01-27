@@ -48,19 +48,20 @@ public class PropSat extends Propagator<BoolVar> {
 
     SatSolver sat_;
     TObjectIntHashMap<BoolVar> indices_;
-//    List<int> bound_literals_;
 
     IStateInt sat_trail_;
 
     TIntList early_deductions_;
 
     public PropSat(Solver solver) {
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);
+		// this propagator initially has no variable
+        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
+		this.vars = new BoolVar[0];	// erase solver.ONE from the variable scope
+
         this.indices_ = new TObjectIntHashMap<BoolVar>();
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = solver.getEnvironment().makeInt();
-
     }
 
     @Override
