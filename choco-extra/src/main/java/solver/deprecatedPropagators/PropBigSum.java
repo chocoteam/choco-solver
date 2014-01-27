@@ -34,6 +34,7 @@
 
 package solver.deprecatedPropagators;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -251,6 +252,7 @@ public class PropBigSum extends Propagator<IntVar> {
                 leafIndex = index;
                 leafs[index++] = this;
             }
+			IEnvironment environment = solver.getEnvironment();
             oldLB = environment.makeInt();
             oldUB = environment.makeInt();
         }

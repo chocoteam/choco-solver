@@ -28,6 +28,7 @@ package solver.deprecatedPropagators;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -131,6 +132,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         this.lb = new int[n2];
         this.ub = new int[n2];
         this.flow = new IStateInt[n2];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             ub[i] = lb[i] = 1; // 1 unit of flow per variable
             flow[i] = environment.makeInt(0);

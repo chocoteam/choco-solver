@@ -27,6 +27,7 @@
 
 package solver.constraints.nary.tree;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -75,6 +76,7 @@ public class PropKLoops extends Propagator<IntVar> {
         super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY, true);
         this.n = succs.length;
         this.offSet = offSet;
+		IEnvironment environment = solver.getEnvironment();
         this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
         this.nbMinLoops = environment.makeInt();
     }

@@ -114,7 +114,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 instantiatedValues[idx++] = vars[i].getValue();
             }
         }
-        ivIdx = environment.makeInt(idx);
+        ivIdx = solver.getEnvironment().makeInt(idx);
     }
 
     @Override

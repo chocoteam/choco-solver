@@ -34,6 +34,7 @@
 
 package solver.constraints.nary.sum;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -73,6 +74,7 @@ public class PropBoolSum extends Propagator<IntVar> {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, true);
         n = variables.length;
         this.sum = vars[n];
+		IEnvironment environment = solver.getEnvironment();
         min = environment.makeInt();
         max = environment.makeInt();
     }

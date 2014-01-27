@@ -27,6 +27,7 @@
 
 package solver.deprecatedPropagators;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -77,6 +78,7 @@ public class PropSumEqIncr extends Propagator<IntVar> {
         this.b = b;
         I = new IStateInt[l];
         oldx = new IStateInt[l];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < l; i++) {
             oldx[i] = environment.makeInt();
             I[i] = environment.makeInt();

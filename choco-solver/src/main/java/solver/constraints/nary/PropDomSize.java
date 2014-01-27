@@ -34,6 +34,7 @@
 
 package solver.constraints.nary;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -63,6 +64,7 @@ public class PropDomSize extends Propagator<IntVar> {
         super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         size = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             size[i] = environment.makeInt(vars[i].getDomainSize());
         }

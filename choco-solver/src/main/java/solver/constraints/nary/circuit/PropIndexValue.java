@@ -34,6 +34,7 @@
 
 package solver.constraints.nary.circuit;
 
+import memory.IEnvironment;
 import memory.IStateBool;
 import memory.IStateInt;
 import solver.constraints.Propagator;
@@ -71,6 +72,7 @@ public class PropIndexValue extends Propagator<IntVar> {
         n = variables.length;
         this.nb = vars[n];
         this.offset = offset;
+		IEnvironment environment = solver.getEnvironment();
         minLoops = environment.makeInt();
         maxLoops = environment.makeInt();
         possible = new IStateBool[n];
