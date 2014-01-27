@@ -55,7 +55,7 @@ public class PropSat extends Propagator<BoolVar> {
     TIntList early_deductions_;
 
     public PropSat(Solver solver) {
-        super(solver, new BoolVar[0], PropagatorPriority.VERY_SLOW, true);
+        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);
         this.indices_ = new TObjectIntHashMap<BoolVar>();
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
