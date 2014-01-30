@@ -44,11 +44,8 @@ The CHANGES.md file starts at this version.
 * Associate variables with the solver in AbstractVariable super constructor
 * Unique ObjectiveManager (merge of IntObjectiveManager and RealObjectiveManager)
 * Default implementation of Propagator.getPropagationConditions(int vIdx) which reacts to all kinds of fine event.
-<<<<<<< HEAD
-* Fix #158 fix bug in PropMemberEnum
-=======
 * Fix #146: a new propagation engine is now available which manages coarse propagations
 * Fix #159: avoid stackoverflow using GCC_fast
 * Fix #160: speed up count propagator
 * Fix #161: Propagator: fine_evt and default implementation of propagate(int,int)
->>>>>>> develop
+* Fix #158 fix bug in PropMemberEnum
