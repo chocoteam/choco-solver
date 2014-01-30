@@ -169,6 +169,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     lastProp.fineERcalls++;
                     lastProp.propagate(v, mask);
                 }
+                // This part is for debugging only!!
+                if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
+                    FakeEngine.checkIdempotency(lastProp);
+                }
             }
             notEmpty = notEmpty & ~(1 << i);
         }

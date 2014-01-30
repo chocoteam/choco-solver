@@ -37,7 +37,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -300,7 +299,6 @@ public class ReifiedTest {
                     IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp)));
         }
 
-        solver.set(new VariableEngine(solver));
         try {
             solver.propagate();
             cp.updateUpperBound(5, Cause.Null);

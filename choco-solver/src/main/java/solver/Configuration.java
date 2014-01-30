@@ -111,7 +111,6 @@ public enum Configuration {
     }
 
     // Define how to react when a propagator is not ensured to be idempotent
-    // /!\ only works with PropagatorEngine /!\
     // disabled : does not anything
     // error: print an error message when a propagator is not guaranteed to be idempotent -- fir debug only
     // force : extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available
