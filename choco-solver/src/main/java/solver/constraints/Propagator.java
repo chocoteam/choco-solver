@@ -38,10 +38,10 @@ import solver.Identity;
 import solver.Solver;
 import solver.constraints.set.SCF;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.propagation.IPropagationEngine;
 import solver.variables.*;
 import util.ESat;
 
@@ -343,13 +343,24 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 	/**
 	 * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable
 	 * of index idxVarInProp has changed. This method calls a CUSTOM_PROPAGATION (coarse-grained) by default.
+     * <p/>
+     * This method should be overridden if the argument <code>reactToFineEvt</code> is set to <code>true</code> in the constructor.
+     * Otherwise, it executes <code>propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
 	 *
 	 * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
 	 * @param mask         type of event
 	 * @throws solver.exception.ContradictionException if a contradiction occurs
 	 */
 	public void propagate(int idxVarInProp, int mask) throws ContradictionException{
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		if(reactToFineEvt){
+            throw new SolverException(this+" has been declared to ignore which variable is modified.\n" +
+                    "To change the configuration, consider:\n" +
+                    "- to set 'reactToFineEvt' to false or,\n" +
+                    "- to override the following methode:\n" +
+                    "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
+                    "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
+        }
+        propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());
 	}
 
 	/**
@@ -360,13 +371,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 	 * @param evt event type
 	 */
 	public final void forcePropagate(EventType evt) throws ContradictionException {
-		if (nbPendingEvt == 0) {
-			if (Configuration.PRINT_PROPAGATION) {
-				IPropagationEngine.Trace.printPropagation(null, this);
-			}
-			coarseERcalls++;
-			propagate(evt.getStrengthenedMask());
-		}
+		solver.getEngine().delayedPropagation(this, evt);
 	}
 
 	/** informs that this propagator is now active. Should not be called by the user. */

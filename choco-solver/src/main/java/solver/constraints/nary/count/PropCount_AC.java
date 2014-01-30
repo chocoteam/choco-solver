@@ -74,7 +74,7 @@ public class PropCount_AC extends Propagator<IntVar> {
         super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, true);
         this.value = restrictedValue;
         this.n = decvars.length;
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         this.possibles = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
         this.mandatories = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
     }
@@ -97,27 +97,6 @@ public class PropCount_AC extends Propagator<IntVar> {
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
-
-    @Override
-    public boolean advise(int varIdx, int mask) {
-        if (super.advise(varIdx, mask)) {
-            if (varIdx < n) {
-                if (possibles.contain(varIdx)) {
-                    if (!vars[varIdx].contains(value)) {
-                        possibles.remove(varIdx);
-                        return true;
-                    } else if (vars[varIdx].isInstantiated()) {
-                        possibles.remove(varIdx);
-                        mandatories.add(varIdx);
-                        return true;
-                    }
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -143,7 +122,20 @@ public class PropCount_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        if (varIdx < n) {
+            if (possibles.contain(varIdx)) {
+                if (!vars[varIdx].contains(value)) {
+                    possibles.remove(varIdx);
+                    filter();
+                } else if (vars[varIdx].isInstantiated()) {
+                    possibles.remove(varIdx);
+                    mandatories.add(varIdx);
+                    filter();
+                }
+            }
+        } else {
+            filter();
+        }
     }
 
     private void filter() throws ContradictionException {
