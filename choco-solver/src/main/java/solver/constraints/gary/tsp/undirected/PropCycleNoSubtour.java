@@ -35,6 +35,7 @@
 package solver.constraints.gary.tsp.undirected;
 
 import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -82,6 +83,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         e1 = new IStateInt[n];
         e2 = new IStateInt[n];
         size = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             e1[i] = environment.makeInt(i);
             e2[i] = environment.makeInt(i);

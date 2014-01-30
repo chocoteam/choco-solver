@@ -34,6 +34,7 @@
 
 package solver.constraints.set;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -79,6 +80,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
         this.iv = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.sdm = set.monitorDelta(this);
+		IEnvironment environment = solver.getEnvironment();
 		watchLit1 = environment.makeInt(iv.getLB()-1);
 		watchLit2 = environment.makeInt(iv.getLB()-1);
         elemRem = new IntProcedure() {

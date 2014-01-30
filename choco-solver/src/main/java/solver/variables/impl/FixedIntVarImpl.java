@@ -135,6 +135,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         return constante == value;
     }
 
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
+
     @Override
     public int getValue() {
         return constante;

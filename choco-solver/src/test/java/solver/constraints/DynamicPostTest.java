@@ -49,7 +49,7 @@ public class DynamicPostTest {
     }
 
     public DynamicPostTest() {
-        this(PropagationEngineFactory.PROPAGATORDRIVEN);
+        this(PropagationEngineFactory.DEFAULT);
     }
 
     @Test(groups = "1s")

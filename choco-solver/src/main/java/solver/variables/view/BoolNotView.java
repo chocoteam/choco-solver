@@ -144,6 +144,11 @@ public final class BoolNotView extends IntView implements BoolVar {
         return var.isInstantiatedTo(1 - value);
     }
 
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
+
     @Override
     public int getValue() {
         int v = var.getValue();

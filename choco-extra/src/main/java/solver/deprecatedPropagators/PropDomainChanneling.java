@@ -26,6 +26,7 @@
  */
 package solver.deprecatedPropagators;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -80,6 +81,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         this.dsize = bvars.length;
+		IEnvironment environment = solver.getEnvironment();
         oldinf = environment.makeInt();
         oldsup = environment.makeInt();
         this.rem_proc = new RemProc(this);

@@ -26,6 +26,7 @@
  */
 package solver.constraints.extension.nary;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -77,6 +78,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
         this.tab = relation.getTableLists();
         this.supports = new IStateInt[arity][];
 
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < arity; i++) {
             offsets[i] = vs[i].getLB();
             this.supports[i] = new IStateInt[vs[i].getUB() - vs[i].getLB() + 1];

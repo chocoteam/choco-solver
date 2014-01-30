@@ -27,6 +27,7 @@
 
 package solver.constraints.gary.basic;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -66,6 +67,7 @@ public class PropKArcs extends Propagator {
         g = (GraphVar) vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.k = (IntVar) vars[1];
+		IEnvironment environment = solver.getEnvironment();
         nbInEnv = environment.makeInt();
         nbInKer = environment.makeInt();
         arcEnforced = new EnfArc();

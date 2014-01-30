@@ -27,6 +27,7 @@
 
 package solver.constraints.gary.trees;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -67,6 +68,7 @@ public class PropTreeCostScalar extends Propagator<UndirectedGraphVar> {
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();
         distMatrix = costMatrix;
+		IEnvironment environment = solver.getEnvironment();
         minSum = environment.makeInt(0);
         maxSum = environment.makeInt(0);
         gdm = g.monitorDelta(this);

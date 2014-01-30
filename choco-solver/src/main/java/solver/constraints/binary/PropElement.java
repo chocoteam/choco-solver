@@ -28,6 +28,7 @@
 package solver.constraints.binary;
 
 import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.structure.Operation;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -209,6 +210,7 @@ public class PropElement extends Propagator<IntVar> {
                     }
                 }
                 if (s == Sort.detect) {
+					IEnvironment environment = solver.getEnvironment();
                     if (isDsc) {
                         s = Sort.desc;
                         environment.save(new Operation() {

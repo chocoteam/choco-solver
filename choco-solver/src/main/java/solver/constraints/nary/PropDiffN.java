@@ -26,6 +26,7 @@
  */
 package solver.constraints.nary;
 
+import memory.IEnvironment;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,6 +57,7 @@ public class PropDiffN extends Propagator<IntVar> {
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
         }
+		IEnvironment environment = solver.getEnvironment();
         overlappingBoxes = new UndirectedGraph(environment, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
     }

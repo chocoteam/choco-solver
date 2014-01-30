@@ -41,7 +41,7 @@ import java.util.List;
 public class NQueenTestFactory {
 
     int[] propagation = {
-            0, 1, 2     // PropagatorEngine OR VariableEngine OR PropagatorEngine
+            0, 1
     };
 
     private int[] size = {4, 8, 12};//,5,6,7,8,9,10,11,12};

@@ -394,6 +394,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     }
 
 	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
+
+	@Override
     public boolean contains(int aValue) {
         if (aValue >= getLB() && aValue <= getUB()) {
             for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= aValue; i = indexes.nextSetBit(i + 1)) {

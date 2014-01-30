@@ -26,6 +26,7 @@
  */
 package solver.constraints.nary.nValue;
 
+import memory.IEnvironment;
 import memory.IStateBitSet;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -85,6 +86,7 @@ public class AMNV_Gci_R_R13 extends Propagator<IntVar> {
 		misValues = new int[max + 1 - min];
 		this.diff = diff;
 		eqs = new IStateBitSet[n];
+		IEnvironment environment = solver.getEnvironment();
 		for (int i = 0; i < n; i++) {
 			eqs[i] = environment.makeBitSet(n);
 		}

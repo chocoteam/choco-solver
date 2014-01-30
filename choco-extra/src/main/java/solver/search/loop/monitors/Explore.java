@@ -176,6 +176,11 @@ public class Explore {
         }
 
         @Override
+        public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+
+        }
+
+        @Override
         public void onPropagatorExecution(Propagator propagator) {
         }
 
