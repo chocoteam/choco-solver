@@ -221,6 +221,17 @@ public class PropagatorEngine implements IPropagationEngine {
     }
 
     @Override
+    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+        if (propagator.getNbPendingEvt() == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                IPropagationEngine.Trace.printPropagation(null, propagator);
+            }
+            //coarseERcalls++;
+            propagator.propagate(type.getStrengthenedMask());
+        }
+    }
+
+    @Override
     public void onPropagatorExecution(Propagator propagator) {
         desactivatePropagator(propagator);
     }
@@ -230,13 +241,13 @@ public class PropagatorEngine implements IPropagationEngine {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
         //if (aid > -1) {
-            assert aid > -1 : "try to desactivate an unknown constraint";
-            // we don't remove the element from its master to avoid costly operations
-            BitSet evtset = eventsets[aid];
-            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-                propagator.clearMask(p);
-            }
-            evtset.clear();
+        assert aid > -1 : "try to desactivate an unknown constraint";
+        // we don't remove the element from its master to avoid costly operations
+        BitSet evtset = eventsets[aid];
+        for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+            propagator.clearMask(p);
+        }
+        evtset.clear();
         propagator.flushPendingEvt();
     }
 

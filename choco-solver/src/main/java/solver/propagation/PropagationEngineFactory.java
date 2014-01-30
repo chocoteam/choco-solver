@@ -29,6 +29,7 @@ package solver.propagation;
 import solver.Solver;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import solver.propagation.hardcoded.TwoBucketsPropagationEngine;
 import solver.propagation.hardcoded.VariableEngine;
 
 /**
@@ -75,6 +76,16 @@ public enum PropagationEngineFactory {
     },
 
     /**
+     * Create a propagation engine which handles both priority and separated coarse propagation.
+     */
+    TWOBUCKETSPROPAGATIONENGINE() {
+        @Override
+        public IPropagationEngine make(Solver solver) {
+            return new TwoBucketsPropagationEngine(solver);
+        }
+    },
+
+    /**
      * Create a DSL driven propagation engine.
      */
     DSLDRIVEN() {
@@ -87,7 +98,7 @@ public enum PropagationEngineFactory {
     DEFAULT() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return PROPAGATORDRIVEN.make(solver);
+            return TWOBUCKETSPROPAGATIONENGINE.make(solver);
         }
     };
 

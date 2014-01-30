@@ -254,6 +254,17 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
+    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+        if (propagator.getNbPendingEvt() == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                IPropagationEngine.Trace.printPropagation(null, propagator);
+            }
+            //coarseERcalls++;
+            propagator.propagate(type.getStrengthenedMask());
+        }
+    }
+
+    @Override
     public void onPropagatorExecution(Propagator propagator) {
         desactivatePropagator(propagator);
     }
