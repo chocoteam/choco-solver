@@ -41,8 +41,7 @@ import java.util.List;
 public class DynamicPostTestFactory {
 
     PropagationEngineFactory[] engines = new PropagationEngineFactory[]{
-            PropagationEngineFactory.PROPAGATORDRIVEN,
-            PropagationEngineFactory.VARIABLEDRIVEN,
+            PropagationEngineFactory.TWOBUCKETSPROPAGATIONENGINE,
             PropagationEngineFactory.PROPAGATORDRIVEN_7QD};
 
     @Factory

@@ -271,7 +271,7 @@ public class TestSolveur {
         solver.post(IntConstraintFactory.arithm(vars[0], "=", vars[n - 1]));
 
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
-        PropagationEngineFactory.PROPAGATORDRIVEN.make(solver);
+        PropagationEngineFactory.TWOBUCKETSPROPAGATIONENGINE.make(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");

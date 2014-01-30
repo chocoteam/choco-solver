@@ -55,14 +55,14 @@ import java.util.List;
  * UNARY, BINARY, TERNARY propagators are stored in the top-priority queue,
  * LINEAR propagators are stored in the mid-priority queue,
  * QUADRATIC, CUBIC, VERY_SLOW propagators are stored in the low priority queue.
- *
+ * <p/>
  * Then, managing coarse events (that is, delayed calls to `propagate(int)') is made thanks to 4 additional queues:
  * UNARY, BINARY, TERNARY propagators cannot be delayed!
  * LINEAR propagators are in the top-priority queue,
  * QUADRATIC propagators are in the second-priority queue,
  * CUBIC propagators are in the second-priority queue,
  * VERY_SLOW propagators are in the second-priority queue.
- *
+ * <p/>
  * The engine empties the first queue, then propagates one event from the following one, and check the first queue again, etc.
  *
  * @author Charles Prud'homme
@@ -86,6 +86,7 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
     protected final ArrayDeque<Propagator> pro_queue_f3;
     protected boolean[] schedule_f; // also maintains the index of the queue!
     protected IntCircularQueue[] event_f;
+    protected int[][] eventmasks;// the i^th event mask stores modification events on the i^th variable, since the last propagation
 
     protected final ArrayDeque<Propagator> pro_queue_c1;
     protected final ArrayDeque<Propagator> pro_queue_c2;
@@ -139,9 +140,11 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
         notEmpty = 0;
 
         event_f = new IntCircularQueue[nbProp];
+        eventmasks = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
             int nbv = propagators[i].getNbVars();
             event_f[i] = new IntCircularQueue(nbv);
+            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
         }
         event_c = new EventType[nbProp];
         init = true;
@@ -232,18 +235,16 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
         int aid = p2i.get(lastProp.getId());
         schedule_f[aid] = false;
         IntCircularQueue evtset = event_f[aid];
-        //for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
-        while(!evtset.isEmpty()){
+        while (!evtset.isEmpty()) {
             int v = evtset.pollFirst();
             assert lastProp.isActive() : "propagator is not active";
             if (Configuration.PRINT_PROPAGATION) {
                 Trace.printPropagation(lastProp.getVar(v), lastProp);
             }
             // clear event
-            //evtset.clear(v);
-            int mask = lastProp.getMask(v);
-            lastProp.clearMask(v);
-            //lastProp.decNbPendingEvt();
+            int vid = lastProp.reactToFineEvent() ? v : 0;
+            int mask = eventmasks[aid][vid];
+            eventmasks[aid][vid] = 0;
             // run propagation on the specific event
             lastProp.fineERcalls++;
             lastProp.propagate(v, mask);
@@ -280,43 +281,43 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
             switch (i) {
                 case 0:
                     while (!pro_queue_f1.isEmpty()) {
-                        lastProp = pro_queue_f1.pollFirst();
+                        lastProp = pro_queue_f1.pollLast();
                         flushFine();
                     }
                     break;
                 case 1:
                     while (!pro_queue_f2.isEmpty()) {
-                        lastProp = pro_queue_f2.pollFirst();
+                        lastProp = pro_queue_f2.pollLast();
                         flushFine();
                     }
                     break;
                 case 2:
                     while (!pro_queue_f3.isEmpty()) {
-                        lastProp = pro_queue_f3.pollFirst();
+                        lastProp = pro_queue_f3.pollLast();
                         flushFine();
                     }
                     break;
                 case 3:
                     while (!pro_queue_c1.isEmpty()) {
-                        lastProp = pro_queue_c1.pollFirst();
+                        lastProp = pro_queue_c1.pollLast();
                         flushCoarse();
                     }
                     break;
                 case 4:
                     while (!pro_queue_c2.isEmpty()) {
-                        lastProp = pro_queue_c2.pollFirst();
+                        lastProp = pro_queue_c2.pollLast();
                         flushCoarse();
                     }
                     break;
                 case 5:
                     while (!pro_queue_c3.isEmpty()) {
-                        lastProp = pro_queue_c3.pollFirst();
+                        lastProp = pro_queue_c3.pollLast();
                         flushCoarse();
                     }
                     break;
                 case 6:
                     while (!pro_queue_c4.isEmpty()) {
-                        lastProp = pro_queue_c4.pollFirst();
+                        lastProp = pro_queue_c4.pollLast();
                         flushCoarse();
                     }
                     break;
@@ -329,9 +330,10 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
         int aid = p2i.get(lastProp.getId());
         IntCircularQueue evtset = event_f[aid];
         //for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-        while(!evtset.isEmpty()){
-            int p = evtset.pollLast();
-            lastProp.clearMask(p);
+        while (!evtset.isEmpty()) {
+            int v = evtset.pollLast();
+            int vid = lastProp.reactToFineEvent() ? v : 0;
+            eventmasks[aid][vid] = 0;
         }
         evtset.clear();
         schedule_f[aid] = false;
@@ -354,18 +356,20 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
             int pindice = variable.getIndexInPropagator(p);
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
-                if (prop.updateMask(pindice, type)) { // not scheduled yet
+                int vid = prop.reactToFineEvent() ? pindice : 0;
+                boolean needSched = (eventmasks[aid][vid] == 0);
+                eventmasks[aid][vid] |= type.strengthened_mask;
+                if (needSched) {
                     //assert !event_f[aid].get(pindice);
                     if (Configuration.PRINT_SCHEDULE) {
                         Trace.printSchedule(prop);
                     }
-                    //prop.incNbPendingEvt();
-                    event_f[aid].addLast(pindice);//set(pindice);
+                    event_f[aid].addLast(pindice);
                 } else if (Configuration.PRINT_SCHEDULE) {
                     Trace.printAlreadySchedule(prop);
                 }
                 if (!schedule_f[aid]) {
-                    PropagatorPriority prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority();
+                    PropagatorPriority prio = prop.getPriority();
                     switch (prio) {
                         case UNARY:
                         case BINARY:
