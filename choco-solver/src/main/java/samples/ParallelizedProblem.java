@@ -35,7 +35,7 @@
 package samples;
 
 import solver.Solver;
-import solver.propagation.hardcoded.TwoBucketsPropagationEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 public abstract class ParallelizedProblem extends AbstractProblem {
@@ -51,7 +51,7 @@ public abstract class ParallelizedProblem extends AbstractProblem {
 		this.buildModel();
 		this.configureSearch();
 		overrideExplanation();
-		solver.set(new TwoBucketsPropagationEngine(solver));
+		solver.set(new TwoBucketPropagationEngine(solver));
 		if (level.getLevel() > Level.SILENT.getLevel()) {
 			SearchMonitorFactory.log(solver,
 					level.getLevel() > Level.VERBOSE.getLevel(),

@@ -29,7 +29,6 @@ package solver.constraints.ternary;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
@@ -49,7 +48,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
-        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.X = vars[0];
         this.Y = vars[1];
         this.Z = vars[2];
@@ -159,20 +158,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
         } while (hasChanged);
     }
 
-    /**
-     * filtering algorihtm that synchronise the variable of index varIdx and
-     * its related views (sign(vars[varIdx]) and |vars[varIdx]|). Filtering is delegate
-     * to the main propagation method.
-     *
-     * @param varIdx: modified variable since the last call
-     * @param pmask:  type of variable modification
-     * @throws ContradictionException
-     */
-    @Override
-    public void propagate(int varIdx, int pmask) throws ContradictionException {
-        // enforce propagation
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
 
     @Override
     public ESat isEntailed() {
