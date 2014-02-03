@@ -286,7 +286,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             IntCircularQueue evtset = eventsets[aid];
             while (evtset.size() > 0) {
                 int v = evtset.pollFirst();
-                int vid = lastProp.reactToFineEvent() ? v : 0;
+                int vid = propagator.reactToFineEvent() ? v : 0;
                 eventmasks[aid][vid] = 0;
             }
             evtset.clear();
