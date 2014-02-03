@@ -48,3 +48,4 @@ The CHANGES.md file starts at this version.
 * Fix #159: avoid stackoverflow using GCC_fast
 * Fix #160: speed up count propagator
 * Fix #161: Propagator: fine_evt and default implementation of propagate(int,int)
+* Fix #162: update filtering algorithm of PropFivXYZ
