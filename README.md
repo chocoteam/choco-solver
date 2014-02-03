@@ -4,7 +4,7 @@ Choco3 is an open-source Java library for Constraint Programming.
 
 Choco3 is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
 
-The 3.1.0 version is the first stable one.
+Current stable version is 3.1.1.
 
 Choco3 comes with:
 - various type of variables (integer, boolean, set, graph and real),
