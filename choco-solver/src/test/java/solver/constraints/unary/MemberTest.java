@@ -32,6 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -128,6 +129,19 @@ public class MemberTest {
                 Assert.assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
             }
         }
+    }
+
+    @Test
+    public void test_alxpgr() {
+        Solver s = new Solver();
+        IntVar vars = VariableFactory.enumerated("v", 0, 10, s);
+        int[] values = new int[]{0, 2, 4, 6, 8};
+
+        s.post(ICF.member(vars, values));
+        s.set(IntStrategyFactory.presetI(vars));
+
+        s.findAllSolutions();
+
     }
 
 }

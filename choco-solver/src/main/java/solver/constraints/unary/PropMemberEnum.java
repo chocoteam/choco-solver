@@ -67,12 +67,16 @@ public class PropMemberEnum extends Propagator<IntVar> {
                 if (val == right + 1) {
                     right = val;
                 } else {
-                    rall &= vars[0].removeInterval(left, right, aCause);
+                    if(left  > Integer.MIN_VALUE){
+                        rall &= vars[0].removeInterval(left, right, aCause);
+                    }
                     left = right = val;
                 }
             }
         }
-        rall &= vars[0].removeInterval(left, right, aCause);
+        if(left  > Integer.MIN_VALUE){
+            rall &= vars[0].removeInterval(left, right, aCause);
+        }
         if (rall) {
             this.setPassive();
         }
