@@ -48,9 +48,6 @@ The CHANGES.md file starts at this version.
 * Fix #159: avoid stackoverflow using GCC_fast
 * Fix #160: speed up count propagator
 * Fix #161: Propagator: fine_evt and default implementation of propagate(int,int)
-<<<<<<< HEAD
-* Fix #158 fix bug in PropMemberEnum
-=======
 * Fix #162: update filtering algorithm of PropFivXYZ
 * Fix #163: Constraint#isSatisfied() handles stateless propagators
->>>>>>> develop
+* Fix #158 fix bug in PropMemberEnum
