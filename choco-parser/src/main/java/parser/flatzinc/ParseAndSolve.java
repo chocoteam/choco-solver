@@ -197,6 +197,7 @@ public class ParseAndSolve {
 
     protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
+            default:
             case 1:
                 solver.set(new TwoBucketPropagationEngine(solver));
                 break;
