@@ -45,10 +45,9 @@ import java.util.Set;
  * It can either be posted or reified
  *
  * @author Jean-Guillaume Fages
- * @version major revision 13/01/2014
- *
  * @author Xavier Lorca
  * @author Charles Prud'homme
+ * @version major revision 13/01/2014
  * @see solver.variables.Variable
  * @see Propagator
  * @see solver.propagation.IPropagationEngine
@@ -56,33 +55,34 @@ import java.util.Set;
  */
 public class Constraint implements Serializable {
 
-	// propagators of the constraint (they will filter domains and eventually check solutions)
+    // propagators of the constraint (they will filter domains and eventually check solutions)
     final protected Propagator[] propagators;
 
     // for reification
     private BoolVar boolReif;
     private Constraint opposite;
 
-	// name
-	protected String name;
+    // name
+    protected String name;
 
-	// serialization stuff
-	private static final long serialVersionUID = 1L;
+    // serialization stuff
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Make a new constraint defined as a set of given propagators
-	 * @param name			name of the constraint
-	 * @param propagators	set of propagators defining the constraint
-	 */
+    /**
+     * Make a new constraint defined as a set of given propagators
+     *
+     * @param name        name of the constraint
+     * @param propagators set of propagators defining the constraint
+     */
     public Constraint(String name, Propagator... propagators) {
-		if(propagators==null || propagators.length==0){
-			throw new UnsupportedOperationException("cannot create a constraint without propagators ");
-		}
-		this.name = name;
+        if (propagators == null || propagators.length == 0) {
+            throw new UnsupportedOperationException("cannot create a constraint without propagators ");
+        }
+        this.name = name;
         this.propagators = propagators;
-		for (int i = 0; i < propagators.length; i++) {
-			propagators[i].defineIn(this);
-		}
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].defineIn(this);
+        }
     }
 
     /**
@@ -91,7 +91,7 @@ public class Constraint implements Serializable {
      * @return an array of {@link Propagator}.
      */
     public Propagator[] getPropagators() {
-		return propagators;
+        return propagators;
     }
 
     public Propagator getPropagator(int i) {
@@ -100,36 +100,40 @@ public class Constraint implements Serializable {
 
     /**
      * Test if this <code>Constraint</code> object is satisfied,
-	 * regarding its <code>Propagators</code> and its <code>Variable</code> current domains.
-	 *
-	 * This method is called on each solution as a checker when assertions are enabled (-ea in VM parameters)
-	 * It is also called for constraint reification (to state whether or not a constraint is satisfied)
-	 *
-	 * The method calls entailment checks of <code>this</code> propagators
+     * regarding its <code>Propagators</code> and its <code>Variable</code> current domains.
+     * <p/>
+     * This method is called on each solution as a checker when assertions are enabled (-ea in VM parameters)
+     * It is also called for constraint reification (to state whether or not a constraint is satisfied)
+     * <p/>
+     * The method calls entailment checks of <code>this</code> propagators
      *
      * @return <code>ESat.FALSE</code> if the constraint cannot be satisfied (from domain consideration),
-	 *         <code>ESat.TRUE</code> if whatever future decisions are, the constraint will be satisfied for sure (without propagating domain modifications)
-	 *         <code>ESat.UNDIFINED</code> otherwise (more decisions/filtering must be made before concluding about constraint satisfaction)
+     * <code>ESat.TRUE</code> if whatever future decisions are, the constraint will be satisfied for sure (without propagating domain modifications)
+     * <code>ESat.UNDIFINED</code> otherwise (more decisions/filtering must be made before concluding about constraint satisfaction)
      */
     public ESat isSatisfied() {
         int sat = 0;
         for (int i = 0; i < propagators.length; i++) {
-			ESat entail = propagators[i].isEntailed();
-			if (entail.equals(ESat.FALSE)) {
-				return entail;
-			} else if (entail.equals(ESat.TRUE)) {
-				sat++;
-			}
+            if (!propagators[i].isStateLess()) {
+                ESat entail = propagators[i].isEntailed();
+                if (entail.equals(ESat.FALSE)) {
+                    return entail;
+                } else if (entail.equals(ESat.TRUE)) {
+                    sat++;
+                }
+            }else{
+                sat++;
+            }
         }
         if (sat == propagators.length) {
             return ESat.TRUE;
-        }else {// No need to check if FALSE, must have been returned before
+        } else {// No need to check if FALSE, must have been returned before
             return ESat.UNDEFINED;
         }
     }
 
     public String toString() {
-        return name+" ("+Arrays.toString(propagators)+")";
+        return name + " (" + Arrays.toString(propagators) + ")";
     }
 
     /**
@@ -146,12 +150,12 @@ public class Constraint implements Serializable {
      * @param bool
      */
     public final void reifyWith(BoolVar bool) {
-		Solver s = propagators[0].getSolver();
+        Solver s = propagators[0].getSolver();
         if (boolReif == null) {
             boolReif = bool;
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
         } else {
-            s.post(ICF.arithm(bool,"=",boolReif));
+            s.post(ICF.arithm(bool, "=", boolReif));
         }
     }
 
@@ -162,7 +166,7 @@ public class Constraint implements Serializable {
      */
     public final BoolVar reif() {
         if (boolReif == null) {
-			Solver s = propagators[0].getSolver();
+            Solver s = propagators[0].getSolver();
             boolReif = VF.bool(StringUtils.randomName(), s);
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
         }
@@ -191,33 +195,34 @@ public class Constraint implements Serializable {
      * but it can be overridden to provide better constraint negations
      */
     public Constraint makeOpposite() {
-		Variable[] vars;
-		if(propagators.length==1){
-			vars = propagators[0].vars;
-		}else{
-			Set<Variable> allvars = new HashSet<>();
-			for(Propagator p:propagators){
-				for(Variable v:p.vars){
-					allvars.add(v);
-				}
-			}
-			vars = allvars.toArray(new Variable[0]);
-		}
-        return new Constraint("DefaultOppositeOf"+name,new PropOpposite(this,vars));
+        Variable[] vars;
+        if (propagators.length == 1) {
+            vars = propagators[0].vars;
+        } else {
+            Set<Variable> allvars = new HashSet<>();
+            for (Propagator p : propagators) {
+                for (Variable v : p.vars) {
+                    allvars.add(v);
+                }
+            }
+            vars = allvars.toArray(new Variable[0]);
+        }
+        return new Constraint("DefaultOppositeOf" + name, new PropOpposite(this, vars));
     }
 
-	/**
-	 * Changes the name of <code>this</code> constraint
-	 * @param newName
-	 */
-	public void setName(String newName){
-		name = newName;
-	}
+    /**
+     * Changes the name of <code>this</code> constraint
+     *
+     * @param newName
+     */
+    public void setName(String newName) {
+        name = newName;
+    }
 
-	/**
-	 * @return the name of <code>this</code> constraint
-	 */
-	public String getName(){
-		return name;
-	}
+    /**
+     * @return the name of <code>this</code> constraint
+     */
+    public String getName() {
+        return name;
+    }
 }

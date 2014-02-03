@@ -65,7 +65,7 @@ public class AllTest {
                 new AllSolverProp(
                         SearchLoops.BINARY,
                         ExplanationFactory.CBJ, false),
-                PropagationEngineFactory.TWOBUCKETSPROPAGATIONENGINE, 6);
+                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE, 6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,

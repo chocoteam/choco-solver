@@ -29,7 +29,6 @@ package solver.constraints.ternary;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
@@ -49,7 +48,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
-        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.X = vars[0];
         this.Y = vars[1];
         this.Z = vars[2];
@@ -99,6 +98,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 3: // X and Y are instanciated
                     vx = X.getValue();
                     vy = Y.getValue();
+                    hasChanged |= updateAbsX();
+                    hasChanged |= updateAbsY();
                     vz = vx / vy;//(int) Math.floor((double) (vx + ((vx * vy < 0 ? 1 : 0) * (vy - 1))) / (double) vy);
                     if (vy != 0) {
                         if (inInterval(Z, vz, vz)) return; // entail
@@ -115,6 +116,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 5: // X and Z are instanciated
                     vx = X.getValue();
                     vz = Z.getValue();
+                    hasChanged |= updateAbsX();
+                    hasChanged |= updateAbsZ();
                     if (vz != 0 && vx == 0) {
                         this.contradiction(X, "");
                     }
@@ -123,6 +126,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 6: // Y and Z are instanciated
                     vy = Y.getValue();
                     vz = Z.getValue();
+                    hasChanged |= updateAbsY();
+                    hasChanged |= updateAbsZ();
                     if (vz == 0) {
                         if (inInterval(X, -Math.abs(vy) + 1, Math.abs(vy) - 1)) return;
                     } else { // Y*Z > 0  ou < 0
@@ -159,20 +164,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
         } while (hasChanged);
     }
 
-    /**
-     * filtering algorihtm that synchronise the variable of index varIdx and
-     * its related views (sign(vars[varIdx]) and |vars[varIdx]|). Filtering is delegate
-     * to the main propagation method.
-     *
-     * @param varIdx: modified variable since the last call
-     * @param pmask:  type of variable modification
-     * @throws ContradictionException
-     */
-    @Override
-    public void propagate(int varIdx, int pmask) throws ContradictionException {
-        // enforce propagation
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
 
     @Override
     public ESat isEntailed() {
@@ -195,7 +186,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * @param lb new lower bound
      * @param ub new upper bound
      * @throws solver.exception.ContradictionException
-     *
      */
     private boolean inInterval(IntVar v, int lb, int ub) throws ContradictionException {
         if (v.getLB() >= lb && v.getUB() <= ub) {
@@ -222,7 +212,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * @param ub new upper bound
      * @return true iff a value has been removed from v
      * @throws solver.exception.ContradictionException
-     *
      */
     private boolean outInterval(IntVar v, int lb, int ub) throws ContradictionException {
         if (lb > ub) {

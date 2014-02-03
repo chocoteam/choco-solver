@@ -40,7 +40,7 @@ import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.propagation.hardcoded.TwoBucketsPropagationEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -91,8 +91,9 @@ public class ParseAndSolveExt extends ParseAndSolve {
     protected void makeEngine(Solver solver, Datas datas) {
 
         switch (eng) {
+            default:
             case 1:
-                solver.set(new TwoBucketsPropagationEngine(solver));
+                solver.set(new TwoBucketPropagationEngine(solver));
                 break;
             case 2:
                 solver.set(new SevenQueuesPropagatorEngine(solver));

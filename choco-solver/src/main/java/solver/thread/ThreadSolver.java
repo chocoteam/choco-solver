@@ -31,7 +31,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.propagation.NoPropagationEngine;
-import solver.propagation.hardcoded.TwoBucketsPropagationEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.variables.IntVar;
 
 /**
@@ -61,7 +61,7 @@ public class ThreadSolver extends Thread {
     @Override
     public void run() {
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
-            solver.set(new TwoBucketsPropagationEngine(solver));
+            solver.set(new TwoBucketPropagationEngine(solver));
         }
         solver.getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
         solver.getSearchLoop().launch(saf);

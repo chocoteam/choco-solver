@@ -64,6 +64,26 @@ public enum Configuration {
         } catch (Exception e) {
             logger.error("Unable to load " + UDPATH + " file from classpath.", e);
         }
+        {
+            String values = properties.getProperty("FINE_EVENT_QUEUES");
+            values = values.substring(1,values.length()-1);
+            String[] values_ = values.split(",");
+            short[] shorts = new short[values_.length];
+            for (int i = 0; i < values_.length; i++) {
+                shorts[i] = Short.parseShort(values_[i]);
+            }
+            FINE_EVENT_QUEUES = shorts;
+        }
+        {
+            String values = properties.getProperty("COARSE_EVENT_QUEUES");
+            values = values.substring(1,values.length()-1);
+            String[] values_ = values.split(",");
+            short[] shorts = new short[values_.length];
+            for (int i = 0; i < values_.length; i++) {
+                shorts[i] = Short.parseShort(values_[i]);
+            }
+            COARSE_EVENT_QUEUES = shorts;
+        }
     }
 
     public static final String WELCOME_TITLE = properties.getProperty("WELCOME_TITLE");
@@ -125,4 +145,11 @@ public enum Configuration {
 
     // Defines the smallest used double for multicostregular
     public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
+
+    // Defines, for each priority, the queue the propagators of this priority should be scheduled in
+    // /!\ for advanced use only
+    // 1. For fine events
+    public static final short[] FINE_EVENT_QUEUES;
+    // 2. For coarse events
+    public static final short[] COARSE_EVENT_QUEUES;
 }

@@ -43,7 +43,7 @@ import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.propagation.hardcoded.TwoBucketsPropagationEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.monitors.SMF;
 
 import java.io.File;
@@ -197,8 +197,9 @@ public class ParseAndSolve {
 
     protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
+            default:
             case 1:
-                solver.set(new TwoBucketsPropagationEngine(solver));
+                solver.set(new TwoBucketPropagationEngine(solver));
                 break;
             case 2:
                 solver.set(new SevenQueuesPropagatorEngine(solver));

@@ -31,6 +31,8 @@ import samples.integer.*;
 import solver.Solver;
 import solver.propagation.PropagationEngineFactory;
 
+import java.util.Arrays;
+
 /**
  * <br/>
  *
@@ -42,7 +44,7 @@ public class PropagationEnginesTest {
 
     private static PropagationEngineFactory[] engines = new PropagationEngineFactory[]{
             PropagationEngineFactory.PROPAGATORDRIVEN_7QD,
-            PropagationEngineFactory.TWOBUCKETSPROPAGATIONENGINE
+            PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE
     };
 
 
@@ -99,14 +101,14 @@ public class PropagationEnginesTest {
                             stats[0][1] = problem.solver.getMeasures().getNodeCount();
                             stats[0][2] = problem.solver.getMeasures().getFailCount();
                             break;
-                        case TWOBUCKETSPROPAGATIONENGINE:
+                        case TWOBUCKETPROPAGATIONENGINE:
                             stats[1][0] = problem.solver.getMeasures().getSolutionCount();
                             stats[1][1] = problem.solver.getMeasures().getNodeCount();
                             stats[1][2] = problem.solver.getMeasures().getFailCount();
                             break;
                     }
                 }
-                Assert.assertEquals(stats[0], stats[1]);
+                Assert.assertEquals(stats[0], stats[1], problem.getClass().getCanonicalName()+":"+Arrays.toString(stats[0])+"!="+Arrays.toString(stats[1]));
             }
             //System.out.printf("OK\n");
         }

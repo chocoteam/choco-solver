@@ -68,9 +68,29 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 05/07/12
  */
-public class TwoBucketsPropagationEngine implements IPropagationEngine {
+public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     private static final int WORD_MASK = 0xffffffff;
+    private static final short[] match_f = Configuration.FINE_EVENT_QUEUES;
+    private static final short[] match_c = Configuration.COARSE_EVENT_QUEUES;
+
+    private static final short max_f;
+    private static final short max_c;
+
+    static {
+        short _max_ = -1;
+        for (int i = 0; i < match_f.length; i++) {
+            if (_max_ < match_f[i]) _max_ = match_f[i];
+        }
+        _max_++;
+        max_f = _max_;
+        _max_ = -1;
+        for (int i = 0; i < match_c.length; i++) {
+            if (_max_ < match_c[i]) _max_ = match_c[i];
+        }
+        _max_++;
+        max_c = _max_;
+    }
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
@@ -81,17 +101,12 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
     protected Propagator lastProp;
     protected int notEmpty; // point out the no empty queues
 
-    protected final ArrayDeque<Propagator> pro_queue_f1;
-    protected final ArrayDeque<Propagator> pro_queue_f2;
-    protected final ArrayDeque<Propagator> pro_queue_f3;
+    protected final ArrayDeque<Propagator>[] pro_queue_f;
     protected boolean[] schedule_f; // also maintains the index of the queue!
     protected IntCircularQueue[] event_f;
     protected int[][] eventmasks;// the i^th event mask stores modification events on the i^th variable, since the last propagation
 
-    protected final ArrayDeque<Propagator> pro_queue_c1;
-    protected final ArrayDeque<Propagator> pro_queue_c2;
-    protected final ArrayDeque<Propagator> pro_queue_c3;
-    protected final ArrayDeque<Propagator> pro_queue_c4;
+    protected final ArrayDeque<Propagator>[] pro_queue_c;
     protected boolean[] schedule_c;
     protected EventType[] event_c;
 
@@ -99,7 +114,7 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
 
     final PropagationTrigger trigger; // an object that starts the propagation
 
-    public TwoBucketsPropagationEngine(Solver solver) {
+    public TwoBucketPropagationEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
@@ -125,16 +140,17 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
         }
         trigger.addAll(propagators);
 
-        pro_queue_f1 = new ArrayDeque<>(propagators.length / 2 + 1);
-        pro_queue_f2 = new ArrayDeque<>(propagators.length / 2 + 1);
-        pro_queue_f3 = new ArrayDeque<>(propagators.length / 2 + 1);
+        pro_queue_f = new ArrayDeque[max_f];
+        for (int i = 0; i < max_f; i++) {
+            pro_queue_f[i] = new ArrayDeque<>(propagators.length / 2 + 1);
+        }
         schedule_f = new boolean[nbProp];
 
 
-        pro_queue_c1 = new ArrayDeque<>(propagators.length / 2 + 1);
-        pro_queue_c2 = new ArrayDeque<>(propagators.length / 2 + 1);
-        pro_queue_c3 = new ArrayDeque<>(propagators.length / 2 + 1);
-        pro_queue_c4 = new ArrayDeque<>(propagators.length / 2 + 1);
+        pro_queue_c = new ArrayDeque[max_c];
+        for (int i = 0; i < max_c; i++) {
+            pro_queue_c[i] = new ArrayDeque<>(propagators.length / 2 + 1);
+        }
         schedule_c = new boolean[nbProp];
 
         notEmpty = 0;
@@ -172,52 +188,24 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
             trigger.propagate();
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
-            switch (i) {
-                case 0:
-                    while (!pro_queue_f1.isEmpty()) {
-                        propagateFine(pro_queue_f1);
-                    }
-                    notEmpty = notEmpty & ~1;
-                    break;
-                case 1:
-                    propagateFine(pro_queue_f2);
-                    if (pro_queue_f2.isEmpty()) {
-                        notEmpty = notEmpty & ~(1 << 1);
-                    }
-                    break;
-                case 2:
-                    propagateFine(pro_queue_f3);
-                    if (pro_queue_f3.isEmpty()) {
-                        notEmpty = notEmpty & ~(1 << 2);
-                    }
-                    break;
-                case 3:
-                    propagateCoarse(pro_queue_c1);
-                    if (pro_queue_c1.isEmpty()) {
-                        notEmpty = notEmpty & ~(1 << 3);
-                    }
-                    break;
-                case 4:
-                    propagateCoarse(pro_queue_c2);
-                    if (pro_queue_c2.isEmpty()) {
-                        notEmpty = notEmpty & ~(1 << 4);
-                    }
-                    break;
-                case 5:
-                    propagateCoarse(pro_queue_c3);
-                    if (pro_queue_c3.isEmpty()) {
-                        notEmpty = notEmpty & ~(1 << 5);
-                    }
-                    break;
-                case 6:
-                    propagateCoarse(pro_queue_c4);
-                    if (pro_queue_c4.isEmpty()) {
-                        notEmpty = notEmpty & ~(1 << 6);
-                    }
-                    break;
+            if (i == 0) { // specific case, for finest events
+                while (!pro_queue_f[i].isEmpty()) {
+                    propagateFine(pro_queue_f[i]);
+                }
+                notEmpty = notEmpty & ~1;
+            } else if (i < max_f) { // other finest events, lower priority
+                propagateFine(pro_queue_f[i]);
+                if (pro_queue_f[i].isEmpty()) {
+                    notEmpty = notEmpty & ~(1 << i);
+                }
+            } else { // coarse events
+                int j = i - max_f;
+                propagateCoarse(pro_queue_c[j]);
+                if (pro_queue_c[j].isEmpty()) {
+                    notEmpty = notEmpty & ~(1 << i);
+                }
             }
         }
-
     }
 
     private int nextNotEmpty(int fromIndex) {
@@ -278,49 +266,16 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
             flushCoarse();
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
-            switch (i) {
-                case 0:
-                    while (!pro_queue_f1.isEmpty()) {
-                        lastProp = pro_queue_f1.pollLast();
-                        flushFine();
-                    }
-                    break;
-                case 1:
-                    while (!pro_queue_f2.isEmpty()) {
-                        lastProp = pro_queue_f2.pollLast();
-                        flushFine();
-                    }
-                    break;
-                case 2:
-                    while (!pro_queue_f3.isEmpty()) {
-                        lastProp = pro_queue_f3.pollLast();
-                        flushFine();
-                    }
-                    break;
-                case 3:
-                    while (!pro_queue_c1.isEmpty()) {
-                        lastProp = pro_queue_c1.pollLast();
-                        flushCoarse();
-                    }
-                    break;
-                case 4:
-                    while (!pro_queue_c2.isEmpty()) {
-                        lastProp = pro_queue_c2.pollLast();
-                        flushCoarse();
-                    }
-                    break;
-                case 5:
-                    while (!pro_queue_c3.isEmpty()) {
-                        lastProp = pro_queue_c3.pollLast();
-                        flushCoarse();
-                    }
-                    break;
-                case 6:
-                    while (!pro_queue_c4.isEmpty()) {
-                        lastProp = pro_queue_c4.pollLast();
-                        flushCoarse();
-                    }
-                    break;
+            if (i < max_f) { // other finest events, lower priority
+                while (!pro_queue_f[i].isEmpty()) {
+                    lastProp = pro_queue_f[i].pollLast();
+                    flushFine();
+                }
+            } else { // coarse events
+                while (!pro_queue_c[i - max_f].isEmpty()) {
+                    lastProp = pro_queue_c[i - max_f].pollLast();
+                    flushCoarse();
+                }
             }
             notEmpty = notEmpty & ~(1 << i);
         }
@@ -370,28 +325,10 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
                 }
                 if (!schedule_f[aid]) {
                     PropagatorPriority prio = prop.getPriority();
-                    switch (prio) {
-                        case UNARY:
-                        case BINARY:
-                        case TERNARY:
-                            pro_queue_f1.addLast(prop);
-                            schedule_f[aid] = true;
-                            notEmpty = notEmpty | 1;
-                            break;
-                        case LINEAR:
-                            pro_queue_f2.addLast(prop);
-                            schedule_f[aid] = true;
-                            notEmpty = notEmpty | (1 << 1);
-                            break;
-                        case QUADRATIC:
-                        case CUBIC:
-                        case VERY_SLOW:
-                        default:
-                            pro_queue_f3.addLast(prop);
-                            schedule_f[aid] = true;
-                            notEmpty = notEmpty | (1 << 2);
-                            break;
-                    }
+                    int q = match_f[prio.priority-1];
+                    pro_queue_f[q].addLast(prop);
+                    schedule_f[aid] = true;
+                    notEmpty = notEmpty | (1 << q);
                 }
             }
         }
@@ -403,37 +340,12 @@ public class TwoBucketsPropagationEngine implements IPropagationEngine {
         int aid = p2i.get(propagator.getId());
         if (!schedule_c[aid]) {
             PropagatorPriority prio = /*dynamic ? prop.dynPriority() :*/ propagator.getPriority();
-            switch (prio) {
-                case UNARY:
-                case BINARY:
-                case TERNARY:
-                    throw new SolverException("Cannot schedule coarse event for low priority propagator.");
-                case LINEAR:
-                    pro_queue_c1.addLast(propagator);
-                    schedule_c[aid] = true;
-                    event_c[aid] = type;
-                    notEmpty = notEmpty | (1 << 3);
-                    break;
-                case QUADRATIC:
-                    pro_queue_c2.addLast(propagator);
-                    schedule_c[aid] = true;
-                    event_c[aid] = type;
-                    notEmpty = notEmpty | (1 << 4);
-                    break;
-                case CUBIC:
-                    pro_queue_c3.addLast(propagator);
-                    schedule_c[aid] = true;
-                    event_c[aid] = type;
-                    notEmpty = notEmpty | (1 << 5);
-                    break;
-                case VERY_SLOW:
-                default:
-                    pro_queue_c4.addLast(propagator);
-                    schedule_c[aid] = true;
-                    event_c[aid] = type;
-                    notEmpty = notEmpty | (1 << 6);
-                    break;
-            }
+            int q = match_c[prio.priority-1];
+            if (q == -1) throw new SolverException("Cannot schedule coarse event for low priority propagator.");
+            pro_queue_c[q].addLast(propagator);
+            schedule_c[aid] = true;
+            event_c[aid] = type;
+            notEmpty = notEmpty | (1 << (q + max_f));
         }
     }
 
