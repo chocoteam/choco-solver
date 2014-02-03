@@ -49,3 +49,4 @@ The CHANGES.md file starts at this version.
 * Fix #160: speed up count propagator
 * Fix #161: Propagator: fine_evt and default implementation of propagate(int,int)
 * Fix #162: update filtering algorithm of PropFivXYZ
+* Fix #163: Constraint#isSatisfied() handles stateless propagators
