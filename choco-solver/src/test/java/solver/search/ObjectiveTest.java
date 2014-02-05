@@ -60,7 +60,8 @@ public class ObjectiveTest {
         solver.post(ICF.arithm(iv, ">=", 0));
         solver.post(ICF.arithm(iv, "<=", 10));
         Random rnd = new Random();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 2000; i++) {
+            rnd.setSeed(i);
             int k = rnd.nextInt(4);
             switch (k) {
                 case 0:

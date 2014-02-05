@@ -161,15 +161,15 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * This method enables to solve a problem another time:
      * <ul>
-     *     <li>It backtracks up to the root node of the search tree,</li>
-     *     <li>it sets the objective manager to null,</li>
-     *     <li>it resets the measures to 0,</li>
-     *     <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
+     * <li>It backtracks up to the root node of the search tree,</li>
+     * <li>it sets the objective manager to null,</li>
+     * <li>it resets the measures to 0,</li>
+     * <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
      * </ul>
      */
     public void reset() {
         // if a resolution has already been done
-        if(rootWorldIndex>-1){
+        if (rootWorldIndex > -1) {
             this.nextState = INIT;
             env.worldPopUntil(rootWorldIndex);
             this.objectivemanager = ObjectiveManager.SAT();
@@ -178,6 +178,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             searchWorldIndex = -1;
             solver.set(NoPropagationEngine.SINGLETON);
             this.measures.reset();
+            while (decision != RootDecision.ROOT) {
+                Decision tmp = decision;
+                decision = decision.getPrevious();
+                tmp.free();
+            }
         }
     }
 
@@ -376,7 +381,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setObjectiveManager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
-        if(objectivemanager.isOptimization()){
+        if (objectivemanager.isOptimization()) {
             this.measures.declareObjective();
         }
     }
