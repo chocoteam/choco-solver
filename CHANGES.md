@@ -51,3 +51,4 @@ The CHANGES.md file starts at this version.
 * Fix #162: update filtering algorithm of PropFivXYZ
 * Fix #163: Constraint#isSatisfied() handles stateless propagators
 * Fix #158 fix bug in PropMemberEnum
+* Fix #165: reset AbstractSearchLoop.decision on a call to reset()
