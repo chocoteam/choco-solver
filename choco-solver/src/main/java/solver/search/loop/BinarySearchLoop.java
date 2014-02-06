@@ -181,7 +181,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     protected void upBranch() {
         env.worldPop();
-        //if (env.getWorldIndex() <= searchWorldIndex ){// Issue#55
         if (decision == RootDecision.ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
             interrupt(MSG_ROOT);

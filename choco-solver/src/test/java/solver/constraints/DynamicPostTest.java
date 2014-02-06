@@ -29,10 +29,13 @@ package solver.constraints;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.reification.PropConditionnal;
 import solver.propagation.PropagationEngineFactory;
 import solver.search.loop.monitors.IMonitorOpenNode;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 /**
  * <br/>
@@ -60,12 +63,43 @@ public class DynamicPostTest {
         final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
         solver.set(engine.make(solver));
         solver.findAllSolutions();
-        Assert.assertEquals(8, solver.getMeasures().getSolutionCount());
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
     }
 
 
     @Test(groups = "1s")
     public void test1() {
+        final Solver solver = new Solver();
+        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
+        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
+        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+
+        solver.post(new Constraint("Conditionnal",
+                new PropConditionnal(new IntVar[]{X, Y, Z},
+                        new Constraint[]{IntConstraintFactory.arithm(X, "=", Y), IntConstraintFactory.arithm(Y, "=", Z)},
+                        new Constraint[]{}) {
+                    @Override
+                    public ESat checkCondition() {
+                        int nbNode = (int) solver.getMeasures().getNodeCount();
+                        switch (nbNode) {
+                            case 0:
+                            case 1:
+                                return ESat.UNDEFINED;
+                            case 2:
+                                return ESat.TRUE;
+                            default:
+                                return ESat.FALSE;
+                        }
+
+                    }
+                }));
+        solver.set(engine.make(solver));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
+    }
+
+    @Test(groups = "1s")
+    public void test2() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
         final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
@@ -85,30 +119,47 @@ public class DynamicPostTest {
         });
         solver.set(engine.make(solver));
         solver.findAllSolutions();
-        Assert.assertEquals(5, solver.getMeasures().getSolutionCount());
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups = "1s")
-    public void test2() {
+    public void test3() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
         final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
         final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
-            @Override
-            public void beforeOpenNode() {
-            }
+        Constraint c1 = IntConstraintFactory.arithm(X, "=", Y);
+        Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
+        solver.post(c1);
+        solver.post(c2);
+        solver.unpost(c2);
+        solver.unpost(c1);
+        solver.set(engine.make(solver));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        Assert.assertEquals(solver.getNbCstrs(), 0);
+    }
 
+    @Test(groups = "1s")
+    public void test4() {
+        final Solver solver = new Solver();
+        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
+        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
+        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+        final Constraint c1 = IntConstraintFactory.arithm(X, "=", Y);
+        final Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
+        solver.post(c1);
+        solver.post(c2);
+        solver.plugMonitor(new IMonitorSolution() {
             @Override
-            public void afterOpenNode() {
-                if (solver.getMeasures().getNodeCount() == 1) {
-                    solver.postCut(IntConstraintFactory.arithm(X, "=", Y));
-                    solver.postCut(IntConstraintFactory.arithm(Y, "=", Z));
-                }
+            public void onSolution() {
+                solver.unpost(c1);
+                solver.unpost(c2);
             }
         });
         solver.set(engine.make(solver));
         solver.findAllSolutions();
-        Assert.assertEquals(2, solver.getMeasures().getSolutionCount());
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
+        Assert.assertEquals(solver.getNbCstrs(), 0);
     }
 }

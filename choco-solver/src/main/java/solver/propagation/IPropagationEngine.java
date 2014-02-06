@@ -115,5 +115,7 @@ public interface IPropagationEngine extends Serializable {
      */
     void desactivatePropagator(Propagator propagator);
 
-    void dynamicAddition(Constraint c, boolean cut);
+    void dynamicAddition(Constraint c, boolean permanent);
+
+    void dynamicDeletion(Constraint c);
 }

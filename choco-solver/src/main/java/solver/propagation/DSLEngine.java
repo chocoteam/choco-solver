@@ -232,7 +232,12 @@ public class DSLEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean cut) {
+    public void dynamicAddition(Constraint c, boolean permanent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void dynamicDeletion(Constraint c) {
         throw new UnsupportedOperationException();
     }
 }

@@ -38,8 +38,8 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationTrigger;
-import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
+import solver.propagation.hardcoded.util.MId2AbId;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import util.objects.IntCircularQueue;
@@ -134,7 +134,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-        p2i = new AId2AbId(m, M, -1);
+        //p2i = new AId2AbId(m, M, -1);
+        p2i = new MId2AbId(M - m + 1, -1);
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
@@ -325,7 +326,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 }
                 if (!schedule_f[aid]) {
                     PropagatorPriority prio = prop.getPriority();
-                    int q = match_f[prio.priority-1];
+                    int q = match_f[prio.priority - 1];
                     pro_queue_f[q].addLast(prop);
                     schedule_f[aid] = true;
                     notEmpty = notEmpty | (1 << q);
@@ -340,7 +341,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         int aid = p2i.get(propagator.getId());
         if (!schedule_c[aid]) {
             PropagatorPriority prio = /*dynamic ? prop.dynPriority() :*/ propagator.getPriority();
-            int q = match_c[prio.priority-1];
+            int q = match_c[prio.priority - 1];
             if (q == -1) throw new SolverException("Cannot schedule coarse event for low priority propagator.");
             pro_queue_c[q].addLast(propagator);
             schedule_c[aid] = true;
@@ -369,7 +370,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean cut) {
+    public void dynamicAddition(Constraint c, boolean permanent) {
         int osize = propagators.length;
         int nbp = c.getPropagators().length;
         int nsize = osize + nbp;
@@ -379,7 +380,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             p2i.set(propagators[j].getId(), j);
-            trigger.add(propagators[j], cut);
+            trigger.dynAdd(propagators[j], permanent);
         }
 
         boolean[] _schedule_f = schedule_f;
@@ -401,6 +402,78 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         EventType[] _event_c = event_c;
         event_c = new EventType[nsize];
         System.arraycopy(_event_c, 0, event_c, 0, osize);
+        int[][] _eventmasks = eventmasks;
+        eventmasks = new int[nsize][];
+        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
+        for (int i = osize; i < nsize; i++) {
+            int nbv = propagators[i].getNbVars();
+            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+        }
+    }
 
+    @Override
+    public void dynamicDeletion(Constraint c) {
+        for (Propagator toDelete : c.getPropagators()) {
+            int nsize = propagators.length - 1;
+            Propagator toMove = propagators[nsize];
+            int idtd = p2i.get(toDelete.getId());
+            int idtm = p2i.get(toMove.getId());
+
+
+            assert idtd <= idtm : "wrong id for prop to delete";
+
+            // 1. remove from propagators[] and p2i
+            Propagator[] _propagators = propagators;
+            propagators = new Propagator[nsize];
+            System.arraycopy(_propagators, 0, propagators, 0, nsize);
+
+            // 2. resize schedule_f[]
+            boolean sftm = schedule_f[idtm];
+            assert !schedule_f[idtd] : "try to delete a propagator which is scheduled (fine)";
+            boolean[] _schedule_f = schedule_f;
+            schedule_f = new boolean[nsize];
+            System.arraycopy(_schedule_f, 0, schedule_f, 0, nsize);
+
+            // 3. resize schedule_c[]
+            boolean sctm = schedule_c[idtm];
+            assert !schedule_c[idtd] : "try to delete a propagator which is scheduled (coarse)";
+            boolean[] _schedule_c = schedule_c;
+            schedule_c = new boolean[nsize];
+            System.arraycopy(_schedule_c, 0, schedule_c, 0, nsize);
+
+            // 4. remove event_f
+            IntCircularQueue icqtm = event_f[idtm];
+            assert event_f[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
+            IntCircularQueue[] _event_f = event_f;
+            event_f = new IntCircularQueue[nsize];
+            System.arraycopy(_event_f, 0, event_f, 0, nsize);
+
+
+            // 5. remove event_f
+            EventType ettm = event_c[idtm];
+            assert event_c[idtd] == EventType.VOID : "try to delete a propagator which has events to propagate (coarse)";
+            EventType[] _event_c = event_c;
+            event_c = new EventType[nsize];
+            System.arraycopy(_event_c, 0, event_c, 0, nsize);
+
+            // 6. remove eventmasks
+            int[] emtm = eventmasks[idtm];
+//            assert eventmasks[idtd]. : "try to delete a propagator which has events to propagate (fine)";
+            int[][] _eventmasks = eventmasks;
+            eventmasks = new int[nsize][];
+            System.arraycopy(_eventmasks, 0, eventmasks, 0, nsize);
+
+            // 6. copy data
+            if (idtd < nsize) {
+                propagators[idtd] = toMove;
+                p2i.set(toMove.getId(), idtd);
+                schedule_f[idtd] = sftm;
+                schedule_c[idtd] = sctm;
+                event_f[idtd] = icqtm;
+                event_c[idtd] = ettm;
+                eventmasks[idtd] = emtm;
+            }
+            trigger.remove(toDelete);
+        }
     }
 }

@@ -114,14 +114,10 @@ public class Constraint implements Serializable {
     public ESat isSatisfied() {
         int sat = 0;
         for (int i = 0; i < propagators.length; i++) {
-            if (!propagators[i].isStateLess()) {
-                ESat entail = propagators[i].isEntailed();
-                if (entail.equals(ESat.FALSE)) {
-                    return entail;
-                } else if (entail.equals(ESat.TRUE)) {
-                    sat++;
-                }
-            }else{
+            ESat entail = propagators[i].isEntailed();
+            if (entail.equals(ESat.FALSE)) {
+                return entail;
+            } else if (entail.equals(ESat.TRUE)) {
                 sat++;
             }
         }

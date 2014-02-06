@@ -35,8 +35,8 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationTrigger;
-import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
+import solver.propagation.hardcoded.util.MId2AbId;
 import solver.propagation.queues.CircularQueue;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -49,10 +49,7 @@ import java.util.List;
  * This engine is priority-driven constraint-oriented seven queues engine.
  * <br/>On a call to {@code onVariableUpdate}, it stores the event generated and schedules the propagator in
  * one of the 7 queues wrt to its priority for future revision.
- * <br/>A propagator can schedule itself on a call to {@code schedulePropagator}.
- * In this case, the propagator is pushed into one of the 7 other queues for delayed propagation.
- * <br/>On a call to {@code propagate} a variable is removed from the queue and a loop over its active propagator is achieved.
- * <br/>The queues of fine-grained events is always emptied before treating one element of the coarse-grained one.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -101,7 +98,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
         trigger.addAll(propagators);
 
-        p2i = new AId2AbId(m, M, -1);
+        //p2i = new AId2AbId(m, M, -1);
+        p2i = new MId2AbId(M - m + 1, -1);
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
@@ -300,7 +298,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean cut) {
+    public void dynamicAddition(Constraint c, boolean permanent) {
         int osize = propagators.length;
         int nbp = c.getPropagators().length;
         int nsize = osize + nbp;
@@ -310,7 +308,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             p2i.set(propagators[j].getId(), j);
-            trigger.add(propagators[j], cut);
+            trigger.dynAdd(propagators[j], permanent);
         }
 
         short[] _scheduled = scheduled;
@@ -321,9 +319,63 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         IntCircularQueue[] _eventsets = eventsets;
         eventsets = new IntCircularQueue[nsize];
         System.arraycopy(_eventsets, 0, eventsets, 0, osize);
+
+        int[][] _eventmasks = eventmasks;
+        eventmasks = new int[nsize][];
+        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
         for (int i = osize; i < nsize; i++) {
             int nbv = propagators[i].getNbVars();
             eventsets[i] = new IntCircularQueue(nbv);
+            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+        }
+    }
+
+    @Override
+    public void dynamicDeletion(Constraint c) {
+        for (Propagator toDelete : c.getPropagators()) {
+            int nsize = propagators.length - 1;
+            Propagator toMove = propagators[nsize];
+            int idtd = p2i.get(toDelete.getId());
+            int idtm = p2i.get(toMove.getId());
+
+            assert idtd <= idtm : "wrong id for prop to delete";
+
+            // 1. remove from propagators[] and p2i
+            Propagator[] _propagators = propagators;
+            propagators = new Propagator[nsize];
+            System.arraycopy(_propagators, 0, propagators, 0, nsize);
+
+            // 2. resize scheduled
+            short stm = scheduled[idtm];
+            assert scheduled[idtd] == 0 : "try to delete a propagator which is scheduled (fine)";
+            short[] _scheduled = scheduled;
+            scheduled = new short[nsize];
+            System.arraycopy(_scheduled, 0, scheduled, 0, nsize);
+
+
+            // 3. remove eventsets
+            IntCircularQueue estm = eventsets[idtm];
+            assert eventsets[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
+            IntCircularQueue[] _eventsets = eventsets;
+            eventsets = new IntCircularQueue[nsize];
+            System.arraycopy(_eventsets, 0, eventsets, 0, nsize);
+
+            // 4. remove eventmasks
+            int[] emtm = eventmasks[idtm];
+//            assert eventmasks[idtd]. : "try to delete a propagator which has events to propagate (fine)";
+            int[][] _eventmasks = eventmasks;
+            eventmasks = new int[nsize][];
+            System.arraycopy(_eventmasks, 0, eventmasks, 0, nsize);
+
+            // 4. copy data
+            if (idtd < nsize) {
+                propagators[idtd] = toMove;
+                p2i.set(toMove.getId(), idtd);
+                scheduled[idtd] = stm;
+                eventsets[idtd] = estm;
+                eventmasks[idtd] = emtm;
+            }
+            trigger.remove(toDelete);
         }
     }
 }

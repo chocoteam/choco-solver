@@ -94,7 +94,12 @@ class FakeEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean cut) {
+    public void dynamicAddition(Constraint c, boolean permanent) {
+    }
+
+    @Override
+    public void dynamicDeletion(Constraint c) {
+
     }
 
     public static void checkIdempotency(Propagator lastProp) throws ContradictionException {

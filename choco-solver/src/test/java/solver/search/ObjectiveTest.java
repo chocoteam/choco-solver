@@ -31,7 +31,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.reification.PropConditionnal;
 import solver.objective.ObjectiveManager;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
@@ -41,6 +43,7 @@ import solver.search.strategy.ISF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import util.ESat;
 
 import java.util.Random;
 
@@ -137,12 +140,25 @@ public class ObjectiveTest {
         final IntVar iv = VF.enumerated("iv", 0, 10, solver);
         solver.post(ICF.arithm(iv, ">=", 2));
 
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                solver.post(ICF.arithm(iv, ">=", 4));
-            }
-        });
+        solver.post(new Constraint("Conditionnal",
+                new PropConditionnal(new IntVar[]{iv},
+                        new Constraint[]{ICF.arithm(iv, ">=", 4)},
+                        new Constraint[]{solver.TRUE}) {
+                    @Override
+                    public ESat checkCondition() {
+                        int nbNode = (int) solver.getMeasures().getNodeCount();
+                        switch (nbNode) {
+                            case 0:
+                            case 1:
+                                return ESat.UNDEFINED;
+                            case 2:
+                                return ESat.TRUE;
+                            default:
+                                return ESat.FALSE;
+                        }
+
+                    }
+                }));
         solver.findSolution();
         Assert.assertEquals(iv.getValue(), 2);
 
@@ -150,7 +166,7 @@ public class ObjectiveTest {
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
-                solver.postCut(ICF.arithm(iv, ">=", 6));
+                solver.post(ICF.arithm(iv, ">=", 6));
             }
         });
         solver.findSolution();
@@ -183,7 +199,7 @@ public class ObjectiveTest {
         BoolVar b2 = VF.bool("b2", solver);
         solver.post(ICF.arithm(b1, "<=", b2));
         SMF.log(solver, true, true);
-        solver.set(new ObjectiveManager<IntVar,Integer>(b1, ResolutionPolicy.MINIMIZE, true));
+        solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
             solver.set(new SevenQueuesPropagatorEngine(solver));
