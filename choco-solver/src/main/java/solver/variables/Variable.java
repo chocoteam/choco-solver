@@ -174,8 +174,9 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * SHOULD BE CONTAINED IN THIS.
      *
      * @param propagator the propagator to remove
+     *
      */
-    void unlink(Propagator propagator, int idxInProp);
+    void unlink(Propagator propagator);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

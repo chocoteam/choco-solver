@@ -189,7 +189,11 @@ public class Explore {
         }
 
         @Override
-        public void dynamicAddition(Constraint c, boolean cut) {
+        public void dynamicAddition(Constraint c, boolean permanent) {
+        }
+
+        @Override
+        public void dynamicDeletion(Constraint c) {
         }
     }
 }

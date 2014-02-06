@@ -240,7 +240,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public String toString() {
-        return name + "=" + String.valueOf(constante);
+        return name + " = " + String.valueOf(constante);
     }
 
     @Override

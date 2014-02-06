@@ -98,7 +98,11 @@ public enum NoPropagationEngine implements IPropagationEngine {
         }
 
         @Override
-        public void dynamicAddition(Constraint c, boolean cut) {
+        public void dynamicAddition(Constraint c, boolean permanent) {
+        }
+
+        @Override
+        public void dynamicDeletion(Constraint c) {
         }
     };
 }

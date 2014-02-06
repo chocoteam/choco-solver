@@ -42,44 +42,65 @@ import java.util.Arrays;
 /**
  * A specific propagation engine for initial propagation and dynamic addition of propagators during the resolution.
  * <br/>
+ * It handles three different types of constraints:
+ * - constraints posted before solving the problem,
+ * - permanent constraints posted once the resolution has begun,
+ * - temporary constraints (removed upon backtrack) posted once the resolution has begun.
  *
  * @author Charles Prud'homme
  * @since 15/12/12
  */
 public class PropagationTrigger implements Serializable {
 
-    IPropagationEngine engine; // wrapped engine
-    IEnvironment environment;
+    final IPropagationEngine engine; // wrapped engine
+    final IEnvironment environment;
+    final Solver solver;
 
     // stores the static propagators
     ArrayList<Propagator> sta_propagators = new ArrayList<Propagator>();
     // stores the dynamic propagators, ie cut
-    ArrayList<Propagator> dyn_propagators = new ArrayList<Propagator>();
+    ArrayList<Propagator> perm_propagators = new ArrayList<Propagator>();
     // stores the world of the last propagation of the cuts
-    TIntArrayList dyn_world = new TIntArrayList();
+    TIntArrayList perm_world = new TIntArrayList();
+
     int size;
 
     public PropagationTrigger(IPropagationEngine engine, Solver solver) {
         this.engine = engine;
         this.environment = solver.getEnvironment();
+        this.solver = solver;
         size = 0;
     }
 
     public void addAll(Propagator... propagators) {
-        assert dyn_propagators.size() == dyn_world.size();
+        assert perm_propagators.size() == perm_world.size();
         sta_propagators.addAll(Arrays.asList(propagators));
         size += propagators.length;
     }
 
-    public void add(Propagator propagator, boolean dynamic) {
-        if (dynamic) {
-            assert dyn_propagators.size() == dyn_world.size();
-            dyn_propagators.add(propagator);
-            dyn_world.add(Integer.MAX_VALUE);
-        } else {
-            sta_propagators.add(propagator);
+    public void dynAdd(Propagator propagator, boolean permanent) {
+        if (permanent) {
+            assert perm_propagators.size() == perm_world.size();
+            perm_propagators.add(propagator);
+            perm_world.add(Integer.MAX_VALUE);
+            size++;
         }
-        size++;
+    }
+
+    public void remove(Propagator propagator) {
+        // Remove a pending propagator, ie, not yet propagated
+
+        // 1. look for a static propagator
+        int idx = sta_propagators.indexOf(propagator);
+        if (idx > -1) {
+            sta_propagators.remove(idx);
+        }
+        // 2. then, if necessary look for permanent one
+        idx = perm_propagators.indexOf(propagator);
+        if (idx > -1) {
+            perm_propagators.remove(idx);
+            perm_world.removeAt(idx);
+        }
     }
 
     public boolean needToRun() {
@@ -95,25 +116,50 @@ public class PropagationTrigger implements Serializable {
      * @throws ContradictionException can throw a contradiction
      */
     public void propagate() throws ContradictionException {
-        if (dyn_propagators.size() > 0) {
-            int cw = environment.getWorldIndex(); // get current index
-            for (int p = 0; p < dyn_propagators.size(); p++) {
-                if (dyn_world.getQuick(p) >= cw) {
-                    execute(dyn_propagators.get(p));
-                    dyn_world.replace(p, cw);
-                }
-            }
-        }
         if (sta_propagators.size() > 0) {
             for (int p = 0; p < sta_propagators.size(); p++) {
-                execute(sta_propagators.get(p));
+                execute(sta_propagators.get(p), engine);
             }
             size -= sta_propagators.size();
             sta_propagators.clear();
         }
+        if (perm_propagators.size() > 0) {
+            int cw = environment.getWorldIndex(); // get current index
+            for (int p = 0; p < perm_propagators.size(); p++) {
+                if (perm_world.getQuick(p) >= cw) {
+                    execute(perm_propagators.get(p), engine);
+                    perm_world.replace(p, cw);
+                    // TODO: add a test on the root world to clear the list
+                }
+            }
+        }
+        /*if (tmp_propagators.size() > 0) {
+            for (int p = 0; p < tmp_propagators.size(); p++) {
+                Propagator propagator = tmp_propagators.get(p);
+                execute(propagator, engine);
+                tmp_propagators.remove(p);
+                p--;
+                size--;
+                tmp_cstr.add(propagator.getConstraint());
+            }
+            for (final Constraint c : tmp_cstr) {
+                // the constraint has been added during the resolution.
+                // it should be removed on backtrack -> create a new undo operation
+                environment.save(new Operation() {
+                    @Override
+                    public void undo() {
+                        if (LoggerFactory.getLogger("solver").isDebugEnabled()) {
+                            LoggerFactory.getLogger("solver").debug("unpost " + c);
+                        }
+                        solver.unpost(c);
+                    }
+                });
+            }
+            tmp_cstr.clear();
+        }*/
     }
 
-    private void execute(Propagator toPropagate) throws ContradictionException {
+    public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
         if (Configuration.PRINT_PROPAGATION) {
             LoggerFactory.getLogger("solver").info("[A] {}", toPropagate);
         }

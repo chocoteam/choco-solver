@@ -32,6 +32,7 @@ import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.constraints.Propagator;
 import solver.constraints.nary.cnf.PropFalse;
 import solver.constraints.nary.cnf.PropTrue;
 import solver.constraints.nary.cnf.SatConstraint;
@@ -42,6 +43,7 @@ import solver.explanations.ExplanationEngine;
 import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
+import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
@@ -168,9 +170,9 @@ public class Solver implements Serializable {
         ONE = new FixedBoolVarImpl("1", 1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
-        TRUE = new Constraint("TRUE cstr",new PropTrue(ONE));
-        FALSE = new Constraint("FALSE cstr",new PropFalse(ZERO));
-		set(ObjectiveManager.SAT());
+        TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
+        FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
+        set(ObjectiveManager.SAT());
     }
 
     /**
@@ -197,24 +199,24 @@ public class Solver implements Serializable {
 
 
     /**
-	 * Returns the unique and internal seach loop.
-	 *
-	 * @return the unique and internal <code>AbstractSearchLoop</code> object.
-	 */
-	public AbstractSearchLoop getSearchLoop() {
-		return search;
-	}
+     * Returns the unique and internal seach loop.
+     *
+     * @return the unique and internal <code>AbstractSearchLoop</code> object.
+     */
+    public AbstractSearchLoop getSearchLoop() {
+        return search;
+    }
 
-	/**
-	 * Get the objective manager
-	 */
-	public ObjectiveManager getObjectiveManager() {
-		return this.search.getObjectiveManager();
-	}
+    /**
+     * Get the objective manager
+     */
+    public ObjectiveManager getObjectiveManager() {
+        return this.search.getObjectiveManager();
+    }
 
-	public AbstractStrategy getStrategy(){
-		return search.getStrategy();
-	}
+    public AbstractStrategy getStrategy() {
+        return search.getStrategy();
+    }
 
     /**
      * Returns the propagation engine used in <code>this</code>.
@@ -399,29 +401,29 @@ public class Solver implements Serializable {
         this.search = searchLoop;
     }
 
-	/**
-	 * Override the default search strategies to use in <code>this</code>.
-	 * In case many strategies are given, they will be called in sequence:
-	 * The first strategy in parameter is first called to compute a decision, if possible.
-	 * If it cannot provide a new decision, the second strategy is called ...
-	 * and so on, until the last strategy.
-	 *
-	 * <p/>
-	 * <b>BEWARE:</b> the default strategy requires variables to be integer.
-	 *
-	 * @param strategies the search strategies to use.
-	 */
-	public void set(AbstractStrategy... strategies) {
-		if(strategies==null || strategies.length==0){
-			throw new UnsupportedOperationException("no search strategy has been specified");
-		}
-		if(strategies.length==1){
-			search.set(strategies[0]);
-		}else{
-			search.set(ISF.sequencer(strategies));
-		}
+    /**
+     * Override the default search strategies to use in <code>this</code>.
+     * In case many strategies are given, they will be called in sequence:
+     * The first strategy in parameter is first called to compute a decision, if possible.
+     * If it cannot provide a new decision, the second strategy is called ...
+     * and so on, until the last strategy.
+     * <p/>
+     * <p/>
+     * <b>BEWARE:</b> the default strategy requires variables to be integer.
+     *
+     * @param strategies the search strategies to use.
+     */
+    public void set(AbstractStrategy... strategies) {
+        if (strategies == null || strategies.length == 0) {
+            throw new UnsupportedOperationException("no search strategy has been specified");
+        }
+        if (strategies.length == 1) {
+            search.set(strategies[0]);
+        } else {
+            search.set(ISF.sequencer(strategies));
+        }
 
-	}
+    }
 
     /**
      * Attach a propagation engine <code>this</code>.
@@ -440,20 +442,21 @@ public class Solver implements Serializable {
         this.explainer = explainer;
     }
 
-	/**
-	 * Override the objective manager
-	 */
-	public void set(ObjectiveManager om) {
-		this.search.setObjectiveManager(om);
-	}
+    /**
+     * Override the objective manager
+     */
+    public void set(ObjectiveManager om) {
+        this.search.setObjectiveManager(om);
+    }
 
-	/**
-	 * Put a search monitor to react on search events (solutions, decisions, fails, ...)
-	 * @param sm a search monitor to be plugged in the solver
-	 */
-	public void plugMonitor(ISearchMonitor sm){
-		search.plugSearchMonitor(sm);
-	}
+    /**
+     * Put a search monitor to react on search events (solutions, decisions, fails, ...)
+     *
+     * @param sm a search monitor to be plugged in the solver
+     */
+    public void plugMonitor(ISearchMonitor sm) {
+        search.plugSearchMonitor(sm);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
@@ -493,7 +496,7 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Post a constraint <code>c</code> in the constraints network of <code>this</code>:
+     * Post permanently a constraint <code>c</code> in the constraints network of <code>this</code>:
      * - add it to the data structure,
      * - set the fixed idx,
      * - checks for restrictions
@@ -501,11 +504,11 @@ public class Solver implements Serializable {
      * @param c a Constraint
      */
     public void post(Constraint c) {
-        _post(false, c);
+        _post(true, c);
     }
 
     /**
-     * Post constraints <code>cs</code> in the constraints network of <code>this</code>:
+     * Post constraints <code>cs</code> permanently in the constraints network of <code>this</code>:
      * - add them to the data structure,
      * - set the fixed idx,
      * - checks for restrictions
@@ -513,25 +516,39 @@ public class Solver implements Serializable {
      * @param cs Constraints
      */
     public void post(Constraint... cs) {
-        _post(false, cs);
+        _post(true, cs);
     }
 
     /**
-     * Post a cut (permanent constraint) during the search has started, .
+     * Post a constraint temporary, that is, it will be unposted upon backtrack.
      *
      * @param c constraint to add
      */
-    public void postCut(Constraint c) {
-        _post(true, c);
+    public void postTemp(Constraint c) throws ContradictionException {
+        _post(false, c);
+        if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
+            throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
+                    "A call to Solver.post(Constraint) is more appropriate.");
+        }
+        for (Propagator propagator : c.getPropagators()) {
+            PropagationTrigger.execute(propagator, engine);
+        }
     }
 
 
-    private void _post(boolean cut, Constraint... cs) {
+    /**
+     * Add constraints to the model.
+     *
+     * @param permanent specify whether the constraints are added permanently (if set to true) or temporary (ie, should be removed on backtrack)
+     * @param cs        list of constraints
+     */
+    private void _post(boolean permanent, Constraint... cs) {
         boolean dynAdd = false;
+        // check if the resolution already started -> if true, dynamic addition
         if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
             dynAdd = true;
         }
-
+        // then store the constraints
         if (cIdx + cs.length >= cstrs.length) {
             int nsize = cstrs.length;
             while (cIdx + cs.length >= nsize) {
@@ -543,15 +560,45 @@ public class Solver implements Serializable {
         }
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
+        // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
             if (dynAdd) {
-                engine.dynamicAddition(cs[i], cut);
+                engine.dynamicAddition(cs[i], permanent);
             }
             if (cs[i].isReified()) {
                 try {
                     cs[i].reif().setToTrue(Cause.Null);
                 } catch (ContradictionException e) {
                     throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove permanently the constraint <code>c</code> from the constraint network.
+     *
+     * @param c
+     */
+    public void unpost(Constraint c) {
+        // 1. look for the constraint c
+        int idx = 0;
+        while (idx < cIdx && cstrs[idx] != c) {
+            idx++;
+        }
+        // 2. remove it from the network
+        if (idx < cIdx) {
+            Constraint cm = cstrs[--cIdx];
+            cstrs[idx] = cm;
+            cstrs[cIdx] = null;
+            // 3. check if the resolution already started -> if true, dynamic deletion
+            if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+                engine.dynamicDeletion(c);
+            }
+            // 4. remove the propagators of the constraint from its variables
+            for (Propagator prop : c.getPropagators()) {
+                for (int v = 0; v < prop.getNbVars(); v++) {
+                    prop.getVar(v).unlink(prop);
                 }
             }
         }
@@ -671,9 +718,9 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-		if(!getObjectiveManager().isOptimization()){
-			set(new ObjectiveManager<IntVar,Integer>(objective, policy, true));
-		}
+        if (!getObjectiveManager().isOptimization()) {
+            set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
+        }
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
@@ -693,9 +740,9 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-		if(!getObjectiveManager().isOptimization()){
-			set(new ObjectiveManager<RealVar,Double>(objective,policy,precision,true));
-		}
+        if (!getObjectiveManager().isOptimization()) {
+            set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
+        }
         search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
@@ -724,16 +771,16 @@ public class Solver implements Serializable {
         engine.propagate();
     }
 
-	/**
-	 * Return the current state of the CSP.
-	 * <p/>
-	 * Given the current domains, it can return a value among:
-	 * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
-	 * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-	 * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-	 * <p/>
-	 * Presumably, not all variables are instantiated.
-	 */
+    /**
+     * Return the current state of the CSP.
+     * <p/>
+     * Given the current domains, it can return a value among:
+     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
+     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
+     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
+     * <p/>
+     * Presumably, not all variables are instantiated.
+     */
     public ESat isSatisfied() {
         int OK = 0;
         for (int c = 0; c < cIdx; c++) {

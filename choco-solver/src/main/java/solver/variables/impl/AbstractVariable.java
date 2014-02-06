@@ -86,15 +86,15 @@ public abstract class AbstractVariable implements Variable {
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
-		solver.associates(this);
+        solver.associates(this);
     }
 
-	@Override
+    @Override
     public int getId() {
         return ID;
     }
 
-	@Override
+    @Override
     public int link(Propagator propagator, int idxInProp) {
         //ensure capacity
         if (pIdx == propagators.length) {
@@ -112,35 +112,27 @@ public abstract class AbstractVariable implements Variable {
         return pIdx - 1;
     }
 
-	@Override
+    @Override
     public void recordMask(int mask) {
         modificationEvents |= mask;
     }
 
-	@Override
-    public void unlink(Propagator propagator, int idxInProp) {
-//        int i = 0;
-//        while (i < pIdx && propagators[i] != propagator) {
-//            i++;
-//        }
-//        assert idxInProp == i: "wrong index";
-//        assert i < pIdx : "remove unknown propagator";
-        assert idxInProp < pIdx : "remove unknown propagator";
-        // swap it with the last one
-        pIdx--;
-        if (pIdx > idxInProp) {
-            // swap with the pidx^th propagator
-            propagators[idxInProp] = propagators[pIdx];
-            assert propagators[idxInProp].getVar(pindices[pIdx]).getId() == this.ID;
-            propagators[idxInProp].setVIndices(pindices[pIdx], idxInProp);
-            pindices[idxInProp] = pindices[pIdx];
+    @Override
+    public void unlink(Propagator propagator) {
+        int i = 0;
+        while (i < pIdx && propagators[i] != propagator) {
+            i++;
         }
-        propagators[pIdx] = null;
-        pindices[pIdx] = 0;
-
+        assert i < pIdx : "remove unknown propagator";
+        if (i < pIdx) {
+            propagators[i] = propagators[pIdx - 1];
+            pindices[i] = pindices[--pIdx];
+            propagators[pIdx] = null;
+            pindices[pIdx] = 0;
+        }
     }
 
-	@Override
+    @Override
     public Propagator[] getPropagators() {
         if (propagators.length > pIdx) {
             propagators = Arrays.copyOf(propagators, pIdx);
@@ -148,17 +140,17 @@ public abstract class AbstractVariable implements Variable {
         return propagators;
     }
 
-	@Override
+    @Override
     public Propagator getPropagator(int idx) {
         return propagators[idx];
     }
 
-	@Override
+    @Override
     public int getNbProps() {
         return pIdx;
     }
 
-	@Override
+    @Override
     public int[] getPIndices() {
         if (pindices.length > pIdx) {
             pindices = Arrays.copyOf(pindices, pIdx);
@@ -166,12 +158,12 @@ public abstract class AbstractVariable implements Variable {
         return pindices;
     }
 
-	@Override
+    @Override
     public int getIndexInPropagator(int pidx) {
         return pindices[pidx];
     }
 
-	@Override
+    @Override
     public String getName() {
         return this.name;
     }
@@ -180,7 +172,7 @@ public abstract class AbstractVariable implements Variable {
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
 
-	@Override
+    @Override
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         if (cause == Cause.Null) {
@@ -196,7 +188,7 @@ public abstract class AbstractVariable implements Variable {
         }
     }
 
-	@Override
+    @Override
     public void addMonitor(IVariableMonitor monitor) {
         // 1. check the non redundancy of a monitor
         for (int i = 0; i < mIdx; i++) {
@@ -211,12 +203,12 @@ public abstract class AbstractVariable implements Variable {
         monitors[mIdx++] = monitor;
     }
 
-	@Override
+    @Override
     public void removeMonitor(IVariableMonitor monitor) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-	@Override
+    @Override
     public void subscribeView(IView view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
@@ -226,28 +218,28 @@ public abstract class AbstractVariable implements Variable {
         views[vIdx++] = view;
     }
 
-	@Override
+    @Override
     public Solver getSolver() {
         return solver;
     }
 
-	@Override
+    @Override
     public IView[] getViews() {
         return Arrays.copyOfRange(views, 0, vIdx);
     }
 
-	@Override
+    @Override
     public int compareTo(Variable o) {
         return this.getId() - o.getId();
     }
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+    @Override
+    public String toString() {
+        return getName();
+    }
 
-	@Override
-	public boolean instantiated(){
-		return isInstantiated();
-	}
+    @Override
+    public boolean instantiated() {
+        return isInstantiated();
+    }
 }
