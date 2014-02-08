@@ -138,16 +138,30 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 
 	@Override
 	public String toString() {
+		String st = "";
 		switch (policy) {
-			case MINIMIZE:
-				return String.format("Minimize %s = %d", this.objective.getName(), bestProvedUB);
-			case MAXIMIZE:
-				return String.format("Maximize %s = %d", this.objective.getName(), bestProvedLB);
 			case SATISFACTION:
 				return "SAT";
+			case MINIMIZE: st = "Minimize"; break;
+			case MAXIMIZE: st = "Maximize"; break;
 			default:
 				throw new UnsupportedOperationException("no objective manager");
 		}
+		if(intOrReal){
+			return String.format(st+" %s = %d", this.objective.getName(), getBestSolutionValue());
+		}else{
+			return String.format(st+" %s = %."+getNbDecimals()+"f", this.objective.getName(), getBestSolutionValue());
+		}
+	}
+
+	protected int getNbDecimals(){
+		int dec = 0;
+		double p = precision;
+		while((int)p<=0 && dec<=12){
+			dec++;
+			p*=10;
+		}
+		return dec;
 	}
 
 	/**
