@@ -40,7 +40,7 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.conditions.Condition;
 import solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
 import solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
-import solver.constraints.nary.among.PropAmongGAC;
+import solver.constraints.nary.among.PropAmongGAC_GoodImpl;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -473,7 +473,7 @@ public class IntConstraintFactory {
     public static Constraint among(IntVar NVAR, IntVar[] VARS, int[] VALUES) {
 		int[] values = new TIntHashSet(VALUES).toArray(); // remove double occurrences
 		Arrays.sort(values);							  // sort
-		return new Constraint("Among",new PropAmongGAC(ArrayUtils.append(VARS, new IntVar[]{NVAR}), values));
+		return new Constraint("Among",new PropAmongGAC_GoodImpl(ArrayUtils.append(VARS, new IntVar[]{NVAR}), values));
     }
 
 	/**
