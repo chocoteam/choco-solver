@@ -58,7 +58,7 @@ public class PropMax extends Propagator<IntVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		int idx = -1;
-		int lb = vars[n].getLB();
+		int lb = vars[n].getLB()-1;
 		int ub = lb;
 		// update max
 		for(int i=0; i<n; i++){
@@ -80,11 +80,6 @@ public class PropMax extends Propagator<IntVar> {
 				setPassive();
 			}
 		}
-	}
-
-	@Override
-	public void propagate(int idx, int mask) throws ContradictionException {
-		propagate(0);
 	}
 
 	@Override
