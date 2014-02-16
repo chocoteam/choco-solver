@@ -77,7 +77,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							   boolean fast, Cumulative.Filter... filters) {
 		super(s, d, e, h, capa,true,fast, filters);
-		this.g = new UndirectedGraph(solver.getEnvironment(), n, SetType.SWAP_ARRAY, true);
+		this.g = new UndirectedGraph(solver.getEnvironment(), n, SetType.BITSET, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
 	}
