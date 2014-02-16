@@ -599,7 +599,7 @@ public class IntConstraintFactory {
 	 * @return a cumulative constraint
 	 */
 	public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
-		return cumulative(TASKS, HEIGHTS, CAPACITY, false);
+		return cumulative(TASKS, HEIGHTS, CAPACITY, TASKS.length>500);
 	}
 
 	/**
