@@ -34,81 +34,74 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.*;
 
+/**
+ * Object which stores resolution information to get statistics
+ * @author Charles Prud'Homme
+ */
 public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonitorContradiction, IMonitorDownBranch,
         IMonitorInitialize, IMonitorInitPropagation, IMonitorOpenNode, IMonitorRestart,
         IMonitorSolution, IMonitorUpBranch {
 
-    private static final float IN_MS = 1000 * 1000f;
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private static final float IN_SEC = 1000 * IN_MS;
+	private static final float IN_MS = 1000 * 1000f;
+	private static final float IN_SEC = 1000 * IN_MS;
 
-    public long solutionCount;
+	public boolean hasObjective;
+	public boolean objectiveOptimal;
+	public long solutionCount;
+	public long timeCount;
+	public long readingTimeCount;
+	public long initialisationTimeCount;
+	public long initialPropagationTimeCount;
+	public long nodeCount;
+	public long backtrackCount;
+	public long failCount;
+	public long restartCount;
+	public long maxDepth, depth;
+	public long propagationCount, eventCount;
+	public long usedMemory;
 
-    public boolean objectiveOptimal;
+	protected long startingTime, startingMemory;
 
-    public boolean hasObjective;
+	protected Solver solver;
+	protected Constraint[] cstrs;
 
-    public long timeCount;
-
-    public long readingTimeCount;
-
-    public long initialisationTimeCount;
-
-    public long initialPropagationTimeCount;
-
-    public long nodeCount;
-
-    public long backtrackCount;
-
-    public long restartCount;
-
-    public long failCount;
-
-    public long propagationCount, eventCount;
-
-    public long usedMemory;
-
-    public long maxDepth, depth;
-
-    protected Solver solver;
-
-    protected long startingTime, startingMemory;
-
-    protected Constraint[] cstrs;
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
     public MeasuresRecorder(Solver solver) {
         super();
         this.solver = solver;
     }
 
-    public final void reset() {
-        timeCount = 0;
-        nodeCount = 0;
-        backtrackCount = 0;
-        restartCount = 0;
-        failCount = 0;
-        solutionCount = 0;
-        hasObjective = false;
-        readingTimeCount = 0;
-        initialisationTimeCount = 0;
-        initialPropagationTimeCount = 0;
-        propagationCount = 0;
-        eventCount = 0;
-        maxDepth = 0;
-        cstrs = null;
-    }
-
-
-    public long timestamp() {
-        return nodeCount + backtrackCount;
-    }
-//	public void setSearchMeasures(ISearchMeasures toCopy) {
-//		timeCount = toCopy.getTimeCount();
-//		nodeCount = toCopy.getNodeCount();
-//		backtrackCount = toCopy.getBackTrackCount();
-//		restartCount = toCopy.getRestartCount();
-//		failCount = toCopy.getFailCount();
-//	}
+	@Override
+	public MeasuresRecorder clone(){
+		MeasuresRecorder mr = new MeasuresRecorder(solver);
+		mr.hasObjective		= hasObjective;
+		mr.objectiveOptimal = objectiveOptimal;
+		mr.solutionCount	= solutionCount;
+		mr.timeCount		= timeCount;
+		mr.readingTimeCount	= readingTimeCount;
+		mr.initialisationTimeCount = initialisationTimeCount;
+		mr.initialPropagationTimeCount = initialPropagationTimeCount;
+		mr.nodeCount		= nodeCount;
+		mr.backtrackCount	= backtrackCount;
+		mr.failCount		= failCount;
+		mr.restartCount		= restartCount;
+		mr.maxDepth			= maxDepth;
+		mr.depth			= depth;
+		mr.propagationCount	= propagationCount;
+		mr.eventCount		= eventCount;
+		mr.usedMemory		= usedMemory;
+		mr.startingTime		= startingTime;
+		mr.startingMemory	= startingMemory;
+		mr.cstrs			= cstrs.clone();
+		return mr;
+	}
 
     //****************************************************************************************************************//
     //**************************************** SETTERS ***************************************************************//
@@ -129,6 +122,23 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         this.objectiveOptimal = objectiveOptimal;
     }
 
+	@Override
+	public final void reset() {
+		timeCount = 0;
+		nodeCount = 0;
+		backtrackCount = 0;
+		restartCount = 0;
+		failCount = 0;
+		solutionCount = 0;
+		hasObjective = false;
+		readingTimeCount = 0;
+		initialisationTimeCount = 0;
+		initialPropagationTimeCount = 0;
+		propagationCount = 0;
+		eventCount = 0;
+		maxDepth = 0;
+		cstrs = null;
+	}
 
     //****************************************************************************************************************//
     //**************************************** GETTERS ***************************************************************//
@@ -219,18 +229,16 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         return usedMemory;
     }
 
-
     static long memoryUsedInMB() {
         return Runtime.getRuntime().freeMemory() / 1024 / 1024;
     }
 
-    /**
-     * Updates the used memory
-     */
-    void updateMemoryUsed() {
+	@Override
+    public void updateMemoryUsed() {
         usedMemory = memoryUsedInMB() - startingMemory;
     }
 
+	@Override
     public void updatePropagationCount() {
         if (cstrs == null || cstrs.length != solver.getNbCstrs()) {
             cstrs = solver.getCstrs();
@@ -248,13 +256,16 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     }
 
-    /**
-     * Updates the time recorder
-     */
+	@Override
     public void updateTimeCount() {
 //        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
         timeCount = System.nanoTime() - startingTime;
     }
+
+	@Override
+	public long timestamp() {
+		return nodeCount + backtrackCount;
+	}
 
     //****************************************************************************************************************//
     //**************************************** INCREMENTERS **********************************************************//
@@ -358,6 +369,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     //**************************************** PRINTERS **************************************************************//
     //****************************************************************************************************************//
 
+	@Override
     public Number[] toArray() {
         return new Number[]{
                 solutionCount,
@@ -448,6 +460,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         return st.toString();
     }
 
+	@Override
     public String toCSV() {
         StringBuilder st = new StringBuilder(256);
         // solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
