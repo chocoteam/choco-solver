@@ -56,3 +56,4 @@ The CHANGES.md file starts at this version.
 * Fix #167: ObjectiveManager toString able to handle real values
 * new implementation of Among propagator
 * Fix #176: bug fixed in PropMin/PropMax
+* Fix #175: IMeasure objects can be cloned
