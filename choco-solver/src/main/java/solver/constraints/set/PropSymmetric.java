@@ -72,7 +72,7 @@ public class PropSymmetric extends Propagator<SetVar> {
         super(sets, PropagatorPriority.LINEAR, true);
         n = sets.length;
         this.offSet = offSet;
-        sdm = new SetDeltaMonitor[n];
+        sdm = new ISetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }

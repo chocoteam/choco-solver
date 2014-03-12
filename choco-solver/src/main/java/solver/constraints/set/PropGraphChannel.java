@@ -90,7 +90,7 @@ public class PropGraphChannel extends Propagator<Variable> {
         n = sets.length;
         this.g = (GraphVar) vars[n];
         assert (n == g.getEnvelopGraph().getNbNodes());
-        sdm = new SetDeltaMonitor[n];
+        sdm = new ISetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
             sdm[i] = sets[i].monitorDelta(this);
         }
