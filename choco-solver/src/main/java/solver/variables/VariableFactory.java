@@ -50,9 +50,22 @@ import java.util.Arrays;
  */
 public class VariableFactory {
 
-    VariableFactory() {}
+    VariableFactory() {
+    }
 
     private static final String CSTE_NAME = "cste -- ";
+
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from underflow, but may avoid it, somehow.
+     */
+    public static final int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
+
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from overflow, but may avoid it, somehow.
+     */
+    public static final int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
 
     //TODO : build domain in Variable
 
@@ -235,7 +248,7 @@ public class VariableFactory {
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
     public static IntVar enumerated(String NAME, int[] VALUES, Solver SOLVER) {
-		VALUES = sortIfNot(VALUES);
+        VALUES = sortIfNot(VALUES);
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
@@ -515,50 +528,51 @@ public class VariableFactory {
         }
     }
 
-	/**
-	 * Sorts the input array if it is not already sorted,
-	 * and removes multiple occurrences of the same value
-	 * @param values
-	 * @return a sorted array containing each value of values exactly once
-	 */
-	private static int[] sortIfNot(int[] values) {
-		int n = values.length;
-		boolean sorted = true;
-		boolean noDouble = true;
-		for(int i=0;i<n-1 && sorted;i++){
-			if(values[i]>values[i+1]){
-				sorted = false;
-				noDouble = false;// cannot be sure
-			}
-			if(values[i]==values[i+1]){
-				noDouble = false;
-			}
-		}
-		if(!sorted){
-			Arrays.sort(values);
-		}
-		if(!noDouble){
-			int nbVals = 1;
-			for(int i=0;i<n-1;i++){
-				assert values[i]<=values[i+1];
-				if(values[i]<values[i+1]){
-					nbVals++;
-				}
-			}
-			if(nbVals<n){
-				int[] correctValues = new int[nbVals];
-				int idx=0;
-				for(int i=0;i<n-1;i++){
-					if(values[i]<values[i+1]){
-						correctValues[idx++] = values[i];
-					}
-				}
-				correctValues[idx++] = values[n-1];
-				return correctValues;
-			}
-		}
-		return values;
-	}
+    /**
+     * Sorts the input array if it is not already sorted,
+     * and removes multiple occurrences of the same value
+     *
+     * @param values
+     * @return a sorted array containing each value of values exactly once
+     */
+    private static int[] sortIfNot(int[] values) {
+        int n = values.length;
+        boolean sorted = true;
+        boolean noDouble = true;
+        for (int i = 0; i < n - 1 && sorted; i++) {
+            if (values[i] > values[i + 1]) {
+                sorted = false;
+                noDouble = false;// cannot be sure
+            }
+            if (values[i] == values[i + 1]) {
+                noDouble = false;
+            }
+        }
+        if (!sorted) {
+            Arrays.sort(values);
+        }
+        if (!noDouble) {
+            int nbVals = 1;
+            for (int i = 0; i < n - 1; i++) {
+                assert values[i] <= values[i + 1];
+                if (values[i] < values[i + 1]) {
+                    nbVals++;
+                }
+            }
+            if (nbVals < n) {
+                int[] correctValues = new int[nbVals];
+                int idx = 0;
+                for (int i = 0; i < n - 1; i++) {
+                    if (values[i] < values[i + 1]) {
+                        correctValues[idx++] = values[i];
+                    }
+                }
+                correctValues[idx++] = values[n - 1];
+                return correctValues;
+            }
+        }
+        return values;
+    }
 
     /**
      * Checks domain range.
@@ -615,51 +629,51 @@ public class VariableFactory {
     // CONSTANTS
     //*************************************************************************************
 
-	/**
-	 * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
-	 * <p/>
-	 * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
-	 *
-	 * @param NAME   name of the constant
-	 * @param VALUE  its value
-	 * @param SOLVER the solver to build the integer variable in.
-	 */
-	public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-		if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
-			return SOLVER.cachedConstants.get(VALUE);
-		}
-		FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
-		if (NAME.equals(Integer.toString(VALUE))) {
-			SOLVER.cachedConstants.put(VALUE, cste);
-		}
-		return cste;
-	}
+    /**
+     * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
+     * <p/>
+     * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
+     *
+     * @param NAME   name of the constant
+     * @param VALUE  its value
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
+        if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
+            return SOLVER.cachedConstants.get(VALUE);
+        }
+        FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+        if (NAME.equals(Integer.toString(VALUE))) {
+            SOLVER.cachedConstants.put(VALUE, cste);
+        }
+        return cste;
+    }
 
-	/**
-	 * get a specific boolean variable, whom domain is reduced to the singleton {VALUE}.
-	 * This variable is unnamed as it is actually a solver constant
-	 *
-	 * @param VALUE  its value
-	 * @param SOLVER the solver to build the integer variable in.
-	 */
-	public static IntVar fixed(boolean VALUE, Solver SOLVER) {
-		if(VALUE) {
-			return SOLVER.ONE;
-		}else{
-			return SOLVER.ZERO;
-		}
-	}
+    /**
+     * get a specific boolean variable, whom domain is reduced to the singleton {VALUE}.
+     * This variable is unnamed as it is actually a solver constant
+     *
+     * @param VALUE  its value
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static IntVar fixed(boolean VALUE, Solver SOLVER) {
+        if (VALUE) {
+            return SOLVER.ONE;
+        } else {
+            return SOLVER.ZERO;
+        }
+    }
 
-	/**
-	 * Create a specific set variable, named NAME whom domain is reduced to the singleton {VALUE}.
-	 *
-	 * @param NAME   name of the constant
-	 * @param VALUE  its value, a set of integers (duplicates will be removed)
-	 * @param SOLVER the solver to build the integer variable in.
-	 */
-	public static SetVar fixed(String NAME, int[] VALUE, Solver SOLVER) {
-		return new FixedSetVarImpl(NAME,VALUE,SOLVER);
-	}
+    /**
+     * Create a specific set variable, named NAME whom domain is reduced to the singleton {VALUE}.
+     *
+     * @param NAME   name of the constant
+     * @param VALUE  its value, a set of integers (duplicates will be removed)
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static SetVar fixed(String NAME, int[] VALUE, Solver SOLVER) {
+        return new FixedSetVarImpl(NAME, VALUE, SOLVER);
+    }
 
     //*************************************************************************************
     // VIEWS
@@ -785,14 +799,14 @@ public class VariableFactory {
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-			Solver s = VAR.getSolver();
+            Solver s = VAR.getSolver();
             IntVar abs;
-            if(VAR.hasEnumeratedDomain()){
-                abs = enumerated(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
-            }else{
-                abs = bounded(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            if (VAR.hasEnumeratedDomain()) {
+                abs = enumerated(StringUtils.randomName(), 0, Math.max(-VAR.getLB(), VAR.getUB()), s);
+            } else {
+                abs = bounded(StringUtils.randomName(), 0, Math.max(-VAR.getLB(), VAR.getUB()), s);
             }
-			s.post(IntConstraintFactory.absolute(abs,VAR));
+            s.post(IntConstraintFactory.absolute(abs, VAR));
             return abs;
         }
     }

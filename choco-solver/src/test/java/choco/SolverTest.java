@@ -189,7 +189,7 @@ public class SolverTest {
     public void testFH1() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
-        IntVar i = VF.bounded("i", 1, 3, solver);
+        IntVar i = VF.bounded("i", VF.MIN_INT_BOUND, VF.MAX_INT_BOUND, solver);
         SetVar s = VF.set("s", 2, 3, solver);
         RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
         GraphVar g = VF.directedGraph("g", 2, solver);

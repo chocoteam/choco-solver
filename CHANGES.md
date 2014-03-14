@@ -62,3 +62,4 @@ The CHANGES.md file starts at this version.
 * Fix #177-#179: add a ContradictionException to NoPropagatioEngine to handle with empty domain variables
 * Fix #173: modify default failure message in initial propagation
 * Fix #172: fix retriveXXXvars() + tests
+* Fix #171: define VF.MIN_INT_BOUND and VF.MAX_INT_BOUND
