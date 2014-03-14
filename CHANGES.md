@@ -60,3 +60,4 @@ The CHANGES.md file starts at this version.
 * Fix #182: Set propagators manage ISetDeltaMonitors
 * Fix #183: change release script
 * Fix #177-#179: add a ContradictionException to NoPropagatioEngine to handle with empty domain variables
+* Fix #173: modify default failure message in initial propagation
