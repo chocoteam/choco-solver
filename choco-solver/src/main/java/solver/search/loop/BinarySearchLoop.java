@@ -79,7 +79,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             this.env.worldPop();
             solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
-            interrupt(MSG_SEARCH_INIT);
+            interrupt(MSG_INIT + ": " + cex.getMessage());
         }
         moveTo(OPEN_NODE);
     }

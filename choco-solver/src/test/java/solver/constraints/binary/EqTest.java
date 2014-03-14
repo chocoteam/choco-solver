@@ -26,7 +26,7 @@
  */
 package solver.constraints.binary;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;

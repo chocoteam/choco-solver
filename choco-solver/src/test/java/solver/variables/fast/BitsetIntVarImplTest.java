@@ -26,7 +26,7 @@
  */
 package solver.variables.fast;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import solver.Cause;

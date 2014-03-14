@@ -105,7 +105,7 @@ public class NValues extends Constraint {
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
 	 * Considers a set of difference constraints "diff" to achieve
-	 * a stronger filtering (AMNV(Gci,RMD,R13) of Fages and Lapègue, CP'13)
+	 * a stronger filtering (AMNV(Gci,RMD,R13) of Fages and Lapegue, CP'13)
 	 *
 	 * @param vars
 	 * @param nValues

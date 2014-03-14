@@ -914,7 +914,7 @@ public class IntConstraintFactory {
 
 	/**
 	 * Filters the conjunction of NValue and difference constraints
-	 * (propagator AMNV(Gci,RMD,R13) of Fages and Lapègue, CP'13)
+	 * (propagator AMNV(Gci,RMD,R13) of Fages and Lapegue, CP'13)
 	 * Difference constraint should be propagated separately in addition
 	 * @param VARS		collection of variables
 	 * @param NVALUES	limit variable
