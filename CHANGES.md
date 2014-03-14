@@ -57,3 +57,5 @@ The CHANGES.md file starts at this version.
 * new implementation of Among propagator
 * Fix #176: bug fixed in PropMin/PropMax
 * Fix #175: IMeasure objects can be cloned
+* Fix #182: Set propagators manage ISetDeltaMonitors
+* Fix #183: change release script

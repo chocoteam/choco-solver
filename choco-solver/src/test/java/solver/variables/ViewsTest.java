@@ -32,9 +32,11 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.set.SCF;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.SetStrategyFactory;
 
 /**
  * <br/>
@@ -455,5 +457,19 @@ public class ViewsTest {
         s.propagate();
 
         Assert.assertFalse(v1.contains(1));
+    }
+
+    @Test
+    public void testJL2() {
+        Solver solver = new Solver();
+        SetVar v1 = VF.fixed("{0,1}", new int[]{0, 1}, solver);
+        SetVar v2 = VF.set("v2", 0, 3, solver);
+        solver.post(SCF.subsetEq(new SetVar[]{v1, v2}));
+        solver.set(SetStrategyFactory.force_first(new SetVar[]{v1, v2}));
+        if (solver.findSolution()) {
+            do {
+                System.out.println(v1 + " subseteq " + v2);
+            } while (solver.nextSolution());
+        }
     }
 }
