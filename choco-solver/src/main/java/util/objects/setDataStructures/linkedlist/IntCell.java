@@ -32,7 +32,7 @@ import java.io.Serializable;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 9 f�vr. 2011
+ * Date: 9 fevr. 2011
  */
 public class IntCell implements Serializable {
 

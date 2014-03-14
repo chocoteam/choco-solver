@@ -63,3 +63,4 @@ The CHANGES.md file starts at this version.
 * Fix #173: modify default failure message in initial propagation
 * Fix #172: fix retriveXXXvars() + tests
 * Fix #171: define VF.MIN_INT_BOUND and VF.MAX_INT_BOUND
+* Fix #170: update dependencies

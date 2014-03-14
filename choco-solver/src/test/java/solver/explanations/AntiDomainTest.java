@@ -26,7 +26,7 @@
  */
 package solver.explanations;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.explanations.antidom.AntiDomBitset;

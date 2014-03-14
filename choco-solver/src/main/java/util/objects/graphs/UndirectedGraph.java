@@ -35,7 +35,7 @@ import util.objects.setDataStructures.SetType;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
- * Date: 9 f�vr. 2011
+ * Date: 9 fevr. 2011
  * <p/>
  * Specific implementation of an undirected graph
  */
