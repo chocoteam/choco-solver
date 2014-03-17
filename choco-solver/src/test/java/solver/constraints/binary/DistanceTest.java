@@ -36,7 +36,7 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.selectors.values.InDomainRandom;
+import solver.search.strategy.selectors.values.IntDomainRandom;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -129,7 +129,7 @@ public class DistanceTest {
                     s1.getEnvironment().worldPush();
                     s2.getEnvironment().worldPush();
 
-                    InDomainRandom r = new InDomainRandom(j);
+                    IntDomainRandom r = new IntDomainRandom(j);
                     int val = r.selectValue(vs1[0]);
                     vs1[0].removeValue(val, Cause.Null);
                     vs2[0].removeValue(val, Cause.Null);

@@ -30,7 +30,7 @@ package solver.search.strategy.strategy;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 import util.PoolManager;
@@ -45,25 +45,25 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     VariableSelector<IntVar> varselector;
 
-    InValueIterator valueIterator;
+    IntValueSelector valueSelector;
 
     PoolManager<FastDecision> decisionPool;
 
-    DecisionOperator assgnt = DecisionOperator.int_eq;
+    DecisionOperator<IntVar> assgnt = DecisionOperator.int_eq;
 
-    public Assignment(VariableSelector<IntVar> varselector, InValueIterator valueIterator) {
-        super(varselector.getScope());
+    public Assignment(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
+        super(scope);
         this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecision>();
+        this.valueSelector = valueSelector;
+        decisionPool = new PoolManager<>();
     }
 
-    public Assignment(VariableSelector<IntVar> varselector, InValueIterator valueIterator,
-                      DecisionOperator assgnt) {
-        super(varselector.getScope());
+    public Assignment(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
+                      DecisionOperator<IntVar> assgnt) {
+        super(scope);
         this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecision>();
+        this.valueSelector = valueSelector;
+        decisionPool = new PoolManager<>();
         this.assgnt = assgnt;
     }
 
@@ -76,7 +76,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
-        int value = valueIterator.selectValue(variable);
+        int value = valueSelector.selectValue(variable);
         FastDecision d = decisionPool.getE();
         if (d == null) {
             d = new FastDecision(decisionPool);
@@ -88,11 +88,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        IntVar variable = null;
-        if (varselector.hasNext()) {
-            varselector.advance();
-            variable = varselector.getVariable();
-        }
+        IntVar variable = varselector.getVariable(vars);
         return computeDecision(variable);
     }
 }

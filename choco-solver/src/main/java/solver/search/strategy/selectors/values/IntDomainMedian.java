@@ -27,25 +27,32 @@
 
 package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 /**
- * Assigns the largest value in the variable's domain.
+ * Assigns the middle value in the variable's domain.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 28 sept. 2010
+ * @since 2 juil. 2010
  */
-public final class InDomainMax implements InValueIterator {
-
+public class IntDomainMedian implements IntValueSelector {
 
     /**
      * {@inheritDoc}
      */
     @Override
     public int selectValue(IntVar var) {
-        return var.getUB();
+        if (var.hasEnumeratedDomain()) {
+            int dz = var.getDomainSize();
+            int median = var.getLB();
+            for (int i = 0; i < dz / 2; i++) {
+                median = var.nextValue(median);
+            }
+            return median;
+        } else {
+            return var.getLB();
+        }
     }
-
 }

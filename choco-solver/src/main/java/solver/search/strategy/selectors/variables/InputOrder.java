@@ -27,7 +27,6 @@
 
 package solver.search.strategy.selectors.variables;
 
-import memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.Variable;
 
@@ -41,41 +40,14 @@ import solver.variables.Variable;
  */
 public class InputOrder<V extends Variable> implements VariableSelector<V> {
 
-    V[] variables;
-
-    IStateInt index;
-
-    public InputOrder(V[] variables) {
-        this.variables = variables.clone();
-        this.index = variables[0].getSolver().getEnvironment().makeInt();
-    }
-
     @Override
-    public V[] getScope() {
-        return variables;
-    }
-
-    @Override
-    public boolean hasNext() {
-        int idx = index.get();
-        for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
-        int idx = index.get();
-        for (; idx < variables.length; idx++) {
+    public V getVariable(V[] variables) {
+        int small_idx = -1;
+        for (int idx = 0; idx < variables.length; idx++) {
             if (!variables[idx].isInstantiated()) {
-                return;
+                small_idx = idx;
             }
-            index.add(1);
         }
-    }
-
-    @Override
-    public V getVariable() {
-        return variables[index.get()];
+        return small_idx > -1 ? variables[small_idx] : null;
     }
 }

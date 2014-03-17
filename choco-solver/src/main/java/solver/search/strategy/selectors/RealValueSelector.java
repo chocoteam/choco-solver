@@ -27,19 +27,19 @@
 
 package solver.search.strategy.selectors;
 
-import solver.variables.IntVar;
+import solver.variables.RealVar;
 
 import java.io.Serializable;
 
 /**
- * A value iterator specfies which value should be chosen to constrained the selected variable.
+ * A value selector specifies which value should be chosen to constrain the selected variable.
  * The value chosen must belong to the domain of the selected variable.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 28 sept. 2010
  */
-public interface InValueIterator extends Serializable {
+public interface RealValueSelector extends Serializable {
 
     /**
      * Selects and returns the value to constrained chosen variable with.
@@ -47,6 +47,6 @@ public interface InValueIterator extends Serializable {
      *
      * @return the value, based on the domain of variable
      */
-    public int selectValue(IntVar var);
+    public double selectValue(RealVar var);
 
 }

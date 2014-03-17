@@ -27,7 +27,7 @@
 package solver.search.strategy.selectors.values;
 
 import solver.exception.SolverException;
-import solver.search.strategy.selectors.RealValueIterator;
+import solver.search.strategy.selectors.RealValueSelector;
 import solver.variables.RealVar;
 
 /**
@@ -36,7 +36,7 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public class RealDomainMiddle implements RealValueIterator {
+public class RealDomainMiddle implements RealValueSelector {
 
     @Override
     public double selectValue(RealVar var) {

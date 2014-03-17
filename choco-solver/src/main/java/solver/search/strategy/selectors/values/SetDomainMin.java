@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,41 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.selectors.values;
 
-package solver.search.strategy.selectors.variables;
-
-import solver.search.strategy.selectors.VariableEvaluator;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import solver.search.strategy.selectors.SetValueSelector;
+import solver.variables.SetVar;
 
 /**
- * <b>Largest</b> variable selector.
- * It chooses the variable with the largest value in its domain (instantiated variables are ignored).
- * <br/>
+ * Selects the first integer in the envelope and not in the kernel
  *
- * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @author Jean-Guillaum Fages, Charles Prud'homme
+ * @since 17/03/2014
  */
-public class Largest implements VariableSelector<IntVar>,VariableEvaluator<IntVar>{
-
+public class SetDomainMin implements SetValueSelector {
 
     @Override
-    public IntVar getVariable(IntVar[] variables) {
-        int large_idx = -1;
-        int large_value = Integer.MIN_VALUE;
-        for (int idx = 0; idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
-            int upper = variables[idx].getUB();
-            if (dsize > 1 && upper > large_value) {
-                large_value = upper;
-                large_idx = idx;
+    public int selectValue(SetVar s) {
+        for (int i = s.getEnvelopeFirst(); i != SetVar.END; i = s.getEnvelopeNext()) {
+            if (!s.kernelContains(i)) {
+                return i;
             }
         }
-        return large_idx > -1 ? variables[large_idx] : null;
-    }
-
-    @Override
-    public double evaluate(IntVar variable) {
-        return -variable.getUB();
+        throw new UnsupportedOperationException(s + " is already instantiated. Cannot compute a decision on it");
     }
 }

@@ -40,20 +40,14 @@ import solver.variables.RealVar;
 public class Cyclic implements VariableSelector<RealVar> {
 
     protected int current;
-    protected RealVar[] vars;
 
-    public Cyclic(RealVar[] vars) {
+    public Cyclic() {
         this.current = -1;
-        this.vars = vars;
     }
 
-    @Override
-    public RealVar[] getScope() {
-        return vars;
-    }
 
     @Override
-    public boolean hasNext() {
+    public RealVar getVariable(RealVar[] vars) {
         int nbvars = vars.length;
         int start = current == -1 ? nbvars - 1 : current;
         int n = (current + 1) % nbvars;
@@ -61,16 +55,6 @@ public class Cyclic implements VariableSelector<RealVar> {
             n = (n + 1) % nbvars;
         }
         current = n;
-        return !vars[current].isInstantiated();
-    }
-
-    @Override
-    public void advance() {
-        // void
-    }
-
-    @Override
-    public RealVar getVariable() {
-        return vars[current];
+        return vars[current].isInstantiated() ? null : vars[current];
     }
 }

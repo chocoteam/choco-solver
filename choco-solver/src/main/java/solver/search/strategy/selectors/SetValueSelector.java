@@ -25,40 +25,23 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.selectors.variables;
+package solver.search.strategy.selectors;
 
-import solver.search.strategy.selectors.VariableEvaluator;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import solver.variables.SetVar;
 
 /**
- * <b>Largest</b> variable selector.
- * It chooses the variable with the largest value in its domain (instantiated variables are ignored).
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * Heuristic for branching on a given SetVar
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class Largest implements VariableSelector<IntVar>,VariableEvaluator<IntVar>{
+public interface SetValueSelector {
 
+	/**
+	 * Value selection heuristic
+	 * @param v a non-instantiated SetVar
+	 * @return an integer i of v's envelope, which is not included in v's kernel
+	 * so that a decision (forcing/removing i) can be applied on v
+	 */
+	public int selectValue(SetVar v);
 
-    @Override
-    public IntVar getVariable(IntVar[] variables) {
-        int large_idx = -1;
-        int large_value = Integer.MIN_VALUE;
-        for (int idx = 0; idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
-            int upper = variables[idx].getUB();
-            if (dsize > 1 && upper > large_value) {
-                large_value = upper;
-                large_idx = idx;
-            }
-        }
-        return large_idx > -1 ? variables[large_idx] : null;
-    }
-
-    @Override
-    public double evaluate(IntVar variable) {
-        return -variable.getUB();
-    }
 }

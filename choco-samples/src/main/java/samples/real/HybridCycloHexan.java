@@ -94,7 +94,7 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		solver.set(new AssignmentInterval(vars, new Cyclic(vars), new RealDomainMiddle()));
+		solver.set(new AssignmentInterval(vars, new Cyclic(), new RealDomainMiddle()));
 		SearchMonitorFactory.limitTime(solver,10000);
 	}
 
