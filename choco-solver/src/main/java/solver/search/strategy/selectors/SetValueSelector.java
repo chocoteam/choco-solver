@@ -25,29 +25,23 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.selectors.variables;
+package solver.search.strategy.selectors;
 
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.Variable;
+import solver.variables.SetVar;
 
 /**
- * <b>Input order</b> variable selector.
- * It chooses variables in order they appears in the <code>constructor</code> (instantiated variables are ignored).
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * Heuristic for branching on a given SetVar
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class InputOrder<V extends Variable> implements VariableSelector<V> {
+public interface SetValueSelector {
 
-    @Override
-    public V getVariable(V[] variables) {
-        int small_idx = -1;
-        for (int idx = 0; idx < variables.length; idx++) {
-            if (!variables[idx].isInstantiated()) {
-                small_idx = idx;
-            }
-        }
-        return small_idx > -1 ? variables[small_idx] : null;
-    }
+	/**
+	 * Value selection heuristic
+	 * @param v a non-instantiated SetVar
+	 * @return an integer i of v's envelope, which is not included in v's kernel
+	 * so that a decision (forcing/removing i) can be applied on v
+	 */
+	public int selectValue(SetVar v);
+
 }

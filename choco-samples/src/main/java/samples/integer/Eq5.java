@@ -93,7 +93,7 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(new Assignment(new InputOrder<>(vars), new IntDomainMiddle()));
+        solver.set(new Assignment(vars, new InputOrder<IntVar>(), new IntDomainMiddle()));
     }
 
     @Override

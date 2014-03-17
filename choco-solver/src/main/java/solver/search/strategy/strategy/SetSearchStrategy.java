@@ -25,19 +25,20 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy.set;
+package solver.search.strategy.strategy;
 
 import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecisionSet;
+import solver.search.strategy.selectors.SetValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.SetVar;
 import util.PoolManager;
 
 /**
  * Strategy for branching on set variables
+ *
  * @author Jean-Guillaume Fages
  * @since 6/10/13
  */
@@ -48,26 +49,27 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
     //***********************************************************************************
 
     protected PoolManager<FastDecisionSet> pool;
-	protected VariableSelector<SetVar> varSelector;
-	protected SetValueSelector valSelector;
-	protected DecisionOperator<SetVar> operator;
+    protected VariableSelector<SetVar> varSelector;
+    protected SetValueSelector valSelector;
+    protected DecisionOperator<SetVar> operator;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Generic strategy to branch on set variables
-	 * @param variables		SetVar array to branch on
-	 * @param varS			variable selection strategy
-	 * @param valS			integer  selection strategy
-	 * @param enforceFirst	branching order true = enforce first; false = remove first
-	 */
-    public SetSearchStrategy(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst) {
-        super(varS.getScope());
-		varSelector = varS;
-		valSelector = valS;
-		operator = enforceFirst?DecisionOperator.set_force:DecisionOperator.set_remove;
+    /**
+     * Generic strategy to branch on set variables
+     *
+     * @param scope        SetVar array to branch on
+     * @param varS         variable selection strategy
+     * @param valS         integer  selection strategy
+     * @param enforceFirst branching order true = enforce first; false = remove first
+     */
+    public SetSearchStrategy(SetVar[] scope, VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst) {
+        super(scope);
+        varSelector = varS;
+        valSelector = valS;
+        operator = enforceFirst ? DecisionOperator.set_force : DecisionOperator.set_remove;
         pool = new PoolManager<>();
     }
 
@@ -81,25 +83,21 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 
     @Override
     public Decision<SetVar> getDecision() {
-        SetVar variable = null;
-        if (varSelector.hasNext()) {
-            varSelector.advance();
-            variable = varSelector.getVariable();
-        }
+        SetVar variable = varSelector.getVariable(vars);
         return computeDecision(variable);
     }
 
     @Override
-    public Decision<SetVar> computeDecision(SetVar s) {    
-                if (s == null) {
-                    return null;
-                }
-                assert !s.isInstantiated();
-		FastDecisionSet d = pool.getE();
-		if (d == null) {
-			d = new FastDecisionSet(pool);
-		}
-		d.set(s, valSelector.selectValue(s), operator);
-		return d;
+    public Decision<SetVar> computeDecision(SetVar s) {
+        if (s == null) {
+            return null;
+        }
+        assert !s.isInstantiated();
+        FastDecisionSet d = pool.getE();
+        if (d == null) {
+            d = new FastDecisionSet(pool);
+        }
+        d.set(s, valSelector.selectValue(s), operator);
+        return d;
     }
 }

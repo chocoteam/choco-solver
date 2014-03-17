@@ -41,34 +41,9 @@ import solver.variables.Variable;
  */
 public class Occurrence<V extends Variable> implements VariableSelector<V> {
 
-    /* list of variables */
-    V[] variables;
-
-    /* index of the smallest domain variable */
-    int large_idx;
-
-    public Occurrence(V[] variables) {
-        this.variables = variables.clone();
-        large_idx = 0;
-
-    }
-
     @Override
-    public V[] getScope() {
-        return variables;
-    }
-
-    @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
-        int large_idx = 0;
+    public V getVariable(V[] variables) {
+        int large_idx = -1;
         int large_nb_cstrs = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
             int nb_cstrs = variables[idx].getNbProps();
@@ -77,11 +52,6 @@ public class Occurrence<V extends Variable> implements VariableSelector<V> {
                 large_idx = idx;
             }
         }
-        this.large_idx = large_idx;
-    }
-
-    @Override
-    public V getVariable() {
-        return variables[large_idx];
+        return large_idx > -1 ? variables[large_idx] : null;
     }
 }

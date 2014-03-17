@@ -41,47 +41,27 @@ import solver.variables.Variable;
  */
 public class Random<T extends Variable> implements VariableSelector<T> {
 
-    T[] variables;
-
-    int rand_idx;
-
     TIntArrayList sets;
 
     java.util.Random random;
 
-    public Random(T[] variables, long seed) {
-        this.variables = variables.clone();
-        sets = new TIntArrayList(variables.length);
+    public Random(long seed) {
+        sets = new TIntArrayList();
         random = new java.util.Random(seed);
     }
 
-    @Override
-    public T[] getScope() {
-        return variables;
-    }
 
     @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].isInstantiated(); idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
+    public T getVariable(T[] variables) {
         sets.clear();
-        rand_idx = 0;
         for (int idx = 0; idx < variables.length; idx++) {
             if (!variables[idx].isInstantiated()) {
                 sets.add(idx);
             }
         }
-        this.rand_idx = sets.get(random.nextInt(sets.size()));
-    }
-
-    @Override
-    public T getVariable() {
-        return variables[rand_idx];
+        if (sets.size() > 0) {
+            int rand_idx = sets.get(random.nextInt(sets.size()));
+            return variables[rand_idx];
+        } else return null;
     }
 }

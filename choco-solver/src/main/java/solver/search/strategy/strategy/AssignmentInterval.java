@@ -48,8 +48,8 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
 
     PoolManager<FastDecisionReal> decisionPool;
 
-    public AssignmentInterval(RealVar[] vars, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
-        super(vars);
+    public AssignmentInterval(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
+        super(scope);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
         decisionPool = new PoolManager<>();
@@ -76,11 +76,7 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        RealVar variable = null;
-        if (varselector.hasNext()) {
-            varselector.advance();
-            variable = varselector.getVariable();
-        }
+        RealVar variable = varselector.getVariable(vars);
         return computeDecision(variable);
     }
 }

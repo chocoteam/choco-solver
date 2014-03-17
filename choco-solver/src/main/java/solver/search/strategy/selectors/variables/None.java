@@ -39,21 +39,7 @@ enum None implements VariableSelector<Variable> {
     ;
 
     @Override
-    public Variable[] getScope() {
-        return new Variable[0];
-    }
-
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    @Override
-    public void advance() {
-    }
-
-    @Override
-    public Variable getVariable() {
+    public Variable getVariable(Variable[] variables) {
         return null;
     }
 }

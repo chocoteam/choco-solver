@@ -51,16 +51,16 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     DecisionOperator<IntVar> assgnt = DecisionOperator.int_eq;
 
-    public Assignment(VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
-        super(varselector.getScope());
+    public Assignment(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
+        super(scope);
         this.varselector = varselector;
         this.valueSelector = valueSelector;
         decisionPool = new PoolManager<>();
     }
 
-    public Assignment(VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
-                      DecisionOperator assgnt) {
-        super(varselector.getScope());
+    public Assignment(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
+                      DecisionOperator<IntVar> assgnt) {
+        super(scope);
         this.varselector = varselector;
         this.valueSelector = valueSelector;
         decisionPool = new PoolManager<>();
@@ -88,11 +88,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        IntVar variable = null;
-        if (varselector.hasNext()) {
-            varselector.advance();
-            variable = varselector.getVariable();
-        }
+        IntVar variable = varselector.getVariable(vars);
         return computeDecision(variable);
     }
 }

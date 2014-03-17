@@ -41,13 +41,13 @@ import solver.variables.IntVar;
  */
 public class Once extends Assignment {
 
-    public Once(VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
-        super(varselector, valueSelector);
+    public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
+        super(scope, varselector, valueSelector);
     }
 
-    public Once(VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
-                DecisionOperator assgnt) {
-        super(varselector, valueSelector, assgnt);
+    public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
+                DecisionOperator<IntVar> assgnt) {
+        super(scope, varselector, valueSelector, assgnt);
     }
 
     @Override

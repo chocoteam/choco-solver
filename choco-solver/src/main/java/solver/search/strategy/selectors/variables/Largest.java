@@ -40,33 +40,9 @@ import solver.variables.IntVar;
  */
 public class Largest implements VariableSelector<IntVar> {
 
-    /* list of variables */
-    IntVar[] variables;
-
-    /* index of the smallest domain variable */
-    int large_idx;
-
-    public Largest(IntVar[] variables) {
-        this.variables = variables.clone();
-        large_idx = 0;
-
-    }
 
     @Override
-    public IntVar[] getScope() {
-        return variables;
-    }
-
-    @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
+    public IntVar getVariable(IntVar[] variables) {
         int large_idx = 0;
         int large_value = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
@@ -77,11 +53,6 @@ public class Largest implements VariableSelector<IntVar> {
                 large_idx = idx;
             }
         }
-        this.large_idx = large_idx;
-    }
-
-    @Override
-    public IntVar getVariable() {
-        return variables[large_idx];
+        return large_idx > -1 ? variables[large_idx] : null;
     }
 }

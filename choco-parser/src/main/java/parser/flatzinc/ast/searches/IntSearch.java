@@ -51,41 +51,41 @@ public class IntSearch {
     }
 
     public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Solver solver) {
-        VariableSelector<IntVar> varsel = variableSelector(variables, varChoice);
+        VariableSelector<IntVar> varsel = variableSelector(varChoice);
         if (varsel == null) { // free search
             return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 2.0d, 1, seed);
         }
-        return valueSelector(varsel, assignment);
+        return valueSelector(variables, varsel, assignment);
     }
 
-    private static VariableSelector<IntVar> variableSelector(IntVar[] variables, VarChoice varChoice) {
+    private static VariableSelector<IntVar> variableSelector(VarChoice varChoice) {
         switch (varChoice) {
             case input_order:
-                return new InputOrder<>(variables);
+                return new InputOrder<>();
             case first_fail:
-                return new FirstFail(variables);
+                return new FirstFail();
             case anti_first_fail:
-                return new AntiFirstFail(variables);
+                return new AntiFirstFail();
             case smallest:
-                return new Smallest(variables);
+                return new Smallest();
             case largest:
-                return new Largest(variables);
+                return new Largest();
             case occurrence:
-                return new Occurrence<>(variables);
+                return new Occurrence<>();
             case most_constrained:
-                return new MostConstrained(variables);
+                return new MostConstrained();
             case max_regret:
-                return new MaxRegret(variables);
+                return new MaxRegret();
             default:
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;
         }
     }
 
-    private static solver.search.strategy.strategy.Assignment valueSelector(VariableSelector<IntVar> variableSelector,
+    private static solver.search.strategy.strategy.Assignment valueSelector(IntVar[] scope, VariableSelector<IntVar> variableSelector,
                                                                             Assignment assignmennt) {
         IntValueSelector valSelector;
-        DecisionOperator assgnt = DecisionOperator.int_eq;
+        DecisionOperator<IntVar> assgnt = DecisionOperator.int_eq;
         switch (assignmennt) {
             case indomain:
             case indomain_min:
@@ -116,7 +116,7 @@ public class IntSearch {
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + assignmennt.name() + ". Set default.");
                 valSelector = new IntDomainMin();
         }
-        return new solver.search.strategy.strategy.Assignment(variableSelector, valSelector, assgnt);
+        return new solver.search.strategy.strategy.Assignment(scope, variableSelector, valSelector, assgnt);
     }
 
 

@@ -26,7 +26,7 @@
  */
 package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.strategy.set.SetValueSelector;
+import solver.search.strategy.selectors.SetValueSelector;
 import solver.variables.SetVar;
 
 /**

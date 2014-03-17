@@ -160,7 +160,7 @@ public class FGoal {
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && gc.all) {
-                aSolver.set(new Assignment(new FirstFail(ivars), new IntDomainMin()));
+                aSolver.set(new Assignment(ivars, new FirstFail(), new IntDomainMin()));
             } else {
                 switch (gc.bbss) {
                     case 2:
@@ -177,7 +177,7 @@ public class FGoal {
                         break;
                     case 4:
                         description.append("first_fail");
-                        aSolver.set(new Assignment(new FirstFail(ivars), new IntDomainMin()));
+                        aSolver.set(new Assignment(ivars, new FirstFail(), new IntDomainMin()));
                         break;
                     case 1:
                     default:

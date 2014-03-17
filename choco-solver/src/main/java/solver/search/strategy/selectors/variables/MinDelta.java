@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,27 +24,30 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.strategy.selectors.variables;
 
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.Variable;
+import solver.variables.SetVar;
 
 /**
- * <b>Input order</b> variable selector.
- * It chooses variables in order they appears in the <code>constructor</code> (instantiated variables are ignored).
- * <br/>
+ * Selects the variables minimising envelopeSize-kernelSize (quite similar
+ * to minDomain, or first-fail)
  *
- * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class InputOrder<V extends Variable> implements VariableSelector<V> {
+public class MinDelta implements VariableSelector<SetVar> {
+
 
     @Override
-    public V getVariable(V[] variables) {
+    public SetVar getVariable(SetVar[] variables) {
         int small_idx = -1;
+        int delta = Integer.MAX_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
-            if (!variables[idx].isInstantiated()) {
+            SetVar variable = variables[idx];
+            int d = variable.getEnvelopeSize() - variable.getKernelSize();
+            if (d > 0 && d < delta) {
+                delta = d;
                 small_idx = idx;
             }
         }
