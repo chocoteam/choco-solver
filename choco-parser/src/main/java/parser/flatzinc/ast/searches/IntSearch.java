@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.selectors.IntValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.selectors.VariableSelectorWithTies;
 import solver.search.strategy.selectors.values.*;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -73,7 +74,8 @@ public class IntSearch {
             case occurrence:
                 return new Occurrence<>();
             case most_constrained:
-                return new MostConstrained();
+                // It chooses the variable with the smallest value in its domain, breaking ties using the number of propagators
+                return new VariableSelectorWithTies<>(new Smallest(), new Occurrence<IntVar>());
             case max_regret:
                 return new MaxRegret();
             default:

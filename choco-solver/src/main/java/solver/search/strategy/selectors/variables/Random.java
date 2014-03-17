@@ -28,6 +28,7 @@
 package solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.Variable;
 
@@ -39,7 +40,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Random<T extends Variable> implements VariableSelector<T> {
+public class Random<T extends Variable> implements VariableSelector<T>, VariableEvaluator<T> {
 
     TIntArrayList sets;
 
@@ -63,5 +64,10 @@ public class Random<T extends Variable> implements VariableSelector<T> {
             int rand_idx = sets.get(random.nextInt(sets.size()));
             return variables[rand_idx];
         } else return null;
+    }
+
+    @Override
+    public double evaluate(T variable) {
+        return random.nextDouble();
     }
 }

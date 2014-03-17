@@ -27,6 +27,7 @@
 
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.Variable;
 
@@ -39,7 +40,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Occurrence<V extends Variable> implements VariableSelector<V> {
+public class Occurrence<V extends Variable> implements VariableSelector<V>,VariableEvaluator<V> {
 
     @Override
     public V getVariable(V[] variables) {
@@ -53,5 +54,10 @@ public class Occurrence<V extends Variable> implements VariableSelector<V> {
             }
         }
         return large_idx > -1 ? variables[large_idx] : null;
+    }
+
+    @Override
+    public double evaluate(V variable) {
+        return -(variable.getNbProps());
     }
 }

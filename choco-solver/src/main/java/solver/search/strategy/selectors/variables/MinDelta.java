@@ -26,6 +26,7 @@
  */
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.SetVar;
 
@@ -36,7 +37,7 @@ import solver.variables.SetVar;
  * @author Jean-Guillaume Fages
  * @since 6/10/13
  */
-public class MinDelta implements VariableSelector<SetVar> {
+public class MinDelta implements VariableSelector<SetVar>,VariableEvaluator<SetVar> {
 
 
     @Override
@@ -52,5 +53,10 @@ public class MinDelta implements VariableSelector<SetVar> {
             }
         }
         return small_idx > -1 ? variables[small_idx] : null;
+    }
+
+    @Override
+    public double evaluate(SetVar variable) {
+        return variable.getEnvelopeSize() - variable.getKernelSize();
     }
 }

@@ -27,6 +27,7 @@
 
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -38,7 +39,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class AntiFirstFail implements VariableSelector<IntVar> {
+public class AntiFirstFail implements VariableSelector<IntVar>,VariableEvaluator<IntVar> {
 
     @Override
     public IntVar getVariable(IntVar[] variables) {
@@ -52,5 +53,10 @@ public class AntiFirstFail implements VariableSelector<IntVar> {
             }
         }
         return large_idx > -1 ? variables[large_idx] : null;
+    }
+
+    @Override
+    public double evaluate(IntVar variable) {
+        return -variable.getDomainSize();
     }
 }

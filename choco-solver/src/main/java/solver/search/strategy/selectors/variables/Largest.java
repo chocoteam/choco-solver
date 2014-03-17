@@ -27,6 +27,7 @@
 
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -38,12 +39,12 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Largest implements VariableSelector<IntVar> {
+public class Largest implements VariableSelector<IntVar>,VariableEvaluator<IntVar>{
 
 
     @Override
     public IntVar getVariable(IntVar[] variables) {
-        int large_idx = 0;
+        int large_idx = -1;
         int large_value = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
@@ -54,5 +55,10 @@ public class Largest implements VariableSelector<IntVar> {
             }
         }
         return large_idx > -1 ? variables[large_idx] : null;
+    }
+
+    @Override
+    public double evaluate(IntVar variable) {
+        return -variable.getUB();
     }
 }

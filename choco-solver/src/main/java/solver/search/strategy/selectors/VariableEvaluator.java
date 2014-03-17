@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,37 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.selectors;
 
-package solver.search.strategy.selectors.variables;
-
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
- * <b>Most constrained</b> variable selector.
- * It chooses the variable with the smallest value in its domain, breaking ties using the number of propagators
- * (instantiated variables are ignored).
+ * A variable evaluator. One provide a way to evaluate a variable (domain size, smallest values, ...).
+ * It should return a value which can be minimized.
+ * For instance, to select the integer variable with the smallest value in its domain, return ivar.getLB().
+ * To select the variable with the largest value in its domain, return -ivar.getUB().
+ * <p/>
+ * Such evaluator can be called and combined with others to define a variable selector which enables tie breaking.
+ * Indeed, many uninstantied variables may return the same value for the evaluation.
+ * In that case, the next evaluator should break ties, otherwise the first computed variable would be returned.
+ * <p/>
+ * Be aware that using a single variable evaluator in {@code solver.search.strategy.selectors.VariableSelectorWithTies} may result
+ * in a slower execution due to the generalisation it requires.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @since 17/03/2014
  */
-public class MostConstrained implements VariableSelector<IntVar> {
+public interface VariableEvaluator<V extends Variable> {
 
-    @Override
-    public IntVar getVariable(IntVar[] variables) {
-        int small_idx = -1;
-        int small_value = Integer.MAX_VALUE;
-        for (int idx = 0; idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
-            int lower = variables[idx].getLB();
-            if (dsize > 1 &&
-                    (lower < small_value
-                            || (lower == small_value && variables[idx].getNbProps() < variables[small_idx].getNbProps()))) {
-                small_value = lower;
-                small_idx = idx;
-            }
-        }
-        return small_idx > -1 ? variables[small_idx] : null;
-    }
+    /**
+     * Evaluates the heuristic that is <b>minimized</b> in order to find the best variable
+     *
+     * @param variable array of variable
+     * @return the result of the evaluation, to minimize
+     */
+    public abstract double evaluate(V variable);
 }

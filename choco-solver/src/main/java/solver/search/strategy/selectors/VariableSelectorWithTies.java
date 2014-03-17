@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,22 +24,67 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.selectors.variables;
+package solver.search.strategy.selectors;
 
-import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.Variable;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 06/02/13
+ * @since 17/03/2014
  */
-enum None implements VariableSelector<Variable> {
-    ;
+public class VariableSelectorWithTies<V extends Variable> implements VariableSelector<V> {
+
+    final VariableEvaluator<V>[] heuristics;
+    ArrayList<V> oldv = new ArrayList<>();
+    ArrayList<V> newv = new ArrayList<>();
+
+
+    public VariableSelectorWithTies(VariableEvaluator<V>... heuristics) {
+        this.heuristics = heuristics;
+    }
+
 
     @Override
-    public Variable getVariable(Variable[] variables) {
-        return null;
+    public V getVariable(V[] variables) {
+        oldv.clear();
+        newv.clear();
+        Collections.addAll(oldv, variables);
+        // 1. remove instantied variables
+        for (V v : oldv) {
+            if (!v.isInstantiated()) {
+                newv.add(v);
+            }
+        }
+        if (newv.size() == 0) return null;
+
+        // Then apply each heuristic one by one
+        double minValue = Double.MAX_VALUE - 1;
+        for (VariableEvaluator<V> h : heuristics) {
+            oldv.clear();
+            oldv.addAll(newv);
+            newv.clear();
+            for (V v : oldv) {
+                double val = h.evaluate(v);
+                if (val < minValue) {
+                    newv.clear();
+                    newv.add(v);
+                    minValue = val;
+                } else if (val == minValue) {
+                    newv.add(v);
+                }
+            }
+        }
+        switch (oldv.size()) {
+            case 0:
+                return null;
+            default:
+            case 1:
+                return oldv.get(0);
+        }
     }
 }
