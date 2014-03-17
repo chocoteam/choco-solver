@@ -90,11 +90,11 @@ public class FGoal {
         // First define solving process
         AbstractSearchLoop search = aSolver.getSearchLoop();
         GoalConf gc = datas.goals();
-		IntVar obj = null;
-		if(type!=ResolutionPolicy.SATISFACTION){
-			obj = expr.intVarValue(aSolver);
-		}
-		aSolver.set(new ObjectiveManager<IntVar,Integer>(obj, type, true));//                solver.setRestart(true);
+        IntVar obj = null;
+        if (type != ResolutionPolicy.SATISFACTION) {
+            obj = expr.intVarValue(aSolver);
+        }
+        aSolver.set(new ObjectiveManager<IntVar, Integer>(obj, type, true));//                solver.setRestart(true);
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
@@ -173,8 +173,8 @@ public class FGoal {
                         break;
                     case 3:
                         description.append("wdeg");
-                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed);
-                        aSolver.set(new Assignment(dwd, new InDomainMin()));
+                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed, new InDomainMin());
+                        aSolver.set(dwd);
                         break;
                     case 4:
                         description.append("first_fail");
@@ -206,25 +206,25 @@ public class FGoal {
         for (int i = 0; i < dvars.length; i++) {
             dvars[i] = (IntVar) ddvars[i];
         }
-		ObjectiveManager om = solver.getObjectiveManager();
+        ObjectiveManager om = solver.getObjectiveManager();
         ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
         switch (gc.lns) {
             case RLNS:
                 lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
-				if(!om.isOptimization()){
-					lns = null;
-					solver.set(ISF.ActivityBased(dvars,0));
-				}
+                if (!om.isOptimization()) {
+                    lns = null;
+                    solver.set(ISF.ActivityBased(dvars, 0));
+                }
                 break;
             case RLNS_BB:
                 lns = LNSFactory.rlns(solver, ivars, 200, gc.seed, fr);
                 break;
             case PGLNS:
                 lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
-				if(!om.isOptimization()){
-					lns = null;
-					solver.set(ISF.domOverWDeg_InDomainMin(dvars, 0));
-				}
+                if (!om.isOptimization()) {
+                    lns = null;
+                    solver.set(ISF.domOverWDeg_InDomainMin(dvars, 0));
+                }
                 break;
             case PGLNS_BB:
                 lns = LNSFactory.pglns(solver, ivars, 200, 100, 10, gc.seed, fr);

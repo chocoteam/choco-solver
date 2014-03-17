@@ -60,7 +60,7 @@ public class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> presetI(IntVar... VARS) {
-        return new Assignment(new InputOrder(VARS), new InDomainMin());
+        return new Assignment(new InputOrder<>(VARS), new InDomainMin());
     }
 
 
@@ -71,7 +71,7 @@ public class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> inputOrder_InDomainMin(IntVar... VARS) {
-        return new Assignment(new InputOrder(VARS), new InDomainMin());
+        return new Assignment(new InputOrder<>(VARS), new InDomainMin());
     }
 
     /**
@@ -95,7 +95,7 @@ public class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> inputOrder_InDomainMax(IntVar... VARS) {
-        return new Assignment(new InputOrder(VARS), new InDomainMax());
+        return new Assignment(new InputOrder<>(VARS), new InDomainMax());
     }
 
     /**
@@ -147,7 +147,7 @@ public class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> random(IntVar[] VARS, long SEED) {
-        return new Assignment(new Random(VARS, SEED), new InDomainRandom(SEED));
+        return new Assignment(new Random<>(VARS, SEED), new InDomainRandom(SEED));
     }
 
 
@@ -158,7 +158,7 @@ public class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
-        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMin());
+        return new DomOverWDeg(VARS, SEED, new InDomainMin());
     }
 
     /**

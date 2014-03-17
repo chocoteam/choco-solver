@@ -26,21 +26,28 @@
  */
 package solver.search.strategy.selectors.variables;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Propagator;
+import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.loop.monitors.FailPerPropagator;
-import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.assignments.DecisionOperator;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
-
-import java.util.Random;
+import util.PoolManager;
 
 /**
  * <br/>
@@ -48,7 +55,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 12/07/12
  */
-public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<IntVar> {
+public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMonitor<IntVar> {
 
     /* list of variables */
     IntVar[] variables;
@@ -57,62 +64,83 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
 
     TIntObjectHashMap<IStateInt> pid2ari;
     TIntIntHashMap pid2arity;
-    Random random;
+    TIntList bests;
 
-    /* index of the smallest domain variable */
-    int small_idx;
+    java.util.Random random;
 
-    public DomOverWDeg(IntVar[] variables, long seed) {
+    PoolManager<FastDecision> decisionPool;
+
+    InValueIterator valueIterator;
+
+    public DomOverWDeg(IntVar[] variables, long seed, InValueIterator valueIterator) {
+        super(variables);
         this.variables = variables.clone();
-        small_idx = 0;
         Solver solver = variables[0].getSolver();
         counter = new FailPerPropagator(solver.getCstrs(), solver);
-        pid2ari = new TIntObjectHashMap<IStateInt>();
+        pid2ari = new TIntObjectHashMap<>();
         pid2arity = new TIntIntHashMap(10, 0.5F, -1, -1);
+        bests = new TIntArrayList();
+        this.valueIterator = valueIterator;
+        decisionPool = new PoolManager<>();
+        random = new java.util.Random(seed);
+    }
+
+    @Override
+    public void init() throws ContradictionException {
+        IEnvironment env = vars[0].getSolver().getEnvironment();
         for (int i = 0; i < variables.length; i++) {
             variables[i].addMonitor(this);
             Propagator[] props = variables[i].getPropagators();
             for (int j = 0; j < props.length; j++) {
-                pid2ari.putIfAbsent(props[j].getId(), solver.getEnvironment().makeInt(props[j].arity()));
+                pid2ari.putIfAbsent(props[j].getId(), env.makeInt(props[j].arity()));
             }
         }
-        random = new Random(seed);
     }
 
-    @Override
-    public IntVar[] getScope() {
-        return variables;
-    }
 
     @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+    public Decision<IntVar> computeDecision(IntVar variable) {
+        if (variable == null || variable.isInstantiated()) {
+            return null;
         }
-        return idx < variables.length;
+        int currentVal = valueIterator.selectValue(variable);
+        FastDecision currrent = decisionPool.getE();
+        if (currrent == null) {
+            currrent = new FastDecision(decisionPool);
+        }
+        currrent.set(variable, currentVal, DecisionOperator.int_eq);
+        return currrent;
     }
 
     @Override
-    public void advance() {
+    public Decision<IntVar> getDecision() {
+        IntVar best = null;
+        bests.clear();
         pid2arity.clear();
-        small_idx = -1;
         long _d1 = Integer.MAX_VALUE;
         long _d2 = 0;
-        for (int idx = 0; idx < variables.length; idx++) {
+        for (int idx = 0; idx < vars.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             if (dsize > 1) {
                 int degree = variables[idx].getNbProps();
                 int weight = weight(variables[idx]);
                 long c1 = dsize * _d2;
                 long c2 = _d1 * degree * weight;
-                if (c1 < c2 || (c1 == c2 && random.nextBoolean())) {
+                if (c1 < c2) {
+                    bests.clear();
+                    bests.add(idx);
                     _d1 = dsize;
                     _d2 = degree * weight;
-                    small_idx = idx;
+                } else if (c1 == c2) {
+                    bests.add(idx);
                 }
             }
         }
-        // swap with the last index
+        if (bests.size() > 0) {
+            int currentVar = bests.get(random.nextInt(bests.size()));
+            best = vars[currentVar];
+        }
+        return computeDecision(best);
     }
 
     private int weight(IntVar v) {
@@ -124,7 +152,7 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
             if (pid2arity.get(pid) > 1) {
                 w += counter.getFails(prop);
             } else {
-                if(pid2ari.get(pid)==null){
+                if (pid2ari.get(pid) == null) {
                     pid2ari.putIfAbsent(prop.getId(), v.getSolver().getEnvironment().makeInt(prop.arity()));
                 }
                 int a = pid2ari.get(pid).get();
@@ -135,11 +163,6 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
             }
         }
         return w;
-    }
-
-    @Override
-    public IntVar getVariable() {
-        return variables[small_idx];
     }
 
     @Override
