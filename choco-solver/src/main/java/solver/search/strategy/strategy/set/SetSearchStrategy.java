@@ -49,7 +49,7 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 
     protected PoolManager<FastDecisionSet> pool;
 	protected VariableSelector<SetVar> varSelector;
-	protected SetValSelector valSelector;
+	protected SetValueSelector valSelector;
 	protected DecisionOperator<SetVar> operator;
 
     //***********************************************************************************
@@ -63,12 +63,12 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 	 * @param valS			integer  selection strategy
 	 * @param enforceFirst	branching order true = enforce first; false = remove first
 	 */
-    public SetSearchStrategy(VariableSelector<SetVar> varS, SetValSelector valS, boolean enforceFirst) {
+    public SetSearchStrategy(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst) {
         super(varS.getScope());
 		varSelector = varS;
 		valSelector = valS;
 		operator = enforceFirst?DecisionOperator.set_force:DecisionOperator.set_remove;
-        pool = new PoolManager<FastDecisionSet>();
+        pool = new PoolManager<>();
     }
 
     //***********************************************************************************
@@ -77,7 +77,6 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 
     @Override
     public void init() throws ContradictionException {
-		valSelector.init();
     }
 
     @Override

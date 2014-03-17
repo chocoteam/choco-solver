@@ -27,7 +27,7 @@
 
 package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 import java.util.Random;
@@ -39,11 +39,11 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class InDomainRandom implements InValueIterator {
+public class IntDomainRandom implements IntValueSelector {
 
     final Random rand;
 
-    public InDomainRandom(long seed) {
+    public IntDomainRandom(long seed) {
         this.rand = new Random(seed);
     }
 

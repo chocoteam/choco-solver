@@ -34,7 +34,6 @@ import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.EIdentifier;
 import parser.flatzinc.ast.expression.Expression;
 import parser.flatzinc.ast.searches.IntSearch;
-import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -48,7 +47,7 @@ import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.selectors.values.InDomainMin;
+import solver.search.strategy.selectors.values.IntDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.search.strategy.selectors.variables.DomOverWDeg;
 import solver.search.strategy.selectors.variables.FirstFail;
@@ -161,7 +160,7 @@ public class FGoal {
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && gc.all) {
-                aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
+                aSolver.set(new Assignment(new FirstFail(ivars), new IntDomainMin()));
             } else {
                 switch (gc.bbss) {
                     case 2:
@@ -173,12 +172,12 @@ public class FGoal {
                         break;
                     case 3:
                         description.append("wdeg");
-                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed, new InDomainMin());
+                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed, new IntDomainMin());
                         aSolver.set(dwd);
                         break;
                     case 4:
                         description.append("first_fail");
-                        aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
+                        aSolver.set(new Assignment(new FirstFail(ivars), new IntDomainMin()));
                         break;
                     case 1:
                     default:
@@ -264,7 +263,7 @@ public class FGoal {
             case int_search:
             case bool_search:
                 IntVar[] scope = exps[0].toIntVarArray(solver);
-                return IntSearch.build(scope, vchoice, assignment, Strategy.complete, solver);
+                return IntSearch.build(scope, vchoice, assignment, solver);
             case set_search:
             default:
                 LoggerFactory.getLogger(FGoal.class).error("Unknown search annotation " + e.toString());
@@ -304,7 +303,7 @@ public class FGoal {
                 return o1.getDomainSize() - o2.getDomainSize();
             }
         });
-//        return new Once(new InputOrder(ivars), new InDomainMin());
+//        return new Once(new InputOrder(ivars), new IntDomainMin());
         return new AbstractStrategy<IntVar>(ivars) {
             boolean created = false;
             Decision d = new Decision<IntVar>() {

@@ -42,7 +42,7 @@ import solver.search.loop.monitors.FailPerPropagator;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
@@ -70,9 +70,9 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
 
     PoolManager<FastDecision> decisionPool;
 
-    InValueIterator valueIterator;
+    IntValueSelector valueSelector;
 
-    public DomOverWDeg(IntVar[] variables, long seed, InValueIterator valueIterator) {
+    public DomOverWDeg(IntVar[] variables, long seed, IntValueSelector valueSelector) {
         super(variables);
         this.variables = variables.clone();
         Solver solver = variables[0].getSolver();
@@ -80,7 +80,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         pid2ari = new TIntObjectHashMap<>();
         pid2arity = new TIntIntHashMap(10, 0.5F, -1, -1);
         bests = new TIntArrayList();
-        this.valueIterator = valueIterator;
+        this.valueSelector = valueSelector;
         decisionPool = new PoolManager<>();
         random = new java.util.Random(seed);
     }
@@ -103,7 +103,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
-        int currentVal = valueIterator.selectValue(variable);
+        int currentVal = valueSelector.selectValue(variable);
         FastDecision currrent = decisionPool.getE();
         if (currrent == null) {
             currrent = new FastDecision(decisionPool);

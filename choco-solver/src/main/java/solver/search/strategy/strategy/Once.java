@@ -29,7 +29,7 @@ package solver.search.strategy.strategy;
 
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -41,13 +41,13 @@ import solver.variables.IntVar;
  */
 public class Once extends Assignment {
 
-    public Once(VariableSelector<IntVar> varselector, InValueIterator valueIterator) {
-        super(varselector, valueIterator);
+    public Once(VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
+        super(varselector, valueSelector);
     }
 
-    public Once(VariableSelector<IntVar> varselector, InValueIterator valueIterator,
+    public Once(VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
                 DecisionOperator assgnt) {
-        super(varselector, valueIterator, assgnt);
+        super(varselector, valueSelector, assgnt);
     }
 
     @Override
