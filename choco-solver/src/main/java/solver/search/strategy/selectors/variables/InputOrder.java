@@ -46,6 +46,7 @@ public class InputOrder<V extends Variable> implements VariableSelector<V> {
         for (int idx = 0; idx < variables.length; idx++) {
             if (!variables[idx].isInstantiated()) {
                 small_idx = idx;
+                break;
             }
         }
         return small_idx > -1 ? variables[small_idx] : null;
