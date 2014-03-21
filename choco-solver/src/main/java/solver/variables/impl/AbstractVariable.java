@@ -123,7 +123,8 @@ public abstract class AbstractVariable implements Variable {
         while (i < pIdx && propagators[i] != propagator) {
             i++;
         }
-        assert i < pIdx : "remove unknown propagator";
+        // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
+        //assert i < pIdx : "remove unknown propagator : "+propagator + " from "+this;
         if (i < pIdx) {
             propagators[i] = propagators[pIdx - 1];
             pindices[i] = pindices[--pIdx];
