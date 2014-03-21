@@ -50,10 +50,7 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
-import solver.search.solution.BestSolutionsRecorder;
-import solver.search.solution.ISolutionRecorder;
-import solver.search.solution.LastSolutionRecorder;
-import solver.search.solution.Solution;
+import solver.search.solution.*;
 import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
@@ -766,6 +763,7 @@ public class Solver implements Serializable {
 				getEngine().flush();
 				getSearchLoop().reset();
 				post(ICF.arithm(objective, "=", opt));
+				set(new AllSolutionsRecorder(this));
 				findAllSolutions();
 			}
 		}else{

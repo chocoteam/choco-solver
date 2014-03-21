@@ -32,7 +32,8 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SMF;
+import solver.search.solution.AllSolutionsRecorder;
+import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
@@ -82,6 +83,7 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void configureSearch() {
+		solver.set(ISF.random(bins, 0));
 		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 			@Override
 			public void onSolution() {
@@ -96,13 +98,28 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		// solution limit (too many optima)
-		SMF.limitSolution(solver, 100);
-		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, minLoad, true);
+		int mode = 2;
+		switch (mode){
+			case 0:// to check
+				solver.post(ICF.arithm(minLoad,"=",17));
+				solver.set(new AllSolutionsRecorder(solver));
+				solver.findAllSolutions();
+				break;
+			case 1:// one step approach (could be slow)
+				solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, minLoad, false);
+				break;
+			case 2:// two step approach (find and prove optimum, then enumerate)
+				solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, minLoad, true);
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
 	}
 
 	@Override
-	public void prettyOut() {}
+	public void prettyOut() {
+		System.out.println("There are "+solver.getSolutionRecorder().getSolutions().size()+" optimal solutions");
+	}
 
 	//***********************************************************************************
 	// DATA
@@ -112,7 +129,7 @@ public class BinPacking extends AbstractProblem{
 	    new BinPacking().execute(args);
 	}
 	private final static int[] d1_w = new int[]{
-			2,5,3,4,12,9,1,0,5,6,2,4,6,7,3,13,5,18,3,9,4,12,11,1
+			2,5,3,4,12,9,1,0,5,6,2,4
 	};
-	private final static int d1_nb = 4;
+	private final static int d1_nb = 3;
 }

@@ -31,7 +31,6 @@ import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
-import util.PoolManager;
 
 /**
  * Class to store best solutions found.
@@ -43,7 +42,7 @@ import util.PoolManager;
 public class BestSolutionsRecorder extends AllSolutionsRecorder {
 
 	IntVar objective;
-	PoolManager<Solution> pool = new PoolManager<>();
+	int lastValue;
 
 	public BestSolutionsRecorder(final IntVar objective){
 		super(objective.getSolver());
@@ -73,14 +72,11 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
 		return new IMonitorSolution() {
 			@Override
 			public void onSolution() {
-				int val = objective.getValue();
-				for(int i=solutions.size()-1;i>=0;i--){
-					if(solutions.get(i).getIntVal(objective)!=val){
-						pool.returnE(solutions.remove(i));
-					}
+				if(objective.getValue()!=lastValue){
+					lastValue = objective.getValue();
+					solutions.clear();
 				}
-				Solution solution = pool.getE();
-				if(solution==null)solution = new Solution();
+				Solution solution = new Solution();
 				solution.record(solver);
 				solutions.add(solution);
 			}
