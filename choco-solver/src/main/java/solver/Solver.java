@@ -486,9 +486,9 @@ public class Solver implements Serializable {
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
-        if (getEngine() != null && getEngine().isInitialized()) {
-            throw new SolverException("Solver does not support dynamic variable addition");
-        }
+//        if (getEngine() != null && getEngine().isInitialized()) {
+//            throw new SolverException("Solver does not support dynamic variable addition");
+//        }
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
             vars = new Variable[tmp.length * 2];
@@ -779,6 +779,33 @@ public class Solver implements Serializable {
 			set(new BestSolutionsRecorder(objective));
 			solve(false);
 		}
+	}
+
+	/**
+	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+	 * Finds and stores all optimal solution
+	 * Restores the best solution found so far (if any)
+	 *
+	 * @param policy    	optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+	 * @param objectives	the variables to optimize. BEWARE they should all respect the SAME optimization policy
+	 */
+	public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
+		if (policy == ResolutionPolicy.SATISFACTION) {
+			throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+		}
+		if (objectives==null || objectives.length==0) {
+			throw new SolverException("No objective variable has been defined");
+		}
+		if (objectives.length==1) {
+			throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
+		}
+		// BEWARE the usual optimization manager is only defined for mono-objective optimization
+		// so we use a satisfaction manager by default (it does nothing)
+		if (getObjectiveManager().isOptimization()) {
+			set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
+		}
+		set(new ParetoSolutionsRecorder(policy,objectives));
+		solve(false);
 	}
 
 	/**
