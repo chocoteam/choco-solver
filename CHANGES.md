@@ -57,3 +57,4 @@ The CHANGES.md file starts at this version.
 * new implementation of Among propagator
 * Fix #176: bug fixed in PropMin/PropMax
 * Fix #175: IMeasure objects can be cloned
+- Added methods to enumerate and store all optimal solutions (#189)

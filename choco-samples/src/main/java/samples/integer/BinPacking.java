@@ -32,12 +32,16 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
+import solver.search.loop.monitors.SMF;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
 /**
  * Bin packing example
  * put items into bins so that bin load is balanced
+ *
+ * Illustrates the enumeration of optimal solutions
+ *
  * @author Jean-Guillaume Fages
  */
 public class BinPacking extends AbstractProblem{
@@ -92,7 +96,9 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE,minLoad);
+		// solution limit (too many optima)
+		SMF.limitSolution(solver, 100);
+		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, minLoad, true);
 	}
 
 	@Override
