@@ -57,4 +57,14 @@ The CHANGES.md file starts at this version.
 * new implementation of Among propagator
 * Fix #176: bug fixed in PropMin/PropMax
 * Fix #175: IMeasure objects can be cloned
-- Added methods to enumerate and store all optimal solutions (#189)
+* Fix #182: Set propagators manage ISetDeltaMonitors
+* Fix #183: change release script
+* Fix #177-#179: add a ContradictionException to NoPropagatioEngine to handle with empty domain variables
+* Fix #173: modify default failure message in initial propagation
+* Fix #172: fix retriveXXXvars() + tests
+* Fix #171: define VF.MIN_INT_BOUND and VF.MAX_INT_BOUND
+* Fix #170: update dependencies
+* Fix #95-#186: simplify search strategies and enable tie breaking
+* Fix #187: patch Once
+* Fix #174: a default search strategy is now available, dealing with each type of variables present
+* Fix #189: Added methods to enumerate and store all optimal solutions
