@@ -25,63 +25,71 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 07/06/13
- * Time: 12:52
- */
-
 package solver.search.solution;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorClose;
+import solver.search.loop.monitors.IMonitorSolution;
 
 import java.util.LinkedList;
+import java.util.List;
 
-public class LastSolutionRecorder implements ISolutionRecorder, IMonitorClose {
+/**
+ * Recorder for the last (presumably best) solution found so far
+ * The Solution object is updated on each solution
+ *
+ * @author Jean-Guillaume Fages
+ * @since 2013
+ */
+public class LastSolutionRecorder implements ISolutionRecorder {
 
 	Solution solution;
 	Solver solver;
 	boolean restoreOnClose;
 
-	public LastSolutionRecorder(Solution solution, boolean restoreOnClose, Solver solver){
+	public LastSolutionRecorder(final Solution solution, boolean restoreOnClose, final Solver solver){
 		this.solver = solver;
 		this.solution = solution;
 		this.restoreOnClose = restoreOnClose;
-	}
-
-	@Override
-	public void onSolution() {
-		solution.record(solver);
-	}
-
-	@Override
-	public void afterClose() {
-		if(restoreOnClose && solution.hasBeenFound()){
-			try{
-				solver.getSearchLoop().restoreRootNode();
-				solver.getEnvironment().worldPush();
-				solution.restore();
-			}catch (ContradictionException e){
-				throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+		solver.plugMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				solution.record(solver);
 			}
-            solver.getEngine().flush();
+		});
+		if(restoreOnClose){
+			solver.plugMonitor(new IMonitorClose() {
+				@Override
+				public void beforeClose() {
+					if(solution.hasBeenFound()){
+						try{
+							solver.getSearchLoop().restoreRootNode();
+							solver.getEnvironment().worldPush();
+							solution.restore();
+						}catch (ContradictionException e){
+							throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+						}
+						solver.getEngine().flush();
+					}
+				}
+				@Override
+				public void afterClose() {}
+			});
 		}
 	}
 
 	@Override
-	public void beforeClose() {}
-
-	@Override
 	public Solution getLastSolution(){
-		return solution;
+		return solution.hasBeenFound()?solution:null;
 	}
 
 	@Override
-	public LinkedList<Solution> getAllSolutions() {
-		throw new UnsupportedOperationException("only the last decision has been stored. " +
-				"Please use an AllSolutionsRecorder instead");
+	public List<Solution> getSolutions() {
+		List<Solution> l = new LinkedList<>();
+		if(solution.hasBeenFound()){
+			l.add(solution);
+		}
+		return l;
 	}
 }

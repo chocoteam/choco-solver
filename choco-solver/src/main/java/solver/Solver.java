@@ -32,6 +32,7 @@ import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.Propagator;
 import solver.constraints.nary.cnf.PropFalse;
 import solver.constraints.nary.cnf.PropTrue;
@@ -49,6 +50,8 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
+import solver.search.solution.BestSolutionsRecorder;
+import solver.search.solution.ISolutionRecorder;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
 import solver.search.strategy.ISF;
@@ -115,6 +118,8 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
+	protected ISolutionRecorder solutionRecorder;
+
     /**
      * Solver name
      */
@@ -172,6 +177,7 @@ public class Solver implements Serializable {
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
         FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
+		solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
         set(ObjectiveManager.SAT());
     }
 
@@ -388,6 +394,11 @@ public class Solver implements Serializable {
         return explainer;
     }
 
+	/**
+	 * Return the solution recorder
+	 */
+	public ISolutionRecorder getSolutionRecorder(){return solutionRecorder;}
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -448,6 +459,14 @@ public class Solver implements Serializable {
     public void set(ObjectiveManager om) {
         this.search.setObjectiveManager(om);
     }
+
+	/**
+	 * Override the solution recorder.
+	 * Beware : multiple recorders which restore a solution might create a conflict.
+	 */
+	public void set(ISolutionRecorder sr){
+		this.solutionRecorder = sr;
+	}
 
     /**
      * Put a search monitor to react on search events (solutions, decisions, fails, ...)
@@ -713,7 +732,7 @@ public class Solver implements Serializable {
      */
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
+            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
@@ -721,12 +740,50 @@ public class Solver implements Serializable {
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
         }
-        search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
+		set(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 
+	/**
+	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+	 * Finds and stores all optimal solution
+	 * Restores the best solution found so far (if any)
+	 *
+	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+	 * @param objective the variable to optimize
+	 * @param twoSteps	When set to true it calls two resolution:
+	 *                  	1) It finds and prove the optimum
+	 *                  	2) It reset search and enumerates all solutions of optimal cost
+	 *                  When set to false, it performs only one resolution but which does impose to find strictly
+	 *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
+	 *                  the best cost found so far (but not necessarily optimal).
+	 */
+	public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
+		if(twoSteps){
+			findOptimalSolution(policy,objective);
+			if(getMeasures().getSolutionCount()>0){
+				int opt = getObjectiveManager().getBestSolutionValue().intValue();
+				getEngine().flush();
+				getSearchLoop().reset();
+				post(ICF.arithm(objective, "=", opt));
+				findAllSolutions();
+			}
+		}else{
+			if (policy == ResolutionPolicy.SATISFACTION) {
+				throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+			}
+			if (objective == null) {
+				throw new SolverException("No objective variable has been defined");
+			}
+			if (!getObjectiveManager().isOptimization()) {
+				set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
+			}
+			set(new BestSolutionsRecorder(objective));
+			solve(false);
+		}
+	}
 
-    /**
+	/**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
      * Restores the best solution found so far (if any)
      *
@@ -743,7 +800,7 @@ public class Solver implements Serializable {
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
         }
-        search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
+        set(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 

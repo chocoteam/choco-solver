@@ -27,15 +27,63 @@
 
 package solver.search.solution;
 
-import java.util.List;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorClose;
+import solver.search.loop.monitors.IMonitorSolution;
+import solver.variables.IntVar;
+import util.PoolManager;
 
 /**
- * Interface to record and store solutions of a problem
+ * Class to store best solutions found.
+ * Worse solutions are removed from the solution set.
+ * This enables to get all optimal solutions of a problem.
+ *
+ * @author Jean-Guillaume Fages
  */
-public interface ISolutionRecorder {
+public class BestSolutionsRecorder extends AllSolutionsRecorder {
 
-	/** @return the last recorded solution, presumably the best one. Returns null if no solution has been found */
-	public Solution getLastSolution();
-	/** @return a list of all recorded solutions */
-	public List<Solution> getSolutions();
+	IntVar objective;
+	PoolManager<Solution> pool = new PoolManager<>();
+
+	public BestSolutionsRecorder(final IntVar objective){
+		super(objective.getSolver());
+		this.objective = objective;
+		solver.plugMonitor(new IMonitorClose() {
+			@Override
+			public void beforeClose() {
+				Solution last = getLastSolution();
+				if(last!=null){
+					try{
+						solver.getSearchLoop().restoreRootNode();
+						solver.getEnvironment().worldPush();
+						last.restore();
+					}catch (ContradictionException e){
+						throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+					}
+					solver.getEngine().flush();
+				}
+			}
+			@Override
+			public void afterClose() {}
+		});
+	}
+
+	@Override
+	protected IMonitorSolution createRecMonitor() {
+		return new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				int val = objective.getValue();
+				for(int i=solutions.size()-1;i>=0;i--){
+					if(solutions.get(i).getIntVal(objective)!=val){
+						pool.returnE(solutions.remove(i));
+					}
+				}
+				Solution solution = pool.getE();
+				if(solution==null)solution = new Solution();
+				solution.record(solver);
+				solutions.add(solution);
+			}
+		};
+	}
 }

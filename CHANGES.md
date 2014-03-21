@@ -67,3 +67,4 @@ The CHANGES.md file starts at this version.
 * Fix #95-#186: simplify search strategies and enable tie breaking
 * Fix #187: patch Once
 * Fix #174: a default search strategy is now available, dealing with each type of variables present
+* Fix #189: Added methods to enumerate and store all optimal solutions

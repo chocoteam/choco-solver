@@ -41,6 +41,7 @@ import solver.variables.graph.GraphVar;
 import java.util.HashMap;
 
 /**
+ * Class which stores the value of each variable in a solution
  * <br/>
  *
  * @author Jean-Guillaume Fages
