@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,67 +24,67 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.selectors;
 
-package solver.search.strategy.selectors.variables;
+import solver.variables.Variable;
 
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
- * <b>Most constrained</b> variable selector.
- * It chooses the variable with the smallest value in its domain, breaking ties using the number of propagators
- * (instantiated variables are ignored).
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @since 17/03/2014
  */
-public class MostConstrained implements VariableSelector<IntVar> {
+public class VariableSelectorWithTies<V extends Variable> implements VariableSelector<V> {
 
-    /* list of variables */
-    IntVar[] variables;
+    final VariableEvaluator<V>[] heuristics;
+    ArrayList<V> oldv = new ArrayList<>();
+    ArrayList<V> newv = new ArrayList<>();
 
-    /* index of the smallest domain variable */
-    int small_idx;
 
-    public MostConstrained(IntVar[] variables) {
-        this.variables = variables.clone();
-        small_idx = 0;
-
+    public VariableSelectorWithTies(VariableEvaluator<V>... heuristics) {
+        this.heuristics = heuristics;
     }
 
-    @Override
-    public IntVar[] getScope() {
-        return variables;
-    }
 
     @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
-        int small_idx = 0;
-        int small_value = Integer.MAX_VALUE;
-        for (int idx = 0; idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
-            int lower = variables[idx].getLB();
-            if (dsize > 1 &&
-                    (lower < small_value
-                            || (lower == small_value && variables[idx].getNbProps() < variables[small_idx].getNbProps()))) {
-                small_value = lower;
-                small_idx = idx;
+    public V getVariable(V[] variables) {
+        oldv.clear();
+        newv.clear();
+        Collections.addAll(oldv, variables);
+        // 1. remove instantied variables
+        for (V v : oldv) {
+            if (!v.isInstantiated()) {
+                newv.add(v);
             }
         }
-        this.small_idx = small_idx;
-    }
+        if (newv.size() == 0) return null;
 
-    @Override
-    public IntVar getVariable() {
-        return variables[small_idx];
+        // Then apply each heuristic one by one
+        double minValue = Double.MAX_VALUE - 1;
+        for (VariableEvaluator<V> h : heuristics) {
+            oldv.clear();
+            oldv.addAll(newv);
+            newv.clear();
+            for (V v : oldv) {
+                double val = h.evaluate(v);
+                if (val < minValue) {
+                    newv.clear();
+                    newv.add(v);
+                    minValue = val;
+                } else if (val == minValue) {
+                    newv.add(v);
+                }
+            }
+        }
+        switch (oldv.size()) {
+            case 0:
+                return null;
+            default:
+            case 1:
+                return oldv.get(0);
+        }
     }
 }

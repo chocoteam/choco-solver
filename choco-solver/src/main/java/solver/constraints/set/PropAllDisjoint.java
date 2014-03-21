@@ -74,7 +74,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         super(sets, PropagatorPriority.LINEAR, true);
         n = sets.length;
         // delta monitors
-        sdm = new SetDeltaMonitor[n];
+        sdm = new ISetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }

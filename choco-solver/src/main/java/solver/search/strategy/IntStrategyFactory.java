@@ -28,10 +28,10 @@
 package solver.search.strategy;
 
 import solver.Solver;
-import solver.search.strategy.selectors.values.InDomainMax;
-import solver.search.strategy.selectors.values.InDomainMiddle;
-import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.values.InDomainRandom;
+import solver.search.strategy.selectors.values.IntDomainMax;
+import solver.search.strategy.selectors.values.IntDomainMiddle;
+import solver.search.strategy.selectors.values.IntDomainMin;
+import solver.search.strategy.selectors.values.IntDomainRandom;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
@@ -54,28 +54,28 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>.
+     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMin</code>.
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> presetI(IntVar... VARS) {
-        return new Assignment(new InputOrder(VARS), new InDomainMin());
+        return new Assignment(VARS, new InputOrder<IntVar>(), new IntDomainMin());
     }
 
 
     /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>.
+     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMin</code>.
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> inputOrder_InDomainMin(IntVar... VARS) {
-        return new Assignment(new InputOrder(VARS), new InDomainMin());
+        return new Assignment(VARS, new InputOrder<IntVar>(), new IntDomainMin());
     }
 
     /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>
+     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMin</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
@@ -89,54 +89,54 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMax</code>
+     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMax</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> inputOrder_InDomainMax(IntVar... VARS) {
-        return new Assignment(new InputOrder(VARS), new InDomainMax());
+        return new Assignment(VARS, new InputOrder<IntVar>(), new IntDomainMax());
     }
 
     /**
-     * Assignment strategy combining <code>FirstFail</code> and <code>InDomainMin</code>
+     * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMin</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> firstFail_InDomainMin(IntVar... VARS) {
-        return new Assignment(new FirstFail(VARS), new InDomainMin());
+        return new Assignment(VARS, new FirstFail(), new IntDomainMin());
     }
 
 
     /**
-     * Assignment strategy combining <code>FirstFail</code> and <code>InDomainMiddle</code>
+     * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMiddle</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> firstFail_InDomainMiddle(IntVar... VARS) {
-        return new Assignment(new FirstFail(VARS), new InDomainMiddle());
+        return new Assignment(VARS, new FirstFail(), new IntDomainMiddle());
     }
 
     /**
-     * Assignment strategy combining <code>FirstFail</code> and <code>InDomainMax</code>
+     * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMax</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> firstFail_InDomainMax(IntVar... VARS) {
-        return new Assignment(new FirstFail(VARS), new InDomainMax());
+        return new Assignment(VARS, new FirstFail(), new IntDomainMax());
     }
 
     /**
-     * Assignment strategy combining <code>MaxRegret</code> and <code>InDomainMin</code>
+     * Assignment strategy combining <code>MaxRegret</code> and <code>IntDomainMin</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> maxReg_InDomainMin(IntVar... VARS) {
-        return new Assignment(new MaxRegret(VARS), new InDomainMin());
+        return new Assignment(VARS, new MaxRegret(), new IntDomainMin());
     }
 
     /**
@@ -147,18 +147,18 @@ public class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> random(IntVar[] VARS, long SEED) {
-        return new Assignment(new Random(VARS, SEED), new InDomainRandom(SEED));
+        return new Assignment(VARS, new Random<IntVar>(SEED), new IntDomainRandom(SEED));
     }
 
 
     /**
-     * Assignment strategy combining <code>DomOverWDeg</code> and <code>InDomainMin</code>
+     * Assignment strategy combining <code>DomOverWDeg</code> and <code>IntDomainMin</code>
      *
      * @param VARS list of variables
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
-        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMin());
+        return new DomOverWDeg(VARS, SEED, new IntDomainMin());
     }
 
     /**

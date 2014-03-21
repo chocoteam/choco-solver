@@ -27,73 +27,21 @@
 
 package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 /**
- * Selects the value in the variable's domain closest to the mean of its current bounds.
- * <br/>
- * It computes the middle value of the domain. Then it checks if the mean is contained in the domain.
- * If not, the closest value to the middle is chosen. It uses a policy to define whether the mean value should
- * be floored or ceiled
+ * Assigns the smallest value in the variable's domain.
  * <br/>
  *
- * BEWARE: should not be used with assignment decisions over bounded variables (because the decision negation
- * would result in no inference)
- *
- * @author Charles Prud'homme, Jean-Guillaume Fages
- * @since 2 juil. 2010
+ * @author Charles Prud'homme
+ * @since 28 sept. 2010
  */
-public class InDomainMiddle implements InValueIterator {
+public final class IntDomainMin implements IntValueSelector {
 
-	// VARIABLES
-	public final static boolean FLOOR = true;
-	public final static boolean CEIL = !FLOOR;
-	protected final boolean roundingPolicy;
-
-	// CONSTRUCTORS
-	public InDomainMiddle(){
-		this(FLOOR);
-	}
-
-	/**Selects the middle value
-	 * @param roundingPolicy should be either FLOOR or CEIL
-	 */
-	public InDomainMiddle(boolean roundingPolicy){
-		this.roundingPolicy = roundingPolicy;
-	}
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int selectValue(IntVar var) {
-		int low = var.getLB();
-		int upp = var.getUB();
-		double mean = (double)(low + upp) / 2;
-		int value;
-		if(roundingPolicy==FLOOR){
-			value = (int) mean;
-		}else{
-			value = (int) Math.ceil(mean);
-		}
-		if (var.hasEnumeratedDomain()) {
-            if (!var.contains(value)) {
-				double a = var.previousValue(value);
-				double b = var.nextValue(value);
-				if(mean-a < b-mean){
-					return (int) a;
-				}else if(mean-a > b-mean){
-					return (int) b;
-				}else{ //tie break
-					if(roundingPolicy==FLOOR){
-						return (int) a;
-					}else{
-						return (int) b;
-					}
-				}
-            }
-        }
-		return value;
+        return var.getLB();
     }
+
 }

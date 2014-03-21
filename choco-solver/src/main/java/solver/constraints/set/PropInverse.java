@@ -82,7 +82,7 @@ public class PropInverse extends Propagator<SetVar> {
         this.sets = Arrays.copyOfRange(vars, 0, sets.length);
         this.invsets = Arrays.copyOfRange(vars, sets.length, vars.length);
         // delta monitors
-        sdm = new SetDeltaMonitor[n + n2];
+        sdm = new ISetDeltaMonitor[n + n2];
         for (int i = 0; i < n + n2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }

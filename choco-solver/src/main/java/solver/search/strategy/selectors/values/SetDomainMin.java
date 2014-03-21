@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,52 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.binary;
+package solver.search.strategy.selectors.values;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import util.ESat;
+import solver.search.strategy.selectors.SetValueSelector;
+import solver.variables.SetVar;
 
 /**
- * <br/>
+ * Selects the first integer in the envelope and not in the kernel
  *
- * @author Charles Prud'homme
- * @since 12/06/13
+ * @author Jean-Guillaum Fages, Charles Prud'homme
+ * @since 17/03/2014
  */
-public class EqTest {
+public class SetDomainMin implements SetValueSelector {
 
-    @Test
-    public void test1() {
-        Solver s = new Solver();
-        IntVar two1 = VF.fixed(2, s);
-        IntVar two2 = VF.fixed(2, s);
-        s.post(ICF.arithm(two1, "=", two2));
-        Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
-    }
-
-
-    @Test
-    public void test2() {
-        Solver s = new Solver();
-        IntVar three = VF.fixed(3, s);
-        IntVar two = VF.fixed(2, s);
-        s.post(ICF.arithm(three, "-", two, "=", 1));
-        Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
-    }
-
-    @Test
-    public void test3() {
-        Solver s = new Solver();
-        IntVar three = VF.fixed(3, s);
-        IntVar two = VF.fixed(2, s);
-        s.post(ICF.arithm(three, "=", two, "+", 1));
-        Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
+    @Override
+    public int selectValue(SetVar s) {
+        for (int i = s.getEnvelopeFirst(); i != SetVar.END; i = s.getEnvelopeNext()) {
+            if (!s.kernelContains(i)) {
+                return i;
+            }
+        }
+        throw new UnsupportedOperationException(s + " is already instantiated. Cannot compute a decision on it");
     }
 }

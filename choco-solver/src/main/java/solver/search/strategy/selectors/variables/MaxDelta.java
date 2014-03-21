@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -26,34 +26,34 @@
  */
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.Variable;
+import solver.variables.SetVar;
 
 /**
- * <br/>
+ * Selects the variables maximising envelopeSize-kernelSize.
  *
- * @author Charles Prud'homme
- * @since 06/02/13
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-enum None implements VariableSelector<Variable> {
-    ;
-
+public class MaxDelta implements VariableSelector<SetVar>,VariableEvaluator<SetVar> {
     @Override
-    public Variable[] getScope() {
-        return new Variable[0];
+    public SetVar getVariable(SetVar[] variables) {
+        int small_idx = -1;
+        int delta = 0;
+        for (int idx = 0; idx < variables.length; idx++) {
+            SetVar variable = variables[idx];
+            int d = variable.getEnvelopeSize() - variable.getKernelSize();
+            if (d > delta) {
+                delta = d;
+                small_idx = idx;
+            }
+        }
+        return small_idx > -1 ? variables[small_idx] : null;
     }
 
     @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    @Override
-    public void advance() {
-    }
-
-    @Override
-    public Variable getVariable() {
-        return null;
+    public double evaluate(SetVar variable) {
+        return -variable.getEnvelopeSize() - variable.getKernelSize();
     }
 }

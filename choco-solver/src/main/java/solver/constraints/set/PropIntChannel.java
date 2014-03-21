@@ -83,7 +83,7 @@ public class PropIntChannel extends Propagator<Variable> {
         this.sets = new SetVar[nSets];
         this.ints = new IntVar[nInts];
         this.idm = new IIntDeltaMonitor[nInts];
-        this.sdm = new SetDeltaMonitor[nSets];
+        this.sdm = new ISetDeltaMonitor[nSets];
         this.offSet1 = offSet1;
         this.offSet2 = offSet2;
         for (int i = 0; i < nInts; i++) {

@@ -24,52 +24,24 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.binary;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import util.ESat;
+package solver.search.strategy.selectors;
+
+import solver.variables.SetVar;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 12/06/13
+ * Heuristic for branching on a given SetVar
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public class EqTest {
+public interface SetValueSelector {
 
-    @Test
-    public void test1() {
-        Solver s = new Solver();
-        IntVar two1 = VF.fixed(2, s);
-        IntVar two2 = VF.fixed(2, s);
-        s.post(ICF.arithm(two1, "=", two2));
-        Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
-    }
+	/**
+	 * Value selection heuristic
+	 * @param v a non-instantiated SetVar
+	 * @return an integer i of v's envelope, which is not included in v's kernel
+	 * so that a decision (forcing/removing i) can be applied on v
+	 */
+	public int selectValue(SetVar v);
 
-
-    @Test
-    public void test2() {
-        Solver s = new Solver();
-        IntVar three = VF.fixed(3, s);
-        IntVar two = VF.fixed(2, s);
-        s.post(ICF.arithm(three, "-", two, "=", 1));
-        Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
-    }
-
-    @Test
-    public void test3() {
-        Solver s = new Solver();
-        IntVar three = VF.fixed(3, s);
-        IntVar two = VF.fixed(2, s);
-        s.post(ICF.arithm(three, "=", two, "+", 1));
-        Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
-    }
 }

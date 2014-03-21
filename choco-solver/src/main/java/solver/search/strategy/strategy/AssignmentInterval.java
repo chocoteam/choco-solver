@@ -29,7 +29,7 @@ package solver.search.strategy.strategy;
 
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecisionReal;
-import solver.search.strategy.selectors.RealValueIterator;
+import solver.search.strategy.selectors.RealValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.RealVar;
 import util.PoolManager;
@@ -44,15 +44,15 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
 
     VariableSelector<RealVar> varselector;
 
-    RealValueIterator valueIterator;
+    RealValueSelector valueIterator;
 
     PoolManager<FastDecisionReal> decisionPool;
 
-    public AssignmentInterval(RealVar[] vars, VariableSelector<RealVar> varselector, RealValueIterator valueIterator) {
-        super(vars);
+    public AssignmentInterval(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
+        super(scope);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecisionReal>();
+        decisionPool = new PoolManager<>();
     }
 
     @Override
@@ -76,11 +76,7 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        RealVar variable = null;
-        if (varselector.hasNext()) {
-            varselector.advance();
-            variable = varselector.getVariable();
-        }
+        RealVar variable = varselector.getVariable(vars);
         return computeDecision(variable);
     }
 }

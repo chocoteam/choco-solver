@@ -93,7 +93,7 @@ zip)
 
     mvn javadoc:aggregate  || exit 1
     cd target/site/
-    zip apidocs-${VERSION}.zip ./apidocs/*
+    zip -r apidocs-${VERSION}.zip ./apidocs/*
     mv apidocs-${VERSION}.zip ../../choco-${VERSION}
     cd ../../
 

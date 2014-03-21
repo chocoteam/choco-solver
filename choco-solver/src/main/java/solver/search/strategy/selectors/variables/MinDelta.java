@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,45 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.selectors.variables;
 
-package solver.search.strategy.strategy.set;
-
+import solver.search.strategy.selectors.VariableEvaluator;
+import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.SetVar;
 
 /**
- * Heuristic for branching on a given SetVar
+ * Selects the variables minimising envelopeSize-kernelSize (quite similar
+ * to minDomain, or first-fail)
+ *
  * @author Jean-Guillaume Fages
  * @since 6/10/13
  */
-public interface SetValSelector {
+public class MinDelta implements VariableSelector<SetVar>,VariableEvaluator<SetVar> {
 
-	/**
-	 * Value selection heuristic
-	 * @param v a non-instantiated SetVar
-	 * @return an integer i of v's envelope, which is not included in v's kernel
-	 * so that a decision (forcing/removing i) can be applied on v
-	 */
-	public int selectValue(SetVar v);
 
-	/**
-	 * Eventually perform some computation before the search process starts
-	 */
-	public void init();
+    @Override
+    public SetVar getVariable(SetVar[] variables) {
+        int small_idx = -1;
+        int delta = Integer.MAX_VALUE;
+        for (int idx = 0; idx < variables.length; idx++) {
+            SetVar variable = variables[idx];
+            int d = variable.getEnvelopeSize() - variable.getKernelSize();
+            if (d > 0 && d < delta) {
+                delta = d;
+                small_idx = idx;
+            }
+        }
+        return small_idx > -1 ? variables[small_idx] : null;
+    }
 
-	/**
-	 * Selects the first integer in the envelope and not in the kernel
-	 */
-	public class FirstVal implements SetValSelector{
-		@Override
-		public int selectValue(SetVar s) {
-			for (int i=s.getEnvelopeFirst(); i!=SetVar.END; i=s.getEnvelopeNext()) {
-				if (!s.kernelContains(i)) {
-					return i;
-				}
-			}
-			throw new UnsupportedOperationException(s+" is already instantiated. Cannot compute a decision on it");
-		}
-		@Override
-		public void init(){}
-	}
+    @Override
+    public double evaluate(SetVar variable) {
+        return variable.getEnvelopeSize() - variable.getKernelSize();
+    }
 }

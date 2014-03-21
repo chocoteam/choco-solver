@@ -38,7 +38,7 @@ import memory.structure.Operation;
  * iteration : O(m)
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 10 f�vr. 2011
+ * Date: 10 fevr. 2011
  */
 public class Set_Std_LinkedList extends Set_LinkedList {
 

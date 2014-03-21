@@ -151,7 +151,7 @@ public class RealTest {
         // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
         solver.post(new RealConstraint("RC","{0} * {1} = 8", vars));
-        solver.set(new AssignmentInterval(vars, new Cyclic(vars), new RealDomainMiddle()));
+        solver.set(new AssignmentInterval(vars, new Cyclic(), new RealDomainMiddle()));
         solver.findSolution();
         Assert.assertEquals(x.getValue(), 2);
         Assert.assertEquals(y.getValue(), 4);

@@ -71,7 +71,7 @@ public class PropSubsetEq extends Propagator<SetVar> {
     public PropSubsetEq(SetVar X, SetVar Y) {
         super(new SetVar[]{X, Y}, PropagatorPriority.LINEAR, true);
         // delta monitors
-        sdm = new SetDeltaMonitor[2];
+        sdm = new ISetDeltaMonitor[2];
         for (int i = 0; i < 2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }

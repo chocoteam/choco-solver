@@ -1,4 +1,4 @@
-// Generated from parser/flatzinc/Flatzinc4Parser.g4 by ANTLR 4.0
+// Generated from parser/flatzinc/Flatzinc4Parser.g4 by ANTLR 4.2
 package parser.flatzinc;
 
 /*
@@ -28,94 +28,242 @@ package parser.flatzinc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
 
-import gnu.trove.list.array.TIntArrayList;
-
-import parser.flatzinc.ast.declaration.*;
-import parser.flatzinc.ast.expression.*;
-import parser.flatzinc.FZNException;
-import parser.flatzinc.FZNLayout;
-import parser.flatzinc.ast.FConstraint;
-import parser.flatzinc.ast.FGoal;
-import parser.flatzinc.ast.FParameter;
-import parser.flatzinc.ast.FVariable;
-import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.FGoal;
-
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.ResolutionPolicy;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import org.antlr.v4.runtime.tree.*;
-import org.antlr.v4.runtime.Token;
-
+/**
+ * This interface defines a complete listener for a parse tree produced by
+ * {@link Flatzinc4Parser}.
+ */
 public interface Flatzinc4ParserListener extends ParseTreeListener {
-	void enterId_expr(Flatzinc4Parser.Id_exprContext ctx);
-	void exitId_expr(Flatzinc4Parser.Id_exprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#id_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterId_expr(@NotNull Flatzinc4Parser.Id_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#id_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitId_expr(@NotNull Flatzinc4Parser.Id_exprContext ctx);
 
-	void enterPred_param(Flatzinc4Parser.Pred_paramContext ctx);
-	void exitPred_param(Flatzinc4Parser.Pred_paramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#pred_param}.
+	 * @param ctx the parse tree
+	 */
+	void enterPred_param(@NotNull Flatzinc4Parser.Pred_paramContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#pred_param}.
+	 * @param ctx the parse tree
+	 */
+	void exitPred_param(@NotNull Flatzinc4Parser.Pred_paramContext ctx);
 
-	void enterSolve_goal(Flatzinc4Parser.Solve_goalContext ctx);
-	void exitSolve_goal(Flatzinc4Parser.Solve_goalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#solve_goal}.
+	 * @param ctx the parse tree
+	 */
+	void enterSolve_goal(@NotNull Flatzinc4Parser.Solve_goalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#solve_goal}.
+	 * @param ctx the parse tree
+	 */
+	void exitSolve_goal(@NotNull Flatzinc4Parser.Solve_goalContext ctx);
 
-	void enterPred_param_type(Flatzinc4Parser.Pred_param_typeContext ctx);
-	void exitPred_param_type(Flatzinc4Parser.Pred_param_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#pred_param_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterPred_param_type(@NotNull Flatzinc4Parser.Pred_param_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#pred_param_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitPred_param_type(@NotNull Flatzinc4Parser.Pred_param_typeContext ctx);
 
-	void enterConstraint(Flatzinc4Parser.ConstraintContext ctx);
-	void exitConstraint(Flatzinc4Parser.ConstraintContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#constraint}.
+	 * @param ctx the parse tree
+	 */
+	void enterConstraint(@NotNull Flatzinc4Parser.ConstraintContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#constraint}.
+	 * @param ctx the parse tree
+	 */
+	void exitConstraint(@NotNull Flatzinc4Parser.ConstraintContext ctx);
 
-	void enterBool_const(Flatzinc4Parser.Bool_constContext ctx);
-	void exitBool_const(Flatzinc4Parser.Bool_constContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#bool_const}.
+	 * @param ctx the parse tree
+	 */
+	void enterBool_const(@NotNull Flatzinc4Parser.Bool_constContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#bool_const}.
+	 * @param ctx the parse tree
+	 */
+	void exitBool_const(@NotNull Flatzinc4Parser.Bool_constContext ctx);
 
-	void enterExpr(Flatzinc4Parser.ExprContext ctx);
-	void exitExpr(Flatzinc4Parser.ExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr(@NotNull Flatzinc4Parser.ExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr(@NotNull Flatzinc4Parser.ExprContext ctx);
 
-	void enterResolution(Flatzinc4Parser.ResolutionContext ctx);
-	void exitResolution(Flatzinc4Parser.ResolutionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#resolution}.
+	 * @param ctx the parse tree
+	 */
+	void enterResolution(@NotNull Flatzinc4Parser.ResolutionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#resolution}.
+	 * @param ctx the parse tree
+	 */
+	void exitResolution(@NotNull Flatzinc4Parser.ResolutionContext ctx);
 
-	void enterVar_type_u(Flatzinc4Parser.Var_type_uContext ctx);
-	void exitVar_type_u(Flatzinc4Parser.Var_type_uContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#var_type_u}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_type_u(@NotNull Flatzinc4Parser.Var_type_uContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#var_type_u}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_type_u(@NotNull Flatzinc4Parser.Var_type_uContext ctx);
 
-	void enterVar_decl(Flatzinc4Parser.Var_declContext ctx);
-	void exitVar_decl(Flatzinc4Parser.Var_declContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#var_decl}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_decl(@NotNull Flatzinc4Parser.Var_declContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#var_decl}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_decl(@NotNull Flatzinc4Parser.Var_declContext ctx);
 
-	void enterPar_type_u(Flatzinc4Parser.Par_type_uContext ctx);
-	void exitPar_type_u(Flatzinc4Parser.Par_type_uContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#par_type_u}.
+	 * @param ctx the parse tree
+	 */
+	void enterPar_type_u(@NotNull Flatzinc4Parser.Par_type_uContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#par_type_u}.
+	 * @param ctx the parse tree
+	 */
+	void exitPar_type_u(@NotNull Flatzinc4Parser.Par_type_uContext ctx);
 
-	void enterPar_pred_param_type(Flatzinc4Parser.Par_pred_param_typeContext ctx);
-	void exitPar_pred_param_type(Flatzinc4Parser.Par_pred_param_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#par_pred_param_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterPar_pred_param_type(@NotNull Flatzinc4Parser.Par_pred_param_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#par_pred_param_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitPar_pred_param_type(@NotNull Flatzinc4Parser.Par_pred_param_typeContext ctx);
 
-	void enterAnnotation(Flatzinc4Parser.AnnotationContext ctx);
-	void exitAnnotation(Flatzinc4Parser.AnnotationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#annotation}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnnotation(@NotNull Flatzinc4Parser.AnnotationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#annotation}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnnotation(@NotNull Flatzinc4Parser.AnnotationContext ctx);
 
-	void enterVar_pred_param_type(Flatzinc4Parser.Var_pred_param_typeContext ctx);
-	void exitVar_pred_param_type(Flatzinc4Parser.Var_pred_param_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#var_pred_param_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_pred_param_type(@NotNull Flatzinc4Parser.Var_pred_param_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#var_pred_param_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_pred_param_type(@NotNull Flatzinc4Parser.Var_pred_param_typeContext ctx);
 
-	void enterPar_type(Flatzinc4Parser.Par_typeContext ctx);
-	void exitPar_type(Flatzinc4Parser.Par_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#par_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterPar_type(@NotNull Flatzinc4Parser.Par_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#par_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitPar_type(@NotNull Flatzinc4Parser.Par_typeContext ctx);
 
-	void enterIndex_set(Flatzinc4Parser.Index_setContext ctx);
-	void exitIndex_set(Flatzinc4Parser.Index_setContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#index_set}.
+	 * @param ctx the parse tree
+	 */
+	void enterIndex_set(@NotNull Flatzinc4Parser.Index_setContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#index_set}.
+	 * @param ctx the parse tree
+	 */
+	void exitIndex_set(@NotNull Flatzinc4Parser.Index_setContext ctx);
 
-	void enterVar_type(Flatzinc4Parser.Var_typeContext ctx);
-	void exitVar_type(Flatzinc4Parser.Var_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#var_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_type(@NotNull Flatzinc4Parser.Var_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#var_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_type(@NotNull Flatzinc4Parser.Var_typeContext ctx);
 
-	void enterAnnotations(Flatzinc4Parser.AnnotationsContext ctx);
-	void exitAnnotations(Flatzinc4Parser.AnnotationsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#annotations}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnnotations(@NotNull Flatzinc4Parser.AnnotationsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#annotations}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnnotations(@NotNull Flatzinc4Parser.AnnotationsContext ctx);
 
-	void enterParam_decl(Flatzinc4Parser.Param_declContext ctx);
-	void exitParam_decl(Flatzinc4Parser.Param_declContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#param_decl}.
+	 * @param ctx the parse tree
+	 */
+	void enterParam_decl(@NotNull Flatzinc4Parser.Param_declContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#param_decl}.
+	 * @param ctx the parse tree
+	 */
+	void exitParam_decl(@NotNull Flatzinc4Parser.Param_declContext ctx);
 
-	void enterFlatzinc_model(Flatzinc4Parser.Flatzinc_modelContext ctx);
-	void exitFlatzinc_model(Flatzinc4Parser.Flatzinc_modelContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#flatzinc_model}.
+	 * @param ctx the parse tree
+	 */
+	void enterFlatzinc_model(@NotNull Flatzinc4Parser.Flatzinc_modelContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#flatzinc_model}.
+	 * @param ctx the parse tree
+	 */
+	void exitFlatzinc_model(@NotNull Flatzinc4Parser.Flatzinc_modelContext ctx);
 
-	void enterPred_decl(Flatzinc4Parser.Pred_declContext ctx);
-	void exitPred_decl(Flatzinc4Parser.Pred_declContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Flatzinc4Parser#pred_decl}.
+	 * @param ctx the parse tree
+	 */
+	void enterPred_decl(@NotNull Flatzinc4Parser.Pred_declContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Flatzinc4Parser#pred_decl}.
+	 * @param ctx the parse tree
+	 */
+	void exitPred_decl(@NotNull Flatzinc4Parser.Pred_declContext ctx);
 }

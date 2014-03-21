@@ -27,21 +27,25 @@
 
 package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 /**
- * Assigns the smallest value in the variable's domain.
+ * Assigns the largest value in the variable's domain.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 28 sept. 2010
  */
-public final class InDomainMin implements InValueIterator {
+public final class IntDomainMax implements IntValueSelector {
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int selectValue(IntVar var) {
-        return var.getLB();
+        return var.getUB();
     }
 
 }

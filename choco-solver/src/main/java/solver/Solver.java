@@ -263,7 +263,7 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the IntVar only (including BoolVar).
+     * Iterate over the variable of <code>this</code> and build an array that contains the IntVar only (<b>excluding</b> BoolVar).
      * It also contains FIXED variables and VIEWS, if any.
      *
      * @return array of IntVars of <code>this</code>
@@ -272,7 +272,7 @@ public class Solver implements Serializable {
         IntVar[] ivars = new IntVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.INT) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.INT) {
                 ivars[k++] = (IntVar) vars[i];
             }
         }
@@ -289,7 +289,7 @@ public class Solver implements Serializable {
         BoolVar[] bvars = new BoolVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.BOOL) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
                 bvars[k++] = (BoolVar) vars[i];
             }
         }
@@ -306,7 +306,7 @@ public class Solver implements Serializable {
         SetVar[] bvars = new SetVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.SET) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.SET) {
                 bvars[k++] = (SetVar) vars[i];
             }
         }
@@ -323,7 +323,7 @@ public class Solver implements Serializable {
         RealVar[] bvars = new RealVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.REAL) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
                 bvars[k++] = (RealVar) vars[i];
             }
         }
@@ -340,7 +340,7 @@ public class Solver implements Serializable {
         GraphVar[] bvars = new GraphVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.GRAPH) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.GRAPH) {
                 bvars[k++] = (GraphVar) vars[i];
             }
         }

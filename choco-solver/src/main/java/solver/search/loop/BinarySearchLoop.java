@@ -30,11 +30,24 @@ package solver.search.loop;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
-import solver.variables.VariableFactory;
+import solver.search.strategy.selectors.values.RealDomainMiddle;
+import solver.search.strategy.selectors.variables.Cyclic;
+import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.AssignmentInterval;
+import solver.search.strategy.strategy.StrategiesSequencer;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.RealVar;
+import solver.variables.SetVar;
+import solver.variables.graph.GraphVar;
 import util.ESat;
+
+import java.util.Arrays;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.
@@ -69,9 +82,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
-            //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-            solver.set(IntStrategyFactory.firstFail_InDomainMin(VariableFactory.castToIntVar(solver.getVars())));
-//            set(StrategyFactory.firstFail_InDomainMin(VariableFactory.castToIntVar(solver.getVars()), solver.getEnvironment()));
+            defaultSearchStrategy(solver);
+
         }
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
@@ -79,9 +91,45 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             this.env.worldPop();
             solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
-            interrupt(MSG_SEARCH_INIT);
+            interrupt(MSG_INIT + ": " + cex.getMessage());
         }
         moveTo(OPEN_NODE);
+    }
+
+    private void defaultSearchStrategy(Solver solver) {
+        IntVar[] ivars = solver.retrieveIntVars();
+        AbstractStrategy[] strats = new AbstractStrategy[5];
+        int nb = 0;
+        if (ivars.length > 0) {
+            strats[nb++] = IntStrategyFactory.firstFail_InDomainMin(ivars);
+        }
+
+        BoolVar[] bvars = solver.retrieveBoolVars();
+        if (bvars.length > 0) {
+            strats[nb++] = IntStrategyFactory.inputOrder_InDomainMax(bvars);
+        }
+
+        SetVar[] svars = solver.retrieveSetVars();
+        if (svars.length > 0) {
+            strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
+        }
+
+        GraphVar[] gvars = solver.retrieveGraphVars();
+        if (gvars.length > 0) {
+            AbstractStrategy<GraphVar>[] gstrats = new AbstractStrategy[gvars.length];
+            for (int g = 0; g < gvars.length; g++) {
+                gstrats[g] = GraphStrategyFactory.graphLexico(gvars[g]);
+            }
+            strats[nb++] = new StrategiesSequencer(gstrats);
+        }
+
+        RealVar[] rvars = solver.retrieveRealVars();
+        if (rvars.length > 0) {
+            strats[nb] = new AssignmentInterval(rvars, new Cyclic(), new RealDomainMiddle());
+        }
+
+        solver.set(new StrategiesSequencer(Arrays.copyOf(strats, nb)));
+
     }
 
     /**
