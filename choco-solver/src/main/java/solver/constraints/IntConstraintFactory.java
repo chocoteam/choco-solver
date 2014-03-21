@@ -780,8 +780,8 @@ public class IntConstraintFactory {
 
     /**
      * Ensures that :
-     * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; CAPA
-     * <br/>- OCCURRENCES[i] * ENERGY[i] = POWER
+     * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; TOTAL_WEIGHT
+     * <br/>- OCCURRENCES[i] * ENERGY[i] = TOTAL_ENERGY
      * <br/>and maximizing the value of POWER.
      * <p/>
      * <p/>
@@ -794,17 +794,17 @@ public class IntConstraintFactory {
      * and must fill it with the most useful items."
      *
      * @param OCCURRENCES number of occurrences of an item
-     * @param CAPA        capacity of the knapsack
-     * @param POWER       variable to maximize
+     * @param TOTAL_WEIGHT        capacity of the knapsack
+     * @param TOTAL_ENERGY       variable to maximize
      * @param WEIGHT      weight of each item
      * @param ENERGY      energy of each item
      */
-    public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar CAPA, IntVar POWER,
+    public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar TOTAL_WEIGHT, IntVar TOTAL_ENERGY,
                                       int[] WEIGHT, int[] ENERGY) {
 		return new Constraint("Knapsack",ArrayUtils.append(
-				scalar(OCCURRENCES, WEIGHT, CAPA).propagators,
-				scalar(OCCURRENCES, ENERGY, POWER).propagators,
-				new Propagator[]{new PropKnapsack(OCCURRENCES, CAPA, POWER, WEIGHT, ENERGY)}
+				scalar(OCCURRENCES, WEIGHT, TOTAL_WEIGHT).propagators,
+				scalar(OCCURRENCES, ENERGY, TOTAL_ENERGY).propagators,
+				new Propagator[]{new PropKnapsack(OCCURRENCES, TOTAL_WEIGHT, TOTAL_ENERGY, WEIGHT, ENERGY)}
 		));
     }
 
