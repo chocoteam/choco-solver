@@ -46,6 +46,7 @@ import util.objects.IntCircularQueue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -164,6 +165,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
         }
         event_c = new EventType[nbProp];
+        Arrays.fill(event_c, EventType.VOID);
         init = true;
     }
 
@@ -402,6 +404,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         EventType[] _event_c = event_c;
         event_c = new EventType[nsize];
         System.arraycopy(_event_c, 0, event_c, 0, osize);
+        Arrays.fill(event_c, osize, nsize, EventType.VOID);
+
         int[][] _eventmasks = eventmasks;
         eventmasks = new int[nsize][];
         System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
