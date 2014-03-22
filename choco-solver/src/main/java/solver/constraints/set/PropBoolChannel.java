@@ -152,7 +152,8 @@ public class PropBoolChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
-            if (bools[j - offSet].isInstantiatedTo(0)) {
+            int i = j - offSet;
+            if (i < 0  || i >= bools.length || bools[i].isInstantiatedTo(0)) {
                 return ESat.FALSE;
             }
         }
