@@ -34,12 +34,12 @@ Contents:
    6_appendix/61_constraints.rst
    6_appendix/62_searches.rst
    6_appendix/63_glossary.rst
-
+   glossary
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
+.. * :ref:`modindex`
 * :ref:`search`
 
