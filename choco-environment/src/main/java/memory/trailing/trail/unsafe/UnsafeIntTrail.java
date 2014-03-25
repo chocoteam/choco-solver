@@ -195,6 +195,64 @@ public class UnsafeIntTrail implements IStoredIntTrail {
         }
     }
 
+    @Override
+    public void buildFakeHistory(StoredInt v, int initValue, int olderStamp) {
+        // from world 0 to olderStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredInt[][] _variableStack = variableStack;
+        long[] _valueStack = valueStack;
+        long[] _stampStack = stampStack;
+        int[] _chunks = chunks;
+        int[] _tops = tops;
+
+        variableStack = new StoredInt[1][];
+        variableStack[0] = new StoredInt[DEFAULT_CHUNK_SIZE];
+
+        valueStack = new long[1];
+        valueStack[0] = unsafe.allocateMemory(DEFAULT_CHUNK_SIZE * SIZEOF_DATA);
+
+        stampStack = new long[1];
+        stampStack[0] = unsafe.allocateMemory(DEFAULT_CHUNK_SIZE * SIZEOF_INT);
+
+        chunks = new int[_chunks.length + 1];
+        tops = new int[_tops.length + 1];
+
+
+        curChunk = nextTop = 0;
+
+        // then replay the history
+        StoredInt[] cvar;
+        int cval;
+        int cstmp;
+        for (int w = 1; w < olderStamp; w++) {
+            int fc = _chunks[w];
+            int tc = _chunks[w + 1];
+            int ft = _tops[w];
+            int tt = _tops[w + 1];
+
+            for (int cc = fc; cc <= tc; cc++) {
+                cvar = _variableStack[cc];
+                int from = (cc == fc ? ft : 0);
+                int to = (cc == tc ? tt : DEFAULT_CHUNK_SIZE);
+                for (; from < to; from++) {
+                    cval = unsafe.getInt(_valueStack[cc] + (from * SIZEOF_DATA));
+                    cstmp = unsafe.getInt(_stampStack[cc] + (from * SIZEOF_INT));
+                    savePreviousState(cvar[from], cval, cstmp);
+                }
+            }
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        savePreviousState(v, initValue, olderStamp - 1);
+
+        int c = _chunks[0];
+        for (int cc = _valueStack.length - 1; cc >= c; cc--) {
+            unsafe.freeMemory(_valueStack[cc]);
+            unsafe.freeMemory(_stampStack[cc]);
+        }
+    }
+
     private void increase(int l) {
         StoredInt[][] varBigger = new StoredInt[l + 1][];
         System.arraycopy(variableStack, 0, varBigger, 0, l);
@@ -226,7 +284,7 @@ public class UnsafeIntTrail implements IStoredIntTrail {
     protected void finalize() throws Throwable {
         super.finalize();
         final int c = chunks[0];
-        for (int cc = valueStack.length; cc >= c; cc--) {
+        for (int cc = valueStack.length - 1; cc >= c; cc--) {
             unsafe.freeMemory(valueStack[cc]);
             unsafe.freeMemory(stampStack[cc]);
         }

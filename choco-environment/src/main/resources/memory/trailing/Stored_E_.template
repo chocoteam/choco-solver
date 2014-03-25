@@ -46,6 +46,9 @@ public class Stored#E# extends IState#E# {
     public Stored#E#(final EnvironmentTrailing env, final #e# i) {
         super(env, i);
         myTrail = env.get#E#Trail();
+        if(timeStamp>0){
+            myTrail.buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     /**

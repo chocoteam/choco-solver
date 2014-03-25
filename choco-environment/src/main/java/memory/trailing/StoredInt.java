@@ -46,7 +46,9 @@ public class StoredInt extends IStateInt {
     public StoredInt(final EnvironmentTrailing env, final int i) {
         super(env, i);
         myTrail = env.getIntTrail();
-        currentValue = i;
+        if (timeStamp > 0) {
+            myTrail.buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     /**
