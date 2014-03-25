@@ -18,6 +18,7 @@ Choco3 is distributed under BSD licence (Copyright (c) 1999-2013, Ecole des Mine
 
 Contact: choco@mines-nantes.fr
 
+
 ## Usage ##
 ### Inside a maven project ###
 
