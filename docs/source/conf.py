@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Choco3 User Guide documentation build configuration file, created by
+# Choco3 documentation build configuration file, created by
 # sphinx-quickstart on Tue Mar 25 10:03:28 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Choco3 User Guide'
+project = u'Choco3'
 copyright = u'2014, Charles Prud\'homme, Jean-Guillaume Fages'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -183,7 +183,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Choco3UserGuidedoc'
+htmlhelp_basename = 'Choco3doc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -203,13 +203,13 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Choco3UserGuide.tex', u'Choco3 User Guide Documentation',
+  ('index', 'Choco3.tex', u'Choco3 Documentation',
    u'Charles Prud\'homme, Jean-Guillaume Fages', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = '0_resources/CHOCO_cmjn.jpg'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -227,13 +227,12 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'choco3userguide', u'Choco3 User Guide Documentation',
+    ('index', 'choco3userguide', u'Choco3 Documentation',
      [u'Charles Prud\'homme, Jean-Guillaume Fages'], 1)
 ]
 
@@ -247,8 +246,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Choco3UserGuide', u'Choco3 User Guide Documentation',
-   u'Charles Prud\'homme, Jean-Guillaume Fages', 'Choco3UserGuide', 'One line description of project.',
+  ('index', 'Choco3', u'Choco3 Documentation',
+   u'Charles Prud\'homme, Jean-Guillaume Fages', 'Choco3', 'One line description of project.',
    'Miscellaneous'),
 ]
 
