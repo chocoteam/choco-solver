@@ -1,0 +1,2 @@
+Declaring variables
+===================
