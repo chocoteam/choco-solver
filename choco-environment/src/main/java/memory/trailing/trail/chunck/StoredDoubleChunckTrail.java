@@ -178,6 +178,58 @@ public class StoredDoubleChunckTrail implements IStoredDoubleTrail {
         }
     }
 
+    @Override
+    public void buildFakeHistory(StoredDouble v, double initValue, int olderStamp) {
+        // from world 0 to olderStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredDouble[][] _variableStack = variableStack;
+        double[][] _valueStack = valueStack;
+        int[][] _stampStack = stampStack;
+        int[] _chunks = chunks;
+        int[] _tops = tops;
+
+        variableStack = new StoredDouble[1][];
+        variableStack[0] = new StoredDouble[CHUNK_SIZE];
+
+        valueStack = new double[1][];
+        valueStack[0] = new double[CHUNK_SIZE];
+
+        stampStack = new int[1][];
+        stampStack[0] = new int[CHUNK_SIZE];
+
+        chunks = new int[_chunks.length + 1];
+        tops = new int[_tops.length + 1];
+
+
+        curChunk = nextTop = 0;
+
+        // then replay the history
+        StoredDouble[] cvar;
+        double[] cval;
+        int[] cstmp;
+        for (int w = 1; w < olderStamp; w++) {
+            int fc = _chunks[w];
+            int tc = _chunks[w + 1];
+            int ft = _tops[w];
+            int tt = _tops[w + 1];
+
+            for (int cc = fc; cc <= tc; cc++) {
+                cvar = _variableStack[cc];
+                cval = _valueStack[cc];
+                cstmp = _stampStack[cc];
+                int from = (cc == fc ? ft : 0);
+                int to = (cc == tc ? tt : CHUNK_SIZE);
+                for (; from < to; from++) {
+                    savePreviousState(cvar[from], cval[from], cstmp[from]);
+                }
+            }
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        savePreviousState(v, initValue, olderStamp - 1);
+    }
+
     private void increase(int l) {
         StoredDouble[][] varBigger = new StoredDouble[l + 1][];
         System.arraycopy(variableStack, 0, varBigger, 0, l);

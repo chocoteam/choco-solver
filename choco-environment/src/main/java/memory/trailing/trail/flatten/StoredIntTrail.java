@@ -211,6 +211,7 @@ public class StoredIntTrail implements IStoredIntTrail {
         savePreviousState(v, initValue, olderStamp - 1);
     }
 
+
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
         // first, copy the stack of variables

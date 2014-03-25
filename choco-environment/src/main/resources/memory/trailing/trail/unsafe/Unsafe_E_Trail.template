@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.trailing.trail.buffer;
+package memory.trailing.trail.unsafe;
 
 import memory.trailing.Stored#E#;
 import memory.trailing.trail.IStored#E#Trail;
@@ -38,7 +38,7 @@ import java.lang.reflect.Field;
  * @author Charles Prud'homme
  * @since 13/05/13
  */
-public class Buffered#E#Trail implements IStored#E#Trail {
+public class Unsafe#E#Trail implements IStored#E#Trail {
 
     private final boolean isUnsafe;
 
@@ -90,7 +90,7 @@ public class Buffered#E#Trail implements IStored#E#Trail {
     private int[] chunks;
     private int[] tops;
 
-    public Buffered#E#Trail(int nUpdates, int nWorlds) {
+    public Unsafe#E#Trail(int nUpdates, int nWorlds) {
         unsafe = getTheUnsafe();
         isUnsafe = unsafe != null;
         curChunk = nextTop = 0;
@@ -196,7 +196,7 @@ public class Buffered#E#Trail implements IStored#E#Trail {
     }
 
     @Override
-    public void buildFakeHistory(Stored#E# v, int initValue, int olderStamp) {
+    public void buildFakeHistory(Stored#E# v, #e# initValue, int olderStamp) {
         // from world 0 to olderStamp (excluded), create a fake history based on initValue
         // kind a copy of the current elements
         // 1. make a copy of variableStack
@@ -207,7 +207,7 @@ public class Buffered#E#Trail implements IStored#E#Trail {
         int[] _tops = tops;
 
         variableStack = new Stored#E#[1][];
-        variableStack[0] = new StoredInt[DEFAULT_CHUNK_SIZE];
+        variableStack[0] = new Stored#E#[DEFAULT_CHUNK_SIZE];
 
         valueStack = new long[1];
         valueStack[0] = unsafe.allocateMemory(DEFAULT_CHUNK_SIZE * SIZEOF_DATA);

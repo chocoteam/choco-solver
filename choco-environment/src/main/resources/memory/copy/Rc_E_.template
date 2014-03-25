@@ -39,7 +39,7 @@ import memory.IState#E#;
 public class Rc#E# extends IState#E# {
 
     public Rc#E#(EnvironmentCopying env) {
-        this(env, #E#.MAX_VALUE);
+        this(env, #EMAX#);
     }
 
     public Rc#E#(EnvironmentCopying env, #e# i) {

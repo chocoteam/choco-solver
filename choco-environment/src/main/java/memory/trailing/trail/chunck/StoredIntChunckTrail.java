@@ -38,7 +38,7 @@ import memory.trailing.trail.IStoredIntTrail;
  */
 public class StoredIntChunckTrail implements IStoredIntTrail {
 
-    private static final int CHUNK_SIZE = 3;
+    private static final int CHUNK_SIZE = 20000;
 
     /**
      * Stack of backtrackable search variables.

@@ -284,7 +284,7 @@ public class UnsafeIntTrail implements IStoredIntTrail {
     protected void finalize() throws Throwable {
         super.finalize();
         final int c = chunks[0];
-        for (int cc = valueStack.length - 1; cc >= c; cc--) {
+        for (int cc = valueStack.length-1; cc >= c; cc--) {
             unsafe.freeMemory(valueStack[cc]);
             unsafe.freeMemory(stampStack[cc]);
         }

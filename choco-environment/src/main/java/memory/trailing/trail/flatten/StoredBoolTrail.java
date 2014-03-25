@@ -175,6 +175,42 @@ public class StoredBoolTrail implements IStoredBoolTrail {
         }
     }
 
+    @Override
+    public void buildFakeHistory(StoredBool v, boolean initValue, int olderStamp) {
+        // from world 0 to fromStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredBool[] _variableStack = variableStack;
+        boolean[] _valueStack = valueStack;
+        int[] _stampStack = stampStack;
+        int[] _worldStartLevels = worldStartLevels;
+        int _maxUpdates = variableStack.length + olderStamp;
+
+        variableStack = new StoredBool[_maxUpdates];
+        valueStack = new boolean[_maxUpdates];
+        stampStack = new int[_maxUpdates];
+        worldStartLevels = new int[worldStartLevels.length];
+        currentLevel = 0;
+
+
+        // then replay the history
+        for (int w = 1; w < olderStamp; w++) {
+            int f = _worldStartLevels[w];
+            int t = _worldStartLevels[w + 1];
+            // copy the true history
+            System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
+            System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
+            System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
+            currentLevel += (t - f);
+
+
+            // add the fake one
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        savePreviousState(v, initValue, olderStamp - 1);
+    }
+
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
         // first, copy the stack of variables
