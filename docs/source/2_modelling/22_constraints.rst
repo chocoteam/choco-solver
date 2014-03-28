@@ -1,2 +1,0 @@
-Posting constraints
-==================
