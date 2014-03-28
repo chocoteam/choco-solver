@@ -1,2 +1,2 @@
-Declaring variables
+Posting constraints
 ===================
