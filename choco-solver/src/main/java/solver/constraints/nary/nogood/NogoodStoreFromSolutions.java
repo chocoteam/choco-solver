@@ -40,7 +40,8 @@ import solver.variables.IntVar;
  * - Must be posted as a constraint AND plugged as a monitor as well
  * - Cannot be reified
  * - Only works for integer variables
- * - Only works if branching decisions are assignments (no domain split nor value removal)
+ *
+ * This can be used to remove similar/symmetric solutions
  *
  * @author Jean-Guillaume Fages, Charles Prud'homme
  * @since 20/06/13
@@ -50,6 +51,7 @@ public class NogoodStoreFromSolutions extends Constraint implements IMonitorSolu
 	static final String MSG_NGOOD = "unit propagation failure (nogood from solution)";
 	INogood solutionNoGood;
 	final PropNogoodStore png;
+	final protected IntVar[] decisionVars;
 
 	/**
 	 * Avoid exploring same solutions (useful with restart on solution)
@@ -57,11 +59,14 @@ public class NogoodStoreFromSolutions extends Constraint implements IMonitorSolu
 	 * - Must be posted as a constraint AND plugged as a monitor as well
 	 * - Cannot be reified
 	 * - Only works for integer variables
-	 * - Only works if branching decisions are assignments (no domain split nor value removal)
-	 * @param vars all variables which may occur in the branching.
+	 *
+	 * This can be used to remove similar/symmetric solutions
+	 *
+	 * @param vars all decision variables which define a solution (can be a subset of variables)
 	 */
 	public NogoodStoreFromSolutions(IntVar[] vars) {
 		super("NogoodStoreFromSolutions",new PropNogoodStore(vars));
+		decisionVars = vars;
 		png = (PropNogoodStore) propagators[0];
 
 	}
@@ -88,22 +93,15 @@ public class NogoodStoreFromSolutions extends Constraint implements IMonitorSolu
 	}
 
 	private void extractNogoodFromPath() {
-		int d = png.getSolver().getSearchLoop().getCurrentDepth();
-		IntVar[] vars = new IntVar[d];
-		int[] values = new int[d];
-		Decision<IntVar> decision = png.getSolver().getSearchLoop().decision;
-		int i = 0;
-		while (decision != RootDecision.ROOT) {
-			vars[i] = decision.getDecisionVariable();
-			values[i] = (Integer) decision.getDecisionValue();
-			i++;
-			decision = decision.getPrevious();
-		}
-		switch (i){
-			case 0:		png.getSolver().getSearchLoop().interrupt(MSG_NGOOD);
-						solutionNoGood = null; break;
-			case 1:		solutionNoGood = new UnitNogood(vars[0], values[0]); break;
-			default:	solutionNoGood = new Nogood(vars, values); break;
+		int n = decisionVars.length;
+		if(n==1){
+			solutionNoGood = new UnitNogood(decisionVars[0], decisionVars[0].getValue());
+		}else{
+			int[] values = new int[n];
+			for(int i=0;i<n;i++){
+				values[i] = decisionVars[i].getValue();
+			}
+			solutionNoGood = new Nogood(decisionVars, values);
 		}
 	}
 }

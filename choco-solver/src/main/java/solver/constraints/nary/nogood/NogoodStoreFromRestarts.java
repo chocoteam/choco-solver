@@ -30,8 +30,10 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
+import solver.search.strategy.decision.fast.FastDecision;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -63,7 +65,7 @@ public class NogoodStoreFromRestarts extends Constraint implements IMonitorResta
 	 * - Must be posted as a constraint AND plugged as a monitor as well
 	 * - Cannot be reified
 	 * - Only works for integer variables
-	 * - Only works if branching decisions are assignments (no domain split nor value removal)
+	 * - Only works if branching decisions are assignments (neither domain split nor value removal)
 	 * @param vars
 	 */
     public NogoodStoreFromRestarts(IntVar[] vars) {
@@ -108,6 +110,8 @@ public class NogoodStoreFromRestarts extends Constraint implements IMonitorResta
         int i = 0;
         while (!decisions.isEmpty()) {
             decision = decisions.pollLast();
+			assert decision instanceof FastDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
+			assert decision.toString().contains(DecisionOperator.int_eq.toString()):"NogoodStoreFromRestarts is only valid for assignment decisions";
             if (decision.hasNext()) {
                 vars[i] = decision.getDecisionVariable();
                 values[i] = (Integer) decision.getDecisionValue();

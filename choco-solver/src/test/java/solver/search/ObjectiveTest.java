@@ -231,7 +231,9 @@ public class ObjectiveTest {
 		IntVar a = VF.enumerated("a", -2, 2, solver);
 
 		SMF.log(solver, true, true);
-		solver.set(ISF.firstFail_InDomainMin(a));
+		solver.set(
+				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN,true),
+				ISF.firstFail_InDomainMin(a));
 		solver.getSearchLoop().restartAfterEachSolution(true);
 		NogoodStoreFromSolutions ng = new NogoodStoreFromSolutions(new IntVar[]{a});
 		solver.post(ng);

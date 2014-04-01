@@ -70,5 +70,5 @@ The CHANGES.md file starts at this version.
 * Fix #189: Added methods to enumerate and store all optimal solutions
 * Start documentation (see user_guide.pdf and http://chocoteam.github.io/choco3/)
 * NogoodFromRestart now trigger propagation fixpoint
-* Fix #192: NogoodFromSolution now available (only for integer variables subject to assignment decisions)
+* Fix #192: NogoodFromSolution now available (only for integer variables)
 * Fix #193: VF.enumerated() now copies the input array of values
