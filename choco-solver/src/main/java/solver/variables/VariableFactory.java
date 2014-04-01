@@ -248,7 +248,7 @@ public class VariableFactory {
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
     public static IntVar enumerated(String NAME, int[] VALUES, Solver SOLVER) {
-        VALUES = sortIfNot(VALUES);
+        VALUES = sortIfNot(VALUES.clone());
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
