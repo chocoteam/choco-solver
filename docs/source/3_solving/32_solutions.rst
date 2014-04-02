@@ -8,7 +8,7 @@ Choco |version| includes several ways to record solutions.
 Solution storage
 ~~~~~~~~~~~~~~~~
 
-A solution is usually stored throw a ``Solution`` object which maps every variable with its current value.
+A solution is usually stored through a ``Solution`` object which maps every variable with its current value.
 Such an object can be erased to store new solutions.
 
 Solution recording
