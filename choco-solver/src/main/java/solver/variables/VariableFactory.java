@@ -632,23 +632,22 @@ public class VariableFactory {
     /**
      * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
      * <p/>
-     * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
+     * <b>Beware: if the name start with "cste -- ", the resulting variable will be cached.</b>
      *
      * @param NAME   name of the constant
      * @param VALUE  its value
      * @param SOLVER the solver to build the integer variable in.
      */
     public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
+        if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
         FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
-        if (NAME.equals(Integer.toString(VALUE))) {
+        if (NAME.equals(CSTE_NAME + VALUE)) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
         return cste;
     }
-
     /**
      * get a specific boolean variable, whom domain is reduced to the singleton {VALUE}.
      * This variable is unnamed as it is actually a solver constant
