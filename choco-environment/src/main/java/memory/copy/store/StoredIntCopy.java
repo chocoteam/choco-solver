@@ -24,10 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store.flatten;
+package memory.copy.store;
 
-import memory.copy.RcBool;
-import memory.copy.store.IStoredBoolCopy;
+import memory.copy.RcInt;
 
 /**
  * <br/>
@@ -35,23 +34,23 @@ import memory.copy.store.IStoredBoolCopy;
  * @author Charles Prud'homme
  * @since 14/05/13
  */
-public class StoredBoolCopy implements IStoredBoolCopy {
+public class StoredIntCopy implements IStoredIntCopy {
 
-    RcBool[] objects;
-    boolean[][] values;
+    RcInt[] objects;
+    int[][] values;
     int position;
 
-    public StoredBoolCopy() {
-        objects = new RcBool[64];
-        values = new boolean[64][];
+    public StoredIntCopy() {
+        objects = new RcInt[64];
+        values = new int[64][];
     }
 
 
-    public void add(RcBool rc) {
+    public void add(RcInt rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
-            RcBool[] oldElements = objects;
-            objects = new RcBool[newSize];
+            RcInt[] oldElements = objects;
+            objects = new RcInt[newSize];
             System.arraycopy(oldElements, 0, objects, 0, oldElements.length);
         }
         objects[position++] = rc;
@@ -59,21 +58,21 @@ public class StoredBoolCopy implements IStoredBoolCopy {
 
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
-            boolean[][] tmp = values;
-            values = new boolean[tmp.length * 3 / 2 + 1][];
+            int[][] tmp = values;
+            values = new int[tmp.length * 3 / 2 + 1][];
             System.arraycopy(tmp, 0, values, 0, tmp.length);
         }
-        boolean[] tmpboolean = new boolean[position];
+        int[] tmpint = new int[position];
         for (int i = position; --i >= 0; ) {
-            tmpboolean[i] = objects[i].deepCopy();
+            tmpint[i] = objects[i].deepCopy();
         }
-        values[worldIndex] = tmpboolean;
+        values[worldIndex] = tmpint;
     }
 
     public void worldPop(int worldIndex) {
-        boolean[] tmpboolean = values[worldIndex];
-        for (int i = tmpboolean.length; --i >= 0; )
-            objects[i]._set(tmpboolean[i], worldIndex);
+        int[] tmpint = values[worldIndex];
+        for (int i = tmpint.length; --i >= 0; )
+            objects[i]._set(tmpint[i], worldIndex);
     }
 
     @Override

@@ -24,10 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store.flatten;
+package memory.copy.store;
 
-import memory.copy.RcInt;
-import memory.copy.store.IStoredIntCopy;
+import memory.copy.RcDouble;
 
 /**
  * <br/>
@@ -35,23 +34,23 @@ import memory.copy.store.IStoredIntCopy;
  * @author Charles Prud'homme
  * @since 14/05/13
  */
-public class StoredIntCopy implements IStoredIntCopy {
+public class StoredDoubleCopy implements IStoredDoubleCopy {
 
-    RcInt[] objects;
-    int[][] values;
+    RcDouble[] objects;
+    double[][] values;
     int position;
 
-    public StoredIntCopy() {
-        objects = new RcInt[64];
-        values = new int[64][];
+    public StoredDoubleCopy() {
+        objects = new RcDouble[64];
+        values = new double[64][];
     }
 
 
-    public void add(RcInt rc) {
+    public void add(RcDouble rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
-            RcInt[] oldElements = objects;
-            objects = new RcInt[newSize];
+            RcDouble[] oldElements = objects;
+            objects = new RcDouble[newSize];
             System.arraycopy(oldElements, 0, objects, 0, oldElements.length);
         }
         objects[position++] = rc;
@@ -59,21 +58,21 @@ public class StoredIntCopy implements IStoredIntCopy {
 
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
-            int[][] tmp = values;
-            values = new int[tmp.length * 3 / 2 + 1][];
+            double[][] tmp = values;
+            values = new double[tmp.length * 3 / 2 + 1][];
             System.arraycopy(tmp, 0, values, 0, tmp.length);
         }
-        int[] tmpint = new int[position];
+        double[] tmpdouble = new double[position];
         for (int i = position; --i >= 0; ) {
-            tmpint[i] = objects[i].deepCopy();
+            tmpdouble[i] = objects[i].deepCopy();
         }
-        values[worldIndex] = tmpint;
+        values[worldIndex] = tmpdouble;
     }
 
     public void worldPop(int worldIndex) {
-        int[] tmpint = values[worldIndex];
-        for (int i = tmpint.length; --i >= 0; )
-            objects[i]._set(tmpint[i], worldIndex);
+        double[] tmpdouble = values[worldIndex];
+        for (int i = tmpdouble.length; --i >= 0; )
+            objects[i]._set(tmpdouble[i], worldIndex);
     }
 
     @Override
