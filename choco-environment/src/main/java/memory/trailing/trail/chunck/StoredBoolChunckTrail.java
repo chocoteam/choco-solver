@@ -188,6 +188,8 @@ public class StoredBoolChunckTrail implements IStoredBoolTrail {
         int[][] _stampStack = stampStack;
         int[] _chunks = chunks;
         int[] _tops = tops;
+        int _curChunk = curChunk;
+        int _nextTop = nextTop;
 
         variableStack = new StoredBool[1][];
         variableStack[0] = new StoredBool[CHUNK_SIZE];
@@ -205,29 +207,28 @@ public class StoredBoolChunckTrail implements IStoredBoolTrail {
         curChunk = nextTop = 0;
 
         // then replay the history
-        StoredBool[] cvar;
-        boolean[] cval;
-        int[] cstmp;
-        for (int w = 1; w < olderStamp; w++) {
-            int fc = _chunks[w];
-            int tc = _chunks[w + 1];
-            int ft = _tops[w];
-            int tt = _tops[w + 1];
 
-            for (int cc = fc; cc <= tc; cc++) {
-                cvar = _variableStack[cc];
-                cval = _valueStack[cc];
-                cstmp = _stampStack[cc];
-                int from = (cc == fc ? ft : 0);
-                int to = (cc == tc ? tt : CHUNK_SIZE);
-                for (; from < to; from++) {
-                    savePreviousState(cvar[from], cval[from], cstmp[from]);
-                }
-            }
+        for (int w = 1; w < olderStamp; w++) {
+            rebuild(_chunks[w], _chunks[w + 1], _tops[w], _tops[w + 1], _variableStack, _valueStack, _stampStack);
             savePreviousState(v, initValue, w - 1);
             worldPush(w + 1);
         }
+
+        rebuild(_chunks[olderStamp], _curChunk, _tops[olderStamp], _nextTop, _variableStack, _valueStack, _stampStack);
         savePreviousState(v, initValue, olderStamp - 1);
+    }
+
+    private void rebuild(int fc, int tc, int ft, int tt, StoredBool[][] _variableStack, boolean[][] _valueStack, int[][] _stampStack) {
+        for (int cc = fc; cc <= tc; cc++) {
+            StoredBool[] cvar = _variableStack[cc];
+            boolean[] cval = _valueStack[cc];
+            int[] cstmp = _stampStack[cc];
+            int from = (cc == fc ? ft : 0);
+            int to = (cc == tc ? tt : CHUNK_SIZE);
+            for (; from < to; from++) {
+                savePreviousState(cvar[from], cval[from], cstmp[from]);
+            }
+        }
     }
 
 

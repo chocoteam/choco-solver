@@ -38,7 +38,6 @@ import memory.IStateDouble;
  */
 public class RcDouble extends IStateDouble {
 
-
     public RcDouble(EnvironmentCopying env) {
         this(env, Double.POSITIVE_INFINITY);
     }

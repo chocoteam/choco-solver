@@ -205,6 +205,8 @@ public class UnsafeIntTrail implements IStoredIntTrail {
         long[] _stampStack = stampStack;
         int[] _chunks = chunks;
         int[] _tops = tops;
+        int _curChunk = curChunk;
+        int _nextTop = nextTop;
 
         variableStack = new StoredInt[1][];
         variableStack[0] = new StoredInt[DEFAULT_CHUNK_SIZE];
@@ -222,34 +224,31 @@ public class UnsafeIntTrail implements IStoredIntTrail {
         curChunk = nextTop = 0;
 
         // then replay the history
-        StoredInt[] cvar;
-        int cval;
-        int cstmp;
         for (int w = 1; w < olderStamp; w++) {
-            int fc = _chunks[w];
-            int tc = _chunks[w + 1];
-            int ft = _tops[w];
-            int tt = _tops[w + 1];
-
-            for (int cc = fc; cc <= tc; cc++) {
-                cvar = _variableStack[cc];
-                int from = (cc == fc ? ft : 0);
-                int to = (cc == tc ? tt : DEFAULT_CHUNK_SIZE);
-                for (; from < to; from++) {
-                    cval = unsafe.getInt(_valueStack[cc] + (from * SIZEOF_DATA));
-                    cstmp = unsafe.getInt(_stampStack[cc] + (from * SIZEOF_INT));
-                    savePreviousState(cvar[from], cval, cstmp);
-                }
-            }
+            rebuild(_chunks[w], _chunks[w + 1], _tops[w], _tops[w + 1], _variableStack, _valueStack, _stampStack);
             savePreviousState(v, initValue, w - 1);
             worldPush(w + 1);
         }
+        rebuild(_chunks[olderStamp], _curChunk, _tops[olderStamp], _nextTop, _variableStack, _valueStack, _stampStack);
         savePreviousState(v, initValue, olderStamp - 1);
 
         int c = _chunks[0];
         for (int cc = _valueStack.length - 1; cc >= c; cc--) {
             unsafe.freeMemory(_valueStack[cc]);
             unsafe.freeMemory(_stampStack[cc]);
+        }
+    }
+
+    private void rebuild(int fc, int tc, int ft, int tt, StoredInt[][] _variableStack, long[] _valueStack, long[] _stampStack) {
+        for (int cc = fc; cc <= tc; cc++) {
+            StoredInt[] cvar = _variableStack[cc];
+            int from = (cc == fc ? ft : 0);
+            int to = (cc == tc ? tt : DEFAULT_CHUNK_SIZE);
+            for (; from < to; from++) {
+                int cval = unsafe.getInt(_valueStack[cc] + (from * SIZEOF_DATA));
+                int cstmp = unsafe.getInt(_stampStack[cc] + (from * SIZEOF_INT));
+                savePreviousState(cvar[from], cval, cstmp);
+            }
         }
     }
 
