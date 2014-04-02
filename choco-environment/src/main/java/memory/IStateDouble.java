@@ -30,6 +30,7 @@ package memory;
 import java.io.Serializable;
 
 /**
+ * An abstract class for backtrackable double.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -40,6 +41,7 @@ public abstract class IStateDouble implements Serializable {
     protected final IEnvironment environment;
     protected double currentValue;
     protected int timeStamp;
+
 
     public IStateDouble(IEnvironment env, double i) {
         environment = env;
@@ -89,7 +91,7 @@ public abstract class IStateDouble implements Serializable {
     /**
      * Make a deep copy of this.
      *
-     * @return a long
+     * @return a double
      */
     public final double deepCopy() {
         return currentValue;

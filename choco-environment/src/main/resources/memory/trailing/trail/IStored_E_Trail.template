@@ -37,4 +37,6 @@ import memory.trailing.Stored#E#;
 public interface IStored#E#Trail extends ITrailStorage {
 
     void savePreviousState(Stored#E# v, #e# oldValue, int oldStamp);
+
+    void buildFakeHistory(Stored#E# v, #e# initValue, int fromStamp);
 }

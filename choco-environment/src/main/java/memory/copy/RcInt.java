@@ -36,7 +36,7 @@ import memory.IStateInt;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public class RcInt extends IStateInt{
+public class RcInt extends IStateInt {
 
     public RcInt(EnvironmentCopying env) {
         this(env, Integer.MAX_VALUE);
@@ -45,6 +45,9 @@ public class RcInt extends IStateInt{
     public RcInt(EnvironmentCopying env, int i) {
         super(env, i);
         env.getIntCopy().add(this);
+        if (timeStamp > 0) {
+            env.getIntCopy().buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     @Override

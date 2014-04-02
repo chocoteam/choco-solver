@@ -44,7 +44,7 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
 
     private final Unsafe unsafe;
 
-    public static final int SIZEOF_DATA = 1;
+    public static final int SIZEOF_DATA = 2;
 
     public static final int SIZEOF_INT = 4;
 
@@ -181,7 +181,7 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
      * on the stacks.
      */
     public void savePreviousState(StoredBool v, boolean oldValue, int oldStamp) {
-        unsafe.putByte(valueStack[curChunk] + (nextTop * SIZEOF_DATA), (byte)(oldValue ? 1 : 0));
+        unsafe.putByte(valueStack[curChunk] + (nextTop * SIZEOF_DATA), (byte) (oldValue ? 1 : 0));
         variableStack[curChunk][nextTop] = v;
         unsafe.putInt(stampStack[curChunk] + (nextTop * SIZEOF_INT), oldStamp);
         nextTop++;
@@ -192,6 +192,63 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
                 increase(l);
             }
             nextTop = 0;
+        }
+    }
+
+    @Override
+    public void buildFakeHistory(StoredBool v, boolean initValue, int olderStamp) {
+        // from world 0 to olderStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredBool[][] _variableStack = variableStack;
+        long[] _valueStack = valueStack;
+        long[] _stampStack = stampStack;
+        int[] _chunks = chunks;
+        int[] _tops = tops;
+        int _curChunk = curChunk;
+        int _nextTop = nextTop;
+
+        variableStack = new StoredBool[1][];
+        variableStack[0] = new StoredBool[DEFAULT_CHUNK_SIZE];
+
+        valueStack = new long[1];
+        valueStack[0] = unsafe.allocateMemory(DEFAULT_CHUNK_SIZE * SIZEOF_DATA);
+
+        stampStack = new long[1];
+        stampStack[0] = unsafe.allocateMemory(DEFAULT_CHUNK_SIZE * SIZEOF_INT);
+
+        chunks = new int[_chunks.length + 1];
+        tops = new int[_tops.length + 1];
+
+
+        curChunk = nextTop = 0;
+
+        // then replay the history
+        for (int w = 1; w < olderStamp; w++) {
+            rebuild(_chunks[w], _chunks[w + 1], _tops[w], _tops[w + 1], _variableStack, _valueStack, _stampStack);
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        rebuild(_chunks[olderStamp], _curChunk, _tops[olderStamp], _nextTop, _variableStack, _valueStack, _stampStack);
+        savePreviousState(v, initValue, olderStamp - 1);
+
+        int c = _chunks[0];
+        for (int cc = _valueStack.length - 1; cc >= c; cc--) {
+            unsafe.freeMemory(_valueStack[cc]);
+            unsafe.freeMemory(_stampStack[cc]);
+        }
+    }
+
+    private void rebuild(int fc, int tc, int ft, int tt, StoredBool[][] _variableStack, long[] _valueStack, long[] _stampStack) {
+        for (int cc = fc; cc <= tc; cc++) {
+            StoredBool[] cvar = _variableStack[cc];
+            int from = (cc == fc ? ft : 0);
+            int to = (cc == tc ? tt : DEFAULT_CHUNK_SIZE);
+            for (; from < to; from++) {
+                int cval = unsafe.getInt(_valueStack[cc] + (from * SIZEOF_DATA));
+                int cstmp = unsafe.getInt(_stampStack[cc] + (from * SIZEOF_INT));
+                savePreviousState(cvar[from], cval == 1, cstmp);
+            }
         }
     }
 
@@ -226,7 +283,7 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
     protected void finalize() throws Throwable {
         super.finalize();
         final int c = chunks[0];
-        for (int cc = valueStack.length; cc >= c; cc--) {
+        for (int cc = valueStack.length-1; cc >= c; cc--) {
             unsafe.freeMemory(valueStack[cc]);
             unsafe.freeMemory(stampStack[cc]);
         }

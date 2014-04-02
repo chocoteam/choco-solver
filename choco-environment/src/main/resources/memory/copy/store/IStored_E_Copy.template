@@ -24,26 +24,20 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package util.objects;
+package memory.copy.store;
+
+import memory.IStorage;
+import memory.copy.Rc#E#;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19/11/12
+ * @since 14/05/13
  */
-public enum BitsetFactory {
-    ;
+public interface IStored#E#Copy extends IStorage {
 
-    public static IBitset make(int nbits) {
-        if (nbits < 0) {
-            throw new NegativeArraySizeException("nbits < 0: " + nbits);
-        } else if (nbits <= 32) {
-            return new Bitset32b(nbits);
-        } else if (nbits <= 64) {
-            return new Bitset64b(nbits);
-        } else {
-            return new Bitset64n(nbits);
-        }
-    }
+    void add(Rc#E# rc);
+
+    void buildFakeHistory(Rc#E# v, #e# initValue, int olderStamp);
 }

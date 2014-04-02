@@ -68,6 +68,8 @@ The CHANGES.md file starts at this version.
 * Fix #187: patch Once
 * Fix #174: a default search strategy is now available, dealing with each type of variables present
 * Fix #189: Added methods to enumerate and store all optimal solutions
+* Fix #190: Entailment of PropBoolChannel
+* Fix #191: Enable dynamic addition of variables during the resolution (cf. Pareto)
 * Start documentation (see user_guide.pdf and http://chocoteam.github.io/choco3/)
 * NogoodFromRestart now trigger propagation fixpoint
 * Fix #192: NogoodFromSolution now available (only for integer variables)

@@ -68,7 +68,7 @@ import java.util.regex.Pattern;
 public class CodeGenerator {
     private static final WrapperInfo[] WRAPPERS = new WrapperInfo[]{
             new WrapperInfo("double", "Double", "POSITIVE_INFINITY", "NEGATIVE_INFINITY", "8"),
-//            new WrapperInfo("boolean", "Bool", "false", "true", "2"),
+            new WrapperInfo("boolean", "Bool", "FALSE", "true", "2"),
 //                new WrapperInfo("float", "Float", "POSITIVE_INFINITY", "NEGATIVE_INFINITY"),
             new WrapperInfo("int", "Integer", "MAX_VALUE", "MIN_VALUE", "4"),
             new WrapperInfo("long", "Long", "MAX_VALUE", "MIN_VALUE", "8"),

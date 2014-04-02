@@ -27,7 +27,7 @@
 
 package memory;
 
-import memory.structure.IndexedBipartiteSet;
+import memory.structure.BasicIndexedBipartiteSet;
 import memory.structure.OneWordS32BitSet;
 import memory.structure.OneWordS64BitSet;
 import memory.structure.S64BitSet;
@@ -50,11 +50,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
     /**
      * Shared BitSet
      */
-    public IndexedBipartiteSet currentBitSet;
-    /**
-     * Nex free bit in the shared BitSet
-     */
-    protected int nextOffset;
+    public BasicIndexedBipartiteSet booleanSet;
 
     protected AbstractEnvironment(Type type) {
         this.type = type;
@@ -93,8 +89,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
     }
 
     public final void createSharedBipartiteSet(int size) {
-        currentBitSet = new IndexedBipartiteSet(this, size);
-        nextOffset = -1;
+        booleanSet = new BasicIndexedBipartiteSet(this, size);
     }
 
     /**
@@ -103,37 +98,10 @@ public abstract class AbstractEnvironment implements IEnvironment {
      * @return
      */
     @Override
-    public final IndexedBipartiteSet getSharedBipartiteSetForBooleanVars() {
-        if (currentBitSet == null) {
+    public final BasicIndexedBipartiteSet getSharedBipartiteSetForBooleanVars() {
+        if (booleanSet == null) {
             createSharedBipartiteSet(SIZE);
         }
-        nextOffset++;
-        if (nextOffset > currentBitSet.size() - 1) {
-            increaseSizeOfSharedBipartiteSet(currentBitSet.size() * 2);
-        }
-        return currentBitSet;
+        return booleanSet;
     }
-
-    /**
-     * Increase the size of the shared bi partite set,
-     * it HAS to be called before the end of the environment creation
-     * BEWARE: be sure you are correctly calling this method
-     *
-     * @param gap the gap the reach the expected size
-     */
-    @Override
-    public void increaseSizeOfSharedBipartiteSet(int gap) {
-        currentBitSet.increaseSize(gap);
-    }
-
-    /**
-     * Return the next free bit in the shared StoredBitSetVector object
-     *
-     * @return
-     */
-    @Override
-    public final int getNextOffset() {
-        return nextOffset;
-    }
-
 }

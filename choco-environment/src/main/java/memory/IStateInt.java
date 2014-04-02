@@ -30,6 +30,7 @@ package memory;
 import java.io.Serializable;
 
 /**
+ * An abstract class for backtrackable int.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -40,6 +41,7 @@ public abstract class IStateInt implements Serializable {
     protected final IEnvironment environment;
     protected int currentValue;
     protected int timeStamp;
+
 
     public IStateInt(IEnvironment env, int i) {
         environment = env;
@@ -89,7 +91,7 @@ public abstract class IStateInt implements Serializable {
     /**
      * Make a deep copy of this.
      *
-     * @return a long
+     * @return a int
      */
     public final int deepCopy() {
         return currentValue;

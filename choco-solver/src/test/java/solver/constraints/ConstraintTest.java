@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,45 +24,36 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints;
 
-package memory.structure;
-
-import memory.IEnvironment;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.set.SCF;
+import solver.variables.BoolVar;
+import solver.variables.SetVar;
+import solver.variables.VF;
 
 /**
- * The methods in parameter can be statically get at the first object creation, then used at each call.
- * <p/>
- * But, using reflection can be 4 times much slower than using dedicated operation, because this is not hot spotted.
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 11/02/11
+ * @since 24/03/2014
  */
-public class ReflectionOperation<E> extends Operation {
+public class ConstraintTest {
 
-    E object;
-    Method method;
-    Object[] params;
-
-    public ReflectionOperation(IEnvironment environment, E obj, Method method, Object[] params) {
-        super(environment);
-        this.object = obj;
-        this.method = method;
-        this.params = params;
-    }
-
-    @Override
-    public void undo() {
-        try {
-            method.invoke(object, params);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+    @Test
+    public void testBooleanChannelingJL() {
+        //#issue 190
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("bs", 3, solver);
+        SetVar s1 = VF.set("s1", -3, 3, solver);
+        SetVar s2 = VF.set("s2", -3, 3, solver);
+        solver.post(LCF.or(SCF.all_equal(new SetVar[]{s1, s2}), SCF.bool_channel(bs, s1, 0)));
+        if (solver.findSolution()) {
+            do {
+                System.out.println(s1 + " : " + s2);
+            } while (solver.nextSolution());
         }
     }
+
 }

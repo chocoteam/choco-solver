@@ -30,6 +30,7 @@ package memory;
 import java.io.Serializable;
 
 /**
+ * An abstract class for backtrackable boolean.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -40,6 +41,7 @@ public abstract class IStateBool implements Serializable {
     protected final IEnvironment environment;
     protected boolean currentValue;
     protected int timeStamp;
+
 
     public IStateBool(IEnvironment env, boolean i) {
         environment = env;
@@ -77,7 +79,7 @@ public abstract class IStateBool implements Serializable {
     /**
      * Make a deep copy of this.
      *
-     * @return a long
+     * @return a boolean
      */
     public final boolean deepCopy() {
         return currentValue;
