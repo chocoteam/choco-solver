@@ -38,7 +38,7 @@ import memory.trailing.trail.IStoredBoolTrail;
  */
 public class StoredBoolChunckTrail implements IStoredBoolTrail {
 
-    private static final int CHUNK_SIZE = 20000;
+    private static final int CHUNK_SIZE = 1048576;
 
     /**
      * Stack of backtrackable search variables.
@@ -230,7 +230,6 @@ public class StoredBoolChunckTrail implements IStoredBoolTrail {
             }
         }
     }
-
 
     private void increase(int l) {
         StoredBool[][] varBigger = new StoredBool[l + 1][];

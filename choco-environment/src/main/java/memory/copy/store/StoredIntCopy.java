@@ -79,4 +79,15 @@ public class StoredIntCopy implements IStoredIntCopy {
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void buildFakeHistory(RcInt v, int initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            int[] _values = values[i];
+            int size = _values.length;
+            values[i] = new int[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
+    }
 }

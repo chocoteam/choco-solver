@@ -38,4 +38,6 @@ import memory.copy.RcLong;
 public interface IStoredLongCopy extends IStorage {
 
     void add(RcLong rc);
+
+    void buildFakeHistory(RcLong v, long initValue, int olderStamp);
 }

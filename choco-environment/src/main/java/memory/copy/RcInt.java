@@ -45,6 +45,9 @@ public class RcInt extends IStateInt {
     public RcInt(EnvironmentCopying env, int i) {
         super(env, i);
         env.getIntCopy().add(this);
+        if (timeStamp > 0) {
+            env.getIntCopy().buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     @Override

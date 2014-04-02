@@ -79,4 +79,15 @@ public class StoredDoubleCopy implements IStoredDoubleCopy {
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void buildFakeHistory(RcDouble v, double initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            double[] _values = values[i];
+            int size = _values.length;
+            values[i] = new double[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
+    }
 }

@@ -38,4 +38,6 @@ import memory.copy.RcDouble;
 public interface IStoredDoubleCopy extends IStorage {
 
     void add(RcDouble rc);
+
+    void buildFakeHistory(RcDouble v, double initValue, int olderStamp);
 }

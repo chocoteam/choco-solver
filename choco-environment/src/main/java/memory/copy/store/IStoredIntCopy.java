@@ -38,4 +38,6 @@ import memory.copy.RcInt;
 public interface IStoredIntCopy extends IStorage {
 
     void add(RcInt rc);
+
+    void buildFakeHistory(RcInt v, int initValue, int olderStamp);
 }

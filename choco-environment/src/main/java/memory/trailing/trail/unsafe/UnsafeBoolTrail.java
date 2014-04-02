@@ -44,7 +44,7 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
 
     private final Unsafe unsafe;
 
-    public static final int SIZEOF_DATA = 1;
+    public static final int SIZEOF_DATA = 2;
 
     public static final int SIZEOF_INT = 4;
 
@@ -252,7 +252,6 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
         }
     }
 
-
     private void increase(int l) {
         StoredBool[][] varBigger = new StoredBool[l + 1][];
         System.arraycopy(variableStack, 0, varBigger, 0, l);
@@ -284,7 +283,7 @@ public class UnsafeBoolTrail implements IStoredBoolTrail {
     protected void finalize() throws Throwable {
         super.finalize();
         final int c = chunks[0];
-        for (int cc = valueStack.length; cc >= c; cc--) {
+        for (int cc = valueStack.length-1; cc >= c; cc--) {
             unsafe.freeMemory(valueStack[cc]);
             unsafe.freeMemory(stampStack[cc]);
         }

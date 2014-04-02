@@ -79,4 +79,15 @@ public class StoredBoolCopy implements IStoredBoolCopy {
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void buildFakeHistory(RcBool v, boolean initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            boolean[] _values = values[i];
+            int size = _values.length;
+            values[i] = new boolean[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
+    }
 }

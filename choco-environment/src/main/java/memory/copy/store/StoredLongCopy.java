@@ -79,4 +79,15 @@ public class StoredLongCopy implements IStoredLongCopy {
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void buildFakeHistory(RcLong v, long initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            long[] _values = values[i];
+            int size = _values.length;
+            values[i] = new long[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
+    }
 }

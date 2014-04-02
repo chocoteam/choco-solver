@@ -214,6 +214,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
         currentLevel += (t - f);
     }
 
+
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
         // first, copy the stack of variables

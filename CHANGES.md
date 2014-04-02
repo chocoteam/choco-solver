@@ -69,3 +69,4 @@ The CHANGES.md file starts at this version.
 * Fix #174: a default search strategy is now available, dealing with each type of variables present
 * Fix #189: Added methods to enumerate and store all optimal solutions
 * Fix #190: Entailment of PropBoolChannel
+* Fix #191: Enable dynamic addition of variables during the resolution (cf. Pareto)

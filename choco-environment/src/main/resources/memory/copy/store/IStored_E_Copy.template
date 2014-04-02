@@ -27,7 +27,7 @@
 package memory.copy.store;
 
 import memory.IStorage;
-import memory.copy.RcBool;
+import memory.copy.Rc#E#;
 
 /**
  * <br/>
@@ -35,9 +35,9 @@ import memory.copy.RcBool;
  * @author Charles Prud'homme
  * @since 14/05/13
  */
-public interface IStoredBoolCopy extends IStorage {
+public interface IStored#E#Copy extends IStorage {
 
-    void add(RcBool rc);
+    void add(Rc#E# rc);
 
-    void buildFakeHistory(RcBool v, boolean initValue, int olderStamp);
+    void buildFakeHistory(Rc#E# v, #e# initValue, int olderStamp);
 }
