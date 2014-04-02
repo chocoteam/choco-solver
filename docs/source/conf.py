@@ -190,6 +190,8 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Choco3doc'
 
+html_logo = '0_resources/CHOCO_cmjn.jpg'
+
 # -- CPRU: new options ---------------------------------------------------
 
 # -- Options for LaTeX output ---------------------------------------------
