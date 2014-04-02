@@ -648,6 +648,7 @@ public class VariableFactory {
         }
         return cste;
     }
+
     /**
      * get a specific boolean variable, whom domain is reduced to the singleton {VALUE}.
      * This variable is unnamed as it is actually a solver constant
