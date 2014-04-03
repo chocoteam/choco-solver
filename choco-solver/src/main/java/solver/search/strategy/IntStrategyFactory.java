@@ -28,238 +28,427 @@
 package solver.search.strategy;
 
 import solver.Solver;
+import solver.search.strategy.assignments.DecisionOperator;
+import solver.search.strategy.selectors.IntValueSelector;
+import solver.search.strategy.selectors.VariableSelector;
 import solver.search.strategy.selectors.values.IntDomainMax;
 import solver.search.strategy.selectors.values.IntDomainMiddle;
 import solver.search.strategy.selectors.values.IntDomainMin;
 import solver.search.strategy.selectors.values.IntDomainRandom;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.IntStrategy;
 import solver.search.strategy.strategy.LastConflict;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 
 /**
  * Strategies, Variable selectors and Value selectors factory.
  * Just there to simplify strategies creation.
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 5 juil. 2010
  */
 public class IntStrategyFactory {
 
-    IntStrategyFactory() {
-    }
+	IntStrategyFactory() {
+	}
 
-    /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMin</code>.
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> presetI(IntVar... VARS) {
-        return new Assignment(VARS, new InputOrder<IntVar>(), new IntDomainMin());
-    }
+	// ************************************************************************************
+	// VARIABLE SELECTORS (non-exhaustive list)
+	// ************************************************************************************
 
+	/**
+	 * Selects the first non-instantiated variable, to branch on it.
+	 * @return a variable selector
+	 */
+	public static VariableSelector<IntVar> first_var_selector(){
+		return new InputOrder<IntVar>();
+	}
 
-    /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMin</code>.
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> inputOrder_InDomainMin(IntVar... VARS) {
-        return new Assignment(VARS, new InputOrder<IntVar>(), new IntDomainMin());
-    }
+	/**
+	 * Selects randomly a non-instantiated variable to branch on
+	 * @param SEED	random seed
+	 * @return	a variable selector
+	 */
+	public static VariableSelector<IntVar> random_var_selector(long SEED){
+		return new Random<IntVar>(SEED);
+	}
 
-    /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMin</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> force_InputOrder_InDomainMin(Variable... VARS) {
-        IntVar[] ivars = new IntVar[VARS.length];
-        for (int i = 0; i < VARS.length; i++) {
-            ivars[i] = (IntVar) VARS[i];
-        }
-        return inputOrder_InDomainMin(ivars);
-    }
+	/**
+	 * Selects the non-instantiated variable of smallest domain, to branch on it.
+	 * This heuristic is sometimes called FirstFail.
+	 * @return a variable selector
+	 */
+	public static VariableSelector<IntVar> minDomainSize_var_selector(){
+		return new FirstFail();
+	}
 
-    /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>IntDomainMax</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> inputOrder_InDomainMax(IntVar... VARS) {
-        return new Assignment(VARS, new InputOrder<IntVar>(), new IntDomainMax());
-    }
+	/**
+	 * Selects the non-instantiated variable of largest domain, to branch on it.
+	 * This heuristic is sometimes called AntiFirstFail.
+	 * @return a variable selector
+	 */
+	public static VariableSelector<IntVar> maxDomainSize_var_selector(){
+		return new AntiFirstFail();
+	}
 
-    /**
-     * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMin</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> firstFail_InDomainMin(IntVar... VARS) {
-        return new Assignment(VARS, new FirstFail(), new IntDomainMin());
-    }
+	/**
+	 * Selects the non-instantiated variable of largest domain, to branch on it.
+	 * This heuristic is sometimes called AntiFirstFail.
+	 * @return a variable selector
+	 */
+	public static VariableSelector<IntVar> maxRegret_var_selector(){
+		return new MaxRegret();
+	}
 
+	// ************************************************************************************
+	// VALUE SELECTORS
+	// ************************************************************************************
 
-    /**
-     * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMiddle</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> firstFail_InDomainMiddle(IntVar... VARS) {
-        return new Assignment(VARS, new FirstFail(), new IntDomainMiddle());
-    }
+	/**
+	 * Selects the variable lower bound
+	 * @return a value selector
+	 */
+	public static IntValueSelector min_value_selector(){
+		return new IntDomainMin();
+	}
 
-    /**
-     * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMax</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> firstFail_InDomainMax(IntVar... VARS) {
-        return new Assignment(VARS, new FirstFail(), new IntDomainMax());
-    }
+	/**
+	 * Selects a value at the middle between the variable lower and upper bounds
+	 * @return a value selector
+	 */
+	public static IntValueSelector mid_value_selector(){
+		return new IntDomainMiddle();
+	}
 
-    /**
-     * Assignment strategy combining <code>MaxRegret</code> and <code>IntDomainMin</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> maxReg_InDomainMin(IntVar... VARS) {
-        return new Assignment(VARS, new MaxRegret(), new IntDomainMin());
-    }
+	/**
+	 * Selects the variable upper bound
+	 * @return a value selector
+	 */
+	public static IntValueSelector max_value_selector(){
+		return new IntDomainMax();
+	}
 
-    /**
-     * Assignment strategy combining <code>Random</code> and <code>Random</code>
-     *
-     * @param VARS list of variables
-     * @param SEED a seed for random
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> random(IntVar[] VARS, long SEED) {
-        return new Assignment(VARS, new Random<IntVar>(SEED), new IntDomainRandom(SEED));
-    }
+	/**
+	 * Selects randomly a value in the variable domain
+	 * @return a value selector
+	 */
+	public static IntValueSelector random_value_selector(long SEED){
+		return new IntDomainRandom(SEED);
+	}
 
+	// ************************************************************************************
+	// OPERATORS
+	// ************************************************************************************
 
-    /**
-     * Assignment strategy combining <code>DomOverWDeg</code> and <code>IntDomainMin</code>
-     *
-     * @param VARS list of variables
-     * @return assignment strategy
-     */
-    public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
-        return new DomOverWDeg(VARS, SEED, new IntDomainMin());
-    }
+	/**
+	 * Assign the selected variable to the selected value
+	 * e.g. X = 42
+	 * @return a decision operator
+	 */
+	public static DecisionOperator<IntVar> assign(){
+		return DecisionOperator.int_eq;
+	}
 
-    /**
-     * Create an Activity based search strategy.
-     * <p/>
-     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
-     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
-     * <br/>
-     *
-     * @param VARS           collection of variables
-     * @param GAMMA          aging parameters
-     * @param DELTA          for interval domain size estimation
-     * @param ALPHA          forget parameter
-     * @param RESTART        restart parameter
-     * @param FORCE_SAMPLING minimal number of iteration for sampling phase
-     * @param SEED           the seed for random
-     */
-    public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, Solver solver, double GAMMA, double DELTA, int ALPHA,
-                                                         double RESTART, int FORCE_SAMPLING, long SEED) {
-        return new ActivityBased(solver, VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
-    }
+	/**
+	 * Remove the selected value from the selected variable domain
+	 * e.g. X != 42
+	 * @return a decision operator
+	 */
+	public static DecisionOperator<IntVar> remove(){
+		return DecisionOperator.int_neq;
+	}
 
-    /**
-     * Create an Activity based search strategy.
-     * <p/>
-     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
-     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
-     * <br/>
-     * Uses default parameters (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
-     *
-     * @param VARS collection of variables
-     * @param SEED the seed for random
-     */
-    public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, long SEED) {
-        return new ActivityBased(VARS[0].getSolver(), VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
-    }
+	/**
+	 * Split the domain of the selected variable at the selected value, by updating the upper bound.
+	 * e.g. X <= 42
+	 * @return a decision operator
+	 */
+	public static DecisionOperator<IntVar> split(){
+		return DecisionOperator.int_split;
+	}
 
-    /**
-     * Create an Impact-based search strategy.
-     * <p/>
-     * <b>"Impact-Based Search Strategies for Constraint Programming",
-     * Philippe Refalo, CP2004.</b>
-     *
-     * @param VARS       variables of the problem (should be integers)
-     * @param ALPHA      aging parameter
-     * @param SPLIT      split parameter for subdomains computation
-     * @param NODEIMPACT force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
-     * @param SEED       a seed for random
-     * @param INITONLY   only apply the initialisation phase, do not update impact thereafter
-     */
-    public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
-        return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
-    }
+	/**
+	 * Split the domain of the selected variable at the selected value, by updating the lower bound.
+	 *
+	 * e.g. X >= 42
+	 * @return a decision operator
+	 */
+	public static DecisionOperator<IntVar> reverse_split(){
+		return DecisionOperator.int_reverse_split;
+	}
 
-    /**
-     * Create an Impact-based search strategy.
-     * <p/>
-     * <b>"Impact-Based Search Strategies for Constraint Programming",
-     * Philippe Refalo, CP2004.</b>
-     * Uses default parameters (ALPHA=2,SPLIT=3,NODEIMPACT=10,INITONLY=true)
-     *
-     * @param VARS variables of the problem (should be integers)
-     * @param SEED a seed for random
-     */
-    public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, long SEED) {
-        return new ImpactBased(VARS, 2, 3, 10, SEED, true);
-    }
+	// ************************************************************************************
+	// CUSTOM STRATEGIES
+	// ************************************************************************************
 
-    /**
-     * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
-     *
-     * @param SOLVER
-     * @param STRAT
-     * @return last conflict strategy
-     */
-    public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
-        return new LastConflict(SOLVER, STRAT, 1);
-    }
+	/**
+	 * Builds your own search strategy
+	 * @param VAR_SELECTOR	defines how to select a variable to branch on.
+	 * @param VAL_SELECTOR	defines how to select a value in the domain of the selected variable
+	 * @param DEC_OPERATOR	defines how to modify the domain of the selected variable with the selected value
+	 * @param VARS			variables to branch on
+	 * @return a custom search strategy
+	 */
+	public static AbstractStrategy<IntVar> custom(VariableSelector<IntVar> VAR_SELECTOR,
+												  IntValueSelector VAL_SELECTOR,
+												  DecisionOperator<IntVar> DEC_OPERATOR,
+												  IntVar... VARS){
+		return new IntStrategy(VARS, VAR_SELECTOR, VAL_SELECTOR, DEC_OPERATOR);
+	}
 
-    /**
-     * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
-     * Considers the K last conflicts
-     *
-     * @param SOLVER
-     * @param STRAT
-     * @return last conflict strategy
-     */
-    public static AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT) {
-        return new LastConflict(SOLVER, STRAT, K);
-    }
+	/**
+	 * Builds your own assignment strategy :
+	 * Selects a variable X and a value V to make the decision X = V.
+	 * Note that value assignments are the default decision operators.
+	 * Therefore, they are not mentioned in the search heuristic name.
+	 *
+	 * @param VAR_SELECTOR	defines how to select a variable to branch on.
+	 * @param VAL_SELECTOR	defines how to select a value in the domain of the selected variable
+	 * @param VARS			variables to branch on
+	 * @return a custom search strategy
+	 */
+	public static AbstractStrategy<IntVar> custom(VariableSelector<IntVar> VAR_SELECTOR,
+												  IntValueSelector VAL_SELECTOR,
+												  IntVar... VARS){
+		return custom(VAR_SELECTOR, VAL_SELECTOR, assign(), VARS);
+	}
 
-    /**
-     * Build a sequence of <code>AbstractStrategy</code>.
-     * The first strategy in parameter is first called to compute a decision, if possible.
-     * Otherwise, the second strategy is called, ...
-     * And so on, until the last one.
-     *
-     * @param strategies a list of strategies
-     * @return a strategy sequencer
-     */
-    public static AbstractStrategy sequencer(AbstractStrategy... strategies) {
-        return new StrategiesSequencer(strategies);
-    }
+	// ************************************************************************************
+	// SOME EXAMPLES OF STRATEGIES YOU CAN BUILD
+	// ************************************************************************************
+
+	/**
+	 * Assign the first non-instantiated variable to its lower bound.
+	 *
+	 * @param VARS list of variables
+	 * @return int strategy based on value assignments
+	 */
+	public static AbstractStrategy<IntVar> first_LB(IntVar... VARS) {
+		return custom(first_var_selector(), min_value_selector(), VARS);
+	}
+
+	/**
+	 * Remove the lower bound value from the domain of the first non-instantiated variable
+	 *
+	 * @param VARS list of variables
+	 * @return int strategy based on value removals
+	 */
+	public static AbstractStrategy<IntVar> first_Neq_LB(IntVar... VARS) {
+		return custom(first_var_selector(), min_value_selector(), remove(), VARS);
+	}
+
+	/**
+	 * Splits the domain of the first non-instantiated variable.
+	 *
+	 * @param VARS list of variables
+	 * @return int strategy based on domain splits
+	 */
+	public static AbstractStrategy<IntVar> first_Split(IntVar... VARS) {
+		return custom(first_var_selector(), mid_value_selector(), split(), VARS);
+	}
+
+	/**
+	 * Assign the first non-instantiated variable to its upper bound.
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> first_UB(IntVar... VARS) {
+		return custom(first_var_selector(), max_value_selector(), VARS);
+	}
+
+	/**
+	 * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMin</code>
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> minDom_LB(IntVar... VARS) {
+		return custom(minDomainSize_var_selector(), min_value_selector(), VARS);
+	}
+
+	/**
+	 * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMiddle</code>
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> minDom_MidValue(IntVar... VARS) {
+		return custom(minDomainSize_var_selector(), mid_value_selector(), VARS);
+	}
+
+	/**
+	 * Splits the domain of the variable of largest domain
+	 *
+	 * @param VARS list of variables
+	 * @return an int strategy based on domain splits
+	 */
+	public static AbstractStrategy<IntVar> maxDom_Split(IntVar... VARS) {
+		return custom(maxDomainSize_var_selector(), mid_value_selector(), split(), VARS);
+	}
+
+	/**
+	 * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMax</code>
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> minDom_UB(IntVar... VARS) {
+		return custom(minDomainSize_var_selector(), max_value_selector(), VARS);
+	}
+
+	/**
+	 * Assignment strategy combining <code>MaxRegret</code> and <code>IntDomainMin</code>
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> maxReg_LB(IntVar... VARS) {
+		return custom(maxRegret_var_selector(), min_value_selector(), VARS);
+	}
+
+	/**
+	 * Assignment strategy combining <code>Random</code> and <code>Random</code>
+	 *
+	 * @param VARS list of variables
+	 * @param SEED a seed for random
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> random(IntVar[] VARS, long SEED) {
+		return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
+	}
+
+	/**
+	 * Build a sequence of <code>AbstractStrategy</code>.
+	 * The first strategy in parameter is first called to compute a decision, if possible.
+	 * Otherwise, the second strategy is called, ...
+	 * And so on, until the last one.
+	 *
+	 * @param strategies a list of strategies
+	 * @return a strategy sequencer
+	 */
+	public static AbstractStrategy sequencer(AbstractStrategy... strategies) {
+		return new StrategiesSequencer(strategies);
+	}
+
+	// ************************************************************************************
+	// BLACK-BOX STRATEGIES
+	// ************************************************************************************
+
+	/**
+	 * Assignment strategy which selects a variable according to <code>DomOverWDeg</code>
+	 * and assign it to the selected value
+	 *
+	 * @param VARS list of variables
+	 * @param SEED random seed
+	 * @param VAL_SELECTOR	heuristic to selected the value to assign to the selected variable
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED, IntValueSelector VAL_SELECTOR) {
+		return new DomOverWDeg(VARS, SEED, VAL_SELECTOR);
+	}
+
+	/**
+	 * Assignment strategy which selects a variable according to <code>DomOverWDeg</code>
+	 * and assign it to its lower bound
+	 *
+	 * @param VARS	list of variables
+	 * @param SEED  random seed
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED) {
+		return domOverWDeg(VARS, SEED, min_value_selector());
+	}
+
+	/**
+	 * Create an Activity based search strategy.
+	 * <p/>
+	 * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
+	 * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
+	 * <br/>
+	 *
+	 * @param VARS           collection of variables
+	 * @param GAMMA          aging parameters
+	 * @param DELTA          for interval domain size estimation
+	 * @param ALPHA          forget parameter
+	 * @param RESTART        restart parameter
+	 * @param FORCE_SAMPLING minimal number of iteration for sampling phase
+	 * @param SEED           the seed for random
+	 */
+	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, Solver solver, double GAMMA, double DELTA, int ALPHA,
+														 double RESTART, int FORCE_SAMPLING, long SEED) {
+		return new ActivityBased(solver, VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
+	}
+
+	/**
+	 * Create an Activity based search strategy.
+	 * <p/>
+	 * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
+	 * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
+	 * <br/>
+	 * Uses default parameters (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
+	 *
+	 * @param VARS collection of variables
+	 * @param SEED the seed for random
+	 */
+	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, long SEED) {
+		return new ActivityBased(VARS[0].getSolver(), VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
+	}
+
+	/**
+	 * Create an Impact-based search strategy.
+	 * <p/>
+	 * <b>"Impact-Based Search Strategies for Constraint Programming",
+	 * Philippe Refalo, CP2004.</b>
+	 *
+	 * @param VARS       variables of the problem (should be integers)
+	 * @param ALPHA      aging parameter
+	 * @param SPLIT      split parameter for subdomains computation
+	 * @param NODEIMPACT force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
+	 * @param SEED       a seed for random
+	 * @param INITONLY   only apply the initialisation phase, do not update impact thereafter
+	 */
+	public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
+		return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
+	}
+
+	/**
+	 * Create an Impact-based search strategy.
+	 * <p/>
+	 * <b>"Impact-Based Search Strategies for Constraint Programming",
+	 * Philippe Refalo, CP2004.</b>
+	 * Uses default parameters (ALPHA=2,SPLIT=3,NODEIMPACT=10,INITONLY=true)
+	 *
+	 * @param VARS variables of the problem (should be integers)
+	 * @param SEED a seed for random
+	 */
+	public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, long SEED) {
+		return new ImpactBased(VARS, 2, 3, 10, SEED, true);
+	}
+
+	/**
+	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
+	 *
+	 * @param SOLVER
+	 * @param STRAT
+	 * @return last conflict strategy
+	 */
+	public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
+		return new LastConflict(SOLVER, STRAT, 1);
+	}
+
+	/**
+	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
+	 * Considers the K last conflicts
+	 *
+	 * @param SOLVER
+	 * @param STRAT
+	 * @return last conflict strategy
+	 */
+	public static AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT) {
+		return new LastConflict(SOLVER, STRAT, K);
+	}
 }

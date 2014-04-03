@@ -83,8 +83,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(x));
-//        solver.set(IntStrategyFactory.firstFail_InDomainMin(x));
+        solver.set(IntStrategyFactory.first_LB(x));
     }
 
     @Override

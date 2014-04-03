@@ -163,7 +163,7 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.domOverWDeg_InDomainMin(vars, seed));
+        solver.set(IntStrategyFactory.domOverWDeg(vars, seed));
         SearchMonitorFactory.luby(solver, 2, 2, new FailCounter(2), 25000);
     }
 

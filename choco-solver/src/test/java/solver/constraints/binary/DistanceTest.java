@@ -157,7 +157,7 @@ public class DistanceTest {
         IntVar Y = VariableFactory.bounded("Y", -5, 5, solver);
         IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
         solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{Z, X, Y, Z}));
+        solver.set(IntStrategyFactory.first_LB(new IntVar[]{Z, X, Y, Z}));
         SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         System.out.printf("end\n");

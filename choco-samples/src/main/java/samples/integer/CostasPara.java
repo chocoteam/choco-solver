@@ -74,10 +74,10 @@ public class CostasPara extends ParallelizedProblem {
     public void configureSearch() {
 		switch (searchIdx){
 			case 0:
-				solver.set(ISF.force_InputOrder_InDomainMin(vars));
+				solver.set(ISF.first_LB(vars));
 				break;
 			case 1:
-				solver.set(ISF.firstFail_InDomainMin(vars));
+				solver.set(ISF.minDom_LB(vars));
 				break;
 			default:
 					solver.set(ISF.ActivityBased(vars,0));

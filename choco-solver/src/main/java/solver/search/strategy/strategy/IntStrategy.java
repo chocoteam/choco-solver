@@ -36,40 +36,63 @@ import solver.variables.IntVar;
 import util.PoolManager;
 
 /**
+ * Class to perform branching decisions over integer variables
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 2 juil. 2010
  */
-public class Assignment extends AbstractStrategy<IntVar> {
+public class IntStrategy extends AbstractStrategy<IntVar> {
 
-    VariableSelector<IntVar> varselector;
-
+	// Search strategy parameters
+    VariableSelector<IntVar> variableSelector;
     IntValueSelector valueSelector;
+	DecisionOperator<IntVar> decisionOperator;
 
+	// object recycling management
     PoolManager<FastDecision> decisionPool;
 
-    DecisionOperator<IntVar> assgnt = DecisionOperator.int_eq;
-
-    public Assignment(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
-        super(scope);
-        this.varselector = varselector;
-        this.valueSelector = valueSelector;
-        decisionPool = new PoolManager<>();
+	/**
+	 * Creates a search strategy which selects a variable X and a value V to perform
+	 * the decision X = V
+	 *
+	 * BEWARE: if the variable domain is not enumerated, the value V should be a domain bound.
+	 * Otherwise, the decision cannot be negated, and the search may loop infinitely.
+	 *
+	 * @param scope			defines which variables to branch on
+	 * @param varSelector	defines how to select the next variable to branch on
+	 * @param valSelector	defines how to select the value involved in the branching decision
+	 */
+    public IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector) {
+        this(scope, varSelector, valSelector,DecisionOperator.int_eq);
     }
 
-    public Assignment(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
-                      DecisionOperator<IntVar> assgnt) {
+	/**
+	 * Creates a search strategy which selects a variable X and a value V to perform
+	 * the decision X decOperator V
+	 *
+	 * This can be X <= V for instance.
+	 *
+	 * BEWARE: if the variable domain is not enumerated, and if the operator is either "=" or "!=",
+	 * then the value V should be a domain bound. Otherwise, the decision cannot be negated,
+	 * and the search may loop infinitely.
+	 *
+	 * @param scope			defines which variables to branch on
+	 * @param varSelector	defines how to select the next variable to branch on
+	 * @param valSelector	defines how to select the value involved in the branching decision
+	 * @param decOperator	defines what to do in a branching decision
+	 */
+    public IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector,
+					   DecisionOperator<IntVar> decOperator) {
         super(scope);
-        this.varselector = varselector;
-        this.valueSelector = valueSelector;
-        decisionPool = new PoolManager<>();
-        this.assgnt = assgnt;
+        this.variableSelector = varSelector;
+        this.valueSelector = valSelector;
+		this.decisionOperator = decOperator;
+        this.decisionPool = new PoolManager<>();
     }
 
     @Override
-    public void init() {
-    }
+    public void init() {}
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
@@ -81,14 +104,14 @@ public class Assignment extends AbstractStrategy<IntVar> {
         if (d == null) {
             d = new FastDecision(decisionPool);
         }
-        d.set(variable, value, assgnt);
+        d.set(variable, value, decisionOperator);
         return d;
     }
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        IntVar variable = varselector.getVariable(vars);
+        IntVar variable = variableSelector.getVariable(vars);
         return computeDecision(variable);
     }
 }

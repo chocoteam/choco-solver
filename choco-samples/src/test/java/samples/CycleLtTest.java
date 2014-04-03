@@ -67,7 +67,7 @@ public class CycleLtTest {
         cstrs[i] = IntConstraintFactory.arithm(vars[n - 1], "<", vars[0]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.first_LB(vars));
         return s;
     }
 

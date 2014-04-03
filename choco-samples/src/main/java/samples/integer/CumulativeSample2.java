@@ -88,7 +88,7 @@ public class CumulativeSample2 extends AbstractProblem {
 
 	@Override
 	public void configureSearch(){
-		solver.set(IntStrategyFactory.inputOrder_InDomainMin(starts));
+		solver.set(IntStrategyFactory.first_LB(starts));
 	}
 
 	@Override

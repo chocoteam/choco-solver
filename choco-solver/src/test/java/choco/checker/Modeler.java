@@ -71,7 +71,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -103,7 +103,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(allvars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -144,7 +144,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(allvars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -171,7 +171,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -198,7 +198,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -224,7 +224,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.alldifferent(vars, "BC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -250,7 +250,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -276,7 +276,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -310,7 +310,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, closed);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -336,7 +336,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.times(vars[0], vars[1], vars[2]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -362,7 +362,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.absolute(vars[0], vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -402,7 +402,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.count(params[1], vars, tmp);
             Constraint[] ctrs = new Constraint[]{ctr, link};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -442,7 +442,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.count(params[1], vars, tmp);
             Constraint[] ctrs = new Constraint[]{ctr, link};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -473,7 +473,7 @@ public interface Modeler {
             Constraint ctr = (Boolean) parameters?ICF.lex_less(X,Y):ICF.lex_less_eq(X,Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y));
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(ArrayUtils.append(X, Y));
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -508,7 +508,7 @@ public interface Modeler {
             Constraint ctr = (Boolean) parameters?ICF.lex_chain_less(X,Y,Z):ICF.lex_chain_less_eq(X,Y,Z);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y, Z));
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(ArrayUtils.append(X, Y, Z));
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -534,7 +534,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0, "detect");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -563,7 +563,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.among(occVar, vars, params);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -592,7 +592,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.among(occVar, vars, params);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -622,7 +622,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], (String[]) parameters);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -657,7 +657,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, false);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -688,7 +688,7 @@ public interface Modeler {
             Constraint ctr = IntConstraintFactory.tree(succs, nbRoots, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -712,7 +712,7 @@ public interface Modeler {
             }
             Constraint ctr = IntConstraintFactory.circuit(vars, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -736,7 +736,7 @@ public interface Modeler {
             }
             Constraint ctr = IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, s));
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -773,7 +773,7 @@ public interface Modeler {
                 dy[i] = vars[i + 3 * k];
             }
             Constraint[] ctrs = IntConstraintFactory.diffn(x, y, dx, dy,true);
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -808,7 +808,7 @@ public interface Modeler {
             IntVar capa = vars[vars.length - 1];
             Constraint ctr = IntConstraintFactory.cumulative(tasks, h, capa, true);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
             solver.post(ctrs);
             solver.set(strategy);
             return solver;

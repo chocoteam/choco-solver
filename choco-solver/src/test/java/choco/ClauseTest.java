@@ -79,7 +79,7 @@ public class ClauseTest {
                 LogOp or = LogOp.or(bs);
                 log.info(or.toString());
                 SatFactory.addClauses(or, s);
-                s.set(IntStrategyFactory.presetI(bs));
+                s.set(IntStrategyFactory.first_LB(bs));
 
 				s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
@@ -99,7 +99,7 @@ public class ClauseTest {
         LogOp and = LogOp.and(bs[0], bs[0].not());
 
         SatFactory.addClauses(and, s);
-        s.set(IntStrategyFactory.presetI(bs));
+        s.set(IntStrategyFactory.first_LB(bs));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 0);
@@ -116,7 +116,7 @@ public class ClauseTest {
         SatFactory.addClauses(or, s);
 
         BoolVar[] bs = new BoolVar[]{b};
-        s.set(IntStrategyFactory.presetI(bs));
+        s.set(IntStrategyFactory.first_LB(bs));
         SMF.log(s, true, true);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();

@@ -93,7 +93,7 @@ public class SmallSantaClaude {
 		);
 
 		// set search strategy (ABS)
-		solver.set(IntStrategyFactory.firstFail_InDomainMin(kid_gift));
+		solver.set(IntStrategyFactory.minDom_LB(kid_gift));
 		// displays resolution statistics
 		SearchMonitorFactory.log(solver,true,false);
 		// print each solution

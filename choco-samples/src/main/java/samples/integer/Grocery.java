@@ -93,7 +93,7 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrder_InDomainMax(itemCost));
+        solver.set(IntStrategyFactory.first_UB(itemCost));
     }
 
     @Override

@@ -101,12 +101,12 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         AbstractStrategy[] strats = new AbstractStrategy[5];
         int nb = 0;
         if (ivars.length > 0) {
-            strats[nb++] = IntStrategyFactory.firstFail_InDomainMin(ivars);
+            strats[nb++] = IntStrategyFactory.minDom_LB(ivars);
         }
 
         BoolVar[] bvars = solver.retrieveBoolVars();
         if (bvars.length > 0) {
-            strats[nb++] = IntStrategyFactory.inputOrder_InDomainMax(bvars);
+            strats[nb++] = IntStrategyFactory.first_UB(bvars);
         }
 
         SetVar[] svars = solver.retrieveSetVars();

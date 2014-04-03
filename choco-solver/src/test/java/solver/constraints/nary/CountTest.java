@@ -185,7 +185,7 @@ public class CountTest {
         IntVar[] vars = VariableFactory.enumeratedArray("e", vs.length + 1, 0, ub, solver);
 
         List<int[]> tuples = new LinkedList<int[]>();
-        solver.set(IntStrategyFactory.presetI(vars));
+        solver.set(IntStrategyFactory.first_LB(vars));
         solver.findSolution();
         do {
             int[] tuple = new int[vars.length];

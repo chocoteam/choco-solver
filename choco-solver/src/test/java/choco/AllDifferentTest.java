@@ -89,7 +89,7 @@ public class AllDifferentTest {
             s.post(IntConstraintFactory.alldifferent(diag1, "BC"));
             s.post(IntConstraintFactory.alldifferent(diag2, "BC"));
         }
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+        AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
         s.set(strategy);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -139,7 +139,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.first_LB(vars));
         //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -169,7 +169,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.first_LB(vars));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -255,7 +255,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        s.set(IntStrategyFactory.first_LB(vars));
         return s;
     }
 

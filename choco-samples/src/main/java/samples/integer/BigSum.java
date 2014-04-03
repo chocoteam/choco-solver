@@ -61,7 +61,7 @@ public class BigSum extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.first_LB(vars));
     }
 
     @Override

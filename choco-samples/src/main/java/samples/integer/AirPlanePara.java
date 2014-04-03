@@ -192,7 +192,7 @@ public class AirPlanePara extends ParallelizedProblem {
 			});
 			solver.set(
 					IntStrategyFactory.random(bVars, seed),
-					IntStrategyFactory.inputOrder_InDomainMin(planes)
+					IntStrategyFactory.first_LB(planes)
 			);
 		}
 		if(searchIdx>=2){

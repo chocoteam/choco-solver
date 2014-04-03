@@ -85,7 +85,7 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.force_InputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.first_LB(vars));
     }
 
 

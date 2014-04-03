@@ -63,7 +63,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(Y, "!=", 4)
         };
 
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+        AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -86,7 +86,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(Y, "!=", -2)
         };
 
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+        AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -108,7 +108,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1)
         };
 
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+        AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -130,7 +130,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(X, "=", Y, "+", coeff)
         };
 
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+        AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
 
         s.post(cstrs);
         s.set(strategy);

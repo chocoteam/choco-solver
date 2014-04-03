@@ -255,7 +255,7 @@ public class ViewsTest {
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
                 ref.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n, solver)));
-                ref.set(IntStrategyFactory.firstFail_InDomainMin(x));
+                ref.set(IntStrategyFactory.minDom_LB(x));
             }
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, solver);
@@ -266,7 +266,7 @@ public class ViewsTest {
                 }
                 solver.post(IntConstraintFactory.sum(y, VariableFactory.fixed(n, solver)));
 
-                solver.set(IntStrategyFactory.firstFail_InDomainMin(x));
+                solver.set(IntStrategyFactory.minDom_LB(x));
 
             }
             check(ref, solver, seed, true, true);

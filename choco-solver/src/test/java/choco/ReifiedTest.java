@@ -77,7 +77,7 @@ public class ReifiedTest {
             Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
 
             s.post(LogicalConstraintFactory.ifThenElse(b, cons, oppCons));
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.first_LB(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -102,7 +102,7 @@ public class ReifiedTest {
 
         s.post(IntConstraintFactory.sum(new IntVar[]{a, b, c}, VariableFactory.bool("sum", s)));
 
-        s.set(IntStrategyFactory.presetI(new IntVar[]{x, y, z}));
+        s.set(IntStrategyFactory.first_LB(new IntVar[]{x, y, z}));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -127,7 +127,7 @@ public class ReifiedTest {
             Constraint cstr = LogicalConstraintFactory.ifThenElse(b, cons, oppCons);
 
             s.post(cstr);
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.first_LB(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -155,7 +155,7 @@ public class ReifiedTest {
 
         s1.post(IntConstraintFactory.alldifferent(vars1, "AC"));
 
-        s1.set(IntStrategyFactory.presetI(vars1));
+        s1.set(IntStrategyFactory.first_LB(vars1));
         return s1;
     }
 
@@ -221,7 +221,7 @@ public class ReifiedTest {
             }
         }
 
-        s2.set(IntStrategyFactory.presetI(X));
+        s2.set(IntStrategyFactory.first_LB(X));
         return s2;
     }
 
@@ -469,7 +469,7 @@ public class ReifiedTest {
                 LogicalConstraintFactory.ifThen(
                         b,
                         IntConstraintFactory.arithm(c, "=", 1))));
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(new BoolVar[]{a, b, c}));
+        solver.set(IntStrategyFactory.minDom_LB(new BoolVar[]{a, b, c}));
         if (solver.findSolution()) {
             int index = 0;
             do {

@@ -53,7 +53,7 @@ import solver.search.strategy.selectors.variables.DomOverWDeg;
 import solver.search.strategy.selectors.variables.FirstFail;
 import solver.search.strategy.selectors.variables.ImpactBased;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.IntStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -160,7 +160,7 @@ public class FGoal {
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && gc.all) {
-                aSolver.set(new Assignment(ivars, new FirstFail(), new IntDomainMin()));
+                aSolver.set(new IntStrategy(ivars, new FirstFail(), new IntDomainMin()));
             } else {
                 switch (gc.bbss) {
                     case 2:
@@ -177,7 +177,7 @@ public class FGoal {
                         break;
                     case 4:
                         description.append("first_fail");
-                        aSolver.set(new Assignment(ivars, new FirstFail(), new IntDomainMin()));
+                        aSolver.set(new IntStrategy(ivars, new FirstFail(), new IntDomainMin()));
                         break;
                     case 1:
                     default:
@@ -222,7 +222,7 @@ public class FGoal {
                 lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
                 if (!om.isOptimization()) {
                     lns = null;
-                    solver.set(ISF.domOverWDeg_InDomainMin(dvars, 0));
+                    solver.set(ISF.domOverWDeg(dvars, 0));
                 }
                 break;
             case PGLNS_BB:

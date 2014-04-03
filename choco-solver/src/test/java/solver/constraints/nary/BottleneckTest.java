@@ -72,7 +72,7 @@ public class BottleneckTest {
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
 
-            solver.set(IntStrategyFactory.firstFail_InDomainMin(allvars));
+            solver.set(IntStrategyFactory.minDom_LB(allvars));
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, sum);
         }
     }
@@ -101,7 +101,7 @@ public class BottleneckTest {
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            solver.set(IntStrategyFactory.firstFail_InDomainMin(allvars));
+            solver.set(IntStrategyFactory.minDom_LB(allvars));
 
             solver.findSolution();
         }
