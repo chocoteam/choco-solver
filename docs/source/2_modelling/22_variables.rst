@@ -6,14 +6,12 @@ A factory is available to ease the declaration of variables: ``VariableFactory``
 At least, a varible requires a name and a solver to be declared in.
 The name is only helpful for the user, to read the results computed.
 
-
 Integer variable
 ~~~~~~~~~~~~~~~~
 
 An integer variable is based on domain made with integer values. 
 There exists under three different forms: **bounded**, **enumerated** or **boolean**.
 An alternative is to declare variable-based views.
-
 
 Bounded variable
 ----------------
@@ -32,6 +30,11 @@ To create an array of 5 bounded variables of initial domain :math:`[\![-2,8]\!]`
 To create a matrix of 5x6 bounded variables of initial domain :math:`[\![0,5]\!]` : ::
 
  IntVar[][] vs = VariableFactory.boundedMatrix("vs", 5, 6, 0, 5, solver);
+
+.. note::
+   When using bounded variables, branching decisions must either be domain splits or bound assignments/removals.
+   Indeed, assigning a bounded variable to a value strictly comprised between its bounds may results in disastrous performances,
+   because such branching decisions will not be refutable.
 
 Enumerated variable
 -------------------
@@ -80,7 +83,6 @@ To create a matrix of 5x6 boolean variables: ::
 
  BoolVar[] bs = VariableFactory.boolMatrix("bs", 5, 6, solver);
 
-
 Variable's view
 ---------------
 
@@ -107,15 +109,33 @@ Views can be combined together: ::
  
  IntVar x = Views.offset(Views.scale(y,2),5);
 
-
-
 Set variable
 ~~~~~~~~~~~~
+
+A set variable ``SV`` represents a set of integers.
+Its domain is defined by a set interval: ``[S_E,S_K]``
+
+- the envelope ``S_E`` is an ``ISet`` which contains integers that potentially figure in at least one solution,
+- the kernel ``S_K`` is an ``ISet`` which contains integers that figure in every solutions.
+
+Initial values for both ``S_K`` and ``S_E`` can be specified.
+Then, decisions and filtering algorithms will remove integers from ``S_E`` and add some others to ``S_K``.
+A set variable is instantiated if`and only if ``S_E = S_K``.
+
+A set variable can be created as follows: ::
+
+    // z initial domain
+    int[] z_envelope = new int[]{2,1,3,5,7,12};
+    int[] z_kernel = new int[]{2};
+    z = VariableFactory.set("z", z_envelope, z_kernel, solver);
+
+Example of use can be found in ``Partition`` and ``SetUnion`` samples.
 
 Graph variable
 ~~~~~~~~~~~~~~
 
-A graph variable ``GV`` is a kind of set variable designed to model graphs. It is defined by two graphs:
+A graph variable ``GV`` is a kind of set variable designed to model graphs.
+Its domain is defined by a graph interval: ``[G_E,G_K]``
 
 - the envelope ``G_E`` contains nodes/arcs that potentially figure in at least one solution,
 - the kernel ``G_K`` contains nodes/arcs that figure in every solutions.
@@ -124,9 +144,9 @@ Initially ``G_K`` is empty while ``G_E`` is set to an initial domain.
 Then, decisions and filtering algorithms will remove nodes or arcs from ``G_E`` and add some others to ``G_K``. 
 A graph variable ``GV=(G_E,G_K)`` is instantiated if`and only if ``G_E = G_K``.
 
-We distinguish two kind of graphs, ``DirectedGraphVar`` and ``UndirectedGraphVar``. 
+We distinguish two kind of graph variables, ``DirectedGraphVar`` and ``UndirectedGraphVar``.
 Then for each kind, several data structures are available and can be found in enum ``GraphType``. 
-For instance ``MATRIX`` involves a bitset representation while ``LINKED_LIST`` involves linked lists and is much more appropriate for sparse graphs.
+For instance ``BITSET`` involves a bitset representation while ``LINKED_LIST`` involves linked lists and is much more appropriate for sparse graphs.
 
 **Reification graph**
 
