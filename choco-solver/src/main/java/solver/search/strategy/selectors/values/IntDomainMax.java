@@ -31,7 +31,7 @@ import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 /**
- * Assigns the largest value in the variable's domain.
+ * Selects the variable upper bound
  * <br/>
  *
  * @author Charles Prud'homme

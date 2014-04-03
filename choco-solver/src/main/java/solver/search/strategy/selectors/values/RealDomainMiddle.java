@@ -31,6 +31,7 @@ import solver.search.strategy.selectors.RealValueSelector;
 import solver.variables.RealVar;
 
 /**
+ * Selects a real value at the middle between the lower and the upper bound of the variable
  * <br/>
  *
  * @author Charles Prud'homme

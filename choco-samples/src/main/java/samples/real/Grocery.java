@@ -83,7 +83,7 @@ public class Grocery extends AbstractProblem {
     public void configureSearch() {
         // choco branching
         SMF.log(solver, true, true);
-        solver.set(IntStrategyFactory.first_UB(itemCost));
+        solver.set(IntStrategyFactory.lexico_UB(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));
     }

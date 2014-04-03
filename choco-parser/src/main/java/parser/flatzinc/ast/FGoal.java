@@ -212,7 +212,7 @@ public class FGoal {
                 lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
                 if (!om.isOptimization()) {
                     lns = null;
-                    solver.set(ISF.ActivityBased(dvars, 0));
+                    solver.set(ISF.activity(dvars, 0));
                 }
                 break;
             case RLNS_BB:

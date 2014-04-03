@@ -213,7 +213,7 @@ public class ObjectiveTest {
         int bestvalue = b1.getValue();
         solver.getSearchLoop().reset();
         solver.post(ICF.arithm(b1, "=", bestvalue));
-        solver.set(ISF.first_LB(new BoolVar[]{b1, b2}));
+        solver.set(ISF.lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
         if (solver.findSolution()) {
             do {

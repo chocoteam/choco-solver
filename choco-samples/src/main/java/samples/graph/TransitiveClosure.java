@@ -95,7 +95,7 @@ public class TransitiveClosure extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		// tries to find the smallest graph first
-		solver.set(ISF.first_LB(new IntVar[]{nbArcs}),
+		solver.set(ISF.lexico_LB(new IntVar[]{nbArcs}),
 				GraphStrategyFactory.graphLexico(tc));
 	}
 

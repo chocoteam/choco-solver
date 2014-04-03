@@ -106,7 +106,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 
         BoolVar[] bvars = solver.retrieveBoolVars();
         if (bvars.length > 0) {
-            strats[nb++] = IntStrategyFactory.first_UB(bvars);
+            strats[nb++] = IntStrategyFactory.lexico_UB(bvars);
         }
 
         SetVar[] svars = solver.retrieveSetVars();

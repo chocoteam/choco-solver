@@ -67,7 +67,7 @@ public class SimpleExplanationTest {
         lcstrs[1] = IntConstraintFactory.arithm(vars[1], "<", vars[2]);
         lcstrs[2] = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
         // configure Solver
-        AbstractStrategy strategy = IntStrategyFactory.first_LB(vars);
+        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
         s.post(lcstrs);
         s.set(strategy);
         // solve

@@ -161,7 +161,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
-        solver.set(IntStrategyFactory.first_UB(vars));
+        solver.set(IntStrategyFactory.lexico_UB(vars));
     }
 
     @Override

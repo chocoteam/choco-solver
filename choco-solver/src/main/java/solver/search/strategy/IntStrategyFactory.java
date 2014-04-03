@@ -31,10 +31,7 @@ import solver.Solver;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.selectors.IntValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.search.strategy.selectors.values.IntDomainMax;
-import solver.search.strategy.selectors.values.IntDomainMiddle;
-import solver.search.strategy.selectors.values.IntDomainMin;
-import solver.search.strategy.selectors.values.IntDomainRandom;
+import solver.search.strategy.selectors.values.*;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.IntStrategy;
@@ -63,7 +60,7 @@ public class IntStrategyFactory {
 	 * Selects the first non-instantiated variable, to branch on it.
 	 * @return a variable selector
 	 */
-	public static VariableSelector<IntVar> first_var_selector(){
+	public static VariableSelector<IntVar> lexico_var_selector(){
 		return new InputOrder<IntVar>();
 	}
 
@@ -96,7 +93,6 @@ public class IntStrategyFactory {
 
 	/**
 	 * Selects the non-instantiated variable of largest domain, to branch on it.
-	 * This heuristic is sometimes called AntiFirstFail.
 	 * @return a variable selector
 	 */
 	public static VariableSelector<IntVar> maxRegret_var_selector(){
@@ -117,6 +113,10 @@ public class IntStrategyFactory {
 
 	/**
 	 * Selects a value at the middle between the variable lower and upper bounds
+	 *
+	 * BEWARE: this should not be used within assignments and/or value removals if variables
+	 * have a bounded domain.
+	 *
 	 * @return a value selector
 	 */
 	public static IntValueSelector mid_value_selector(){
@@ -132,7 +132,22 @@ public class IntStrategyFactory {
 	}
 
 	/**
-	 * Selects randomly a value in the variable domain
+	 * Selects randomly either the lower bound or the upper bound of the variable
+	 * Takes an arbitrary value in {LB,UB}
+	 *
+	 * @return a value selector
+	 */
+	public static IntValueSelector randomBound_value_selector(long SEED){
+		return new IntDomainRandomBound(SEED);
+	}
+
+	/**
+	 * Selects randomly a value in the variable domain.
+	 * Takes an arbitrary value in [LB,UB]
+	 *
+	 * BEWARE: this should not be used within assignments and/or value removals if variables
+	 * have a bounded domain.
+	 *
 	 * @return a value selector
 	 */
 	public static IntValueSelector random_value_selector(long SEED){
@@ -146,6 +161,7 @@ public class IntStrategyFactory {
 	/**
 	 * Assign the selected variable to the selected value
 	 * e.g. X = 42
+	 * If this decision fails, it is automatically negated (i.e. X != 42)
 	 * @return a decision operator
 	 */
 	public static DecisionOperator<IntVar> assign(){
@@ -155,6 +171,7 @@ public class IntStrategyFactory {
 	/**
 	 * Remove the selected value from the selected variable domain
 	 * e.g. X != 42
+	 * If this decision fails, it is automatically negated (i.e. X = 42)
 	 * @return a decision operator
 	 */
 	public static DecisionOperator<IntVar> remove(){
@@ -164,6 +181,7 @@ public class IntStrategyFactory {
 	/**
 	 * Split the domain of the selected variable at the selected value, by updating the upper bound.
 	 * e.g. X <= 42
+	 * If this decision fails, it is automatically negated (i.e. X > 42)
 	 * @return a decision operator
 	 */
 	public static DecisionOperator<IntVar> split(){
@@ -172,8 +190,8 @@ public class IntStrategyFactory {
 
 	/**
 	 * Split the domain of the selected variable at the selected value, by updating the lower bound.
-	 *
 	 * e.g. X >= 42
+	 * If this decision fails, it is automatically negated (i.e. X < 42)
 	 * @return a decision operator
 	 */
 	public static DecisionOperator<IntVar> reverse_split(){
@@ -221,23 +239,23 @@ public class IntStrategyFactory {
 	// ************************************************************************************
 
 	/**
-	 * Assign the first non-instantiated variable to its lower bound.
+	 * Assigns the first non-instantiated variable to its lower bound.
 	 *
 	 * @param VARS list of variables
 	 * @return int strategy based on value assignments
 	 */
-	public static AbstractStrategy<IntVar> first_LB(IntVar... VARS) {
-		return custom(first_var_selector(), min_value_selector(), VARS);
+	public static AbstractStrategy<IntVar> lexico_LB(IntVar... VARS) {
+		return custom(lexico_var_selector(), min_value_selector(), VARS);
 	}
 
 	/**
-	 * Remove the lower bound value from the domain of the first non-instantiated variable
+	 * Removes the lower bound value from the domain of the first non-instantiated variable
 	 *
 	 * @param VARS list of variables
 	 * @return int strategy based on value removals
 	 */
-	public static AbstractStrategy<IntVar> first_Neq_LB(IntVar... VARS) {
-		return custom(first_var_selector(), min_value_selector(), remove(), VARS);
+	public static AbstractStrategy<IntVar> lexico_Neq_LB(IntVar... VARS) {
+		return custom(lexico_var_selector(), min_value_selector(), remove(), VARS);
 	}
 
 	/**
@@ -246,22 +264,22 @@ public class IntStrategyFactory {
 	 * @param VARS list of variables
 	 * @return int strategy based on domain splits
 	 */
-	public static AbstractStrategy<IntVar> first_Split(IntVar... VARS) {
-		return custom(first_var_selector(), mid_value_selector(), split(), VARS);
+	public static AbstractStrategy<IntVar> lexico_Split(IntVar... VARS) {
+		return custom(lexico_var_selector(), mid_value_selector(), split(), VARS);
 	}
 
 	/**
-	 * Assign the first non-instantiated variable to its upper bound.
+	 * Assigns the first non-instantiated variable to its upper bound.
 	 *
 	 * @param VARS list of variables
 	 * @return assignment strategy
 	 */
-	public static AbstractStrategy<IntVar> first_UB(IntVar... VARS) {
-		return custom(first_var_selector(), max_value_selector(), VARS);
+	public static AbstractStrategy<IntVar> lexico_UB(IntVar... VARS) {
+		return custom(lexico_var_selector(), max_value_selector(), VARS);
 	}
 
 	/**
-	 * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMin</code>
+	 * Assigns the non-instantiated variable of smallest domain size to its lower bound.
 	 *
 	 * @param VARS list of variables
 	 * @return assignment strategy
@@ -271,7 +289,7 @@ public class IntStrategyFactory {
 	}
 
 	/**
-	 * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMiddle</code>
+	 * Assigns the non-instantiated variable of smallest domain size to a value at the middle of its domain.
 	 *
 	 * @param VARS list of variables
 	 * @return assignment strategy
@@ -291,7 +309,7 @@ public class IntStrategyFactory {
 	}
 
 	/**
-	 * Assignment strategy combining <code>FirstFail</code> and <code>IntDomainMax</code>
+	 * Assigns the non-instantiated variable of smallest domain size to its upper bound.
 	 *
 	 * @param VARS list of variables
 	 * @return assignment strategy
@@ -301,7 +319,7 @@ public class IntStrategyFactory {
 	}
 
 	/**
-	 * Assignment strategy combining <code>MaxRegret</code> and <code>IntDomainMin</code>
+	 * Assigns the non-instantiated variable of maximum regret to its lower bound.
 	 *
 	 * @param VARS list of variables
 	 * @return assignment strategy
@@ -311,13 +329,25 @@ public class IntStrategyFactory {
 	}
 
 	/**
-	 * Assignment strategy combining <code>Random</code> and <code>Random</code>
+	 * Randomly selects a variable and assigns it to a value randomly taken in {LB,UB}
+	 * i.e. it fixes the variable to one of its bounds
 	 *
 	 * @param VARS list of variables
 	 * @param SEED a seed for random
 	 * @return assignment strategy
 	 */
-	public static AbstractStrategy<IntVar> random(IntVar[] VARS, long SEED) {
+	public static AbstractStrategy<IntVar> random_bound(IntVar[] VARS, long SEED) {
+		return custom(random_var_selector(SEED), randomBound_value_selector(SEED), VARS);
+	}
+
+	/**
+	 * Randomly selects a variable and assigns it to a value randomly taken in [LB,UB]
+	 *
+	 * @param VARS list of variables
+	 * @param SEED a seed for random
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> random_value(IntVar[] VARS, long SEED) {
 		return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
 	}
 
@@ -378,9 +408,9 @@ public class IntStrategyFactory {
 	 * @param FORCE_SAMPLING minimal number of iteration for sampling phase
 	 * @param SEED           the seed for random
 	 */
-	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, Solver solver, double GAMMA, double DELTA, int ALPHA,
-														 double RESTART, int FORCE_SAMPLING, long SEED) {
-		return new ActivityBased(solver, VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
+	public static AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
+													double RESTART, int FORCE_SAMPLING, long SEED) {
+		return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
 	}
 
 	/**
@@ -394,8 +424,8 @@ public class IntStrategyFactory {
 	 * @param VARS collection of variables
 	 * @param SEED the seed for random
 	 */
-	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, long SEED) {
-		return new ActivityBased(VARS[0].getSolver(), VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
+	public static AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED) {
+		return activity(VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
 	}
 
 	/**
@@ -411,7 +441,7 @@ public class IntStrategyFactory {
 	 * @param SEED       a seed for random
 	 * @param INITONLY   only apply the initialisation phase, do not update impact thereafter
 	 */
-	public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
+	public static AbstractStrategy<IntVar> impact(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
 		return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
 	}
 
@@ -425,8 +455,8 @@ public class IntStrategyFactory {
 	 * @param VARS variables of the problem (should be integers)
 	 * @param SEED a seed for random
 	 */
-	public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, long SEED) {
-		return new ImpactBased(VARS, 2, 3, 10, SEED, true);
+	public static AbstractStrategy<IntVar> impact(IntVar[] VARS, long SEED) {
+		return impact(VARS, 2, 3, 10, SEED, true);
 	}
 
 	/**

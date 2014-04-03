@@ -147,7 +147,7 @@ public class CumulativeTest {
 		final IntVar[] e = VF.enumeratedArray("e",n,0,n*dmax,solver);
 		final IntVar[] h = VF.enumeratedArray("h",n,0,hmax,solver);
 		final IntVar capa = VF.enumerated("capa", 0, capamax, solver);
-		final IntVar last = VF.bounded("last", 0, n * dmax, solver);
+		final IntVar last = VF.enumerated("last", 0, n * dmax, solver);
 		Task[] t = new Task[n];
 		for(int i=0;i<n;i++){
 			t[i] = new Task(s[i],d[i],e[i]);
@@ -155,7 +155,7 @@ public class CumulativeTest {
 		}
 		Constraint c = ICF.cumulative(t,h,capa,graph);
 		solver.post(c);
-		solver.set(ISF.random(solver.retrieveIntVars(), seed));
+		solver.set(ISF.random_bound(solver.retrieveIntVars(), seed));
 		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
 		SMF.limitTime(solver,5000);
 		switch (mode){

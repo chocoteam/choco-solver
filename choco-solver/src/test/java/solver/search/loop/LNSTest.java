@@ -72,7 +72,7 @@ public class LNSTest {
         solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
         solver.post(IntConstraintFactory.scalar(objects, energies, power));
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
-        solver.set(IntStrategyFactory.first_LB(objects));
+        solver.set(IntStrategyFactory.lexico_LB(objects));
         SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:

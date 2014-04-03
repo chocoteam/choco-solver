@@ -65,7 +65,7 @@ public class NurseScheduling {
         },*/
         RAND {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.random(vars, 0);
+                return IntStrategyFactory.random_bound(vars, 0);
             }
         };
 

@@ -89,7 +89,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.first_LB(ArrayUtils.flatten(M)));
+        solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.flatten(M)));
     }
 
     @Override

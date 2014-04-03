@@ -106,7 +106,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.first_LB(ticks));
+        solver.set(IntStrategyFactory.lexico_LB(ticks));
     }
 
     @Override

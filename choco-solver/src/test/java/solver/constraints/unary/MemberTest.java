@@ -92,7 +92,7 @@ public class MemberTest {
                 Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
-                s.set(IntStrategyFactory.first_LB(vars));
+                s.set(IntStrategyFactory.lexico_LB(vars));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
@@ -120,7 +120,7 @@ public class MemberTest {
                 Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
-                s.set(IntStrategyFactory.first_LB(vars));
+                s.set(IntStrategyFactory.lexico_LB(vars));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
@@ -138,7 +138,7 @@ public class MemberTest {
         int[] values = new int[]{0, 2, 4, 6, 8};
 
         s.post(ICF.member(vars, values));
-        s.set(IntStrategyFactory.first_LB(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
 
         s.findAllSolutions();
 

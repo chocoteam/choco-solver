@@ -190,8 +190,8 @@ public class AirPlaneLanding extends AbstractProblem {
             }
         });
         solver.set(
-                IntStrategyFactory.random(bVars, seed),
-                IntStrategyFactory.first_LB(planes)
+                IntStrategyFactory.random_bound(bVars, seed),
+                IntStrategyFactory.lexico_LB(planes)
         );
     }
 

@@ -60,7 +60,7 @@ public class DistanceTest {
 				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff},X));
                 IntVar Z = VariableFactory.abs(diff);
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
-                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
+                solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
@@ -79,7 +79,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
                 solver.post(IntConstraintFactory.distance(X, Y, "=", 5));
-                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
+                solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
@@ -157,7 +157,7 @@ public class DistanceTest {
         IntVar Y = VariableFactory.bounded("Y", -5, 5, solver);
         IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
         solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
-        solver.set(IntStrategyFactory.first_LB(new IntVar[]{Z, X, Y, Z}));
+        solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{Z, X, Y, Z}));
         SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         System.out.printf("end\n");

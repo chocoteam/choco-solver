@@ -30,18 +30,28 @@ package solver.search.strategy.selectors.values;
 import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
+import java.util.Random;
+
 /**
- * Selects the variable lower bound
+ * Selects randomly between the lower and the upper bound of the variable
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 28 sept. 2010
+ * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @since 2 april 2014
  */
-public final class IntDomainMin implements IntValueSelector {
+public class IntDomainRandomBound implements IntValueSelector {
 
-    @Override
-    public int selectValue(IntVar var) {
-        return var.getLB();
+    final Random rand;
+
+    public IntDomainRandomBound(long seed) {
+        this.rand = new Random(seed);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int selectValue(IntVar var) {
+		return rand.nextBoolean() ? var.getLB() : var.getUB();
+    }
 }

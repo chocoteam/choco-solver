@@ -113,7 +113,7 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = IntStrategyFactory.first_LB(objects);
+        AbstractStrategy strat = IntStrategyFactory.lexico_LB(objects);
         // trick : top-down maximization
         solver.set(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN, true), strat);
     }

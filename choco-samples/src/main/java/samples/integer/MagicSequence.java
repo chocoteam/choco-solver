@@ -83,7 +83,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.first_LB(x));
+        solver.set(IntStrategyFactory.lexico_LB(x));
     }
 
     @Override

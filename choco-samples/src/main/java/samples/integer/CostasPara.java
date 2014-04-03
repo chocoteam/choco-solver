@@ -74,13 +74,13 @@ public class CostasPara extends ParallelizedProblem {
     public void configureSearch() {
 		switch (searchIdx){
 			case 0:
-				solver.set(ISF.first_LB(vars));
+				solver.set(ISF.lexico_LB(vars));
 				break;
 			case 1:
 				solver.set(ISF.minDom_LB(vars));
 				break;
 			default:
-					solver.set(ISF.ActivityBased(vars,0));
+					solver.set(ISF.activity(vars, 0));
 		}
     }
 

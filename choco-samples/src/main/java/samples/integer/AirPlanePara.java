@@ -182,7 +182,7 @@ public class AirPlanePara extends ParallelizedProblem {
     @Override
     public void configureSearch() {
 		if(searchIdx==1){
-			solver.set(ISF.ActivityBased(solver.retrieveIntVars(),0));
+			solver.set(ISF.activity(solver.retrieveIntVars(), 0));
 		}else{
 			Arrays.sort(planes, new Comparator<IntVar>() {
 				@Override
@@ -191,8 +191,8 @@ public class AirPlanePara extends ParallelizedProblem {
 				}
 			});
 			solver.set(
-					IntStrategyFactory.random(bVars, seed),
-					IntStrategyFactory.first_LB(planes)
+					IntStrategyFactory.random_bound(bVars, seed),
+					IntStrategyFactory.lexico_LB(planes)
 			);
 		}
 		if(searchIdx>=2){

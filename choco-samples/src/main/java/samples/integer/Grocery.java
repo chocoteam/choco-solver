@@ -93,7 +93,7 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.first_UB(itemCost));
+        solver.set(IntStrategyFactory.lexico_UB(itemCost));
     }
 
     @Override

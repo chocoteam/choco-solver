@@ -73,7 +73,7 @@ public class NumericalSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.first_LB(U));
+        solver.set(IntStrategyFactory.lexico_LB(U));
     }
 
     @Override

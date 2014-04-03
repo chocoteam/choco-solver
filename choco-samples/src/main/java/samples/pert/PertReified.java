@@ -90,8 +90,8 @@ public class PertReified extends Pert {
     @Override
     public void configureSearch() {
         solver.set(
-				IntStrategyFactory.first_LB(bvars),
-				IntStrategyFactory.first_LB(vars)
+				IntStrategyFactory.lexico_LB(bvars),
+				IntStrategyFactory.lexico_LB(vars)
         );
     }
 
