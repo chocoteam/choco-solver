@@ -58,7 +58,6 @@ import solver.constraints.nary.lex.PropLex;
 import solver.constraints.nary.lex.PropLexChain;
 import solver.constraints.nary.min_max.PropMax;
 import solver.constraints.nary.min_max.PropMin;
-import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
 import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.nary.sum.PropSumEq;
@@ -904,26 +903,22 @@ public class IntConstraintFactory {
      * This embeds a light propagator by default.
      * Additional filtering algorithms can be added.
      *
-     * @param VARS    collection of variables
-     * @param NVALUES limit variable
-     * @param ALGOS   additional filtering algorithms, among {"at_most_BC","at_least_AC","at_most_greedy"}
+     * @param VARS		collection of variables
+     * @param NVALUES	limit variable
+     * @param ALGOS		additional filtering algorithms, among :
+	 *                  "at_most_BC", bound filtering alogorithm from Beldiceanu's for AtMostNValue
+	 *
+	 *                  "at_least_AC", domain filtering algorithm derivated from (Soft)AllDifferent for AtLeastNValue
+	 *
+	 *                  "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
+	 * 						(see Fages and Lapègue, CP'13 or Artificial Intelligence journal)
+	 *                   	automatically detects disequalities and alldifferent constraints.
+	 *                   	Presumably useful when NVALUES must be minimized.
+	 *
      */
     public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES, String... ALGOS) {
         return new NValues(VARS, NVALUES, ALGOS);
     }
-
-	/**
-	 * Filters the conjunction of NValue and difference constraints
-	 * (propagator AMNV(Gci,RMD,R13) of Fages and Lapegue, CP'13)
-	 * Difference constraint should be propagated separately in addition
-	 * @param VARS		collection of variables
-	 * @param NVALUES	limit variable
-	 * @param DIFF		set of difference constraints
-	 * @return a NValue constraint
-	 */
-	public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES, Differences DIFF) {
-		return new NValues(VARS,NVALUES,DIFF);
-	}
 
     /**
      * Enforces the sequence of VARS to be a word

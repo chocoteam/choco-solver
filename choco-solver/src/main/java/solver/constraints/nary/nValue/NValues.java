@@ -30,6 +30,16 @@ package solver.constraints.nary.nValue;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
+import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
+import solver.constraints.nary.nValue.amnv.differences.D;
+import solver.constraints.nary.nValue.amnv.graph.G;
+import solver.constraints.nary.nValue.amnv.graph.Gci;
+import solver.constraints.nary.nValue.amnv.graph.Gi;
+import solver.constraints.nary.nValue.amnv.mis.F;
+import solver.constraints.nary.nValue.amnv.mis.MD;
+import solver.constraints.nary.nValue.amnv.mis.MDRk;
+import solver.constraints.nary.nValue.amnv.mis.Rk;
+import solver.constraints.nary.nValue.amnv.rules.*;
 import solver.variables.IntVar;
 import util.tools.ArrayUtils;
 
@@ -40,46 +50,6 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  */
 public class NValues extends Constraint {
-
-	public enum Type {
-		at_most_BC {
-			@Override
-			public Propagator[] addProp(IntVar[] vars, IntVar nValues) {
-				boolean enumDom = false;
-				for (IntVar v : vars) {
-					if (v.hasEnumeratedDomain()) {
-						enumDom = true;
-						break;
-					}
-				}
-				if (enumDom){ // added twice to perform fixpoint
-					return new Propagator[]{
-							new PropAtMostNValues_BC(vars, nValues),
-							new PropAtMostNValues_BC(vars, nValues)
-					};
-				}else{
-					return new Propagator[]{new PropAtMostNValues_BC(vars, nValues)};
-				}
-			}
-		},
-		at_most_greedy {
-			@Override
-			public Propagator[] addProp(IntVar[] vars, IntVar nValues) {
-				return new Propagator[]{
-						new AMNV_Gci_MD_R13(vars,nValues,Differences.NONE),
-						new AMNV_Gci_R_R13(vars,nValues,Differences.NONE,30)
-				};
-			}
-		},
-		at_least_AC {
-			@Override
-			public Propagator[] addProp(IntVar[] vars, IntVar nValues) {
-				return new Propagator[]{new PropAtLeastNValues_AC(vars, nValues)};
-			}
-		};
-
-		public abstract Propagator[] addProp(IntVar[] vars, IntVar nValues);
-	}
 
 	/**
 	 * NValues constraint
@@ -96,26 +66,63 @@ public class NValues extends Constraint {
 	public static Propagator[] createProps(IntVar[] vars, IntVar nValues, String... types) {
 		Propagator[] props = new Propagator[]{new PropNValues_Light(vars, getDomainUnion(vars), nValues)};
 		for (String t : types) {
-			props = ArrayUtils.append(props,Type.valueOf(t).addProp(vars, nValues));
+			switch (t){
+				case "at_most_BC":
+					boolean enumDom = false;
+					for (IntVar v : vars) {
+						if (v.hasEnumeratedDomain()) {
+							enumDom = true;
+							break;
+						}
+					}
+					if (enumDom){ // added twice to perform fixpoint
+						props = ArrayUtils.append(props,new Propagator[]{
+								new PropAtMostNValues_BC(vars, nValues),
+								new PropAtMostNValues_BC(vars, nValues)
+						});
+					}else{
+						props = ArrayUtils.append(props,new Propagator[]{new PropAtMostNValues_BC(vars, nValues)});
+					}
+					break;
+				case "at_least_AC":
+					props = ArrayUtils.append(props,new Propagator[]{new PropAtLeastNValues_AC(vars, nValues)});
+					break;
+				default:
+					if(!t.contains("AMNV")){
+						t="AMNV<Gci|MDRk|R13>";
+					}
+					String[] cols = t.replace('<','|').replace('>', '|').split("\\|");
+					D diff = new AutoDiffDetection(vars);
+					G graph;
+					switch (cols[1]){
+						case "Gi":	graph = new Gi(vars);break;
+						case "Gci":	graph = new Gci(vars,diff);break;
+						default:throw new UnsupportedOperationException("unknown graph type "+cols[1]+". \nUse Gi or Gci");
+					}
+					F heur;
+					switch (cols[2]){
+						case "MD":	heur = new MD(graph);break;
+						case "Rk":	heur = new Rk(graph,30);break;
+						case "MDRk":heur = new MDRk(graph,30);break;
+						default:throw new UnsupportedOperationException("unknown independent set heuristic type "+cols[2]+". \n" +
+								"Use MD, Rk or MDRk");
+					}
+					R[] rules;
+					switch (cols[3]){
+						case "R1":	rules = new R[]{new R1()};break;
+						case "R12":	rules = new R[]{new R1(),new R2()};break;
+						case "R13":	rules = new R[]{new R1(),new R3()};break;
+						case "R14":	rules = new R[]{new R1(),new R4()};break;
+						case "R124":rules = new R[]{new R1(),new R2(),new R4()};break;
+						case "R134":rules = new R[]{new R1(),new R3(),new R4()};break;
+						default:throw new UnsupportedOperationException("unknown or unimplemented filtering rule configuration "+
+								cols[3]+".\nUse R1, R12, R13, R14, R124 or R134");
+					}
+					props = ArrayUtils.append(props,new Propagator[]{new PropAMNV(vars,nValues,graph,heur,rules)});
+					break;
+			}
 		}
 		return props;
-	}
-
-	/**
-	 * NValues constraint
-	 * The number of distinct values in vars is exactly nValues
-	 * Considers a set of difference constraints "diff" to achieve
-	 * a stronger filtering (AMNV(Gci,RMD,R13) of Fages and Lapegue, CP'13)
-	 *
-	 * @param vars
-	 * @param nValues
-	 * @param diff
-	 */
-	public NValues(IntVar[] vars, IntVar nValues, Differences diff) {
-		super("NValue",new PropNValues_Light(vars, getDomainUnion(vars), nValues),
-				new AMNV_Gci_MD_R13(vars,nValues,diff),
-				new AMNV_Gci_R_R13(vars,nValues,diff,30)
-		);
 	}
 
 	private static TIntArrayList getDomainUnion(IntVar[] vars) {
