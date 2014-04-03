@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,19 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.strategy;
 
-package solver.search.solution;
-
-import java.io.Serializable;
-import java.util.List;
+import memory.Environments;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.SolverProperties;
+import solver.constraints.ICF;
+import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
+import solver.variables.IntVar;
+import solver.variables.VF;
 
 /**
- * Interface to record and store solutions of a problem
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 02/04/2014
  */
-public interface ISolutionRecorder extends Serializable{
+public class RestartTest {
 
-	/** @return the last recorded solution, presumably the best one. Returns null if no solution has been found */
-	public Solution getLastSolution();
-	/** @return a list of all recorded solutions */
-	public List<Solution> getSolutions();
+    @Test
+    public void test1() {
+
+        for (int j = 1; j < 5; j++) {
+            int n = 200;
+            Solver solver = new Solver(Environments.COPY.make(), "Test", SolverProperties.DEFAULT);
+            IntVar[] X = VF.enumeratedArray("X", n, 1, n, solver);
+            IntVar[] Y = VF.enumeratedArray("Y", n, n + 1, 2 * (n + 1), solver);
+            solver.post(ICF.alldifferent(X));
+            for (int i = 0; i < n; i++) {
+                solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
+            }
+            solver.getSearchLoop().restartAfterEachSolution(true);
+            solver.set(ISF.inputOrder_InDomainMin(X));
+            SMF.log(solver, false, false);
+            SMF.limitSolution(solver, 100);
+            solver.findAllSolutions();
+            //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
+        }
+    }
 }
