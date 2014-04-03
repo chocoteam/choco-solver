@@ -157,7 +157,7 @@ public class MarioKart extends AbstractProblem {
 			}
 		});
 		/* Heuristic choices */
-		AbstractStrategy strat = IntStrategyFactory.firstFail_InDomainMin(next);
+		AbstractStrategy strat = IntStrategyFactory.minDom_LB(next);
 		solver.set(IntStrategyFactory.lastConflict(solver,strat));
 //		solver.set(strat);
 	}

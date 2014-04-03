@@ -27,11 +27,12 @@
 
 package solver.search.strategy.strategy;
 
-import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.selectors.IntValueSelector;
+import solver.search.strategy.decision.fast.FastDecisionReal;
+import solver.search.strategy.selectors.RealValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
+import solver.variables.RealVar;
+import util.PoolManager;
 
 /**
  * <br/>
@@ -39,23 +40,43 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Once extends IntStrategy {
+public class RealStrategy extends AbstractStrategy<RealVar> {
 
-    public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
-        super(scope, varselector, valueSelector);
-    }
+    VariableSelector<RealVar> varselector;
 
-    public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
-                DecisionOperator<IntVar> assgnt) {
-        super(scope, varselector, valueSelector, assgnt);
+    RealValueSelector valueIterator;
+
+    PoolManager<FastDecisionReal> decisionPool;
+
+    public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
+        super(scope);
+        this.varselector = varselector;
+        this.valueIterator = valueIterator;
+        decisionPool = new PoolManager<>();
     }
 
     @Override
-    public Decision<IntVar> computeDecision(IntVar variable) {
-        Decision<IntVar> d = super.computeDecision(variable);
-        if (d != null) {
-            d.once(true);
+    public void init() {
+    }
+
+    @Override
+    public Decision<RealVar> computeDecision(RealVar variable) {
+        if (variable == null || variable.isInstantiated()) {
+            return null;
         }
+        double value = valueIterator.selectValue(variable);
+        FastDecisionReal d = decisionPool.getE();
+        if (d == null) {
+            d = new FastDecisionReal(decisionPool);
+        }
+        d.set(variable, value);
         return d;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    @Override
+    public Decision getDecision() {
+        RealVar variable = varselector.getVariable(vars);
+        return computeDecision(variable);
     }
 }

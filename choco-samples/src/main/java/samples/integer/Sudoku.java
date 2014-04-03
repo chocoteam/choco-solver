@@ -99,7 +99,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(ArrayUtils.append(rows)));
+        solver.set(IntStrategyFactory.minDom_LB(ArrayUtils.append(rows)));
 
     }
 

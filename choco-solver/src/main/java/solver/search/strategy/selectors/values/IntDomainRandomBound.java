@@ -25,58 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecisionReal;
-import solver.search.strategy.selectors.RealValueSelector;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.RealVar;
-import util.PoolManager;
+import solver.search.strategy.selectors.IntValueSelector;
+import solver.variables.IntVar;
+
+import java.util.Random;
 
 /**
+ * Selects randomly between the lower and the upper bound of the variable
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @since 2 april 2014
  */
-public class AssignmentInterval extends AbstractStrategy<RealVar> {
+public class IntDomainRandomBound implements IntValueSelector {
 
-    VariableSelector<RealVar> varselector;
+    final Random rand;
 
-    RealValueSelector valueIterator;
-
-    PoolManager<FastDecisionReal> decisionPool;
-
-    public AssignmentInterval(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
-        super(scope);
-        this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<>();
+    public IntDomainRandomBound(long seed) {
+        this.rand = new Random(seed);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void init() {
-    }
-
-    @Override
-    public Decision<RealVar> computeDecision(RealVar variable) {
-        if (variable == null || variable.isInstantiated()) {
-            return null;
-        }
-        double value = valueIterator.selectValue(variable);
-        FastDecisionReal d = decisionPool.getE();
-        if (d == null) {
-            d = new FastDecisionReal(decisionPool);
-        }
-        d.set(variable, value);
-        return d;
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public Decision getDecision() {
-        RealVar variable = varselector.getVariable(vars);
-        return computeDecision(variable);
+    public int selectValue(IntVar var) {
+		return rand.nextBoolean() ? var.getLB() : var.getUB();
     }
 }

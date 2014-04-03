@@ -307,7 +307,7 @@ public class StableMarriage extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(ArrayUtils.append(husband, wife)));
+        solver.set(IntStrategyFactory.minDom_LB(ArrayUtils.append(husband, wife)));
     }
 
     @Override

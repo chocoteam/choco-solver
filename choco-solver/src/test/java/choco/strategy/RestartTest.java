@@ -57,7 +57,7 @@ public class RestartTest {
                 solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
             }
             solver.getSearchLoop().restartAfterEachSolution(true);
-            solver.set(ISF.inputOrder_InDomainMin(X));
+            solver.set(ISF.lexico_LB(X));
             SMF.log(solver, false, false);
             SMF.limitSolution(solver, 100);
             solver.findAllSolutions();

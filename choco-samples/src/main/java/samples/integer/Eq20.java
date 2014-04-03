@@ -87,7 +87,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
+        solver.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     @Override

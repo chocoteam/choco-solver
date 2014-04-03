@@ -34,7 +34,7 @@ import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
-import solver.search.strategy.strategy.AssignmentInterval;
+import solver.search.strategy.strategy.RealStrategy;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
 
@@ -91,7 +91,7 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(new AssignmentInterval(vars, new Cyclic(), new RealDomainMiddle()));
+        solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
     }
 
     @Override

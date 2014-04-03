@@ -62,7 +62,7 @@ public class SolverTest {
         }
         s.post(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
         s.post(IntConstraintFactory.scalar(objects, energies, power));
-        s.set(IntStrategyFactory.inputOrder_InDomainMin(objects));
+        s.set(IntStrategyFactory.lexico_LB(objects));
         return s;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

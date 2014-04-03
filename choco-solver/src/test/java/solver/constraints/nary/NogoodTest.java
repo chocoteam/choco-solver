@@ -51,7 +51,7 @@ public class NogoodTest {
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
         NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
         solver.post(ngs);
-        solver.set(ISF.random(vars, 29091981L));
+        solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(30);
         sc.setAction(new ICounterAction() {
             @Override
@@ -74,7 +74,7 @@ public class NogoodTest {
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);
         NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
         solver.post(ngs);
-        solver.set(ISF.random(vars, 29091981L));
+        solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(32);
         sc.setAction(new ICounterAction() {
             @Override

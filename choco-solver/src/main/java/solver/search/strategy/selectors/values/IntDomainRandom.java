@@ -33,7 +33,10 @@ import solver.variables.IntVar;
 import java.util.Random;
 
 /**
- * Assigns the middle value in the variable's domain.
+ * Selects randomly a value in the variable domain.
+ *
+ * BEWARE: this should not be used within assignments and/or value removals if variables
+ * have a bounded domain.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -52,16 +55,12 @@ public class IntDomainRandom implements IntValueSelector {
      */
     @Override
     public int selectValue(IntVar var) {
-        if (var.hasEnumeratedDomain()) {
-            int i = rand.nextInt(var.getDomainSize());
-            int value = var.getLB();
-            while (i > 0) {
-                value = var.nextValue(value);
-                i--;
-            }
-            return value;
-        } else {
-            return rand.nextBoolean() ? var.getLB() : var.getUB();
-        }
+		int i = rand.nextInt(var.getDomainSize());
+		int value = var.getLB();
+		while (i > 0) {
+			value = var.nextValue(value);
+			i--;
+		}
+		return value;
     }
 }

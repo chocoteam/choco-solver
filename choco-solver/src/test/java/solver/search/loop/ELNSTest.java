@@ -69,7 +69,7 @@ public class ELNSTest {
                                 new ExplainingCut(solver, 200, 123456L),
                                 new RandomNeighborhood4Explanation(solver, vars, 200, 123456L)), true));
         solver.post(ngs);
-        solver.set(IntStrategyFactory.random(vars, seed));
+        solver.set(IntStrategyFactory.random_bound(vars, seed));
 
 
         SMF.log(solver, true, true, new IMessage() {

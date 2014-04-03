@@ -74,3 +74,4 @@ The CHANGES.md file starts at this version.
 * NogoodFromRestart now trigger propagation fixpoint
 * Fix #192: NogoodFromSolution now available (only for integer variables)
 * Fix #193: VF.enumerated() now copies the input array of values
+* Strong refactoring of IntStrategyFactory (access to variable and value selectors, decision operators, and more simple to understand search names).

@@ -95,7 +95,7 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(positions));
+        solver.set(IntStrategyFactory.minDom_LB(positions));
     }
 
     @Override

@@ -131,7 +131,7 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(scheds));
+        solver.set(IntStrategyFactory.minDom_LB(scheds));
     }
 
     @Override

@@ -56,7 +56,7 @@ public class BoolNotViewTest {
                 xs[0] = VariableFactory.bool("x", ref);
                 xs[1] = VariableFactory.bool("y", ref);
                 ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(1, ref)));
-                ref.set(IntStrategyFactory.random(xs, seed));
+                ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -64,7 +64,7 @@ public class BoolNotViewTest {
                 xs[0] = VariableFactory.bool("x", solver);
                 xs[1] = VariableFactory.not(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(1, solver)));
-                solver.set(IntStrategyFactory.random(xs, seed));
+                solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

@@ -65,7 +65,7 @@ public class BigLeq extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMiddle(vars));
+        solver.set(IntStrategyFactory.minDom_MidValue(vars));
     }
 
     @Override

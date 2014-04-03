@@ -128,8 +128,8 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(suppliers),
-				IntStrategyFactory.maxReg_InDomainMin(costPerStore)
+        solver.set(IntStrategyFactory.lexico_LB(suppliers),
+				IntStrategyFactory.maxReg_LB(costPerStore)
 		);
     }
 

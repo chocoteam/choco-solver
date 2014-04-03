@@ -240,7 +240,7 @@ public class LogicTreeTest {
                     LogOp.and(rCNF[1], rCNF[2])
             );
             SatFactory.addClauses(tree, sCNF);
-            sCNF.set(IntStrategyFactory.random(rCNF, seed));
+            sCNF.set(IntStrategyFactory.random_bound(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
             sCNF.findAllSolutions();

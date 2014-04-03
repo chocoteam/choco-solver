@@ -97,7 +97,7 @@ public class Langford extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMax(position));
+        solver.set(IntStrategyFactory.minDom_UB(position));
     }
 
     @Override

@@ -120,7 +120,7 @@ public class ViewSumXYTest {
                 xs[1] = VariableFactory.bounded("y", 1, 5, ref);
                 xs[2] = VariableFactory.bounded("z", 2, 10, ref);
                 ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, VariableFactory.fixed(0, ref)));
-                ref.set(IntStrategyFactory.random(xs, seed));
+                ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -130,7 +130,7 @@ public class ViewSumXYTest {
 				IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
 				solver.post(IntConstraintFactory.sum(xs,Z));
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(IntStrategyFactory.random(xs, seed));
+                solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -151,7 +151,7 @@ public class ViewSumXYTest {
                 xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
                 xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
                 ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, VariableFactory.fixed(0, ref)));
-                ref.set(IntStrategyFactory.random(xs, seed));
+                ref.set(IntStrategyFactory.random_value(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -161,7 +161,7 @@ public class ViewSumXYTest {
 				IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
 				solver.post(IntConstraintFactory.sum(xs,Z));
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(IntStrategyFactory.random(xs, seed));
+                solver.set(IntStrategyFactory.random_value(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
