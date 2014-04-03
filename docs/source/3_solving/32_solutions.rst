@@ -39,7 +39,7 @@ Custom recorder
 ---------------
 
 You can build you own way of recording solutions by either implementing your own ``ISolutionRecorder`` object
-or by simply using an ``ÌSolutionMonitor``.
+or by simply using an ``ISolutionMonitor``.
 
 Solution restoration
 ~~~~~~~~~~~~~~~~~~~~

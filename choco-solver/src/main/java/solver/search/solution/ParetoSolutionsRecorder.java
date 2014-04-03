@@ -31,6 +31,7 @@ import solver.ResolutionPolicy;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.LCF;
+import solver.constraints.Operator;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -94,13 +95,12 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
 				solutions.add(solution);
 				// aim at better solutions
 				Constraint[] better = new Constraint[n];
-				String symbol = ">";
+				Operator symbol = Operator.GT;
 				if(policy==ResolutionPolicy.MINIMIZE){
-					symbol = "<";
+                    symbol = Operator.LT;
 				}
 				for(int i=0;i<n;i++){
-					better[i] = ICF.arithm(objectives[i],symbol,vals[i]);
-					System.out.println(objectives[i]+symbol+vals[i]);
+					better[i] = ICF.arithm(objectives[i],symbol.toString(),vals[i]);
 				}
 				solver.post(LCF.or(better));
 			}
