@@ -172,4 +172,3 @@ to ensure there is no pending events.
 
  If there are still pending events in the propagation engine, the propagation may results in unexpected results.
 
-
