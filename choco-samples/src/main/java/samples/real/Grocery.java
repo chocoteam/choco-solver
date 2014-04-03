@@ -73,8 +73,8 @@ public class Grocery extends AbstractProblem {
         // views as real variables to be used by Ibex
         realitemCost = VariableFactory.real(itemCost, epsilon);
 
-		solver.post(new RealConstraint("Sum",		"{0} + {1} + {2} + {3} = 711", Ibex.COMPO, realitemCost));
-		solver.post(new RealConstraint("Product",	"{0} * {1}/100 * {2}/100 * {3}/100 = 711", Ibex.HC4, realitemCost));
+	solver.post(new RealConstraint("Sum", "{0} + {1} + {2} + {3} = 711", Ibex.COMPO, realitemCost));
+	solver.post(new RealConstraint("Product", "{0} * {1}/100 * {2}/100 * {3}/100 = 711", Ibex.HC4, realitemCost));
         // symmetry breaking
         solver.post(new RealConstraint("SymmetryBreaking","{0} <= {1};{1} <= {2};{2} <= {3}", Ibex.HC4, realitemCost));
     }

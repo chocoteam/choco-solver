@@ -39,12 +39,15 @@ import memory.IStateBool;
 public class RcBool extends IStateBool {
 
     public RcBool(EnvironmentCopying env) {
-        this(env, false);
+        this(env, Boolean.FALSE);
     }
 
     public RcBool(EnvironmentCopying env, boolean i) {
         super(env, i);
         env.getBoolCopy().add(this);
+        if (timeStamp > 0) {
+            env.getBoolCopy().buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     @Override

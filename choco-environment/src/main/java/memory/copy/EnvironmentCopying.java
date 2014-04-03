@@ -29,10 +29,6 @@ package memory.copy;
 
 import memory.*;
 import memory.copy.store.*;
-import memory.copy.store.flatten.StoredBoolCopy;
-import memory.copy.store.flatten.StoredDoubleCopy;
-import memory.copy.store.flatten.StoredIntCopy;
-import memory.copy.store.flatten.StoredLongCopy;
 import memory.structure.Operation;
 
 public class EnvironmentCopying extends AbstractEnvironment {
@@ -78,6 +74,14 @@ public class EnvironmentCopying extends AbstractEnvironment {
             copies[i].worldPop(wi);
         }
         currentWorld--;
+    }
+
+    @Override
+    public void worldPopUntil(int w) {
+        for (int i = copySize - 1; i >= 0; i--) {
+            copies[i].worldPop(w);
+        }
+        currentWorld=w;
     }
 
     @Override

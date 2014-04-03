@@ -175,6 +175,46 @@ public class StoredLongTrail implements IStoredLongTrail {
         }
     }
 
+    @Override
+    public void buildFakeHistory(StoredLong v, long initValue, int olderStamp) {
+        // from world 0 to fromStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredLong[] _variableStack = variableStack;
+        long[] _valueStack = valueStack;
+        int[] _stampStack = stampStack;
+        int[] _worldStartLevels = worldStartLevels;
+        int _maxUpdates = variableStack.length + olderStamp;
+        int _currentLevel = currentLevel;
+
+        variableStack = new StoredLong[_maxUpdates];
+        valueStack = new long[_maxUpdates];
+        stampStack = new int[_maxUpdates];
+        worldStartLevels = new int[worldStartLevels.length];
+        currentLevel = 0;
+
+        // then replay the history
+        for (int w = 1; w < olderStamp; w++) {
+            // copy the true history
+            rebuild(_worldStartLevels[w], _worldStartLevels[w + 1], _variableStack, _valueStack, _stampStack);
+            // add the fake one
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        // copy the true history
+        rebuild(_worldStartLevels[olderStamp], _currentLevel, _variableStack, _valueStack, _stampStack);
+
+        savePreviousState(v, initValue, olderStamp - 1);
+    }
+
+    private void rebuild(int f, int t, StoredLong[] _variableStack, long[] _valueStack, int[] _stampStack) {
+        System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
+        System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
+        System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
+        currentLevel += (t - f);
+    }
+
+
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
         // first, copy the stack of variables

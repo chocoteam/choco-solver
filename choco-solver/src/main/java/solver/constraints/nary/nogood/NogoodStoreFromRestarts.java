@@ -26,14 +26,14 @@
  */
 package solver.constraints.nary.nogood;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
+import solver.search.strategy.decision.fast.FastDecision;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -43,18 +43,31 @@ import java.util.Arrays;
  * <p/>
  * Related to "Nogood Recording from Restarts", C. Lecoutre et al.
  * <br/>
+ * Beware :
+ * - Must be posted as a constraint AND plugged as a monitor as well
+ * - Cannot be reified
+ * - Only works for integer variables
+ * - Only works if branching decisions are assignments (no domain split nor value removal)
  *
  * @author Charles Prud'homme
  * @since 20/06/13
  */
 public class NogoodStoreFromRestarts extends Constraint implements IMonitorRestart {
 
-    static final Logger LOGGER = LoggerFactory.getLogger("solver");
     static final String MSG_NGOOD = "unit propagation failure (nogood)";
     CircularQueue<Decision<IntVar>> decisions;
     CircularQueue<INogood> nogoods;
 	final PropNogoodStore png;
 
+	/**
+	 * A constraint for the specific Nogood store designed to store ONLY positive decisions.
+	 * Beware :
+	 * - Must be posted as a constraint AND plugged as a monitor as well
+	 * - Cannot be reified
+	 * - Only works for integer variables
+	 * - Only works if branching decisions are assignments (neither domain split nor value removal)
+	 * @param vars
+	 */
     public NogoodStoreFromRestarts(IntVar[] vars) {
         super("NogoodStoreFromRestarts",new PropNogoodStore(vars));
 		png = (PropNogoodStore) propagators[0];
@@ -71,11 +84,15 @@ public class NogoodStoreFromRestarts extends Constraint implements IMonitorResta
     @Override
     public void afterRestart() {
         try {
+			// add newly created no goods
             while (!nogoods.isEmpty()) {
                 INogood ng = nogoods.pollFirst();
 				png.addNogood(ng);
             }
+			// initial propagation of no goods
 			png.unitPropagation();
+			// forces to reach the fix-point of constraints
+			png.getSolver().getEngine().propagate();
         } catch (ContradictionException e) {
 			png.getSolver().getSearchLoop().interrupt(MSG_NGOOD);
         }
@@ -93,6 +110,8 @@ public class NogoodStoreFromRestarts extends Constraint implements IMonitorResta
         int i = 0;
         while (!decisions.isEmpty()) {
             decision = decisions.pollLast();
+			assert decision instanceof FastDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
+			assert decision.toString().contains(DecisionOperator.int_eq.toString()):"NogoodStoreFromRestarts is only valid for assignment decisions";
             if (decision.hasNext()) {
                 vars[i] = decision.getDecisionVariable();
                 values[i] = (Integer) decision.getDecisionValue();

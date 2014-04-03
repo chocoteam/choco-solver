@@ -45,6 +45,9 @@ public class RcLong extends IStateLong {
     public RcLong(EnvironmentCopying env, long i) {
         super(env, i);
         env.getLongCopy().add(this);
+        if (timeStamp > 0) {
+            env.getLongCopy().buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     @Override

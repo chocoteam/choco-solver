@@ -33,8 +33,12 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.nary.nogood.NogoodStoreFromRestarts;
+import solver.constraints.nary.nogood.NogoodStoreFromSolutions;
 import solver.constraints.reification.PropConditionnal;
 import solver.objective.ObjectiveManager;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -221,4 +225,21 @@ public class ObjectiveTest {
         Assert.assertEquals(count, 2);
     }
 
+	@Test(groups = "1s")
+	public void testJL2() {
+		Solver solver = new Solver();
+		IntVar a = VF.enumerated("a", -2, 2, solver);
+
+		SMF.log(solver, true, true);
+		solver.set(
+				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN,true),
+				ISF.firstFail_InDomainMin(a));
+		solver.getSearchLoop().restartAfterEachSolution(true);
+		NogoodStoreFromSolutions ng = new NogoodStoreFromSolutions(new IntVar[]{a});
+		solver.post(ng);
+		solver.plugMonitor(ng);
+
+		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);
+		Assert.assertEquals(solver.hasReachedLimit(),false);
+	}
 }

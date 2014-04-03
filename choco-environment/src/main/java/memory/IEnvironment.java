@@ -27,7 +27,7 @@
 
 package memory;
 
-import memory.structure.IndexedBipartiteSet;
+import memory.structure.BasicIndexedBipartiteSet;
 import memory.structure.Operation;
 
 import java.io.Serializable;
@@ -143,35 +143,12 @@ public interface IEnvironment extends Serializable {
      */
     IStateDoubleVector makeDoubleVector(int size, double initialValue);
 
-    /**
-     * Build a shared bipartite set
-     *
-     * @param size size of the bi partite set
-     */
-    void createSharedBipartiteSet(int size);
-
-    /**
+        /**
      * Factory pattern : shared IndexedBipartiteSet object is return by the environment
      *
      * @return IndexedBipartiteSet
      */
-    IndexedBipartiteSet getSharedBipartiteSetForBooleanVars();
-
-    /**
-     * Increase the size of the shared bi partite set,
-     * it HAS to be called before the end of the environment creation
-     * BEWARE: be sure you are correctly calling this method
-     *
-     * @param gap the gap the reach the expected size
-     */
-    void increaseSizeOfSharedBipartiteSet(int gap);
-
-    /**
-     * Return the next free bit in the shared StoredBitSetVector object
-     *
-     * @return
-     */
-    int getNextOffset();
+    BasicIndexedBipartiteSet getSharedBipartiteSetForBooleanVars();
 
     void save(Operation operation);
 

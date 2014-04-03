@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,45 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.strategy;
 
-package memory.structure;
-
-import memory.IEnvironment;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import memory.Environments;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.SolverProperties;
+import solver.constraints.ICF;
+import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
+import solver.variables.IntVar;
+import solver.variables.VF;
 
 /**
- * The methods in parameter can be statically get at the first object creation, then used at each call.
- * <p/>
- * But, using reflection can be 4 times much slower than using dedicated operation, because this is not hot spotted.
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 11/02/11
+ * @since 02/04/2014
  */
-public class ReflectionOperation<E> extends Operation {
+public class RestartTest {
 
-    E object;
-    Method method;
-    Object[] params;
+    @Test
+    public void test1() {
 
-    public ReflectionOperation(IEnvironment environment, E obj, Method method, Object[] params) {
-        super(environment);
-        this.object = obj;
-        this.method = method;
-        this.params = params;
-    }
-
-    @Override
-    public void undo() {
-        try {
-            method.invoke(object, params);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        for (int j = 1; j < 5; j++) {
+            int n = 200;
+            Solver solver = new Solver(Environments.COPY.make(), "Test", SolverProperties.DEFAULT);
+            IntVar[] X = VF.enumeratedArray("X", n, 1, n, solver);
+            IntVar[] Y = VF.enumeratedArray("Y", n, n + 1, 2 * (n + 1), solver);
+            solver.post(ICF.alldifferent(X));
+            for (int i = 0; i < n; i++) {
+                solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
+            }
+            solver.getSearchLoop().restartAfterEachSolution(true);
+            solver.set(ISF.inputOrder_InDomainMin(X));
+            SMF.log(solver, false, false);
+            SMF.limitSolution(solver, 100);
+            solver.findAllSolutions();
+            //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
         }
     }
 }

@@ -24,10 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store.flatten;
+package memory.copy.store;
 
 import memory.copy.RcInt;
-import memory.copy.store.IStoredIntCopy;
 
 /**
  * <br/>
@@ -79,5 +78,16 @@ public class StoredIntCopy implements IStoredIntCopy {
     @Override
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void buildFakeHistory(RcInt v, int initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            int[] _values = values[i];
+            int size = _values.length;
+            values[i] = new int[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
     }
 }

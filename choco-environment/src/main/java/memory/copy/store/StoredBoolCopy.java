@@ -24,10 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store.flatten;
+package memory.copy.store;
 
-import memory.copy.RcLong;
-import memory.copy.store.IStoredLongCopy;
+import memory.copy.RcBool;
 
 /**
  * <br/>
@@ -35,23 +34,23 @@ import memory.copy.store.IStoredLongCopy;
  * @author Charles Prud'homme
  * @since 14/05/13
  */
-public class StoredLongCopy implements IStoredLongCopy {
+public class StoredBoolCopy implements IStoredBoolCopy {
 
-    RcLong[] objects;
-    long[][] values;
+    RcBool[] objects;
+    boolean[][] values;
     int position;
 
-    public StoredLongCopy() {
-        objects = new RcLong[64];
-        values = new long[64][];
+    public StoredBoolCopy() {
+        objects = new RcBool[64];
+        values = new boolean[64][];
     }
 
 
-    public void add(RcLong rc) {
+    public void add(RcBool rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
-            RcLong[] oldElements = objects;
-            objects = new RcLong[newSize];
+            RcBool[] oldElements = objects;
+            objects = new RcBool[newSize];
             System.arraycopy(oldElements, 0, objects, 0, oldElements.length);
         }
         objects[position++] = rc;
@@ -59,25 +58,36 @@ public class StoredLongCopy implements IStoredLongCopy {
 
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
-            long[][] tmp = values;
-            values = new long[tmp.length * 3 / 2 + 1][];
+            boolean[][] tmp = values;
+            values = new boolean[tmp.length * 3 / 2 + 1][];
             System.arraycopy(tmp, 0, values, 0, tmp.length);
         }
-        long[] tmplong = new long[position];
+        boolean[] tmpboolean = new boolean[position];
         for (int i = position; --i >= 0; ) {
-            tmplong[i] = objects[i].deepCopy();
+            tmpboolean[i] = objects[i].deepCopy();
         }
-        values[worldIndex] = tmplong;
+        values[worldIndex] = tmpboolean;
     }
 
     public void worldPop(int worldIndex) {
-        long[] tmplong = values[worldIndex];
-        for (int i = tmplong.length; --i >= 0; )
-            objects[i]._set(tmplong[i], worldIndex);
+        boolean[] tmpboolean = values[worldIndex];
+        for (int i = tmpboolean.length; --i >= 0; )
+            objects[i]._set(tmpboolean[i], worldIndex);
     }
 
     @Override
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void buildFakeHistory(RcBool v, boolean initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            boolean[] _values = values[i];
+            int size = _values.length;
+            values[i] = new boolean[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
     }
 }

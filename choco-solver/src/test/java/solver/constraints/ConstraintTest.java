@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,20 +24,36 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store;
+package solver.constraints;
 
-import memory.IStorage;
-import memory.copy.RcBool;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.set.SCF;
+import solver.variables.BoolVar;
+import solver.variables.SetVar;
+import solver.variables.VF;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/05/13
+ * @since 24/03/2014
  */
-public interface IStoredBoolCopy extends IStorage {
+public class ConstraintTest {
 
-    void add(RcBool rc);
+    @Test
+    public void testBooleanChannelingJL() {
+        //#issue 190
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("bs", 3, solver);
+        SetVar s1 = VF.set("s1", -3, 3, solver);
+        SetVar s2 = VF.set("s2", -3, 3, solver);
+        solver.post(LCF.or(SCF.all_equal(new SetVar[]{s1, s2}), SCF.bool_channel(bs, s1, 0)));
+        if (solver.findSolution()) {
+            do {
+                System.out.println(s1 + " : " + s2);
+            } while (solver.nextSolution());
+        }
+    }
 
-    void buildFakeHistory(RcBool v, boolean initValue, int olderStamp);
 }

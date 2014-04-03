@@ -27,12 +27,13 @@
 
 package solver.search.solution;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Interface to record and store solutions of a problem
  */
-public interface ISolutionRecorder {
+public interface ISolutionRecorder extends Serializable{
 
 	/** @return the last recorded solution, presumably the best one. Returns null if no solution has been found */
 	public Solution getLastSolution();
