@@ -44,7 +44,8 @@ or by simply using an ``ÌSolutionMonitor``.
 Solution restoration
 ~~~~~~~~~~~~~~~~~~~~
 
-A ``Solution`` object can be restored, i.e. variables are fixed back to their values in that solution,
+A ``Solution`` object can be restored, i.e. variables are fixed back to their values in that solution.
+For this purpose, we recommend to restore initial domains and then restore the solution,
 with the following code: ::
  try{
     solver.getSearchLoop().restoreRootNode();
@@ -54,3 +55,6 @@ with the following code: ::
     throw new UnsupportedOperationException("restoring the solution ended in a failure");
  }
  solver.getEngine().flush();
+
+Note that if initial domains are not restored, then the solution restoration may lead to a failure.
+This would happen when trying to restore out of the current domain.
