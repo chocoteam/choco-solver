@@ -38,7 +38,7 @@ import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.AssignmentInterval;
+import solver.search.strategy.strategy.RealStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -125,7 +125,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 
         RealVar[] rvars = solver.retrieveRealVars();
         if (rvars.length > 0) {
-            strats[nb] = new AssignmentInterval(rvars, new Cyclic(), new RealDomainMiddle());
+            strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());
         }
 
         solver.set(new StrategiesSequencer(Arrays.copyOf(strats, nb)));

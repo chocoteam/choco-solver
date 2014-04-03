@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
-import solver.search.strategy.strategy.AssignmentInterval;
+import solver.search.strategy.strategy.RealStrategy;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
@@ -151,7 +151,7 @@ public class RealTest {
         // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
         solver.post(new RealConstraint("RC","{0} * {1} = 8", vars));
-        solver.set(new AssignmentInterval(vars, new Cyclic(), new RealDomainMiddle()));
+        solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
         solver.findSolution();
         Assert.assertEquals(x.getValue(), 2);
         Assert.assertEquals(y.getValue(), 4);

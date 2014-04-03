@@ -40,7 +40,7 @@ import util.PoolManager;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class AssignmentInterval extends AbstractStrategy<RealVar> {
+public class RealStrategy extends AbstractStrategy<RealVar> {
 
     VariableSelector<RealVar> varselector;
 
@@ -48,7 +48,7 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
 
     PoolManager<FastDecisionReal> decisionPool;
 
-    public AssignmentInterval(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
+    public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
         super(scope);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
