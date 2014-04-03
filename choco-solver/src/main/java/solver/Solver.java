@@ -672,13 +672,13 @@ public class Solver implements Serializable {
      * <p/>
      * Possible back values are:
      * <p/>
-     * <br/>- <code>true</code> : the resolution is complete and
+     * <br/>- <code>false</code> : the resolution is complete and
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
-     * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
+     * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
      */
     public boolean hasReachedLimit() {
         return search.hasReachedLimit();
@@ -810,7 +810,7 @@ public class Solver implements Serializable {
 
 	/**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the best solution found so far (if any)
+     * Restores the last solution found so far (if any)
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
