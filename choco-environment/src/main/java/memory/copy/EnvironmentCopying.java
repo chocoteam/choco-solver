@@ -77,6 +77,14 @@ public class EnvironmentCopying extends AbstractEnvironment {
     }
 
     @Override
+    public void worldPopUntil(int w) {
+        for (int i = copySize - 1; i >= 0; i--) {
+            copies[i].worldPop(w);
+        }
+        currentWorld=w;
+    }
+
+    @Override
     public void save(Operation operation) {
         getOperationCopy().savePreviousState(operation);
     }
