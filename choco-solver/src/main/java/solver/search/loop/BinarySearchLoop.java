@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.ISF;
 import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -40,14 +40,13 @@ import solver.search.strategy.selectors.variables.Cyclic;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.RealStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.RealVar;
-import solver.variables.SetVar;
+import solver.variables.*;
 import solver.variables.graph.GraphVar;
 import util.ESat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.
@@ -97,23 +96,28 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     }
 
     private void defaultSearchStrategy(Solver solver) {
-        IntVar[] ivars = solver.retrieveIntVars();
         AbstractStrategy[] strats = new AbstractStrategy[5];
-        int nb = 0;
+		int nb = 0;
+
+		// INTEGER VARIABLES DEFAULT SEARCH STRATEGY
+		IntVar[] ivars = solver.retrieveIntVars();
         if (ivars.length > 0) {
-            strats[nb++] = IntStrategyFactory.minDom_LB(ivars);
+			strats[nb++] = ISF.minDom_LB(ivars);
         }
 
+		// BOOLEAN VARIABLES DEFAULT SEARCH STRATEGY
         BoolVar[] bvars = solver.retrieveBoolVars();
         if (bvars.length > 0) {
-            strats[nb++] = IntStrategyFactory.lexico_UB(bvars);
+            strats[nb++] = ISF.lexico_UB(bvars);
         }
 
+		// SET VARIABLES DEFAULT SEARCH STRATEGY
         SetVar[] svars = solver.retrieveSetVars();
         if (svars.length > 0) {
             strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
         }
 
+		// GRAPH VARIABLES DEFAULT SEARCH STRATEGY
         GraphVar[] gvars = solver.retrieveGraphVars();
         if (gvars.length > 0) {
             AbstractStrategy<GraphVar>[] gstrats = new AbstractStrategy[gvars.length];
@@ -123,6 +127,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             strats[nb++] = new StrategiesSequencer(gstrats);
         }
 
+		// REAL VARIABLES DEFAULT SEARCH STRATEGY
         RealVar[] rvars = solver.retrieveRealVars();
         if (rvars.length > 0) {
             strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());

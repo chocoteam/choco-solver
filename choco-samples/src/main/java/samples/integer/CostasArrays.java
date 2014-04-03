@@ -85,7 +85,7 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.set(IntStrategyFactory.random_bound(vectors,0));
     }
 
 
