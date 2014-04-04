@@ -295,27 +295,71 @@ public class SearchMonitorFactory {
      * <br/>
      * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
      *
-     * @param limit maximal resolution time in millisecond
+	 * @param solver	the solver subject to the time limit
+     * @param limit		maximal resolution time in millisecond
      * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
-        TimeCounter counter = new TimeCounter(solver, limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-		solver.plugMonitor(counter);
+        limitTime(solver, limit,"ms");
     }
+
+	/**
+	 * Defines a limit over the run time.
+	 * When the limit is reached, the resolution is stopped.
+	 * <br/>
+	 * <br/>
+	 * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
+	 *
+	 * @param solver	the solver subject to the time limit
+	 * @param limit		maximal resolution time in millisecond
+	 * @param unit		time unit (h, m, s or ms)
+	 * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
+	 */
+	public static void limitTime(Solver solver, long limit, String unit) {
+		switch (unit){
+			case "h": limit*=24;
+			case "m": limit*=60;
+			case "s": limit*=1000;
+			case "ms":break;
+			default:throw new UnsupportedOperationException("Unknown time unit. Please use h, m, s or ms");
+		}
+		TimeCounter counter = new TimeCounter(solver, limit);
+		counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+		solver.plugMonitor(counter);
+	}
 
 
     /**
      * Defines a limit over the run time, set in a thread.
      * When the limit is reached, the resolution is stopped.
      *
-     * @param limit maximal resolution time in millisecond
+	 * @param solver	the solver subject to the time limit
+     * @param limit		maximal resolution time in millisecond
      */
     public static void limitThreadTime(Solver solver, long limit) {
-        ThreadTimeCounter counter = new ThreadTimeCounter(solver, limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-		solver.plugMonitor(counter);
+        limitThreadTime(solver, limit, "ms");
     }
+
+	/**
+	 * Defines a limit over the run time, set in a thread.
+	 * When the limit is reached, the resolution is stopped.
+	 *
+	 * @param solver	the solver subject to the time limit
+	 * @param limit		maximal resolution time in millisecond
+	 * @param unit		time unit (h, m, s or ms)
+	 */
+	public static void limitThreadTime(Solver solver, long limit, String unit) {
+		switch (unit){
+			case "h": limit*=24;
+			case "m": limit*=60;
+			case "s": limit*=1000;
+			case "ms":break;
+			default:throw new UnsupportedOperationException("Unknown time unit. Please use h, m, s or ms");
+		}
+		ThreadTimeCounter counter = new ThreadTimeCounter(solver, limit);
+		counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+		solver.plugMonitor(counter);
+	}
 
     /**
      * Defines a limit over the number of fails allowed during the resolution.
