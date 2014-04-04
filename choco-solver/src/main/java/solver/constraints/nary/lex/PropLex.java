@@ -26,7 +26,6 @@
  */
 package solver.constraints.nary.lex;
 
-import choco.annotations.PropAnn;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
@@ -48,7 +47,6 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
-@PropAnn(tested = {PropAnn.Status.CONSISTENCY, PropAnn.Status.CORRECTION, PropAnn.Status.BENCHMARK, PropAnn.Status.IDEMPOTENCE})
 public class PropLex extends Propagator<IntVar> {
 
     public final int n;            // size of both vectors

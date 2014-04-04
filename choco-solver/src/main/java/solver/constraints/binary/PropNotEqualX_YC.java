@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,7 +55,6 @@ import util.ESat;
  * @version 0.01, june 2010
  * @since 0.01
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     IntVar x;

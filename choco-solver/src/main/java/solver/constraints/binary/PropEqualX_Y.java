@@ -27,7 +27,6 @@
 
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,7 +50,6 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 1 oct. 2010
  */
-@PropAnn(tested = {PropAnn.Status.CORRECTION, PropAnn.Status.EXPLAINED})
 public final class PropEqualX_Y extends Propagator<IntVar> {
 
     private IntVar x, y;

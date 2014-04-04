@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Operator;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -49,7 +48,6 @@ import util.procedure.UnaryIntProcedure;
  * @author Charles Prud'homme
  * @since 21/03/12
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropDistanceXYC extends Propagator<IntVar> {
 
     protected final Operator operator;

@@ -27,7 +27,6 @@
 
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.Propagator;
@@ -46,7 +45,6 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotMemberEnum extends Propagator<IntVar> {
 
     final TIntHashSet values;

@@ -170,11 +170,6 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-
-                            <processors>
-                                <!-- list of processors to use -->
-                                <processor>choco.annotations.PropagatorAnnotationProcessor</processor>
-                            </processors>
                             <options>
                                 <myoption>TRUE</myoption>
                             </options>
