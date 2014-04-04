@@ -38,8 +38,13 @@ This may be used to enumerate all optimal (or at least, best) solutions of a pro
 Custom recorder
 ---------------
 
-You can build you own way of recording solutions by either implementing your own ``ISolutionRecorder`` object
-or by simply using an ``ISolutionMonitor``.
+You can build you own way of manipulating and recording solutions by either implementing your own ``ISolutionRecorder`` object
+or by simply using an ``ISolutionMonitor``, as follows:
+
+.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/SMPTSP.java
+   :language: java
+   :lines: 118-124
+   :linenos:
 
 Solution restoration
 ~~~~~~~~~~~~~~~~~~~~

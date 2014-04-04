@@ -41,6 +41,8 @@ import solver.search.solution.Solution;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
+import java.util.List;
+
 /**
  * Multi-objective optimization illustration to compute pareto solutions
  *
@@ -83,9 +85,10 @@ public class Pareto extends AbstractProblem {
 
 	@Override
 	public void prettyOut() {
-		System.out.println("The pareto front has "+solver.getSolutionRecorder().getSolutions().size()+" solutions : ");
-		for(Solution s:solver.getSolutionRecorder().getSolutions()){
-			System.out.println("a="+s.getIntVal(a)+" and b="+s.getIntVal(b));
+		List<Solution> paretoFront = solver.getSolutionRecorder().getSolutions();
+		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
+		for(Solution s:paretoFront){
+			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
 		}
 	}
 
