@@ -27,7 +27,6 @@
 
 package solver.constraints.nary.nValue.amnv.graph;
 
-import memory.IEnvironment;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
 

@@ -27,9 +27,9 @@
 
 package solver.constraints.nary.nValue.amnv.rules;
 
+import solver.constraints.Propagator;
 import solver.constraints.nary.nValue.amnv.graph.G;
 import solver.constraints.nary.nValue.amnv.mis.F;
-import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 

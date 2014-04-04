@@ -29,6 +29,7 @@ package solver.constraints.nary.nValue.amnv.mis;
 
 import solver.constraints.nary.nValue.amnv.graph.G;
 import util.objects.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 /**

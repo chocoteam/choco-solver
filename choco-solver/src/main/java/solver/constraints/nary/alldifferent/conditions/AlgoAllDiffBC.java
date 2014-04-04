@@ -30,6 +30,7 @@ package solver.constraints.nary.alldifferent.conditions;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+
 import java.io.Serializable;
 import java.util.Comparator;
 
