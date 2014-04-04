@@ -301,7 +301,8 @@ public class SearchMonitorFactory {
      * <br/>
      * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
      *
-     * @param limit maximal resolution time in millisecond
+	 * @param solver	the solver subject to the time limit
+     * @param limit		maximal resolution time in millisecond
      * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
@@ -325,7 +326,7 @@ public class SearchMonitorFactory {
      */
     public static void limitTime(Solver solver, String duration) {
         limitTime(solver, convertInMilliseconds(duration));
-    }
+	}
 
     /**
      * Defines a limit over the run time, set in a thread.
@@ -396,7 +397,7 @@ public class SearchMonitorFactory {
         }
         if (milliseconds == 0) throw new SolverException("Duration cannot be parsed or must be positive" + duration);
         return milliseconds;
-    }
+	}
 
     /**
      * Defines a limit over the number of fails allowed during the resolution.

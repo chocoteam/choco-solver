@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,45 +25,31 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue;
+package solver.constraints.nary.nValue.amnv.mis;
+
+import java.util.BitSet;
 
 /**
- * @author Jean-Guillaume Fages and Tanguy Lapegue
+ * Interface to represent an heuristic which computes independent sets
  *
- * Object that represent a binary difference constraint
- * This object is not a constraint, it will not be propagated,
- * it is only used to inform an NValue constraint that differences
- * are present in the model, in order to improve filtering
+ * @since 01/01/2014
+ * @author Jean-Guillaume Fages
  */
-public interface Differences {
+public interface F {
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+	/** Potentially performs some calculation before computing independent sets */
+	public void prepare();
+
+	/** Computes an Independent Set as large as possible, although it is not necessarily maximum */
+	public void computeMIS();
 
 	/**
-	 * @param i1
-	 * @param i2
-	 * @return true iff variables associated with indexes i1 and i2 MUST be different
+	 * @return true iff the heuristic can compute another independent set
 	 */
-	public boolean mustBeDifferent(int i1, int i2);
+	public boolean hasNextMIS();
 
-	//***********************************************************************************
-	// IMPLEMENTATIONS
-	//***********************************************************************************
-
-	/** No difference constraint is considered */
-	public final static Differences NONE = new Differences() {
-		@Override
-		public boolean mustBeDifferent(int i1, int i2) {
-			return false;
-		}
-	};
-	/** Variables must be all different */
-	public final static Differences ALL = new Differences() {
-		@Override
-		public boolean mustBeDifferent(int i1, int i2) {
-			return i1!=i2;
-		}
-	};
+	/**
+	 * @return a BitSet representing vertices that belong to the independent set
+	 */
+	public BitSet getMIS();
 }
