@@ -52,13 +52,13 @@ public final class SetStrategyFactory {
     /**
      * Generic strategy to branch on set variables
      *
-     * @param sets         SetVar array to branch on
      * @param varS         variable selection strategy
      * @param valS         integer  selection strategy
      * @param enforceFirst branching order true = enforce first; false = remove first
+	 * @param sets         SetVar array to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy generic(SetVar[] sets, VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst) {
+    public static SetSearchStrategy generic(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
         return new SetSearchStrategy(sets, varS, valS, enforceFirst);
     }
 
@@ -68,8 +68,8 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy force_first(SetVar[] sets) {
-        return new SetSearchStrategy(sets, new InputOrder<SetVar>(), new SetDomainMin(), true);
+    public static SetSearchStrategy force_first(SetVar... sets) {
+        return generic(new InputOrder<SetVar>(), new SetDomainMin(), true, sets);
     }
 
     /**
@@ -78,8 +78,8 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy remove_first(SetVar[] sets) {
-        return new SetSearchStrategy(sets, new InputOrder<SetVar>(), new SetDomainMin(), false);
+    public static SetSearchStrategy remove_first(SetVar... sets) {
+        return generic(new InputOrder<SetVar>(), new SetDomainMin(), false, sets);
     }
 
     /**
@@ -90,8 +90,8 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy force_minDelta_first(SetVar[] sets) {
-        return new SetSearchStrategy(sets, new MinDelta(), new SetDomainMin(), true);
+    public static SetSearchStrategy force_minDelta_first(SetVar... sets) {
+        return generic(new MinDelta(), new SetDomainMin(), true, sets);
     }
 
     /**
@@ -102,7 +102,7 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy force_maxDelta_first(SetVar[] sets) {
-        return new SetSearchStrategy(sets, new MaxDelta(), new SetDomainMin(), true);
+    public static SetSearchStrategy force_maxDelta_first(SetVar... sets) {
+        return generic(new MaxDelta(), new SetDomainMin(), true, sets);
     }
 }
