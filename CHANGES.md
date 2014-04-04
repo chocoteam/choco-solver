@@ -77,3 +77,4 @@ The CHANGES.md file starts at this version.
 * Strong refactoring of IntStrategyFactory (access to variable and value selectors, decision operators, and more simple to understand search names).
 * Stronger AtMostNValue constraint with automatic detection of disequalities 
 * Fix #114: Enable to specify a time unit in time limits (ms, s, m or h)
+* Fix #195: fix bug while using IntViews over BoolVar
