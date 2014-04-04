@@ -92,7 +92,7 @@ public class AmongTest {
             int value = 1;
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random(allvars, i));
+            solver.set(IntStrategyFactory.random_bound(allvars, i));
             solver.post(IntConstraintFactory.among(occ, vars, new int[]{value}));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -109,7 +109,7 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random(allvars, i));
+            solver.set(IntStrategyFactory.random_bound(allvars, i));
             solver.post(IntConstraintFactory.among(occ, vars, values));
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -174,7 +174,11 @@ public class AmongTest {
             }
             solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, vars[6]));
 
-            solver.set(IntStrategyFactory.random(vars, seed));
+			if(!enumvar){
+				solver.set(IntStrategyFactory.random_bound(vars, seed));
+			}else{
+				solver.set(IntStrategyFactory.random_value(vars, seed));
+			}
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -227,7 +231,12 @@ public class AmongTest {
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
-            solver.set(IntStrategyFactory.random(vars, seed));
+
+			if(!enumvar){
+				solver.set(IntStrategyFactory.random_bound(vars, seed));
+			}else{
+				solver.set(IntStrategyFactory.random_value(vars, seed));
+			}
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();

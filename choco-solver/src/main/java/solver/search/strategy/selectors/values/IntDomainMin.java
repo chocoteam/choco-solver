@@ -31,7 +31,7 @@ import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 /**
- * Assigns the smallest value in the variable's domain.
+ * Selects the variable lower bound
  * <br/>
  *
  * @author Charles Prud'homme

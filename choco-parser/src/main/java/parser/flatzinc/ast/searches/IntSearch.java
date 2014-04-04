@@ -36,6 +36,7 @@ import solver.search.strategy.selectors.VariableSelectorWithTies;
 import solver.search.strategy.selectors.values.*;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.IntStrategy;
 import solver.variables.IntVar;
 
 /**
@@ -84,7 +85,7 @@ public class IntSearch {
         }
     }
 
-    private static solver.search.strategy.strategy.Assignment valueSelector(IntVar[] scope, VariableSelector<IntVar> variableSelector,
+    private static IntStrategy valueSelector(IntVar[] scope, VariableSelector<IntVar> variableSelector,
                                                                             Assignment assignmennt) {
         IntValueSelector valSelector;
         DecisionOperator<IntVar> assgnt = DecisionOperator.int_eq;
@@ -118,7 +119,7 @@ public class IntSearch {
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + assignmennt.name() + ". Set default.");
                 valSelector = new IntDomainMin();
         }
-        return new solver.search.strategy.strategy.Assignment(scope, variableSelector, valSelector, assgnt);
+        return new IntStrategy(scope, variableSelector, valSelector, assgnt);
     }
 
 

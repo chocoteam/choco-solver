@@ -77,10 +77,10 @@ public class EqualXYCExplTest {
             indicess[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, sol);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(IntStrategyFactory.force_InputOrder_InDomainMin(allvarsr));
+        ref.set(IntStrategyFactory.lexico_LB(allvarsr));
 
         IntVar[] allvarss = ArrayUtils.flatten(ArrayUtils.toArray(varss, indicess));
-        sol.set(IntStrategyFactory.force_InputOrder_InDomainMin(allvarss));
+        sol.set(IntStrategyFactory.lexico_LB(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {

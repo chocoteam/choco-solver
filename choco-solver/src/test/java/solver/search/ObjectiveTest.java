@@ -33,7 +33,6 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.constraints.nary.nogood.NogoodStoreFromRestarts;
 import solver.constraints.nary.nogood.NogoodStoreFromSolutions;
 import solver.constraints.reification.PropConditionnal;
 import solver.objective.ObjectiveManager;
@@ -214,7 +213,7 @@ public class ObjectiveTest {
         int bestvalue = b1.getValue();
         solver.getSearchLoop().reset();
         solver.post(ICF.arithm(b1, "=", bestvalue));
-        solver.set(ISF.inputOrder_InDomainMin(new BoolVar[]{b1, b2}));
+        solver.set(ISF.lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
         if (solver.findSolution()) {
             do {
@@ -233,7 +232,7 @@ public class ObjectiveTest {
 		SMF.log(solver, true, true);
 		solver.set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN,true),
-				ISF.firstFail_InDomainMin(a));
+				ISF.minDom_LB(a));
 		solver.getSearchLoop().restartAfterEachSolution(true);
 		NogoodStoreFromSolutions ng = new NogoodStoreFromSolutions(new IntVar[]{a});
 		solver.post(ng);

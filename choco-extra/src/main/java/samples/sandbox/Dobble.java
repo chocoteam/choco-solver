@@ -117,7 +117,7 @@ public class Dobble {
 			solver.post(new Constraint("Sym",new PropTakeFirstValues(flatVars, max)));
         }
         // search strategy
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(flatVars));
+        solver.set(IntStrategyFactory.lexico_LB(flatVars));
         // time limit
         SearchMonitorFactory.limitTime(solver, timeLimit);
         // run!

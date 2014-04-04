@@ -52,13 +52,18 @@ import java.util.Random;
  */
 public class ElementTest {
 
-    private static void model(Solver s, IEnvironment env, IntVar index, int[] values, IntVar var,
+    private static void model(Solver s, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
         s.post(IntConstraintFactory.element(var, values, index, offset, "detect"));
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
-        s.set(IntStrategyFactory.random(allvars, System.currentTimeMillis()));
+
+		if(!(index.hasEnumeratedDomain() && var.hasEnumeratedDomain())){
+			s.set(IntStrategyFactory.random_bound(allvars, System.currentTimeMillis()));
+		}else{
+			s.set(IntStrategyFactory.random_value(allvars, System.currentTimeMillis()));
+		}
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
@@ -67,21 +72,19 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test1() {
         Solver s = new Solver();
-        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", -3, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
-        model(s, env, index, values, var, 0, 5);
+        model(s, index, values, var, 0, 5);
     }
 
     @Test(groups = "1s")
     public void test2() {
         Solver s = new Solver();
-        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", 2, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
-        model(s, env, index, values, var, 0, 3);
+        model(s, index, values, var, 0, 3);
     }
 
     @Test(groups = "1s")
@@ -89,25 +92,23 @@ public class ElementTest {
         for (int j = 0; j < 100; j++) {
             Random r = new Random(j);
             Solver s = new Solver();
-            IEnvironment env = s.getEnvironment();
             IntVar index = VariableFactory.enumerated("v_0", 23, 25, s);
             IntVar val = VariableFactory.bounded("v_1", 0, 1, s);
             int[] values = new int[24];
             for (int i = 0; i < values.length; i++) {
                 values[i] = r.nextInt(2);
             }
-            model(s, env, index, values, val, 0, 1);
+            model(s, index, values, val, 0, 1);
         }
     }
 
     @Test(groups = "1s")
     public void test4() {
         Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
         int[] values = new int[]{0, 0, 1};
         IntVar index = VariableFactory.enumerated("v_0", 1, 3, s);
         IntVar var = VariableFactory.enumerated("v_1", 0, 1, s);
-        model(s, env, index, values, var, 1, 3);
+        model(s, index, values, var, 1, 3);
     }
 
     @Test(groups = "1s")
@@ -163,7 +164,7 @@ public class ElementTest {
             indicesr[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, ref);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(IntStrategyFactory.random(allvarsr, seed));
+        ref.set(IntStrategyFactory.random_value(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0, "detect"));

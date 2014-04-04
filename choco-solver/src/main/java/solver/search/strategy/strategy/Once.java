@@ -39,7 +39,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Once extends Assignment {
+public class Once extends IntStrategy {
 
     public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
         super(scope, varselector, valueSelector);

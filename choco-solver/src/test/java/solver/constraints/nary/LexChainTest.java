@@ -100,7 +100,11 @@ public class LexChainTest {
         }
 
         SatFactory.addClauses(LogOp.and(trees), solver);
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
+		if(bounded){
+			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
+		}else{
+			solver.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
+		}
         return solver;
     }
 
@@ -112,9 +116,12 @@ public class LexChainTest {
                     VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
                     VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
         }
-
         solver.post(ICF.lex_chain_less(X));
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
+		if(bounded){
+			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
+		}else{
+			solver.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
+		}
         return solver;
     }
 

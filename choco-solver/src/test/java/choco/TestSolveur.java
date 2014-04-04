@@ -69,7 +69,7 @@ public class TestSolveur {
             }
 
             s.post(cstrs);
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.lexico_LB(vars));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
@@ -95,7 +95,7 @@ public class TestSolveur {
             }
 
             s.post(cstrs);
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.lexico_LB(vars));
             long t = System.currentTimeMillis();
             System.out.println("nb solutions : " + s.findAllSolutions());
             t = System.currentTimeMillis() - t;
@@ -123,7 +123,7 @@ public class TestSolveur {
         cstrs[i] = IntConstraintFactory.arithm(vars[k - 1], "!=", vars[0]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -165,7 +165,7 @@ public class TestSolveur {
             cstrs[i] = IntConstraintFactory.arithm(vars[n - 1], "<", vars[0]);
 
             s.post(cstrs);
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.lexico_LB(vars));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 0, "nb sol");
             Assert.assertEquals(s.getMeasures().getNodeCount(), 0, "nb nod");
@@ -198,7 +198,7 @@ public class TestSolveur {
         //System.out.println(cstrs[(n/2)-1]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -237,7 +237,7 @@ public class TestSolveur {
         }
         s.post(IntConstraintFactory.arithm(vars[(n / 2) - 1], "<", vars[n / 2]));
 
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
         s.findAllSolutions();
         s.getMeasures().getSolutionCount();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
@@ -270,7 +270,7 @@ public class TestSolveur {
         }
         solver.post(IntConstraintFactory.arithm(vars[0], "=", vars[n - 1]));
 
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.lexico_LB(vars));
         PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE.make(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");

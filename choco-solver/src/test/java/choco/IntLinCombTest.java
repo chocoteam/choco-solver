@@ -99,7 +99,7 @@ public class IntLinCombTest {
         };
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
 
         s.findAllSolutions();
     }
@@ -144,7 +144,7 @@ public class IntLinCombTest {
                 IntConstraintFactory.arithm(sum, opname, b)
         };
         solver.post(cstrs);
-        solver.set(IntStrategyFactory.presetI(bins));
+        solver.set(IntStrategyFactory.lexico_LB(bins));
         return solver;
     }
 
@@ -167,7 +167,7 @@ public class IntLinCombTest {
                 IntConstraintFactory.arithm(sum, opname, b)
         };
         solver.post(cstrs);
-        solver.set(IntStrategyFactory.presetI(bins));
+        solver.set(IntStrategyFactory.lexico_LB(bins));
         return solver;
     }
 

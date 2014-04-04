@@ -34,17 +34,17 @@ public class NurseScheduling {
         },*/
         INC_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.domOverWDeg_InDomainMin(vars, System.currentTimeMillis());
+                return IntStrategyFactory.domOverWDeg(vars, System.currentTimeMillis());
             }
         },
         FORCE_INPUT {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.firstFail_InDomainMin(cast(s.getVars()));
+                return IntStrategyFactory.minDom_LB(cast(s.getVars()));
             }
         },
         FORCE_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.domOverWDeg_InDomainMin(cast(s.getVars()), System.currentTimeMillis());
+                return IntStrategyFactory.domOverWDeg(cast(s.getVars()), System.currentTimeMillis());
             }
         },
         /*DOMWDEG {
@@ -54,7 +54,7 @@ public class NurseScheduling {
         },*/
         MIN_DOM {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.firstFail_InDomainMin(vars);
+                return IntStrategyFactory.minDom_LB(vars);
             }
         },
 
@@ -65,7 +65,7 @@ public class NurseScheduling {
         },*/
         RAND {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.random(vars, 0);
+                return IntStrategyFactory.random_bound(vars, 0);
             }
         };
 

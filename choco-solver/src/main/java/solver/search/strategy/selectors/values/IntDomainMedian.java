@@ -31,7 +31,10 @@ import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 /**
- * Assigns the middle value in the variable's domain.
+ * Selects the median value in the variable domain.
+ *
+ * BEWARE: this should not be used within assignments and/or value removals if variables
+ * have a bounded domain.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -44,15 +47,11 @@ public class IntDomainMedian implements IntValueSelector {
      */
     @Override
     public int selectValue(IntVar var) {
-        if (var.hasEnumeratedDomain()) {
-            int dz = var.getDomainSize();
-            int median = var.getLB();
-            for (int i = 0; i < dz / 2; i++) {
-                median = var.nextValue(median);
-            }
-            return median;
-        } else {
-            return var.getLB();
-        }
+		int dz = var.getDomainSize();
+		int median = var.getLB();
+		for (int i = 0; i < dz / 2; i++) {
+			median = var.nextValue(median);
+		}
+		return median;
     }
 }
