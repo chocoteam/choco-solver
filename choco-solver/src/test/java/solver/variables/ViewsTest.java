@@ -446,7 +446,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
         IntVar v1 = VF.enumerated("v1", -2, 2, s);
@@ -459,7 +459,7 @@ public class ViewsTest {
         Assert.assertFalse(v1.contains(1));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testJL2() {
         Solver solver = new Solver();
         SetVar v1 = VF.fixed("{0,1}", new int[]{0, 1}, solver);
@@ -472,4 +472,18 @@ public class ViewsTest {
             } while (solver.nextSolution());
         }
     }
+
+	@Test(groups = "1s")
+	public void testJL3(){
+		Solver solver = new Solver();
+		solver.post(ICF.arithm(
+				VF.enumerated("int", -3,3, solver),
+				"=",
+				VF.minus(VF.bool("bool", solver))));
+		if(solver.findSolution()) {
+			do{
+				System.out.println(solver);
+			}while(solver.nextSolution());
+		}
+	}
 }

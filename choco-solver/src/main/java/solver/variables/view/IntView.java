@@ -84,8 +84,8 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public final int getTypeAndKind() {
-        return Variable.VIEW | var.getTypeAndKind();
+    public int getTypeAndKind() {
+        return Variable.VIEW | Variable.INT;
     }
 
 	@Override
