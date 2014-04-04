@@ -27,7 +27,6 @@
 
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,7 +41,6 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotMemberBound extends Propagator<IntVar> {
 
     final int lb, ub;

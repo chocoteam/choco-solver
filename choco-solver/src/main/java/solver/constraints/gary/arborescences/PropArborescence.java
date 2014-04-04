@@ -67,7 +67,6 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
     /**
      * @param graph
      * @param source root of the arborescence
-     * @PropAnn(tested = {BENCHMARK,CORRECTION})
      * Ensures that graph is an arborescence rooted in node source
      */
     public PropArborescence(DirectedGraphVar graph, int source, boolean simple) {

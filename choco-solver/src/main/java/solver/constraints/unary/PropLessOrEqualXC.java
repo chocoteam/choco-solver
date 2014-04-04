@@ -26,7 +26,6 @@
  */
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -43,7 +42,6 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropLessOrEqualXC extends Propagator<IntVar> {
 
     private final int constant;

@@ -27,7 +27,6 @@
 
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import memory.IEnvironment;
 import memory.structure.Operation;
 import solver.constraints.Propagator;
@@ -53,7 +52,6 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 02/02/12
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropElement extends Propagator<IntVar> {
 
     int[] lval;

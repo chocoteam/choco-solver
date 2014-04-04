@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -48,7 +47,6 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
