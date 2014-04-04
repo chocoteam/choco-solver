@@ -116,7 +116,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     public void configureSearch() {
 		final GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
 		strategy.configure(GraphStrategies.MIN_COST, true);
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			@Override
 			public void onSolution() {
 				System.out.println("solution found, cost : "+totalCost.getValue());

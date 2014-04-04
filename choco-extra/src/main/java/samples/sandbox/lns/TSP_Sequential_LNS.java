@@ -136,8 +136,7 @@ public class TSP_Sequential_LNS {
         strategy.configure(GraphStrategies.MIN_COST, true);
         solver.set(strategy);
         SearchMonitorFactory.limitTime(solver, 100000);
-        solver.getSearchLoop().plugSearchMonitor(
-                new LargeNeighborhoodSearch(solver, new TSP_LNS_Monitor(solver, undi, totalCost), false));
+        solver.plugMonitor(new LargeNeighborhoodSearch(solver, new TSP_LNS_Monitor(solver, undi, totalCost), false));
         // resolution
         long timeInst = System.currentTimeMillis();
         System.out.println("start LNS...");

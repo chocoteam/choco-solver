@@ -103,7 +103,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+        solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
