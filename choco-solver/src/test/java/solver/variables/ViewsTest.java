@@ -35,6 +35,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.set.SCF;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
+import solver.search.strategy.ISF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;
 
@@ -485,5 +486,34 @@ public class ViewsTest {
 				System.out.println(solver);
 			}while(solver.nextSolution());
 		}
+	}
+
+	@Test(groups = "1s")
+	public void testJL4() throws ContradictionException {
+		//this test is unfixed yet
+
+		// it illustrates that views can break idempotency and correctness of a propagator !
+		
+		// Here the set use the value 1, so the channeling propagator sets "bool" to true.
+		// However, as views squize propagation, it sets to true "view" as well without
+		// informing the channeling propagator.
+	    Solver s = new Solver();
+
+	    BoolVar bool = VF.bool("bool", s);
+		BoolVar view = VF.eq(bool);
+
+	    SetVar set = VF.set("set", 0, 1, s);
+
+	    // Keep 1 bool not in EqView
+		s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
+
+	    s.post(SCF.member(VF.one(s), set));
+	    s.set(ISF.minDom_UB(bool));
+
+	    if (s.findSolution()) {
+	        do {
+	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
+	        } while (s.nextSolution());
+	    }
 	}
 }

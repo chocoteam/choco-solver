@@ -79,3 +79,4 @@ The CHANGES.md file starts at this version.
 * Fix #114: Enable to specify a time unit in time limits (ms, s, m or h)
 * Fix #195: fix bug while using IntViews over BoolVar
 * Fix #17: propagator annotations (PropAnn) have been removed
+* Fix #127: a specific view problem remains (new issue opened)
