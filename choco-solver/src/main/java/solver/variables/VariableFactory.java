@@ -695,21 +695,34 @@ public class VariableFactory {
         return new OffsetView(VAR, CSTE, VAR.getSolver());
     }
 
-    /**
-     * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
-     * <p/>
-     * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-     * Any operations on this will transformed to operations on VAR following the offset rules.
-     *
-     * @param VAR an integer variable
-     */
-    public static IntVar eq(IntVar VAR) {
-        if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
-            return eqbool((BoolVar) VAR);
-        } else {
-            return eqint(VAR);
-        }
-    }
+	/**
+	 * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
+	 * <p/>
+	 * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
+	 * Any operations on this will transformed to operations on VAR following the offset rules.
+	 *
+	 * @param VAR an integer variable
+	 */
+	public static IntVar eq(IntVar VAR) {
+		// this part should remain (at least for Propagator.checkVariable())
+		if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
+			return eqbool((BoolVar) VAR);
+		} else {
+			return eqint(VAR);
+		}
+	}
+
+	/**
+	 * Create a kind of clone of VAR such that, the resulting view is defined on VAR.
+	 * <p/>
+	 * The resulting BoolVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
+	 * Any operations on this will transformed to operations on VAR.
+	 *
+	 * @param VAR an integer variable
+	 */
+	public static BoolVar eq(BoolVar VAR) {
+		return eqbool(VAR);
+	}
 
     private static IntVar eqint(IntVar ivar) {
         return new EqView(ivar, ivar.getSolver());
