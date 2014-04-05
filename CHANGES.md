@@ -80,3 +80,4 @@ The CHANGES.md file starts at this version.
 * Fix #195: fix bug while using IntViews over BoolVar
 * Fix #17: propagator annotations (PropAnn) have been removed
 * Fix #127: a specific view problem remains (new issue opened)
+* Fix #166: remove constants from default search strategy

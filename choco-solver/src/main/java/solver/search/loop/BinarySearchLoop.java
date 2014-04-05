@@ -100,25 +100,25 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 		int nb = 0;
 
 		// INTEGER VARIABLES DEFAULT SEARCH STRATEGY
-		IntVar[] ivars = solver.retrieveIntVars();
+		IntVar[] ivars = excludeConstants(solver.retrieveIntVars(),Variable.INT);
         if (ivars.length > 0) {
 			strats[nb++] = ISF.minDom_LB(ivars);
         }
 
 		// BOOLEAN VARIABLES DEFAULT SEARCH STRATEGY
-        BoolVar[] bvars = solver.retrieveBoolVars();
+        BoolVar[] bvars = excludeConstants(solver.retrieveBoolVars(),Variable.BOOL);
         if (bvars.length > 0) {
             strats[nb++] = ISF.lexico_UB(bvars);
         }
 
 		// SET VARIABLES DEFAULT SEARCH STRATEGY
-        SetVar[] svars = solver.retrieveSetVars();
+        SetVar[] svars = excludeConstants(solver.retrieveSetVars(),Variable.SET);
         if (svars.length > 0) {
             strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
         }
 
 		// GRAPH VARIABLES DEFAULT SEARCH STRATEGY
-        GraphVar[] gvars = solver.retrieveGraphVars();
+        GraphVar[] gvars = excludeConstants(solver.retrieveGraphVars(),Variable.GRAPH);
         if (gvars.length > 0) {
             AbstractStrategy<GraphVar>[] gstrats = new AbstractStrategy[gvars.length];
             for (int g = 0; g < gvars.length; g++) {
@@ -128,7 +128,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         }
 
 		// REAL VARIABLES DEFAULT SEARCH STRATEGY
-        RealVar[] rvars = solver.retrieveRealVars();
+        RealVar[] rvars = excludeConstants(solver.retrieveRealVars(),Variable.REAL);
         if (rvars.length > 0) {
             strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());
         }
@@ -136,6 +136,37 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         solver.set(new StrategiesSequencer(Arrays.copyOf(strats, nb)));
 
     }
+
+	private static <V extends Variable> V[] excludeConstants(V[] vars, int type){
+		int nb = 0;
+		for(V v:vars){
+			if((v.getTypeAndKind() & Variable.CSTE) == 0){
+				nb++;
+			}
+		}
+		if(nb==vars.length)return vars;
+		V[] noCsts;
+		if((type & Variable.BOOL)!=0){
+			noCsts = (V[]) new BoolVar[nb];
+		}else if((type & Variable.INT)!=0){
+			noCsts = (V[]) new IntVar[nb];
+		}else if((type & Variable.SET)!=0){
+			noCsts = (V[]) new SetVar[nb];
+		}else if((type & Variable.GRAPH)!=0){
+			noCsts = (V[]) new GraphVar[nb];
+		}else if((type & Variable.REAL)!=0){
+			noCsts = (V[]) new RealVar[nb];
+		}else{
+			throw new UnsupportedOperationException();
+		}
+		nb = 0;
+		for(V v:vars){
+			if((v.getTypeAndKind() & Variable.CSTE) == 0){
+				noCsts[nb++] = v;
+			}
+		}
+		return noCsts;
+	}
 
     /**
      * {@inheritDoc}
