@@ -516,4 +516,33 @@ public class ViewsTest {
 	        } while (s.nextSolution());
 	    }
 	}
+
+	@Test(groups = "1s")
+	public void testJG() throws ContradictionException {
+		//this test is unfixed yet
+		// it illustrates that views can break idempotency and correctness of a propagator !
+	    Solver s = new Solver();
+	    BoolVar bool = VF.bool("bool", s);
+		BoolVar view = VF.eq(bool);
+		IntVar sum = VF.bounded("sum",0,6,s);
+
+		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+
+		s.propagate();
+
+		Assert.assertEquals(sum.isInstantiated(), true);
+
+		/** What currently happens :
+		 * sum > 2 implies sum = [3,7]
+		 * so the scalar sets to 1 "bool" (coef=5)
+		 * As "view" is an eqView of "bool", it is set to 1 as well
+		 * However, it informs its propagators that it changes because of the scalar
+		 * This is false. The real cause is the equality constraint hidden inside the view.
+		 * Therefore the scalar does not know that "view" has changes,
+		 * so it does not fix the sum to 6
+		 * ...
+		 * I believe we the cause should be the view...
+		 */
+	}
 }
