@@ -133,8 +133,12 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());
         }
 
-        solver.set(new StrategiesSequencer(Arrays.copyOf(strats, nb)));
-
+		if (nb==0) {
+			// simply to avoid null pointers in case all variables are instantiated
+			solver.set(ISF.minDom_LB(solver.ONE));
+		}else{
+			solver.set(Arrays.copyOf(strats, nb));
+		}
     }
 
 	private static <V extends Variable> V[] excludeConstants(V[] vars, int type){
