@@ -100,25 +100,25 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 		int nb = 0;
 
 		// INTEGER VARIABLES DEFAULT SEARCH STRATEGY
-		IntVar[] ivars = excludeConstants(solver.retrieveIntVars(),Variable.INT);
+		IntVar[] ivars = excludeConstants(solver.retrieveIntVars());
         if (ivars.length > 0) {
 			strats[nb++] = ISF.minDom_LB(ivars);
         }
 
 		// BOOLEAN VARIABLES DEFAULT SEARCH STRATEGY
-        BoolVar[] bvars = excludeConstants(solver.retrieveBoolVars(),Variable.BOOL);
+        BoolVar[] bvars = excludeConstants(solver.retrieveBoolVars());
         if (bvars.length > 0) {
             strats[nb++] = ISF.lexico_UB(bvars);
         }
 
 		// SET VARIABLES DEFAULT SEARCH STRATEGY
-        SetVar[] svars = excludeConstants(solver.retrieveSetVars(),Variable.SET);
+        SetVar[] svars = excludeConstants(solver.retrieveSetVars());
         if (svars.length > 0) {
             strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
         }
 
 		// GRAPH VARIABLES DEFAULT SEARCH STRATEGY
-        GraphVar[] gvars = excludeConstants(solver.retrieveGraphVars(),Variable.GRAPH);
+        GraphVar[] gvars = excludeConstants(solver.retrieveGraphVars());
         if (gvars.length > 0) {
             AbstractStrategy<GraphVar>[] gstrats = new AbstractStrategy[gvars.length];
             for (int g = 0; g < gvars.length; g++) {
@@ -128,7 +128,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         }
 
 		// REAL VARIABLES DEFAULT SEARCH STRATEGY
-        RealVar[] rvars = excludeConstants(solver.retrieveRealVars(),Variable.REAL);
+        RealVar[] rvars = excludeConstants(solver.retrieveRealVars());
         if (rvars.length > 0) {
             strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());
         }
@@ -141,7 +141,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 		}
     }
 
-	private static <V extends Variable> V[] excludeConstants(V[] vars, int type){
+	private static <V extends Variable> V[] excludeConstants(V[] vars){
 		int nb = 0;
 		for(V v:vars){
 			if((v.getTypeAndKind() & Variable.CSTE) == 0){
@@ -150,17 +150,13 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 		}
 		if(nb==vars.length)return vars;
 		V[] noCsts;
-		if((type & Variable.BOOL)!=0){
-			noCsts = (V[]) new BoolVar[nb];
-		}else if((type & Variable.INT)!=0){
-			noCsts = (V[]) new IntVar[nb];
-		}else if((type & Variable.SET)!=0){
-			noCsts = (V[]) new SetVar[nb];
-		}else if((type & Variable.GRAPH)!=0){
-			noCsts = (V[]) new GraphVar[nb];
-		}else if((type & Variable.REAL)!=0){
-			noCsts = (V[]) new RealVar[nb];
-		}else{
+		switch (vars[0].getTypeAndKind() & Variable.KIND){
+			case Variable.BOOL:	noCsts = (V[]) new BoolVar[nb];	break;
+			case Variable.INT:	noCsts = (V[]) new IntVar[nb];	break;
+			case Variable.SET:	noCsts = (V[]) new SetVar[nb];	break;
+			case Variable.GRAPH:noCsts = (V[]) new GraphVar[nb];break;
+			case Variable.REAL:	noCsts = (V[]) new RealVar[nb];	break;
+		default:
 			throw new UnsupportedOperationException();
 		}
 		nb = 0;
