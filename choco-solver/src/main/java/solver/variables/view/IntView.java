@@ -143,7 +143,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyPropagators(evt, cause);
+        notifyPropagators(evt, this);
     }
 
     @Override
