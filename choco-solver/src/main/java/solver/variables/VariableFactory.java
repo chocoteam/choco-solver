@@ -802,7 +802,7 @@ public class VariableFactory {
 			}else{
 				ov = bounded(name,lb,ub,s);
 			}
-			s.post(ICF.arithm(ov,"-",VAR,"=",0));
+			s.post(ICF.arithm(ov,"+",VAR,"=",0));
 			return ov;
 		}
     }
