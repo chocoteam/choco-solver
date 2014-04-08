@@ -153,7 +153,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

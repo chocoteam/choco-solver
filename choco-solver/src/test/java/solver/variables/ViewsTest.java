@@ -489,26 +489,13 @@ public class ViewsTest {
 
 	@Test(groups = "1s")
 	public void testJL4() throws ContradictionException {
-		//this test is unfixed yet
-
-		// it illustrates that views can break idempotency and correctness of a propagator !
-		
-		// Here the set use the value 1, so the channeling propagator sets "bool" to true.
-		// However, as views squize propagation, it sets to true "view" as well without
-		// informing the channeling propagator.
 	    Solver s = new Solver();
-
 	    BoolVar bool = VF.bool("bool", s);
 		BoolVar view = VF.eq(bool);
-
 	    SetVar set = VF.set("set", 0, 1, s);
-
-	    // Keep 1 bool not in EqView
 		s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
-
 	    s.post(SCF.member(VF.one(s), set));
 	    s.set(ISF.minDom_UB(bool));
-
 	    if (s.findSolution()) {
 	        do {
 	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
@@ -518,30 +505,49 @@ public class ViewsTest {
 
 	@Test(groups = "1s")
 	public void testJG() throws ContradictionException {
-		//this test is unfixed yet
-		// it illustrates that views can break idempotency and correctness of a propagator !
 	    Solver s = new Solver();
 	    BoolVar bool = VF.bool("bool", s);
 		BoolVar view = VF.eq(bool);
 		IntVar sum = VF.bounded("sum",0,6,s);
-
 		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
 	    s.post(ICF.arithm(sum, ">", 2));
-
 		s.propagate();
-
 		Assert.assertEquals(sum.isInstantiated(), true);
+	}
 
-		/** What currently happens :
-		 * sum > 2 implies sum = [3,7]
-		 * so the scalar sets to 1 "bool" (coef=5)
-		 * As "view" is an eqView of "bool", it is set to 1 as well
-		 * However, it informs its propagators that it changes because of the scalar
-		 * This is false. The real cause is the equality constraint hidden inside the view.
-		 * Therefore the scalar does not know that "view" has changes,
-		 * so it does not fix the sum to 6
-		 * ...
-		 * I believe we the cause should be the view...
-		 */
+	@Test(groups = "1s")
+	public void testJG2() throws ContradictionException {
+	    Solver s = new Solver();
+	    BoolVar bool = VF.bool("bool", s);
+		BoolVar view = VF.not(bool);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
+	}
+
+	@Test(groups = "1s")
+	public void testJG3() throws ContradictionException {
+	    Solver s = new Solver();
+	    IntVar var = VF.bounded("int", 0, 2,s);
+		IntVar view = VF.eq(var);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
+	}
+
+	@Test(groups = "1s")
+	public void testJG4() throws ContradictionException {
+	    Solver s = new Solver();
+	    IntVar var = VF.bounded("int", 0, 2,s);
+		IntVar view = VF.minus(var);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
 	}
 }
