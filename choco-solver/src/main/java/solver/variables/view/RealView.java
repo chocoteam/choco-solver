@@ -154,16 +154,6 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
 	@Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
-	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

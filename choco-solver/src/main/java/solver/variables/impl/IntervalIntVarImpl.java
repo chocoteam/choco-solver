@@ -446,18 +446,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
 	@Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
-            //records.forEach(afterModification.set(this, event, cause));
-            //solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
-	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

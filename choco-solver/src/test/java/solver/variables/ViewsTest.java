@@ -105,7 +105,6 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1a() {
         // Z = X + Y (bounded)
-//        int seed = 5;
         for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
