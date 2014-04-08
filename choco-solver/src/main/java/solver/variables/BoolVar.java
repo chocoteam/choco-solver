@@ -49,5 +49,7 @@ public interface BoolVar extends IntVar, ILogical {
 
     BoolVar not();
 
+	boolean hasNot();
+
     void _setNot(BoolVar not);
 }

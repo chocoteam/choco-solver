@@ -225,6 +225,11 @@ public final class BoolNotView extends IntView implements BoolVar {
         assert not == var;
     }
 
+	@Override
+	public boolean hasNot() {
+		return true;
+	}
+
     @Override
     public boolean isLit() {
         return true;
@@ -234,6 +239,11 @@ public final class BoolNotView extends IntView implements BoolVar {
     public boolean isNot() {
         return !var.isNot();
     }
+
+	@Override
+	public void setNot(boolean isNot){
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public int getTypeAndKind() {

@@ -76,7 +76,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public BoolVar not() {
-        if (not == null) {
+        if (!hasNot()) {
             not = VF.not(this);
             not._setNot(this);
         }
@@ -93,10 +93,20 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
         return true;
     }
 
+	@Override
+	public boolean hasNot() {
+		return not!=null;
+	}
+
     @Override
     public boolean isNot() {
         return constante == 0;
     }
+
+	@Override
+	public void setNot(boolean isNot){
+		throw new UnsupportedOperationException();
+	}
 
     @Override
     public String toString() {

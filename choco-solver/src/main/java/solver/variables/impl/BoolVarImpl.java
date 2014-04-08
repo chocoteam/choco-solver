@@ -396,17 +396,6 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
-            //records.forEach(afterModification.set(this, event, cause));
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
-    @Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -496,20 +485,32 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar not() {
-        if (not == null) {
+        if (!hasNot()) {
             not = VF.not(this);
             not._setNot(this);
         }
         return not;
     }
 
+	@Override
+	public boolean hasNot() {
+		return not!=null;
+	}
+
     @Override
     public boolean isLit() {
         return true;
     }
 
+	private boolean isNot = false;
+
     @Override
     public boolean isNot() {
-        return false;
+        return isNot;
     }
+
+	@Override
+	public void setNot(boolean isNot){
+		this.isNot = isNot;
+	}
 }

@@ -749,13 +749,17 @@ public class VariableFactory {
 		}
     }
 
-    private static BoolVar eqbool(BoolVar boolVar) {
+    private static BoolVar eqbool(BoolVar BOOL) {
 		if(Configuration.ENABLE_VIEWS){
-			return new BoolEqView(boolVar, boolVar.getSolver());
+			return new BoolEqView(BOOL, BOOL.getSolver());
 
 		}else{
-			BoolVar ov = boolVar.duplicate();
-			boolVar.getSolver().post(ICF.arithm(ov,"=",boolVar));
+			BoolVar ov = BOOL.duplicate();
+			BOOL.getSolver().post(ICF.arithm(ov, "=", BOOL));
+			if(BOOL.hasNot()){
+				ov._setNot(BOOL.not());
+			}
+			ov.setNot(BOOL.isNot());
 			return ov;
 		}
     }
@@ -772,10 +776,17 @@ public class VariableFactory {
 		if(Configuration.ENABLE_VIEWS) {
 			return new BoolNotView(BOOL, BOOL.getSolver());
 		}else{
-			Solver s = BOOL.getSolver();
-			BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
-			s.post(ICF.arithm(ov, "!=", BOOL));
-			return ov;
+			if(BOOL.hasNot()){
+				return BOOL.not();
+			}else {
+				Solver s = BOOL.getSolver();
+				BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
+				s.post(ICF.arithm(ov, "!=", BOOL));
+				BOOL._setNot(ov);
+				ov._setNot(BOOL);
+				ov.setNot(true);
+				return ov;
+			}
 		}
     }
 
