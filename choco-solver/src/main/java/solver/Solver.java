@@ -168,8 +168,8 @@ public class Solver implements Serializable {
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<FixedIntVarImpl>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = new FixedBoolVarImpl("Solver constant 0", 0, this);
-        ONE = new FixedBoolVarImpl("Solver constant 1", 1, this);
+        ZERO = new FixedBoolVarImpl("0", 0, this);
+        ONE = new FixedBoolVarImpl("1", 1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
