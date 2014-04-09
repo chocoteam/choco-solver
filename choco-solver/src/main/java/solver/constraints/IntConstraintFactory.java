@@ -359,15 +359,40 @@ public class IntConstraintFactory {
 		);
     }
 
-    /**
-     * Ensures: X * Y = Z
-     *
-     * @param X first variable
-     * @param Y second variable
-     * @param Z result
-     */
-    public static Constraint times(IntVar X, IntVar Y, IntVar Z) {
-        return new Times(X, Y, Z);
+	/**
+	 * Ensures: X * Y = Z
+	 *
+	 * @param X first variable
+	 * @param Y second variable
+	 * @param Z result variable
+	 */
+	public static Constraint times(IntVar X, IntVar Y, IntVar Z) {
+		if(Y.isInstantiated()){
+			return times(X,Y.getValue(),Z);
+		}else if(X.isInstantiated()){
+			return times(Y, X.getValue(), Z);
+		}else {
+			return new Times(X, Y, Z);
+		}
+	}
+
+	/**
+	 * Ensures: X * Y = Z
+	 *
+	 * @param X first variable
+	 * @param Y a constant
+	 * @param Z result variable
+	 */
+	public static Constraint times(IntVar X, int Y, IntVar Z) {
+		if(Y==0){
+			return arithm(Z,"=",0);
+		}else if(Y==1){
+			return arithm(X,"=",Z);
+		}else if(Y<0){
+			return times(VF.minus(X),-Y,Z);
+		}else {
+			return new Constraint("Times", new PropScale(X, Y, Z));
+		}
 	}
 
 	//##################################################################################################################

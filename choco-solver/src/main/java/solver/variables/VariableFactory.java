@@ -859,7 +859,7 @@ public class VariableFactory {
 					}else{
 						ov = bounded(name,lb,ub,s);
 					}
-					s.post(ICF.times(VAR, fixed(CSTE, VAR.getSolver()), ov));
+					s.post(ICF.times(VAR, CSTE, ov));
 					return ov;
 				}
             }

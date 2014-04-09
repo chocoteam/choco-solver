@@ -48,7 +48,11 @@ public class Times extends Constraint {
         return l1 && l2 && l3 && l4;
     }
 
-    private static boolean inIntBounds(long l1) {
+	/**
+	 * @param l1 a long
+	 * @return Integer.MIN_VALUE < l1 < Integer.MAX_VALUE
+	 */
+    public static boolean inIntBounds(long l1) {
         return l1 > Integer.MIN_VALUE && l1 < Integer.MAX_VALUE;
     }
 

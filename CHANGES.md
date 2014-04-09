@@ -82,3 +82,7 @@ The CHANGES.md file starts at this version.
 * Fix #127: a specific view problem remains (new issue opened)
 * Fix #166: remove constants from default search strategy
 * Fix #196: fix view awakening problem
+- Views are now safe
+- Possibility to reformulate views with channeling constraints
+- Catch some particular cases of times in the factory
+- AC guaranteed for times(X,Y,Z) constraint when Y is a constant
