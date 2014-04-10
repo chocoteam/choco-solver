@@ -1139,6 +1139,43 @@ public class IntConstraintFactory {
 		));
     }
 
+	/**
+	 * Creates a subpath constraint which ensures that
+	 * <p/> the elements of VARS define a path of SIZE vertices, leading from START to END
+	 * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
+	 * <p/> where VARS[i] = OFFSET+i means that vertex i is excluded from the path.
+	 * <p/> Therefore, VARS[END] = |VARS|+OFFSET
+	 * <p/> Requires : |VARS|>0
+	 * <p/>
+	 * Filtering algorithms: see subcircuit constraint
+	 *
+	 * @param VARS		vector of variables which take their value in [OFFSET,OFFSET+|VARS|]
+	 * @param START		variable indicating the index of the first variable in the path
+	 * @param END		variable indicating the index of the last variable in the path
+	 * @param OFFSET	0 by default but typically 1 if used within MiniZinc
+	 * 					(which counts from 1 to n instead of from 0 to n-1)
+	 * @param SIZE		variable indicating the number of variables to belong to the path
+	 * @return a subpath constraint
+	 */
+	public static Constraint[] subpath(IntVar[] VARS, IntVar START, IntVar END, int OFFSET, IntVar SIZE){
+		assert START!=null && END!=null && VARS!=null;
+		switch (VARS.length){
+			case 0:throw new UnsupportedOperationException("|VARS| Should be strictly greater than 0");
+			case 1:return new Constraint[]{
+					arithm(START,"=",OFFSET),
+					arithm(END,"=",OFFSET),
+					arithm(VARS[0],"=",1+OFFSET),
+					arithm(SIZE,"=",1)
+			};
+			default:
+				return new Constraint[]{
+						arithm(START, "<", VARS.length+OFFSET),
+						subcircuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET, VF.offset(SIZE,1)),
+						element(VF.fixed(VARS.length + OFFSET, END.getSolver()), VARS, END, OFFSET)
+				};
+		}
+	}
+
     /**
      * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> = SUM.
      *

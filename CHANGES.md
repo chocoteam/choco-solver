@@ -86,4 +86,4 @@ The CHANGES.md file starts at this version.
 - Possibility to reformulate views with channeling constraints
 - Catch some particular cases of times in the factory
 - AC guaranteed for times(X,Y,Z) constraint when Y is a constant
-- Add a path constraint which holds on integer variables
+- Add path and subpath constraints, holding on integer variables
