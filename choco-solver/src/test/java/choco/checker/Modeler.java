@@ -64,7 +64,7 @@ public interface Modeler {
 				System.out.printf("");
 			}
 			s.post(ICF.arithm(vars[0], "=", vars[1]));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -87,7 +87,7 @@ public interface Modeler {
 			}
 			IntVar[] allvars = ArrayUtils.append(X, Y);
 			s.post(ICF.inverse_channeling(X, Y, 0, 0));
-			s.set(ISF.lexico_LB(allvars));
+			s.set(ISF.random_value(allvars));
 			return s;
 		}
 		@Override
@@ -119,7 +119,7 @@ public interface Modeler {
 			}
 			IntVar[] allvars = ArrayUtils.append(X, Y);
 			s.post(ICF.inverse_channeling(X, Y, 0, 0));
-			s.set(ISF.lexico_LB(allvars));
+			s.set(ISF.random_bound(allvars));
 			return s;
 		}
 		@Override
@@ -138,7 +138,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.arithm(vars[0], "!=", vars[1]));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -157,7 +157,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.alldifferent(vars, "AC"));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -176,7 +176,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.alldifferent(vars, "BC"));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -195,7 +195,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.alldifferent(vars, "AC"));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -214,7 +214,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.alldifferent(vars, "AC"));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -241,7 +241,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i + n / 2], cards[i]);
 			}
 			s.post(ICF.global_cardinality(vars, values, cards, closed));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -260,7 +260,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.times(vars[0], vars[1], vars[2]));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -279,7 +279,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.absolute(vars[0], vars[1]));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -314,7 +314,7 @@ public interface Modeler {
 					ICF.arithm(tmp, ro, occVar),
 					ICF.count(params[1], vars, tmp)
 			);
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -349,7 +349,7 @@ public interface Modeler {
 					ICF.count(params[1], vars, tmp),
 					ICF.arithm(tmp, ro, occVar)
 			);
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 
@@ -375,7 +375,7 @@ public interface Modeler {
 			}
 			Constraint ctr = (Boolean) parameters?ICF.lex_less(X,Y):ICF.lex_less_eq(X,Y);
 			s.post(ctr);
-			s.set(ISF.lexico_LB(ArrayUtils.append(X, Y)));
+			s.set(ISF.random_value(ArrayUtils.append(X, Y)));
 			return s;
 		}
 		@Override
@@ -405,7 +405,7 @@ public interface Modeler {
 			}
 			Constraint ctr = (Boolean) parameters?ICF.lex_chain_less(X,Y,Z):ICF.lex_chain_less_eq(X,Y,Z);
 			s.post(ctr);
-			s.set(ISF.lexico_LB(ArrayUtils.append(X, Y, Z)));
+			s.set(ISF.random_value(ArrayUtils.append(X, Y, Z)));
 			return s;
 		}
 		@Override
@@ -424,7 +424,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0, "detect"));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -446,7 +446,7 @@ public interface Modeler {
 			if (map != null) map.put(domains[n - 1], occVar);
 			int[] params = (int[]) parameters;
 			s.post(ICF.among(occVar, vars, params));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -468,7 +468,7 @@ public interface Modeler {
 			if (map != null) map.put(domains[n - 1], occVar);
 			int[] params = (int[]) parameters;
 			s.post(ICF.among(occVar, vars, params));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -491,7 +491,7 @@ public interface Modeler {
 				}
 			}
 			s.post(ICF.nvalues(decvars, vars[n - 1], (String[]) parameters));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -518,7 +518,7 @@ public interface Modeler {
 			int[] values = vals.toArray();
 			IntVar[] cards = VF.boolArray("cards", values.length, s);
 			s.post(ICF.global_cardinality(vars, values, cards, false));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -542,7 +542,7 @@ public interface Modeler {
 			}
 			IntVar nbRoots = vars[n - 1];
 			s.post(ICF.tree(succs, nbRoots, 0));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -561,7 +561,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.circuit(vars, 0));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -584,7 +584,7 @@ public interface Modeler {
 			IntVar to = VF.enumerated("v_" + (n-1), domains[n-1], s);
 			if (map != null) map.put(domains[n-1], to);
 			s.post(ICF.path(vars, from, to, 0));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(ArrayUtils.append(vars,new IntVar[]{from,to})));
 			return s;
 		}
 		@Override
@@ -603,7 +603,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			s.post(ICF.subcircuit(vars, 0, VF.bounded("length", 0, vars.length - 1, s)));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_value(vars));
 			return s;
 		}
 		@Override
@@ -636,7 +636,7 @@ public interface Modeler {
 				dy[i] = vars[i + 3 * k];
 			}
 			s.post(ICF.diffn(x, y, dx, dy,true));
-			s.set(ISF.lexico_LB(vars));
+			s.set(ISF.random_bound(vars));
 			return s;
 		}
 		@Override
@@ -666,7 +666,7 @@ public interface Modeler {
 			}
 			IntVar capa = vars[vars.length - 1];
 			solver.post(ICF.cumulative(tasks, h, capa, true));
-			solver.set(ISF.lexico_LB(vars));
+			solver.set(ISF.random_bound(vars));
 			return solver;
 		}
 
