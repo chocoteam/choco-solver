@@ -45,7 +45,7 @@ import solver.variables.VF;
  */
 public class CumulativeTest {
 
-	public static final boolean VERBOSE = true;
+	public static final boolean VERBOSE = false;
 	// too long, but can be used manually
 	public void testLong(){
 		for(int mode:new int[]{1})
@@ -100,14 +100,15 @@ public class CumulativeTest {
 		test(32,3,2,2,3,0);
 	}
 
-	@Test(groups = ">2h")
+	@Test(groups = "1m")
 	public void testMed(){
 		for(int mode:new int[]{0,1})
-			for(int n=1;n<30;n*=2){
+			for(int n=1;n<20;n*=2){
 				for(int dmin = 0; dmin<5;dmin+=2){
 					for(int hmax = 0; hmax<5;hmax+=2){
 						for(int capamax = 0; capamax<10;capamax+=3){
 							for(long seed = 0; seed<10;seed++){
+//								long seed = System.currentTimeMillis();
 								test(n,capamax,dmin,hmax,seed,mode);
 							}
 						}
