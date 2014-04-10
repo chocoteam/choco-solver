@@ -10,10 +10,6 @@ or::
  Solver solver = new Solver("my problem");
 
 
-This should be the first instruction:
-
-.. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
-   :language: java
-   :lines: 44-54
-   :emphasize-lines: 44,45
-   :linenos:
+This should be the first instruction, prior to any other modelling instructions.
+The solver stores the declared variables and the posted constraints.
+It eases the resolution
