@@ -700,29 +700,55 @@ public interface Modeler {
         }
     };
 
-    Modeler modelCircuit = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("circuit_" + n);
-            IEnvironment env = s.getEnvironment();
-            IntVar[] vars = new IntVar[n];
-            for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                if (map != null) map.put(domains[i], vars[i]);
-            }
-            Constraint ctr = IntConstraintFactory.circuit(vars, 0);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-            s.post(ctrs);
-            s.set(strategy);
-            return s;
-        }
+	Modeler modelCircuit = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("circuit_" + n);
+			IEnvironment env = s.getEnvironment();
+			IntVar[] vars = new IntVar[n];
+			for (int i = 0; i < n; i++) {
+				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+				if (map != null) map.put(domains[i], vars[i]);
+			}
+			Constraint ctr = IntConstraintFactory.circuit(vars, 0);
+			Constraint[] ctrs = new Constraint[]{ctr};
+			AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
+			s.post(ctrs);
+			s.set(strategy);
+			return s;
+		}
 
-        @Override
-        public String name() {
-            return "modelCircuit";
-        }
-    };
+		@Override
+		public String name() {
+			return "modelCircuit";
+		}
+	};
+
+	Modeler modelPath = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("path_" + n);
+			IntVar[] vars = new IntVar[n-2];
+			for (int i = 0; i < n-2; i++) {
+				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+				if (map != null) map.put(domains[i], vars[i]);
+			}
+			IntVar from = VariableFactory.enumerated("v_" + (n-2), domains[n-2], s);
+			if (map != null) map.put(domains[n-2], from);
+			IntVar to = VariableFactory.enumerated("v_" + (n-1), domains[n-1], s);
+			if (map != null) map.put(domains[n-1], to);
+			Constraint[] ctrs = IntConstraintFactory.path(vars, from, to, 0);
+			AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
+			s.post(ctrs);
+			s.set(strategy);
+			return s;
+		}
+
+		@Override
+		public String name() {
+			return "modelPath";
+		}
+	};
 
     Modeler modelSubcircuit = new Modeler() {
         @Override

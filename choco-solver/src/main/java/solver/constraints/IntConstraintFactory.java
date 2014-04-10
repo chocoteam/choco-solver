@@ -945,6 +945,44 @@ public class IntConstraintFactory {
         return new NValues(VARS, NVALUES, ALGOS);
     }
 
+	/**
+	 * Creates a path constraint which ensures that
+	 * <p/> the elements of VARS define a covering path from START to END
+	 * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
+	 * <p/> Therefore, VARS[END] = |VARS|+OFFSET
+	 * <p/> Requires : |VARS|>0
+	 * <p/>
+	 * Filtering algorithms: see circuit constraint
+	 *
+	 * @param VARS		vector of variables which take their value in [OFFSET,OFFSET+|VARS|]
+	 * @param START		variable indicating the index of the first variable in the path
+	 * @param END		variable indicating the index of the last variable in the path
+	 * @param OFFSET	0 by default but typically 1 if used within MiniZinc
+	 * 					(which counts from 1 to n instead of from 0 to n-1)
+	 * @return a path constraint
+	 */
+	public static Constraint[] path(IntVar[] VARS, IntVar START, IntVar END, int OFFSET){
+		assert START!=null && END!=null && VARS!=null;
+		switch (VARS.length){
+			case 0:throw new UnsupportedOperationException("|VARS| Should be strictly greater than 0");
+			case 1:return new Constraint[]{
+					arithm(START,"=",OFFSET),
+					arithm(END,"=",OFFSET),
+					arithm(VARS[0],"=",1+OFFSET),
+			};
+			default:
+				if(START==END){
+					return new Constraint[]{START.getSolver().FALSE};
+				}else {
+					return new Constraint[]{
+							arithm(START, "!=", END),
+							circuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET),
+							element(VF.fixed(VARS.length + OFFSET, END.getSolver()), VARS, END, OFFSET)
+					};
+				}
+		}
+	}
+
     /**
      * Enforces the sequence of VARS to be a word
      * recognized by the deterministic finite automaton AUTOMATON.

@@ -342,15 +342,25 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
-    public void testCircuit() {
+	@Test(groups = "1m")
+	public void testCircuit() {
 		for (int n = 2; n < 25; n +=5) {
 			for (int i = 0; i < 50; i++) {
 				long seed = System.currentTimeMillis();
-                CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n, seed, true);
-            }
-        }
-    }
+				CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n, seed, true);
+			}
+		}
+	}
+
+	@Test(groups = "1m")
+	public void testPath() {
+		for (int n = 3; n < 25; n +=5) {
+			for (int i = 0; i < 50; i++) {
+				long seed = System.currentTimeMillis();
+				CorrectnessChecker.checkCorrectness(Modeler.modelPath, n, 0, n, seed, true);
+			}
+		}
+	}
 
     @Test(groups = "1m")
     public void testSubcircuit() {
