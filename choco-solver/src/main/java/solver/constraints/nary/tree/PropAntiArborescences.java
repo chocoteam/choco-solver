@@ -76,10 +76,10 @@ public class PropAntiArborescences extends Propagator<IntVar> {
      * @param linear
      */
     public PropAntiArborescences(IntVar[] succs, int offSet, boolean linear) {
-        super(succs, PropagatorPriority.LINEAR, true);
+        super(succs, PropagatorPriority.LINEAR, false);
         this.n = succs.length;
         this.offSet = offSet;
-        this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
+        this.connectedGraph = new DirectedGraph(n + 1, SetType.BITSET, false);
         if (linear) {
             domFinder = new AlphaDominatorsFinder(n, connectedGraph);
         } else {
@@ -100,11 +100,6 @@ public class PropAntiArborescences extends Propagator<IntVar> {
             }
         }
         structuralPruning();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     private void structuralPruning() throws ContradictionException {
