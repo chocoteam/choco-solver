@@ -114,11 +114,14 @@ public class PropIndexValue extends Propagator<IntVar> {
             if (min == nb.getValue()) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].removeValue(i + offset, aCause);
+                        if(vars[i].removeValue(i + offset, aCause)){
+							maxLoops.add(-1);
+						}
                     }
                 }
-                maxLoops.set(min);
-                setPassive();
+				if(maxLoops.get()==minLoops.get()) {
+					setPassive();
+				}
             } else if (max == nb.getValue()) {
                 for (int i = 0; i < n; i++) {
                     if (vars[i].contains(i)) {
