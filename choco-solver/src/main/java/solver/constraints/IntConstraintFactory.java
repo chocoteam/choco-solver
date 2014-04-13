@@ -63,7 +63,7 @@ import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.constraints.nary.sum.Scalar;
 import solver.constraints.nary.tree.PropAntiArborescences;
-import solver.constraints.nary.tree.PropKLoops;
+import solver.constraints.nary.PropKLoops;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -1131,7 +1131,7 @@ public class IntConstraintFactory {
 				alldifferent(VARS).getPropagators(),
 				ArrayUtils.toArray(
 						new PropEqualXY_C(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, n),
-						new PropIndexValue(VARS, OFFSET, nbLoops),
+						new PropKLoops(VARS, OFFSET, nbLoops),
 						new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE),
 						new PropSubcircuit_AntiArboFiltering(VARS, OFFSET),
 						new PropSubCircuitSCC(VARS, OFFSET)
@@ -1257,23 +1257,23 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Partition succs variables into nbArbo (anti) arborescences
-     * <p/> vars[i] = offset+j means that j is the successor of i.
-     * <p/> and vars[i] = offset+i means that i is a root
+     * Partition SUCCS variables into NBTREES (anti) arborescences
+     * <p/> SUCCS[i] = OFFSET+j means that j is the successor of i.
+     * <p/> and SUCCS[i] = OFFSET+i means that i is a root
      * <p/>
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
-     * <p/> However, the filtering over nbArbo is quite light here
+     * <p/> However, the filtering over NBTREES is quite light here
      *
-     * @param succs  successors variables
-     * @param nbArbo number of arborescences (=number of loops)
-     * @param offSet 0 by default but 1 if used within MiniZinc
+     * @param SUCCS  successors variables
+     * @param NBTREES number of arborescences (=number of loops)
+     * @param OFFSET 0 by default but 1 if used within MiniZinc
      *               (which counts from 1 to n instead of from 0 to n-1)
      * @return a tree constraint
      */
-    public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet) {
+    public static Constraint tree(IntVar[] SUCCS, IntVar NBTREES, int OFFSET) {
         return new Constraint("tree",
-				new PropAntiArborescences(succs, offSet, false),
-                new PropKLoops(succs, nbArbo, offSet)
+				new PropAntiArborescences(SUCCS, OFFSET, false),
+                new PropKLoops(SUCCS, OFFSET, NBTREES)
 		);
     }
 }
