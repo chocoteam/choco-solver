@@ -41,6 +41,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
+import solver.variables.delta.IDelta;
 import util.ESat;
 
 /**
@@ -184,7 +185,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
                 tmp.free();
             }
             for(Variable var : solver.getVars()) {
-                var.getDelta().lazyClear();
+                IDelta delta = var.getDelta();
+                if (delta != null) {
+                    delta.lazyClear();
+                }
             }
         }
     }
