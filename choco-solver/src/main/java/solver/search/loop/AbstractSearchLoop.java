@@ -183,6 +183,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
                 decision = decision.getPrevious();
                 tmp.free();
             }
+            for(Variable var : solver.getVars()) {
+                var.getDelta().lazyClear();
+            }
         }
     }
 
