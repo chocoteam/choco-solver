@@ -470,7 +470,7 @@ public interface Modeler {
                 Y[i - n / 2] = VariableFactory.enumerated("Y_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
-            Constraint ctr = (Boolean) parameters?ICF.lex_less(X,Y):ICF.lex_less_eq(X,Y);
+            Constraint ctr = (Boolean) parameters ? ICF.lex_less(X, Y) : ICF.lex_less_eq(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(ArrayUtils.append(X, Y));
@@ -505,7 +505,7 @@ public interface Modeler {
                 Z[i - 2 * n / 3] = VariableFactory.enumerated("Z_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Z[i - 2 * n / 3]);
             }
-            Constraint ctr = (Boolean) parameters?ICF.lex_chain_less(X,Y,Z):ICF.lex_chain_less_eq(X,Y,Z);
+            Constraint ctr = (Boolean) parameters ? ICF.lex_chain_less(X, Y, Z) : ICF.lex_chain_less_eq(X, Y, Z);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(ArrayUtils.append(X, Y, Z));
@@ -772,7 +772,7 @@ public interface Modeler {
                 dx[i] = vars[i + 2 * k];
                 dy[i] = vars[i + 3 * k];
             }
-            Constraint[] ctrs = IntConstraintFactory.diffn(x, y, dx, dy,true);
+            Constraint[] ctrs = IntConstraintFactory.diffn(x, y, dx, dy, true);
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
             s.set(strategy);
@@ -817,6 +817,34 @@ public interface Modeler {
         @Override
         public String name() {
             return "modelCumulative";
+        }
+    };
+
+    Modeler modelSortBC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("Sort");
+
+            IntVar[] X = new IntVar[n / 2];
+            for (int i = 0; i < n / 2; i++) {
+                X[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], X[i]);
+            }
+            IntVar[] Y = new IntVar[n / 2];
+            for (int i = n / 2; i < n; i++) {
+                Y[i - n / 2] = VariableFactory.bounded("Y_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], Y[i - n / 2]);
+            }
+            s.post(ICF.sort(X,Y));
+
+            AbstractStrategy strategy = IntStrategyFactory.random_bound(ArrayUtils.append(X,Y), System.currentTimeMillis());
+            s.set(strategy);
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelSortBC";
         }
     };
 }
