@@ -3,7 +3,7 @@ Declaring variables
 
 Choco |version| includes five types of variables: ``IntVar``, ``BoolVar``, ``SetVar``, ``GraphVar`` and ``RealVar``.
 A factory is available to ease the declaration of variables: ``VariableFactory`` (or ``VF`` for short).
-At least, a varible requires a name and a solver to be declared in.
+At least, a variable requires a name and a solver to be declared in.
 The name is only helpful for the user, to read the results computed.
 
 Integer variable

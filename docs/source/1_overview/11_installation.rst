@@ -22,7 +22,7 @@ We provide a zip file which contains the following files:
 
 apidocs-|release|.zip   
  Javadoc of Choco-|release|
-choco-solver-3.1.1-jar-with-dependencies.jar
+choco-solver-|release|-jar-with-dependencies.jar
  An ready-to-use jar file which contains `choco-environment` and `choco-solver` artifacts and dependencies; it enable modeling and solving CP problems. 
 choco-solver-|release|-sources.jar
  The source of the artifacts `choco-environment` and `choco-solver`.
