@@ -34,7 +34,6 @@
 
 package solver.constraints.gary.trees;
 
-import choco.annotations.PropAnn;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
@@ -52,7 +51,6 @@ import java.util.BitSet;
 /**
  * Simple NoSubtour applied to (undirected) tree/forest
  */
-@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 
     //***********************************************************************************

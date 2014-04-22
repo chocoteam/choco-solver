@@ -96,7 +96,7 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			@Override
 			public void onSolution() {
 				StringBuilder st = new StringBuilder();

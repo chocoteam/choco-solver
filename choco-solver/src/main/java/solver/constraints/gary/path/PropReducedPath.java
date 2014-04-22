@@ -34,7 +34,6 @@
 
 package solver.constraints.gary.path;
 
-import choco.annotations.PropAnn;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
@@ -63,7 +62,6 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since 17/11/2011
  */
-@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropReducedPath extends Propagator<DirectedGraphVar> {
 
     //***********************************************************************************

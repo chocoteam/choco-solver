@@ -31,6 +31,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.BoolVar;
+import solver.variables.Variable;
 import util.ESat;
 
 /**
@@ -74,6 +75,11 @@ public final class BoolEqView extends EqView implements BoolVar {
         return var.not();
     }
 
+	@Override
+	public boolean hasNot() {
+		return var.hasNot();
+	}
+
     @Override
     public void _setNot(BoolVar not) {
         throw new SolverException("Unexpected call to BoolEqView._setNot()");
@@ -88,4 +94,14 @@ public final class BoolEqView extends EqView implements BoolVar {
     public boolean isNot() {
         return var.isNot();
     }
+
+	@Override
+	public void setNot(boolean isNot){
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getTypeAndKind() {
+		return Variable.VIEW | Variable.BOOL;
+	}
 }

@@ -29,6 +29,7 @@ package choco.checker.consistency;
 
 import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import solver.Solver;
@@ -50,6 +51,8 @@ import static choco.checker.DomainBuilder.buildFullDomains;
  */
 public class ConsistencyChecker {
 
+    private static Logger LOGGER = LoggerFactory.getLogger("test");
+
     enum Consistency {
         ac, bc
     }
@@ -59,7 +62,7 @@ public class ConsistencyChecker {
         System.out.printf("Running %s\n", modeler.name());
         Consistency _consistency = Consistency.valueOf(consistency);
 
-        THashMap<int[], IntVar> map = new THashMap<int[], IntVar>();
+        THashMap<int[], IntVar> map = new THashMap<>();
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};
         int loop = 0;
@@ -70,7 +73,7 @@ public class ConsistencyChecker {
                     int[][] domains = buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
                     Solver ref = referencePropagation(modeler, nbVar, domains, map, parameters);
                     if (ref == null) break; // no solution found for this generated problem
-                    // otherwise, link original domains with refernce one.
+                    // otherwise, link original domains with reference one.
                     IntVar[] rvars = new IntVar[nbVar];
                     for (int k = 0; k < nbVar; k++) {
                         rvars[k] = map.get(domains[k]);
@@ -91,17 +94,17 @@ public class ConsistencyChecker {
                             Solver test = modeler.model(nbVar, _domains, map, parameters);
                             try {
                                 if (!test.findSolution()) {
-                                    LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                            new Object[]{ds, ide, h, rvars[d], val, loop, seed});
-                                    LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+                                    LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+                                            ds, ide, h, rvars[d], val, loop, seed);
+                                    LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                     writeDown(ref);
                                     Assert.fail("no solution found");
                                 }
                             } catch (Exception e) {
-                                LoggerFactory.getLogger("test").error(e.getMessage());
-                                LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                        new Object[]{ds, ide, h, rvars[d], val, loop, seed});
-                                LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+                                LOGGER.error(e.getMessage());
+                                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+                                        ds, ide, h, rvars[d], val, loop, seed);
+                                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                 writeDown(ref);
                                 Assert.fail();
                             }
@@ -115,15 +118,16 @@ public class ConsistencyChecker {
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
         Solver ref = modeler.model(nbVar, domains, map, parameters);
+//        LOGGER.error(ref.toString());
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
+            LOGGER.info("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             writeDown(ref);
-            LoggerFactory.getLogger("test").error(e.getMessage());
-            LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+            LOGGER.error(e.getMessage());
+            LOGGER.error("REF:\n{}\n", ref);
             Assert.fail();
         }
         return ref;

@@ -341,6 +341,18 @@ public class IntStrategyFactory {
 	}
 
 	/**
+	 * Randomly selects a variable and assigns it to a value randomly taken in {LB,UB}
+	 * i.e. it fixes the variable to one of its bounds
+	 * Uses fixed seed 0 by default
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> random_bound(IntVar[] VARS) {
+		return random_bound(VARS,0);
+	}
+
+	/**
 	 * Randomly selects a variable and assigns it to a value randomly taken in [LB,UB]
 	 *
 	 * @param VARS list of variables
@@ -349,6 +361,17 @@ public class IntStrategyFactory {
 	 */
 	public static AbstractStrategy<IntVar> random_value(IntVar[] VARS, long SEED) {
 		return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
+	}
+
+	/**
+	 * Randomly selects a variable and assigns it to a value randomly taken in [LB,UB]
+	 * Uses fixed seed 0 by default
+	 *
+	 * @param VARS list of variables
+	 * @return assignment strategy
+	 */
+	public static AbstractStrategy<IntVar> random_value(IntVar[] VARS) {
+		return random_value(VARS,0);
 	}
 
 	/**

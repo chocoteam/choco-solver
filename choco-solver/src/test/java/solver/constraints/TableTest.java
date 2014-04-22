@@ -25,31 +25,42 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
-
-import solver.ICause;
-import solver.constraints.nary.cnf.ILogical;
-import solver.exception.ContradictionException;
-import util.ESat;
 
 /**
- * <br/>
- * CPRU r544: remove default implementation
- *
- * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * @author Jean-Guillaume Fages
+ * @since 10/04/14
+ * Created by IntelliJ IDEA.
  */
-public interface BoolVar extends IntVar, ILogical {
+package solver.constraints;
 
-    ESat getBooleanValue();
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.extension.nary.IterTuplesTable;
+import solver.variables.IntVar;
+import solver.variables.VF;
 
-    boolean setToTrue(ICause cause) throws ContradictionException;
+import java.util.Arrays;
+import java.util.List;
 
-    boolean setToFalse(ICause cause) throws ContradictionException;
+public class TableTest {
 
-    BoolVar not();
+	@Test(groups = "1s")
+	public void test1() {
+		List<int[]> tuples = Arrays.asList(new int[][]{
+		        {0, 0, 0},
+		        {1, 1, 1},
+		        {2, 2, 2}
+		});
+		int[] min = new int[]{0, 0, 0};
+		int[] max = new int[]{1, 1, 1};
+		IterTuplesTable relation = new IterTuplesTable(tuples, min, max);
 
-	boolean hasNot();
+		Solver solver = new Solver();
+		IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+		Constraint tableConstraint = ICF.table(vars, relation, "AC2001");
+		solver.post(tableConstraint);
 
-    void _setNot(BoolVar not);
+		solver.findSolution();
+	}
+
 }

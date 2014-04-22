@@ -31,6 +31,7 @@ import choco.checker.DomainBuilder;
 import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -52,7 +53,6 @@ public class OffsetViewTest {
     @Test(groups = "1s")
     public void test1() {
         Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
         IntVar Y = VariableFactory.offset(X, 2);
@@ -75,7 +75,6 @@ public class OffsetViewTest {
     @Test(groups = "1s")
     public void test2() {
         Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
         IntVar Y = VariableFactory.offset(X, 3);
@@ -96,7 +95,6 @@ public class OffsetViewTest {
 
     private Solver bijective(int low, int upp, int coeff) {
         Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
         IntVar Y = VariableFactory.offset(X, coeff);
@@ -117,7 +115,6 @@ public class OffsetViewTest {
 
     private Solver contraint(int low, int upp, int coeff) {
         Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
         IntVar Y = VariableFactory.enumerated("Y", low + coeff, upp + coeff, s);
@@ -224,6 +221,14 @@ public class OffsetViewTest {
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.enumerated("o", domains[0], solver);
             IntVar v = VariableFactory.offset(o, 2);
+			if(!Configuration.ENABLE_VIEWS){
+				try {
+					solver.propagate();
+				}catch (Exception e){
+					e.printStackTrace();
+					throw new UnsupportedOperationException();
+				}
+			}
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() - 2));

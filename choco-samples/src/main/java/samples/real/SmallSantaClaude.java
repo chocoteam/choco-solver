@@ -97,7 +97,7 @@ public class SmallSantaClaude {
 		// displays resolution statistics
 		SearchMonitorFactory.log(solver,true,false);
 		// print each solution
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+        solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 if (LoggerFactory.getLogger("solver").isInfoEnabled()) {

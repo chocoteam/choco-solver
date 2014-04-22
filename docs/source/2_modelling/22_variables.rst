@@ -2,8 +2,8 @@ Declaring variables
 ===================
 
 Choco |version| includes five types of variables: ``IntVar``, ``BoolVar``, ``SetVar``, ``GraphVar`` and ``RealVar``.
-A factory is available to ease the declaration of variables: ``VariableFactory``.
-At least, a varible requires a name and a solver to be declared in.
+A factory is available to ease the declaration of variables: ``VariableFactory`` (or ``VF`` for short).
+At least, a variable requires a name and a solver to be declared in.
 The name is only helpful for the user, to read the results computed.
 
 Integer variable
@@ -39,7 +39,7 @@ To create a matrix of 5x6 bounded variables of initial domain :math:`[\![0,5]\!]
 Enumerated variable
 -------------------
 
-Integer variables with enumerated domains, or shortly, enumerated variables, take their value in `[\![a,b]\!]` where :math:`a` and :math:`b` are integers such that :math:`a < b` (the case where :math:`a = b` is handled through views) or in an array of ordered values :math:`{a,b,c,..,z}`, where :math:`a < b < c ... < z`. 
+Integer variables with enumerated domains, or shortly, enumerated variables, take their value in :math:`[\![a,b]\!]` where :math:`a` and :math:`b` are integers such that :math:`a < b` (the case where :math:`a = b` is handled through views) or in an array of ordered values :math:`{a,b,c,..,z}`, where :math:`a < b < c ... < z`.
 Enumerated variables provide more information than bounded variables but are heavier in memory (usually the domain requires a bitset).
 
 To create an enumerated variable, the ``VariableFactory`` should be used: ::
@@ -83,8 +83,8 @@ To create a matrix of 5x6 boolean variables: ::
 
  BoolVar[] bs = VariableFactory.boolMatrix("bs", 5, 6, solver);
 
-Variable's view
----------------
+Variable views
+--------------
 
 Views are particular integer variables, they can be used inside constraints. 
 Their domains are implicitly defined by a function and implied variables.
@@ -115,12 +115,12 @@ Set variable
 A set variable ``SV`` represents a set of integers.
 Its domain is defined by a set interval: ``[S_E,S_K]``
 
-- the envelope ``S_E`` is an ``ISet`` which contains integers that potentially figure in at least one solution,
-- the kernel ``S_K`` is an ``ISet`` which contains integers that figure in every solutions.
+- the envelope ``S_E`` is an ``ISet`` object which contains integers that potentially figure in at least one solution,
+- the kernel ``S_K`` is an ``ISet`` object which contains integers that figure in every solutions.
 
-Initial values for both ``S_K`` and ``S_E`` can be specified.
+Initial values for both ``S_K`` and ``S_E`` can be specified. If no initial value is given for ``S_K``, it is empty by default.
 Then, decisions and filtering algorithms will remove integers from ``S_E`` and add some others to ``S_K``.
-A set variable is instantiated if`and only if ``S_E = S_K``.
+A set variable is instantiated if and only if ``S_E = S_K``.
 
 A set variable can be created as follows: ::
 
@@ -129,7 +129,14 @@ A set variable can be created as follows: ::
     int[] z_kernel = new int[]{2};
     z = VariableFactory.set("z", z_envelope, z_kernel, solver);
 
-Example of use can be found in ``Partition`` and ``SetUnion`` samples.
+For instance, the following example imposes three set variables (``x``, ``y`` and ``z``)
+to form a partition of another set variable (``universe``), whose sum of integers must be minimized, while remaining in :math:`[\![12,19]\!]`.
+ while minimizing the sum of integers in the universe variable.
+
+.. literalinclude:: /../../choco-samples/src/main/java/samples/set/Partition.java
+   :language: java
+   :lines: 65,75-90,96,97,102,103,108,109,114,115
+   :linenos:
 
 Graph variable
 ~~~~~~~~~~~~~~
@@ -137,55 +144,17 @@ Graph variable
 A graph variable ``GV`` is a kind of set variable designed to model graphs.
 Its domain is defined by a graph interval: ``[G_E,G_K]``
 
-- the envelope ``G_E`` contains nodes/arcs that potentially figure in at least one solution,
-- the kernel ``G_K`` contains nodes/arcs that figure in every solutions.
+- the envelope ``G_E`` is a graph object which contains nodes/arcs that potentially figure in at least one solution,
+- the kernel ``G_K`` is a graph object which contains nodes/arcs that figure in every solutions.
 
 Initially ``G_K`` is empty while ``G_E`` is set to an initial domain.
 Then, decisions and filtering algorithms will remove nodes or arcs from ``G_E`` and add some others to ``G_K``. 
-A graph variable ``GV=(G_E,G_K)`` is instantiated if`and only if ``G_E = G_K``.
+A graph variable ``GV=(G_E,G_K)`` is instantiated if and only if ``G_E = G_K``.
 
 We distinguish two kind of graph variables, ``DirectedGraphVar`` and ``UndirectedGraphVar``.
 Then for each kind, several data structures are available and can be found in enum ``GraphType``. 
 For instance ``BITSET`` involves a bitset representation while ``LINKED_LIST`` involves linked lists and is much more appropriate for sparse graphs.
 
-**Reification graph**
-
- A graph variable ``GV=(G_E,G_K)`` can be used to model a matrix ``B`` of boolean variables.
- 
- - Each arc ``(x,y)`` corresponds to the boolean variable ``B[x][y]``,
- - ``(x,y)`` not in ``G_E`` => ``B[x][y]`` is ``false```,
- - ``(x,y)`` in ``G_K`` => ``B[x][y]`` is ``true``.
-
- This channeling is very easy to set: ::
-
-  UndirectedGraphVar GV = new UndirectedGraphVar(B.length);
-  // create an empty default constraint
-  Constraint c = ConstraintFactory.makeConstraint(solver);
-  // channeling between B and GV
-  c.addPropagator(PropagatorFactory.graphBooleanChanneling(GV,B,solver); 
-
-**Relation graph**
-
- A graph variable ``GV=(G_E,G_K)`` can be used to model a binary relation ``R`` between a set of variables ``V``.
-
- - Each node ``x`` represents the variable ``V[x]``. If ``x`` is not in ``G_E`` then it is not concerned by the relation ``R``.
- - Each arc ``(x,y)`` of ``G_E`` represents the potential application of ``xRy``.
- - Each arc (x,y) not in G_E represents either x(!R)y, either nothing (depending of whether !R is defined or not, like reifications and half reifications).
- - Each arc (x,y) of G_K implies the application of xRy.
-
- For instance the global constraint NValue(V,N) which ensures that variables in V take exactly N different values can be reformulated by: ::
- 
-  // the meaning of an arc is the equivalence relation
-  GraphRelation relation = GraphRelationFactory.equivalence(V); 
-  UndirectedGraphVar GV = new UndirectedGraphVar(V.length);
-  // the graph GVmust contain Ncliques
-  Constraint nValues = GraphConstraintFactory.nCliques(GV,N,solver);i
-  // channeling between V and GV
-  nValues.addPropagator(PropagatorFactory.graphRelationChanneling(GV,V,R,solver); 
-
- The good thing is that such a model remains valid en case of vectorial variables (``NVector`` constraint).
-
- Relation graphs can be seen as a kind of reification but they require only 1 graph variable and :math:`O(1)` propagators running in :math:`O(n^2)` time, whereas a reified approach would imply :math:`n^2` boolean variables and propagators. Moreover, relation graphs treat the problem globally through graph theory's algorithms.
 
 Real variable
 ~~~~~~~~~~~~~

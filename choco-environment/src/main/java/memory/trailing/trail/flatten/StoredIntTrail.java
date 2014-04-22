@@ -216,7 +216,7 @@ public class StoredIntTrail implements IStoredIntTrail {
 
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((maxUpdates * 3) / 2);
+        final int newCapacity = ((variableStack.length * 3) / 2);
         // first, copy the stack of variables
         final StoredInt[] tmp1 = new StoredInt[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);

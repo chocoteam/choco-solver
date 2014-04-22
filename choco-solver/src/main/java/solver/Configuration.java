@@ -108,6 +108,10 @@ public enum Configuration {
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = Boolean.parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
 
+	// Set to true to allow the creation of views in the VariableFactory.
+	// Creates new variables with channeling constraints otherwise.
+    public static final boolean ENABLE_VIEWS = Boolean.parseBoolean(properties.getProperty("ENABLE_VIEWS"));
+
     public enum MOVP {
         disabled, //throws an error when a variable occurs more than once
         silent, // do not do anything

@@ -25,31 +25,47 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
-
-import solver.ICause;
-import solver.constraints.nary.cnf.ILogical;
-import solver.exception.ContradictionException;
-import util.ESat;
 
 /**
- * <br/>
- * CPRU r544: remove default implementation
- *
- * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * @author Jean-Guillaume Fages
+ * @since 07/04/14
+ * Created by IntelliJ IDEA.
  */
-public interface BoolVar extends IntVar, ILogical {
+package solver;
 
-    ESat getBooleanValue();
+import org.testng.annotations.Test;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.ISF;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
+import util.tools.StringUtils;
 
-    boolean setToTrue(ICause cause) throws ContradictionException;
+public class EnvironmentTest {
 
-    boolean setToFalse(ICause cause) throws ContradictionException;
-
-    BoolVar not();
-
-	boolean hasNot();
-
-    void _setNot(BoolVar not);
+	@Test(groups = "1s")
+	public void testSize(){
+		int n = 14;
+		IntVar[] vars, vectors;
+		Solver solver = new Solver("CostasArrays");
+		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+		vectors = new IntVar[n * n - n];
+		int idx = 0;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (i != j) {
+					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
+					// just to create many variables
+					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, vars[j]).reif();
+					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
+					idx++;
+				}
+			}
+		}
+		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+		solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
+		solver.set(ISF.domOverWDeg(ArrayUtils.append(vectors, vars), 0));
+		solver.findSolution();
+	}
 }

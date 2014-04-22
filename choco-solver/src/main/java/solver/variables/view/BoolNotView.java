@@ -33,6 +33,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
@@ -224,6 +225,11 @@ public final class BoolNotView extends IntView implements BoolVar {
         assert not == var;
     }
 
+	@Override
+	public boolean hasNot() {
+		return true;
+	}
+
     @Override
     public boolean isLit() {
         return true;
@@ -233,4 +239,14 @@ public final class BoolNotView extends IntView implements BoolVar {
     public boolean isNot() {
         return !var.isNot();
     }
+
+	@Override
+	public void setNot(boolean isNot){
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getTypeAndKind() {
+		return Variable.VIEW | Variable.BOOL;
+	}
 }

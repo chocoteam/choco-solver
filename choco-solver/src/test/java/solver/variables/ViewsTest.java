@@ -35,6 +35,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.set.SCF;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
+import solver.search.strategy.ISF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;
 
@@ -104,7 +105,6 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1a() {
         // Z = X + Y (bounded)
-//        int seed = 5;
         for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
@@ -446,7 +446,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
         IntVar v1 = VF.enumerated("v1", -2, 2, s);
@@ -459,7 +459,7 @@ public class ViewsTest {
         Assert.assertFalse(v1.contains(1));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testJL2() {
         Solver solver = new Solver();
         SetVar v1 = VF.fixed("{0,1}", new int[]{0, 1}, solver);
@@ -472,4 +472,82 @@ public class ViewsTest {
             } while (solver.nextSolution());
         }
     }
+
+	@Test(groups = "1s")
+	public void testJL3(){
+		Solver solver = new Solver();
+		solver.post(ICF.arithm(
+				VF.enumerated("int", -3,3, solver),
+				"=",
+				VF.minus(VF.bool("bool", solver))));
+		if(solver.findSolution()) {
+			do{
+				System.out.println(solver);
+			}while(solver.nextSolution());
+		}
+	}
+
+	@Test(groups = "1s")
+	public void testJL4() throws ContradictionException {
+	    Solver s = new Solver();
+	    BoolVar bool = VF.bool("bool", s);
+		BoolVar view = VF.eq(bool);
+	    SetVar set = VF.set("set", 0, 1, s);
+		s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
+	    s.post(SCF.member(VF.one(s), set));
+	    s.set(ISF.minDom_UB(bool));
+	    if (s.findSolution()) {
+	        do {
+	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
+	        } while (s.nextSolution());
+	    }
+	}
+
+	@Test(groups = "1s")
+	public void testJG() throws ContradictionException {
+	    Solver s = new Solver();
+	    BoolVar bool = VF.bool("bool", s);
+		BoolVar view = VF.eq(bool);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
+	}
+
+	@Test(groups = "1s")
+	public void testJG2() throws ContradictionException {
+	    Solver s = new Solver();
+	    BoolVar bool = VF.bool("bool", s);
+		BoolVar view = VF.not(bool);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
+	}
+
+	@Test(groups = "1s")
+	public void testJG3() throws ContradictionException {
+	    Solver s = new Solver();
+	    IntVar var = VF.bounded("int", 0, 2,s);
+		IntVar view = VF.eq(var);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
+	}
+
+	@Test(groups = "1s")
+	public void testJG4() throws ContradictionException {
+	    Solver s = new Solver();
+	    IntVar var = VF.bounded("int", 0, 2,s);
+		IntVar view = VF.minus(var);
+		IntVar sum = VF.bounded("sum",0,6,s);
+		s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1,5}, sum));
+	    s.post(ICF.arithm(sum, ">", 2));
+		s.propagate();
+		Assert.assertEquals(sum.isInstantiated(), true);
+	}
 }

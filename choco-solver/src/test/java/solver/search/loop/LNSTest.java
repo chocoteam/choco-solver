@@ -128,7 +128,7 @@ public class LNSTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "10m")
     public void test1() {
         // opt: 8372
         knapsack20(0);

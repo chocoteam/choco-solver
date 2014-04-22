@@ -124,7 +124,6 @@ public abstract class AbstractVariable implements Variable {
             i++;
         }
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-        //assert i < pIdx : "remove unknown propagator : "+propagator + " from "+this;
         if (i < pIdx) {
             propagators[i] = propagators[pIdx - 1];
             pindices[i] = pindices[--pIdx];
@@ -172,6 +171,16 @@ public abstract class AbstractVariable implements Variable {
     ////////////////////////////////////////////////////////////////
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
+
+	@Override
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        notifyMonitors(event);
+        if ((modificationEvents & event.mask) != 0) {
+            solver.getEngine().onVariableUpdate(this, event, cause);
+        }
+        notifyViews(event, cause);
+    }
 
     @Override
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {

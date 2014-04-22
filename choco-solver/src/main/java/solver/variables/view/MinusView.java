@@ -62,7 +62,6 @@ public class MinusView extends IntView {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
-//            throw new UnsupportedOperationException();
         }
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
@@ -94,7 +93,6 @@ public class MinusView extends IntView {
                 return true;
             }
         }
-//        }
         return false;
     }
 
@@ -154,7 +152,6 @@ public class MinusView extends IntView {
                 return true;
             }
         }
-//        }
         return false;
     }
 

@@ -32,6 +32,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorInitPropagation;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.solution.Solution;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
@@ -54,6 +55,7 @@ public class SMPTSP extends AbstractProblem {
 	//input
 	private int nbTasks;
 	private int nbAvailableShifts;
+	private int bestObj;
 
 	// model
 	private IntVar nbValues;
@@ -105,10 +107,19 @@ public class SMPTSP extends AbstractProblem {
 		// bottom-up optimisation, then classical branching
 		solver.set(ISF.lexico_LB(nbValues), ISF.minDom_LB(assignment));
 		// displays the root lower bound
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorInitPropagation() {
-			public void beforeInitialPropagation() {}
+		solver.plugMonitor(new IMonitorInitPropagation() {
+			public void beforeInitialPropagation() {
+			}
+
 			public void afterInitialPropagation() {
 				System.out.println("bound after initial propagation : " + nbValues);
+			}
+		});
+		solver.plugMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				bestObj = nbValues.getValue();
+				System.out.println("Solution found! Objective = "+bestObj);
 			}
 		});
 	}

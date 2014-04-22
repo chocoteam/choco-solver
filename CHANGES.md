@@ -77,3 +77,13 @@ The CHANGES.md file starts at this version.
 * Strong refactoring of IntStrategyFactory (access to variable and value selectors, decision operators, and more simple to understand search names).
 * Stronger AtMostNValue constraint with automatic detection of disequalities 
 * Fix #114: Enable to specify a time unit in time limits (ms, s, m or h)
+* Fix #195: fix bug while using IntViews over BoolVar
+* Fix #17: propagator annotations (PropAnn) have been removed
+* Fix #127: a specific view problem remains (new issue opened)
+* Fix #166: remove constants from default search strategy
+* Fix #196: fix view awakening problem
+- Views are now safe
+- Possibility to reformulate views with channeling constraints
+- Catch some particular cases of times in the factory
+- AC guaranteed for times(X,Y,Z) constraint when Y is a constant
+- Add path and subpath constraints, holding on integer variables

@@ -62,7 +62,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void createSolver() {
-        solver = new Solver("set union sample");
+		solver = new Solver("set union sample");
     }
 
     @Override
@@ -72,45 +72,47 @@ public class Partition extends AbstractProblem {
 		// VARIABLES //
 		///////////////
 
-        // x initial domain
+		// x initial domain
 		int[] x_envelope = new int[]{1,3,2,8}; // not necessarily ordered
 		int[] x_kernel = new int[]{1};
 		x = VariableFactory.set("x", x_envelope, x_kernel, solver);
-        // y initial domain
+		// y initial domain
 		int[] y_envelope = new int[]{2,6,7};
 		y = VariableFactory.set("y", y_envelope, solver);
-        // z initial domain
+		// z initial domain
 		int[] z_envelope = new int[]{2,1,3,5,7,12};
 		int[] z_kernel = new int[]{2};
 		z = VariableFactory.set("z", z_envelope, z_kernel, solver);
-        // universe initial domain (note that the universe is a variable)
+		// universe initial domain (note that the universe is a variable)
 		int[] universe_envelope = new int[]{1,2,3,5,7,8,42};
 		universe = VariableFactory.set("universe", universe_envelope, solver);
-        // sum variable
+		// sum variable
 		sum = VariableFactory.bounded("sum of universe", 12, 19, solver);
 
 		/////////////////
 		// CONSTRAINTS //
 		/////////////////
 
-        // partition constraint
-        solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
-        if (noEmptySet) {
-            // forbid empty sets
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, VariableFactory.fixed(0, solver)));
-        }
-        // restricts the sum of elements in universe
-        solver.post(SetConstraintsFactory.sum(universe, sum, true));
+		// partition constraint
+		solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
+		if (noEmptySet) {
+			// forbid empty sets
+			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, VariableFactory.fixed(0, solver)));
+		}
+		// restricts the sum of elements in universe
+		solver.post(SetConstraintsFactory.sum(universe, sum, true));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(SetStrategyFactory.force_first(new SetVar[]{x, y, z, universe}));
+		// set a search strategy
+		solver.set(SetStrategyFactory.force_first(x, y, z, universe));
     }
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
+		// find the optimum
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
     }
 
     @Override

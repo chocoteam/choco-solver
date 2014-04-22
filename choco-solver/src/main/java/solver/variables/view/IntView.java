@@ -84,8 +84,8 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public final int getTypeAndKind() {
-        return Variable.VIEW | var.getTypeAndKind();
+    public int getTypeAndKind() {
+        return Variable.VIEW | Variable.INT;
     }
 
 	@Override
@@ -123,17 +123,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         return this.getId() - o.getId();
     }
 
-    @Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
-            //records.forEach(afterModification.set(this, event, cause));
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
 	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
@@ -143,7 +132,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyPropagators(evt, cause);
+        notifyPropagators(evt, this);
     }
 
     @Override
@@ -164,7 +153,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

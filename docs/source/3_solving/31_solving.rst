@@ -6,9 +6,10 @@ Before everything, there are two methods which help interpreting the results.
 
 **Feasibility**:
  Once the resolution ends, a call to the ``solver.isFeasible()`` method will return a boolean which indicates whether or not the problem is feasible.
- - ``true``: at least one solution has been found, the problem is proven to be feasible
- - ``false``: in principle, the problem has no solution.
- More precisely, if the search space is guaranteed to be explored entirely, it is proven that the problem has no solution.
+
+ - ``true``: at least one solution has been found, the problem is proven to be feasible,
+
+ - ``false``: in principle, the problem has no solution. More precisely, if the search space is guaranteed to be explored entirely, it is proven that the problem has no solution.
 
 
 **Limitation**:
@@ -22,7 +23,7 @@ Before everything, there are two methods which help interpreting the results.
  In some cases, the search may not be complete.
  For instance, if one enables restart on each failure with a static search strategy,
  there is a possibility that the same sub-tree is explored permanently.
- In those cases, the two methods are not enough to confirm the lack of solution.
+ In those cases, the search may never stop or the two above methods may not be sufficient to confirm the lack of solution.
 
 Satisfaction problems
 ~~~~~~~~~~~~~~~~~~~~~
@@ -71,7 +72,7 @@ One may enumerate all solution like this::
     }while(solver.nextSolution());
  }
 
-``solver.findSolution()`` and  ``solver.nextSolution()`` are the only ways to resume a resolution process which has alreay began.
+``solver.findSolution()`` and  ``solver.nextSolution()`` are the only ways to resume a resolution process which has already began.
 
 
 An alternative is to call ``solver.findAllSolutions()``. It attempts to find all solutions of the problem.
@@ -132,7 +133,7 @@ then enumerating all solutions of optimal cost.
 Set to ``false``, the posted cuts are *soft*.
 When an equivalent solution is found, it is stored and the resolution goes on.
 When a strictly better solution is found, previous solutions are removed.
-Setting the boolean to ``false`` allow finding non-optimal intermediary solutions, which may be time consumming.
+Setting the boolean to ``false`` allow finding non-optimal intermediary solutions, which may be time consuming.
 
 
 
@@ -158,17 +159,9 @@ its best known value.
 
 The method ends by restoring the last solution found so far, if any.
 
-Propagation
-~~~~~~~~~~~
+Here is a simple illustration:
 
-One may want to propagate each constraint manually.
-This can be achieved by calling ``solver.propagate()``.
-This method runs, in turn, the domain reduction algorithms of the constraints until it reaches a fix point.
-It may throw a ``ContradictionException`` if a contradiction occurs.
-In that case, the propagation engine must be flushed calling ``solver.getEngine().flush()``
-to ensure there is no pending events.
-
-.. warning::
-
- If there are still pending events in the propagation engine, the propagation may results in unexpected results.
-
+.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/Pareto.java
+   :language: java
+   :lines: 71,72,73,75,83,88-92
+   :linenos:

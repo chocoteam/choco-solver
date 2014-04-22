@@ -34,7 +34,6 @@
 
 package solver.constraints.gary.tsp.undirected;
 
-import choco.annotations.PropAnn;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
@@ -51,7 +50,6 @@ import util.procedure.PairProcedure;
 /**
  * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case
  */
-@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
     //***********************************************************************************

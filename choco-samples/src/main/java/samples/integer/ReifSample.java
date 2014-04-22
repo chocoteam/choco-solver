@@ -82,7 +82,7 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			@Override
 			public void onSolution() {
 				System.out.println("////////////////");

@@ -149,7 +149,7 @@ public class MarioKart extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		/* Listeners */
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void onSolution() {
