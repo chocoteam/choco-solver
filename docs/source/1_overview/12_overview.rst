@@ -7,21 +7,31 @@ The minimal problem should at least contains a solver, some variables and constr
 To facilitate the modeling, Choco |version| provides factories for almost every required component of CSP and its resolution:
 
 
-+----------------------------+---------------------------------------------------------------------------------------------------------+
-| **Factory**                |  **Description**                                                                                        |
-+----------------------------+---------------------------------------------------------------------------------------------------------+
-| ``VariableFactory``        | to create any kind of variables and views (integer, boolean, set, graph and real)                       |
-+----------------------------+---------------------------------------------------------------------------------------------------------+
-| ``IntConstraintFactory``   |  to declare constraints over variables                                                                  |
-| ``SetConstraintFactory``   |                                                                                                         |
-| ``GraphConstraintFactory`` |                                                                                                         |
-+----------------------------+---------------------------------------------------------------------------------------------------------+
-| ``IntStrategyFactory``     |  to define a specific search strategy, which can be combined together with a StrategiesSequencer object |
-| ``SetStrategyFactory``     |                                                                                                         |
-| ``GraphStrategyFactory``   |                                                                                                         |   
-+----------------------------+---------------------------------------------------------------------------------------------------------+
-| ``SearchMonitorFactory``   | to enable logging resolution, setting limits and restart policies.                                      |
-+----------------------------+---------------------------------------------------------------------------------------------------------+
++------------------------------+--------------+-------------------------------------------+
+| **Factory**                  | **Shortcut** |  **Enables to create**                    |
++==============================+==============+===========================================+
+| ``VariableFactory``          | VF           | Variables and views                       |
+|                              |              | (integer, boolean, set, graph and real)   |
++------------------------------+--------------+-------------------------------------------+
++------------------------------+--------------+-------------------------------------------+
+| ``IntConstraintFactory``     | ICF          | Constraints over variables                |
++------------------------------+--------------+-------------------------------------------+
+| ``SetConstraintFactory``     | SCF          |                                           |
++------------------------------+--------------+-------------------------------------------+
+| ``GraphConstraintFactory``   | GCF          |                                           |
++------------------------------+--------------+-------------------------------------------+
+| ``LogicalConstraintFactory`` | LCF          | (Manages constraint reification)          |
++------------------------------+--------------+-------------------------------------------+
++------------------------------+--------------+-------------------------------------------+
+| ``IntStrategyFactory``       | ISF          | Custom or black-box search strategies     |
++------------------------------+--------------+-------------------------------------------+
+| ``SetStrategyFactory``       | SSF          |                                           |
++------------------------------+--------------+-------------------------------------------+
+| ``GraphStrategyFactory``     | GSF          |                                           |
++------------------------------+--------------+-------------------------------------------+
++------------------------------+--------------+-------------------------------------------+
+| ``SearchMonitorFactory``     | SMF          | log, resolution limits, restarts etc.     |
++------------------------------+--------------+-------------------------------------------+
 
 Let say we want to model and solve the following equation: :math:`x + y < 5`, where the :math:`x \in [\![0,5]\!]` and :math:`y \in [\![0,5]\!]`.
 Here is a short example which illustrates the main steps of a CSP modeling and resolution with Choco |version| to treat this equation.
