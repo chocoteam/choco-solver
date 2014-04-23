@@ -29,14 +29,7 @@ package choco.checker.consistency;
 
 import choco.checker.Modeler;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
 import solver.search.loop.SearchLoops;
-import solver.variables.EventType;
-
-import java.io.IOException;
 
 import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
 
@@ -357,7 +350,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelSortBC, 8, -20, 20, null, seed + i, "bc");
     }
 
-    @Test
+    /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/kyzrsoze/Sources/Choco3/SOLVER_ERROR.ser");
         s.getEnvironment().worldPopUntil(0);
@@ -370,6 +363,6 @@ public class TestConsistency {
             }
         }
         s.propagate();
-    }
+    }*/
 }
 
