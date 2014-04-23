@@ -67,7 +67,7 @@ public class AverageCSV{
             if (!exist) {
                 out.write(";AVERAGE;;;;;;;;;;;;;");
                 out.write("\n");
-                out.write("instance;solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
+                out.write("instance;solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
                 out.write("\n");
             }
             out.write(text);
