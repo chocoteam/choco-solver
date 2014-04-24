@@ -25,41 +25,41 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.delta;
-
-import solver.search.loop.ISearchLoop;
-
-import java.io.Serializable;
+package solver.search.loop;
 
 /**
+ * Class for factorizing code of time stamped objects
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 18 oct. 2010
+ * @author Jean-Guillaume Fages
+ * @since 24/04/2014
  */
-public interface IDelta extends Serializable {
+public abstract class TimeStampedObject {
 
-    /**
-     * Returns the number of element
-     *
-     * @return number of element
-     */
-    int size();
+	protected int timestamp = -1;
+	protected final ISearchLoop loop;
 
-    /**
-     * Clear the delta
-     */
-    void clear();
+	public TimeStampedObject(ISearchLoop loop) {
+		this.loop = loop;
+	}
 
-    /**
-     * Lazy clear the delta, on world change
-     */
-    void lazyClear();
+	/** @return the search loop */
+	public final ISearchLoop getSearchLoop() {
+		return loop;
+	}
 
-    /**
-     * Return the associate search loop
-     *
-     * @return associate search loop
-     */
-    ISearchLoop getSearchLoop();
+	/** @return the current time stamp of the object */
+	public int getTimeStamp(){
+		return timestamp;
+	}
+
+	/** @return true iff the current time stamp of the object is different from the time stamp of the search loop */
+	public final boolean needReset() {
+		return timestamp != loop.getTimeStamp();
+	}
+
+	/** sets the current time stamp of the object to the time stamp of the search loop */
+	public final void resetStamp() {
+		timestamp = loop.getTimeStamp();
+	}
 }

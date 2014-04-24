@@ -30,8 +30,9 @@ package solver.variables.delta;
 import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
-public class GraphDelta extends AbstractDelta implements IGraphDelta {
+public class GraphDelta extends TimeStampedObject implements IGraphDelta {
 
     //***********************************************************************************
     // VARIABLES
@@ -49,7 +50,6 @@ public class GraphDelta extends AbstractDelta implements IGraphDelta {
         for (int i = 0; i < NB; i++) {
             deltaOfType[i] = new EnumDelta(loop);
         }
-        timestamp = loop.getTimeStamp();
     }
 
     //***********************************************************************************
@@ -66,7 +66,7 @@ public class GraphDelta extends AbstractDelta implements IGraphDelta {
         for (int i = 0; i < NB; i++) {
             deltaOfType[i].clear();
         }
-        timestamp = loop.getTimeStamp();
+		resetStamp();
     }
 
     @Override
@@ -84,7 +84,7 @@ public class GraphDelta extends AbstractDelta implements IGraphDelta {
 
 	@Override
     public void lazyClear() {
-        if (timestamp != loop.getTimeStamp()) {
+        if (needReset()) {
             clear();
         }
     }

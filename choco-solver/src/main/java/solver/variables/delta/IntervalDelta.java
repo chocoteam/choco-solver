@@ -30,6 +30,7 @@ package solver.variables.delta;
 import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
 /**
  * A class to store the removed intervals of an integer variable.
@@ -37,7 +38,7 @@ import solver.search.loop.ISearchLoop;
  * It defines methods to <code>add</code> a value, <code>clear</code> the structure
  * and execute a <code>Procedure</code> for each value stored.
  */
-public final class IntervalDelta extends AbstractDelta implements IIntervalDelta {
+public final class IntervalDelta extends TimeStampedObject implements IIntervalDelta {
     private static final int SIZE = 32;
 
     int[] from;
@@ -68,7 +69,7 @@ public final class IntervalDelta extends AbstractDelta implements IIntervalDelta
 
 	@Override
     public void lazyClear() {
-        if (timestamp - loop.getTimeStamp() != 0) {
+        if (needReset()) {
             clear();
         }
     }
@@ -107,6 +108,6 @@ public final class IntervalDelta extends AbstractDelta implements IIntervalDelta
     @Override
     public void clear() {
         last = 0;
-        timestamp = loop.getTimeStamp();
+        resetStamp();
     }
 }

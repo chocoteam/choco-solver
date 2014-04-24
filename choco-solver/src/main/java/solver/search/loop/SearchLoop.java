@@ -133,6 +133,7 @@ public class SearchLoop implements ISearchLoop {
 	ObjectiveManager objectivemanager;
 
 	private boolean alive;
+	
 	public Decision decision = RootDecision.ROOT;
 
     //***********************************************************************************

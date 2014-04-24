@@ -30,12 +30,13 @@ package solver.variables.delta;
 import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
 /**
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetDelta extends AbstractDelta implements ISetDelta {
+public class SetDelta extends TimeStampedObject implements ISetDelta {
 
     //***********************************************************************************
     // VARIABLES
@@ -52,7 +53,6 @@ public class SetDelta extends AbstractDelta implements ISetDelta {
         delta = new IEnumDelta[2];
         delta[0] = new EnumDelta(loop);
         delta[1] = new EnumDelta(loop);
-        timestamp = loop.getTimeStamp();
     }
 
     //***********************************************************************************
@@ -68,7 +68,7 @@ public class SetDelta extends AbstractDelta implements ISetDelta {
     public void clear() {
         delta[0].clear();
         delta[1].clear();
-        timestamp = loop.getTimeStamp();
+        resetStamp();
     }
 
 	@Override
@@ -86,7 +86,7 @@ public class SetDelta extends AbstractDelta implements ISetDelta {
 
 	@Override
     public void lazyClear() {
-        if (timestamp != loop.getTimeStamp()) {
+        if (needReset()) {
             clear();
         }
     }

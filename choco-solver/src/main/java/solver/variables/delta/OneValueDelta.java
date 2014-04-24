@@ -30,6 +30,7 @@ package solver.variables.delta;
 import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
 /**
  * <br/>
@@ -37,7 +38,7 @@ import solver.search.loop.ISearchLoop;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class OneValueDelta extends AbstractDelta implements IEnumDelta {
+public final class OneValueDelta extends TimeStampedObject implements IEnumDelta {
 
     int value;
     ICause cause;
@@ -49,9 +50,9 @@ public final class OneValueDelta extends AbstractDelta implements IEnumDelta {
 
 	@Override
     public void lazyClear() {
-        if (timestamp - loop.getTimeStamp() != 0) {
+        if (needReset()) {
             set = false;
-            timestamp = loop.getTimeStamp();
+            resetStamp();
         }
     }
 
