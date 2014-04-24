@@ -73,7 +73,6 @@ public class Datas {
         map.put(name, o);
     }
 
-
     public Object get(String id) {
         return map.get(id);
     }
@@ -115,7 +114,7 @@ public class Datas {
     }
 
     public void plugLayout(Solver aSolver) {
-        mLayout.setSearchLoop(aSolver.getSearchLoop());
+        mLayout.set(aSolver);
     }
 
     public void clear() {
