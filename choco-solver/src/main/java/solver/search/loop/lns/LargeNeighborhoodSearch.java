@@ -34,8 +34,6 @@
 
 package solver.search.loop.lns;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -52,14 +50,11 @@ import solver.search.loop.monitors.IMonitorSolution;
  */
 public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonitorInterruption, IMonitorRestart {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
-
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     protected Solver solver;
-    protected final boolean restartAfterEachSolution;
     protected final INeighbor neighbor;
     protected boolean hasAppliedNeighborhood;
 
@@ -67,11 +62,17 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public LargeNeighborhoodSearch(Solver solver, INeighbor neighbor, boolean restartAfterEachSolution) {
-        solver.getSearchLoop().restartAfterEachSolution(true);
+    public LargeNeighborhoodSearch(final Solver solver, INeighbor neighbor, final boolean restartAfterEachSolution) {
         this.solver = solver;
         this.neighbor = neighbor;
-        this.restartAfterEachSolution = restartAfterEachSolution;
+		solver.plugMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				if(restartAfterEachSolution){
+					solver.getSearchLoop().restart();
+				}
+			}
+		});
     }
 
     //***********************************************************************************
@@ -91,7 +92,6 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public void afterInterrupt() {
         if (hasAppliedNeighborhood && solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
-            solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             solver.getSearchLoop().forceAlive(true);
             solver.getSearchLoop().restart();
         }
@@ -109,7 +109,6 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     @Override
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
-            solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             try {
                 neighbor.fixSomeVariables(this);
                 hasAppliedNeighborhood = true;
@@ -122,9 +121,6 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
         }
     }
 
-
     @Override
-    public void explain(Deduction d, Explanation e) {
-    }
-
+    public void explain(Deduction d, Explanation e) {}
 }

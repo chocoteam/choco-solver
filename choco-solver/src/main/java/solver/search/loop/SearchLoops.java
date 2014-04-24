@@ -40,7 +40,7 @@ public enum SearchLoops {
     BINARY() {
         @Override
         public void make(Solver solver) {
-            solver.set(new BinarySearchLoop(solver));
+            solver.set(new SearchLoop(solver));
         }
     },
     DEFAULT() {

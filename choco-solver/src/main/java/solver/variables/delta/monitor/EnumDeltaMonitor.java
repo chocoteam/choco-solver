@@ -29,10 +29,10 @@ package solver.variables.delta.monitor;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.search.loop.TimeStampedObject;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -42,18 +42,15 @@ import util.procedure.SafeIntProcedure;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class EnumDeltaMonitor implements IIntDeltaMonitor {
+public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMonitor {
 
     protected final IEnumDelta delta;
     protected int first, last, frozenFirst, frozenLast;
     protected ICause propagator;
 
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
-
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
+		super(delta.getSearchLoop());
         this.delta = delta;
-        loop = delta.getSearchLoop();
         this.first = 0;
         this.last = 0;
         this.frozenFirst = 0;
@@ -63,7 +60,6 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
 
     @Override
     public void freeze() {
-        assert delta.timeStamped() : "delta is not timestamped";
         lazyClear();
         this.frozenFirst = first; // freeze indices
         this.frozenLast = last = delta.size();
@@ -78,9 +74,9 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
     }
 
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
+        if (timestamp - loop.getTimeStamp() != 0) {
             clear();
-            timestamp = loop.timeStamp;
+            timestamp = loop.getTimeStamp();
         }
     }
 

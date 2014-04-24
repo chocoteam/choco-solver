@@ -38,13 +38,12 @@ import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
-import solver.search.loop.AbstractSearchLoop;
+import solver.Solver;
 import solver.search.loop.monitors.AverageCSV;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +68,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     StringBuilder stringBuilder = new StringBuilder();
 
-    AbstractSearchLoop searchLoop;
+	Solver solver;
 
     boolean wrongSolution;
     int nbSolution;
@@ -132,7 +131,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                 }
                 LOGGER.info("----------");
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("% " + searchLoop.getMeasures().toOneShortLineString());
+                    LOGGER.debug("% " + solver.getMeasures().toOneShortLineString());
                 }
             }
         } else {
@@ -170,15 +169,15 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     @Override
     public void beforeClose() {
         if (LOGGER.isInfoEnabled()) {
-            if (searchLoop.getMeasures().getSolutionCount() == 0) {
-                if ((wrongSolution && nbSolution == 0) || searchLoop.hasReachedLimit()) {
+            if (solver.getMeasures().getSolutionCount() == 0) {
+                if ((wrongSolution && nbSolution == 0) || solver.hasReachedLimit()) {
                     LOGGER.info("=====UNKNOWN=====");
                 } else {
                     LOGGER.info("=====UNSATISFIABLE=====");
                 }
             } else {
-                if (searchLoop.hasReachedLimit()
-                        && (searchLoop.getObjectiveManager().isOptimization())) {
+                if (solver.hasReachedLimit()
+                        && (solver.getObjectiveManager().isOptimization())) {
                     LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");
@@ -186,39 +185,39 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             }
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("% - Search statistics");
-                LOGGER.debug("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
-                if (searchLoop.getMeasures().hasObjective()) {
-                    LOGGER.debug("% \t Objective : {}", searchLoop.getMeasures().getBestSolutionValue().intValue());
+                LOGGER.debug("% \t Solutions : {}", solver.getMeasures().getSolutionCount());
+                if (solver.getMeasures().hasObjective()) {
+                    LOGGER.debug("% \t Objective : {}", solver.getMeasures().getBestSolutionValue().intValue());
                 }
-                LOGGER.debug("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
-                LOGGER.debug("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
-                LOGGER.debug("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
-                LOGGER.debug("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
-                LOGGER.debug("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
-                LOGGER.debug("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
-                LOGGER.debug("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
-                LOGGER.debug("% \t Max Depth : {}", searchLoop.getMeasures().getMaxDepth());
-                LOGGER.debug("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
-                LOGGER.debug("% \t Variables : {}", searchLoop.getSolver().getVars().length);
-                LOGGER.debug("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
-                LOGGER.debug("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
-                        searchLoop.getMeasures().getPropagationsCount());
+                LOGGER.debug("% \t Building time : {}ms", solver.getMeasures().getReadingTimeCount());
+                LOGGER.debug("% \t Initial propagation : {}ms", solver.getMeasures().getInitialPropagationTimeCount());
+                LOGGER.debug("% \t Resolution : {}ms", solver.getMeasures().getTimeCount());
+                LOGGER.debug("% \t Nodes : {}", solver.getMeasures().getNodeCount());
+                LOGGER.debug("% \t Backtracks : {}", solver.getMeasures().getBackTrackCount());
+                LOGGER.debug("% \t Fails : {}", solver.getMeasures().getFailCount());
+                LOGGER.debug("% \t Restarts : {}", solver.getMeasures().getRestartCount());
+                LOGGER.debug("% \t Max Depth : {}", solver.getMeasures().getMaxDepth());
+                LOGGER.debug("% \t Memory : {}", solver.getMeasures().getUsedMemory());
+                LOGGER.debug("% \t Variables : {}", solver.getVars().length);
+                LOGGER.debug("% \t Constraints : {}", solver.getCstrs().length);
+                LOGGER.debug("% \t Checks : {} + {}", solver.getMeasures().getEventsCount(),
+						solver.getMeasures().getPropagationsCount());
             } else {
-                LOGGER.info("% " + searchLoop.getMeasures().toOneShortLineString());
+                LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
             }
         }
         if (sql != null) {
             // query the database
             sql.connect();
             sql.insert(instance, dbbenchname,
-                    searchLoop.getMeasures().toArray(),
-                    searchLoop.getObjectiveManager().getPolicy(),
-                    searchLoop.hasReachedLimit(),
-                    searchLoop.getMeasures().isObjectiveOptimal());
+					solver.getMeasures().toArray(),
+					solver.getObjectiveManager().getPolicy(),
+					solver.hasReachedLimit(),
+					solver.getMeasures().isObjectiveOptimal());
         }
         if (!csv.equals("")) {
             assert acsv != null;
-            acsv.record(csv, instance, gc.getDescription(), searchLoop.getMeasures().toArray());
+            acsv.record(csv, instance, gc.getDescription(), solver.getMeasures().toArray());
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
@@ -290,10 +289,9 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         }
     }
 
-
-    public void setSearchLoop(AbstractSearchLoop searchLoop) {
-        searchLoop.plugSearchMonitor(this);
-        this.searchLoop = searchLoop;
+    public void set(Solver solver) {
+        solver.plugMonitor(this);
+        this.solver = solver;
     }
 
     public void makeup() {

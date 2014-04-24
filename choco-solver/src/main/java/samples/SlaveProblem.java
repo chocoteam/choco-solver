@@ -37,7 +37,7 @@ package samples;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.thread.AbstractParallelSlave;
 
@@ -82,7 +82,7 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
             solver = model.getSolver();
 
 			// communication
-			final AbstractSearchLoop searchLoop = solver.getSearchLoop();
+			final ISearchLoop searchLoop = solver.getSearchLoop();
 			searchLoop.plugSearchMonitor(new IMonitorSolution() {
 				@Override
 				public void onSolution() {

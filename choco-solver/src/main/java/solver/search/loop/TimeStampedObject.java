@@ -24,54 +24,42 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.limits;
 
-import solver.search.loop.ISearchLoop;
+package solver.search.loop;
 
 /**
- * A factory dedicated to counter actions; action to be performed when a counter reached its limit.
+ * Class for factorizing code of time stamped objects
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 07/06/13
+ * @author Jean-Guillaume Fages
+ * @since 24/04/2014
  */
-public class ActionCounterFactory {
+public abstract class TimeStampedObject {
 
-    private ActionCounterFactory() {
-    }
+	protected int timestamp = -1;
+	protected final ISearchLoop loop;
 
-    private static ThreadLocal<ICounterAction> none = new ThreadLocal<ICounterAction>() {
-        @Override
-        protected ICounterAction initialValue() {
-            return new ICounterAction() {
-                @Override
-                public void onLimitReached() {
-                    // nothing
-                }
-            };
-        }
-    };
+	public TimeStampedObject(ISearchLoop loop) {
+		this.loop = loop;
+	}
 
-    public static ICounterAction none() {
-        return none.get();
-    }
+	/** @return the search loop */
+	public final ISearchLoop getSearchLoop() {
+		return loop;
+	}
 
+	/** @return the current time stamp of the object */
+	public int getTimeStamp(){
+		return timestamp;
+	}
 
-    public static ICounterAction interruptSearch(final ISearchLoop searchLoop) {
-        return new ICounterAction() {
-            @Override
-            public void onLimitReached() {
-                searchLoop.reachLimit();
-            }
-        };
-    }
+	/** @return true iff the current time stamp of the object is different from the time stamp of the search loop */
+	public final boolean needReset() {
+		return timestamp != loop.getTimeStamp();
+	}
 
-    public static ICounterAction restartSearch(final ISearchLoop searchLoop) {
-        return new ICounterAction() {
-            @Override
-            public void onLimitReached() {
-                searchLoop.restart();
-            }
-        };
-    }
+	/** sets the current time stamp of the object to the time stamp of the search loop */
+	public final void resetStamp() {
+		timestamp = loop.getTimeStamp();
+	}
 }
