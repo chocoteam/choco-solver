@@ -184,6 +184,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private <V extends Variable> void checkVariable(V[] vars) {
+		if(Configuration.MUL_OCC_VAR_PROP == Configuration.MOVP.silent){
+			return;
+		}
         set.get().clear();
         for (int i = 0; i < vars.length; i++) {
             Variable v = vars[i];
@@ -220,8 +223,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                                 }
                             }
                             break;
-                        case silent:
-                        default:
+                        default: throw new UnsupportedOperationException("This should never occur");
                     }
 
                 }
