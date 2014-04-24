@@ -29,7 +29,7 @@ package solver.variables.delta.monitor;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -48,8 +48,8 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
     protected int first, last, frozenFirst, frozenLast;
     protected ICause propagator;
 
-    int timestamp = -1;
-    final SearchLoop loop;
+    long timestamp = -1;
+    final ISearchLoop loop;
 
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
         this.delta = delta;
@@ -78,9 +78,9 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
     }
 
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
+        if (timestamp - loop.getTimeStamp() != 0) {
             clear();
-            timestamp = loop.timeStamp;
+            timestamp = loop.getTimeStamp();
         }
     }
 

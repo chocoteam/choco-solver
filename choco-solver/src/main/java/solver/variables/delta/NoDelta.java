@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.ICause;
 import solver.exception.SolverException;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 
 /**
  * <br/>
@@ -50,7 +50,7 @@ public enum NoDelta implements IEnumDelta, IIntervalDelta, ISetDelta {
     public void lazyClear() {}
 
     @Override
-    public SearchLoop getSearchLoop() {
+    public ISearchLoop getSearchLoop() {
         throw new SolverException("NoDelta#getSearchLoop(): fordidden call!");
     }
 

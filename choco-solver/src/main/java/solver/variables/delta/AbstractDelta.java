@@ -25,36 +25,32 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.loop;
+package solver.variables.delta;
 
-import solver.search.loop.monitors.ISearchMonitor;
-
-import java.io.Serializable;
+import solver.search.loop.ISearchLoop;
 
 /**
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @author Jean-Guillaume Fages
+ * @since 24/04/2014
  */
-public interface ISearchLoop extends Serializable {
+public abstract class AbstractDelta implements IDelta {
 
-    /**
-     * Launch the resolution of the problem described in a Solver.
-     *
-     * @param stopAtFirst should stop at first solution
-     */
-    void launch(boolean stopAtFirst);
+    protected long timestamp = -1;
+    protected final ISearchLoop loop;
 
-    /**
-     * Resume the resolution of the problem described in a Solver.
-     */
-    void resume();
+    public AbstractDelta(ISearchLoop loop) {
+        this.loop = loop;
+    }
 
-    /**
-     * Branch a search monitor
-     *
-     * @param sm
-     */
-    void plugSearchMonitor(ISearchMonitor sm);
+    @Override
+    public final ISearchLoop getSearchLoop() {
+        return loop;
+    }
+
+    @Override
+    public final boolean timeStamped() {
+        return timestamp == loop.getTimeStamp();
+    }
 }

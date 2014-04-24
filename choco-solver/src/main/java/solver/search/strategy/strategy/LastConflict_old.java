@@ -102,7 +102,7 @@ public class LastConflict_old extends AbstractStrategy<Variable> implements IMon
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Variable curDecVar = solver.getSearchLoop().decision.getDecisionVariable();
+        Variable curDecVar = solver.getSearchLoop().getLastDecision().getDecisionVariable();
         if (candidate == null && cIdx < k && !search(testingSet, 0, cIdx, curDecVar)) {
 			boolean inScope = false;
 			for(Variable v:mainStrategy.vars){

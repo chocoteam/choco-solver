@@ -95,7 +95,7 @@ public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm, 
     @Override
     public void onSolution() {
         // we need to prepare a "false" backtrack on this decision
-        Decision dec = mSolver.getSearchLoop().decision;
+        Decision dec = mSolver.getSearchLoop().getLastDecision();
         while ((dec != RootDecision.ROOT) && (!dec.hasNext())) {
             dec = dec.getPrevious();
         }
@@ -121,7 +121,7 @@ public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm, 
      * @param cause  cause of the failure
      */
     protected void updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
-        Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
+        Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {
             dec = dec.getPrevious();
             nworld--;

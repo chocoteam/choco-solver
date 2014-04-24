@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 
 /**
  * A class to store the removed value of an integer variable.
@@ -37,19 +37,17 @@ import solver.search.loop.SearchLoop;
  * It defines methods to <code>add</code> a value, <code>clear</code> the structure
  * and execute a <code>Procedure</code> for each value stored.
  */
-public final class EnumDelta implements IEnumDelta {
+public final class EnumDelta extends AbstractDelta implements IEnumDelta {
     private static final int SIZE = 32;
 
     int[] rem;
     ICause[] causes;
     int last;
-    int timestamp = -1;
-    final SearchLoop loop;
 
-    public EnumDelta(SearchLoop loop) {
+    public EnumDelta(ISearchLoop loop) {
+		super(loop);
         rem = new int[SIZE];
         causes = new ICause[SIZE];
-        this.loop = loop;
     }
 
     private void ensureCapacity() {
@@ -63,8 +61,9 @@ public final class EnumDelta implements IEnumDelta {
         }
     }
 
+	@Override
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
+        if (timestamp - loop.getTimeStamp() != 0) {
             clear();
         }
     }
@@ -95,9 +94,6 @@ public final class EnumDelta implements IEnumDelta {
         return causes[idx];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int size() {
         return last;
@@ -106,16 +102,6 @@ public final class EnumDelta implements IEnumDelta {
     @Override
     public void clear() {
         last = 0;
-        timestamp = loop.timeStamp;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
-    }
-
-    @Override
-    public SearchLoop getSearchLoop() {
-        return loop;
+        timestamp = loop.getTimeStamp();
     }
 }

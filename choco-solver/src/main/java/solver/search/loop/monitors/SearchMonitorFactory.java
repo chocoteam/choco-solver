@@ -47,7 +47,7 @@ public class SearchMonitorFactory {
     SearchMonitorFactory() {
     }
 
-    private static class DefaultSolutionMessage implements IMessage {
+	private static class DefaultSolutionMessage implements IMessage {
 
         private Solver solver;
 
@@ -436,4 +436,12 @@ public class SearchMonitorFactory {
         solver.plugMonitor(new OutputCSV(solver, prefix, filename));
     }
 
+	public static void restartAfterEachSolution(final Solver solver) {
+		solver.plugMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				solver.getSearchLoop().restart();
+			}
+		});
+	}
 }

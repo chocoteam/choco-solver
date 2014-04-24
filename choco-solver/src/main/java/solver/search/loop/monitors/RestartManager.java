@@ -27,7 +27,7 @@
 package solver.search.loop.monitors;
 
 import solver.search.limits.ICounter;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.search.restart.IRestartStrategy;
 
 /**
@@ -43,13 +43,13 @@ public final class RestartManager implements IMonitorInitialize, IMonitorOpenNod
 
     final ICounter restartStrategyLimit; // restarts trigger
 
-    final SearchLoop searchLoop;
+    final ISearchLoop searchLoop;
 
     int restartFromStrategyCount, restartCutoff, restartLimit;
 
     //NB: the initial cutoff is defined by the limit associated to this strategy
     protected RestartManager(IRestartStrategy restartStrategy, ICounter restartStrategyLimit,
-                             SearchLoop searchLoop, int restartLimit) {
+                             ISearchLoop searchLoop, int restartLimit) {
         this.restartStrategy = restartStrategy;
         this.restartStrategyLimit = restartStrategyLimit;
         this.restartLimit = restartLimit;

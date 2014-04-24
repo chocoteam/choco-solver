@@ -89,27 +89,14 @@ import java.util.Arrays;
  */
 public class SearchLoop implements ISearchLoop {
 
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
 	protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
 
 	//    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
 	public int timeStamp;
-
-	static final int INIT = 0;
-	static final int INITIAL_PROPAGATION = 1;
-	static final int OPEN_NODE = 1 << 1;
-	static final int DOWN_LEFT_BRANCH = 1 << 2;
-	static final int DOWN_RIGHT_BRANCH = 1 << 3;
-	static final int UP_BRANCH = 1 << 4;
-	static final int RESTART = 1 << 5;
-	static final int RESUME = 1 << 6;
-
-	static final String MSG_LIMIT = "a limit has been reached";
-	static final String MSG_ROOT = "the entire search space has been explored";
-	static final String MSG_CUT = "applying the cut leads to a failure";
-	static final String MSG_FIRST_SOL = "stop at first solution";
-	static final String MSG_INIT = "failure encountered during initial propagation";
-	static final String MSG_SEARCH_INIT = "search strategy detects inconsistency";
-
 
 	/* Reference to the solver */
 	final Solver solver;
@@ -119,9 +106,6 @@ public class SearchLoop implements ISearchLoop {
 
 	/* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
 	public int stateAfterSolution = UP_BRANCH;
-
-	/* Define the state to move to once a fail occured : UP_BRANCH or RESTART */
-	public int stateAfterFail = UP_BRANCH;
 
 	/* Node selection, or how to select a couple variable-value to continue branching */
 	AbstractStrategy<Variable> strategy;
@@ -141,22 +125,22 @@ public class SearchLoop implements ISearchLoop {
 	// Store the number of wrolds to jump to -- usefull in UpBranch
 	int jumpTo;
 
-	/**
-	 * Stores the search measures
-	 */
+	/** Stores the search measures */
 	final protected IMeasures measures;
 
 	boolean hasReachedLimit;
 
 	public SearchMonitorList smList;
 
-	/**
-	 * Objective manager. Default object is no objective.
-	 */
+	/** Objective manager. Default object is no objective. */
 	ObjectiveManager objectivemanager;
 
 	private boolean alive;
 	public Decision decision = RootDecision.ROOT;
+
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
 	@SuppressWarnings({"unchecked"})
 	public SearchLoop(Solver solver) {
@@ -169,15 +153,11 @@ public class SearchLoop implements ISearchLoop {
 		rootWorldIndex = -1;
 	}
 
-	/**
-	 * This method enables to solve a problem another time:
-	 * <ul>
-	 * <li>It backtracks up to the root node of the search tree,</li>
-	 * <li>it sets the objective manager to null,</li>
-	 * <li>it resets the measures to 0,</li>
-	 * <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
-	 * </ul>
-	 */
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
+
+	@Override
 	public void reset() {
 		// if a resolution has already been done
 		if (rootWorldIndex > -1) {
@@ -191,14 +171,7 @@ public class SearchLoop implements ISearchLoop {
 		}
 	}
 
-	@SuppressWarnings({"unchecked"})
-	public void set(AbstractStrategy strategy) {
-		this.strategy = strategy;
-	}
-
-	/**
-	 * Solves the problem states by the solver.
-	 */
+	@Override
 	public void launch(boolean stopatfirst) {
 		if (nextState != INIT) {
 			throw new SolverException("!! The search has not been initialized.\n" +
@@ -214,7 +187,7 @@ public class SearchLoop implements ISearchLoop {
 	/**
 	 * Main loop. Flatten representation of recursive tree search.
 	 */
-	void loop() {
+	private void loop() {
 		alive = true;
 		while (alive) {
 			switch (nextState) {
@@ -272,7 +245,7 @@ public class SearchLoop implements ISearchLoop {
 	/**
 	 * Initializes the measures, just before the beginning of the search
 	 */
-	public void initialize() {
+	private void initialize() {
 		this.rootWorldIndex = env.getWorldIndex();
 		this.nextState = INITIAL_PROPAGATION;
 	}
@@ -280,7 +253,7 @@ public class SearchLoop implements ISearchLoop {
 	/**
 	 * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
 	 */
-	protected void initialPropagation(){
+	private void initialPropagation(){
 		this.env.worldPush();
 		try {
 			solver.getEngine().propagate();
@@ -312,7 +285,7 @@ public class SearchLoop implements ISearchLoop {
 	/**
 	 * Opens a new node in the tree search : compute the next decision or store a solution.
 	 */
-	protected void openNode() {
+	private void openNode() {
 		Decision tmp = decision;
 		decision = strategy.getDecision();
 		if (decision != null) { // null means there is no more decision
@@ -324,7 +297,7 @@ public class SearchLoop implements ISearchLoop {
 		}
 	}
 
-	protected void recordSolution() {
+	private void recordSolution() {
 		//todo: checker d'etat
 		solver.setFeasible(ESat.TRUE);
 		assert (ESat.TRUE.equals(solver.isSatisfied())) : Reporting.fullReport(solver);
@@ -352,15 +325,15 @@ public class SearchLoop implements ISearchLoop {
 	/**
 	 * Goes down in the tree search : apply the current decision.
 	 */
-	protected void downLeftBranch() {
+	private void downLeftBranch() {
 		downBranch();
 	}
 
-	protected void downRightBranch() {
+	private void downRightBranch() {
 		downBranch();
 	}
 
-	protected void downBranch() {
+	private void downBranch() {
 		env.worldPush();
 		try {
 			decision.buildNext();
@@ -371,7 +344,7 @@ public class SearchLoop implements ISearchLoop {
 			moveTo(OPEN_NODE);
 		} catch (ContradictionException e) {
 			solver.getEngine().flush();
-			moveTo(stateAfterFail);
+			moveTo(UP_BRANCH);
 			jumpTo = 1;
 			smList.onContradiction(e);
 		}
@@ -384,7 +357,7 @@ public class SearchLoop implements ISearchLoop {
 	 * Then, if it goes back to the base world, stop the search.
 	 * Otherwise, gets the opposite decision, applies it and calls the propagation.
 	 */
-	protected void upBranch() {
+	private void upBranch() {
 		env.worldPop();
 		if (decision == RootDecision.ROOT) {// Issue#55
 			// The entire tree search has been explored, the search cannot be followed
@@ -404,7 +377,7 @@ public class SearchLoop implements ISearchLoop {
 	/**
 	 * Force restarts of the search from a previous node in the tree search.
 	 */
-	public void restartSearch() {
+	private void restartSearch() {
 		restoreRootNode();
 		solver.getEnvironment().worldPush(); //issue#55
 		try {
@@ -425,6 +398,7 @@ public class SearchLoop implements ISearchLoop {
 	 *
 	 * @param to STEP to reach
 	 */
+	@Override
 	public void moveTo(int to) {
 		if ((nextState & RESTART) == 0) {
 			nextState = to;
@@ -435,7 +409,7 @@ public class SearchLoop implements ISearchLoop {
 	 * Close the search, restore the last solution if any,
 	 * and set the feasibility and optimality variables.
 	 */
-	public void close() {
+	private void close() {
 		ESat sat = ESat.FALSE;
 		if (measures.getSolutionCount() > 0) {
 			sat = ESat.TRUE;
@@ -449,6 +423,7 @@ public class SearchLoop implements ISearchLoop {
 		solver.setFeasible(sat);
 	}
 
+	@Override
 	public void restoreRootNode() {
 		env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
 		timeStamp++; // to force clear delta, on solution recording
@@ -460,20 +435,7 @@ public class SearchLoop implements ISearchLoop {
 		}
 	}
 
-	public final void reachLimit() {
-		hasReachedLimit = true;
-		interrupt(MSG_LIMIT);
-	}
-
-	public boolean hasReachedLimit() {
-		return hasReachedLimit;
-	}
-
-	/**
-	 * Force the search to stop
-	 *
-	 * @param message a message to motivate the interruption -- for logging only
-	 */
+	@Override
 	public final void interrupt(String message) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Search interruption: {}", message);
@@ -483,17 +445,16 @@ public class SearchLoop implements ISearchLoop {
 		smList.afterInterrupt();
 	}
 
+	@Override
 	public final void forceAlive(boolean bvalue) {
 		alive = bvalue;
 	}
 
-
-	/**
-	 * Sets the following action in the search to be a restart instruction.
-	 */
+	@Override
 	public final void restart() {
 		nextState = RESTART;
 	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override
@@ -509,6 +470,7 @@ public class SearchLoop implements ISearchLoop {
 	/////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Override
 	public void setObjectiveManager(ObjectiveManager objectivemanager) {
 		this.objectivemanager = objectivemanager;
 		if (objectivemanager.isOptimization()) {
@@ -516,42 +478,59 @@ public class SearchLoop implements ISearchLoop {
 		}
 	}
 
+	@Override
 	public void restartAfterEachSolution(boolean does) {
 		stateAfterSolution = does ? RESTART : UP_BRANCH;
 	}
 
-	public void restartAfterEachFail(boolean does) {
-		stateAfterFail = does ? RESTART : UP_BRANCH;
-	}
-
+	@Override
 	public void overridePreviousWorld(int gap) {
 		this.jumpTo = gap;
+	}
+
+	@Override
+	public void set(AbstractStrategy strategy) {
+		this.strategy = strategy;
+	}
+
+	@Override
+	public final void reachLimit() {
+		hasReachedLimit = true;
+		interrupt(MSG_LIMIT);
+	}
+
+	@Override
+	public void setLastDecision(Decision d){
+		decision = d;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public IMeasures getMeasures() {
+	private IMeasures getMeasures() {
 		return measures;
 	}
 
+	@Override
 	public ObjectiveManager getObjectiveManager() {
 		return objectivemanager;
 	}
 
-	public Solver getSolver() {
+	private Solver getSolver() {
 		return solver;
 	}
 
+	@Override
 	public AbstractStrategy<Variable> getStrategy() {
 		return strategy;
 	}
 
-	public String decisionToString() {
+	private String decisionToString() {
 		return decision.toString();
 	}
 
+	@Override
 	public int getCurrentDepth() {
 		int d = 0;
 		Decision tmp = decision;
@@ -560,6 +539,26 @@ public class SearchLoop implements ISearchLoop {
 			d++;
 		}
 		return d;
+	}
+
+	@Override
+	public boolean hasReachedLimit() {
+		return hasReachedLimit;
+	}
+
+	@Override
+	public long getTimeStamp(){
+		return timeStamp;
+	}
+
+	@Override
+	public Decision getLastDecision(){
+		return decision;
+	}
+
+	@Override
+	public SearchMonitorList getSMList(){
+		return smList;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

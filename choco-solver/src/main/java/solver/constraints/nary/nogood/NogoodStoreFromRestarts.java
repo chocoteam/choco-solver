@@ -100,7 +100,7 @@ public class NogoodStoreFromRestarts extends Constraint implements IMonitorResta
 
     private void extractNogoodFromPath() {
         int d = png.getSolver().getSearchLoop().getCurrentDepth();
-        Decision<IntVar> decision = png.getSolver().getSearchLoop().decision;
+        Decision<IntVar> decision = png.getSolver().getSearchLoop().getLastDecision();
         while (decision != RootDecision.ROOT) {
             decisions.addLast(decision);
             decision = decision.getPrevious();

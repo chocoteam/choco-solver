@@ -28,7 +28,7 @@ package solver.variables.delta.monitor;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
@@ -49,8 +49,8 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
     protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
     protected ICause propagator;
 
-    int timestamp = -1;
-    final SearchLoop loop;
+    long timestamp = -1;
+    final ISearchLoop loop;
 
     public GraphDeltaMonitor(IGraphDelta delta, ICause propagator) {
         this.delta = delta;
@@ -76,7 +76,7 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
 
     @Override
     public void unfreeze() {
-        timestamp = loop.timeStamp;
+        timestamp = loop.getTimeStamp();
         for (int i = 0; i < 3; i++) {
             this.first[i] = last[i] = delta.getSize(i);
         }
@@ -88,9 +88,9 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
     }
 
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
+        if (timestamp - loop.getTimeStamp() != 0) {
             clear();
-            timestamp = loop.timeStamp;
+            timestamp = loop.getTimeStamp();
         }
     }
 

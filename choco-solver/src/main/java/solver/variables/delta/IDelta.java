@@ -27,8 +27,7 @@
 
 package solver.variables.delta;
 
-import solver.search.loop.SearchLoop;
-
+import solver.search.loop.ISearchLoop;
 import java.io.Serializable;
 
 /**
@@ -61,10 +60,10 @@ public interface IDelta extends Serializable {
      *
      * @return associate search loop
      */
-    SearchLoop getSearchLoop();
+    ISearchLoop getSearchLoop();
 
     /**
-     * Check wether the delta is up-to-date with the search loop
+     * Check whether the delta is up-to-date with the search loop
      *
      * @return
      */

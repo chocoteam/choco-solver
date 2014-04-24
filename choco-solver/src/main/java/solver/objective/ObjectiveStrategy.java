@@ -38,6 +38,7 @@ import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SMF;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -105,7 +106,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         this.coefLB = coefs[0];
         this.coefUB = coefs[1];
         this.optPolicy = policy;
-        solver.getSearchLoop().restartAfterEachSolution(true);
+		SMF.restartAfterEachSolution(solver);
         if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
             throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
         }

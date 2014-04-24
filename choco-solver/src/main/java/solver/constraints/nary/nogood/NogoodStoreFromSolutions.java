@@ -30,8 +30,6 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.RootDecision;
 import solver.variables.IntVar;
 
 /**

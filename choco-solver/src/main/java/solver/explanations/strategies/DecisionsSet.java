@@ -4,10 +4,9 @@ import memory.IEnvironment;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
-
 import java.io.Serializable;
 import java.util.ArrayDeque;
 
@@ -71,7 +70,7 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
 
     @Override
     public void apply() throws ContradictionException {
-        SearchLoop mSearchLoop = dynamicBacktracking.getSolver().getSearchLoop();
+        ISearchLoop mSearchLoop = dynamicBacktracking.getSolver().getSearchLoop();
         IEnvironment environment = dynamicBacktracking.getSolver().getEnvironment();
         Decision dec;
         // retrieve the decision applied BEFORE the decision to refute, which is the last one in the decision_path
@@ -85,12 +84,12 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
         dec = decision_path.pollFirst();
         dec.setPrevious(previous);
         dec.setWorldIndex(swi++);
-        mSearchLoop.decision = dec;
+        mSearchLoop.setLastDecision(dec);
         dec.buildNext();
 
         // then simulate down_branch
         dec.apply();
-        mSearchLoop.smList.afterDownLeftBranch();
+        mSearchLoop.getSMList().afterDownLeftBranch();
         previous = dec;
 
         // iterate over decisions
@@ -100,14 +99,14 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
             dec = decision_path.pollFirst();
             dec.setPrevious(previous);
             dec.setWorldIndex(swi++);
-            mSearchLoop.decision = dec;
+            mSearchLoop.setLastDecision(dec);
             dec.buildNext();
 
             // then simulate down_branch
-            mSearchLoop.smList.beforeDownLeftBranch();
+            mSearchLoop.getSMList().beforeDownLeftBranch();
             environment.worldPush();
             dec.apply();
-            mSearchLoop.smList.afterDownLeftBranch();
+            mSearchLoop.getSMList().afterDownLeftBranch();
 
             previous = dec;
         }

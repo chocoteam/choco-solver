@@ -219,7 +219,7 @@ public class IntLinCombTest {
         ((IntVar) vars[0+offSet]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1+offSet]).instantiateTo(-1, Cause.Null);
         sum.propagate();
-        sum.getSearchLoop().timeStamp++;
+//        sum.getSearchLoop().timeStamp++;
         ((IntVar) vars[2+offSet]).removeValue(-2, Cause.Null);
         sum.propagate();
         Assert.assertTrue(vars[2+offSet].isInstantiated());

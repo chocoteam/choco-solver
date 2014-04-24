@@ -58,7 +58,7 @@ public class RandomNeighborhood4Explanation extends RandomNeighborhood implement
     public void recordSolution() {
         super.recordSolution();
         if (duplicator == null) {
-            duplicator = mSolver.getSearchLoop().decision.duplicate();
+            duplicator = mSolver.getSearchLoop().getLastDecision().duplicate();
         }
     }
 
@@ -89,7 +89,7 @@ public class RandomNeighborhood4Explanation extends RandomNeighborhood implement
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().decision.getId() == last.getId()) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
             mSolver.getSearchLoop().restart();
         }
     }

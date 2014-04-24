@@ -28,7 +28,7 @@ package solver.variables.delta.monitor;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.ISetDelta;
 import solver.variables.delta.ISetDeltaMonitor;
@@ -46,8 +46,8 @@ public class SetDeltaMonitor implements ISetDeltaMonitor {
     protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
     protected ICause propagator;
 
-    int timestamp = -1;
-    final SearchLoop loop;
+    long timestamp = -1;
+    final ISearchLoop loop;
 
     public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
         this.delta = delta;
@@ -71,7 +71,7 @@ public class SetDeltaMonitor implements ISetDeltaMonitor {
 
     @Override
     public void unfreeze() {
-        timestamp = loop.timeStamp;
+        timestamp = loop.getTimeStamp();
         for (int i = 0; i < 2; i++) {
             this.first[i] = last[i] = delta.getSize(i);
         }
@@ -82,9 +82,9 @@ public class SetDeltaMonitor implements ISetDeltaMonitor {
 
 	@Override
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
+        if (timestamp - loop.getTimeStamp() != 0) {
             clear();
-            timestamp = loop.timeStamp;
+            timestamp = loop.getTimeStamp();
         }
     }
 

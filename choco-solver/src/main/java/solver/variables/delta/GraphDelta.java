@@ -29,29 +29,27 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 
-public class GraphDelta implements IGraphDelta {
+public class GraphDelta extends AbstractDelta implements IGraphDelta {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     private IEnumDelta[] deltaOfType;
-    private long timestamp;
-    private final SearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public GraphDelta(SearchLoop loop) {
+    public GraphDelta(ISearchLoop loop) {
+		super(loop);
         deltaOfType = new IEnumDelta[NB];
-        this.loop = loop;
         for (int i = 0; i < NB; i++) {
             deltaOfType[i] = new EnumDelta(loop);
         }
-        timestamp = loop.timeStamp;
+        timestamp = loop.getTimeStamp();
     }
 
     //***********************************************************************************
@@ -63,16 +61,12 @@ public class GraphDelta implements IGraphDelta {
         throw new UnsupportedOperationException();
     }
 
-    //***********************************************************************************
-    // ACCESSORS
-    //***********************************************************************************
-
     @Override
     public void clear() {
         for (int i = 0; i < NB; i++) {
             deltaOfType[i].clear();
         }
-        timestamp = loop.timeStamp;
+        timestamp = loop.getTimeStamp();
     }
 
     @Override
@@ -88,8 +82,9 @@ public class GraphDelta implements IGraphDelta {
         deltaOfType[type].add(element, cause);
     }
 
+	@Override
     public void lazyClear() {
-        if (timestamp != loop.timeStamp) {
+        if (timestamp != loop.getTimeStamp()) {
             clear();
         }
     }
@@ -102,15 +97,5 @@ public class GraphDelta implements IGraphDelta {
     @Override
     public ICause getCause(int index, int type) {
         return deltaOfType[type].getCause(index);
-    }
-
-    @Override
-    public SearchLoop getSearchLoop() {
-        return loop;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
     }
 }

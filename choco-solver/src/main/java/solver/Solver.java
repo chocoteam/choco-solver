@@ -46,7 +46,7 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.search.loop.SearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -106,7 +106,7 @@ public class Solver implements Serializable {
     /**
      * Search loop of the solver
      */
-    protected SearchLoop search;
+    protected ISearchLoop search;
 
     protected IPropagationEngine engine;
 
@@ -206,7 +206,7 @@ public class Solver implements Serializable {
      *
      * @return the unique and internal <code>AbstractSearchLoop</code> object.
      */
-    public SearchLoop getSearchLoop() {
+    public ISearchLoop getSearchLoop() {
         return search;
     }
 
@@ -405,7 +405,7 @@ public class Solver implements Serializable {
      *
      * @param searchLoop the search loop to use
      */
-    public void set(SearchLoop searchLoop) {
+    public void set(ISearchLoop searchLoop) {
         this.search = searchLoop;
     }
 
@@ -761,7 +761,7 @@ public class Solver implements Serializable {
 			if(getMeasures().getSolutionCount()>0){
 				int opt = getObjectiveManager().getBestSolutionValue().intValue();
 				getEngine().flush();
-				getSearchLoop().reset();
+				search.reset();
 				post(ICF.arithm(objective, "=", opt));
 				set(new AllSolutionsRecorder(this));
 				findAllSolutions();

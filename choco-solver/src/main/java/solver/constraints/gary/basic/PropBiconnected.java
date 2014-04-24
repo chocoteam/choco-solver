@@ -77,8 +77,8 @@ public class PropBiconnected extends Propagator<UndirectedGraphVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (timestamp != solver.getSearchLoop().timeStamp) {
-            timestamp = solver.getSearchLoop().timeStamp;
+        if (timestamp != solver.getSearchLoop().getTimeStamp()) {
+            timestamp = solver.getSearchLoop().getTimeStamp();
             propagate(0);
         }
         // todo incremental behavior ?
