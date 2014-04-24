@@ -131,11 +131,6 @@ public class PropIntersection extends Propagator<SetVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         SetVar intersection = vars[k];
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {

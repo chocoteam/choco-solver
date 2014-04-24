@@ -46,17 +46,12 @@ public class PropNotEmpty extends Propagator<SetVar> {
 	//***********************************************************************************
 
 	public PropNotEmpty(SetVar set) {
-		super(new SetVar[]{set}, PropagatorPriority.UNARY, true);
+		super(new SetVar[]{set}, PropagatorPriority.UNARY, false);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
-	}
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
@@ -69,11 +64,6 @@ public class PropNotEmpty extends Propagator<SetVar> {
 		if(vars[0].getKernelSize()>0){
 			setPassive();
 		}
-	}
-
-	@Override
-	public void propagate(int v, int mask) throws ContradictionException {
-		propagate(0);
 	}
 
 	@Override
