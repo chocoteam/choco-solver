@@ -269,7 +269,6 @@ public class SearchLoop implements ISearchLoop {
 		// call to HeuristicVal.update(Action.initial_propagation)
 		if (strategy == null) {
 			defaultSearchStrategy(solver);
-
 		}
 		try {
 			strategy.init(); // the initialisation of the strategy can detect inconsistency
@@ -277,7 +276,7 @@ public class SearchLoop implements ISearchLoop {
 			this.env.worldPop();
 			solver.setFeasible(ESat.FALSE);
 			solver.getEngine().flush();
-			interrupt(MSG_INIT + ": " + cex.getMessage());
+			interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage());
 		}
 		moveTo(OPEN_NODE);
 	}
