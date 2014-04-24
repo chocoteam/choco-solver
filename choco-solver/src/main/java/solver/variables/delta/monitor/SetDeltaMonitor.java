@@ -71,16 +71,14 @@ public class SetDeltaMonitor implements ISetDeltaMonitor {
 
     @Override
     public void unfreeze() {
+        delta.lazyClear();    // fix 27/07/12
         timestamp = loop.timeStamp;
         for (int i = 0; i < 2; i++) {
             this.first[i] = last[i] = delta.getSize(i);
         }
-        // VRAIMENT UTILE?
-        delta.lazyClear();    // fix 27/07/12
-        lazyClear();        // fix 27/07/12
     }
 
-	@Override
+    @Override
     public void lazyClear() {
         if (timestamp - loop.timeStamp != 0) {
             clear();
@@ -95,7 +93,7 @@ public class SetDeltaMonitor implements ISetDeltaMonitor {
         }
     }
 
-	@Override
+    @Override
     public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
         int x;
         if (evt == EventType.ADD_TO_KER) {
