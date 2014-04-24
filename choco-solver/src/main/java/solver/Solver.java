@@ -46,7 +46,7 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -106,7 +106,7 @@ public class Solver implements Serializable {
     /**
      * Search loop of the solver
      */
-    protected AbstractSearchLoop search;
+    protected SearchLoop search;
 
     protected IPropagationEngine engine;
 
@@ -206,7 +206,7 @@ public class Solver implements Serializable {
      *
      * @return the unique and internal <code>AbstractSearchLoop</code> object.
      */
-    public AbstractSearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return search;
     }
 
@@ -405,7 +405,7 @@ public class Solver implements Serializable {
      *
      * @param searchLoop the search loop to use
      */
-    public void set(AbstractSearchLoop searchLoop) {
+    public void set(SearchLoop searchLoop) {
         this.search = searchLoop;
     }
 

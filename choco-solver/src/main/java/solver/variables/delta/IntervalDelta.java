@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 
 /**
  * A class to store the removed intervals of an integer variable.
@@ -45,9 +45,9 @@ public final class IntervalDelta implements IIntervalDelta {
     ICause[] causes;
     int last;
     int timestamp = -1;
-    final AbstractSearchLoop loop;
+    final SearchLoop loop;
 
-    public IntervalDelta(AbstractSearchLoop loop) {
+    public IntervalDelta(SearchLoop loop) {
         from = new int[SIZE];
         to = new int[SIZE];
         causes = new ICause[SIZE];
@@ -120,7 +120,7 @@ public final class IntervalDelta implements IIntervalDelta {
     }
 
     @Override
-    public AbstractSearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return loop;
     }
 }

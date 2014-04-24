@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 
 public class GraphDelta implements IGraphDelta {
 
@@ -39,13 +39,13 @@ public class GraphDelta implements IGraphDelta {
 
     private IEnumDelta[] deltaOfType;
     private long timestamp;
-    private final AbstractSearchLoop loop;
+    private final SearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public GraphDelta(AbstractSearchLoop loop) {
+    public GraphDelta(SearchLoop loop) {
         deltaOfType = new IEnumDelta[NB];
         this.loop = loop;
         for (int i = 0; i < NB; i++) {
@@ -105,7 +105,7 @@ public class GraphDelta implements IGraphDelta {
     }
 
     @Override
-    public AbstractSearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return loop;
     }
 

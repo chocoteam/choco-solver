@@ -4,7 +4,7 @@ import memory.IEnvironment;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 
@@ -71,7 +71,7 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
 
     @Override
     public void apply() throws ContradictionException {
-        AbstractSearchLoop mSearchLoop = dynamicBacktracking.getSolver().getSearchLoop();
+        SearchLoop mSearchLoop = dynamicBacktracking.getSolver().getSearchLoop();
         IEnvironment environment = dynamicBacktracking.getSolver().getEnvironment();
         Decision dec;
         // retrieve the decision applied BEFORE the decision to refute, which is the last one in the decision_path

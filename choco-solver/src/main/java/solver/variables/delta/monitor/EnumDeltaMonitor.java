@@ -29,7 +29,7 @@ package solver.variables.delta.monitor;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -49,7 +49,7 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
     protected ICause propagator;
 
     int timestamp = -1;
-    final AbstractSearchLoop loop;
+    final SearchLoop loop;
 
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
         this.delta = delta;

@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 
 /**
  * @author Jean-Guillaume Fages
@@ -42,13 +42,13 @@ public class SetDelta implements ISetDelta {
     //***********************************************************************************
     private IEnumDelta[] delta;
     private long timestamp;
-    private final AbstractSearchLoop loop;
+    private final SearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public SetDelta(AbstractSearchLoop loop) {
+    public SetDelta(SearchLoop loop) {
         this.loop = loop;
         delta = new IEnumDelta[2];
         delta[0] = new EnumDelta(loop);
@@ -107,7 +107,7 @@ public class SetDelta implements ISetDelta {
     }
 
     @Override
-    public AbstractSearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return loop;
     }
 

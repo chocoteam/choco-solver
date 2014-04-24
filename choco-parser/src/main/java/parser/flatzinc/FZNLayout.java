@@ -38,7 +38,7 @@ import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.search.loop.monitors.AverageCSV;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -69,7 +69,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     StringBuilder stringBuilder = new StringBuilder();
 
-    AbstractSearchLoop searchLoop;
+    SearchLoop searchLoop;
 
     boolean wrongSolution;
     int nbSolution;
@@ -291,7 +291,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     }
 
 
-    public void setSearchLoop(AbstractSearchLoop searchLoop) {
+    public void setSearchLoop(SearchLoop searchLoop) {
         searchLoop.plugSearchMonitor(this);
         this.searchLoop = searchLoop;
     }

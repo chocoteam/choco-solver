@@ -41,7 +41,7 @@ import solver.exception.ContradictionException;
 import solver.objective.ObjectiveManager;
 import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -87,7 +87,7 @@ public class FGoal {
 
     public static void define_goal(Datas datas, Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
-        AbstractSearchLoop search = aSolver.getSearchLoop();
+        SearchLoop search = aSolver.getSearchLoop();
         GoalConf gc = datas.goals();
         IntVar obj = null;
         if (type != ResolutionPolicy.SATISFACTION) {

@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 
 /**
  * A class to store the removed value of an integer variable.
@@ -44,9 +44,9 @@ public final class EnumDelta implements IEnumDelta {
     ICause[] causes;
     int last;
     int timestamp = -1;
-    final AbstractSearchLoop loop;
+    final SearchLoop loop;
 
-    public EnumDelta(AbstractSearchLoop loop) {
+    public EnumDelta(SearchLoop loop) {
         rem = new int[SIZE];
         causes = new ICause[SIZE];
         this.loop = loop;
@@ -115,7 +115,7 @@ public final class EnumDelta implements IEnumDelta {
     }
 
     @Override
-    public AbstractSearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return loop;
     }
 }

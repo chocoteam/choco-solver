@@ -46,7 +46,7 @@ public enum Reporting {
     ;
 
     public static String onDecisions(Solver solver) {
-        AbstractSearchLoop searchLoop = solver.getSearchLoop();
+        SearchLoop searchLoop = solver.getSearchLoop();
         Decision last = searchLoop.decision;
         Deque<Decision> stack = new ArrayDeque<Decision>();
         while (last != null) {

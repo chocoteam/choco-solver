@@ -28,7 +28,7 @@ package solver.variables.delta.monitor;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.ISetDelta;
 import solver.variables.delta.ISetDeltaMonitor;
@@ -47,7 +47,7 @@ public class SetDeltaMonitor implements ISetDeltaMonitor {
     protected ICause propagator;
 
     int timestamp = -1;
-    final AbstractSearchLoop loop;
+    final SearchLoop loop;
 
     public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
         this.delta = delta;

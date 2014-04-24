@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.SearchLoop;
 
 /**
  * <br/>
@@ -44,9 +44,9 @@ public final class OneValueDelta implements IEnumDelta {
     ICause cause;
     boolean set;
     int timestamp = -1;
-    final AbstractSearchLoop loop;
+    final SearchLoop loop;
 
-    public OneValueDelta(AbstractSearchLoop loop) {
+    public OneValueDelta(SearchLoop loop) {
         this.loop = loop;
     }
 
@@ -96,7 +96,7 @@ public final class OneValueDelta implements IEnumDelta {
     }
 
     @Override
-    public AbstractSearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return loop;
     }
 
