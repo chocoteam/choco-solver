@@ -62,16 +62,25 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     protected final boolean restartAfterEachSolution;
     protected final INeighbor neighbor;
     protected boolean hasAppliedNeighborhood;
+	protected boolean restartOnSolution;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public LargeNeighborhoodSearch(Solver solver, INeighbor neighbor, boolean restartAfterEachSolution) {
-        solver.getSearchLoop().restartAfterEachSolution(true);
+    public LargeNeighborhoodSearch(final Solver solver, INeighbor neighbor, boolean restartAfterEachSolution) {
         this.solver = solver;
         this.neighbor = neighbor;
         this.restartAfterEachSolution = restartAfterEachSolution;
+		restartOnSolution = true;
+		solver.plugMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				if(restartOnSolution){
+					solver.getSearchLoop().restart();
+				}
+			}
+		});
     }
 
     //***********************************************************************************
@@ -91,7 +100,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public void afterInterrupt() {
         if (hasAppliedNeighborhood && solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
-            solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
+            restartOnSolution = restartAfterEachSolution;
             solver.getSearchLoop().forceAlive(true);
             solver.getSearchLoop().restart();
         }
@@ -109,7 +118,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     @Override
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
-            solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
+			restartOnSolution = restartAfterEachSolution;
             try {
                 neighbor.fixSomeVariables(this);
                 hasAppliedNeighborhood = true;

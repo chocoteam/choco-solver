@@ -146,8 +146,6 @@ public interface ISearchLoop extends Serializable {
 
 	void forceAlive(boolean b);
 
-	void restartAfterEachSolution(boolean restartAfterEachSolution);
-
 	void setLastDecision(Decision cobdec);
 
 	void overridePreviousWorld(int i);

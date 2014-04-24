@@ -104,9 +104,6 @@ public class SearchLoop implements ISearchLoop {
 	/* Reference to the environment of the solver */
 	IEnvironment env;
 
-	/* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
-	public int stateAfterSolution = UP_BRANCH;
-
 	/* Node selection, or how to select a couple variable-value to continue branching */
 	AbstractStrategy<Variable> strategy;
 
@@ -190,7 +187,7 @@ public class SearchLoop implements ISearchLoop {
 		} else if (nextState != RESUME) {
 			throw new SolverException("The search cannot be resumed.");
 		}
-		moveTo(stateAfterSolution);
+		moveTo(UP_BRANCH);
 		loop();
 	}
 
@@ -364,7 +361,7 @@ public class SearchLoop implements ISearchLoop {
 		if (stopAtFirstSolution) {
 			interrupt(MSG_FIRST_SOL);
 		} else {
-			moveTo(stateAfterSolution);
+			moveTo(UP_BRANCH);
 		}
 		smList.onSolution();
 	}
@@ -475,11 +472,6 @@ public class SearchLoop implements ISearchLoop {
 		if (objectivemanager.isOptimization()) {
 			this.measures.declareObjective();
 		}
-	}
-
-	@Override
-	public void restartAfterEachSolution(boolean does) {
-		stateAfterSolution = does ? RESTART : UP_BRANCH;
 	}
 
 	@Override
