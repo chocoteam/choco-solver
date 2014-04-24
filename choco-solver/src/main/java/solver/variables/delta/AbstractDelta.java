@@ -37,7 +37,7 @@ import solver.search.loop.ISearchLoop;
  */
 public abstract class AbstractDelta implements IDelta {
 
-    protected long timestamp = -1;
+    protected int timestamp = -1;
     protected final ISearchLoop loop;
 
     public AbstractDelta(ISearchLoop loop) {

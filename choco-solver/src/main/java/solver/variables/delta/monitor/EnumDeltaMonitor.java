@@ -48,7 +48,7 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
     protected int first, last, frozenFirst, frozenLast;
     protected ICause propagator;
 
-    long timestamp = -1;
+    int timestamp = -1;
     final ISearchLoop loop;
 
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {

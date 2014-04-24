@@ -47,7 +47,7 @@ public final class Magic<S extends ISchedulable> extends PropagationStrategy<S> 
     protected S lastPopped;
     protected final double g;
 
-    long timestamp; // to force updating
+    int timestamp; // to force updating
 
     final ISearchLoop sl;
 

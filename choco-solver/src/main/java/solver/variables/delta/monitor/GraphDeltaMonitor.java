@@ -49,7 +49,7 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
     protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
     protected ICause propagator;
 
-    long timestamp = -1;
+    int timestamp = -1;
     final ISearchLoop loop;
 
     public GraphDeltaMonitor(IGraphDelta delta, ICause propagator) {
