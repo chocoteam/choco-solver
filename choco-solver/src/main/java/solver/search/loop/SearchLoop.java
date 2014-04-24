@@ -182,6 +182,66 @@ public class SearchLoop implements ISearchLoop {
 		loop();
 	}
 
+	@Override
+	public void resume() {
+		if (nextState == INIT) {
+			throw new SolverException("the search loop has not been initialized.\n " +
+					"This appears when 'nextSolution' is called before 'findSolution'.");
+		} else if (nextState != RESUME) {
+			throw new SolverException("The search cannot be resumed.");
+		}
+		moveTo(stateAfterSolution);
+		loop();
+	}
+
+	/**
+	 * Required method to be sure a restart is taken into account.
+	 * Because, restart limit checker are threads, si they can interrupt the search loop at any moment.
+	 * And the interruption must not be forget and replaced by the wrong next state.
+	 * <br/>
+	 * <b>Beware, if this method is called from RESTART case, it leads to an infinite loop!</b>
+	 *
+	 * @param to STEP to reach
+	 */
+	@Override
+	public void moveTo(int to) {
+		if ((nextState & RESTART) == 0) {
+			nextState = to;
+		}
+	}
+
+	@Override
+	public void restoreRootNode() {
+		env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
+		timeStamp++; // to force clear delta, on solution recording
+		Decision tmp;
+		while (decision != RootDecision.ROOT) {
+			tmp = decision;
+			decision = tmp.getPrevious();
+			tmp.free();
+		}
+	}
+
+	@Override
+	public final void interrupt(String message) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Search interruption: {}", message);
+		}
+		nextState = RESUME;
+		alive = false;
+		smList.afterInterrupt();
+	}
+
+	@Override
+	public final void forceAlive(boolean bvalue) {
+		alive = bvalue;
+	}
+
+	@Override
+	public final void restart() {
+		nextState = RESTART;
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -309,18 +369,6 @@ public class SearchLoop implements ISearchLoop {
 		smList.onSolution();
 	}
 
-	@Override
-	public void resume() {
-		if (nextState == INIT) {
-			throw new SolverException("the search loop has not been initialized.\n " +
-					"This appears when 'nextSolution' is called before 'findSolution'.");
-		} else if (nextState != RESUME) {
-			throw new SolverException("The search cannot be resumed.");
-		}
-		moveTo(stateAfterSolution);
-		loop();
-	}
-
 	/**
 	 * Goes down in the tree search : apply the current decision.
 	 */
@@ -389,22 +437,6 @@ public class SearchLoop implements ISearchLoop {
 	}
 
 	/**
-	 * Required method to be sure a restart is taken into account.
-	 * Because, restart limit checker are threads, si they can interrupt the search loop at any moment.
-	 * And the interruption must not be forget and replaced by the wrong next state.
-	 * <br/>
-	 * <b>Beware, if this method is called from RESTART case, it leads to an infinite loop!</b>
-	 *
-	 * @param to STEP to reach
-	 */
-	@Override
-	public void moveTo(int to) {
-		if ((nextState & RESTART) == 0) {
-			nextState = to;
-		}
-	}
-
-	/**
 	 * Close the search, restore the last solution if any,
 	 * and set the feasibility and optimality variables.
 	 */
@@ -420,38 +452,6 @@ public class SearchLoop implements ISearchLoop {
 			sat = ESat.UNDEFINED;
 		}
 		solver.setFeasible(sat);
-	}
-
-	@Override
-	public void restoreRootNode() {
-		env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
-		timeStamp++; // to force clear delta, on solution recording
-		Decision tmp;
-		while (decision != RootDecision.ROOT) {
-			tmp = decision;
-			decision = tmp.getPrevious();
-			tmp.free();
-		}
-	}
-
-	@Override
-	public final void interrupt(String message) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Search interruption: {}", message);
-		}
-		nextState = RESUME;
-		alive = false;
-		smList.afterInterrupt();
-	}
-
-	@Override
-	public final void forceAlive(boolean bvalue) {
-		alive = bvalue;
-	}
-
-	@Override
-	public final void restart() {
-		nextState = RESTART;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -507,26 +507,14 @@ public class SearchLoop implements ISearchLoop {
 	/////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private IMeasures getMeasures() {
-		return measures;
-	}
-
 	@Override
 	public ObjectiveManager getObjectiveManager() {
 		return objectivemanager;
 	}
 
-	private Solver getSolver() {
-		return solver;
-	}
-
 	@Override
 	public AbstractStrategy<Variable> getStrategy() {
 		return strategy;
-	}
-
-	private String decisionToString() {
-		return decision.toString();
 	}
 
 	@Override
