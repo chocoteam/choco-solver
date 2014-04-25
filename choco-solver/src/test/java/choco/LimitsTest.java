@@ -73,7 +73,7 @@ public class LimitsTest {
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
-        float tc = s.getMeasures().getTimeCount();
+		int tc = (int)(s.getMeasures().getTimeCount()*1000);
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
@@ -83,7 +83,7 @@ public class LimitsTest {
         long tl = 500;
         SearchMonitorFactory.limitThreadTime(s, tl);
         s.findAllSolutions();
-        float tc = s.getMeasures().getTimeCount();
+        int tc = (int)(s.getMeasures().getTimeCount()*1000);
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
 

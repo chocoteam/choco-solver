@@ -30,7 +30,7 @@ import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.DoubleMinHeap;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 
 /**
  * <br/>
@@ -47,12 +47,12 @@ public final class Magic<S extends ISchedulable> extends PropagationStrategy<S> 
     protected S lastPopped;
     protected final double g;
 
-    long timestamp; // to force updating
+    int timestamp; // to force updating
 
-    final AbstractSearchLoop sl;
+    final ISearchLoop sl;
 
     @SuppressWarnings({"unchecked"})
-    public Magic(AbstractSearchLoop sl, double g, S[] schedulables) {
+    public Magic(ISearchLoop sl, double g, S[] schedulables) {
         super(schedulables);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
@@ -131,8 +131,8 @@ public final class Magic<S extends ISchedulable> extends PropagationStrategy<S> 
     }
 
     private void update() {
-        if (timestamp != sl.timeStamp) {
-            timestamp = sl.timeStamp;
+        if (timestamp != sl.getTimeStamp()) {
+            timestamp = sl.getTimeStamp();
             for (int i = 0; i < w.length; i++) {
                 w[i] *= g;
             }

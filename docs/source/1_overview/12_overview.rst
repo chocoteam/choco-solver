@@ -33,6 +33,8 @@ To facilitate the modeling, Choco |version| provides factories for almost every 
 | ``SearchMonitorFactory``     | SMF          | log, resolution limits, restarts etc.     |
 +------------------------------+--------------+-------------------------------------------+
 
+Note that, in order to have a concise and readable model, factories have shortcut names. Furthermore, they can be imported in a static way.
+
 Let say we want to model and solve the following equation: :math:`x + y < 5`, where the :math:`x \in [\![0,5]\!]` and :math:`y \in [\![0,5]\!]`.
 Here is a short example which illustrates the main steps of a CSP modeling and resolution with Choco |version| to treat this equation.
 

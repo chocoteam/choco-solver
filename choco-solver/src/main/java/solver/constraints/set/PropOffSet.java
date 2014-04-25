@@ -83,11 +83,6 @@ public class PropOffSet extends Propagator<SetVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         // kernel
         for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {

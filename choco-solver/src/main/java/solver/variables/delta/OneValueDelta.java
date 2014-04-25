@@ -29,7 +29,8 @@ package solver.variables.delta;
 
 import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
 /**
  * <br/>
@@ -37,23 +38,21 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class OneValueDelta implements IEnumDelta {
-
+public final class OneValueDelta extends TimeStampedObject implements IEnumDelta {
 
     int value;
     ICause cause;
     boolean set;
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
 
-    public OneValueDelta(AbstractSearchLoop loop) {
-        this.loop = loop;
+    public OneValueDelta(ISearchLoop loop) {
+        super(loop);
     }
 
+	@Override
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
+        if (needReset()) {
             set = false;
-            timestamp = loop.timeStamp;
+            resetStamp();
         }
     }
 
@@ -94,15 +93,4 @@ public final class OneValueDelta implements IEnumDelta {
     public void clear() {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
-    }
-
 }
