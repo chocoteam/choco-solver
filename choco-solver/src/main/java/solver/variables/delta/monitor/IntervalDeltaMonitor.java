@@ -69,15 +69,15 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     public void unfreeze() {
         //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
-        timestamp = loop.getTimeStamp();
+        resetStamp();
         this.first = this.last = delta.size();
     }
 
     public void lazyClear() {
-        if (timestamp - loop.getTimeStamp() != 0) {
-            clear();
-            timestamp = loop.getTimeStamp();
-        }
+		if (needReset()) {
+			clear();
+			resetStamp();
+		}
     }
 
     @Override

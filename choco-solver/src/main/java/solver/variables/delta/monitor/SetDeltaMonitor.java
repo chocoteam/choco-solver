@@ -68,7 +68,7 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
     @Override
     public void unfreeze() {
         delta.lazyClear();    // fix 27/07/12
-        timestamp = loop.getTimeStamp();
+        resetStamp();
         for (int i = 0; i < 2; i++) {
             this.first[i] = last[i] = delta.getSize(i);
         }
@@ -76,10 +76,10 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
 
     @Override
     public void lazyClear() {
-        if (timestamp - loop.getTimeStamp() != 0) {
-            clear();
-            timestamp = loop.getTimeStamp();
-        }
+		if (needReset()) {
+			clear();
+			resetStamp();
+		}
     }
 
     @Override
