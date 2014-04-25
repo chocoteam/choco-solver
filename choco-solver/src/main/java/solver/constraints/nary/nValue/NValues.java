@@ -111,10 +111,10 @@ public class NValues extends Constraint {
 					switch (cols[3]){
 						case "R1":	rules = new R[]{new R1()};break;
 						case "R12":	rules = new R[]{new R1(),new R2()};break;
-						case "R13":	rules = new R[]{new R1(),new R3()};break;
+						case "R13":	rules = new R[]{new R1(),new R3(vars.length,nValues.getSolver().getEnvironment())};break;
 						case "R14":	rules = new R[]{new R1(),new R4()};break;
 						case "R124":rules = new R[]{new R1(),new R2(),new R4()};break;
-						case "R134":rules = new R[]{new R1(),new R3(),new R4()};break;
+						case "R134":rules = new R[]{new R1(),new R3(vars.length,nValues.getSolver().getEnvironment()),new R4()};break;
 						default:throw new UnsupportedOperationException("unknown or unimplemented filtering rule configuration "+
 								cols[3]+".\nUse R1, R12, R13, R14, R124 or R134");
 					}
