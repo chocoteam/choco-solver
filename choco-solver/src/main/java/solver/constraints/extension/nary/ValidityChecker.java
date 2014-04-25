@@ -40,8 +40,6 @@ import java.util.Comparator;
  */
 public class ValidityChecker implements Comparator<IntVar> {
 
-    public static int nbCheck = 0;
-
     //variables sorted from the minimum domain to the max
     protected IntVar[] sortedvs;
     public int[] position;
@@ -89,11 +87,7 @@ public class ValidityChecker implements Comparator<IntVar> {
      * Sort the variables by domain size
      */
     public int compare(IntVar o, IntVar o1) {
-        if (o.getDomainSize() < o1.getDomainSize()) {
-            return -1;
-        } else if (o.getDomainSize() == o1.getDomainSize()) {
-            return 0;
-        } else return 1;
+        return o.getDomainSize() - o1.getDomainSize();
     }
 
 

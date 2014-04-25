@@ -46,7 +46,7 @@ import solver.variables.VF;
 
 public class TableTest {
 
-    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "GAC3rm"};
+    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm"};
 
     @Test(groups = "1s")
     public void test1() {
@@ -112,13 +112,13 @@ public class TableTest {
     public void testAllDifferent() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {7, 0, 7}};
 
-        for (int p = 0; p < params.length; p++) {
+        for (int p = 2; p < params.length; p++) {
             Solver solver = new Solver();
             IntVar[] vars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
             allDifferent(solver, vars, -1);
             long nbs = solver.findAllSolutions();
             long nbn = solver.getMeasures().getNodeCount();
-//            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
+//            System.out.printf("%s\n===\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 1; s++) {
                     Solver tsolver = new Solver(ALGOS[a]);
@@ -130,7 +130,13 @@ public class TableTest {
 //                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
                 }
             }
+//            System.out.printf("===\n%s\n", solver.getMeasures().toOneLineString());
         }
+    }
+
+    public static void main(String[] args) {
+        TableTest tt = new TableTest();
+        tt.testAllDifferent();
     }
 
 }

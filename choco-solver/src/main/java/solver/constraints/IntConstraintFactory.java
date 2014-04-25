@@ -1313,6 +1313,7 @@ public class IntConstraintFactory {
             case "GAC2001":
                 p = new PropLargeGAC2001(VARS, TUPLES);
                 break;
+            default:
             case "GACSTR+":
                 if (!TUPLES.isFeasible()) {
                     throw new SolverException("GACSTR+ cannot be used with forbidden tuples.");
@@ -1325,7 +1326,6 @@ public class IntConstraintFactory {
                 }
                 p = new PropLargeGAC2001Positive(VARS, TUPLES);
                 break;
-            default:
             case "GAC3rm+":
                 if (!TUPLES.isFeasible()) {
                     throw new SolverException("GAC3rm+ cannot be used with forbidden tuples.");
