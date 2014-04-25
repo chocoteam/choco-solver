@@ -37,14 +37,12 @@ public class StoredIntTrail implements IStoredIntTrail {
     /**
      * Stack of backtrackable search variables.
      */
-
     private StoredInt[] variableStack;
 
 
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
-
     private int[] valueStack;
 
 
@@ -52,27 +50,19 @@ public class StoredIntTrail implements IStoredIntTrail {
      * Stack of timestamps indicating the world where the former value
      * had been written.
      */
-
     private int[] stampStack;
 
 
     /**
      * Points the level of the last entry.
      */
-
     private int currentLevel;
 
 
     /**
      * A stack of pointers (for each start of a world).
      */
-
     private int[] worldStartLevels;
-
-    /**
-     * capacity of the trailing stack (in terms of number of updates that can be stored)
-     */
-    private int maxUpdates = 0;
 
 
     /**
@@ -84,10 +74,9 @@ public class StoredIntTrail implements IStoredIntTrail {
 
     public StoredIntTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
-        maxUpdates = nUpdates;
-        variableStack = new StoredInt[maxUpdates];
-        valueStack = new int[maxUpdates];
-        stampStack = new int[maxUpdates];
+        variableStack = new StoredInt[nUpdates];
+        valueStack = new int[nUpdates];
+        stampStack = new int[nUpdates];
         worldStartLevels = new int[nWorlds];
     }
 
@@ -170,7 +159,7 @@ public class StoredIntTrail implements IStoredIntTrail {
         variableStack[currentLevel] = v;
         stampStack[currentLevel] = oldStamp;
         currentLevel++;
-        if (currentLevel == maxUpdates) {
+        if (currentLevel == valueStack.length) {
             resizeUpdateCapacity();
         }
     }
@@ -229,8 +218,6 @@ public class StoredIntTrail implements IStoredIntTrail {
         final int[] tmp3 = new int[newCapacity];
         System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
         stampStack = tmp3;
-        // last update the capacity
-        maxUpdates = newCapacity;
     }
 
     public void resizeWorldCapacity(int newWorldCapacity) {

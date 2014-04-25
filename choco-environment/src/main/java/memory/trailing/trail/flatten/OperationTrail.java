@@ -41,28 +41,19 @@ public class OperationTrail implements IOperationTrail {
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
-
     private Operation[] valueStack;
 
 
     /**
      * Points the level of the last entry.
      */
-
     private int currentLevel;
 
 
     /**
      * A stack of pointers (for each start of a world).
      */
-
     private int[] worldStartLevels;
-
-    /**
-     * capacity of the trailing stack (in terms of number of updates that can be stored)
-     */
-    private int maxUpdates = 0;
-
 
     /**
      * Constructs a trail with predefined size.
@@ -70,11 +61,9 @@ public class OperationTrail implements IOperationTrail {
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
      */
-
     public OperationTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
-        maxUpdates = nUpdates;
-        valueStack = new Operation[maxUpdates];
+        valueStack = new Operation[nUpdates];
         worldStartLevels = new int[nWorlds];
     }
 
@@ -84,7 +73,6 @@ public class OperationTrail implements IOperationTrail {
      *
      * @param worldIndex
      */
-
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
     }
@@ -95,7 +83,6 @@ public class OperationTrail implements IOperationTrail {
      *
      * @param worldIndex
      */
-
     public void worldPop(int worldIndex) {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
@@ -108,7 +95,6 @@ public class OperationTrail implements IOperationTrail {
     /**
      * Returns the current size of the stack.
      */
-
     public int getSize() {
         return currentLevel;
     }
@@ -117,7 +103,6 @@ public class OperationTrail implements IOperationTrail {
     /**
      * Comits a world: merging it with the previous one.
      */
-
     public void worldCommit(int worldIndex) {
     }
 
@@ -128,19 +113,17 @@ public class OperationTrail implements IOperationTrail {
     public void savePreviousState(Operation oldValue) {
         valueStack[currentLevel] = oldValue;
         currentLevel++;
-        if (currentLevel == maxUpdates) {
+        if (currentLevel == valueStack.length) {
             resizeUpdateCapacity();
         }
     }
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((maxUpdates * 3) / 2);
+        final int newCapacity = ((valueStack.length * 3) / 2);
         // First, copy the stack of former values
         final Operation[] tmp2 = new Operation[newCapacity];
         System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
         valueStack = tmp2;
-        // last update the capacity
-        maxUpdates = newCapacity;
     }
 
     public void resizeWorldCapacity(int newWorldCapacity) {
