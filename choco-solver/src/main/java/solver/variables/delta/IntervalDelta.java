@@ -27,7 +27,6 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
 import solver.search.loop.TimeStampedObject;
@@ -70,15 +69,14 @@ public final class IntervalDelta extends TimeStampedObject implements IIntervalD
 	@Override
     public void lazyClear() {
         if (needReset()) {
-            clear();
+			last = 0;
+			resetStamp();
         }
     }
 
     @Override
     public void add(int lb, int ub, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         ensureCapacity();
         causes[last] = cause;
         from[last] = lb;
@@ -103,11 +101,5 @@ public final class IntervalDelta extends TimeStampedObject implements IIntervalD
     @Override
     public int size() {
         return last;
-    }
-
-    @Override
-    public void clear() {
-        last = 0;
-        resetStamp();
     }
 }

@@ -27,7 +27,6 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
 import solver.search.loop.TimeStampedObject;
@@ -58,9 +57,7 @@ public final class OneValueDelta extends TimeStampedObject implements IEnumDelta
 
     @Override
     public void add(int value, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         this.value = value;
         this.cause = cause;
         set = true;
@@ -87,10 +84,5 @@ public final class OneValueDelta extends TimeStampedObject implements IEnumDelta
     @Override
     public int size() {
         return set ? 1 : 0;
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
     }
 }

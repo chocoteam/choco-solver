@@ -27,7 +27,6 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
 import solver.search.loop.TimeStampedObject;
@@ -57,36 +56,24 @@ public class GraphDelta extends TimeStampedObject implements IGraphDelta {
     //***********************************************************************************
 
     @Override
-    public int size() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-        for (int i = 0; i < NB; i++) {
-            deltaOfType[i].clear();
-        }
-		resetStamp();
-    }
-
-    @Override
     public int getSize(int i) {
         return deltaOfType[i].size();
     }
 
     @Override
     public void add(int element, int type, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         deltaOfType[type].add(element, cause);
     }
 
 	@Override
     public void lazyClear() {
         if (needReset()) {
-            clear();
-        }
+			for (int i = 0; i < NB; i++) {
+				deltaOfType[i].lazyClear();
+			}
+			resetStamp();
+		}
     }
 
     @Override

@@ -148,9 +148,7 @@ public final class Magic<S extends ISchedulable> extends PropagationStrategy<S> 
         while (!toPropagate.isEmpty()) {
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
-            if (Configuration.LAZY_UPDATE) {
-                lastPopped.flush();
-            }
+			lastPopped.flush();
             lastPopped.deque();
         }
     }

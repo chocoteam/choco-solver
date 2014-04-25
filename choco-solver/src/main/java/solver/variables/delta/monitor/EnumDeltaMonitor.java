@@ -60,7 +60,10 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
 
     @Override
     public void freeze() {
-        lazyClear();
+		if (needReset()) {
+			this.first = this.last = 0;
+			resetStamp();
+		}
         this.frozenFirst = first; // freeze indices
         this.frozenLast = last = delta.size();
     }
@@ -71,18 +74,6 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
         delta.lazyClear();    // fix 27/07/12
         resetStamp();
         this.first = this.last = delta.size();
-    }
-
-    public void lazyClear() {
-		if (needReset()) {
-			clear();
-			resetStamp();
-		}
-    }
-
-    @Override
-    public void clear() {
-        this.first = this.last = 0;
     }
 
     @Override
