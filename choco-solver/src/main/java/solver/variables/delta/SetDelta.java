@@ -59,11 +59,6 @@ public class SetDelta extends TimeStampedObject implements ISetDelta {
     //***********************************************************************************
 
 	@Override
-	public int size() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
     public int getSize(int kerOrEnv) {
         return delta[kerOrEnv].size();
     }

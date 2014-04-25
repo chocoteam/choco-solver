@@ -62,13 +62,4 @@ public interface IIntervalDelta extends IntDelta {
      * @throws IndexOutOfBoundsException if idx is out of the bounds
      */
     int getUB(int idx) throws IndexOutOfBoundsException;
-
-    /**
-     * Return the cause of the idx^th cause stored in the delta, if any
-     *
-     * @param idx rank of the interval
-     * @return cause of the removal
-     * @throws IndexOutOfBoundsException if idx is out of the bounds
-     */
-    ICause getCause(int idx) throws IndexOutOfBoundsException;
 }

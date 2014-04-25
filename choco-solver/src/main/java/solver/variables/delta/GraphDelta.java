@@ -56,11 +56,6 @@ public class GraphDelta extends TimeStampedObject implements IGraphDelta {
     //***********************************************************************************
 
     @Override
-    public int size() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public int getSize(int i) {
         return deltaOfType[i].size();
     }
