@@ -31,6 +31,7 @@ import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * A simple way of storing the tuples as a list. This doesn't allow
@@ -43,6 +44,18 @@ public class TuplesList extends LargeRelation {
 
     // each tuple (a int[]) has its own index
     protected int[][] tuplesIndexes;
+
+    protected static final Comparator<int[]> TCOMP = new Comparator<int[]>() {
+        @Override
+        public int compare(int[] o1, int[] o2) {
+            int n = o1.length;
+            int i = 0;
+            while (i < n && o1[i] == o2[i]) i++;
+            if (i == n) return 0;
+            if (o1[i] < o2[i]) return -1;
+            return 1;
+        }
+    };
 
 
     public TuplesList(Tuples tuples, int[] offsets, int[] domSizes) {
@@ -57,6 +70,7 @@ public class TuplesList extends LargeRelation {
         }
         tuplesIndexes = new int[k][];
         System.arraycopy(_tuplesIndexes, 0, tuplesIndexes, 0, k);
+        Arrays.sort(tuplesIndexes, TCOMP);
 
     }
 
@@ -73,10 +87,7 @@ public class TuplesList extends LargeRelation {
     }
 
     public boolean isConsistent(int[] tuple) {
-        int i = 0;
-        while (i < tuplesIndexes.length && !Arrays.equals(tuple, tuplesIndexes[i])) {
-            i++;
-        }
-        return i < tuplesIndexes.length;
+        return Arrays.binarySearch(tuplesIndexes, tuple, TCOMP) >= 0;
     }
+
 }

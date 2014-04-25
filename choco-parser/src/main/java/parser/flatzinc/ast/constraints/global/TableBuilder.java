@@ -66,7 +66,7 @@ public class TableBuilder implements IBuilder {
         if (x.length == 2) {
             return new Constraint[]{ICF.table(x[0], x[1], tuples, "AC3bit+rm")};
         } else {
-            return new Constraint[]{IntConstraintFactory.table(x, tuples, "GAC3rm+")};
+            return new Constraint[]{IntConstraintFactory.table(x, tuples, "GACSTR+")};
         }
     }
 }

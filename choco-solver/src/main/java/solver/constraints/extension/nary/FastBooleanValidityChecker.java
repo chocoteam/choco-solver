@@ -44,7 +44,6 @@ public final class FastBooleanValidityChecker extends ValidityChecker {
 
     // Is tuple valide ?
     public final boolean isValid(final int[] tuple) {
-        nbCheck++;
         for (int i = 0; i < arity; i++) {
             if (sortedvs[i].isInstantiated()) {
                 if (sortedvs[i].getValue() != tuple[position[i]])
@@ -57,7 +56,6 @@ public final class FastBooleanValidityChecker extends ValidityChecker {
     }
 
     public boolean isValid(int[] tuple, int i) {
-        nbCheck++;
         return sortedvs[i].contains(tuple[position[i]]);
     }
 
