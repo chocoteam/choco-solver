@@ -159,7 +159,14 @@ public class SearchLoop implements ISearchLoop {
 	public void reset() {
 		// if a resolution has already been done
 		if (rootWorldIndex > -1) {
-			restoreRootNode();
+			env.worldPopUntil(rootWorldIndex);
+			timeStamp++;
+			Decision tmp;
+			while (decision != RootDecision.ROOT) {
+				tmp = decision;
+				decision = tmp.getPrevious();
+				tmp.free();
+			}
 			nextState = INIT;
 			rootWorldIndex = -1;
 			searchWorldIndex = -1;
