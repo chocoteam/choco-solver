@@ -26,9 +26,9 @@
  */
 package solver.constraints.extension.nary;
 
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
 import solver.constraints.extension.Tuples;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -38,26 +38,35 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<IntVar> {
+public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
-    protected final R relation;
+    protected final int[] currentTuple;
 
-    protected PropLargeCSP(IntVar[] vars, Tuples tuples) {
-        super(vars, PropagatorPriority.QUADRATIC, true);
-        int[] offsets = new int[vars.length];
-        int[] dsizes = new int[vars.length];
-        for (int i = 0; i < vars.length; i++) {
-            offsets[i] = vars[i].getLB();
-            dsizes[i] = vars[i].getDomainSize();
-        }
-        this.relation = makeRelation(tuples, offsets, dsizes);
+    public PropLargeFC(IntVar[] vars, Tuples tuples) {
+        super(vars, tuples);
+        this.currentTuple = new int[vars.length];
     }
 
-    protected abstract R makeRelation(Tuples tuples, int[] offsets, int[] dsizes);
+    protected LargeRelation makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
+        int totalSize = 1;
+        for (int i = 0; i < offsets.length; i++) {
+            totalSize *= dsizes[i];
+        }
+        if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
+            return new TuplesLargeTable(tuples, offsets, dsizes);
+        }
+        return new TuplesTable(tuples, offsets, dsizes);
+    }
 
 
-    public final LargeRelation getRelation() {
-        return relation;
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        filter();
+    }
+
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     @Override
@@ -85,5 +94,49 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
         }
         sb.append("})");
         return sb.toString();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected void filter() throws ContradictionException {
+        boolean stop = false;
+        int nbUnassigned = 0;
+        int index = -1, i = 0;
+        while (!stop && i < vars.length) {
+            if (!vars[i].isInstantiated()) {
+                nbUnassigned++;
+                index = i;
+            } else {
+                currentTuple[i] = vars[i].getValue();
+            }
+            if (nbUnassigned > 1) {
+                stop = true;
+            }
+            i++;
+        }
+        if (!stop) {
+            if (nbUnassigned == 1) {
+                int left = Integer.MIN_VALUE;
+                int right = left;
+
+                int ub = vars[index].getUB();
+                for (int val = vars[index].getLB(); val <= ub; val = vars[index].nextValue(val)) {
+                    currentTuple[index] = val;
+                    if (!relation.isConsistent(currentTuple)) {
+                        if (val == right + 1) {
+                            right = val;
+                        } else {
+                            vars[index].removeInterval(left, right, aCause);
+                            left = right = val;
+                        }
+                    }
+                }
+                vars[index].removeInterval(left, right, aCause);
+            } else {
+                if (!relation.isConsistent(currentTuple)) {
+                    this.contradiction(null, "not consistent");
+                }
+            }
+        }
     }
 }

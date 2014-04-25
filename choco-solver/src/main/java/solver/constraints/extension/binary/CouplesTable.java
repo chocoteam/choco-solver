@@ -28,11 +28,11 @@
 package solver.constraints.extension.binary;
 
 import solver.constraints.extension.ConsistencyRelation;
-import solver.constraints.extension.ExtensionalBinRelation;
+import solver.constraints.extension.Tuples;
 
 import java.util.BitSet;
 
-public class CouplesTable extends ConsistencyRelation implements ExtensionalBinRelation {
+class CouplesTable extends ConsistencyRelation implements BinRelation {
 
     /**
      * matrix of consistency/inconsistency
@@ -49,21 +49,34 @@ public class CouplesTable extends ConsistencyRelation implements ExtensionalBinR
      */
     protected int offset2;
 
+
+    /**
+     * size of the initial domain of x
+     */
+    protected int n1;
+
+
     /**
      * size of the initial domain of x
      */
     protected int n2;
 
 
-    public CouplesTable() {
+    protected CouplesTable() {
     }
 
-    public CouplesTable(boolean feas, int offset1, int offset2, int n1, int n2) {
-        this.offset1 = offset1;
-        this.offset2 = offset2;
-        this.n2 = n2;
-        this.table = new BitSet(n1 * n2);
-        this.feasible = feas;
+    public CouplesTable(Tuples tuples, int min1, int max1, int min2, int max2) {
+        offset1 = min1;
+        offset2 = min2;
+        n1 = max1 - min1 + 1;
+        n2 = max2 - min2 + 1;
+        table = new BitSet(n1 * n2);
+        feasible = tuples.isFeasible();
+        int nt = tuples.nbTuples();
+        for (int i = 0; i < nt; i++) {
+            int[] tuple = tuples.get(i);
+            setCouple(tuple[0], tuple[1]);
+        }
     }
 
     /**
@@ -82,19 +95,21 @@ public class CouplesTable extends ConsistencyRelation implements ExtensionalBinR
     }
 
     public void setCouple(int x, int y) {
-        table.set((x - offset1) * n2 + y - offset2);
-    }
-
-    public void setCoupleWithoutOffset(int x, int y) {
-        table.set(x * n2 + y);
+        if (between(x - offset1, 0, n1) && between(y - offset2, 0, n2)) {
+            table.set((x - offset1) * n1 + y - offset2);
+        }
     }
 
     public boolean isConsistent(int x, int y) {
-        return table.get((x - offset1) * n2 + y - offset2) == feasible;
+        return table.get((x - offset1) * n1 + y - offset2) == feasible;
     }
 
     public boolean checkCouple(int x, int y) {
-        return table.get((x - offset1) * n2 + y - offset2);
+        return table.get((x - offset1) * n1 + y - offset2);
     }
 
+
+    private static boolean between(int v, int low, int upp) {
+        return (low <= v) && (v <= upp);
+    }
 }

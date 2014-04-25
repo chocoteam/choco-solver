@@ -69,7 +69,7 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     public void unfreeze() {
         //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
-        lazyClear();         // fix 27/07/12
+        timestamp = loop.timeStamp;
         this.first = this.last = delta.size();
     }
 

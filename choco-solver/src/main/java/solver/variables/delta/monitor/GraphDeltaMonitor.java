@@ -72,15 +72,12 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 
     @Override
     public void unfreeze() {
+        delta.lazyClear();    // fix 27/07/12
         timestamp = loop.getTimeStamp();
         for (int i = 0; i < 3; i++) {
             this.first[i] = last[i] = delta.getSize(i);
         }
         this.first[3] = last[3] = delta.getSize(IGraphDelta.AE_tail);
-
-        // VRAIMENT UTILE?
-        delta.lazyClear();    // fix 27/07/12
-        lazyClear();        // fix 27/07/12
     }
 
     public void lazyClear() {

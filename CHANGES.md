@@ -89,3 +89,4 @@ The CHANGES.md file starts at this version.
 - Add path and subpath constraints, holding on integer variables
 - Add SORT constraint
 - Changes measure, times are now in second
+* Fix#199: some deltamonitors were desynchronized with delta

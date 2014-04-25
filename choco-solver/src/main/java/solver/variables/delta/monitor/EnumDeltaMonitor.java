@@ -69,7 +69,7 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     public void unfreeze() {
         //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
-        lazyClear();         // fix 27/07/12
+        timestamp = loop.timeStamp;
         this.first = this.last = delta.size();
     }
 

@@ -26,11 +26,12 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.extension.ConsistencyRelation;
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
-
-import java.util.BitSet;
 
 /**
  * <br/>
@@ -38,7 +39,7 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class TuplesTable extends ConsistencyRelation implements LargeRelation {
+public class TuplesLargeTable extends ConsistencyRelation implements LargeRelation {
 
     /**
      * the number of dimensions of the considered tuples
@@ -47,7 +48,7 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
     /**
      * The consistency matrix
      */
-    protected BitSet table;
+    protected TIntObjectHashMap<TIntSet> tables;
 
     /**
      * offset (lower bound) of each variable
@@ -63,28 +64,31 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
      * in order to speed up the computation of the index of a tuple
      * in the table, blocks[i] stores the product of the size of variables j with j < i.
      */
-    protected int[] blocks;
+    protected long[] blocks;
 
-    public TuplesTable(int n) {
+    public TuplesLargeTable(int n) {
         this.n = n;
     }
 
-    public TuplesTable(Tuples tuples, int[] offsetTable, int[] sizesTable) {
+    public TuplesLargeTable(Tuples tuples, int[] offsetTable, int[] sizesTable) {
         offsets = offsetTable;
         sizes = sizesTable;
         n = offsetTable.length;
         feasible = tuples.isFeasible();
-        int totalSize = 1;
-        blocks = new int[n];
+        long totalSize = 1;
+        blocks = new long[n];
         for (int i = 0; i < n; i++) {
             blocks[i] = totalSize;
             totalSize *= sizes[i];
         }
 
-        if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
-            throw new SolverException("Tuples requiered over 50Mo of memory...");
-        }
-        table = new BitSet(totalSize);
+        /*if (totalSize < 0 || (totalSize > Integer.MAX_VALUE)) {
+            throw new SolverException("Tuples required too much memory to be set in a Bitset...");
+        }*/
+        long nb = (totalSize / Integer.MAX_VALUE) + 1;
+        if (nb < 0 || nb > Integer.MAX_VALUE) throw new SolverException("Tuples required too much memory ...");
+
+        tables = new TIntObjectHashMap<>();
         int nt = tuples.nbTuples();
         for (int i = 0; i < nt; i++) {
             int[] tuple = tuples.get(i);
@@ -107,14 +111,17 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
     }
 
     public boolean checkTuple(int[] tuple) {
-        int address = 0;
+        long address = 0;
         for (int i = (n - 1); i >= 0; i--) {
             if ((tuple[i] < offsets[i]) || (tuple[i] > (offsets[i] + sizes[i] - 1))) {
                 return false;
             }
             address += (tuple[i] - offsets[i]) * blocks[i];
         }
-        return table.get(address);
+        int a = (int) (address % Integer.MAX_VALUE);
+        int t = (int) (address / Integer.MAX_VALUE);
+        TIntSet ts = tables.get(t);
+        return ts != null && ts.contains(a);
     }
 
     public boolean isConsistent(int[] tuple) {
@@ -122,23 +129,30 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
     }
 
     void setTuple(int[] tuple) {
-        int address = 0;
+        long address = 0;
         for (int i = (n - 1); i >= 0; i--) {
             address += (tuple[i] - offsets[i]) * blocks[i];
         }
-        table.set(address);
+        int a = (int) (address % Integer.MAX_VALUE);
+        int t = (int) (address / Integer.MAX_VALUE);
+        TIntSet ts = tables.get(t);
+        if (ts == null) {
+            ts = new TIntHashSet();
+            tables.put(t, ts);
+        }
+        ts.add(a);
     }
 
     /**
      * @return the opposite relation
      */
     public ConsistencyRelation getOpposite() {
-        TuplesTable t = new TuplesTable(this.n);
+        TuplesLargeTable t = new TuplesLargeTable(this.n);
         t.feasible = !feasible;
         t.offsets = offsets;
         t.sizes = sizes;
         t.blocks = blocks;
-        t.table = table;
+        t.tables = tables;
         return t;
     }
 

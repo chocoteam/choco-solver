@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
-import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
@@ -35,11 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.extension.ExtensionalBinRelation;
-import solver.constraints.extension.binary.CouplesTable;
-import solver.constraints.extension.nary.IterTuplesTable;
-import solver.constraints.extension.nary.LargeRelation;
-import solver.exception.SolverException;
+import solver.constraints.extension.Tuples;
 import solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -60,49 +55,18 @@ public class TableBuilder implements IBuilder {
         int[] f_t = exps.get(1).toIntArray();
         int d2 = x.length;
         int d1 = f_t.length / d2;
-        List<int[]> t = new ArrayList<int[]>();
+        List<int[]> t = new ArrayList<>();
         for (int i = 0; i < d1; i++) {
             t.add(Arrays.copyOfRange(f_t, i * d2, (i + 1) * d2));
         }
-        if (x.length == 2) {
-            int[] min = new int[]{x[0].getLB(), x[1].getLB()};
-            int[] max = new int[]{x[0].getUB(), x[1].getUB()};
-            int n1 = max[0] - min[0] + 1;
-            int n2 = max[1] - min[1] + 1;
-            ExtensionalBinRelation relation;
-            /*if (bitset) {
-                relation = new CouplesBitSetTable(feas, min[0], min[1], n1, n2);
-            } else */
-            {
-                relation = new CouplesTable(true, min[0], min[1], n1, n2);
-            }
-            for (int[] couple : t) {
-                if (couple.length != 2) {
-                    throw new SolverException("Wrong dimension : " + couple.length + " for a couple");
-                }
-                if (between(couple[0], min[0], max[0])
-                        && between(couple[1], min[1], max[1])) {
-                    relation.setCouple(couple[0], couple[1]);
-                } else {
-                    LoggerFactory.getLogger("fzn").warn("% {" + couple[0] + "," + couple[1] + "} will not be added, " +
-                            "{0} is not inside [{1},{2}] or {3} is not inside [{4},{5}] ",
-                            new int[]{couple[0], min[0], max[0], couple[1], min[1], max[1]});
-                }
-            }
-            return new Constraint[]{ICF.table(x[0], x[1], relation)};
-        } else {
-            int[] o = new int[x.length];
-            int[] d = new int[x.length];
-            for (int i = 0; i < x.length; i++) {
-                o[i] = x[i].getLB();
-                d[i] = x[i].getUB() - o[i] + 1;
-            }
-            LargeRelation list_t = new IterTuplesTable(t, o, d);
-            return new Constraint[]{IntConstraintFactory.table(x, list_t, "AC2001")};
+        Tuples tuples = new Tuples(true);
+        for (int[] couple : t) {
+            tuples.add(couple);
         }
-    }
-
-    private static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
+        if (x.length == 2) {
+            return new Constraint[]{ICF.table(x[0], x[1], tuples, "AC3bit+rm")};
+        } else {
+            return new Constraint[]{IntConstraintFactory.table(x, tuples, "GAC3rm+")};
+        }
     }
 }

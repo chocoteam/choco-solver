@@ -27,40 +27,38 @@
 
 package solver.constraints.extension.nary;
 
-/**
- * A large relation that provides the seekNextSupport function from
- * a given support of given pair var/val and indexes the tuples
- * by integers to store (eventually) the support as StoredInt
- */
-public interface IterLargeRelation {
+import solver.variables.IntVar;
 
-    /**
-     * seek from the next support available from the index of the
-     * old support and the pair variable/value given in argument
-     *
-     * @param oldIdxSupport
-     * @param var
-     * @param val
-     * @return
-     */
-    public int seekNextTuple(int oldIdxSupport, int var, int val);
+/*
+* Created by IntelliJ IDEA.
+* User: hcambaza
+* Date: Jul 31, 2008
+* Since : Choco 2.0.0
+*
+*/
+public final class FastBooleanValidityChecker extends ValidityChecker {
 
+    public FastBooleanValidityChecker(int arity, IntVar[] vars) {
+        super(arity, vars);
+    }
 
-    /**
-     * return the tuple corresponding to the given index
-     *
-     * @param support
-     * @return
-     */
-    public int[] getTuple(int support);
+    // Is tuple valide ?
+    public final boolean isValid(final int[] tuple) {
+        nbCheck++;
+        for (int i = 0; i < arity; i++) {
+            if (sortedvs[i].isInstantiated()) {
+                if (sortedvs[i].getValue() != tuple[position[i]])
+                    return false;
+            } else break;
+            // variable are sorted by domain size so only non instantiated variables remain
+            // and non instantiated variables do not need to be checked in boolean !
+        }
+        return true;
+    }
 
+    public boolean isValid(int[] tuple, int i) {
+        nbCheck++;
+        return sortedvs[i].contains(tuple[position[i]]);
+    }
 
-    /**
-     * returns the number of supports for the pair (var,val)
-     *
-     * @param var
-     * @param val
-     * @return
-     */
-    public int getNbSupport(int var, int val);
 }
