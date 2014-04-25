@@ -51,6 +51,9 @@ import static org.testng.Assert.assertEquals;
  */
 public class BinTableTest {
 
+
+    private static String[] ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
+
     protected static final Logger LOGGER = LoggerFactory.getLogger("test");
     private Solver s;
     private IntVar v1, v2;
@@ -87,112 +90,35 @@ public class BinTableTest {
 
     @Test(groups = "1s")
     public void testFeas1() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, feasible, "AC3rm"));
+        for (String a : ALGOS) {
+            s = new Solver();
+            v1 = VF.enumerated("v1", 1, 4, s);
+            v2 = VF.enumerated("v2", 1, 4, s);
+            s.post(ICF.table(v1, v2, feasible, a));
 
-        s.findAllSolutions();
-        assertEquals(5, s.getMeasures().getSolutionCount());
-    }
-
-
-    @Test(groups = "1s")
-    public void testFeas2() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, feasible, "AC3"));
-
-        s.findAllSolutions();
-        assertEquals(5, s.getMeasures().getSolutionCount());
-    }
-
-    @Test(groups = "1s")
-    public void testFeas3() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, feasible, "AC3bit+rm"));
-
-        s.findAllSolutions();
-        assertEquals(5, s.getMeasures().getSolutionCount());
-    }
-
-    @Test(groups = "1s")
-    public void testFeas4() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, feasible, "FC"));
-
-        s.findAllSolutions();
-        assertEquals(5, s.getMeasures().getSolutionCount());
-    }
-
-    @Test(groups = "1s")
-    public void testFeas5() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, feasible, "AC2001"));
-
-        s.findAllSolutions();
-        assertEquals(5, s.getMeasures().getSolutionCount());
+            s.findAllSolutions();
+            assertEquals(5, s.getMeasures().getSolutionCount());
+        }
     }
 
 
     @Test(groups = "1s")
     public void testInfeas1() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, infeasible, "AC3"));
+        for (String a : ALGOS) {
+            s = new Solver();
+            v1 = VF.enumerated("v1", 1, 4, s);
+            v2 = VF.enumerated("v2", 1, 4, s);
+            s.post(ICF.table(v1, v2, infeasible, a));
 
-        s.findAllSolutions();
-        assertEquals((16 - 5), s.getMeasures().getSolutionCount());
+            s.findAllSolutions();
+            assertEquals((16 - 5), s.getMeasures().getSolutionCount());
+        }
     }
 
-    @Test(groups = "1s")
-    public void testInfeas2() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, infeasible, "AC3rm"));
-
-        s.findAllSolutions();
-        assertEquals((16 - 5), s.getMeasures().getSolutionCount());
-    }
-
-    @Test(groups = "1s")
-    public void testInfeas3() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, infeasible, "AC3bit+rm"));
-
-        s.findAllSolutions();
-        assertEquals((16 - 5), s.getMeasures().getSolutionCount());
-    }
-
-    @Test(groups = "1s")
-    public void testInfeas4() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, infeasible, "FC"));
-
-        s.findAllSolutions();
-        assertEquals((16 - 5), s.getMeasures().getSolutionCount());
-    }
-
-    @Test(groups = "1s")
-    public void testInfeas5() {
-        v1 = VF.enumerated("v1", 1, 4, s);
-        v2 = VF.enumerated("v2", 1, 4, s);
-        s.post(ICF.table(v1, v2, infeasible, "AC2001"));
-
-        s.findAllSolutions();
-        assertEquals((16 - 5), s.getMeasures().getSolutionCount());
-    }
-
-
-    private static String[] algos = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
     private Constraint absolute(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return ICF.table(v1, v2, TuplesFactory.absolute(v1, v2), algos[algo]);
+            return ICF.table(v1, v2, TuplesFactory.absolute(v1, v2), ALGOS[algo]);
         } else {
             return ICF.absolute(v1, v2);
         }
@@ -206,7 +132,7 @@ public class BinTableTest {
         solver.post(absolute(v1, v2, -1));
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
-        for (int a = 0; a < algos.length; a++) {
+        for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Solver tsolver = new Solver();
                 IntVar tv1 = VF.enumerated("tv1", -10, 10, tsolver);
@@ -221,7 +147,7 @@ public class BinTableTest {
 
     private Constraint arithmLT(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return ICF.table(v1, v2, TuplesFactory.arithm(v1, "<", v2), algos[algo]);
+            return ICF.table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
         } else {
             return ICF.arithm(v1, "<", v2);
         }
@@ -236,7 +162,7 @@ public class BinTableTest {
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int s = 0; s < 20; s++) {
-            for (int a = 0; a < algos.length; a++) {
+            for (int a = 0; a < ALGOS.length; a++) {
                 Solver tsolver = new Solver();
                 IntVar tv1 = VF.enumerated("tv1", -10, 10, tsolver);
                 IntVar tv2 = VF.enumerated("tv2", -10, 10, tsolver);
@@ -250,7 +176,7 @@ public class BinTableTest {
 
     private Constraint arithmNQ(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return ICF.table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), algos[algo]);
+            return ICF.table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
         } else {
             return ICF.arithm(v1, "!=", v2);
         }
@@ -264,7 +190,7 @@ public class BinTableTest {
         solver.post(arithmNQ(v1, v2, -1));
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
-        for (int a = 0; a < algos.length; a++) {
+        for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Solver tsolver = new Solver();
                 IntVar tv1 = VF.enumerated("tv1", -10, 10, tsolver);
@@ -273,6 +199,46 @@ public class BinTableTest {
                 tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
                 Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                 if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+            }
+        }
+    }
+
+    @Test(groups = "1s")
+    public void test2() {
+        for (String a : ALGOS) {
+            for (int i = 0; i < 10; i++) {
+                Tuples tuples = new Tuples(true);
+                tuples.add(-2, -2);
+                tuples.add(-1, -1);
+                tuples.add(0, 0);
+                tuples.add(1, 1);
+
+                Solver solver = new Solver();
+                IntVar[] vars = VF.enumeratedArray("X", 2, -1, 1, solver);
+                solver.post(ICF.table(vars[0], vars[1], tuples, a));
+
+                solver.set(ISF.random_value(vars));
+                Assert.assertEquals(solver.findAllSolutions(), 3);
+            }
+        }
+    }
+
+    @Test(groups = "1s")
+    public void test3() {
+        for (String a : ALGOS) {
+            for (int i = 0; i < 10; i++) {
+                Tuples tuples = new Tuples(true);
+                tuples.add(-2, -2);
+                tuples.add(-1, -1);
+                tuples.add(0, 0);
+                tuples.add(1, 1);
+
+                Solver solver = new Solver();
+                IntVar[] vars = VF.enumeratedArray("X", 2, -1, 1, solver);
+                solver.post(ICF.table(vars[0], vars[1], tuples, a));
+
+                solver.set(ISF.random_value(vars));
+                Assert.assertEquals(solver.findAllSolutions(), 3);
             }
         }
     }

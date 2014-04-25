@@ -26,7 +26,6 @@
  */
 package solver.constraints.extension.binary;
 
-import solver.constraints.extension.ConsistencyRelation;
 import solver.constraints.extension.Tuples;
 import solver.variables.IntVar;
 
@@ -38,7 +37,7 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 22/04/2014
  */
-class CouplesBitSetTable extends ConsistencyRelation implements BinRelation {
+class CouplesBitSetTable extends BinRelation {
 
     /**
      * table[0][i] gives the supports of value i of variable 0
@@ -53,8 +52,8 @@ class CouplesBitSetTable extends ConsistencyRelation implements BinRelation {
 
     protected int[] ns;
 
-    protected CouplesBitSetTable() {
-    }
+
+    protected boolean feasible;
 
     /**
      * Create a tuple list for AC3bit+rm
@@ -90,28 +89,6 @@ class CouplesBitSetTable extends ConsistencyRelation implements BinRelation {
         }
     }
 
-    /**
-     * compute the opposite relation by "reusing" the table of consistency
-     *
-     * @return the opposite relation
-     */
-    public ConsistencyRelation getOpposite() {
-        CouplesBitSetTable t = new CouplesBitSetTable();
-        t.feasible = !feasible;
-        t.table = new BitSet[2][];
-        this.table[0] = new BitSet[ns[0]];
-        this.table[1] = new BitSet[ns[1]];
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < table[i].length; j++) {
-                t.table[i][j] = (BitSet) table[i][j].clone();
-                t.table[i][j].flip(0, ns[i]);
-            }
-        }
-        t.ns = ns;
-        t.offsets = offsets;
-        return t;
-    }
-
 
     private void setCouple(int x, int y) {
         // stored only couples which are between ranges
@@ -137,7 +114,6 @@ class CouplesBitSetTable extends ConsistencyRelation implements BinRelation {
     /**
      * check is there exist a support for value val of variable var
      * within the domain of v
-     *
      */
     public boolean checkValue(int var, int val, IntVar v) {
         int UB = v.getUB();
@@ -149,9 +125,5 @@ class CouplesBitSetTable extends ConsistencyRelation implements BinRelation {
             }
         }
         return false;
-    }
-
-    private static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
     }
 }

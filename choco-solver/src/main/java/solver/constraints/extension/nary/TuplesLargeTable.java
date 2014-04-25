@@ -29,7 +29,6 @@ package solver.constraints.extension.nary;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import solver.constraints.extension.ConsistencyRelation;
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
 
@@ -39,7 +38,7 @@ import solver.exception.SolverException;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class TuplesLargeTable extends ConsistencyRelation implements LargeRelation {
+public class TuplesLargeTable extends LargeRelation {
 
     /**
      * the number of dimensions of the considered tuples
@@ -60,15 +59,13 @@ public class TuplesLargeTable extends ConsistencyRelation implements LargeRelati
      */
     protected int[] sizes;
 
+    protected boolean feasible;
+
     /**
      * in order to speed up the computation of the index of a tuple
      * in the table, blocks[i] stores the product of the size of variables j with j < i.
      */
     protected long[] blocks;
-
-    public TuplesLargeTable(int n) {
-        this.n = n;
-    }
 
     public TuplesLargeTable(Tuples tuples, int[] offsetTable, int[] sizesTable) {
         offsets = offsetTable;
@@ -82,9 +79,6 @@ public class TuplesLargeTable extends ConsistencyRelation implements LargeRelati
             totalSize *= sizes[i];
         }
 
-        /*if (totalSize < 0 || (totalSize > Integer.MAX_VALUE)) {
-            throw new SolverException("Tuples required too much memory to be set in a Bitset...");
-        }*/
         long nb = (totalSize / Integer.MAX_VALUE) + 1;
         if (nb < 0 || nb > Integer.MAX_VALUE) throw new SolverException("Tuples required too much memory ...");
 
@@ -92,22 +86,10 @@ public class TuplesLargeTable extends ConsistencyRelation implements LargeRelati
         int nt = tuples.nbTuples();
         for (int i = 0; i < nt; i++) {
             int[] tuple = tuples.get(i);
-            if (valid(tuple)) {
+            if (valid(tuple, offsets, sizes)) {
                 setTuple(tuple);
             }
         }
-
-    }
-
-    private boolean valid(int[] tuple) {
-        for (int i = 0; i < tuple.length; i++) {
-            if (!between(tuple[i], offsets[i], offsets[i] + sizes[i])) return false;
-        }
-        return true;
-    }
-
-    private static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
     }
 
     public boolean checkTuple(int[] tuple) {
@@ -141,19 +123,6 @@ public class TuplesLargeTable extends ConsistencyRelation implements LargeRelati
             tables.put(t, ts);
         }
         ts.add(a);
-    }
-
-    /**
-     * @return the opposite relation
-     */
-    public ConsistencyRelation getOpposite() {
-        TuplesLargeTable t = new TuplesLargeTable(this.n);
-        t.feasible = !feasible;
-        t.offsets = offsets;
-        t.sizes = sizes;
-        t.blocks = blocks;
-        t.tables = tables;
-        return t;
     }
 
 }

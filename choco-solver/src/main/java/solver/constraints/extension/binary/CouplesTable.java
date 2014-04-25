@@ -27,12 +27,11 @@
 
 package solver.constraints.extension.binary;
 
-import solver.constraints.extension.ConsistencyRelation;
 import solver.constraints.extension.Tuples;
 
 import java.util.BitSet;
 
-class CouplesTable extends ConsistencyRelation implements BinRelation {
+class CouplesTable extends BinRelation {
 
     /**
      * matrix of consistency/inconsistency
@@ -62,8 +61,7 @@ class CouplesTable extends ConsistencyRelation implements BinRelation {
     protected int n2;
 
 
-    protected CouplesTable() {
-    }
+    protected boolean feasible;
 
     public CouplesTable(Tuples tuples, int min1, int max1, int min2, int max2) {
         offset1 = min1;
@@ -79,21 +77,6 @@ class CouplesTable extends ConsistencyRelation implements BinRelation {
         }
     }
 
-    /**
-     * compute the opposite relation by "reusing" the table of consistency
-     *
-     * @return the opposite relation
-     */
-    public ConsistencyRelation getOpposite() {
-        CouplesTable t = new CouplesTable();
-        t.feasible = !feasible;
-        t.table = table;
-        t.offset1 = offset1;
-        t.offset2 = offset2;
-        t.n2 = n2;
-        return t;
-    }
-
     public void setCouple(int x, int y) {
         if (between(x - offset1, 0, n1) && between(y - offset2, 0, n2)) {
             table.set((x - offset1) * n1 + y - offset2);
@@ -106,10 +89,5 @@ class CouplesTable extends ConsistencyRelation implements BinRelation {
 
     public boolean checkCouple(int x, int y) {
         return table.get((x - offset1) * n1 + y - offset2);
-    }
-
-
-    private static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
     }
 }
