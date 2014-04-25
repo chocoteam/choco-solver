@@ -33,7 +33,7 @@ import solver.exception.SolverException;
 /**
  *
  **/
-class IterTuplesTable extends TuplesList implements LargeRelation {
+class IterTuplesTable extends TuplesList{
 
     /**
      * table[i][j] gives the table of supports as an int[] for value j of variable i

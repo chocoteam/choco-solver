@@ -39,7 +39,7 @@ import java.util.Arrays;
  * This simple way of storing supports only allow fast iteration over the all
  * set of tuples and is used by STR gac scheme.
  */
-public class TuplesList implements LargeRelation {
+public class TuplesList extends LargeRelation {
 
     // each tuple (a int[]) has its own index
     protected int[][] tuplesIndexes;
@@ -58,17 +58,6 @@ public class TuplesList implements LargeRelation {
         tuplesIndexes = new int[k][];
         System.arraycopy(_tuplesIndexes, 0, tuplesIndexes, 0, k);
 
-    }
-
-    private boolean valid(int[] tuple, int[] offsets, int[] domSizes) {
-        for (int i = 0; i < tuple.length; i++) {
-            if (!between(tuple[i], offsets[i], offsets[i] + domSizes[i])) return false;
-        }
-        return true;
-    }
-
-    private static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
     }
 
     public int[] getTuple(int support) {

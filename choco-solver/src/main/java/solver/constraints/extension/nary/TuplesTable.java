@@ -26,7 +26,6 @@
  */
 package solver.constraints.extension.nary;
 
-import solver.constraints.extension.ConsistencyRelation;
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
 
@@ -38,7 +37,7 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class TuplesTable extends ConsistencyRelation implements LargeRelation {
+public class TuplesTable extends LargeRelation {
 
     /**
      * the number of dimensions of the considered tuples
@@ -58,6 +57,8 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
      * domain size of each variable
      */
     protected int[] sizes;
+
+    protected boolean feasible;
 
     /**
      * in order to speed up the computation of the index of a tuple
@@ -88,22 +89,11 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
         int nt = tuples.nbTuples();
         for (int i = 0; i < nt; i++) {
             int[] tuple = tuples.get(i);
-            if (valid(tuple)) {
+            if (valid(tuple, offsets, sizes)) {
                 setTuple(tuple);
             }
         }
 
-    }
-
-    private boolean valid(int[] tuple) {
-        for (int i = 0; i < tuple.length; i++) {
-            if (!between(tuple[i], offsets[i], offsets[i] + sizes[i])) return false;
-        }
-        return true;
-    }
-
-    private static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
     }
 
     public boolean checkTuple(int[] tuple) {
@@ -128,18 +118,4 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
         }
         table.set(address);
     }
-
-    /**
-     * @return the opposite relation
-     */
-    public ConsistencyRelation getOpposite() {
-        TuplesTable t = new TuplesTable(this.n);
-        t.feasible = !feasible;
-        t.offsets = offsets;
-        t.sizes = sizes;
-        t.blocks = blocks;
-        t.table = table;
-        return t;
-    }
-
 }

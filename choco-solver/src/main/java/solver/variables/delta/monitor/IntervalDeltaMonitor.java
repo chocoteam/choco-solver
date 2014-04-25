@@ -29,10 +29,10 @@ package solver.variables.delta.monitor;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.search.loop.TimeStampedObject;
 import solver.variables.EventType;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IIntervalDelta;
-import solver.search.loop.TimeStampedObject;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -69,7 +69,7 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     public void unfreeze() {
         //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
-        timestamp = loop.timeStamp;
+        timestamp = loop.getTimeStamp();
         this.first = this.last = delta.size();
     }
 

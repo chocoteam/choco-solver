@@ -36,7 +36,9 @@ package solver.constraints.nary;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
@@ -44,11 +46,29 @@ import solver.variables.VF;
 
 public class TableTest {
 
-    private static String[] algos = {"FC", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "GAC3rm"};
+    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "GAC3rm"};
+
+    @Test(groups = "1s")
+    public void test1() {
+        for (String a : ALGOS) {
+            Tuples tuples = new Tuples(true);
+            tuples.add(0, 0, 0);
+            tuples.add(1, 1, 1);
+            tuples.add(2, 2, 2);
+
+            Solver solver = new Solver();
+            IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+            Constraint tableConstraint = ICF.table(vars, tuples, a);
+            solver.post(tableConstraint);
+
+            solver.findSolution();
+        }
+    }
+
 
     private void allEquals(Solver solver, IntVar[] vars, int algo) {
         if (algo > -1) {
-            solver.post(ICF.table(vars, TuplesFactory.allEquals(vars), algos[algo]));
+            solver.post(ICF.table(vars, TuplesFactory.allEquals(vars), ALGOS[algo]));
         } else {
             for (int i = 1; i < vars.length; i++) {
                 solver.post(ICF.arithm(vars[0], "=", vars[i]));
@@ -66,9 +86,9 @@ public class TableTest {
             long nbs = solver.findAllSolutions();
             long nbn = solver.getMeasures().getNodeCount();
 //            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
-            for (int a = 0; a < algos.length; a++) {
+            for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 10; s++) {
-                    Solver tsolver = new Solver(algos[a]);
+                    Solver tsolver = new Solver(ALGOS[a]);
                     IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allEquals(tsolver, tvars, a);
                     tsolver.set(ISF.random_value(tvars));
@@ -82,7 +102,7 @@ public class TableTest {
 
     private void allDifferent(Solver solver, IntVar[] vars, int algo) {
         if (algo > -1) {
-            solver.post(ICF.table(vars, TuplesFactory.allDifferent(vars), algos[algo]));
+            solver.post(ICF.table(vars, TuplesFactory.allDifferent(vars), ALGOS[algo]));
         } else {
             solver.post(ICF.alldifferent(vars, "AC"));
         }
@@ -99,9 +119,9 @@ public class TableTest {
             long nbs = solver.findAllSolutions();
             long nbn = solver.getMeasures().getNodeCount();
 //            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
-            for (int a = 0; a < algos.length; a++) {
+            for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 1; s++) {
-                    Solver tsolver = new Solver(algos[a]);
+                    Solver tsolver = new Solver(ALGOS[a]);
                     IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allDifferent(tsolver, tvars, a);
                     tsolver.set(ISF.random_value(tvars));
