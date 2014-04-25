@@ -27,10 +27,10 @@
 
 package solver.constraints.extension.nary;
 
+import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * A simple way of storing the tuples as a list. This doesn't allow
@@ -41,21 +41,34 @@ import java.util.List;
  */
 public class TuplesList implements LargeRelation {
 
-    /**
-     * each tuple (a int[]) has its own index
-     *
-     * @return
-     */
+    // each tuple (a int[]) has its own index
     protected int[][] tuplesIndexes;
 
 
-    public TuplesList(List<int[]> tuples) {
-        tuplesIndexes = new int[tuples.size()][];
-        int cpt = 0;
-        for (Iterator<int[]> it = tuples.iterator(); it.hasNext(); ) {
-            tuplesIndexes[cpt] = it.next();
-            cpt++;
+    public TuplesList(Tuples tuples, int[] offsets, int[] domSizes) {
+        int nb = tuples.nbTuples();
+        int[][] _tuplesIndexes = new int[nb][];
+        int k = 0;
+        for (int i = 0; i < nb; i++) {
+            int[] tuple = tuples.get(i);
+            if (valid(tuple, offsets, domSizes)) {
+                _tuplesIndexes[k++] = tuple;
+            }
         }
+        tuplesIndexes = new int[k][];
+        System.arraycopy(_tuplesIndexes, 0, tuplesIndexes, 0, k);
+
+    }
+
+    private boolean valid(int[] tuple, int[] offsets, int[] domSizes) {
+        for (int i = 0; i < tuple.length; i++) {
+            if (!between(tuple[i], offsets[i], offsets[i] + domSizes[i])) return false;
+        }
+        return true;
+    }
+
+    private static boolean between(int v, int low, int upp) {
+        return (low <= v) && (v <= upp);
     }
 
     public int[] getTuple(int support) {
@@ -71,6 +84,10 @@ public class TuplesList implements LargeRelation {
     }
 
     public boolean isConsistent(int[] tuple) {
-        throw new SolverException("TuplesList is an unusual large relation...");
+        int i = 0;
+        while (i < tuplesIndexes.length && !Arrays.equals(tuple, tuplesIndexes[i])) {
+            i++;
+        }
+        return i < tuplesIndexes.length;
     }
 }

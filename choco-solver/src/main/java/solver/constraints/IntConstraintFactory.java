@@ -31,8 +31,8 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.binary.*;
-import solver.constraints.extension.binary.BinRelation;
-import solver.constraints.extension.binary.PropBinAC2001;
+import solver.constraints.extension.Tuples;
+import solver.constraints.extension.binary.*;
 import solver.constraints.extension.nary.*;
 import solver.constraints.nary.PropDiffN;
 import solver.constraints.nary.PropKLoops;
@@ -68,6 +68,7 @@ import solver.constraints.nary.tree.PropAntiArborescences;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
+import solver.exception.SolverException;
 import solver.variables.*;
 import util.tools.ArrayUtils;
 import util.tools.StringUtils;
@@ -97,7 +98,7 @@ public class IntConstraintFactory {
     IntConstraintFactory() {
     }
 
-    // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
+    // BEWARE: PLEASE, keep signatures sorted by increasing arity and alphabetical order!!
 
     //##################################################################################################################
     // ZEROARIES #######################################################################################################
@@ -267,15 +268,39 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Create a table constraint over a couple of variables VAR1 and VAR2, .
-     * <b>AC2001</b>: Arc Consistency version 2001.
+     * Create a table constraint over a couple of variables VAR1 and VAR2:<br/>
+     * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
+     * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
+     * - <b>AC3rm</b>: table constraint which applies the AC3 rm algorithm,<br/>
+     * - <b>AC3bit+rm</b> (default): table constraint which applies the AC3 bit+rm algorithm,<br/>
+     * - <b>FC</b>: table constraint which applies forward checking algorithm.<br/>
      *
-     * @param VAR1     first variable
-     * @param VAR2     second variable
-     * @param RELATION the relation between the two variables
+     * @param VAR1   first variable
+     * @param VAR2   second variable
+     * @param TUPLES the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "FC"}
      */
-    public static Constraint table(IntVar VAR1, IntVar VAR2, BinRelation RELATION) {
-        return new Constraint("TableBinary", new PropBinAC2001(VAR1, VAR2, RELATION));
+    public static Constraint table(IntVar VAR1, IntVar VAR2, Tuples TUPLES, String ALGORITHM) {
+        Propagator p;
+        switch (ALGORITHM) {
+            case "AC2001":
+                p = new PropBinAC2001(VAR1, VAR2, TUPLES);
+                break;
+            case "FC":
+                p = new PropBinFC(VAR1, VAR2, TUPLES);
+                break;
+            case "AC3":
+                p = new PropBinAC3(VAR1, VAR2, TUPLES);
+                break;
+            case "AC3rm":
+                p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
+                break;
+            default:
+            case "AC3bit+rm":
+                p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
+                break;
+        }
+
+        return new Constraint("TableBin(" + ALGORITHM + ")", p);
     }
 
     //##################################################################################################################
@@ -791,7 +816,7 @@ public class IntConstraintFactory {
      */
     public static Constraint inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
         if (VARS1.length != VARS2.length)
-            throw new UnsupportedOperationException(VARS1 + " and " + VARS2 + " should have same size");
+            throw new UnsupportedOperationException(Arrays.toString(VARS1) + " and " + Arrays.toString(VARS2) + " should have same size");
         boolean allEnum = true;
         for (int i = 0; i < VARS1.length && allEnum; i++) {
             if (!(VARS1[i].hasEnumeratedDomain() && VARS2[i].hasEnumeratedDomain())) {
@@ -1140,7 +1165,7 @@ public class IntConstraintFactory {
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      * <p/> SCC-based filtering
      *
-     * @param VARS
+     * @param VARS a vector of variables
      * @param OFFSET          0 by default but 1 if used within MiniZinc
      *                        (which counts from 1 to n instead of from 0 to n-1)
      * @param SUBCIRCUIT_SIZE expected number of nodes in the circuit
@@ -1258,30 +1283,56 @@ public class IntConstraintFactory {
     /**
      * Create a table constraint, with the specified algorithm defined ALGORITHM
      * <p/>
-     * <b>AC2001</b>: Arc Consistency version 2001,
+     * - <b>GAC2001</b>: Arc Consistency version 2001 for tuples,
      * <br/>
-     * <b>AC32</b>: Arc Consistency version 32,
+     * - <b>GAC2001+</b>: Arc Consistency version 2001 for allowed tuples,
      * <br/>
-     * <b>FC</b>: Forward Checking.
+     * - <b>GAC3rm</b>: Arc Consistency version AC3 rm for tuples,
+     * <br/>
+     * - <b>GAC3rm+</b> (default): Arc Consistency version 3rm for allowed tuples,
+     * <br/>
+     * - <b>GACSTR+</b>: Arc Consistency version STR for allowed tuples,
+     * <br/>
+     * - <b>FC</b>: Forward Checking.
      *
      * @param VARS      first variable
-     * @param RELATION  the relation between the two variables
-     * @param ALGORITHM to choose among {"AC2001", "AC32", "FC"}
+     * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
+     * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC"}
      */
-    public static Constraint table(IntVar[] VARS, LargeRelation RELATION, String ALGORITHM) {
+    public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
+        //TODO: vars.length == 2
+
         Propagator p;
         switch (ALGORITHM) {
             case "FC":
-                p = new PropLargeCSP(VARS, RELATION);
+                p = new PropLargeFC(VARS, TUPLES);
                 break;
-            case "AC2001":
-                p = new PropLargeGAC2001Positive(VARS, (IterTuplesTable) RELATION);
+            case "GAC3rm":
+                p = new PropLargeGAC3rm(VARS, TUPLES);
+                break;
+            case "GAC2001":
+                p = new PropLargeGAC2001(VARS, TUPLES);
+                break;
+            case "GACSTR+":
+                if (!TUPLES.isFeasible()) {
+                    throw new SolverException("GACSTR+ cannot be used with forbidden tuples.");
+                }
+                p = new PropLargeGACSTRPos(VARS, TUPLES);
+                break;
+            case "GAC2001+":
+                if (!TUPLES.isFeasible()) {
+                    throw new SolverException("GAC2001+ cannot be used with forbidden tuples.");
+                }
+                p = new PropLargeGAC2001Positive(VARS, TUPLES);
                 break;
             default:
-            case "AC32":
-                p = new PropLargeGAC3rmPositive(VARS, (IterTuplesTable) RELATION);
+            case "GAC3rm+":
+                if (!TUPLES.isFeasible()) {
+                    throw new SolverException("GAC3rm+ cannot be used with forbidden tuples.");
+                }
+                p = new PropLargeGAC3rmPositive(VARS, TUPLES);
         }
-        return new Constraint("LargeCSP", p);
+        return new Constraint("Table(" + ALGORITHM + ")", p);
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,26 +24,22 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.constraints.extension;
 
-import solver.constraints.extension.binary.BinRelation;
-
-/*
-* Created by IntelliJ IDEA.
-* User: hcambaza
-* Date: Jul 29, 2008
-* Since : Choco 2.0.0
-*
-*/
-public interface ExtensionalBinRelation extends BinRelation {
+/**
+ * An interface to implement to filter valid tuples automatically generated through TuplesFactory
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 24/04/2014
+ */
+public interface TupleValidator {
 
     /**
-     * Set the couple (x,y) as consistent
-     *
-     * @param x
-     * @param y
+     * Valid a tuple
+     * @param values tuple to valid
+     * @return a boolean
      */
-    public void setCouple(int x, int y);
+    public boolean valid(int... values);
 
 }

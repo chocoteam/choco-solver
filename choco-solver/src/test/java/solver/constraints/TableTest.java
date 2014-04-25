@@ -33,34 +33,66 @@
  */
 package solver.constraints;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.extension.nary.IterTuplesTable;
+import solver.constraints.extension.Tuples;
+import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class TableTest {
 
-	@Test(groups = "1s")
-	public void test1() {
-		List<int[]> tuples = Arrays.asList(new int[][]{
-		        {0, 0, 0},
-		        {1, 1, 1},
-		        {2, 2, 2}
-		});
-		int[] min = new int[]{0, 0, 0};
-		int[] max = new int[]{1, 1, 1};
-		IterTuplesTable relation = new IterTuplesTable(tuples, min, max);
+    @Test(groups = "1s")
+    public void test1() {
+        Tuples tuples = new Tuples(true);
+        tuples.add(0, 0, 0);
+        tuples.add(1, 1, 1);
+        tuples.add(2, 2, 2);
 
-		Solver solver = new Solver();
-		IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
-		Constraint tableConstraint = ICF.table(vars, relation, "AC2001");
-		solver.post(tableConstraint);
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+        Constraint tableConstraint = ICF.table(vars, tuples, "AC2001");
+        solver.post(tableConstraint);
 
-		solver.findSolution();
-	}
+        solver.findSolution();
+    }
+
+
+    @Test(groups = "1s")
+    public void test2() {
+        for (int i = 0; i < 10; i++) {
+            Tuples tuples = new Tuples(true);
+            tuples.add(-2, -2);
+            tuples.add(-1, -1);
+            tuples.add(0, 0);
+            tuples.add(1, 1);
+
+            Solver solver = new Solver();
+            IntVar[] vars = VF.enumeratedArray("X", 2, -1, 1, solver);
+            solver.post(ICF.table(vars[0], vars[1], tuples, "AC3bit+rm"));
+
+            solver.set(ISF.random_value(vars));
+            Assert.assertEquals(solver.findAllSolutions(), 3);
+        }
+    }
+
+    @Test(groups = "1s")
+    public void test3() {
+        for (int i = 0; i < 10; i++) {
+            Tuples tuples = new Tuples(true);
+            tuples.add(-2, -2);
+            tuples.add(-1, -1);
+            tuples.add(0, 0);
+            tuples.add(1, 1);
+
+            Solver solver = new Solver();
+            IntVar[] vars = VF.enumeratedArray("X", 2, -1, 1, solver);
+            solver.post(ICF.table(vars[0], vars[1], tuples, "AC2001"));
+
+            solver.set(ISF.random_value(vars));
+            Assert.assertEquals(solver.findAllSolutions(), 3);
+        }
+    }
 
 }

@@ -26,25 +26,17 @@
  */
 package solver.constraints.extension.nary;
 
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.extension.FastBooleanValidityChecker;
-import solver.constraints.extension.FastValidityChecker;
-import solver.constraints.extension.ValidityChecker;
+import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Hadrien Cambazard
  * @since 08/06/11
  */
-public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
-
-    protected final IterTuplesTable relation;
+public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
 
     /**
      * supports[i][j stores the index of the tuple that currently support
@@ -72,17 +64,16 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
-        super(vars, PropagatorPriority.QUADRATIC, true);
-        this.relation = relation;
+    public PropLargeGAC3rmPositive(IntVar[] vars, Tuples tuples) {
+        super(vars, tuples);
         this.arity = vars.length;
         this.offsets = new int[arity];
-        this.tab = relation.getTableLists();
         this.supports = new int[arity][];
         for (int i = 0; i < arity; i++) {
             this.offsets[i] = vars[i].getLB();
-            this.supports[i] = new int[vars[i].getUB() - vars[i].getLB() + 1];
+            this.supports[i] = new int[vars[i].getDomainSize()];
         }
+        this.tab = relation.getTableLists();
         int[][] tt = relation.getTupleTable();
         boolean fastValidCheckAllowed = true;
         boolean fastBooleanValidCheckAllowed = true;
@@ -112,8 +103,8 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
+    protected IterTuplesTable makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
+        return new IterTuplesTable(tuples, offsets, dsizes);
     }
 
     @Override
@@ -128,54 +119,9 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
         filter(vIdx);
     }
 
-    /*@Override
-    public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            int[] tuple = new int[vars.length];
-            for (int i = 0; i < vars.length; i++) {
-                tuple[i] = vars[i].getValue();
-            }
-            return ESat.eval(relation.isConsistent(tuple));
-        }
-        return ESat.UNDEFINED;
-    }*/
-    @Override
-    public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            int[] tuple = new int[vars.length];
-            for (int i = 0; i < vars.length; i++) {
-                tuple[i] = vars[i].getValue();
-            }
-
-            int minListIdx = -1;
-            int minSize = Integer.MAX_VALUE;
-            for (int i = 0; i < tuple.length; i++) {
-                if (tab[i][tuple[i] - offsets[i]].length < minSize) {
-                    minSize = tab[i][tuple[i] - offsets[i]].length;
-                    minListIdx = i;
-                }
-            }
-            int currentIdxSupport;
-            int[] currentSupport;
-            int nva = tuple[minListIdx] - relation.getRelationOffset(minListIdx);
-            for (int i = 0; i < tab[minListIdx][nva].length; i++) {
-                currentIdxSupport = tab[minListIdx][nva][i];
-                currentSupport = relation.getTuple(currentIdxSupport);
-                boolean isValid = true;
-                for (int j = 0; isValid && j < tuple.length; j++) {
-                    if (tuple[j] != currentSupport[j]) {
-                        isValid = false;
-                    }
-                }
-                if (isValid) return ESat.TRUE;
-            }
-            return ESat.FALSE;
-
-        }
-        return ESat.UNDEFINED;
-    }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * initialize the residual supports of each pair to their
@@ -206,8 +152,6 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     /**
      * set the support using multidirectionality
      *
-     * @param idxSupport
-     * @return the residual support
      */
     protected void setSupport(final int idxSupport) {
         int[] tuple = relation.getTuple(idxSupport);
@@ -217,7 +161,6 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     }
 
     /**
-     * @param indexVar
      * @param value    with offset removed
      * @return the residual support
      */
@@ -229,7 +172,6 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
      * updates the support for all values in the domain of variable
      * and remove unsupported values for variable
      *
-     * @param indexVar
      * @throws ContradictionException
      */
     protected void reviseVar(final int indexVar) throws ContradictionException {
