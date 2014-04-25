@@ -27,7 +27,6 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.ISearchLoop;
 import solver.search.loop.TimeStampedObject;
@@ -64,13 +63,6 @@ public class SetDelta extends TimeStampedObject implements ISetDelta {
 		throw new UnsupportedOperationException();
 	}
 
-    @Override
-    public void clear() {
-        delta[0].clear();
-        delta[1].clear();
-        resetStamp();
-    }
-
 	@Override
     public int getSize(int kerOrEnv) {
         return delta[kerOrEnv].size();
@@ -78,16 +70,16 @@ public class SetDelta extends TimeStampedObject implements ISetDelta {
 
 	@Override
     public void add(int element, int kerOrEnv, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         delta[kerOrEnv].add(element, cause);
     }
 
 	@Override
     public void lazyClear() {
         if (needReset()) {
-            clear();
+			delta[0].lazyClear();
+			delta[1].lazyClear();
+			resetStamp();
         }
     }
 

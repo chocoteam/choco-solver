@@ -47,11 +47,6 @@ public interface IDelta extends Serializable {
     int size();
 
     /**
-     * Clear the delta
-     */
-    void clear();
-
-    /**
      * Lazy clear the delta, on world change
      */
     void lazyClear();

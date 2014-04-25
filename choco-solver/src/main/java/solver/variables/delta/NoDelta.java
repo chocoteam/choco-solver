@@ -44,9 +44,6 @@ public enum NoDelta implements IEnumDelta, IIntervalDelta, ISetDelta {
     public void add(int value, ICause cause) {}
 
     @Override
-    public void clear() {}
-
-    @Override
     public void lazyClear() {}
 
     @Override
