@@ -40,18 +40,6 @@ import java.io.Serializable;
 public interface IDelta extends Serializable {
 
     /**
-     * Returns the number of element
-     *
-     * @return number of element
-     */
-    int size();
-
-    /**
-     * Clear the delta
-     */
-    void clear();
-
-    /**
      * Lazy clear the delta, on world change
      */
     void lazyClear();

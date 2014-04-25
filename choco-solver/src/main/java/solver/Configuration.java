@@ -140,9 +140,6 @@ public enum Configuration {
     // force : extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available
     public static final Idem IDEMPOTENCY = Idem.valueOf(properties.getProperty("IDEMPOTENCY"));
 
-    // Set to true to activate lazy update of deltas and generators
-    public static final boolean LAZY_UPDATE = true;
-
     // Defines the rounding precision for multicostregular algorithm
     // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
     public static final int MCR_PRECISION = Integer.parseInt(properties.getProperty("MCR_PRECISION"));

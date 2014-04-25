@@ -30,7 +30,7 @@ import java.io.Serializable;
 
 /**
  * A delta monitor.
- * It is based on a specific delta and stores some specific informations about it.
+ * It is based on a specific delta and stores some specific information about it.
  * It can freeze it.
  * <br/>
  *
@@ -43,22 +43,14 @@ public interface IDeltaMonitor extends Serializable {
 
     void unfreeze();
 
-    void clear();
-
     public static enum Default implements IDeltaMonitor {
         NONE() {
-            @Override
-            public void freeze() {
-            }
 
             @Override
-            public void unfreeze() {
-            }
+            public void freeze() {}
 
             @Override
-            public void clear() {
-            }
+            public void unfreeze() {}
         }
     }
-
 }

@@ -56,7 +56,6 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     IIntDeltaMonitor deltamonitor;
     protected ICause propagator;
     protected TIntArrayList values;
-    protected ArrayList<ICause> causes;
     protected Filler filler;
 
     public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor, ICause propagator) {
@@ -65,7 +64,6 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
         values = new TIntArrayList(8);
         filler = new Filler();
     }
-
 
     @Override
     public void freeze() {
@@ -78,16 +76,9 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-    public void clear() {
-        this.deltamonitor.clear();
-    }
-
-
-    @Override
     public void forEach(SafeIntProcedure proc, EventType eventType) {
         values.clear();
         deltamonitor.forEach(filler, eventType);
-        filter();
         for (int v = 0; v < values.size(); v++) {
             proc.execute(transform(values.toArray()[v]));
         }
@@ -97,16 +88,10 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
         values.clear();
         deltamonitor.forEach(filler, eventType);
-        filter();
         for (int v = 0; v < values.size(); v++) {
             proc.execute(transform(values.toArray()[v]));
         }
     }
 
-    protected void filter() {
-        // nothing to do
-    }
-
     protected abstract int transform(int value);
-
 }

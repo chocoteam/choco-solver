@@ -36,8 +36,8 @@ package solver.search.loop;
  */
 public abstract class TimeStampedObject {
 
-	protected int timestamp = -1;
-	protected final ISearchLoop loop;
+	private int timestamp = -1;
+	private final ISearchLoop loop;
 
 	public TimeStampedObject(ISearchLoop loop) {
 		this.loop = loop;
