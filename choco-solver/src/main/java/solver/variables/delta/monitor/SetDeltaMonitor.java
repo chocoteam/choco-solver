@@ -58,7 +58,12 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
 
     @Override
     public void freeze() {
-        lazyClear();
+		if (needReset()) {
+			for (int i = 0; i < 2; i++) {
+				this.first[i] = last[i] = 0;
+			}
+			resetStamp();
+		}
         for (int i = 0; i < 2; i++) {
             this.frozenFirst[i] = first[i]; // freeze indices
             this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
@@ -71,21 +76,6 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
         resetStamp();
         for (int i = 0; i < 2; i++) {
             this.first[i] = last[i] = delta.getSize(i);
-        }
-    }
-
-    @Override
-    public void lazyClear() {
-		if (needReset()) {
-			clear();
-			resetStamp();
-		}
-    }
-
-    @Override
-    public void clear() {
-        for (int i = 0; i < 2; i++) {
-            this.first[i] = last[i] = 0;
         }
     }
 

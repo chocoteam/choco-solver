@@ -36,8 +36,6 @@ import util.procedure.IntProcedure;
  */
 public interface ISetDeltaMonitor extends IDeltaMonitor {
 
-	void lazyClear();
-
 	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException;
 
 	public static enum Default implements ISetDeltaMonitor {
@@ -46,10 +44,6 @@ public interface ISetDeltaMonitor extends IDeltaMonitor {
 			public void freeze() {}
 			@Override
 			public void unfreeze() {}
-			@Override
-			public void clear() {}
-			@Override
-			public void lazyClear() {}
 			@Override
 			public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {}
 		}

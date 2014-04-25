@@ -61,7 +61,12 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 
     @Override
     public void freeze() {
-        lazyClear();
+		if (needReset()) {
+			for (int i = 0; i < 4; i++) {
+				this.first[i] = last[i] = 0;
+			}
+			resetStamp();
+		}
         for (int i = 0; i < 3; i++) {
             this.frozenFirst[i] = first[i]; // freeze indices
             this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
@@ -78,25 +83,6 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
             this.first[i] = last[i] = delta.getSize(i);
         }
         this.first[3] = last[3] = delta.getSize(IGraphDelta.AE_tail);
-    }
-
-    public void lazyClear() {
-		if (needReset()) {
-			clear();
-			resetStamp();
-		}
-    }
-
-    @Override
-    public void clear() {
-        for (int i = 0; i < 4; i++) {
-            this.first[i] = last[i] = 0;
-        }
-    }
-
-    @Deprecated
-    public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
-        throw new UnsupportedOperationException("use forEachNode or forEachArc instead");
     }
 
     @Override
