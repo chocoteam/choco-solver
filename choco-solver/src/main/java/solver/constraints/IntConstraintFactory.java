@@ -978,7 +978,7 @@ public class IntConstraintFactory {
      * Creates a path constraint which ensures that
      * <p/> the elements of VARS define a covering path from START to END
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
-     * <p/> Therefore, VARS[END] = |VARS|+OFFSET
+     * <p/> Moreover, VARS[END-OFFSET] = |VARS|+OFFSET
      * <p/> Requires : |VARS|>0
      * <p/>
      * Filtering algorithms: see circuit constraint
@@ -1192,7 +1192,7 @@ public class IntConstraintFactory {
      * <p/> the elements of VARS define a path of SIZE vertices, leading from START to END
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> where VARS[i] = OFFSET+i means that vertex i is excluded from the path.
-     * <p/> Therefore, VARS[END] = |VARS|+OFFSET
+     * <p/> Moreover, VARS[END-OFFSET] = |VARS|+OFFSET
      * <p/> Requires : |VARS|>0
      * <p/>
      * Filtering algorithms: see subcircuit constraint
