@@ -106,7 +106,7 @@ public class HamiltonianPathTest {
         IMeasures mes = solver.getMeasures();
 
         // the problem has at least one solution
-        Assert.assertFalse(mes.getSolutionCount() == 0 && mes.getTimeCount() < TIME_LIMIT);
+        Assert.assertFalse(mes.getSolutionCount() == 0 && mes.getTimeCount() < TIME_LIMIT/1000);
     }
 
     private static boolean[][] transformMatrix(boolean[][] m) {
