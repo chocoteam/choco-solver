@@ -324,6 +324,7 @@ public class IntConstraintFactory {
 
     /**
      * Ensures DIVIDEND / DIVISOR = RESULT, rounding towards 0 -- Euclidean division
+	 * Also ensures DIVISOR != 0
      *
      * @param DIVIDEND dividend
      * @param DIVISOR  divisor

@@ -167,13 +167,62 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
+		// forbid Y=0
+		if(Y.isInstantiatedTo(0)){
+			return ESat.FALSE;
+		}
+		// X=0 => Z=0
+		if(X.isInstantiatedTo(0) && !Z.contains(0)){
+			return ESat.FALSE;
+		}
+		// check sign
+		boolean pos = (X.getLB()>=0 && Y.getLB()>=0) || (X.getUB()<0 && Y.getUB()<0);
+		if(pos && Z.getUB()<0){
+			return ESat.FALSE;
+		}
+		boolean neg = (X.getLB()>=0 && Y.getUB()<0) || (X.getUB()<0 && Y.getLB()>=0);
+		if(neg && Z.getLB()>0){
+			return ESat.FALSE;
+		}
+		// compute absolute bounds
+		int minAbsX;
+		if(X.getLB()>0){
+			minAbsX = X.getLB();
+		} else if(X.getUB()<0){
+			minAbsX = -X.getUB();
+		} else{
+			minAbsX = 0;
+		}
+		int maxAbsX = Math.max(X.getUB(),-X.getLB());
+		int minAbsY;
+		if(Y.getLB()>0){
+			minAbsY = Y.getLB();
+		} else if(Y.getUB()<0){
+			minAbsY = -Y.getUB();
+		} else{
+			minAbsY = 1;
+		}
+		int maxAbsY = Math.max(Y.getUB(),-Y.getLB());
+		int minAbsZ;
+		if(Z.getLB()>0){
+			minAbsZ = Z.getLB();
+		} else if(Z.getUB()<0){
+			minAbsZ = -Z.getUB();
+		} else{
+			minAbsZ = 0;
+		}
+		int maxAbsZ = Math.max(Z.getUB(),-Z.getLB());
+		// check absolute bounds
+		if((minAbsZ>maxAbsX/minAbsY) || (maxAbsZ<minAbsX/maxAbsY)){
+			return ESat.FALSE;
+		}
+		// check case Z=0
+		if((Z.isInstantiatedTo(0) && minAbsX > maxAbsY) || (maxAbsX < minAbsY && !Z.contains(0))){
+			return ESat.FALSE;
+		}
+		// check tuple
         if (isCompletelyInstantiated()) {
             return ESat.eval(X.getValue() / Y.getValue() == Z.getValue());
-        }
-        if (Y.isInstantiated() && Z.isInstantiatedTo(0)) {
-            int xx = Math.max(Math.abs(X.getLB()), Math.abs(X.getUB()));
-            int yy = Math.abs(Y.getValue());
-            return ESat.eval(xx < yy);
         }
         return ESat.UNDEFINED;
     }
