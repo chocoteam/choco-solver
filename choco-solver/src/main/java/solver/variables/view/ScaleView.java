@@ -122,6 +122,9 @@ public final class ScaleView extends IntView {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
+        if (value % cste != 0) {
+            contradiction(cause, EventType.INSTANTIATE, "Not a multiple of " + cste);
+        }
         boolean done = var.instantiateTo(value / cste, this);
         if (done) {
             notifyPropagators(EventType.INSTANTIATE, cause);
@@ -198,7 +201,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public int nextValue(int v) {
-        int value = var.nextValue(v / cste);
+        int value = var.nextValue(MathUtils.divFloor(v , cste));
         if (value == Integer.MAX_VALUE) {
             return value;
         }
@@ -207,7 +210,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public int previousValue(int v) {
-        int value = var.previousValue(v / cste);
+        int value = var.previousValue(MathUtils.divCeil(v, cste));
         if (value == Integer.MIN_VALUE) {
             return Integer.MIN_VALUE;
         }
