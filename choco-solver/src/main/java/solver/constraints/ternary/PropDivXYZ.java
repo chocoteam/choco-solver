@@ -173,7 +173,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
         if (Y.isInstantiated() && Z.isInstantiatedTo(0)) {
             int xx = Math.max(Math.abs(X.getLB()), Math.abs(X.getUB()));
             int yy = Math.abs(Y.getValue());
-            return ESat.eval(xx < yy);
+            if (xx < yy) return ESat.TRUE;
         }
         return ESat.UNDEFINED;
     }
