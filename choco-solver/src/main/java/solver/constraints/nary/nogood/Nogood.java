@@ -158,9 +158,7 @@ public class Nogood implements INogood {
         int c = 0;
         for (int i = 0; i < vars.length; i++) {
             if (vars[i].contains(values[i])) {
-                if (!vars[i].isInstantiated()) {
-                    return ESat.TRUE;
-                } else {
+                if (vars[i].isInstantiated()) {
                     c++;
                 }
             } else {
