@@ -26,7 +26,6 @@
  */
 package solver.constraints.nary.cumulative;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -81,7 +80,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							   boolean fast, Cumulative.Filter... filters) {
 		super(s, d, e, h, capa,true,fast, filters);
-		this.g = new UndirectedGraph(solver.getEnvironment(), n, SetType.BITSET, true);
+		this.g = new UndirectedGraph(n, SetType.BITSET, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
 	}
@@ -144,7 +143,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 		ISet env = g.getNeighborsOf(taskIndex);
 		for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
 			if (disjoint(taskIndex, i)) {
-				g.removeEdge(taskIndex, i);
+//				g.removeEdge(taskIndex, i);
 			} else {
 				tasks.add(i);
 			}
