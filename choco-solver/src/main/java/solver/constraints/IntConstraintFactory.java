@@ -670,11 +670,31 @@ public class IntConstraintFactory {
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY, boolean INCREMENTAL) {
         // Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
         boolean addHeights = false;
-        for (int h = 0; h < HEIGHTS.length && !addHeights; h++) {
+		int nbUseFull = 0;
+        for (int h = 0; h < HEIGHTS.length; h++) {
             if (!HEIGHTS[h].isInstantiated()) {
                 addHeights = true;
             }
+			if(!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))){
+				nbUseFull++;
+			}
         }
+		// remove tasks which have no impact on resource
+		if(nbUseFull<TASKS.length){
+			if(nbUseFull==0)return arithm(CAPACITY,">=",0);
+			Task[] T2 = new Task[nbUseFull];
+			IntVar[] H2 = new IntVar[nbUseFull];
+			int idx = 0;
+			for (int h = 0; h < HEIGHTS.length; h++) {
+				if(!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))){
+					T2[idx] = TASKS[h];
+					H2[idx] = HEIGHTS[h];
+					idx++;
+				}
+			}
+			TASKS = T2;
+			HEIGHTS = H2;
+		}
         Cumulative.Filter[] filters = new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
         if (addHeights) {
             filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
