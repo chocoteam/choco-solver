@@ -1,5 +1,3 @@
-todo
-
 Graph constraints
 ~~~~~~~~~~~~~~~~~
 
