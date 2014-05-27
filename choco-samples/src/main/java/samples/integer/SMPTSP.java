@@ -40,7 +40,7 @@ import solver.variables.VF;
 
 /**
  * simple CP model to solve a toy SMPTSP instance
- * (see Fages and Lapègue, CP'13 or Artificial Intelligence journal)
+ * (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
  * Enumeration of all optimal solutions
  *
  * @since 01/01/2014
