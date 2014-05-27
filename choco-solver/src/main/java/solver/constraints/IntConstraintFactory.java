@@ -987,7 +987,7 @@ public class IntConstraintFactory {
      *                "at_least_AC", domain filtering algorithm derivated from (Soft)AllDifferent for AtLeastNValue
      *                <p/>
      *                "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
-     *                (see Fages and Lapègue, CP'13 or Artificial Intelligence journal)
+     *                (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
      *                automatically detects disequalities and alldifferent constraints.
      *                Presumably useful when NVALUES must be minimized.
      */
