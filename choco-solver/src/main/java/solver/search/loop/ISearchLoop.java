@@ -27,7 +27,11 @@
 
 package solver.search.loop;
 
+import solver.objective.ObjectiveManager;
 import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.SearchMonitorList;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.strategy.AbstractStrategy;
 
 import java.io.Serializable;
 
@@ -39,22 +43,112 @@ import java.io.Serializable;
  */
 public interface ISearchLoop extends Serializable {
 
-    /**
-     * Launch the resolution of the problem described in a Solver.
-     *
-     * @param stopAtFirst should stop at first solution
-     */
-    void launch(boolean stopAtFirst);
+	static final int INIT = 0;
+	static final int INITIAL_PROPAGATION = 1;
+	static final int OPEN_NODE = 1 << 1;
+	static final int DOWN_LEFT_BRANCH = 1 << 2;
+	static final int DOWN_RIGHT_BRANCH = 1 << 3;
+	static final int UP_BRANCH = 1 << 4;
+	static final int RESTART = 1 << 5;
+	static final int RESUME = 1 << 6;
 
-    /**
-     * Resume the resolution of the problem described in a Solver.
-     */
-    void resume();
+	static final String MSG_LIMIT = "a limit has been reached";
+	static final String MSG_ROOT = "the entire search space has been explored";
+	static final String MSG_CUT = "applying the cut leads to a failure";
+	static final String MSG_FIRST_SOL = "stop at first solution";
+	static final String MSG_INIT = "failure encountered during initial propagation";
+	static final String MSG_SEARCH_INIT = "search strategy detects inconsistency";
 
-    /**
-     * Branch a search monitor
-     *
-     * @param sm
-     */
-    void plugSearchMonitor(ISearchMonitor sm);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////// RESOLUTION /////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Launch the resolution of the problem described in a Solver.
+	 *
+	 * @param stopAtFirst should stop at first solution
+	 */
+	void launch(boolean stopAtFirst);
+
+	/**
+	 * Resume the resolution of the problem described in a Solver.
+	 */
+	void resume();
+
+	/**
+	 * This method enables to solve a problem another time:
+	 * <ul>
+	 * <li>It backtracks up to the root node of the search tree,</li>
+	 * <li>it sets the objective manager to null,</li>
+	 * <li>it resets the measures to 0,</li>
+	 * <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
+	 * </ul>
+	 */
+	void reset();
+
+	/**
+	 * Sets the following action in the search to be a restart instruction.
+	 * Note that the restart may not be immediate
+	 */
+	void restart();
+
+	/**
+	 * Retrieves the state of the root node (after the initial propagation)
+	 * Has an immediate effect
+	 */
+	void restoreRootNode();
+
+	/**
+	 * Force the search to stop
+	 *
+	 * @param msgNgood a message to motivate the interruption -- for logging only
+	 */
+	void interrupt(String msgNgood);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Branch a search monitor
+	 *
+	 * @param sm
+	 */
+	void plugSearchMonitor(ISearchMonitor sm);
+
+	void set(AbstractStrategy strategy);
+
+	void setObjectiveManager(ObjectiveManager om);
+
+	void reachLimit();
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	ObjectiveManager getObjectiveManager();
+
+	AbstractStrategy getStrategy();
+
+	boolean hasReachedLimit();
+
+	int getTimeStamp();
+
+	Decision getLastDecision();
+
+	int getCurrentDepth();
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////// TEMPORARY //////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	SearchMonitorList getSMList();
+
+	void forceAlive(boolean b);
+
+	void setLastDecision(Decision cobdec);
+
+	void overridePreviousWorld(int i);
+
+	void moveTo(int nextState);
 }

@@ -50,7 +50,7 @@ public class PropBiconnected extends Propagator<UndirectedGraphVar> {
 
     private UndirectedGraphVar g;
     private ConnectivityFinder env_CC_finder;
-
+	int timestamp = 0;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -73,15 +73,12 @@ public class PropBiconnected extends Propagator<UndirectedGraphVar> {
         }
     }
 
-    long timestamp = 0;
-
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (timestamp != solver.getSearchLoop().timeStamp) {
-            timestamp = solver.getSearchLoop().timeStamp;
+        if (timestamp != solver.getSearchLoop().getTimeStamp()) {
+            timestamp = solver.getSearchLoop().getTimeStamp();
             propagate(0);
-        }
-        // todo incremental behavior ?
+        } // todo incremental behavior ?
     }
 
     //***********************************************************************************

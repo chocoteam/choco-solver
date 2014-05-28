@@ -29,8 +29,10 @@ package samples.integer;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.IntStrategyFactory;
+import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.tools.StringUtils;
@@ -62,32 +64,34 @@ public class CostasArrays extends AbstractProblem {
         solver = new Solver("CostasArrays");
     }
 
-    @Override
-    public void buildModel() {
-        vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
-        vectors = new IntVar[n * n - n];
-        int idx = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i != j) {
+	@Override
+	public void buildModel() {
+		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+		vectors = new IntVar[(n*(n-1))/2];
+		IntVar[][] diff = new IntVar[n][n];
+		int idx = 0;
+		for (int i = 0; i < n; i++) {
+			for (int j = i+1; j < n; j++) {
+				IntVar k = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
+				solver.post(ICF.arithm(k,"!=",0));
+				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
+				vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
+				diff[i][j] = k;
+				idx++;
+			}
+		}
+		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+		solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
 
+		// symmetry-breaking
+		solver.post(ICF.arithm(vars[0],"<",vars[n-1]));
+	}
 
-					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
-					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
-                    idx++;
-                }
-            }
-        }
-        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
-        solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
-    }
-
-    @Override
-    public void configureSearch() {
-        solver.set(IntStrategyFactory.random_bound(vectors,0));
-    }
-
+	@Override
+	public void configureSearch() {
+		SMF.limitTime(solver,20000);
+		solver.set(ISF.lexico_LB(vectors));
+	}
 
     @Override
     public void solve() {

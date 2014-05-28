@@ -27,10 +27,11 @@
 
 package solver.constraints.extension.nary;
 
+import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * A simple way of storing the tuples as a list. This doesn't allow
@@ -39,23 +40,38 @@ import java.util.List;
  * This simple way of storing supports only allow fast iteration over the all
  * set of tuples and is used by STR gac scheme.
  */
-public class TuplesList implements LargeRelation {
+public class TuplesList extends LargeRelation {
 
-    /**
-     * each tuple (a int[]) has its own index
-     *
-     * @return
-     */
+    // each tuple (a int[]) has its own index
     protected int[][] tuplesIndexes;
 
-
-    public TuplesList(List<int[]> tuples) {
-        tuplesIndexes = new int[tuples.size()][];
-        int cpt = 0;
-        for (Iterator<int[]> it = tuples.iterator(); it.hasNext(); ) {
-            tuplesIndexes[cpt] = it.next();
-            cpt++;
+    protected static final Comparator<int[]> TCOMP = new Comparator<int[]>() {
+        @Override
+        public int compare(int[] o1, int[] o2) {
+            int n = o1.length;
+            int i = 0;
+            while (i < n && o1[i] == o2[i]) i++;
+            if (i == n) return 0;
+            if (o1[i] < o2[i]) return -1;
+            return 1;
         }
+    };
+
+
+    public TuplesList(Tuples tuples, int[] offsets, int[] domSizes) {
+        int nb = tuples.nbTuples();
+        int[][] _tuplesIndexes = new int[nb][];
+        int k = 0;
+        for (int i = 0; i < nb; i++) {
+            int[] tuple = tuples.get(i);
+            if (valid(tuple, offsets, domSizes)) {
+                _tuplesIndexes[k++] = tuple;
+            }
+        }
+        tuplesIndexes = new int[k][];
+        System.arraycopy(_tuplesIndexes, 0, tuplesIndexes, 0, k);
+        Arrays.sort(tuplesIndexes, TCOMP);
+
     }
 
     public int[] getTuple(int support) {
@@ -71,6 +87,7 @@ public class TuplesList implements LargeRelation {
     }
 
     public boolean isConsistent(int[] tuple) {
-        throw new SolverException("TuplesList is an unusual large relation...");
+        return Arrays.binarySearch(tuplesIndexes, tuple, TCOMP) >= 0;
     }
+
 }

@@ -27,40 +27,31 @@
 
 package solver.constraints.extension.nary;
 
-/**
- * A large relation that provides the seekNextSupport function from
- * a given support of given pair var/val and indexes the tuples
- * by integers to store (eventually) the support as StoredInt
- */
-public interface IterLargeRelation {
+import solver.variables.IntVar;
 
-    /**
-     * seek from the next support available from the index of the
-     * old support and the pair variable/value given in argument
-     *
-     * @param oldIdxSupport
-     * @param var
-     * @param val
-     * @return
-     */
-    public int seekNextTuple(int oldIdxSupport, int var, int val);
+/*
+* Created by IntelliJ IDEA.
+* User: hcambaza
+* Date: Jul 31, 2008
+* Since : Choco 2.0.0
+*
+*/
+public final class FastValidityChecker extends ValidityChecker {
 
+    public FastValidityChecker(int arity, IntVar[] vars) {
+        super(arity, vars);
+    }
 
-    /**
-     * return the tuple corresponding to the given index
-     *
-     * @param support
-     * @return
-     */
-    public int[] getTuple(int support);
+    // Is tuple valide ?
+    public final boolean isValid(final int[] tuple) {
+        for (int i = 0; i < arity; i++)
+            if (!sortedvs[i].contains(tuple[position[i]]))
+                return false;
+        return true;
+    }
 
+    public boolean isValid(int[] tuple, int i) {
+        return sortedvs[i].contains(tuple[position[i]]);
+    }
 
-    /**
-     * returns the number of supports for the pair (var,val)
-     *
-     * @param var
-     * @param val
-     * @return
-     */
-    public int getNbSupport(int var, int val);
 }

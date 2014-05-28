@@ -308,7 +308,7 @@ public class Visualization implements IMonitorClose, IMonitorInitialize, IMonito
 
     void node() {
         node_id++;
-        Decision currentDecision = solver.getSearchLoop().decision;
+        Decision currentDecision = solver.getSearchLoop().getLastDecision();
         if (tree.isInfoEnabled()) {
             Object bo = currentDecision.getDecisionVariable();
             String name = bo.toString();

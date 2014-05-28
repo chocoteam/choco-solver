@@ -27,6 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.ICause;
+
 /**
  * An empty interface for delta dedicated to integer variable
  * <br/>
@@ -36,4 +38,19 @@ package solver.variables.delta;
  */
 public interface IntDelta extends IDelta {
 
+	/**
+	 * Returns the number of element
+	 *
+	 * @return number of element
+	 */
+	int size();
+
+	/**
+	 * Return the cause of the idx^th cause stored in the delta, if any
+	 *
+	 * @param idx rank of the interval
+	 * @return cause of the removal
+	 * @throws IndexOutOfBoundsException if idx is out of the bounds
+	 */
+	ICause getCause(int idx) throws IndexOutOfBoundsException;
 }

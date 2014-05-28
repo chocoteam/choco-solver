@@ -25,7 +25,7 @@ The CHANGES.md file starts at this version.
 * Fix #143: Dow/WDeg is now supporting propagator hot addition
 * Fix #144: setObjectiveOptimal(...) in searchLoop.close() is correct
 
-????
+3.2.0 - 28 May 2014
 -------------------
 * Fix #148: update release script
 * Refactoring  #149
@@ -87,3 +87,14 @@ The CHANGES.md file starts at this version.
 - Catch some particular cases of times in the factory
 - AC guaranteed for times(X,Y,Z) constraint when Y is a constant
 - Add path and subpath constraints, holding on integer variables
+- Add SORT constraint
+- Changes measure, times are now in second
+* Fix#199: some deltamonitors were desynchronized with delta
+
+3.2.1-SNAPSHOT - 28 May 2014
+-------------------
+
+
+????
+-------------------
+

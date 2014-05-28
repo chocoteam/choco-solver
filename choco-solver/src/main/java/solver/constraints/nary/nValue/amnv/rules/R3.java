@@ -52,6 +52,7 @@ public class R3 implements R {
 	// VARIABLES
 	//***********************************************************************************
 
+	private int n;
 	private int[] valToRem;
 	private ISet[] learntEqualities;
 
@@ -59,16 +60,21 @@ public class R3 implements R {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public void filter(IntVar[] vars, G graph, F heur, Propagator aCause) throws ContradictionException{
-		int n = vars.length-1;
-		if(valToRem == null) {
-			valToRem = new int[31];
-			learntEqualities = new ISet[n];
-			IEnvironment env = aCause.getSolver().getEnvironment();
-			for(int i=0;i<n;i++){
-				learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET,n,env);
-			}
+	public R3(int nbDecVars, IEnvironment environment){
+		n = nbDecVars;
+		valToRem = new int[31];
+		learntEqualities = new ISet[n];
+		for(int i=0;i<n;i++){
+			learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET,n,environment);
 		}
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	public void filter(IntVar[] vars, G graph, F heur, Propagator aCause) throws ContradictionException{
+		assert  n == vars.length-1;
 		BitSet mis = heur.getMIS();
 		if(mis.cardinality()==vars[n].getUB()){
 			ISet nei;

@@ -184,7 +184,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
                 notFrozen.clear(idx);
             }
         }
-        assert mSolver.getSearchLoop().decision == RootDecision.ROOT;
+        assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
         // add the first refuted decisions
         int first = notFrozen.nextSetBit(0);
         for (int i = (first>-1?refuted.nextSetBit(first):first); i > -1; i = refuted.nextSetBit(i + 1)) {
@@ -239,7 +239,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().decision.getId() == last.getId()) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
             mSolver.getSearchLoop().restart();
         }
     }
@@ -360,7 +360,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
      * Compute the initial fragment, ie set of decisions to keep.
      */
     private void clonePath() {
-        Decision dec = mSolver.getSearchLoop().decision;
+        Decision dec = mSolver.getSearchLoop().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();

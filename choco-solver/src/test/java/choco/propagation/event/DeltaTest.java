@@ -32,9 +32,10 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.set.SCF;
 import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.search.strategy.ISF;
+import solver.variables.*;
 import solver.variables.delta.EnumDelta;
 
 /**
@@ -71,6 +72,22 @@ public class DeltaTest {
 
         Assert.assertFalse(y.contains(4));
 
+    }
+
+    @Test(groups="1s")
+    public void testJL() {
+        Solver solver = new Solver();
+        final SetVar s0 = VF.set("s0", 0, 1, solver);
+        final BoolVar b0 = VF.bool("b0", solver);
+        final BoolVar b1 = VF.bool("b1", solver);
+        final IntVar i0 = VF.bool("i0", solver);
+        solver.set(ISF.lexico_LB(i0));
+        solver.post(SCF.bool_channel(new BoolVar[]{b0, b1}, s0, 0));
+        solver.post(SCF.cardinality(s0, VF.fixed(0, solver)));
+
+        solver.findSolution();
+        solver.getSearchLoop().reset();
+        solver.findSolution();
     }
 
 }

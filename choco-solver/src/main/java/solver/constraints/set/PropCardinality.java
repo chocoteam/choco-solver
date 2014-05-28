@@ -106,11 +106,6 @@ public class PropCardinality extends Propagator<Variable> {
     }
 
     @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public ESat isEntailed() {
         int k = set.getKernelSize();
         int e = set.getEnvelopeSize();

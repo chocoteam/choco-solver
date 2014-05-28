@@ -90,7 +90,7 @@ public class PropMaxElement extends Propagator<Variable> {
 	 *                 false : the set may be empty (if so, the MAX constraint is not applied)
      */
     public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, boolean notEmpty) {
-        super(new Variable[]{setVar, max}, PropagatorPriority.BINARY, true);
+        super(new Variable[]{setVar, max}, PropagatorPriority.BINARY, false);
         this.max = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.weights = weights;
@@ -128,11 +128,6 @@ public class PropMaxElement extends Propagator<Variable> {
 		if(notEmpty || set.getKernelSize()>0){
 			max.updateUpperBound(maxVal, aCause);
 		}
-    }
-
-    @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override

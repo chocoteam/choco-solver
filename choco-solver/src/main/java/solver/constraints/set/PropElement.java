@@ -78,7 +78,7 @@ public class PropElement extends Propagator<Variable> {
      * @param set
      */
     public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set) {
-        super(ArrayUtils.append(array, new Variable[]{set, index}), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(array, new Variable[]{set, index}), PropagatorPriority.LINEAR, false);
         this.index = (IntVar) vars[vars.length - 1];
         this.set = (SetVar) vars[vars.length - 2];
         this.array = new SetVar[array.length];
@@ -92,11 +92,6 @@ public class PropElement extends Propagator<Variable> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
-    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {

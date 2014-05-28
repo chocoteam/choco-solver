@@ -25,40 +25,70 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.extension;
+package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.variables.IntVar;
 
-/*
-* Created by IntelliJ IDEA.
-* User: hcambaza
-* Date: Jul 31, 2008
-* Since : Choco 2.0.0
-*
-*/
-public final class FastBooleanValidityChecker extends ValidityChecker {
+import java.util.Arrays;
+import java.util.Comparator;
 
-    public FastBooleanValidityChecker(int arity, IntVar[] vars) {
-        super(arity, vars);
+/**
+ * A simple class that provides a method to check if a given
+ * tuple is valid i.e. if it is ok regarding the current domain
+ * of the variables
+ */
+public class ValidityChecker implements Comparator<IntVar> {
+
+    //variables sorted from the minimum domain to the max
+    protected IntVar[] sortedvs;
+    public int[] position;
+    protected TObjectIntHashMap<IntVar> mapinit;
+    protected int arity;
+
+    public ValidityChecker(int ari, IntVar[] vars) {
+        arity = ari;
+        sortedvs = new IntVar[arity];
+        mapinit = new TObjectIntHashMap<>(arity);
+        position = new int[arity];
+        for (int i = 0; i < vars.length; i++) {
+            sortedvs[i] = vars[i];
+            mapinit.put(vars[i], i);
+            position[i] = i;
+        }
+    }
+
+    public final int getPosition(int idx) {
+        return position[idx];
+    }
+
+    /**
+     * Sort the variable to speedup the check
+     */
+    public void sortvars() {
+        Arrays.sort(sortedvs, this);
+        for (int i = 0; i < arity; i++) {
+            position[i] = mapinit.get(sortedvs[i]);
+        }
     }
 
     // Is tuple valide ?
-    public final boolean isValid(final int[] tuple) {
-        nbCheck++;
-        for (int i = 0; i < arity; i++) {
-            if (sortedvs[i].isInstantiated()) {
-                if (sortedvs[i].getValue() != tuple[position[i]])
-                    return false;
-            } else break;
-            // variable are sorted by domain size so only non instantiated variables remain
-            // and non instantiated variables do not need to be checked in boolean !
-        }
+    public boolean isValid(int[] tuple) {
+        for (int i = 0; i < arity; i++)
+            if (!sortedvs[i].contains(tuple[position[i]])) return false;
         return true;
     }
 
     public boolean isValid(int[] tuple, int i) {
-        nbCheck++;
         return sortedvs[i].contains(tuple[position[i]]);
     }
+
+    /**
+     * Sort the variables by domain size
+     */
+    public int compare(IntVar o, IntVar o1) {
+        return o.getDomainSize() - o1.getDomainSize();
+    }
+
 
 }

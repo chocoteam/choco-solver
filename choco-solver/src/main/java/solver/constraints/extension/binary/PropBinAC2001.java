@@ -28,14 +28,16 @@ package solver.constraints.extension.binary;
 
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
+ * AC2001 algorithm for binary table constraint
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Hadrien Cambazard
  * @since 08/06/11
  */
 public class PropBinAC2001 extends PropBinCSP {
@@ -46,13 +48,13 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset0;
     protected int offset1;
 
-    public PropBinAC2001(IntVar x, IntVar y, BinRelation relation) {
-        super(x, y, relation);
+    public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {
+        super(x, y, new CouplesTable(tuples, x.getLB(), x.getUB(), y.getLB(), y.getUB()));
         offset0 = x.getLB();
         offset1 = y.getLB();
         currentSupport0 = new IStateInt[x.getUB() - offset0 + 1];
         currentSupport1 = new IStateInt[y.getUB() - offset1 + 1];
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < currentSupport0.length; i++) {
             currentSupport0[i] = environment.makeInt();
             currentSupport0[i].set(-1);
@@ -124,7 +126,7 @@ public class PropBinAC2001 extends PropBinCSP {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            awakeOnInst(idxVarInProp);
+            onInstantiationOf(idxVarInProp);
         } else {
             if (idxVarInProp == 0) {
                 reviseV1();
@@ -136,16 +138,17 @@ public class PropBinAC2001 extends PropBinCSP {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Bin_AC2001(").append(vars[0].getName()).append(", ").append(vars[1].getName()).append(", ").
-                append(this.relation.getClass().getSimpleName()).append(")");
-        return sb.toString();
+        return "Bin_AC2001(" + vars[0].getName() + ", " + vars[1].getName() + ", " + this.relation.getClass().getSimpleName() + ")";
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // updates the support for all values in the domain of v1, and remove unsupported values for v1
-    public void reviseV1() throws ContradictionException {
+    /**
+     * updates the support for all values in the domain of v1, and remove unsupported values for v1
+     *
+     * @throws ContradictionException
+     */
+    private void reviseV1() throws ContradictionException {
         int left = Integer.MIN_VALUE;
         int right = left;
         int ub1 = vars[1].getUB();
@@ -173,8 +176,12 @@ public class PropBinAC2001 extends PropBinCSP {
         vars[1].removeInterval(left, right, aCause);
     }
 
-    // updates the support for all values in the domain of v0, and remove unsupported values for v0
-    public void reviseV0() throws ContradictionException {
+    /**
+     * updates the support for all values in the domain of v0, and remove unsupported values for v0
+     *
+     * @throws ContradictionException
+     */
+    private void reviseV0() throws ContradictionException {
         int left = Integer.MIN_VALUE;
         int right = left;
         int ub0 = vars[0].getUB();
@@ -202,7 +209,7 @@ public class PropBinAC2001 extends PropBinCSP {
         vars[0].removeInterval(left, right, aCause);
     }
 
-    protected void awakeOnInst(int idx) throws ContradictionException {
+    private void onInstantiationOf(int idx) throws ContradictionException {
         if (idx == 0) {
             int value = vars[0].getValue();
             int left = Integer.MIN_VALUE;

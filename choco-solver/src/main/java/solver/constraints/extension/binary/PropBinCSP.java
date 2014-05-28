@@ -35,16 +35,19 @@ import util.tools.ArrayUtils;
 /**
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Hadrien Cambazard
  * @since 08/06/11
  */
 public abstract class PropBinCSP extends Propagator<IntVar> {
 
     protected BinRelation relation;
+    protected IntVar v0, v1;
 
     protected PropBinCSP(IntVar x, IntVar y, BinRelation relation) {
         super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
         this.relation = relation;
+        this.v0 = x;
+        this.v1 = y;
     }
 
     public final BinRelation getRelation() {

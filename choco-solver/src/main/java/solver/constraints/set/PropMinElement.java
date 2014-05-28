@@ -90,7 +90,7 @@ public class PropMinElement extends Propagator<Variable> {
 	 *                 false : the set may be empty (if so, the MIN constraint is not applied)
      */
     public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, boolean notEmpty) {
-        super(new Variable[]{setVar, min}, PropagatorPriority.BINARY, true);
+        super(new Variable[]{setVar, min}, PropagatorPriority.BINARY, false);
         this.min = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.weights = weights;
@@ -128,11 +128,6 @@ public class PropMinElement extends Propagator<Variable> {
 		if(notEmpty || set.getKernelSize()>0){
 			min.updateLowerBound(minVal, aCause);
 		}
-    }
-
-    @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override

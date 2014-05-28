@@ -27,9 +27,9 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
 /**
  * A class to store the removed intervals of an integer variable.
@@ -37,21 +37,19 @@ import solver.search.loop.AbstractSearchLoop;
  * It defines methods to <code>add</code> a value, <code>clear</code> the structure
  * and execute a <code>Procedure</code> for each value stored.
  */
-public final class IntervalDelta implements IIntervalDelta {
+public final class IntervalDelta extends TimeStampedObject implements IIntervalDelta {
     private static final int SIZE = 32;
 
     int[] from;
     int[] to;
     ICause[] causes;
     int last;
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
 
-    public IntervalDelta(AbstractSearchLoop loop) {
+    public IntervalDelta(ISearchLoop loop) {
+		super(loop);
         from = new int[SIZE];
         to = new int[SIZE];
         causes = new ICause[SIZE];
-        this.loop = loop;
     }
 
     private void ensureCapacity() {
@@ -68,17 +66,17 @@ public final class IntervalDelta implements IIntervalDelta {
         }
     }
 
+	@Override
     public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
-            clear();
+        if (needReset()) {
+			last = 0;
+			resetStamp();
         }
     }
 
     @Override
     public void add(int lb, int ub, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         ensureCapacity();
         causes[last] = cause;
         from[last] = lb;
@@ -100,27 +98,8 @@ public final class IntervalDelta implements IIntervalDelta {
         return causes[idx];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int size() {
         return last;
-    }
-
-    @Override
-    public void clear() {
-        last = 0;
-        timestamp = loop.timeStamp;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
     }
 }

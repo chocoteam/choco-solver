@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.extension;
+package solver.constraints.extension.nary;
 
 import solver.variables.IntVar;
 
@@ -36,23 +36,26 @@ import solver.variables.IntVar;
 * Since : Choco 2.0.0
 *
 */
-public final class FastValidityChecker extends ValidityChecker {
+public final class FastBooleanValidityChecker extends ValidityChecker {
 
-    public FastValidityChecker(int arity, IntVar[] vars) {
+    public FastBooleanValidityChecker(int arity, IntVar[] vars) {
         super(arity, vars);
     }
 
     // Is tuple valide ?
     public final boolean isValid(final int[] tuple) {
-        nbCheck++;
-        for (int i = 0; i < arity; i++)
-            if (!sortedvs[i].contains(tuple[position[i]]))
-                return false;
+        for (int i = 0; i < arity; i++) {
+            if (sortedvs[i].isInstantiated()) {
+                if (sortedvs[i].getValue() != tuple[position[i]])
+                    return false;
+            } else break;
+            // variable are sorted by domain size so only non instantiated variables remain
+            // and non instantiated variables do not need to be checked in boolean !
+        }
         return true;
     }
 
     public boolean isValid(int[] tuple, int i) {
-        nbCheck++;
         return sortedvs[i].contains(tuple[position[i]]);
     }
 

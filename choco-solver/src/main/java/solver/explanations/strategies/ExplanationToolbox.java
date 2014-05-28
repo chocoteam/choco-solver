@@ -75,9 +75,9 @@ enum ExplanationToolbox {
         IEnvironment environment = aSolver.getEnvironment();
         ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
         // 1. simulates open node
-        Decision current = aSolver.getSearchLoop().decision;
+        Decision current = aSolver.getSearchLoop().getLastDecision();
         decision.setPrevious(current);
-        aSolver.getSearchLoop().decision = decision;
+        aSolver.getSearchLoop().setLastDecision(decision);
         // 2. simulates down branch
         environment.worldPush();
         decision.setWorldIndex(environment.getWorldIndex());

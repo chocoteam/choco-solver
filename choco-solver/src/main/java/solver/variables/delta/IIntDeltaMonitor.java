@@ -46,24 +46,16 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
     public static enum Default implements IIntDeltaMonitor {
         NONE() {
             @Override
-            public void freeze() {
-            }
+            public void freeze() {}
 
             @Override
-            public void unfreeze() {
-            }
+            public void unfreeze() {}
 
             @Override
-            public void clear() {
-            }
+            public void forEach(SafeIntProcedure proc, EventType eventType) {}
 
             @Override
-            public void forEach(SafeIntProcedure proc, EventType eventType) {
-            }
-
-            @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-            }
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {}
         }
     }
 }

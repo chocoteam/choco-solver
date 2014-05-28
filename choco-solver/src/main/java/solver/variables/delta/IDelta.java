@@ -27,7 +27,7 @@
 
 package solver.variables.delta;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 
 import java.io.Serializable;
 
@@ -40,18 +40,6 @@ import java.io.Serializable;
 public interface IDelta extends Serializable {
 
     /**
-     * Returns the number of element
-     *
-     * @return number of element
-     */
-    int size();
-
-    /**
-     * Clear the delta
-     */
-    void clear();
-
-    /**
      * Lazy clear the delta, on world change
      */
     void lazyClear();
@@ -61,12 +49,5 @@ public interface IDelta extends Serializable {
      *
      * @return associate search loop
      */
-    AbstractSearchLoop getSearchLoop();
-
-    /**
-     * Check wether the delta is up-to-date with the search loop
-     *
-     * @return
-     */
-    boolean timeStamped();
+    ISearchLoop getSearchLoop();
 }

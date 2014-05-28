@@ -27,54 +27,36 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
 /**
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetDelta implements ISetDelta {
+public class SetDelta extends TimeStampedObject implements ISetDelta {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-    private IEnumDelta[] delta;
-    private long timestamp;
-    private final AbstractSearchLoop loop;
+
+	private IEnumDelta[] delta;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public SetDelta(AbstractSearchLoop loop) {
-        this.loop = loop;
+    public SetDelta(ISearchLoop loop) {
+        super(loop);
         delta = new IEnumDelta[2];
         delta[0] = new EnumDelta(loop);
         delta[1] = new EnumDelta(loop);
-        timestamp = loop.timeStamp;
     }
 
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException();
-    }
-
-    //***********************************************************************************
-    // ACCESSORS
-    //***********************************************************************************
-
-    @Override
-    public void clear() {
-        delta[0].clear();
-        delta[1].clear();
-        timestamp = loop.timeStamp;
-    }
 
 	@Override
     public int getSize(int kerOrEnv) {
@@ -83,16 +65,16 @@ public class SetDelta implements ISetDelta {
 
 	@Override
     public void add(int element, int kerOrEnv, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         delta[kerOrEnv].add(element, cause);
     }
 
 	@Override
     public void lazyClear() {
-        if (timestamp != loop.timeStamp) {
-            clear();
+        if (needReset()) {
+			delta[0].lazyClear();
+			delta[1].lazyClear();
+			resetStamp();
         }
     }
 
@@ -104,15 +86,5 @@ public class SetDelta implements ISetDelta {
 	@Override
     public ICause getCause(int index, int kerOrEnv) {
         return delta[kerOrEnv].getCause(index);
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
     }
 }

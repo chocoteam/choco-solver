@@ -28,8 +28,7 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.EventType;
+import solver.constraints.extension.Tuples;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -39,17 +38,22 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class PropLargeCSP extends Propagator<IntVar> {
+public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<IntVar> {
 
-    protected final LargeRelation relation;
+    protected final R relation;
 
-    protected final int[] currentTuple;
-
-    public PropLargeCSP(IntVar[] vars, LargeRelation relation) {
+    protected PropLargeCSP(IntVar[] vars, Tuples tuples) {
         super(vars, PropagatorPriority.QUADRATIC, true);
-        this.relation = relation;
-        this.currentTuple = new int[vars.length];
+        int[] offsets = new int[vars.length];
+        int[] dsizes = new int[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            offsets[i] = vars[i].getLB();
+            dsizes[i] = vars[i].getDomainSize();
+        }
+        this.relation = makeRelation(tuples, offsets, dsizes);
     }
+
+    protected abstract R makeRelation(Tuples tuples, int[] offsets, int[] dsizes);
 
 
     public final LargeRelation getRelation() {
@@ -57,31 +61,16 @@ public class PropLargeCSP extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
-    }
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        filter();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
-    }
-
-    @Override
     public ESat isEntailed() {
-//        if (isCompletelyInstantiated()) {
-//            int[] tuple = new int[vars.length];
-//            for (int i = 0; i < vars.length; i++) {
-//                tuple[i] = vars[i].getValue();
-//            }
-//            return ESat.eval(relation.isConsistent(tuple));
-//        }
-//        return ESat.UNDEFINED;
-        return ESat.TRUE;
+        if (isCompletelyInstantiated()) {
+            int[] tuple = new int[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                tuple[i] = vars[i].getValue();
+            }
+            return ESat.eval(relation.isConsistent(tuple));
+        }
+        return ESat.UNDEFINED;
+//        return ESat.TRUE;
     }
 
     @Override
@@ -92,53 +81,9 @@ public class PropLargeCSP extends Propagator<IntVar> {
             if (i > 0) {
                 sb.append(", ");
             }
-            sb.append(vars[i] + ", ");
+            sb.append(vars[i]).append(", ");
         }
         sb.append("})");
         return sb.toString();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    protected void filter() throws ContradictionException {
-        boolean stop = false;
-        int nbUnassigned = 0;
-        int index = -1, i = 0;
-        while (!stop && i < vars.length) {
-            if (!vars[i].isInstantiated()) {
-                nbUnassigned++;
-                index = i;
-            } else {
-                currentTuple[i] = vars[i].getValue();
-            }
-            if (nbUnassigned > 1) {
-                stop = true;
-            }
-            i++;
-        }
-        if (!stop) {
-            if (nbUnassigned == 1) {
-                int left = Integer.MIN_VALUE;
-                int right = left;
-
-                int ub = vars[index].getUB();
-                for (int val = vars[index].getLB(); val <= ub; val = vars[index].nextValue(val)) {
-                    currentTuple[index] = val;
-                    if (!relation.isConsistent(currentTuple)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            vars[index].removeInterval(left, right, aCause);
-                            left = right = val;
-                        }
-                    }
-                }
-                vars[index].removeInterval(left, right, aCause);
-            } else {
-                if (!relation.isConsistent(currentTuple)) {
-                    this.contradiction(null, "not consistent");
-                }
-            }
-        }
     }
 }

@@ -35,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.search.loop.ISearchLoop;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
@@ -446,11 +447,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             if (learnsAndFails) {
                 learnsAndFails = false;
-                solver.getSearchLoop().moveTo(solver.getSearchLoop().stateAfterFail);
+                solver.getSearchLoop().moveTo(ISearchLoop.UP_BRANCH);
                 //noinspection ThrowableResultOfMethodCallIgnored
-                solver.getSearchLoop().smList.onContradiction(
-                        solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
-                );
+                solver.getSearchLoop().getSMList().onContradiction(
+						solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
+				);
             }
         }
     }

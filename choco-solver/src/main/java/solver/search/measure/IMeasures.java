@@ -28,6 +28,7 @@
 package solver.search.measure;
 
 import solver.search.loop.monitors.ISearchMonitor;
+
 import java.io.Serializable;
 
 /**
@@ -63,16 +64,16 @@ public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
     /** @return the current world unique id */
     long timestamp();
 
-    /** @return the time count (in ms), including initial propagation time count */
+    /** @return the time count (in sec), including initial propagation time count */
     float getTimeCount();
 
-    /** @return the reading time count (in ms) */
+    /** @return the reading time count (in sec) */
     float getReadingTimeCount();
 
-    /** @return the initialization time count (in ms) */
+    /** @return the initialization time count (in sec) */
     float getInitialisationTimeCount();
 
-    /** @return the initial propagation time count (in ms)*/
+    /** @return the initial propagation time count (in sec)*/
     float getInitialPropagationTimeCount();
 
 	/** set the reading time count */

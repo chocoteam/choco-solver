@@ -27,7 +27,6 @@
 package solver.constraints.nary.alldifferent.conditions;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import memory.IStateInt;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -49,7 +48,7 @@ public class AllDiffACAlgorithm {
 
     protected int n, n2;
     protected DirectedGraph digraph;
-    private IStateInt[] matching;
+    private int[] matching;
     private int[] nodeSCC;
     protected BitSet free;
     private StrongConnectivityFinder SCCfinder;
@@ -69,9 +68,9 @@ public class AllDiffACAlgorithm {
         this.vars = variables;
 		aCause = cause;
         n = vars.length;
-        matching = new IStateInt[n];
+        matching = new int[n];
         for (int i = 0; i < n; i++) {
-            matching[i] = variables[0].getSolver().getEnvironment().makeInt(-1);
+            matching[i] = -1;
         }
         map = new TIntIntHashMap();
         IntVar v;
@@ -120,7 +119,7 @@ public class AllDiffACAlgorithm {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            int mate = matching[i].get();
+            int mate = matching[i];
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 int j = map.get(k);
                 if (mate == j) {
@@ -139,7 +138,7 @@ public class AllDiffACAlgorithm {
         int p;
         for (int i = 0; i < n; i++) {
             p = digraph.getPredecessorsOf(i).getFirstElement();
-            matching[i].set(p);
+            matching[i] = p;
         }
     }
 
@@ -213,7 +212,7 @@ public class AllDiffACAlgorithm {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (matching[i].get() == j) {
+                    if (matching[i] == j) {
                         v.instantiateTo(k, aCause);
                     } else {
                         v.removeValue(k, aCause);

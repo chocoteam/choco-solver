@@ -26,7 +26,7 @@
  */
 package solver.search.limits;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 
 /**
  * A factory dedicated to counter actions; action to be performed when a counter reached its limit.
@@ -57,7 +57,7 @@ public class ActionCounterFactory {
     }
 
 
-    public static ICounterAction interruptSearch(final AbstractSearchLoop searchLoop) {
+    public static ICounterAction interruptSearch(final ISearchLoop searchLoop) {
         return new ICounterAction() {
             @Override
             public void onLimitReached() {
@@ -66,7 +66,7 @@ public class ActionCounterFactory {
         };
     }
 
-    public static ICounterAction restartSearch(final AbstractSearchLoop searchLoop) {
+    public static ICounterAction restartSearch(final ISearchLoop searchLoop) {
         return new ICounterAction() {
             @Override
             public void onLimitReached() {

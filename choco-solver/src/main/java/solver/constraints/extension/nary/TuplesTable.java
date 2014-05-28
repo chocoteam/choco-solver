@@ -26,7 +26,7 @@
  */
 package solver.constraints.extension.nary;
 
-import solver.constraints.extension.ConsistencyRelation;
+import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
 
 import java.util.BitSet;
@@ -37,7 +37,7 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 08/06/11
  */
-public class TuplesTable extends ConsistencyRelation implements LargeRelation {
+public class TuplesTable extends LargeRelation {
 
     /**
      * the number of dimensions of the considered tuples
@@ -58,6 +58,8 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
      */
     protected int[] sizes;
 
+    protected boolean feasible;
+
     /**
      * in order to speed up the computation of the index of a tuple
      * in the table, blocks[i] stores the product of the size of variables j with j < i.
@@ -68,11 +70,11 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
         this.n = n;
     }
 
-    public TuplesTable(boolean feas, int[] offsetTable, int[] sizesTable) {
+    public TuplesTable(Tuples tuples, int[] offsetTable, int[] sizesTable) {
         offsets = offsetTable;
         sizes = sizesTable;
         n = offsetTable.length;
-        feasible = feas;
+        feasible = tuples.isFeasible();
         int totalSize = 1;
         blocks = new int[n];
         for (int i = 0; i < n; i++) {
@@ -84,6 +86,14 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
             throw new SolverException("Tuples requiered over 50Mo of memory...");
         }
         table = new BitSet(totalSize);
+        int nt = tuples.nbTuples();
+        for (int i = 0; i < nt; i++) {
+            int[] tuple = tuples.get(i);
+            if (valid(tuple, offsets, sizes)) {
+                setTuple(tuple);
+            }
+        }
+
     }
 
     public boolean checkTuple(int[] tuple) {
@@ -101,25 +111,11 @@ public class TuplesTable extends ConsistencyRelation implements LargeRelation {
         return checkTuple(tuple) == feasible;
     }
 
-    public void setTuple(int[] tuple) {
+    void setTuple(int[] tuple) {
         int address = 0;
         for (int i = (n - 1); i >= 0; i--) {
             address += (tuple[i] - offsets[i]) * blocks[i];
         }
         table.set(address);
     }
-
-    /**
-     * @return the opposite relation
-     */
-    public ConsistencyRelation getOpposite() {
-        TuplesTable t = new TuplesTable(this.n);
-        t.feasible = !feasible;
-        t.offsets = offsets;
-        t.sizes = sizes;
-        t.blocks = blocks;
-        t.table = table;
-        return t;
-    }
-
 }

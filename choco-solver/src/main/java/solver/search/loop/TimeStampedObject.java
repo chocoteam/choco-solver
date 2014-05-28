@@ -25,42 +25,41 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package solver.search.loop;
 
 /**
+ * Class for factorizing code of time stamped objects
+ * <br/>
+ *
  * @author Jean-Guillaume Fages
- * @since 10/04/14
- * Created by IntelliJ IDEA.
+ * @since 24/04/2014
  */
-package solver.constraints;
+public abstract class TimeStampedObject {
 
-import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.extension.nary.IterTuplesTable;
-import solver.variables.IntVar;
-import solver.variables.VF;
+	private int timestamp = -1;
+	private final ISearchLoop loop;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class TableTest {
-
-	@Test(groups = "1s")
-	public void test1() {
-		List<int[]> tuples = Arrays.asList(new int[][]{
-		        {0, 0, 0},
-		        {1, 1, 1},
-		        {2, 2, 2}
-		});
-		int[] min = new int[]{0, 0, 0};
-		int[] max = new int[]{1, 1, 1};
-		IterTuplesTable relation = new IterTuplesTable(tuples, min, max);
-
-		Solver solver = new Solver();
-		IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
-		Constraint tableConstraint = ICF.table(vars, relation, "AC2001");
-		solver.post(tableConstraint);
-
-		solver.findSolution();
+	public TimeStampedObject(ISearchLoop loop) {
+		this.loop = loop;
 	}
 
+	/** @return the search loop */
+	public final ISearchLoop getSearchLoop() {
+		return loop;
+	}
+
+	/** @return the current time stamp of the object */
+	public int getTimeStamp(){
+		return timestamp;
+	}
+
+	/** @return true iff the current time stamp of the object is different from the time stamp of the search loop */
+	public final boolean needReset() {
+		return timestamp != loop.getTimeStamp();
+	}
+
+	/** sets the current time stamp of the object to the time stamp of the search loop */
+	public final void resetStamp() {
+		timestamp = loop.getTimeStamp();
+	}
 }
