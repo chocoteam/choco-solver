@@ -25,7 +25,7 @@ The CHANGES.md file starts at this version.
 * Fix #143: Dow/WDeg is now supporting propagator hot addition
 * Fix #144: setObjectiveOptimal(...) in searchLoop.close() is correct
 
-3.1.2 - 27 May 2014
+????
 -------------------
 * Fix #148: update release script
 * Refactoring  #149
@@ -90,7 +90,3 @@ The CHANGES.md file starts at this version.
 - Add SORT constraint
 - Changes measure, times are now in second
 * Fix#199: some deltamonitors were desynchronized with delta
-
-????
--------------------
-
