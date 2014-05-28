@@ -104,6 +104,8 @@ public interface IPropagationEngine extends Serializable {
      */
     void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException;
 
+    void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException;
+
     void onPropagatorExecution(Propagator propagator);
 
     /**
@@ -113,5 +115,7 @@ public interface IPropagationEngine extends Serializable {
      */
     void desactivatePropagator(Propagator propagator);
 
-    void dynamicAddition(Constraint c, boolean cut);
+    void dynamicAddition(Constraint c, boolean permanent);
+
+    void dynamicDeletion(Constraint c);
 }

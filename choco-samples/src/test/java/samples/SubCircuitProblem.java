@@ -43,10 +43,8 @@ import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.selectors.graph.arcs.RandomArc;
 import solver.search.strategy.selectors.graph.nodes.RandomNode;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
 import util.objects.graphs.Orientation;
@@ -110,16 +108,14 @@ public class SubCircuitProblem extends AbstractProblem {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc = new Constraint(new Variable[]{graph,circuitLength},solver);
-		gc.setPropagators(
+		solver.post(new Constraint("SubCircuit",
 				new PropKNodes(graph, circuitLength),
 				new PropKCC(graph,VariableFactory.fixed(1,solver)),
 				new PropNodeDegree_AtLeast(graph, Orientation.SUCCESSORS, 1),
 				new PropNodeDegree_AtLeast(graph, Orientation.PREDECESSORS, 1),
 				new PropNodeDegree_AtMost(graph, Orientation.SUCCESSORS, 1),
 				new PropNodeDegree_AtMost(graph, Orientation.PREDECESSORS, 1)
-		);
-		solver.post(gc);
+		));
 	}
 
 	//***********************************************************************************
@@ -131,7 +127,7 @@ public class SubCircuitProblem extends AbstractProblem {
 	public void configureSearch() {
 		AbstractStrategy arcs = GraphStrategyFactory.graphStrategy(graph,null,new RandomArc(graph,seed), GraphStrategy.NodeArcPriority.ARCS);
 		AbstractStrategy nodes = GraphStrategyFactory.graphStrategy(graph,new RandomNode(graph,seed), null, GraphStrategy.NodeArcPriority.NODES_THEN_ARCS);
-		solver.set(new StrategiesSequencer(arcs,nodes));
+		solver.set(arcs,nodes);
 //		solver.set(GraphStrategyFactory.graphRandom(graph,seed));
 //		solver.set(GraphStrategyFactory.graphLexico(graph));
 	}

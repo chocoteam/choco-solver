@@ -58,7 +58,7 @@ public class PropMin extends Propagator<IntVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		int idx = -1;
-		int ub = vars[n].getUB();
+		int ub = vars[n].getUB()+1;
 		int lb = ub;
 		// update min
 		for(int i=0; i<n; i++){
@@ -83,11 +83,6 @@ public class PropMin extends Propagator<IntVar> {
 	}
 
 	@Override
-	public void propagate(int idx, int mask) throws ContradictionException {
-		propagate(0);
-	}
-
-	@Override
 	public ESat isEntailed() {
 		int lb = vars[n].getLB();
 		for(int i=0; i<n; i++){
@@ -100,9 +95,9 @@ public class PropMin extends Propagator<IntVar> {
 				return ESat.UNDEFINED;
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			for(int i=0; i<n; i++){
-				if(vars[i].instantiatedTo(lb)){
+				if(vars[i].isInstantiatedTo(lb)){
 					return ESat.TRUE;
 				}
 			}

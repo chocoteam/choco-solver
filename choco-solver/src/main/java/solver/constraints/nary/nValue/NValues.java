@@ -28,14 +28,20 @@
 package solver.constraints.nary.nValue;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
+import solver.constraints.Propagator;
+import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
+import solver.constraints.nary.nValue.amnv.differences.D;
+import solver.constraints.nary.nValue.amnv.graph.G;
+import solver.constraints.nary.nValue.amnv.graph.Gci;
+import solver.constraints.nary.nValue.amnv.graph.Gi;
+import solver.constraints.nary.nValue.amnv.mis.F;
+import solver.constraints.nary.nValue.amnv.mis.MD;
+import solver.constraints.nary.nValue.amnv.mis.MDRk;
+import solver.constraints.nary.nValue.amnv.mis.Rk;
+import solver.constraints.nary.nValue.amnv.rules.*;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.ESat;
 import util.tools.ArrayUtils;
-
-import java.util.BitSet;
 
 /**
  * NValues constraint
@@ -43,137 +49,92 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class NValues extends IntConstraint<IntVar> {
-
-    public enum Type {
-        at_most_BC {
-            @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-                cons.addPropagators(new PropAtMostNValues_BC(vars, nValues));
-                boolean enumDom = false;
-                for (IntVar v : vars) {
-                    if (v.hasEnumeratedDomain()) {
-                        enumDom = true;
-                        break;
-                    }
-                }
-                if (enumDom)// added twice to perform fixpoint
-                    cons.addPropagators(new PropAtMostNValues_BC(vars, nValues));
-            }
-        },
-        at_most_greedy {
-            @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-				cons.addPropagators(
-						new AMNV_Gci_MD_R13(vars,nValues,Differences.NONE),
-						new AMNV_Gci_R_R13(vars,nValues,Differences.NONE,30));
-            }
-        },
-        at_least_AC {
-            @Override
-            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-                cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues));
-            }
-        };
-
-        public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver);
-    }
-
-    /**
-     * NValues constraint
-     * The number of distinct values in vars is exactly nValues
-     * private because the case were all values are not restricted is not tested (i.e. unsafe)
-     *
-     * @param vars
-     * @param nValues
-     * @param concernedValues
-     * @param solver
-     */
-    private NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
-        addPropagators(new PropNValues_Light(vars, concernedValues, nValues));
-    }
-
-    /**
-     * NValues constraint
-     * The number of distinct values in vars is exactly nValues
-     *
-     * @param vars
-     * @param nValues
-     * @param solver
-     * @param types   additional filtering algorithms to consider
-     */
-    public NValues(IntVar[] vars, IntVar nValues, Solver solver, Type... types) {
-        this(vars, nValues, getDomainUnion(vars), solver);
-        for (Type t : types) {
-            t.addProp(vars, nValues, this, solver);
-        }
-    }
+public class NValues extends Constraint {
 
 	/**
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
-	 * Considers a set of difference constraints "diff" to achieve
-	 * a stronger filtering (AMNV(Gci,RMD,R13) of Fages and Lapègue, CP'13)
 	 *
 	 * @param vars
 	 * @param nValues
-	 * @param diff
+	 * @param types   additional filtering algorithms to consider
 	 */
-	public NValues(IntVar[] vars, IntVar nValues, Differences diff) {
-		this(vars, nValues, getDomainUnion(vars), nValues.getSolver());
-		addPropagators(
-				new AMNV_Gci_MD_R13(vars,nValues,diff),
-				new AMNV_Gci_R_R13(vars,nValues,diff,30)
-		);
+	public NValues(IntVar[] vars, IntVar nValues, String... types) {
+		super("NValue",createProps(vars,nValues,types));
 	}
 
-    private static TIntArrayList getDomainUnion(IntVar[] vars) {
-        TIntArrayList values = new TIntArrayList();
-        for (IntVar v : vars) {
-            int ub = v.getUB();
-            for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
-                if (!values.contains(i)) {
-                    values.add(i);
-                }
-            }
-        }
-        return values;
-    }
+	public static Propagator[] createProps(IntVar[] vars, IntVar nValues, String... types) {
+		Propagator[] props = new Propagator[]{new PropNValues_Light(vars, getDomainUnion(vars), nValues)};
+		for (String t : types) {
+			switch (t){
+				case "at_most_BC":
+					boolean enumDom = false;
+					for (IntVar v : vars) {
+						if (v.hasEnumeratedDomain()) {
+							enumDom = true;
+							break;
+						}
+					}
+					if (enumDom){ // added twice to perform fixpoint
+						props = ArrayUtils.append(props,new Propagator[]{
+								new PropAtMostNValues_BC(vars, nValues),
+								new PropAtMostNValues_BC(vars, nValues)
+						});
+					}else{
+						props = ArrayUtils.append(props,new Propagator[]{new PropAtMostNValues_BC(vars, nValues)});
+					}
+					break;
+				case "at_least_AC":
+					props = ArrayUtils.append(props,new Propagator[]{new PropAtLeastNValues_AC(vars, nValues)});
+					break;
+				default:
+					if(!t.contains("AMNV")){
+						t="AMNV<Gci|MDRk|R13>";
+					}
+					String[] cols = t.replace('<','|').replace('>', '|').split("\\|");
+					D diff = new AutoDiffDetection(vars);
+					G graph;
+					switch (cols[1]){
+						case "Gi":	graph = new Gi(vars);break;
+						case "Gci":	graph = new Gci(vars,diff);break;
+						default:throw new UnsupportedOperationException("unknown graph type "+cols[1]+". \nUse Gi or Gci");
+					}
+					F heur;
+					switch (cols[2]){
+						case "MD":	heur = new MD(graph);break;
+						case "Rk":	heur = new Rk(graph,30);break;
+						case "MDRk":heur = new MDRk(graph,30);break;
+						default:throw new UnsupportedOperationException("unknown independent set heuristic type "+cols[2]+". \n" +
+								"Use MD, Rk or MDRk");
+					}
+					R[] rules;
+					switch (cols[3]){
+						case "R1":	rules = new R[]{new R1()};break;
+						case "R12":	rules = new R[]{new R1(),new R2()};break;
+						case "R13":	rules = new R[]{new R1(),new R3(vars.length,nValues.getSolver().getEnvironment())};break;
+						case "R14":	rules = new R[]{new R1(),new R4()};break;
+						case "R124":rules = new R[]{new R1(),new R2(),new R4()};break;
+						case "R134":rules = new R[]{new R1(),new R3(vars.length,nValues.getSolver().getEnvironment()),new R4()};break;
+						default:throw new UnsupportedOperationException("unknown or unimplemented filtering rule configuration "+
+								cols[3]+".\nUse R1, R12, R13, R14, R124 or R134");
+					}
+					props = ArrayUtils.append(props,new Propagator[]{new PropAMNV(vars,nValues,graph,heur,rules)});
+					break;
+			}
+		}
+		return props;
+	}
 
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int minval = tuple[0];
-        for (int i = 0; i < tuple.length - 1; i++) {
-            if (minval > tuple[i])
-                minval = tuple[i];
-        }
-        BitSet values = new BitSet(tuple.length - 1);
-        for (int i = 0; i < tuple.length - 1; i++) {
-            values.set(tuple[i] - minval);
-        }
-        if (values.cardinality() == tuple[tuple.length - 1]) {
-            return ESat.TRUE;
-        }
-        return ESat.FALSE;
-    }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("NValue({");
-        for (int i = 0; i < vars.length - 1; i++) {
-            if (i > 0) sb.append(", ");
-            Variable var = vars[i];
-            sb.append(var);
-        }
-        sb.append("}, " + vars[vars.length - 1]);
-        sb.append(")");
-        return sb.toString();
-    }
+	private static TIntArrayList getDomainUnion(IntVar[] vars) {
+		TIntArrayList values = new TIntArrayList();
+		for (IntVar v : vars) {
+			int ub = v.getUB();
+			for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
+				if (!values.contains(i)) {
+					values.add(i);
+				}
+			}
+		}
+		return values;
+	}
 }

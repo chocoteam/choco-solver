@@ -191,18 +191,19 @@ public class NQueenTest {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
         Solver solver = modeler(new NQueenBinaryGlobal(), 16);
         solver.propagate();
+		int offset = 2;
         Variable[] vars = solver.getVars();
-        ((IntVar) vars[0]).instantiateTo(1, Cause.Null);
-        ((IntVar) vars[1]).instantiateTo(3, Cause.Null);
-        ((IntVar) vars[2]).instantiateTo(5, Cause.Null);
-        ((IntVar) vars[3]).instantiateTo(2, Cause.Null);
-        ((IntVar) vars[4]).instantiateTo(12, Cause.Null);
-        ((IntVar) vars[5]).instantiateTo(16, Cause.Null);
-        ((IntVar) vars[6]).instantiateTo(4, Cause.Null);
+        ((IntVar) vars[0+offset]).instantiateTo(1, Cause.Null);
+        ((IntVar) vars[1+offset]).instantiateTo(3, Cause.Null);
+        ((IntVar) vars[2+offset]).instantiateTo(5, Cause.Null);
+        ((IntVar) vars[3+offset]).instantiateTo(2, Cause.Null);
+        ((IntVar) vars[4+offset]).instantiateTo(12, Cause.Null);
+        ((IntVar) vars[5+offset]).instantiateTo(16, Cause.Null);
+        ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
         solver.propagate();
         LoggerFactory.getLogger("test").error("*******************************************");
         System.out.printf("%s\n", solver.toString());
-        ((IntVar) vars[7]).instantiateTo(7, Cause.Null);
+        ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {
             solver.propagate();
             Assert.fail();

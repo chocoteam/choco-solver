@@ -33,24 +33,21 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.impl.AbstractVariable;
 import util.objects.graphs.IGraph;
 import util.objects.setDataStructures.ISet;
-
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 feb. 2011
  */
-public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, GraphVar<E>>
-        implements Variable<IGraphDelta> {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -74,7 +71,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      */
     public GraphVar(String name, Solver solver) {
         super(name, solver);
-        solver.associates(this);
         this.environment = solver.getEnvironment();
     }
 
@@ -83,7 +79,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     //***********************************************************************************
 
     @Override
-    public boolean instantiated() {
+    public boolean isInstantiated() {
         if (getEnvelopOrder() != getKernelOrder()) {
             return false;
         }
@@ -183,6 +179,26 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     // ACCESSORS
     //***********************************************************************************
 
+	/**
+	 * Checks whether or not a node may belong to a solution or not
+	 * (i.e. if it is present in the envelop graph)
+	 * @param node the id of a node
+	 * @return true iff node belongs to the envelop graph
+	 */
+	public boolean isNodePossible(int node){
+		return envelop.getActiveNodes().contain(node);
+	}
+
+	/**
+	 * Checks whether or not a node must belong to every solution or not
+	 * (i.e. if it is present in the kernel graph)
+	 * @param node the id of a node
+	 * @return true iff node belongs to the kernel graph
+	 */
+	public boolean isNodeMandatory(int node){
+		return kernel.getActiveNodes().contain(node);
+	}
+
     /**
      * Compute the order of the graph in its current state (ie the number of nodes that may belong to an instantiation)
      *
@@ -253,7 +269,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("graph_var " + getName());
-		if(instantiated()){
+		if(isInstantiated()){
 			sb.append("\nvalue: \n");
 			sb.append(envelop.toString());
 		}else{
@@ -278,15 +294,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         return new GraphDeltaMonitor(delta, propagator);
     }
 
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

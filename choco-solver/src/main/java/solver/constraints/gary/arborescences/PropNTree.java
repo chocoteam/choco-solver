@@ -36,6 +36,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import util.ESat;
+import util.graphOperations.GraphTools;
 import util.graphOperations.connectivity.StrongConnectivityFinder;
 import util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import util.graphOperations.dominance.AlphaDominatorsFinder;
@@ -191,8 +192,85 @@ public class PropNTree extends Propagator {
         return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask;
     }
 
+    //***********************************************************************************
+    // ENTAILMENT
+    //***********************************************************************************
+
     @Override
     public ESat isEntailed() {
-        return ESat.TRUE; //not implemented
+        int MINTREE = calcMinTree();
+        int MAXTREE = calcMaxTree();
+        ISet nei;
+        if (nTree.getLB() <= MAXTREE && nTree.getUB() >= MINTREE) {
+            ISet act = g.getEnvelopGraph().getActiveNodes();
+            DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(), false);
+            for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
+                if (g.getEnvelopGraph().getSuccessorsOf(node).getSize() < 1 || g.getKernelGraph().getSuccessorsOf(node).getSize() > 1) {
+                    return ESat.FALSE;
+                }
+                nei = g.getEnvelopGraph().getSuccessorsOf(node);
+                for (int suc = nei.getFirstElement(); suc >= 0; suc = nei.getNextElement()) {
+                    Grs.addArc(suc, node);
+                    if (suc == node) {
+                        Grs.addArc(node, n);
+                        Grs.addArc(n, node);
+                    }
+                }
+            }
+            int[] numDFS = GraphTools.performDFS(n, Grs);
+            boolean rootFound = false;
+            for (int i : numDFS) {
+                if (rootFound && i == 0) return ESat.FALSE;
+                if (i == 0) rootFound = true;
+            }
+        } else {
+            return ESat.FALSE;
+        }
+        if (g.isInstantiated()) {
+            return ESat.TRUE;
+        } else {
+            return ESat.UNDEFINED;
+        }
+    }
+
+    private int calcMaxTree() {
+        int ct = 0;
+        ISet act = g.getEnvelopGraph().getActiveNodes();
+        for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
+            if (g.getEnvelopGraph().arcExists(node, node)) {
+                ct++;
+            }
+        }
+        return ct;
+    }
+
+    private int calcMinTree() {
+		SCCfinder.findAllSCC();
+        int[] sccOf = SCCfinder.getNodesSCC();
+        int node;
+        TIntArrayList sinks = new TIntArrayList();
+        boolean looksSink;
+        ISet nei;
+        for (int scc = SCCfinder.getNbSCC() - 1; scc >= 0; scc--) {
+            looksSink = true;
+            node = SCCfinder.getSCCFirstNode(scc);
+            while (node != -1) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(node);
+                for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
+                    if (sccOf[suc] != sccOf[node]) {
+                        looksSink = false;
+                    }
+                }
+                if (!looksSink) {
+                    node = -1;
+                } else {
+                    node = SCCfinder.getNextNode(node);
+                }
+            }
+            if (looksSink) {
+                sinks.add(scc);
+            }
+        }
+        return sinks.size();
     }
 }

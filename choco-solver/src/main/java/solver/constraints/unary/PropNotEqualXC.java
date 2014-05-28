@@ -26,13 +26,11 @@
  */
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -44,7 +42,6 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotEqualXC extends Propagator<IntVar> {
 
     private final int constant;
@@ -52,14 +49,6 @@ public class PropNotEqualXC extends Propagator<IntVar> {
     public PropNotEqualXC(IntVar var, int cste) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
         this.constant = cste;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[0].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override
@@ -76,7 +65,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (vars[0].instantiatedTo(constant)) {
+        if (vars[0].isInstantiatedTo(constant)) {
             return ESat.FALSE;
         } else if (vars[0].contains(constant)) {
             return ESat.UNDEFINED;

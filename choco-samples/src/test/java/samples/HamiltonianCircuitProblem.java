@@ -59,7 +59,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 	private DirectedGraphVar graph;
 	private IntVar[] integers;
 	private boolean[][] adjacencyMatrix;
-	private Constraint gc;
+//	private Constraint gc;
 	// model parameters
 	private long seed;
 	private boolean strongFilter;
@@ -87,15 +87,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		basicModel();
-		Constraint[] cstrs = new Constraint[]{gc};
-		if (intAllDiff > 0) {
-			cstrs = new Constraint[]{gc, integerAllDiff()};
-		}
-		solver.post(cstrs);
-	}
-
-	private void basicModel() {
 		// create model
 		graph = new DirectedGraphVar("G", solver, n, gt, SetType.LINKED_LIST, true);
 		try {
@@ -112,10 +103,13 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc = GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1, strongFilter);
+		solver.post(GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1, strongFilter));
+		if (intAllDiff > 0) {
+			integerAllDiff();
+		}
 	}
 
-	private Constraint integerAllDiff() {
+	private void integerAllDiff() {
 		integers = new IntVar[n];
 		try {
 			int i = n - 1;
@@ -139,7 +133,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc.addPropagators(new PropIntVarChanneling(integers, graph));
+		solver.post(new Constraint("Channel",new PropIntVarChanneling(integers, graph)));
 		String type = "AC";
 		if (intAllDiff == 2) {
 			type = "BC";
@@ -147,7 +141,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 		if (intAllDiff == 1) {
 			type = "NEQS";
 		}
-		return IntConstraintFactory.alldifferent(integers, type);
+		solver.post(IntConstraintFactory.alldifferent(integers, type));
 	}
 
 	private void configParameters(int ad, boolean strong) {

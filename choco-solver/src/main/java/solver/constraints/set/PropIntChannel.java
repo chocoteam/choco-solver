@@ -42,6 +42,7 @@ import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -63,7 +64,7 @@ public class PropIntChannel extends Propagator<Variable> {
     private SetVar[] sets;
     private IntVar[] ints;
     private int offSet1, offSet2;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IIntDeltaMonitor[] idm;
     private IntProcedure elementForced, elementRemoved, valRem;
 
@@ -82,7 +83,7 @@ public class PropIntChannel extends Propagator<Variable> {
         this.sets = new SetVar[nSets];
         this.ints = new IntVar[nInts];
         this.idm = new IIntDeltaMonitor[nInts];
-        this.sdm = new SetDeltaMonitor[nSets];
+        this.sdm = new ISetDeltaMonitor[nSets];
         this.offSet1 = offSet1;
         this.offSet2 = offSet2;
         for (int i = 0; i < nInts; i++) {
@@ -119,13 +120,6 @@ public class PropIntChannel extends Propagator<Variable> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vIdx < nSets)
-            return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-        else return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < nInts; i++) {
             ints[i].updateLowerBound(offSet1, aCause);
@@ -138,7 +132,7 @@ public class PropIntChannel extends Propagator<Variable> {
                     ints[i].removeValue(j, aCause);
                 }
             }
-            if (ints[i].instantiated()) {
+            if (ints[i].isInstantiated()) {
                 sets[ints[i].getValue() - offSet1].addToKernel(i + offSet2, aCause);
             }
         }
@@ -171,7 +165,7 @@ public class PropIntChannel extends Propagator<Variable> {
             sdm[idxVarInProp].unfreeze();
         } else {
             idx -= nSets;
-            if (ints[idx].instantiated()) {
+            if (ints[idx].isInstantiated()) {
                 sets[ints[idx].getValue() - offSet1].addToKernel(idx + offSet2, aCause);
             }
             idx += offSet2;
@@ -184,7 +178,7 @@ public class PropIntChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < nInts; i++) {
-            if (ints[i].instantiated()) {
+            if (ints[i].isInstantiated()) {
                 int val = ints[i].getValue();
                 if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].envelopeContains(i + offSet2)) {
                     return ESat.FALSE;

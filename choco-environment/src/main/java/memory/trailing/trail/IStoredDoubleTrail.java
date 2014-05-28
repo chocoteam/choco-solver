@@ -37,4 +37,6 @@ import memory.trailing.StoredDouble;
 public interface IStoredDoubleTrail extends ITrailStorage {
 
     void savePreviousState(StoredDouble v, double oldValue, int oldStamp);
+
+    void buildFakeHistory(StoredDouble v, double initValue, int fromStamp);
 }

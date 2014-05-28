@@ -35,6 +35,7 @@
 package solver.constraints.nary.circuit;
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -77,6 +78,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
@@ -96,7 +98,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             vars[i].removeValue(i + offset, aCause);
             vars[i].updateLowerBound(offset, aCause);
             vars[i].updateUpperBound(n - 1 + offset, aCause);
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 fixedVar.add(i);
             }
         }
@@ -142,7 +144,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             boolean isInst = false;
             if (size[start].get() < n) {
                 if (vars[last].removeValue(start + offset, aCause)) {
-                    isInst = vars[last].instantiated();
+                    isInst = vars[last].isInstantiated();
                 }
             }
             origin[last].set(start);
@@ -161,7 +163,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 return ESat.UNDEFINED;
             }
         }

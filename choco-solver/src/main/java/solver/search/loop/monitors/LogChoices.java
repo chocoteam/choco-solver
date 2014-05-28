@@ -29,7 +29,7 @@ package solver.search.loop.monitors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 import util.tools.StringUtils;
 
 /**
@@ -45,7 +45,7 @@ public class LogChoices implements IMonitorDownBranch {
     private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     final Solver solver;
-    final AbstractSearchLoop searchLoop;
+    final ISearchLoop searchLoop;
     final IMessage message;
 
     public LogChoices(Solver solver, IMessage message) {
@@ -60,7 +60,7 @@ public class LogChoices implements IMonitorDownBranch {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[L]{} //{}", new Object[]{
                     StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.decisionToString(), message.print()});
+                    searchLoop.getLastDecision().toString(), message.print()});
         }
     }
 
@@ -73,7 +73,7 @@ public class LogChoices implements IMonitorDownBranch {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[R]{} //{}", new Object[]{
                     StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.decisionToString(), message.print()});
+                    searchLoop.getLastDecision().toString(), message.print()});
         }
     }
 

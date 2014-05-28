@@ -34,28 +34,26 @@ import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.EIdentifier;
 import parser.flatzinc.ast.expression.Expression;
 import parser.flatzinc.ast.searches.IntSearch;
-import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.selectors.values.InDomainMin;
+import solver.search.strategy.selectors.values.IntDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.search.strategy.selectors.variables.DomOverWDeg;
 import solver.search.strategy.selectors.variables.FirstFail;
 import solver.search.strategy.selectors.variables.ImpactBased;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.IntStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -89,13 +87,13 @@ public class FGoal {
 
     public static void define_goal(Datas datas, Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
-        AbstractSearchLoop search = aSolver.getSearchLoop();
+        ISearchLoop search = aSolver.getSearchLoop();
         GoalConf gc = datas.goals();
-		IntVar obj = null;
-		if(type!=ResolutionPolicy.SATISFACTION){
-			obj = expr.intVarValue(aSolver);
-		}
-		search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
+        IntVar obj = null;
+        if (type != ResolutionPolicy.SATISFACTION) {
+            obj = expr.intVarValue(aSolver);
+        }
+        aSolver.set(new ObjectiveManager<IntVar, Integer>(obj, type, true));//                solver.setRestart(true);
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
@@ -162,7 +160,7 @@ public class FGoal {
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && gc.all) {
-                aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
+                aSolver.set(new IntStrategy(ivars, new FirstFail(), new IntDomainMin()));
             } else {
                 switch (gc.bbss) {
                     case 2:
@@ -174,12 +172,12 @@ public class FGoal {
                         break;
                     case 3:
                         description.append("wdeg");
-                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed);
-                        aSolver.set(new Assignment(dwd, new InDomainMin()));
+                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed, new IntDomainMin());
+                        aSolver.set(dwd);
                         break;
                     case 4:
                         description.append("first_fail");
-                        aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
+                        aSolver.set(new IntStrategy(ivars, new FirstFail(), new IntDomainMin()));
                         break;
                     case 1:
                     default:
@@ -195,7 +193,7 @@ public class FGoal {
         }
         plugLNS(aSolver, ivars, defdecvars != null ? defdecvars : ivars, gc);
         if (gc.lastConflict) {
-            aSolver.set(ISF.lastConflict(aSolver, aSolver.getSearchLoop().getStrategy()));
+            aSolver.set(ISF.lastConflict(aSolver, aSolver.getStrategy()));
         }
         gc.setDescription(description.toString());
     }
@@ -207,25 +205,25 @@ public class FGoal {
         for (int i = 0; i < dvars.length; i++) {
             dvars[i] = (IntVar) ddvars[i];
         }
-		ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
+        ObjectiveManager om = solver.getObjectiveManager();
         ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
         switch (gc.lns) {
             case RLNS:
                 lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
-				if(!om.isOptimization()){
-					lns = null;
-					solver.set(ISF.ActivityBased(dvars,0));
-				}
+                if (!om.isOptimization()) {
+                    lns = null;
+                    solver.set(ISF.activity(dvars, 0));
+                }
                 break;
             case RLNS_BB:
                 lns = LNSFactory.rlns(solver, ivars, 200, gc.seed, fr);
                 break;
             case PGLNS:
                 lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
-				if(!om.isOptimization()){
-					lns = null;
-					solver.set(ISF.domOverWDeg_InDomainMin(dvars, 0));
-				}
+                if (!om.isOptimization()) {
+                    lns = null;
+                    solver.set(ISF.domOverWDeg(dvars, 0));
+                }
                 break;
             case PGLNS_BB:
                 lns = LNSFactory.pglns(solver, ivars, 200, 100, 10, gc.seed, fr);
@@ -265,7 +263,7 @@ public class FGoal {
             case int_search:
             case bool_search:
                 IntVar[] scope = exps[0].toIntVarArray(solver);
-                return IntSearch.build(scope, vchoice, assignment, Strategy.complete, solver);
+                return IntSearch.build(scope, vchoice, assignment, solver);
             case set_search:
             default:
                 LoggerFactory.getLogger(FGoal.class).error("Unknown search annotation " + e.toString());
@@ -305,7 +303,7 @@ public class FGoal {
                 return o1.getDomainSize() - o2.getDomainSize();
             }
         });
-//        return new Once(new InputOrder(ivars), new InDomainMin());
+//        return new Once(new InputOrder(ivars), new IntDomainMin());
         return new AbstractStrategy<IntVar>(ivars) {
             boolean created = false;
             Decision d = new Decision<IntVar>() {
@@ -313,7 +311,7 @@ public class FGoal {
                 @Override
                 public void apply() throws ContradictionException {
                     for (int i = 0; i < ivars.length; i++) {
-                        if (!ivars[i].instantiated()) {
+                        if (!ivars[i].isInstantiated()) {
                             ivars[i].instantiateTo(ivars[i].getLB(), this);
                             ivars[i].getSolver().propagate();
                         }

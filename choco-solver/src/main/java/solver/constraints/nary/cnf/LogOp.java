@@ -180,6 +180,11 @@ public final class LogOp implements ILogical {
         return false;
     }
 
+	@Override
+	public void setNot(boolean isNot){
+		throw new UnsupportedOperationException();
+	}
+
     /**
      * Returns the number of direct children of <code>this</code>
      *

@@ -32,6 +32,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -47,7 +48,7 @@ public class PropOffSet extends Propagator<SetVar> {
     private int offSet, tmp;
     private SetVar tmpSet;
     private IntProcedure forced, removed;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -60,7 +61,7 @@ public class PropOffSet extends Propagator<SetVar> {
     public PropOffSet(SetVar set1, SetVar set2, int offSet) {
         super(new SetVar[]{set1, set2}, PropagatorPriority.UNARY, true);
         this.offSet = offSet;
-        sdm = new SetDeltaMonitor[2];
+        sdm = new ISetDeltaMonitor[2];
         sdm[0] = vars[0].monitorDelta(this);
         sdm[1] = vars[1].monitorDelta(this);
         this.forced = new IntProcedure() {
@@ -80,11 +81,6 @@ public class PropOffSet extends Propagator<SetVar> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
-    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {

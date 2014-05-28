@@ -118,7 +118,7 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!g.instantiated()) {
+        if (!g.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         try {

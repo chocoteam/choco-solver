@@ -39,13 +39,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
-import solver.constraints.SatFactory;
+import solver.constraints.*;
 import solver.constraints.nary.cnf.ILogical;
 import solver.constraints.nary.cnf.LogOp;
-import solver.constraints.nary.lex.LexChain;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -65,7 +61,7 @@ public class LexChainTest {
         IntVar[] ar1 = VariableFactory.boundedArray("v1", 3, 0, 10, s);
         IntVar[] ar2 = VariableFactory.boundedArray("v2", 3, -1, 9, s);
 
-        Constraint c = new LexChain(false, s, ar1, ar2);
+        Constraint c = ICF.lex_chain_less_eq(ar1, ar2);
         s.post(c);
         //SearchMonitorFactory.log(s, true, true);
         if (s.findSolution()) {
@@ -104,7 +100,11 @@ public class LexChainTest {
         }
 
         SatFactory.addClauses(LogOp.and(trees), solver);
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
+		if(bounded){
+			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
+		}else{
+			solver.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
+		}
         return solver;
     }
 
@@ -116,9 +116,12 @@ public class LexChainTest {
                     VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
                     VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
         }
-
-        solver.post(new LexChain(X, true, solver));
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
+        solver.post(ICF.lex_chain_less(X));
+		if(bounded){
+			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
+		}else{
+			solver.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
+		}
         return solver;
     }
 
@@ -178,7 +181,7 @@ public class LexChainTest {
             X[i] = VariableFactory.boundedArray("X_" + i, 2, 0, 2, solver);
         }
 
-        solver.post(new LexChain(X, true, solver));
+        solver.post(ICF.lex_chain_less(X));
 
 
         try {

@@ -103,7 +103,7 @@ public class PropCycleEvalObj extends Propagator {
         if (minSum > sum.getUB() || maxSum < sum.getLB()) {
             return ESat.FALSE;
         }
-        if (maxSum == minSum && sum.instantiated()) {
+        if (maxSum == minSum && sum.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

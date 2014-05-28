@@ -31,8 +31,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.objective.IntObjectiveManager;
+import solver.constraints.nary.nogood.NogoodStoreFromSolutions;
+import solver.constraints.reification.PropConditionnal;
+import solver.objective.ObjectiveManager;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -41,6 +46,7 @@ import solver.search.strategy.ISF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import util.ESat;
 
 import java.util.Random;
 
@@ -60,7 +66,8 @@ public class ObjectiveTest {
         solver.post(ICF.arithm(iv, ">=", 0));
         solver.post(ICF.arithm(iv, "<=", 10));
         Random rnd = new Random();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 2000; i++) {
+            rnd.setSeed(i);
             int k = rnd.nextInt(4);
             switch (k) {
                 case 0:
@@ -136,12 +143,25 @@ public class ObjectiveTest {
         final IntVar iv = VF.enumerated("iv", 0, 10, solver);
         solver.post(ICF.arithm(iv, ">=", 2));
 
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                solver.post(ICF.arithm(iv, ">=", 4));
-            }
-        });
+        solver.post(new Constraint("Conditionnal",
+                new PropConditionnal(new IntVar[]{iv},
+                        new Constraint[]{ICF.arithm(iv, ">=", 4)},
+                        new Constraint[]{solver.TRUE}) {
+                    @Override
+                    public ESat checkCondition() {
+                        int nbNode = (int) solver.getMeasures().getNodeCount();
+                        switch (nbNode) {
+                            case 0:
+                            case 1:
+                                return ESat.UNDEFINED;
+                            case 2:
+                                return ESat.TRUE;
+                            default:
+                                return ESat.FALSE;
+                        }
+
+                    }
+                }));
         solver.findSolution();
         Assert.assertEquals(iv.getValue(), 2);
 
@@ -149,7 +169,7 @@ public class ObjectiveTest {
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
-                solver.postCut(ICF.arithm(iv, ">=", 6));
+                solver.post(ICF.arithm(iv, ">=", 6));
             }
         });
         solver.findSolution();
@@ -167,12 +187,12 @@ public class ObjectiveTest {
         BoolVar v = ICF.arithm(iv, "<=", 2).reif();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        System.out.println("Minimum1: " + iv + " : " + solver.isEntailed());
+        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
 
         solver.getSearchLoop().reset();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        System.out.println("Minimum2: " + iv + " : " + solver.isEntailed());
+        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
     @Test(groups = "1s")
@@ -182,18 +202,18 @@ public class ObjectiveTest {
         BoolVar b2 = VF.bool("b2", solver);
         solver.post(ICF.arithm(b1, "<=", b2));
         SMF.log(solver, true, true);
-        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(b1, ResolutionPolicy.MINIMIZE, solver));
+        solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
             solver.set(new SevenQueuesPropagatorEngine(solver));
         }
-        solver.getSearchLoop().getMeasures().setReadingTimeCount(System.nanoTime());
+        solver.getMeasures().setReadingTimeCount(System.nanoTime());
         solver.getSearchLoop().launch(false);
         System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         solver.getSearchLoop().reset();
         solver.post(ICF.arithm(b1, "=", bestvalue));
-        solver.set(ISF.inputOrder_InDomainMin(new BoolVar[]{b1, b2}));
+        solver.set(ISF.lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
         if (solver.findSolution()) {
             do {
@@ -204,4 +224,21 @@ public class ObjectiveTest {
         Assert.assertEquals(count, 2);
     }
 
+	@Test(groups = "1s")
+	public void testJL2() {
+		Solver solver = new Solver();
+		IntVar a = VF.enumerated("a", -2, 2, solver);
+
+		SMF.log(solver, true, true);
+		solver.set(
+				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN,true),
+				ISF.minDom_LB(a));
+		SMF.restartAfterEachSolution(solver);
+		NogoodStoreFromSolutions ng = new NogoodStoreFromSolutions(new IntVar[]{a});
+		solver.post(ng);
+		solver.plugMonitor(ng);
+
+		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);
+		Assert.assertEquals(solver.hasReachedLimit(),false);
+	}
 }

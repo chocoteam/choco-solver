@@ -27,7 +27,7 @@
 
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.structure.Operation;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -52,7 +52,6 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 02/02/12
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropElement extends Propagator<IntVar> {
 
     int[] lval;
@@ -79,11 +78,6 @@ public class PropElement extends Propagator<IntVar> {
         this.lval = values;
         this.cste = offset;
         this.s = s;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
     }
 
     @Override
@@ -120,7 +114,7 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (this.vars[0].instantiated()) {
+        if (this.vars[0].isInstantiated()) {
             boolean allVal = true;
             boolean oneVal = false;
             int ub = this.vars[1].getUB();
@@ -214,6 +208,7 @@ public class PropElement extends Propagator<IntVar> {
                     }
                 }
                 if (s == Sort.detect) {
+					IEnvironment environment = solver.getEnvironment();
                     if (isDsc) {
                         s = Sort.desc;
                         environment.save(new Operation() {

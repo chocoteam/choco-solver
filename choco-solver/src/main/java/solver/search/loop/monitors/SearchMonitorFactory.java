@@ -27,11 +27,15 @@
 package solver.search.loop.monitors;
 
 import solver.Solver;
+import solver.exception.SolverException;
 import solver.search.limits.*;
-import solver.search.loop.AbstractSearchLoop;
 import solver.search.restart.GeometricalRestartStrategy;
 import solver.search.restart.LubyRestartStrategy;
 import solver.variables.Variable;
+
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <br/>
@@ -43,7 +47,7 @@ public class SearchMonitorFactory {
     SearchMonitorFactory() {
     }
 
-    private static class DefaultSolutionMessage implements IMessage {
+	private static class DefaultSolutionMessage implements IMessage {
 
         private Solver solver;
 
@@ -54,9 +58,9 @@ public class SearchMonitorFactory {
         @Override
         public String print() {
             return String.format("- Solution #%s found. %s \n\t%s.",
-                    solver.getSearchLoop().getMeasures().getSolutionCount(),
-                    solver.getSearchLoop().getMeasures().toOneShortLineString(),
-                    print(solver.getSearchLoop().getStrategy().vars)
+                    solver.getMeasures().getSolutionCount(),
+                    solver.getMeasures().toOneShortLineString(),
+                    print(solver.getStrategy().vars)
             );
         }
 
@@ -82,7 +86,7 @@ public class SearchMonitorFactory {
         @Override
         public String print() {
             int limit = 120;
-            Variable[] vars = solver.getSearchLoop().getStrategy().vars;
+            Variable[] vars = solver.getStrategy().vars;
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');
@@ -94,6 +98,7 @@ public class SearchMonitorFactory {
         }
 
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -104,13 +109,12 @@ public class SearchMonitorFactory {
      * @param choices  print choices
      */
     public static void log(Solver solver, boolean solution, boolean choices) {
-        AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogBasic(solver));
+        solver.plugMonitor(new LogBasic(solver));
         if (solution) {
-            sl.plugSearchMonitor(new LogSolutions(sl, new DefaultSolutionMessage(solver)));
+            solver.plugMonitor(new LogSolutions(new DefaultSolutionMessage(solver)));
         }
         if (choices) {
-            sl.plugSearchMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
+            solver.plugMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
         }
     }
 
@@ -123,13 +127,12 @@ public class SearchMonitorFactory {
      * @param choices         print choices
      */
     public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices) {
-        AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogBasic(solver));
+        solver.plugMonitor(new LogBasic(solver));
         if (solution) {
-            sl.plugSearchMonitor(new LogSolutions(sl, solutionMessage));
+            solver.plugMonitor(new LogSolutions(solutionMessage));
         }
         if (choices) {
-            sl.plugSearchMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
+            solver.plugMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
         }
     }
 
@@ -142,13 +145,12 @@ public class SearchMonitorFactory {
      * @param decisionMessage print the message on decisions
      */
     public static void log(Solver solver, boolean solution, boolean choices, IMessage decisionMessage) {
-        AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogBasic(solver));
+        solver.plugMonitor(new LogBasic(solver));
         if (solution) {
-            sl.plugSearchMonitor(new LogSolutions(sl, new DefaultSolutionMessage(solver)));
+            solver.plugMonitor(new LogSolutions(new DefaultSolutionMessage(solver)));
         }
         if (choices) {
-            sl.plugSearchMonitor(new LogChoices(solver, decisionMessage));
+            solver.plugMonitor(new LogChoices(solver, decisionMessage));
         }
     }
 
@@ -162,13 +164,12 @@ public class SearchMonitorFactory {
      * @param decisionMessage print the message on decisions
      */
     public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices, IMessage decisionMessage) {
-        AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogBasic(solver));
+        solver.plugMonitor(new LogBasic(solver));
         if (solution) {
-            sl.plugSearchMonitor(new LogSolutions(sl, solutionMessage));
+            solver.plugMonitor(new LogSolutions(solutionMessage));
         }
         if (choices) {
-            sl.plugSearchMonitor(new LogChoices(solver, decisionMessage));
+            solver.plugMonitor(new LogChoices(solver, decisionMessage));
         }
     }
 
@@ -180,8 +181,7 @@ public class SearchMonitorFactory {
      * @param e      ending choice number
      */
     public static void logWithRank(Solver solver, int s, int e) {
-        AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e, new DefaultDecisionMessage(solver)));
+        solver.plugMonitor(new LogChoicesWithRank(solver, s, e, new DefaultDecisionMessage(solver)));
     }
 
     /**
@@ -193,8 +193,7 @@ public class SearchMonitorFactory {
      * @param decisionMessage print the specific message
      */
     public static void logWithRank(Solver solver, int s, int e, IMessage decisionMessage) {
-        AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e, decisionMessage));
+        solver.plugMonitor(new LogChoicesWithRank(solver, s, e, decisionMessage));
     }
 
     /**
@@ -203,7 +202,7 @@ public class SearchMonitorFactory {
      * @param solver a solver
      */
     public static void logContradiction(Solver solver) {
-        solver.getSearchLoop().plugSearchMonitor(new LogContradiction());
+        solver.plugMonitor(new LogContradiction());
     }
 
     /**
@@ -214,8 +213,7 @@ public class SearchMonitorFactory {
      */
     public static void statEveryXXms(Solver solver, long everyXXmms) {
         if (everyXXmms > 0) {
-            AbstractSearchLoop sl = solver.getSearchLoop();
-            sl.plugSearchMonitor(new LogStatEveryXXms(solver.getSearchLoop(), everyXXmms));
+            solver.plugMonitor(new LogStatEveryXXms(solver, everyXXmms));
         }
     }
 
@@ -230,7 +228,7 @@ public class SearchMonitorFactory {
      */
     public static void luby(Solver solver, int scaleFactor, int geometricalFactor,
                             ICounter restartStrategyLimit, int restartLimit) {
-        solver.getSearchLoop().plugSearchMonitor(new RestartManager(
+        solver.plugMonitor(new RestartManager(
                 new LubyRestartStrategy(scaleFactor, geometricalFactor),
                 restartStrategyLimit, solver.getSearchLoop(), restartLimit
         ));
@@ -247,7 +245,7 @@ public class SearchMonitorFactory {
      */
     public static void geometrical(Solver solver, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        solver.getSearchLoop().plugSearchMonitor(new RestartManager(
+        solver.plugMonitor(new RestartManager(
                 new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
                 restartStrategyLimit, solver.getSearchLoop(), restartLimit
         ));
@@ -259,7 +257,7 @@ public class SearchMonitorFactory {
      * @param solver a solver
      */
     public static void prop_count(Solver solver) {
-        solver.getSearchLoop().plugSearchMonitor(new LogPropagationCount(solver));
+        solver.plugMonitor(new LogPropagationCount(solver));
     }
 
     /**
@@ -268,7 +266,7 @@ public class SearchMonitorFactory {
      * @param solver
      */
     public static void event_count(Solver solver) {
-        solver.getSearchLoop().plugSearchMonitor(new LogEventCount(solver));
+        solver.plugMonitor(new LogEventCount(solver));
     }
 
     /**
@@ -280,7 +278,7 @@ public class SearchMonitorFactory {
     public static void limitNode(Solver solver, long limit) {
         NodeCounter counter = new NodeCounter(limit);
         counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-        solver.getSearchLoop().plugSearchMonitor(counter);
+        solver.plugMonitor(counter);
     }
 
     /**
@@ -292,7 +290,7 @@ public class SearchMonitorFactory {
     public static void limitSolution(Solver solver, long limit) {
         SolutionCounter counter = new SolutionCounter(limit);
         counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-        solver.getSearchLoop().plugSearchMonitor(counter);
+        solver.plugMonitor(counter);
     }
 
 
@@ -303,27 +301,103 @@ public class SearchMonitorFactory {
      * <br/>
      * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
      *
-     * @param limit maximal resolution time in millisecond
+	 * @param solver	the solver subject to the time limit
+     * @param limit		maximal resolution time in millisecond
      * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
         TimeCounter counter = new TimeCounter(solver, limit);
         counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-        solver.getSearchLoop().plugSearchMonitor(counter);
+        solver.plugMonitor(counter);
     }
 
+    /**
+     * Defines a limit over the run time.
+     * When the limit is reached, the resolution is stopped.
+     * <br/>
+     * <br/>
+     * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(String)}, that runs the limit in a separated thread.</b>
+     * <p/>
+     * Based on {@code SearchMonitorFactory.convertInMilliseconds(String duration)}
+     *
+     * @param duration a String which states the duration like "WWd XXh YYm ZZs".
+     * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
+     * @see SearchMonitorFactory#convertInMilliseconds(String)
+     */
+    public static void limitTime(Solver solver, String duration) {
+        limitTime(solver, convertInMilliseconds(duration));
+	}
 
     /**
      * Defines a limit over the run time, set in a thread.
      * When the limit is reached, the resolution is stopped.
      *
      * @param limit maximal resolution time in millisecond
+     * @see SearchMonitorFactory#limitTime(solver.Solver, long)
+     * @see SearchMonitorFactory#convertInMilliseconds(String)
      */
     public static void limitThreadTime(Solver solver, long limit) {
         ThreadTimeCounter counter = new ThreadTimeCounter(solver, limit);
         counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-        solver.getSearchLoop().plugSearchMonitor(counter);
+        solver.plugMonitor(counter);
     }
+
+    /**
+     * Defines a limit over the run time, set in a thread.
+     * When the limit is reached, the resolution is stopped.
+     *
+     * @param duration a String which states the duration like "WWd XXh YYm ZZs".
+     * @see SearchMonitorFactory#limitTime(solver.Solver, String)
+     * @see SearchMonitorFactory#convertInMilliseconds(String)
+     */
+    public static void limitThreadTime(Solver solver, String duration) {
+        limitThreadTime(solver, convertInMilliseconds(duration));
+    }
+
+    public static Pattern Dp = Pattern.compile("(\\d+)d");
+    public static Pattern Hp = Pattern.compile("(\\d+)h");
+    public static Pattern Mp = Pattern.compile("(\\d+)m");
+    public static Pattern Sp = Pattern.compile("(\\d+(\\.\\d+)?)s");
+
+
+    /**
+     * Convert a string which represents a duration. It can be composed of days, hours, minutes and seconds.
+     * Examples:
+     * <p/>
+     * - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
+     * - "2h30m": two hours and 30 minutes<p/>
+     * - "30.5s": 30 seconds and 500 ms<p/>
+     * - "180s": three minutes
+     *
+     * @param duration a String which describes the duration
+     * @return the duration in milliseconds
+     */
+    public static long convertInMilliseconds(String duration) {
+        long milliseconds = 0;
+        duration = duration.replaceAll("\\s+", "");
+        Matcher matcher = Dp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            int days = Integer.parseInt(matcher.group(1));
+            milliseconds += TimeUnit.MILLISECONDS.convert(days, TimeUnit.DAYS);
+        }
+        matcher = Hp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            int hours = Integer.parseInt(matcher.group(1));
+            milliseconds += TimeUnit.MILLISECONDS.convert(hours, TimeUnit.HOURS);
+        }
+        matcher = Mp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            int minutes = Integer.parseInt(matcher.group(1));
+            milliseconds += TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES);
+        }
+        matcher = Sp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 2) {
+            double seconds = Double.parseDouble(matcher.group(1));
+            milliseconds += (int) (seconds * 1000);
+        }
+        if (milliseconds == 0) throw new SolverException("Duration cannot be parsed or must be positive" + duration);
+        return milliseconds;
+	}
 
     /**
      * Defines a limit over the number of fails allowed during the resolution.
@@ -331,10 +405,11 @@ public class SearchMonitorFactory {
      *
      * @param limit maximal number of fails
      */
+
     public static void limitFail(Solver solver, long limit) {
         FailCounter counter = new FailCounter(limit);
         counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-        solver.getSearchLoop().plugSearchMonitor(counter);
+        solver.plugMonitor(counter);
     }
 
     /**
@@ -346,7 +421,7 @@ public class SearchMonitorFactory {
     public static void limitBacktrack(Solver solver, long limit) {
         BacktrackCounter counter = new BacktrackCounter(limit);
         counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
-        solver.getSearchLoop().plugSearchMonitor(counter);
+        solver.plugMonitor(counter);
     }
 
 
@@ -358,7 +433,15 @@ public class SearchMonitorFactory {
      * @param filename absolute path of the CSV output file
      */
     public static void toCSV(Solver solver, String prefix, String filename) {
-        solver.getSearchLoop().plugSearchMonitor(new OutputCSV(solver, prefix, filename));
+        solver.plugMonitor(new OutputCSV(solver, prefix, filename));
     }
 
+	public static void restartAfterEachSolution(final Solver solver) {
+		solver.plugMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				solver.getSearchLoop().restart();
+			}
+		});
+	}
 }

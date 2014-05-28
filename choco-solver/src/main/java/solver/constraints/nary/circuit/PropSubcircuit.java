@@ -35,6 +35,7 @@
 package solver.constraints.nary.circuit;
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -72,6 +73,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
@@ -89,7 +91,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             vars[i].updateLowerBound(offset, aCause);
             vars[i].updateUpperBound(n - 1 + offset, aCause);
-            if (vars[i].instantiated() && i + offset != vars[i].getValue()) {
+            if (vars[i].isInstantiated() && i + offset != vars[i].getValue()) {
                 fixedVar.add(i);
             }
         }
@@ -132,7 +134,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
             if (size[start].get() == length.getUB()) {
                 vars[last].instantiateTo(start + offset, aCause);
 				for(int i=0;i<n;i++){
-					if(!vars[i].instantiated()){
+					if(!vars[i].isInstantiated()){
 						vars[i].instantiateTo(i+offset,aCause);
 					}
 				}
@@ -141,7 +143,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
             boolean isInst = false;
             if (size[start].get() < length.getLB()) {
                 if (vars[last].removeValue(start + offset, aCause)) {
-                    isInst = vars[last].instantiated();
+                    isInst = vars[last].isInstantiated();
                 }
             }
             origin[last].set(start);
@@ -159,7 +161,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated() && length.instantiated()) {
+        if (isCompletelyInstantiated() && length.isInstantiated()) {
             int ct = 0;
             int first = -1;
             BitSet visited = new BitSet(n);

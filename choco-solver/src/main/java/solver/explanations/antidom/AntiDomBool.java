@@ -26,8 +26,8 @@
  */
 package solver.explanations.antidom;
 
-import memory.structure.IndexedBipartiteSet;
-import solver.variables.fast.BooleanBoolVarImpl;
+import memory.structure.BasicIndexedBipartiteSet;
+import solver.variables.impl.BoolVarImpl;
 import util.iterators.DisposableValueIterator;
 
 /**
@@ -53,20 +53,20 @@ public class AntiDomBool implements AntiDomain {
      * A bi partite set indicating for each value whether it is present or not.
      * If the set contains the domain, the variable is not instanciated.
      */
-    protected final IndexedBipartiteSet notInstanciated;
+    protected final BasicIndexedBipartiteSet notInstanciated;
 
     private DisposableValueIterator _viterator;
 
-    public AntiDomBool(BooleanBoolVarImpl var) {
+    public AntiDomBool(BoolVarImpl var) {
         notInstanciated = var.getSolver().getEnvironment().getSharedBipartiteSetForBooleanVars();
-        this.offset = var.getSolver().getEnvironment().getNextOffset();
+        this.offset = notInstanciated.add();
         mValue = 0;
     }
 
     @Override
     public void add(int outsideval) {
         if (outsideval == 0 || outsideval == 1) {
-            notInstanciated.remove(offset);
+            notInstanciated.swap(offset);
             mValue = outsideval;
         }
     }

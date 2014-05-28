@@ -46,8 +46,8 @@ public enum Reporting {
     ;
 
     public static String onDecisions(Solver solver) {
-        AbstractSearchLoop searchLoop = solver.getSearchLoop();
-        Decision last = searchLoop.decision;
+        ISearchLoop searchLoop = solver.getSearchLoop();
+        Decision last = searchLoop.getLastDecision();
         Deque<Decision> stack = new ArrayDeque<Decision>();
         while (last != null) {
             stack.push(last);
@@ -57,7 +57,7 @@ public enum Reporting {
         while (!stack.isEmpty()) {
             sb.append(stack.removeFirst().toString()).append(" & ");
         }
-        sb.append("\n").append(solver.getSearchLoop().getObjectivemanager().toString());
+        sb.append("\n").append(solver.getObjectiveManager().toString());
         return sb.toString();
     }
 
@@ -65,7 +65,7 @@ public enum Reporting {
         Variable[] variables = solver.getVars();
         StringBuilder sb = new StringBuilder();
         for (int c = 0; c < variables.length; c++) {
-            boolean insV = variables[c].instantiated();
+            boolean insV = variables[c].isInstantiated();
             if (!insV) {
                 sb.append("FAILURE >> ").append(variables[c].toString()).append("\n");
             }

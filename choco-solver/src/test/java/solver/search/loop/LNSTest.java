@@ -72,7 +72,7 @@ public class LNSTest {
         solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
         solver.post(IntConstraintFactory.scalar(objects, energies, power));
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(objects));
+        solver.set(IntStrategyFactory.lexico_LB(objects));
         SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:
@@ -128,7 +128,7 @@ public class LNSTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "10m")
     public void test1() {
         // opt: 8372
         knapsack20(0);

@@ -94,11 +94,6 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	//***********************************************************************************
 
 	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
-
-	@Override
 	public ESat isEntailed() {
 		return ESat.TRUE;// redundant propagator
 	}
@@ -239,7 +234,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	private void filterFromInst(int source) throws ContradictionException {
 		int to, arc, x;
 		for (int i = 0; i < n; i++) {
-			if(vars[i].instantiated()){
+			if(vars[i].isInstantiated()){
 				to = vars[i].getValue()-offSet;
 				x = sccOf[i];
 				if(to==source){

@@ -65,11 +65,6 @@ public class OneValueDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-    public void clear() {
-        used = false;
-    }
-
-    @Override
     public void forEach(SafeIntProcedure proc, EventType eventType) {
         if (EventType.isRemove(eventType.mask)) {
             if (used && propagator != delta.getCause(0))

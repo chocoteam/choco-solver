@@ -43,31 +43,11 @@ import java.io.Serializable;
 public interface VariableSelector<V extends Variable> extends Serializable {
 
     /**
-     * Returns the set of variables involved in this.
+     * Provides access to the current selected variable among {@code variables}.
+     * If there is no variable left, return {@code null}.
      *
-     * @return a collection of variables.
+     * @return the current selected variable if any, {@code null} otherwise.
      */
-    public V[] getScope();
+    public V getVariable(V[] variables);
 
-    /**
-     * Checks if there is at least one variable not yet instantiated fitting specifications
-     *
-     * @return <code>true</code> if at least one not instantiated variable fitting the specifications,
-     *         <code>false</code> otherwise
-     */
-    public boolean hasNext();
-
-    /**
-     * Moves the selector to the next not instantiated variable fitting the specifications.
-     * Note that you must <code>advance()</code> at least once before invoking <code>getVariable()</code>.
-     */
-    public void advance();
-
-    /**
-     * Provides access to the current selected variable.
-     * Note that you must <code>advance()</code> at least once before invoking <code>getVariable()</code>.
-     *
-     * @return the current selected variable
-     */
-    public V getVariable();
 }

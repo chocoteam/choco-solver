@@ -100,12 +100,7 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
         }
         Number[] nbs = slaves[0].solver.getMeasures().toArray();
         nbs[0] = nbSol;
-        nbs[6] = policy != ResolutionPolicy.SATISFACTION ? bestVal : 0;
-//        if (!aPas.csv.equals("")) {
-//            AverageCSV acsv = new AverageCSV();
-//            acsv.record(aPas.csv, aPas.instance, aPas.gc.getDescription(),
-//                    nbs);
-//        }
+        nbs[5] = policy != ResolutionPolicy.SATISFACTION ? bestVal : 0;
         System.exit(0);
     }
 

@@ -30,7 +30,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDelta;
 
 /**
  * An interface to define views.
@@ -43,7 +42,7 @@ import solver.variables.delta.IDelta;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public interface IView<D extends IDelta> extends ICause, Variable<D> {
+public interface IView extends ICause, Variable {
 
     /**
      * Return the basis variable

@@ -36,7 +36,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -54,7 +53,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class OffsetView extends IntView {
 
     public final int cste;
 
@@ -92,7 +91,7 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
                 } else if (value == sup) {
                     e = EventType.DECUPP;
                 }
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -137,7 +136,7 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(value - cste, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -156,7 +155,7 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(value - cste, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -173,9 +172,14 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value - cste);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(value - cste);
     }
+
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
 
     @Override
     public int getValue() {

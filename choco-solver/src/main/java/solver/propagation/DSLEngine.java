@@ -202,6 +202,17 @@ public class DSLEngine implements IPropagationEngine {
     }
 
     @Override
+    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+        if (propagator.getNbPendingEvt() == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                IPropagationEngine.Trace.printPropagation(null, propagator);
+            }
+            //coarseERcalls++;
+            propagator.propagate(type.getStrengthenedMask());
+        }
+    }
+
+    @Override
     public void onPropagatorExecution(Propagator propagator) {
         desactivatePropagator(propagator);
     }
@@ -221,7 +232,12 @@ public class DSLEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean cut) {
+    public void dynamicAddition(Constraint c, boolean permanent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void dynamicDeletion(Constraint c) {
         throw new UnsupportedOperationException();
     }
 }

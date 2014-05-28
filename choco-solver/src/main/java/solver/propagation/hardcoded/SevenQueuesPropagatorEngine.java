@@ -35,8 +35,8 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationTrigger;
-import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
+import solver.propagation.hardcoded.util.MId2AbId;
 import solver.propagation.queues.CircularQueue;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -49,10 +49,7 @@ import java.util.List;
  * This engine is priority-driven constraint-oriented seven queues engine.
  * <br/>On a call to {@code onVariableUpdate}, it stores the event generated and schedules the propagator in
  * one of the 7 queues wrt to its priority for future revision.
- * <br/>A propagator can schedule itself on a call to {@code schedulePropagator}.
- * In this case, the propagator is pushed into one of the 7 other queues for delayed propagation.
- * <br/>On a call to {@code propagate} a variable is removed from the queue and a loop over its active propagator is achieved.
- * <br/>The queues of fine-grained events is always emptied before treating one element of the coarse-grained one.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -74,20 +71,15 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     protected short[] scheduled; // also maintains the index of the queue!
     protected IntCircularQueue[] eventsets;
     private boolean init;
-    private final boolean dynamic;
+    protected int[][] eventmasks;// the i^th event mask stores modification events on the i^th variable, since the last propagation
 
     final PropagationTrigger trigger; // an object that starts the propagation
 
 
     public SevenQueuesPropagatorEngine(Solver solver) {
-        this(solver, false);
-    }
-
-    public SevenQueuesPropagatorEngine(Solver solver, boolean dynamic) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
-        this.dynamic = dynamic;
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<Propagator>();
@@ -106,7 +98,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
         trigger.addAll(propagators);
 
-        p2i = new AId2AbId(m, M, -1);
+        //p2i = new AId2AbId(m, M, -1);
+        p2i = new MId2AbId(M - m + 1, -1);
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
@@ -117,9 +110,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
         scheduled = new short[nbProp];
         eventsets = new IntCircularQueue[nbProp];
+        eventmasks = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
             int nbv = propagators[i].getNbVars();
             eventsets[i] = new IntCircularQueue(nbv);
+            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
         }
         notEmpty = 0;
         init = true;
@@ -162,12 +157,17 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                     }
                     // clear event
-                    mask = lastProp.getMask(v);
-                    lastProp.clearMask(v);
+                    int vid = lastProp.reactToFineEvent() ? v : 0;
+                    mask = eventmasks[aid][vid];
+                    eventmasks[aid][vid] = 0;
                     lastProp.decNbPendingEvt();
                     // run propagation on the specific event
                     lastProp.fineERcalls++;
                     lastProp.propagate(v, mask);
+                }
+                // This part is for debugging only!!
+                if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
+                    FakeEngine.checkIdempotency(lastProp);
                 }
             }
             notEmpty = notEmpty & ~(1 << i);
@@ -191,8 +191,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             evtset = eventsets[aid];
             while (evtset.size() > 0) {
-                int p = evtset.pollFirst();
-                lastProp.clearMask(p);
+                int v = evtset.pollFirst();
+                int vid = lastProp.reactToFineEvent() ? v : 0;
+                eventmasks[aid][vid] = 0;
             }
             evtset.clear();
             scheduled[aid] = 0;
@@ -205,8 +206,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 aid = p2i.get(lastProp.getId());
                 evtset = eventsets[aid];
                 while (evtset.size() > 0) {
-                    int p = evtset.pollFirst();
-                    lastProp.clearMask(p);
+                    int v = evtset.pollFirst();
+                    int vid = lastProp.reactToFineEvent() ? v : 0;
+                    eventmasks[aid][vid] = 0;
                 }
                 evtset.clear();
                 scheduled[aid] = 0;
@@ -233,7 +235,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             pindice = vindices[p];
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
-                if (prop.updateMask(pindice, type)) {
+                int vid = prop.reactToFineEvent() ? pindice : 0;
+                boolean needSched = (eventmasks[aid][vid] == 0);
+                eventmasks[aid][vid] |= type.strengthened_mask;
+                if (needSched) {
                     if (Configuration.PRINT_SCHEDULE) {
                         IPropagationEngine.Trace.printSchedule(prop);
                     }
@@ -254,6 +259,17 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
+    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+        if (propagator.getNbPendingEvt() == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                IPropagationEngine.Trace.printPropagation(null, propagator);
+            }
+            propagator.coarseERcalls++;
+            propagator.propagate(type.getStrengthenedMask());
+        }
+    }
+
+    @Override
     public void onPropagatorExecution(Propagator propagator) {
         desactivatePropagator(propagator);
     }
@@ -267,8 +283,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             // we don't remove the element from its master to avoid costly operations
             IntCircularQueue evtset = eventsets[aid];
             while (evtset.size() > 0) {
-                int p = evtset.pollFirst();
-                propagator.clearMask(p);
+                int v = evtset.pollFirst();
+                int vid = propagator.reactToFineEvent() ? v : 0;
+                eventmasks[aid][vid] = 0;
             }
             evtset.clear();
             propagator.flushPendingEvt();
@@ -281,7 +298,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean cut) {
+    public void dynamicAddition(Constraint c, boolean permanent) {
         int osize = propagators.length;
         int nbp = c.getPropagators().length;
         int nsize = osize + nbp;
@@ -291,7 +308,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             p2i.set(propagators[j].getId(), j);
-            trigger.add(propagators[j], cut);
+            trigger.dynAdd(propagators[j], permanent);
         }
 
         short[] _scheduled = scheduled;
@@ -302,9 +319,63 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         IntCircularQueue[] _eventsets = eventsets;
         eventsets = new IntCircularQueue[nsize];
         System.arraycopy(_eventsets, 0, eventsets, 0, osize);
+
+        int[][] _eventmasks = eventmasks;
+        eventmasks = new int[nsize][];
+        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
         for (int i = osize; i < nsize; i++) {
             int nbv = propagators[i].getNbVars();
             eventsets[i] = new IntCircularQueue(nbv);
+            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+        }
+    }
+
+    @Override
+    public void dynamicDeletion(Constraint c) {
+        for (Propagator toDelete : c.getPropagators()) {
+            int nsize = propagators.length - 1;
+            Propagator toMove = propagators[nsize];
+            int idtd = p2i.get(toDelete.getId());
+            int idtm = p2i.get(toMove.getId());
+
+            assert idtd <= idtm : "wrong id for prop to delete";
+
+            // 1. remove from propagators[] and p2i
+            Propagator[] _propagators = propagators;
+            propagators = new Propagator[nsize];
+            System.arraycopy(_propagators, 0, propagators, 0, nsize);
+
+            // 2. resize scheduled
+            short stm = scheduled[idtm];
+            assert scheduled[idtd] == 0 : "try to delete a propagator which is scheduled (fine)";
+            short[] _scheduled = scheduled;
+            scheduled = new short[nsize];
+            System.arraycopy(_scheduled, 0, scheduled, 0, nsize);
+
+
+            // 3. remove eventsets
+            IntCircularQueue estm = eventsets[idtm];
+            assert eventsets[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
+            IntCircularQueue[] _eventsets = eventsets;
+            eventsets = new IntCircularQueue[nsize];
+            System.arraycopy(_eventsets, 0, eventsets, 0, nsize);
+
+            // 4. remove eventmasks
+            int[] emtm = eventmasks[idtm];
+//            assert eventmasks[idtd]. : "try to delete a propagator which has events to propagate (fine)";
+            int[][] _eventmasks = eventmasks;
+            eventmasks = new int[nsize][];
+            System.arraycopy(_eventmasks, 0, eventmasks, 0, nsize);
+
+            // 4. copy data
+            if (idtd < nsize) {
+                propagators[idtd] = toMove;
+                p2i.set(toMove.getId(), idtd);
+                scheduled[idtd] = stm;
+                eventsets[idtd] = estm;
+                eventmasks[idtd] = emtm;
+            }
+            trigger.remove(toDelete);
         }
     }
 }

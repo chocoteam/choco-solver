@@ -39,9 +39,8 @@ import solver.Solver;
 import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.propagation.hardcoded.VariableEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -57,7 +56,7 @@ import java.util.ArrayList;
  */
 public class ParseAndSolveExt extends ParseAndSolve {
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException{
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
         new ParseAndSolveExt().doMain(args);
     }
 
@@ -92,16 +91,11 @@ public class ParseAndSolveExt extends ParseAndSolve {
     protected void makeEngine(Solver solver, Datas datas) {
 
         switch (eng) {
-            case 0:
-                // let the default propagation strategy,
-                break;
+            default:
             case 1:
-                solver.set(new PropagatorEngine(solver));
+                solver.set(new TwoBucketPropagationEngine(solver));
                 break;
             case 2:
-                solver.set(new VariableEngine(solver));
-                break;
-            case 3:
                 solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;
             case 4:
@@ -154,14 +148,6 @@ public class ParseAndSolveExt extends ParseAndSolve {
                     throw new FZNException("cannot parse engine!");
                 }
                 break;
-            case -1:
-                break;
-            default:
-                if (solver.getNbCstrs() > solver.getNbVars()) {
-                    solver.set(new VariableEngine(solver));
-                } else {
-                    solver.set(new PropagatorEngine(solver));
-                }
         }
     }
 

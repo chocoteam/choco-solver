@@ -73,26 +73,17 @@ public class Grocery extends AbstractProblem {
         // views as real variables to be used by Ibex
         realitemCost = VariableFactory.real(itemCost, epsilon);
 
-        //		solver.post(ICF.sum(itemCost,VariableFactory.fixed(711,solver)));
-        RealConstraint rcons = new RealConstraint(solver);
-        rcons.addFunction(
-                "{0} + {1} + {2} + {3} = 711",
-                Ibex.COMPO, realitemCost);
-        rcons.addFunction(
-                "{0} * {1}/100 * {2}/100 * {3}/100 = 711",
-                Ibex.HC4, realitemCost);
-
+	solver.post(new RealConstraint("Sum", "{0} + {1} + {2} + {3} = 711", Ibex.COMPO, realitemCost));
+	solver.post(new RealConstraint("Product", "{0} * {1}/100 * {2}/100 * {3}/100 = 711", Ibex.HC4, realitemCost));
         // symmetry breaking
-        rcons.addFunction("{0} <= {1};{1} <= {2};{2} <= {3}", Ibex.HC4, realitemCost);
-
-        solver.post(rcons);
+        solver.post(new RealConstraint("SymmetryBreaking","{0} <= {1};{1} <= {2};{2} <= {3}", Ibex.HC4, realitemCost));
     }
 
     @Override
     public void configureSearch() {
         // choco branching
         SMF.log(solver, true, true);
-        solver.set(IntStrategyFactory.inputOrder_InDomainMax(itemCost));
+        solver.set(IntStrategyFactory.lexico_UB(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));
     }
@@ -114,8 +105,8 @@ public class Grocery extends AbstractProblem {
             System.out.println("item " + i + " : " + itemCost[i].getValue());
         }
         prod /= 1000000;
-        System.out.println("sum = " + sum + " au lieu de 711");
-        System.out.println("prod = " + prod + " au lieu de 711");
+        System.out.println("sum = " + sum + " instead of 711");
+        System.out.println("prod = " + prod + " instead of 711");
     }
 
     public static void main(String[] args) {

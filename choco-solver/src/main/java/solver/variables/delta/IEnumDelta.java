@@ -52,13 +52,4 @@ public interface IEnumDelta extends IntDelta {
      * @throws IndexOutOfBoundsException if idx is out of the bounds
      */
     int get(int idx) throws IndexOutOfBoundsException;
-
-    /**
-     * Return the cause of the idx^th value stored in the delta, if any
-     *
-     * @param idx rank of the value
-     * @return cause of the removal
-     * @throws IndexOutOfBoundsException if idx is out of the bounds
-     */
-    ICause getCause(int idx) throws IndexOutOfBoundsException;
 }

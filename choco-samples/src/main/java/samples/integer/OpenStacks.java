@@ -31,11 +31,11 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
-import solver.constraints.nary.min_max.Maximum;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -126,12 +126,12 @@ public class OpenStacks extends AbstractProblem {
 
 
         objective = VariableFactory.bounded("OBJ", 0, nc * np, solver);
-        solver.post(new Maximum(objective, open, solver));
+        solver.post(ICF.maximum(objective, open));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(scheds));
+        solver.set(IntStrategyFactory.minDom_LB(scheds));
     }
 
     @Override

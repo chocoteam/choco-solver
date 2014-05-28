@@ -36,7 +36,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -52,7 +51,7 @@ import util.tools.MathUtils;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
+public final class ScaleView extends IntView {
 
     public final int cste;
 
@@ -93,7 +92,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
                     } else if (value == sup) {
                         e = EventType.DECUPP;
                     }
-                    if (this.instantiated()) {
+                    if (this.isInstantiated()) {
                         e = EventType.INSTANTIATE;
                     }
                     this.notifyPropagators(e, cause);
@@ -123,6 +122,9 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
+        if (value % cste != 0) {
+            contradiction(cause, EventType.INSTANTIATE, "Not a multiple of " + cste);
+        }
         boolean done = var.instantiateTo(value / cste, this);
         if (done) {
             notifyPropagators(EventType.INSTANTIATE, cause);
@@ -138,7 +140,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -156,7 +158,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -173,9 +175,14 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return value % cste == 0 && var.instantiatedTo(value / cste);
+    public boolean isInstantiatedTo(int value) {
+        return value % cste == 0 && var.isInstantiatedTo(value / cste);
     }
+
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
 
     @Override
     public int getValue() {
@@ -194,7 +201,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public int nextValue(int v) {
-        int value = var.nextValue(v / cste);
+        int value = var.nextValue(MathUtils.divFloor(v , cste));
         if (value == Integer.MAX_VALUE) {
             return value;
         }
@@ -203,7 +210,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public int previousValue(int v) {
-        int value = var.previousValue(v / cste);
+        int value = var.previousValue(MathUtils.divCeil(v, cste));
         if (value == Integer.MIN_VALUE) {
             return Integer.MIN_VALUE;
         }

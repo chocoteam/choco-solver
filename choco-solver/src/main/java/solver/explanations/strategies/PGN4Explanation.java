@@ -59,7 +59,7 @@ public class PGN4Explanation extends PropagationGuidedNeighborhood implements IM
     public void recordSolution() {
         super.recordSolution();
         if (duplicator == null) {
-            duplicator = mSolver.getSearchLoop().decision.duplicate();
+            duplicator = mSolver.getSearchLoop().getLastDecision().duplicate();
         }
     }
 
@@ -97,7 +97,7 @@ public class PGN4Explanation extends PropagationGuidedNeighborhood implements IM
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().decision.getId() == last.getId()) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
             mSolver.getSearchLoop().restart();
         }
     }

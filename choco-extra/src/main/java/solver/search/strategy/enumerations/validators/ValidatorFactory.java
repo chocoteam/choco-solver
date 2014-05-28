@@ -27,7 +27,7 @@
 
 package solver.search.strategy.enumerations.validators;
 
-import solver.search.strategy.enumerations.validators.variables.Instanciated;
+import solver.search.strategy.enumerations.validators.variables.Instantiated;
 
 /**
  * <br/>
@@ -39,6 +39,6 @@ public class ValidatorFactory {
     protected ValidatorFactory() {
     }
 
-    public static final Instanciated instanciated = new Instanciated();
+    public static final Instantiated INSTANTIATED = new Instantiated();
 
 }

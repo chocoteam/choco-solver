@@ -32,6 +32,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.IEnvironment;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
@@ -477,9 +478,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         intLayer[n + 1] = new int[]{tink.id};
 
         if (intLayer[0].length > 0) {
+			IEnvironment environment = solver.getEnvironment();
             this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
             this.graph.makePathFinder();
-            ((MultiCostRegular) this.constraint).setGraph(this.graph);
         }
     }
 
@@ -727,9 +728,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     protected void checkWorld() throws ContradictionException {
-        int currentworld = environment.getWorldIndex();
-        long currentbt = solver.getSearchLoop().getMeasures().getBackTrackCount();
-        long currentrestart = solver.getSearchLoop().getMeasures().getRestartCount();
+        int currentworld = solver.getEnvironment().getWorldIndex();
+        long currentbt = solver.getMeasures().getBackTrackCount();
+        long currentrestart = solver.getMeasures().getRestartCount();
         //System.err.println("TIME STAMP : "+currentbt+"   BT COUNT : "+solver.getBackTrackCount());
         // assert (currentbt == solver.getBackTrackCount());
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
@@ -849,9 +850,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     public final boolean needPropagation() {
-        int currentworld = environment.getWorldIndex();
-        long currentbt = solver.getSearchLoop().getMeasures().getBackTrackCount();
-        long currentrestart = solver.getSearchLoop().getMeasures().getRestartCount();
+        int currentworld = solver.getEnvironment().getWorldIndex();
+        long currentbt = solver.getMeasures().getBackTrackCount();
+        long currentrestart = solver.getMeasures().getRestartCount();
 
         return (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts);
 
@@ -900,7 +901,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     public boolean isSatisfied() {
         for (IntVar var : this.vars) {
-            if (!var.instantiated())
+            if (!var.isInstantiated())
                 return false;
         }
         return check();
@@ -939,7 +940,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             it.dispose();
         }
         for (int i = 0; i < gcost.length; i++) {
-            if (!z[i].instantiated()) {
+            if (!z[i].isInstantiated()) {
                 LoggerFactory.getLogger("solver").error("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
@@ -960,12 +961,12 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public boolean check() {
         int[] word = new int[offset];
         for (int i = 0; i < offset; i++) {
-            if (!vs[i].instantiated())
+            if (!vs[i].isInstantiated())
                 return true;
             word[i] = vs[i].getValue();
         }
         for (IntVar aZ : z) {
-            if (!aZ.instantiated()) return true;
+            if (!aZ.isInstantiated()) return true;
         }
         return check(word);
     }

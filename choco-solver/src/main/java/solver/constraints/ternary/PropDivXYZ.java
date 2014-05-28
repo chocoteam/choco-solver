@@ -29,7 +29,6 @@ package solver.constraints.ternary;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
@@ -49,18 +48,13 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
-        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.X = vars[0];
         this.Y = vars[1];
         this.Z = vars[2];
         this.absX = VariableFactory.abs(X);
         this.absY = VariableFactory.abs(Y);
         this.absZ = VariableFactory.abs(Z);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
     }
 
     /**
@@ -75,9 +69,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
         int mask;
         do {
             mask = 0;
-            mask += X.instantiated() ? 1 : 0;
-            mask += Y.instantiated() ? 2 : 0;
-            mask += Z.instantiated() ? 4 : 0;
+            mask += X.isInstantiated() ? 1 : 0;
+            mask += Y.isInstantiated() ? 2 : 0;
+            mask += Z.isInstantiated() ? 4 : 0;
 
             hasChanged = Y.removeValue(0, aCause);
             if (outInterval(Y, 0, 0)) return;
@@ -92,7 +86,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 1: // X is instanciated
                     hasChanged |= updateAbsY();
                     hasChanged |= updateAbsZ();
-                    if (X.instantiatedTo(0)) {
+                    if (X.isInstantiatedTo(0)) {
                         // sY!=0 && sX=0 => sZ=0
                         hasChanged |= Z.instantiateTo(0, aCause);
                     }
@@ -104,6 +98,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 3: // X and Y are instanciated
                     vx = X.getValue();
                     vy = Y.getValue();
+                    hasChanged |= updateAbsX();
+                    hasChanged |= updateAbsY();
                     vz = vx / vy;//(int) Math.floor((double) (vx + ((vx * vy < 0 ? 1 : 0) * (vy - 1))) / (double) vy);
                     if (vy != 0) {
                         if (inInterval(Z, vz, vz)) return; // entail
@@ -113,13 +109,15 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsY();
                     // sZ = 0 && sX!=0 => |x| < |y|
-                    if (Z.instantiatedTo(0) && !X.contains(0)) {
+                    if (Z.isInstantiatedTo(0) && !X.contains(0)) {
                         hasChanged |= absX.updateUpperBound(absY.getUB() - 1, aCause);
                     }
                     break;
                 case 5: // X and Z are instanciated
                     vx = X.getValue();
                     vz = Z.getValue();
+                    hasChanged |= updateAbsX();
+                    hasChanged |= updateAbsZ();
                     if (vz != 0 && vx == 0) {
                         this.contradiction(X, "");
                     }
@@ -128,6 +126,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 case 6: // Y and Z are instanciated
                     vy = Y.getValue();
                     vz = Z.getValue();
+                    hasChanged |= updateAbsY();
+                    hasChanged |= updateAbsZ();
                     if (vz == 0) {
                         if (inInterval(X, -Math.abs(vy) + 1, Math.abs(vy) - 1)) return;
                     } else { // Y*Z > 0  ou < 0
@@ -164,30 +164,65 @@ public class PropDivXYZ extends Propagator<IntVar> {
         } while (hasChanged);
     }
 
-    /**
-     * filtering algorihtm that synchronise the variable of index varIdx and
-     * its related views (sign(vars[varIdx]) and |vars[varIdx]|). Filtering is delegate
-     * to the main propagation method.
-     *
-     * @param varIdx: modified variable since the last call
-     * @param pmask:  type of variable modification
-     * @throws ContradictionException
-     */
-    @Override
-    public void propagate(int varIdx, int pmask) throws ContradictionException {
-        // enforce propagation
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
 
     @Override
     public ESat isEntailed() {
+		// forbid Y=0
+		if(Y.isInstantiatedTo(0)){
+			return ESat.FALSE;
+		}
+		// X=0 => Z=0
+		if(X.isInstantiatedTo(0) && !Z.contains(0)){
+			return ESat.FALSE;
+		}
+		// check sign
+		boolean pos = (X.getLB()>=0 && Y.getLB()>=0) || (X.getUB()<0 && Y.getUB()<0);
+		if(pos && Z.getUB()<0){
+			return ESat.FALSE;
+		}
+		boolean neg = (X.getLB()>=0 && Y.getUB()<0) || (X.getUB()<0 && Y.getLB()>=0);
+		if(neg && Z.getLB()>0){
+			return ESat.FALSE;
+		}
+		// compute absolute bounds
+		int minAbsX;
+		if(X.getLB()>0){
+			minAbsX = X.getLB();
+		} else if(X.getUB()<0){
+			minAbsX = -X.getUB();
+		} else{
+			minAbsX = 0;
+		}
+		int maxAbsX = Math.max(X.getUB(),-X.getLB());
+		int minAbsY;
+		if(Y.getLB()>0){
+			minAbsY = Y.getLB();
+		} else if(Y.getUB()<0){
+			minAbsY = -Y.getUB();
+		} else{
+			minAbsY = 1;
+		}
+		int maxAbsY = Math.max(Y.getUB(),-Y.getLB());
+		int minAbsZ;
+		if(Z.getLB()>0){
+			minAbsZ = Z.getLB();
+		} else if(Z.getUB()<0){
+			minAbsZ = -Z.getUB();
+		} else{
+			minAbsZ = 0;
+		}
+		int maxAbsZ = Math.max(Z.getUB(),-Z.getLB());
+		// check absolute bounds
+		if((minAbsZ>maxAbsX/minAbsY) || (maxAbsZ<minAbsX/maxAbsY)){
+			return ESat.FALSE;
+		}
+		// check case Z=0
+		if((Z.isInstantiatedTo(0) && minAbsX > maxAbsY) || (maxAbsX < minAbsY && !Z.contains(0))){
+			return ESat.FALSE;
+		}
+		// check tuple
         if (isCompletelyInstantiated()) {
             return ESat.eval(X.getValue() / Y.getValue() == Z.getValue());
-        }
-        if (Y.instantiated() && Z.instantiatedTo(0)) {
-            int xx = Math.max(Math.abs(X.getLB()), Math.abs(X.getUB()));
-            int yy = Math.abs(Y.getValue());
-            return ESat.eval(xx < yy);
         }
         return ESat.UNDEFINED;
     }
@@ -200,7 +235,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * @param lb new lower bound
      * @param ub new upper bound
      * @throws solver.exception.ContradictionException
-     *
      */
     private boolean inInterval(IntVar v, int lb, int ub) throws ContradictionException {
         if (v.getLB() >= lb && v.getUB() <= ub) {
@@ -227,7 +261,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * @param ub new upper bound
      * @return true iff a value has been removed from v
      * @throws solver.exception.ContradictionException
-     *
      */
     private boolean outInterval(IntVar v, int lb, int ub) throws ContradictionException {
         if (lb > ub) {

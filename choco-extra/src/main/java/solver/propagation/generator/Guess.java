@@ -162,9 +162,7 @@ public final class Guess<S extends ISchedulable> extends PropagationStrategy<S> 
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i)) {
             toPropagate.clear(i);
             lastPopped = elements[i];
-            if (Configuration.LAZY_UPDATE) {
-                lastPopped.flush();
-            }
+			lastPopped.flush();
             lastPopped.deque();
         }
     }

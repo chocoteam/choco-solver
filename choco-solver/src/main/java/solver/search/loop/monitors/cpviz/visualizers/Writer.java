@@ -64,7 +64,7 @@ public class Writer {
     }
 
     protected Writer ivar(IntVar ivar, String idx, int pf) {
-        if (ivar.instantiated()) {
+        if (ivar.isInstantiated()) {
             logger.info(CPVizConstant.V_INTEGER_TAG, new Object[]{prefix(pf), idx, ivar.getValue()});
         } else {
             _st.setLength(0);
@@ -89,7 +89,7 @@ public class Writer {
     }
 
     protected Writer svar(SetVar svar, String idx, int pf) {
-        if (svar.instantiated()) {
+        if (svar.isInstantiated()) {
             //logger.info(CPVizConstant.V_SINTEGER_TAG, new Object[]{prefix(pf), idx, domain(svar.getDomain().getKernelIterator())});
         } else {
             //logger.info(CPVizConstant.V_SVAR_TAG, new Object[]{prefix(pf), idx, domain(svar.getDomain().getKernelIterator()),

@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -51,7 +52,7 @@ public class PropUnion extends Propagator<SetVar> {
     //***********************************************************************************
 
     private int k;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure unionForced, unionRemoved, setForced, setRemoved;
 
     //***********************************************************************************
@@ -67,7 +68,7 @@ public class PropUnion extends Propagator<SetVar> {
     public PropUnion(SetVar[] sets, SetVar union) {
         super(ArrayUtils.append(sets, new SetVar[]{union}), PropagatorPriority.LINEAR, true);
         k = sets.length;
-        sdm = new SetDeltaMonitor[k + 1];
+        sdm = new ISetDeltaMonitor[k + 1];
         for (int i = 0; i <= k; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
@@ -133,11 +134,6 @@ public class PropUnion extends Propagator<SetVar> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {

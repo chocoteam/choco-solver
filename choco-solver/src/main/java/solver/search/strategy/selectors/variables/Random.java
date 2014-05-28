@@ -28,6 +28,7 @@
 package solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.Variable;
 
@@ -39,49 +40,34 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Random<T extends Variable> implements VariableSelector<T> {
-
-    T[] variables;
-
-    int rand_idx;
+public class Random<T extends Variable> implements VariableSelector<T>, VariableEvaluator<T> {
 
     TIntArrayList sets;
 
     java.util.Random random;
 
-    public Random(T[] variables, long seed) {
-        this.variables = variables.clone();
-        sets = new TIntArrayList(variables.length);
+    public Random(long seed) {
+        sets = new TIntArrayList();
         random = new java.util.Random(seed);
     }
 
-    @Override
-    public T[] getScope() {
-        return variables;
-    }
 
     @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
+    public T getVariable(T[] variables) {
         sets.clear();
-        rand_idx = 0;
         for (int idx = 0; idx < variables.length; idx++) {
-            if (!variables[idx].instantiated()) {
+            if (!variables[idx].isInstantiated()) {
                 sets.add(idx);
             }
         }
-        this.rand_idx = sets.get(random.nextInt(sets.size()));
+        if (sets.size() > 0) {
+            int rand_idx = sets.get(random.nextInt(sets.size()));
+            return variables[rand_idx];
+        } else return null;
     }
 
     @Override
-    public T getVariable() {
-        return variables[rand_idx];
+    public double evaluate(T variable) {
+        return random.nextDouble();
     }
 }

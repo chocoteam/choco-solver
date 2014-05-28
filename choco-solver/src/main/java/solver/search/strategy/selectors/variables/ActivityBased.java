@@ -34,13 +34,12 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.limits.FailCounter;
-import solver.search.loop.monitors.IMonitorDownBranch;
-import solver.search.loop.monitors.IMonitorRestart;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.loop.monitors.*;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -145,7 +144,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     TIntList bests = new TIntArrayList();
 
-    public ActivityBased(Solver solver, IntVar[] vars, double g, double d, int a, double r, int samplingIterationForced, long seed) {
+	boolean restartAfterEachFail = true;
+
+    public ActivityBased(final Solver solver, IntVar[] vars, double g, double d, int a, double r, int samplingIterationForced, long seed) {
         super(vars);
         this.solver = solver;
         this.vars = vars;
@@ -173,8 +174,16 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-        solver.getSearchLoop().restartAfterEachFail(true);
-        solver.getSearchLoop().restartAfterEachSolution(true);
+		SMF.restartAfterEachSolution(solver);
+		solver.plugMonitor(new IMonitorContradiction() {
+			@Override
+			public void onContradiction(ContradictionException cex) {
+				if(restartAfterEachFail){
+					solver.getSearchLoop().restart();
+				}
+			}
+		});
+
         solver.getSearchLoop().plugSearchMonitor(this);
         decisionPool = new PoolManager<FastDecision>();
 //        init(vars);
@@ -195,7 +204,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         if (currentVar==-1 || vars[currentVar] != variable) {
@@ -387,7 +396,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     //logger.info(">> {}", Arrays.toString(mA));
                 }
                 sampling = false;
-                solver.getSearchLoop().restartAfterEachFail(false);
+                restartAfterEachFail = false;
                 // then copy values estimated
                 System.arraycopy(mA, 0, A, 0, mA.length);
                 for (int i = 0; i < A.length; i++) {
@@ -408,7 +417,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
      * @return true if the confidence interval is small enough, false otherwise
      */
     private boolean checkInterval(int idx) {
-        if (!vars[idx].instantiated()) {
+        if (!vars[idx].isInstantiated()) {
             double stdev = Math.sqrt(sA[idx] / (nb_probes - 1));
             double a = distribution(nb_probes) * stdev / Math.sqrt(nb_probes);
 //            logger.info("m: {}, v: {}, et: {} => {}", new Object[]{mA[idx], sA[idx], stdev, (a / mA[idx])});

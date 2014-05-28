@@ -27,11 +27,13 @@
 
 package solver.search.strategy;
 
+import solver.search.strategy.selectors.SetValueSelector;
 import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.selectors.values.SetDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
-import solver.search.strategy.strategy.set.SetSearchStrategy;
-import solver.search.strategy.strategy.set.SetValSelector;
-import solver.search.strategy.strategy.set.SetVarSelector;
+import solver.search.strategy.selectors.variables.MaxDelta;
+import solver.search.strategy.selectors.variables.MinDelta;
+import solver.search.strategy.strategy.SetSearchStrategy;
 import solver.variables.SetVar;
 
 /**
@@ -44,58 +46,63 @@ import solver.variables.SetVar;
  */
 public final class SetStrategyFactory {
 
-	private SetStrategyFactory() {
-	}
+    private SetStrategyFactory() {
+    }
 
-	/**
-	 * Generic strategy to branch on set variables
-	 * @param sets		SetVar array to branch on
-	 * @param varS			variable selection strategy
-	 * @param valS			integer  selection strategy
-	 * @param enforceFirst	branching order true = enforce first; false = remove first
-	 * @return a strategy to instantiate sets
-	 */
-	public static SetSearchStrategy generic(SetVar[] sets, VariableSelector<SetVar> varS, SetValSelector valS, boolean enforceFirst){
-		return new SetSearchStrategy(varS,valS, enforceFirst);
-	}
+    /**
+     * Generic strategy to branch on set variables
+     *
+     * @param varS         variable selection strategy
+     * @param valS         integer  selection strategy
+     * @param enforceFirst branching order true = enforce first; false = remove first
+	 * @param sets         SetVar array to branch on
+     * @return a strategy to instantiate sets
+     */
+    public static SetSearchStrategy generic(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
+        return new SetSearchStrategy(sets, varS, valS, enforceFirst);
+    }
 
-	/**
-	 * strategy to branch on sets by choosing the first unfixed variable and forcing its first unfixed value
-	 * @param sets variables to branch on
-	 * @return a strategy to instantiate sets
-	 */
-	public static SetSearchStrategy force_first(SetVar[] sets){
-		return new SetSearchStrategy(new InputOrder<>(sets), new SetValSelector.FirstVal(),true);
-	}
+    /**
+     * strategy to branch on sets by choosing the first unfixed variable and forcing its first unfixed value
+     *
+     * @param sets variables to branch on
+     * @return a strategy to instantiate sets
+     */
+    public static SetSearchStrategy force_first(SetVar... sets) {
+        return generic(new InputOrder<SetVar>(), new SetDomainMin(), true, sets);
+    }
 
-	/**
-	 * strategy to branch on sets by choosing the first unfixed variable and removing its first unfixed value
-	 * @param sets variables to branch on
-	 * @return a strategy to instantiate sets
-	 */
-	public static SetSearchStrategy remove_first(SetVar[] sets){
-		return new SetSearchStrategy(new InputOrder<>(sets), new SetValSelector.FirstVal(),false);
-	}
+    /**
+     * strategy to branch on sets by choosing the first unfixed variable and removing its first unfixed value
+     *
+     * @param sets variables to branch on
+     * @return a strategy to instantiate sets
+     */
+    public static SetSearchStrategy remove_first(SetVar... sets) {
+        return generic(new InputOrder<SetVar>(), new SetDomainMin(), false, sets);
+    }
 
-	/**
-	 * strategy to branch on sets
-	 * by choosing the unfixed variable of minimum delta (envSize-kerSize),
-	 * and forcing its first unfixed value
-	 * @param sets variables to branch on
-	 * @return a strategy to instantiate sets
-	 */
-	public static SetSearchStrategy force_minDelta_first(SetVar[] sets){
-		return new SetSearchStrategy(new SetVarSelector.MinDelta(sets), new SetValSelector.FirstVal(),true);
-	}
+    /**
+     * strategy to branch on sets
+     * by choosing the unfixed variable of minimum delta (envSize-kerSize),
+     * and forcing its first unfixed value
+     *
+     * @param sets variables to branch on
+     * @return a strategy to instantiate sets
+     */
+    public static SetSearchStrategy force_minDelta_first(SetVar... sets) {
+        return generic(new MinDelta(), new SetDomainMin(), true, sets);
+    }
 
-	/**
-	 * strategy to branch on sets
-	 * by choosing the unfixed variable of maximum delta (envSize-kerSize),
-	 * and forcing its first unfixed value
-	 * @param sets variables to branch on
-	 * @return a strategy to instantiate sets
-	 */
-	public static SetSearchStrategy force_maxDelta_first(SetVar[] sets){
-		return new SetSearchStrategy(new SetVarSelector.MaxDelta(sets), new SetValSelector.FirstVal(),true);
-	}
+    /**
+     * strategy to branch on sets
+     * by choosing the unfixed variable of maximum delta (envSize-kerSize),
+     * and forcing its first unfixed value
+     *
+     * @param sets variables to branch on
+     * @return a strategy to instantiate sets
+     */
+    public static SetSearchStrategy force_maxDelta_first(SetVar... sets) {
+        return generic(new MaxDelta(), new SetDomainMin(), true, sets);
+    }
 }

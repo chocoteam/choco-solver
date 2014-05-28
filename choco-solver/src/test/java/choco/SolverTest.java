@@ -31,17 +31,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.*;
+import solver.variables.graph.GraphVar;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <br/>
@@ -57,36 +53,16 @@ public class SolverTest {
     final static int[] nbOmax = {4, 6, 17};
     final static int n = 3;
 
-    //static IntVar power; // remove static for parallel solving
-
     public static Solver knapsack() {
         Solver s = new Solver();
-        memory.IEnvironment env = s.getEnvironment();
-
         IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
-
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
             objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
         }
-
-        List<Constraint> lcstrs = new ArrayList<Constraint>(3);
-
-        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
-        lcstrs.add(IntConstraintFactory.scalar(objects, energies, power));
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(objects);
-
-
-        s.post(cstrs);
-        s.set(strategy);
-
-        if (s.getVar(0) != power) {
-            throw new UnsupportedOperationException();
-        }
-
+        s.post(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
+        s.post(IntConstraintFactory.scalar(objects, energies, power));
+        s.set(IntStrategyFactory.lexico_LB(objects));
         return s;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,6 +183,32 @@ public class SolverTest {
             }
 
         }
+    }
+
+    @Test
+    public void testFH1() {
+        Solver solver = new Solver();
+        BoolVar b = VF.bool("b", solver);
+        IntVar i = VF.bounded("i", VF.MIN_INT_BOUND, VF.MAX_INT_BOUND, solver);
+        SetVar s = VF.set("s", 2, 3, solver);
+        RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
+        GraphVar g = VF.directedGraph("g", 2, solver);
+
+
+        BoolVar[] bvars = solver.retrieveBoolVars();
+        Assert.assertEquals(bvars, new BoolVar[]{solver.ZERO, solver.ONE, b});
+
+        IntVar[] ivars = solver.retrieveIntVars();
+        Assert.assertEquals(ivars, new IntVar[]{i});
+
+        SetVar[] svars = solver.retrieveSetVars();
+        Assert.assertEquals(svars, new SetVar[]{s});
+
+        RealVar[] rvars = solver.retrieveRealVars();
+        Assert.assertEquals(rvars, new RealVar[]{r});
+
+        GraphVar[] gvars = solver.retrieveGraphVars();
+        Assert.assertEquals(gvars, new GraphVar[]{g});
     }
 
 }

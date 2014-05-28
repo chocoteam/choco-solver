@@ -115,7 +115,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
                             break;
                         }
                     }
-                    if (vars[v].instantiated()) {
+                    if (vars[v].isInstantiated()) {
                         mandatory = true;
                         if (mate[i] == -2) {
                             break;
@@ -136,7 +136,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
         vars[n].updateLowerBound(count, aCause);
         vars[n].updateUpperBound(countMax, aCause);
         // filtering decision variables
-        if (count != countMax && vars[n].instantiated())
+        if (count != countMax && vars[n].isInstantiated())
             if (count == vars[n].getUB()) {
                 int val;
                 for (int i = 0; i < idx; i++) {
@@ -167,11 +167,6 @@ public class PropNValues_Light extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         int count = 0;
         int countMax = 0;
@@ -181,7 +176,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(concernedValues.get(i))) {
                     possible = true;
-                    if (vars[v].instantiated()) {
+                    if (vars[v].isInstantiated()) {
                         mandatory = true;
                         break;
                     }
@@ -200,7 +195,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
         if (countMax < vars[n].getLB()) {
             return ESat.FALSE;
         }
-        if (count == countMax && vars[n].instantiated()) {
+        if (count == countMax && vars[n].isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

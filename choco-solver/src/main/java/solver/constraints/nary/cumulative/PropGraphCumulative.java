@@ -33,6 +33,10 @@ import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
+import util.sort.ArraySort;
+
+import java.util.BitSet;
+import java.util.Comparator;
 import java.util.Random;
 
 /**
@@ -76,7 +80,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
 							   boolean fast, Cumulative.Filter... filters) {
 		super(s, d, e, h, capa,true,fast, filters);
-		this.g = new UndirectedGraph(environment, n, SetType.SWAP_ARRAY, true);
+		this.g = new UndirectedGraph(n, SetType.BITSET, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
 	}
@@ -92,13 +96,8 @@ public class PropGraphCumulative extends PropFullCumulative {
 			for (int i = 0; i < n; i++) {
 				g.getNeighborsOf(i).clear();
 			}
-			for (int i = 0; i < n; i++) {
-				for (int j = i + 1; j < n; j++) {
-					if (!disjoint(i, j)) {
-						g.addEdge(i, j);
-					}
-				}
-			}
+//			naiveGraphComputation();
+			sweepBasedGraphComputation();
 		}else{
 			int count = 0;
 			for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
@@ -117,8 +116,8 @@ public class PropGraphCumulative extends PropFullCumulative {
 
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
-		if(timestamp!=environment.getWorldIndex()){
-			timestamp=environment.getWorldIndex();
+		if(timestamp!=solver.getEnvironment().getWorldIndex()){
+			timestamp=solver.getEnvironment().getWorldIndex();
 			toCompute.clear();
 		}
 		if (varIdx < 4 * n) {
@@ -144,7 +143,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 		ISet env = g.getNeighborsOf(taskIndex);
 		for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
 			if (disjoint(taskIndex, i)) {
-				g.removeEdge(taskIndex, i);
+//				g.removeEdge(taskIndex, i);
 			} else {
 				tasks.add(i);
 			}
@@ -159,4 +158,66 @@ public class PropGraphCumulative extends PropFullCumulative {
 	protected boolean disjoint(int i, int j) {
 		return s[i].getLB() >= e[j].getUB() || s[j].getLB() >= e[i].getUB();
 	}
+
+	private void naiveGraphComputation(){
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (!disjoint(i, j)) {
+					g.addEdge(i, j);
+				}
+			}
+		}
+	}
+
+	private void sweepBasedGraphComputation(){
+		Event[] events = new Event[2*n];
+		ArraySort<Event> sort = new ArraySort<>(events.length,true,false);
+		Comparator<Event> eventComparator = new Comparator<Event>(){
+			@Override
+			public int compare(Event e1, Event e2) {
+				if(e1.date == e2.date){
+					return e1.type-e2.type;
+				}
+				return e1.date - e2.date;
+			}
+		};
+		BitSet tprune = new BitSet(n);
+		for(int i=0; i<n; i++) {
+			events[i] = new Event();
+			events[i].set(START, i, s[i].getLB());
+			events[i+n] = new Event();
+			events[i+n].set(END, i, e[i].getUB());
+		}
+		sort.sort(events,2*n,eventComparator);
+		int timeIndex = 0;
+		while(timeIndex<n*2){
+			Event event = events[timeIndex++];
+			switch(event.type) {
+				case(START):
+					for(int i=tprune.nextSetBit(0);i>=0;i=tprune.nextSetBit(i+1)){
+						g.addEdge(i,event.index);
+					}
+					tprune.set(event.index);
+					break;
+				case(END):
+					tprune.clear(event.index);
+					break;
+				default:throw new UnsupportedOperationException();
+			}
+		}
+	}
+
+	private static class Event {
+		protected int type;
+		protected int index;
+		protected int date;
+
+		protected void set(int t, int i, int d) {
+			date = d;
+			type = t;
+			index= i;
+		}
+	}
+
+	private final static int START = 1, END = 2;
 }

@@ -28,11 +28,10 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.fast.IntervalIntVarImpl;
-import util.ESat;
+import solver.variables.impl.IntervalIntVarImpl;
 import util.tools.StringUtils;
 
 /**
@@ -42,16 +41,10 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class Min extends IntConstraint<IntVar> {
+public class Min extends Constraint {
 
-    IntVar X, Y, Z;
-
-    public Min(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
-        setPropagators(new PropMinBC(X, Y, Z));
+    public Min(IntVar X, IntVar Y, IntVar Z) {
+        super("Min",new PropMinBC(X, Y, Z));
     }
 
     public static IntVar var(IntVar a, IntVar b) {
@@ -66,15 +59,5 @@ public class Min extends IntConstraint<IntVar> {
             solver.post(IntConstraintFactory.minimum(z, a, b));
             return z;
         }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] == Math.min(tuple[1], tuple[2]));
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s = MIN(%s, %s)", X.getName(), Y.getName(), Z.getName());
     }
 }

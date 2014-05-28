@@ -47,7 +47,7 @@ public class Eq_Int extends GraphRelation<IntVar> {
         }
         IntVar x = vars[var1];
         IntVar y = vars[var2];
-        if (x.instantiated() && y.instantiated() && x.getValue() == y.getValue()) {
+        if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
             return ESat.TRUE;
         }
         if (x.getLB() > y.getUB() || x.getUB() < y.getLB()) {
@@ -100,9 +100,9 @@ public class Eq_Int extends GraphRelation<IntVar> {
         if (var1 != var2) {
             IntVar x = vars[var1];
             IntVar y = vars[var2];
-            if (x.instantiated()) {
+            if (x.isInstantiated()) {
                 y.removeValue(x.getValue(), cause);
-            } else if (y.instantiated()) {
+            } else if (y.isInstantiated()) {
                 x.removeValue(y.getValue(), cause);
             }
         } else {

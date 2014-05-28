@@ -28,6 +28,7 @@ package solver.constraints.nary.automata;
 
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.IEnvironment;
 import memory.IStateBool;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -74,7 +75,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         }
         this.zIdx = vars.length - 1;
         this.rem_proc = new RemProc(this);
-        this.environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         this.toRemove = new TIntArrayStack();
         this.boundChange = environment.makeBool(false);
         this.graph = graph;
@@ -211,7 +212,7 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     private void checkWorld() {
-        int currentworld = environment.getWorldIndex();
+        int currentworld = solver.getEnvironment().getWorldIndex();
         long currentbt = solver.getMeasures().getBackTrackCount();
         long currentrestart = solver.getMeasures().getRestartCount();
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {

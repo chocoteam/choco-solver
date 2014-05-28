@@ -28,6 +28,7 @@ package solver.constraints.nary.globalcardinality;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IEnvironment;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -82,6 +83,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.possibles = new ISet[n2];
         this.mandatories = new ISet[n2];
         this.map = map;
+        IEnvironment environment = solver.getEnvironment();
         for (int idx = 0; idx < n2; idx++) {
             mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
             possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
@@ -116,44 +118,46 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {// initialization
-            valueToCompute.clear();
-            for (int i = 0; i < n2; i++) {
-                mandatories[i].clear();
-                possibles[i].clear();
-                valueToCompute.add(i);
-            }
-            for (int i = 0; i < n; i++) {
-                IntVar v = vars[i];
-                int ub = v.getUB();
-                if (v.instantiated()) {
-                    if (map.containsKey(v.getValue())) {
-                        int j = map.get(v.getValue());
-                        mandatories[j].add(i);
+        do {
+            if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {// initialization
+                valueToCompute.clear();
+                for (int i = 0; i < n2; i++) {
+                    mandatories[i].clear();
+                    possibles[i].clear();
+                    valueToCompute.add(i);
+                }
+                for (int i = 0; i < n; i++) {
+                    IntVar v = vars[i];
+                    int ub = v.getUB();
+                    if (v.isInstantiated()) {
+                        if (map.containsKey(v.getValue())) {
+                            int j = map.get(v.getValue());
+                            mandatories[j].add(i);
+                        }
+                    } else {
+                        for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                            if (map.containsKey(k)) {
+                                int j = map.get(k);
+                                possibles[j].add(i);
+                            }
+                        }
                     }
-                } else {
-                    for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-                        if (map.containsKey(k)) {
-                            int j = map.get(k);
-                            possibles[j].add(i);
+                }
+            } else {//lazy update
+                for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
+                    for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
+                        if (!vars[var].contains(values[i])) {
+                            possibles[i].remove(var);
+                        } else if (vars[var].isInstantiated()) {
+                            possibles[i].remove(var);
+                            mandatories[i].add(var);
                         }
                     }
                 }
             }
-        } else {//lazy update
-            for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
-                for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
-                    if (!vars[var].contains(values[i])) {
-                        possibles[i].remove(var);
-                    } else if (vars[var].instantiated()) {
-                        possibles[i].remove(var);
-                        mandatories[i].add(var);
-                    }
-                }
-            }
-        }
-        // filtering
-        filter();
+            // filtering
+            evtmask = EventType.CUSTOM_PROPAGATION.getStrengthenedMask();
+        } while (filter());
     }
 
     @Override
@@ -161,12 +165,12 @@ public class PropFastGCC extends Propagator<IntVar> {
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
-    private void filter() throws ContradictionException {
+    private boolean filter() throws ContradictionException {
         boolean again = false;
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
             again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
             again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
-            if (vars[n+i].instantiated()) {
+            if (vars[n + i].isInstantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
@@ -187,16 +191,17 @@ public class PropFastGCC extends Propagator<IntVar> {
         if (boundVar.size() > 0) {
             again |= filterBounds();
         }
-        if (again) {// fix point
-            propagate(EventType.CUSTOM_PROPAGATION.mask);
-        }
+        //if (again) {// fix point
+        //    propagate(EventType.CUSTOM_PROPAGATION.mask);
+        //}
+        return again;
     }
 
     private boolean filterBounds() throws ContradictionException {
         boolean useful = false;
         for (int i = 0; i < boundVar.size(); i++) {
             int var = boundVar.get(i);
-            if (!vars[var].instantiated()) {
+            if (!vars[var].isInstantiated()) {
                 int lb = vars[var].getLB();
                 int index = -1;
                 if (map.containsKey(lb)) {
@@ -263,7 +268,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            if (v.instantiated()) {
+            if (v.isInstantiated()) {
                 if (map.containsKey(v.getValue())) {
                     j = map.get(v.getValue());
                     min[j]++;
@@ -284,7 +289,7 @@ public class PropFastGCC extends Propagator<IntVar> {
             }
         }
         for (int i = 0; i < n2; i++) {
-            if (!(vars[n + i].instantiated() && max[i] == min[i])) {
+            if (!(vars[n + i].isInstantiated() && max[i] == min[i])) {
                 return ESat.UNDEFINED;
             }
         }

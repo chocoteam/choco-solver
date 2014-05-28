@@ -26,16 +26,11 @@
  */
 package solver.constraints.extension.nary;
 
+import memory.IEnvironment;
 import memory.IStateInt;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.extension.FastBooleanValidityChecker;
-import solver.constraints.extension.FastValidityChecker;
-import solver.constraints.extension.ValidityChecker;
+import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import util.ESat;
 import util.iterators.DisposableValueIterator;
 
 /**
@@ -44,7 +39,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 26/07/12
  */
-public class PropLargeGAC2001Positive extends Propagator<IntVar> {
+public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
 
     /**
      * supports[i][j stores the index of the tuple that currently support
@@ -60,8 +55,6 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
 
     protected static final int NO_SUPPORT = -2;
 
-    protected IterTuplesTable relation;
-
     protected int[][][] tab;
 
     // check if none of the tuple is trivially outside
@@ -69,23 +62,23 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    public PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
-        super(vs, PropagatorPriority.LINEAR, true);
-        this.relation = relation;
+    public PropLargeGAC2001Positive(IntVar[] vs, Tuples tuples) {
+        super(vs, tuples);
         this.arity = vs.length;
         this.blocks = new int[arity];
         this.offsets = new int[arity];
-        this.tab = relation.getTableLists();
         this.supports = new IStateInt[arity][];
 
+        IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < arity; i++) {
             offsets[i] = vs[i].getLB();
-            this.supports[i] = new IStateInt[vs[i].getUB() - vs[i].getLB() + 1];
+            this.supports[i] = new IStateInt[vars[i].getDomainSize()];
             for (int j = 0; j < supports[i].length; j++) {
                 this.supports[i][j] = environment.makeInt(0);
             }
 
         }
+        this.tab = relation.getTableLists();
 
         int[][] tt = relation.getTupleTable();
         boolean fastValidCheckAllowed = true;
@@ -117,8 +110,8 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
+    protected IterTuplesTable makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
+        return new IterTuplesTable(tuples, offsets, dsizes);
     }
 
     @Override
@@ -133,16 +126,14 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
         filter(idxVarInProp);
     }
 
-    @Override
-    public ESat isEntailed() {
-        return ESat.TRUE;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * updates the support for all values in the domain of variable
      * and remove unsupported values for variable
      *
-     * @param indexVar
      * @throws ContradictionException
      */
     public void reviseVar(int indexVar) throws ContradictionException {
@@ -180,7 +171,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
      */
     public int seekNextSupport(int indexVar, int nva, int start) {
         int currentIdxSupport;
-        int[] currentSupport = null;
+        int[] currentSupport;
         for (int i = start; i < tab[indexVar][nva].length; i++) {
             currentIdxSupport = tab[indexVar][nva][i];
             currentSupport = relation.getTuple(currentIdxSupport);
@@ -192,8 +183,6 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     /**
      * store the new support
      *
-     * @param indexVar
-     * @param value
      * @param idxSupport : the index of the support in the list of allowed tuples for
      *                   the pair variable-value (indexVar,value)
      */
@@ -202,8 +191,6 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     }
 
     /**
-     * @param indexVar
-     * @param value
      * @return the stored support for the pair (indexVar,value)
      */
     public int getUBport(int indexVar, int value) {

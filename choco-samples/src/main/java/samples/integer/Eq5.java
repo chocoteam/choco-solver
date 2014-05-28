@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.selectors.values.InDomainMiddle;
+import solver.search.strategy.selectors.values.IntDomainMiddle;
 import solver.search.strategy.selectors.variables.InputOrder;
-import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.IntStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
@@ -93,7 +93,7 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(new Assignment(new InputOrder(vars), new InDomainMiddle()));
+        solver.set(new IntStrategy(vars, new InputOrder<IntVar>(), new IntDomainMiddle()));
     }
 
     @Override

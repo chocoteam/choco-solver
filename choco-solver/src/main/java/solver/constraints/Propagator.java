@@ -29,7 +29,6 @@ package solver.constraints;
 
 
 import gnu.trove.set.hash.TIntHashSet;
-import memory.IEnvironment;
 import memory.structure.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +38,10 @@ import solver.Identity;
 import solver.Solver;
 import solver.constraints.set.SCF;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.propagation.IPropagationEngine;
 import solver.variables.*;
 import util.ESat;
 
@@ -82,6 +81,7 @@ import java.util.Arrays;
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.Constraint
@@ -89,42 +89,13 @@ import java.util.Arrays;
  */
 public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
     private static final long serialVersionUID = 2L;
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
-    private final int ID; // unique id of this
-
-    // List of <code>variable</code> objects -- a variable can occur more than once, but it could not have the same index
-    protected V[] vars;
-    // index of this within the list of propagator of the i^th variable
-    private int[] vindices;
-    // the i^th event mask stores modification events on the i^th variable, since the last propagation
-    protected int[] eventmasks;
-
-
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
-    private Operation[] operations;
-
-    /**
-     * Backtrackable boolean indicating wether <code>this</code> is active
-     */
-    private short state; // 0 : new -- 1 : active -- 2 : passive
-    private int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
-    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
-    protected int fails;
-
-    /**
-     * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
-     * to deal with internal backtrackable structure.
-     */
-    public IEnvironment environment;
-    /**
-     * Declaring constraint
-     */
-    protected Constraint<V, Propagator<V>> constraint;
-    protected final PropagatorPriority priority;
-    protected final boolean reactToFineEvt;
-    protected final Solver solver;
-
     private static ThreadLocal<TIntHashSet> set = new ThreadLocal<TIntHashSet>() {
         @Override
         protected TIntHashSet initialValue() {
@@ -132,11 +103,90 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     };
 
-    // cause of variable modifications. The default value is 'this"
-    protected Propagator aCause;
+    // propagator attributes
+    private final int ID; // unique id of this
+    private short state;  // 0 : new -- 1 : active -- 2 : passive
+    private Operation[] operations; // propagator state operations
+    private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
+    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
+    protected Propagator aCause; // cause of variable modifications. The default value is 'this"
+    protected final PropagatorPriority priority;
+    protected final boolean reactToFineEvt;
+    // references
+    protected Constraint constraint; // declaring constraint
+    protected final Solver solver;   // solver of this propagator
+    // variable related information
+    protected V[] vars;// List of <code>variable</code> objects -- a variable can occur more than once, but it could not have the same index
+    private int[] vindices;// index of this within the list of propagator of the i^th variable
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
+
+    /**
+     * Creates a new propagator to filter the domains of vars.
+     *
+     * @param vars           variables of the propagator. Their modification will trigger filtering
+     * @param priority       priority of this propagator (lowest priority propagators are called first)
+     * @param reactToFineEvt indicates whether or not this propagator must be informed of every variable
+     *                       modification, i.e. if it should be incremental or not
+     */
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+        assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
+        this.solver = vars[0].getSolver();
+        checkVariable(vars);
+        this.reactToFineEvt = reactToFineEvt;
+        this.state = NEW;
+        this.priority = priority;
+        this.aCause = this;
+        this.vars = vars.clone();
+        this.vindices = new int[vars.length];
+        for (int v = 0; v < vars.length; v++) {
+            vindices[v] = vars[v].link(this, v);
+        }
+        ID = solver.nextId();
+        operations = new Operation[]{
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = NEW;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = REIFIED;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = ACTIVE;
+                    }
+                }
+        };
+    }
+
+    /**
+     * Creates a non-incremental propagator which does not react to fine events but simply calls a
+     * coarse propagation any time a variable in vars has changed.
+     * This propagator has a regular (linear) priority.
+     *
+     * @param vars variables of the propagator. Their modification will trigger filtering
+     */
+    protected Propagator(V... vars) {
+        this(vars, PropagatorPriority.LINEAR, false);
+    }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private <V extends Variable> void checkVariable(V[] vars) {
+		if(Configuration.MUL_OCC_VAR_PROP == Configuration.MOVP.silent){
+			return;
+		}
         set.get().clear();
         for (int i = 0; i < vars.length; i++) {
             Variable v = vars[i];
@@ -163,18 +213,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                                 vars[i] = (V) v.duplicate();
                                 solver.post(IntConstraintFactory.arithm((IntVar) v, "=", (IntVar) vars[i]));
                             } else {
-								if((v.getTypeAndKind() & Variable.SET) != 0) {
-									Solver solver = v.getSolver();
-									vars[i] = (V) v.duplicate();
-									solver.post(SCF.all_equal(new SetVar[]{(SetVar)v,(SetVar)vars[i]}));
-								}else{
-									throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-											"However, this type of variable does not allow to post an EQ constraint over it.");
-								}
-							}
+                                if ((v.getTypeAndKind() & Variable.SET) != 0) {
+                                    Solver solver = v.getSolver();
+                                    vars[i] = (V) v.duplicate();
+                                    solver.post(SCF.all_equal(new SetVar[]{(SetVar) v, (SetVar) vars[i]}));
+                                } else {
+                                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                            "However, this type of variable does not allow to post an EQ constraint over it.");
+                                }
+                            }
                             break;
-                        case silent:
-                        default:
+                        default: throw new UnsupportedOperationException("This should never occur");
                     }
 
                 }
@@ -183,126 +232,49 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
-
-    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
-        this.solver = solver;
-        checkVariable(vars);
-        this.reactToFineEvt = reactToFineEvt;
-        this.environment = solver.getEnvironment();
-        this.state = NEW;
-        this.priority = priority;
-        this.aCause = this;
-
-        this.vars = vars.clone();
-        this.vindices = new int[vars.length];
-        this.eventmasks = new int[reactToFineEvt ? vars.length : 1];
-        for (int v = 0; v < vars.length; v++) {
-            vindices[v] = vars[v].link(this, v);
-                    /*if (!vars[v].instantiated()) {
-                        nbNi++;
-                    }*/
-        }
-        fails = 0;
-        ID = solver.nextId();
-        operations = new Operation[]{
-                new Operation() {
-                    @Override
-                    public void undo() {
-                        state = NEW;
-                    }
-                },
-                new Operation() {
-                    @Override
-                    public void undo() {
-                        state = REIFIED;
-                    }
-                },
-                new Operation() {
-                    @Override
-                    public void undo() {
-                        state = ACTIVE;
-                    }
-                }
-        };
-
-    }
-
-
-    @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
-        this(vars[0].getSolver(), vars, priority, reactToFineEvt);
-    }
-
+    /**
+     * Enlarges the variable scope of this propagator
+     * Should not be called by the user.
+     *
+     * @param nvars variables to be added to this propagator
+     */
     protected void addVariable(V... nvars) {
         checkVariable(vars);
         V[] tmp = vars;
         vars = Arrays.copyOf(vars, vars.length + nvars.length);
         System.arraycopy(tmp, 0, vars, 0, tmp.length);
         System.arraycopy(nvars, 0, vars, tmp.length, nvars.length);
-
-
         int[] itmp = this.vindices;
         vindices = new int[vars.length];
         System.arraycopy(itmp, 0, vindices, 0, itmp.length);
-
-
-        if (reactToFineEvt) {
-            itmp = this.eventmasks;
-            this.eventmasks = new int[vars.length];
-            System.arraycopy(itmp, 0, eventmasks, 0, itmp.length);
-        }
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }
-
     }
 
-    @Override
-    public int getId() {
-        return ID;
-    }
-
-    public Solver getSolver() {
-        return solver;
-    }
-
+    /**
+     * Informs this propagator the (unique) constraint it filters.
+     * The constraint reference will be overwritten in case of reification.
+     * Should not be called by the user.
+     *
+     * @param c the constraint containing this propagator
+     */
     public void defineIn(Constraint c) {
         this.constraint = c;
     }
 
     /**
-     * Update the mask of the vidx^th variable, and return true if the variable was not modify before.
-     *
-     * @param vidx    index of the modified variable
-     * @param evtType type of event occurring on the variable
-     * @return true if this the first modification recording since last propagation
-     */
-    public boolean updateMask(int vidx, EventType evtType) {
-        vidx = reactToFineEvt ? vidx : 0;
-        boolean needSched = eventmasks[vidx] == 0;
-        eventmasks[vidx] |= evtType.strengthened_mask;
-        return needSched;
-    }
-
-    public int getMask(int vidx) {
-        vidx = reactToFineEvt ? vidx : 0;
-        return eventmasks[vidx];
-    }
-
-    public void clearMask(int vidx) {
-        vidx = reactToFineEvt ? vidx : 0;
-        eventmasks[vidx] = 0;
-    }
-
-    /**
      * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
+     * Reacts to any kind of event by default.
      *
      * @param vIdx index of the variable within the propagator
      * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
-     *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
+     * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
-    protected abstract int getPropagationConditions(int vIdx);
+    protected int getPropagationConditions(int vIdx) {
+        return EventType.ALL_FINE_EVENTS.mask;
+    }
 
     /**
      * Call the main filtering algorithm to apply to the <code>Domain</code> of the <code>Variable</code> objects.
@@ -334,78 +306,84 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * Call filtering algorihtm defined within the <code>Propagator</code> objects.
+     * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable
+     * of index idxVarInProp has changed. This method calls a CUSTOM_PROPAGATION (coarse-grained) by default.
+     * <p/>
+     * This method should be overridden if the argument <code>reactToFineEvt</code> is set to <code>true</code> in the constructor.
+     * Otherwise, it executes <code>propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
      *
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
-     * @throws solver.exception.ContradictionException
-     *          if a contradiction occurs
+     * @throws solver.exception.ContradictionException if a contradiction occurs
      */
-    public abstract void propagate(int idxVarInProp, int mask) throws ContradictionException;
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if (reactToFineEvt) {
+            throw new SolverException(this + " has been declared to ignore which variable is modified.\n" +
+                    "To change the configuration, consider:\n" +
+                    "- to set 'reactToFineEvt' to false or,\n" +
+                    "- to override the following methode:\n" +
+                    "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
+                    "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
+        }
+        propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());
+    }
 
     /**
+     * Schedules a coarse propagation to filter all variables at once.
+     * <p/>
      * Add the coarse event recorder into the engine
      *
      * @param evt event type
      */
     public final void forcePropagate(EventType evt) throws ContradictionException {
-        if (nbPendingEvt == 0) {
-            if (Configuration.PRINT_PROPAGATION) {
-                IPropagationEngine.Trace.printPropagation(null, this);
-            }
-            coarseERcalls++;
-            propagate(evt.getStrengthenedMask());
-        }
+        solver.getEngine().delayedPropagation(this, evt);
     }
 
+    /**
+     * informs that this propagator is now active. Should not be called by the user.
+     */
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
-        environment.save(operations[NEW]);
+        solver.getEnvironment().save(operations[NEW]);
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
             vars[v].recordMask(getPropagationConditions(v));
         }
     }
 
+    /**
+     * informs that this reified propagator must hold. Should not be called by the user.
+     */
     public void setReifiedTrue() {
         assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
         state = ACTIVE;
-        environment.save(operations[REIFIED]);
+        solver.getEnvironment().save(operations[REIFIED]);
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
             vars[v].recordMask(getPropagationConditions(v));
         }
     }
 
+    /**
+     * informs that this reified propagator may not hold. Should not be called by the user.
+     */
     public void setReifiedSilent() {
         assert isStateLess() || isReifiedAndSilent() : "the propagator was neither stateless nor reified";
         state = REIFIED;
     }
 
+    /**
+     * informs that this propagator is now passive : it holds but no further filtering can occur,
+     * so it is useless to propagate it. Should not be called by the user.
+     */
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
-        environment.save(operations[ACTIVE]);
+        solver.getEnvironment().save(operations[ACTIVE]);
         //TODO: update var mask back
         solver.getEngine().desactivatePropagator(this);
-    }
-
-    public boolean isStateLess() {
-        return state == NEW;
-    }
-
-    public boolean isReifiedAndSilent() {
-        return state == REIFIED;
-    }
-
-    public boolean isActive() {
-        return state == ACTIVE;
-    }
-
-    public boolean isPassive() {
-        return state == PASSIVE;
     }
 
     /**
@@ -417,60 +395,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public abstract ESat isEntailed();
 
     /**
-     * Returns the element at the specified position in this internal list of <code>V</code> objects.
-     *
-     * @param i index of the element
-     * @return a <code>V</code> object
-     */
-    public final V getVar(int i) {
-        return vars[i];
-    }
-
-    public final V[] getVars() {
-        return vars;
-    }
-
-    /**
-     * index of the propagator within its variables
-     *
-     * @return
-     */
-    public int[] getVIndices() {
-        return vindices;
-    }
-
-    public void setVIndices(int idx, int val) {
-        vindices[idx] = val;
-    }
-
-    /**
-     * Returns the number of variables involved in <code>this</code>.
-     *
-     * @return number of variables
-     */
-    public final int getNbVars() {
-        return vars.length;
-    }
-
-    /**
-     * Returns the constraint including this propagator
-     *
-     * @return Constraint
-     */
-    public final Constraint getConstraint() {
-        return constraint;
-    }
-
-    public final PropagatorPriority getPriority() {
-        return priority;
-    }
-
-
-    /**
-     * returns a explanation for the decision mentionned in parameters
+     * returns a explanation for the decision mentioned in parameters
      *
      * @param d : a <code>Deduction</code> to explain
-     * @param e
+     * @param e : the explanation to feed
      * @return a set of constraints and past decisions
      */
     @Override
@@ -484,19 +412,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         e.add(this);
     }
 
+    /**
+     * @return true iff all this propagator's variables are instantiated
+     */
     public boolean isCompletelyInstantiated() {
         for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 return false;
             }
         }
         return true;
     }
 
-    public int getNbPendingEvt() {
-        return nbPendingEvt;
-    }
-
+    /**
+     * informs that a new fine event has to be treated. Should not be called by the user.
+     */
     public void incNbPendingEvt() {
         assert (nbPendingEvt >= 0) : "number of enqued records is < 0 " + this;
         nbPendingEvt++;
@@ -504,6 +434,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
     }
 
+    /**
+     * informs that a fine event has been treated. Should not be called by the user.
+     */
     public void decNbPendingEvt() {
         assert (nbPendingEvt > 0) : "number of enqued records is < 0 " + this;
         nbPendingEvt--;
@@ -511,6 +444,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);
     }
 
+    /**
+     * informs that all fine events have been treated. Should not be called by the user.
+     */
     public void flushPendingEvt() {
         nbPendingEvt = 0;
         //if(LoggerFactory.getLogger("solver").isDebugEnabled())
@@ -518,14 +454,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * Returns the number of uninstanciated variables
-     *
-     * @return number of uninstanciated variables
+     * @return the number of uninstantiated variables
      */
     public int arity() {
         int arity = 0;
         for (int i = 0; i < vars.length; i++) {
-            arity += vars[i].instantiated() ? 0 : 1;
+            arity += vars[i].isInstantiated() ? 0 : 1;
         }
         return arity;
     }
@@ -533,12 +467,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public int dynPriority() {
         int arity = 0;
         for (int i = 0; i < vars.length && arity <= 3; i++) {
-            arity += vars[i].instantiated() ? 0 : 1;
+            arity += vars[i].isInstantiated() ? 0 : 1;
         }
         if (arity > 3) {
             return priority.priority;
         } else return arity;
-//        return priority.priority;
     }
 
     /**
@@ -557,8 +490,126 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return this.ID - o.ID;
     }
 
+    //***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
+
+    @Override
+    public int getId() {
+        return ID;
+    }
+
+    /**
+     * @return the solver this propagator is defined in
+     */
+    public Solver getSolver() {
+        return solver;
+    }
+
     @Override
     public int hashCode() {
         return ID;
+    }
+
+    /**
+     * @return the number of fine events which have not been treated yet
+     */
+    public int getNbPendingEvt() {
+        return nbPendingEvt;
+    }
+
+    /**
+     * Returns the element at the specified position in this internal list of <code>V</code> objects.
+     *
+     * @param i index of the element
+     * @return a <code>V</code> object
+     */
+    public final V getVar(int i) {
+        return vars[i];
+    }
+
+    /**
+     * @return the variable set this propagator holds on.
+     * Note that variable multiple occurrence may have lead to variable duplications
+     * (i.e. the creation of new variable)
+     */
+    public final V[] getVars() {
+        return vars;
+    }
+
+    /**
+     * @return the index of the propagator within its variables
+     */
+    public int[] getVIndices() {
+        return vindices;
+    }
+
+    /**
+     * Changes the index of a variable in this propagator.
+     * This method should not be called by the user.
+     *
+     * @param idx old index
+     * @param val new index
+     */
+    public void setVIndices(int idx, int val) {
+        vindices[idx] = val;
+    }
+
+    /**
+     * @return the number of variables involved in <code>this</code>.
+     */
+    public final int getNbVars() {
+        return vars.length;
+    }
+
+    /**
+     * @return the constraint including this propagator
+     */
+    public final Constraint getConstraint() {
+        return constraint;
+    }
+
+    /**
+     * @return the priority of this propagator (may influence the order in which propagators are called)
+     */
+    public final PropagatorPriority getPriority() {
+        return priority;
+    }
+
+    /**
+     * @return true iff this propagator is stateless: its initial propagation has not been performed yet
+     */
+    public boolean isStateLess() {
+        return state == NEW;
+    }
+
+    /**
+     * @return true iff this propagator is reified and it is not established yet whether it should hold or not
+     */
+    public boolean isReifiedAndSilent() {
+        return state == REIFIED;
+    }
+
+    /**
+     * @return true iff this propagator is active (it should filter)
+     */
+    public boolean isActive() {
+        return state == ACTIVE;
+    }
+
+    /**
+     * @return true iff this propagator is passive. This happens when it is entailed : the propagator still hold
+     * but no more filtering can occur
+     */
+    public boolean isPassive() {
+        return state == PASSIVE;
+    }
+
+    /**
+     * @return true iff the propagator reacts to fine event, that is,
+     * it needs to know which variable has been modified and the modification that happened.
+     */
+    public final boolean reactToFineEvent() {
+        return reactToFineEvt;
     }
 }

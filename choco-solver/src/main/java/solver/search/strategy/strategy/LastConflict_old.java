@@ -80,7 +80,7 @@ public class LastConflict_old extends AbstractStrategy<Variable> implements IMon
     public Decision getDecision() {
         Variable decVar = firstNotInst(testingSet, 0, cIdx);
         if (decVar == null) {
-            if (candidate != null && !candidate.instantiated()) {
+            if (candidate != null && !candidate.isInstantiated()) {
                 testingSet[cIdx++] = candidate;
                 decVar = candidate;
             } else {
@@ -102,7 +102,7 @@ public class LastConflict_old extends AbstractStrategy<Variable> implements IMon
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Variable curDecVar = solver.getSearchLoop().decision.getDecisionVariable();
+        Variable curDecVar = solver.getSearchLoop().getLastDecision().getDecisionVariable();
         if (candidate == null && cIdx < k && !search(testingSet, 0, cIdx, curDecVar)) {
 			boolean inScope = false;
 			for(Variable v:mainStrategy.vars){
@@ -136,7 +136,7 @@ public class LastConflict_old extends AbstractStrategy<Variable> implements IMon
 
     private static Variable firstNotInst(Variable[] a, int fromIndex, int toIndex) {
         for (int i = fromIndex; i < toIndex; i++) {
-            if (!a[i].instantiated()) {
+            if (!a[i].isInstantiated()) {
                 return a[i];
             }
         }

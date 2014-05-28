@@ -86,17 +86,18 @@ public class SmallSantaClaude {
 
 		// compute average cost (i.e. average gift cost per kid)
 		RealVar[] allRV = ArrayUtils.append(realViews,new RealVar[]{average,average_deviation});
-		RealConstraint ave_cons = new RealConstraint(solver);
-		ave_cons.addFunction("({0}+{1}+{2})/3={3};" +
-							 "(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}",allRV);
-        solver.post(ave_cons);
+		solver.post(new RealConstraint(
+				"Avg/AvgDev",
+				"({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}",
+				allRV)
+		);
 
 		// set search strategy (ABS)
-		solver.set(IntStrategyFactory.firstFail_InDomainMin(kid_gift));
+		solver.set(IntStrategyFactory.minDom_LB(kid_gift));
 		// displays resolution statistics
 		SearchMonitorFactory.log(solver,true,false);
 		// print each solution
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+        solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 if (LoggerFactory.getLogger("solver").isInfoEnabled()) {

@@ -64,6 +64,26 @@ public enum Configuration {
         } catch (Exception e) {
             logger.error("Unable to load " + UDPATH + " file from classpath.", e);
         }
+        {
+            String values = properties.getProperty("FINE_EVENT_QUEUES");
+            values = values.substring(1,values.length()-1);
+            String[] values_ = values.split(",");
+            short[] shorts = new short[values_.length];
+            for (int i = 0; i < values_.length; i++) {
+                shorts[i] = Short.parseShort(values_[i]);
+            }
+            FINE_EVENT_QUEUES = shorts;
+        }
+        {
+            String values = properties.getProperty("COARSE_EVENT_QUEUES");
+            values = values.substring(1,values.length()-1);
+            String[] values_ = values.split(",");
+            short[] shorts = new short[values_.length];
+            for (int i = 0; i < values_.length; i++) {
+                shorts[i] = Short.parseShort(values_[i]);
+            }
+            COARSE_EVENT_QUEUES = shorts;
+        }
     }
 
     public static final String WELCOME_TITLE = properties.getProperty("WELCOME_TITLE");
@@ -88,6 +108,10 @@ public enum Configuration {
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = Boolean.parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
 
+	// Set to true to allow the creation of views in the VariableFactory.
+	// Creates new variables with channeling constraints otherwise.
+    public static final boolean ENABLE_VIEWS = Boolean.parseBoolean(properties.getProperty("ENABLE_VIEWS"));
+
     public enum MOVP {
         disabled, //throws an error when a variable occurs more than once
         silent, // do not do anything
@@ -111,14 +135,10 @@ public enum Configuration {
     }
 
     // Define how to react when a propagator is not ensured to be idempotent
-    // /!\ only works with PropagatorEngine /!\
     // disabled : does not anything
     // error: print an error message when a propagator is not guaranteed to be idempotent -- fir debug only
     // force : extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available
     public static final Idem IDEMPOTENCY = Idem.valueOf(properties.getProperty("IDEMPOTENCY"));
-
-    // Set to true to activate lazy update of deltas and generators
-    public static final boolean LAZY_UPDATE = true;
 
     // Defines the rounding precision for multicostregular algorithm
     // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
@@ -126,4 +146,11 @@ public enum Configuration {
 
     // Defines the smallest used double for multicostregular
     public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
+
+    // Defines, for each priority, the queue the propagators of this priority should be scheduled in
+    // /!\ for advanced use only
+    // 1. For fine events
+    public static final short[] FINE_EVENT_QUEUES;
+    // 2. For coarse events
+    public static final short[] COARSE_EVENT_QUEUES;
 }

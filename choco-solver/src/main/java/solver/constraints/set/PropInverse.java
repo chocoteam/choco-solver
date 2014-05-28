@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -61,7 +62,7 @@ public class PropInverse extends Propagator<SetVar> {
     private int n, n2, idx;
     private SetVar[] sets, invsets, toFilter;
     private int offSet1, offSet2, offSet;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure elementForced, elementRemoved;
 
     //***********************************************************************************
@@ -81,7 +82,7 @@ public class PropInverse extends Propagator<SetVar> {
         this.sets = Arrays.copyOfRange(vars, 0, sets.length);
         this.invsets = Arrays.copyOfRange(vars, sets.length, vars.length);
         // delta monitors
-        sdm = new SetDeltaMonitor[n + n2];
+        sdm = new ISetDeltaMonitor[n + n2];
         for (int i = 0; i < n + n2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
@@ -102,11 +103,6 @@ public class PropInverse extends Propagator<SetVar> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {

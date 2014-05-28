@@ -108,7 +108,7 @@ public class Nonogram extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(ArrayUtils.flatten(vars)));
+        solver.set(IntStrategyFactory.minDom_LB(ArrayUtils.flatten(vars)));
     }
 
     @Override

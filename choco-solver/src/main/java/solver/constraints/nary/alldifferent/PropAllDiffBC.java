@@ -27,7 +27,6 @@
 
 package solver.constraints.nary.alldifferent;
 
-import choco.annotations.PropAnn;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -38,8 +37,6 @@ import util.ESat;
 
 import java.io.Serializable;
 import java.util.Comparator;
-
-import static choco.annotations.PropAnn.Status.*;
 
 /**
  * Based on: </br>
@@ -53,7 +50,6 @@ import static choco.annotations.PropAnn.Status.*;
  *        <p/>
  *        TODO: useless awakeonbounds?
  */
-@PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
 public class PropAllDiffBC extends Propagator<IntVar> {
 
     //TODO: minsorted et maxsorted => LinkedList
@@ -110,11 +106,11 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             intervals[i] = interval;
             minsorted[i] = interval;
             maxsorted[i] = interval;
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 instantiatedValues[idx++] = vars[i].getValue();
             }
         }
-        ivIdx = environment.makeInt(idx);
+        ivIdx = solver.getEnvironment().makeInt(idx);
     }
 
     @Override
@@ -134,7 +130,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             for (int j = 0; j < vars.length; j++) {
                 left = right = Integer.MIN_VALUE;
                 for (int i = 0; i < j; i++) {
-                    if (vars[i].instantiated()) {
+                    if (vars[i].isInstantiated()) {
                         int val = vars[i].getValue();
                         if (val == right + 1) {
                             right = val;
@@ -145,7 +141,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                     }
                 }
                 for (int i = j + 1; i < vars.length; i++) {
-                    if (vars[i].instantiated()) {
+                    if (vars[i].isInstantiated()) {
                         int val = vars[i].getValue();
                         if (val == right + 1) {
                             right = val;
@@ -235,7 +231,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     protected void awakeOnBound(int i) throws ContradictionException {
         for (int j = 0; j < vars.length; j++) {
-            if (j != i && vars[j].instantiated()) {
+            if (j != i && vars[j].isInstantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getLB()) {
                     vars[i].updateLowerBound(val + 1, aCause);
@@ -249,7 +245,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     protected void awakeOnInf(int i) throws ContradictionException {
         for (int j = 0; j < vars.length; j++) {
-            if (j != i && vars[j].instantiated()) {
+            if (j != i && vars[j].isInstantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getLB()) {
                     vars[i].updateLowerBound(val + 1, aCause);
@@ -260,7 +256,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     protected void awakeOnSup(int i) throws ContradictionException {
         for (int j = 0; j < vars.length; j++) {
-            if (j != i && vars[j].instantiated()) {
+            if (j != i && vars[j].isInstantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getUB()) {
                     vars[i].updateUpperBound(val - 1, aCause);

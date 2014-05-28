@@ -60,7 +60,7 @@ public class Member extends GraphRelation<IntVar> {
             return ESat.FALSE;
         }
         IntVar x = vars[var1];
-        if (x.instantiated()) {
+        if (x.isInstantiated()) {
             if (values.get(x.getValue() - firstVal)) {
                 return ESat.TRUE;
             } else {

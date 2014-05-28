@@ -38,7 +38,6 @@ import memory.IStateDouble;
  */
 public class RcDouble extends IStateDouble {
 
-
     public RcDouble(EnvironmentCopying env) {
         this(env, Double.POSITIVE_INFINITY);
     }
@@ -46,6 +45,9 @@ public class RcDouble extends IStateDouble {
     public RcDouble(EnvironmentCopying env, double i) {
         super(env, i);
         env.getDoubleCopy().add(this);
+        if (timeStamp > 0) {
+            env.getDoubleCopy().buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     @Override

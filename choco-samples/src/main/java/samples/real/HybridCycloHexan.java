@@ -34,7 +34,7 @@ import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
-import solver.search.strategy.strategy.AssignmentInterval;
+import solver.search.strategy.strategy.RealStrategy;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
@@ -82,17 +82,19 @@ public class HybridCycloHexan extends AbstractProblem {
 		z = VariableFactory.real("z", -1.0e8, 1.0e8, precision, solver);
 
 		vars = new RealVar[]{x, y, z};
-		RealConstraint rcons = new RealConstraint(solver);
-		rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
-				"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
-				"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
-				Ibex.HC4_NEWTON, vars);
-		solver.post(rcons);
+		solver.post(new RealConstraint(
+				"CycloHexan",
+				"{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
+						"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
+						"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
+				Ibex.HC4_NEWTON,
+				vars)
+		);
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(new AssignmentInterval(vars, new Cyclic(vars), new RealDomainMiddle()));
+		solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
 		SearchMonitorFactory.limitTime(solver,10000);
 	}
 

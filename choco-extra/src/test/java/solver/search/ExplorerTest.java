@@ -62,7 +62,5 @@ public class ExplorerTest {
         solver.findAllSolutions();
         t += System.nanoTime();
         System.out.printf("%.3fms\n", t / 1000 / 1000f);
-
-
     }
 }

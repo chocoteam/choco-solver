@@ -27,7 +27,6 @@
 
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.Propagator;
@@ -35,7 +34,6 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -47,16 +45,13 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotMemberEnum extends Propagator<IntVar> {
 
     final TIntHashSet values;
 
-
-    public PropNotMemberEnum(IntVar var, TIntHashSet values,
-                             boolean reactOnPromotion) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
-        this.values = values;
+    public PropNotMemberEnum(IntVar var, int[] values) {
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+        this.values = new TIntHashSet(values);
     }
 
     @Override
@@ -70,12 +65,15 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
             if (val == right + 1) {
                 right = val;
             } else {
-                rall &= vars[0].removeInterval(left, right, aCause);
-                left = val;
-                right = val;
+                if(left  > Integer.MIN_VALUE){
+                    rall &= vars[0].removeInterval(left, right, aCause);
+                }
+                left = right = val;
             }
         }
-        rall &= vars[0].removeInterval(left, right, aCause);
+        if(left  > Integer.MIN_VALUE){
+            rall &= vars[0].removeInterval(left, right, aCause);
+        }
         if (rall) {
             this.setPassive();
         }
@@ -84,14 +82,6 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         propagate(0);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override

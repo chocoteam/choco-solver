@@ -42,9 +42,8 @@ import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.propagation.hardcoded.VariableEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.monitors.SMF;
 
 import java.io.File;
@@ -170,13 +169,13 @@ public class ParseAndSolve {
             }
         }
         datas.clear();
-        solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        solver.getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
     }
 
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
         if(ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
-        solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
+        solver.getSearchLoop().launch((!solver.getObjectiveManager().isOptimization()) && !gc.all);
     }
 
     public void buildParser(InputStream is, Solver mSolver, Datas datas) {
@@ -198,24 +197,13 @@ public class ParseAndSolve {
 
     protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
+            default:
             case 1:
-                solver.set(new PropagatorEngine(solver));
+                solver.set(new TwoBucketPropagationEngine(solver));
                 break;
             case 2:
-                solver.set(new VariableEngine(solver));
-                break;
-            case 0:
-            case 3:
                 solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;
-            case -1:
-            default:
-                if (solver.getNbCstrs() > solver.getNbVars()) {
-                    solver.set(new VariableEngine(solver));
-                } else {
-                    solver.set(new PropagatorEngine(solver));
-                }
-
         }
     }
 

@@ -34,7 +34,7 @@
 
 package solver.constraints.gary.path;
 
-import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -62,7 +62,6 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since 17/11/2011
  */
-@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropReducedPath extends Propagator<DirectedGraphVar> {
 
     //***********************************************************************************
@@ -97,6 +96,7 @@ public class PropReducedPath extends Propagator<DirectedGraphVar> {
         G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);
         n = G.getEnvelopGraph().getNbNodes();
+		IEnvironment environment = solver.getEnvironment();
         n_R = environment.makeInt(0);
         G_R = new DirectedGraph(environment, n, SetType.DOUBLE_LINKED_LIST, false);
         sccOf = new IStateInt[n];
@@ -255,7 +255,7 @@ public class PropReducedPath extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (G.instantiated()) {
+        if (G.isInstantiated()) {
             int nr = 0;
             for (int i = 0; i < n_R.get(); i++) {
                 nr += G_R.getSuccessorsOf(i).getSize();

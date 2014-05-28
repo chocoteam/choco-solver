@@ -46,13 +46,15 @@ public class StoredDouble extends IStateDouble {
     public StoredDouble(final EnvironmentTrailing env, final double i) {
         super(env, i);
         myTrail = env.getDoubleTrail();
+        if(timeStamp>0){
+            myTrail.buildFakeHistory(this, i, timeStamp);
+        }
     }
 
     /**
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
      */
-    @Override
     public final void set(final double y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();

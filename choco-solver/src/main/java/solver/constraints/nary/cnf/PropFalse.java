@@ -27,7 +27,6 @@
 
 package solver.constraints.nary.cnf;
 
-import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -43,8 +42,8 @@ import util.ESat;
  */
 public class PropFalse extends Propagator<BoolVar> {
 
-    public PropFalse(Solver solver) {
-        super(new BoolVar[]{solver.ZERO}, PropagatorPriority.UNARY, false);
+    public PropFalse(BoolVar zero) {
+        super(new BoolVar[]{zero}, PropagatorPriority.UNARY, false);
     }
 
     @Override

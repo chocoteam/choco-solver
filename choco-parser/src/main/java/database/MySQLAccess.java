@@ -102,7 +102,7 @@ public class MySQLAccess {
             int bid = getBenchID(benchname);
             int pid = getPbID(name,
                     policy,
-                    optpb ? measures[6].longValue() : measures[0].longValue(),
+                    optpb ? measures[5].longValue() : measures[0].longValue(),
                     optpb ? isopt : isFeasible);
 
             insertData(optpb, measures, bid, pid);
@@ -119,12 +119,12 @@ public class MySQLAccess {
             statement = connection.prepareStatement("insert into RESOLUTIONS values (?, ?, ?, ?, ?, ?, ?, ?)");
             statement.setInt(1, bid);
             statement.setInt(2, pid);
-            statement.setLong(3, measures[1].longValue());
-            statement.setLong(4, measures[5].longValue());
+            statement.setLong(3, measures[1].longValue()); // building time
+            statement.setLong(4, measures[4].longValue()); // solving time
             long obj = -100;
             if (optpb) {
                 if (measures[0].longValue() > 0) {
-                    obj = measures[6].intValue();
+                    obj = measures[5].intValue(); // obj value, if any
                 }
             } else {
                 obj = measures[0].longValue();

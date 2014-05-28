@@ -34,81 +34,74 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.*;
 
+/**
+ * Object which stores resolution information to get statistics
+ *
+ * @author Charles Prud'Homme
+ */
 public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonitorContradiction, IMonitorDownBranch,
         IMonitorInitialize, IMonitorInitPropagation, IMonitorOpenNode, IMonitorRestart,
         IMonitorSolution, IMonitorUpBranch {
 
-    private static final float IN_MS = 1000 * 1000f;
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-    private static final float IN_SEC = 1000 * IN_MS;
-
-    public long solutionCount;
-
-    public boolean objectiveOptimal;
+    private static final float IN_SEC = 1000 * 1000 * 1000f;
 
     public boolean hasObjective;
-
+    public boolean objectiveOptimal;
+    public long solutionCount;
     public long timeCount;
-
     public long readingTimeCount;
-
     public long initialisationTimeCount;
-
     public long initialPropagationTimeCount;
-
     public long nodeCount;
-
     public long backtrackCount;
-
-    public long restartCount;
-
     public long failCount;
-
-    public long propagationCount, eventCount;
-
-    public long usedMemory;
-
+    public long restartCount;
     public long maxDepth, depth;
-
-    protected Solver solver;
+    public long propagationCount, eventCount;
+    public long usedMemory;
 
     protected long startingTime, startingMemory;
 
+    protected Solver solver;
     protected Constraint[] cstrs;
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
     public MeasuresRecorder(Solver solver) {
         super();
         this.solver = solver;
     }
 
-    public final void reset() {
-        timeCount = 0;
-        nodeCount = 0;
-        backtrackCount = 0;
-        restartCount = 0;
-        failCount = 0;
-        solutionCount = 0;
-        hasObjective = false;
-        readingTimeCount = 0;
-        initialisationTimeCount = 0;
-        initialPropagationTimeCount = 0;
-        propagationCount = 0;
-        eventCount = 0;
-        maxDepth = 0;
-        cstrs = null;
+    @Override
+    public MeasuresRecorder clone() {
+        MeasuresRecorder mr = new MeasuresRecorder(solver);
+        mr.hasObjective = hasObjective;
+        mr.objectiveOptimal = objectiveOptimal;
+        mr.solutionCount = solutionCount;
+        mr.timeCount = timeCount;
+        mr.readingTimeCount = readingTimeCount;
+        mr.initialisationTimeCount = initialisationTimeCount;
+        mr.initialPropagationTimeCount = initialPropagationTimeCount;
+        mr.nodeCount = nodeCount;
+        mr.backtrackCount = backtrackCount;
+        mr.failCount = failCount;
+        mr.restartCount = restartCount;
+        mr.maxDepth = maxDepth;
+        mr.depth = depth;
+        mr.propagationCount = propagationCount;
+        mr.eventCount = eventCount;
+        mr.usedMemory = usedMemory;
+        mr.startingTime = startingTime;
+        mr.startingMemory = startingMemory;
+        mr.cstrs = cstrs.clone();
+        return mr;
     }
-
-
-    public long timestamp() {
-        return nodeCount + backtrackCount;
-    }
-//	public void setSearchMeasures(ISearchMeasures toCopy) {
-//		timeCount = toCopy.getTimeCount();
-//		nodeCount = toCopy.getNodeCount();
-//		backtrackCount = toCopy.getBackTrackCount();
-//		restartCount = toCopy.getRestartCount();
-//		failCount = toCopy.getFailCount();
-//	}
 
     //****************************************************************************************************************//
     //**************************************** SETTERS ***************************************************************//
@@ -129,6 +122,23 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         this.objectiveOptimal = objectiveOptimal;
     }
 
+    @Override
+    public final void reset() {
+        timeCount = 0;
+        nodeCount = 0;
+        backtrackCount = 0;
+        restartCount = 0;
+        failCount = 0;
+        solutionCount = 0;
+        hasObjective = false;
+        readingTimeCount = 0;
+        initialisationTimeCount = 0;
+        initialPropagationTimeCount = 0;
+        propagationCount = 0;
+        eventCount = 0;
+        maxDepth = 0;
+        cstrs = null;
+    }
 
     //****************************************************************************************************************//
     //**************************************** GETTERS ***************************************************************//
@@ -151,12 +161,12 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public float getTimeCount() {
-        return timeCount / IN_MS;
+        return timeCount / IN_SEC;
     }
 
     @Override
     public float getReadingTimeCount() {
-        return readingTimeCount / IN_MS;
+        return readingTimeCount / IN_SEC;
     }
 
     @Override
@@ -166,12 +176,12 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public float getInitialisationTimeCount() {
-        return initialisationTimeCount / IN_MS;
+        return initialisationTimeCount / IN_SEC;
     }
 
     @Override
     public float getInitialPropagationTimeCount() {
-        return initialPropagationTimeCount / IN_MS;
+        return initialPropagationTimeCount / IN_SEC;
     }
 
     @Override
@@ -211,7 +221,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public Number getBestSolutionValue() {
-        return solver.getSearchLoop().getObjectivemanager().getBestSolutionValue();
+        return solver.getObjectiveManager().getBestSolutionValue();
     }
 
     @Override
@@ -219,18 +229,16 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         return usedMemory;
     }
 
-
     static long memoryUsedInMB() {
         return Runtime.getRuntime().freeMemory() / 1024 / 1024;
     }
 
-    /**
-     * Updates the used memory
-     */
-    void updateMemoryUsed() {
+    @Override
+    public void updateMemoryUsed() {
         usedMemory = memoryUsedInMB() - startingMemory;
     }
 
+    @Override
     public void updatePropagationCount() {
         if (cstrs == null || cstrs.length != solver.getNbCstrs()) {
             cstrs = solver.getCstrs();
@@ -248,12 +256,15 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     }
 
-    /**
-     * Updates the time recorder
-     */
+    @Override
     public void updateTimeCount() {
 //        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
         timeCount = System.nanoTime() - startingTime;
+    }
+
+    @Override
+    public long timestamp() {
+        return nodeCount + backtrackCount;
     }
 
     //****************************************************************************************************************//
@@ -358,21 +369,21 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     //**************************************** PRINTERS **************************************************************//
     //****************************************************************************************************************//
 
+    @Override
     public Number[] toArray() {
         return new Number[]{
-                solutionCount,
-                readingTimeCount / IN_MS,
-                initialisationTimeCount / IN_MS,
-                (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
-                (timeCount - initialPropagationTimeCount) / IN_MS,
-                timeCount / IN_MS,
-                hasObjective() ? getBestSolutionValue(): 0,
-                nodeCount,
-                backtrackCount,
-                failCount,
-                restartCount,
-                eventCount,
-                propagationCount,
+                getSolutionCount(),
+                getReadingTimeCount(),
+                getInitialisationTimeCount(),
+                getInitialPropagationTimeCount(),
+                getTimeCount(),
+                hasObjective() ? getBestSolutionValue() : 0,
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount(),
+                getEventsCount(),
+                getPropagationsCount(),
 
         };
     }
@@ -382,22 +393,20 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(solver.getSearchLoop().getObjectivemanager() + ", ");
+            st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Building time : %.3fms, Initialisation : %.3fms, Initial propagation : %.3fms, " +
-                "Resolution %.3fs (%.6fms), Total %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d + %d Propagations",
-                readingTimeCount / IN_MS,
-                initialisationTimeCount / IN_MS,
-                (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
-                (timeCount - initialPropagationTimeCount) / IN_SEC,
-                (timeCount - initialPropagationTimeCount) / IN_MS,
-                timeCount / IN_MS,
-                nodeCount,
-                backtrackCount,
-                failCount,
-                restartCount,
-                eventCount,
-                propagationCount));
+        st.append(String.format("Building time : %.3fs, Initialisation : %.3fs, Initial propagation : %.3fs, " +
+                "Total %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d + %d Propagations",
+                getReadingTimeCount(),
+                getInitialisationTimeCount(),
+                getInitialPropagationTimeCount(),
+                getTimeCount(),
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount(),
+                getEventsCount(),
+                getPropagationsCount()));
         return st.toString();
     }
 
@@ -406,15 +415,14 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(solver.getSearchLoop().getObjectivemanager() + ", ");
+            st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Resolution %.3fs (%.6fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts",
-                (timeCount - initialPropagationTimeCount) / IN_SEC,
-                (timeCount - initialPropagationTimeCount) / IN_MS,
-                nodeCount,
-                backtrackCount,
-                failCount,
-                restartCount));
+        st.append(String.format("Resolution %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts",
+                getTimeCount(),
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount()));
         return st.toString();
     }
 
@@ -424,47 +432,44 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         st.append("- Search statistics\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
-            st.append("\t" + solver.getSearchLoop().getObjectivemanager() + ",\n");
+            st.append("\t").append(solver.getObjectiveManager()).append(",\n");
         }
-        st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
-                "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+        st.append(String.format("\tBuilding time : %,.3fs\n\tInitialisation : %,.3fs\n\tInitial propagation : %,.3fs" +
+                "\n\tResolution : %,.3fs\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
                 "Restarts: %,d\n\tMax depth: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d",
-                readingTimeCount / IN_MS,
-                initialisationTimeCount / IN_MS,
-                initialPropagationTimeCount / IN_MS,
-                timeCount / IN_SEC,
-                timeCount / IN_MS,
-                nodeCount,
-                backtrackCount,
-                failCount,
-                restartCount,
-                maxDepth,
-                eventCount,
-                propagationCount,
-                usedMemory,
-                solver.getVars().length,
-                solver.getCstrs().length
+                getReadingTimeCount(),
+                getInitialisationTimeCount(),
+                getInitialPropagationTimeCount(),
+                getTimeCount(),
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount(),
+                getMaxDepth(),
+                getEventsCount(),
+                getPropagationsCount(),
+                getUsedMemory(),
+                solver.getNbVars(),
+                solver.getNbCstrs()
         ));
         return st.toString();
     }
 
+    @Override
     public String toCSV() {
-        StringBuilder st = new StringBuilder(256);
-        // solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
-        st.append(String.format("%d;%.3f;%.3f;%.3f;%.6f;%.3f;%e;%d;%d;%d;%d;%d;%d;",
-                solutionCount,
-                readingTimeCount / IN_MS,
-                initialisationTimeCount / IN_MS,
-                (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
-                (timeCount - initialPropagationTimeCount) / IN_MS,
-                timeCount / IN_MS,
+        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
+        return String.format("%d;%.3f;%.3f;%.3f;%.3f;%e;%d;%d;%d;%d;%d;%d;",
+                getSolutionCount(),
+                getReadingTimeCount(),
+                getInitialisationTimeCount(),
+                getInitialPropagationTimeCount(),
+                getTimeCount(),
                 hasObjective() ? getBestSolutionValue().doubleValue() : 0,
-                nodeCount,
-                backtrackCount,
-                failCount,
-                restartCount,
-                eventCount,
-                propagationCount));
-        return st.toString();
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount(),
+                getEventsCount(),
+                getPropagationsCount());
     }
 }

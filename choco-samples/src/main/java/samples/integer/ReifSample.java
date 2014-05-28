@@ -77,12 +77,12 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		solver.set(ISF.force_InputOrder_InDomainMin(new IntVar[]{x, y, z}));
+		solver.set(ISF.lexico_LB(new IntVar[]{x, y, z}));
 	}
 
 	@Override
 	public void solve() {
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			@Override
 			public void onSolution() {
 				System.out.println("////////////////");

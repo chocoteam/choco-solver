@@ -92,7 +92,7 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(letters));
+        solver.set(IntStrategyFactory.minDom_LB(letters));
     }
 
     @Override

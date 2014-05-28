@@ -38,7 +38,7 @@ import memory.trailing.trail.IStoredDoubleTrail;
  */
 public class StoredDoubleChunckTrail implements IStoredDoubleTrail {
 
-    private static final int CHUNK_SIZE = 20000;
+    private static final int CHUNK_SIZE = 1048576;
 
     /**
      * Stack of backtrackable search variables.
@@ -175,6 +175,59 @@ public class StoredDoubleChunckTrail implements IStoredDoubleTrail {
                 increase(l);
             }
             nextTop = 0;
+        }
+    }
+
+    @Override
+    public void buildFakeHistory(StoredDouble v, double initValue, int olderStamp) {
+        // from world 0 to olderStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredDouble[][] _variableStack = variableStack;
+        double[][] _valueStack = valueStack;
+        int[][] _stampStack = stampStack;
+        int[] _chunks = chunks;
+        int[] _tops = tops;
+        int _curChunk = curChunk;
+        int _nextTop = nextTop;
+
+        variableStack = new StoredDouble[1][];
+        variableStack[0] = new StoredDouble[CHUNK_SIZE];
+
+        valueStack = new double[1][];
+        valueStack[0] = new double[CHUNK_SIZE];
+
+        stampStack = new int[1][];
+        stampStack[0] = new int[CHUNK_SIZE];
+
+        chunks = new int[_chunks.length + 1];
+        tops = new int[_tops.length + 1];
+
+
+        curChunk = nextTop = 0;
+
+        // then replay the history
+
+        for (int w = 1; w < olderStamp; w++) {
+            rebuild(_chunks[w], _chunks[w + 1], _tops[w], _tops[w + 1], _variableStack, _valueStack, _stampStack);
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+
+        rebuild(_chunks[olderStamp], _curChunk, _tops[olderStamp], _nextTop, _variableStack, _valueStack, _stampStack);
+        savePreviousState(v, initValue, olderStamp - 1);
+    }
+
+    private void rebuild(int fc, int tc, int ft, int tt, StoredDouble[][] _variableStack, double[][] _valueStack, int[][] _stampStack) {
+        for (int cc = fc; cc <= tc; cc++) {
+            StoredDouble[] cvar = _variableStack[cc];
+            double[] cval = _valueStack[cc];
+            int[] cstmp = _stampStack[cc];
+            int from = (cc == fc ? ft : 0);
+            int to = (cc == tc ? tt : CHUNK_SIZE);
+            for (; from < to; from++) {
+                savePreviousState(cvar[from], cval[from], cstmp[from]);
+            }
         }
     }
 

@@ -48,7 +48,7 @@ public class FZNLayoutPara extends FZNLayout {
 
     @Override
     public void onSolution() {
-        ObjectiveManager om = searchLoop.getObjectivemanager();
+        ObjectiveManager om = solver.getObjectiveManager();
         int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
         if (master.newSol(val, om.getPolicy())) {
             super.onSolution();

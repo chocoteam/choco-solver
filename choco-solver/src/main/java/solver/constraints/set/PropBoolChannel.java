@@ -41,7 +41,7 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -61,7 +61,7 @@ public class PropBoolChannel extends Propagator<Variable> {
     private int offSet;
     private BoolVar[] bools;
     private SetVar set;
-    private SetDeltaMonitor sdm;
+    private ISetDeltaMonitor sdm;
     private IntProcedure setForced, setRemoved;
 
     //***********************************************************************************
@@ -105,14 +105,9 @@ public class PropBoolChannel extends Propagator<Variable> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask + EventType.INSTANTIATE.mask;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            if (bools[i].instantiated()) {
+            if (bools[i].isInstantiated()) {
                 if (bools[i].getValue() == 0) {
                     set.removeFromEnvelope(i + offSet, aCause);
                 } else {
@@ -152,12 +147,13 @@ public class PropBoolChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
-            if (bools[j - offSet].instantiatedTo(0)) {
+            int i = j - offSet;
+            if (i < 0  || i >= bools.length || bools[i].isInstantiatedTo(0)) {
                 return ESat.FALSE;
             }
         }
         for (int i = 0; i < n; i++) {
-            if (bools[i].instantiatedTo(1)) {
+            if (bools[i].isInstantiatedTo(1)) {
                 if (!set.envelopeContains(i + offSet)) {
                     return ESat.FALSE;
                 }

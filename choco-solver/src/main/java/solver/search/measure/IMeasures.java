@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,131 +27,109 @@
 
 package solver.search.measure;
 
-
 import solver.search.loop.monitors.ISearchMonitor;
 
 import java.io.Serializable;
 
-public interface IMeasures extends ISearchMonitor, Serializable {
+/**
+ * Interface for providing resolution statistics
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
+ */
+public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
 
+	/**
+	 * Clones the IMeasure object (copy every measure)
+	 * @return a new instance of IMeasure
+	 */
+	IMeasures clone();
+
+	/** Reset every measure to its default value (mostly 0) */
     void reset();
 
+	/** @return a summary of recorded statistics */
     String toOneLineString();
 
+	/** @return a short summary of recorded statistics */
     String toOneShortLineString();
 
+	/** @return statistics */
     String toString();
 
+	/** @return statistics in a CSV format */
     String toCSV();
 
+	/** @return statistic values only */
     Number[] toArray();
 
-    /**
-     * Get current world unique id
-     *
-     * @return
-     */
+    /** @return the current world unique id */
     long timestamp();
 
-    /**
-     * Get the time count in milliseconds of the measure (including initial propagation time count).
-     *
-     * @return time count
-     */
+    /** @return the time count (in sec), including initial propagation time count */
     float getTimeCount();
 
-    /**
-     * Get the reading time count in milliseconds of the measure
-     *
-     * @return readingtime count
-     */
+    /** @return the reading time count (in sec) */
     float getReadingTimeCount();
 
-    /**
-     * Get the initialisation time count in milliseconds of the measure
-     *
-     * @return initialisationtime count
-     */
+    /** @return the initialization time count (in sec) */
     float getInitialisationTimeCount();
 
-    /**
-     * Get the initial propagation time count in milliseconds of the measure
-     *
-     * @return initial propagation time count
-     */
+    /** @return the initial propagation time count (in sec)*/
     float getInitialPropagationTimeCount();
 
-    /**
-     * Get the node count of the measure
-     *
-     * @return node count
-     */
-    long getNodeCount();
-
-    /**
-     * Get the backtrack count of the measure
-     *
-     * @return backtrack count
-     */
-    long getBackTrackCount();
-
-    /**
-     * Get the fail count of the measure
-     *
-     * @return fail count
-     */
-    long getFailCount();
-
-    /**
-     * Get the restart count of the measure
-     *
-     * @return restart count
-     */
-    long getRestartCount();
-
-    long getMaxDepth();
-
-    long getCurrentDepth();
-
-    /**
-     * Get the number of call to event recorder execution
-     *
-     * @return propagations count
-     */
-    long getPropagationsCount();
-
-    long getEventsCount();
-
-    /**
-     * Get the used memory
-     *
-     * @return used memory
-     */
-    long getUsedMemory();
-
-    /**
-     * Get the solution count of the measure
-     *
-     * @return solution count
-     */
-    long getSolutionCount();
-
-    void declareObjective();
-
-	boolean hasObjective();
-
-	void setObjectiveOptimal(boolean objectiveOptimal);
-
-	boolean isObjectiveOptimal();
-
-	public Number getBestSolutionValue();
-
+	/** set the reading time count */
     void setReadingTimeCount(long time);
 
+    /** Updates the time recorder */
+    void updateTimeCount();
+
+    /** @return the node count */
+    long getNodeCount();
+
+    /** @return the backtrack count */
+    long getBackTrackCount();
+
+    /** @return the fail count */
+    long getFailCount();
+
+    /** @return the restart count */
+    long getRestartCount();
+
+	/** @return the maximum depth of the search tree */
+    long getMaxDepth();
+
+	/** @return the current depth in the search tree */
+    long getCurrentDepth();
+
+    /** @return the number of call to event recorder execution */
+    long getPropagationsCount();
+
+	/** Updates the propagation recorder */
     void updatePropagationCount();
 
-    /**
-     * Updates the time recorder
-     */
-    void updateTimeCount();
+	/** @return the fine event count (incremental propagations) */
+    long getEventsCount();
+
+    /** @return the used memory */
+    long getUsedMemory();
+
+	/** updates the memory usage count */
+	void updateMemoryUsed();
+
+    /** @return the solution count of the measure */
+    long getSolutionCount();
+
+	/** indicates an objective variable */
+    void declareObjective();
+
+	/** @return true iff the problem has an objective variable (i.e. optimization problem) */
+	boolean hasObjective();
+
+	/** indicates whether or not the optimum has been found and proved */
+	void setObjectiveOptimal(boolean objectiveOptimal);
+
+	/** @return true iff the optimum has been found and proved */
+	boolean isObjectiveOptimal();
+
+	/** @return the objective value of the best solution found (can be Integer or Double) */
+	public Number getBestSolutionValue();
 }

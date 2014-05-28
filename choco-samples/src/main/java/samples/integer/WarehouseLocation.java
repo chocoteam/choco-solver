@@ -33,7 +33,6 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -129,13 +128,9 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-                IntStrategyFactory.inputOrder_InDomainMin(suppliers),
-                IntStrategyFactory.maxReg_InDomainMin(costPerStore)
-        );
-        solver.set(strat);
-
-
+        solver.set(IntStrategyFactory.lexico_LB(suppliers),
+				IntStrategyFactory.maxReg_LB(costPerStore)
+		);
     }
 
     @Override

@@ -38,4 +38,6 @@ import memory.copy.RcBool;
 public interface IStoredBoolCopy extends IStorage {
 
     void add(RcBool rc);
+
+    void buildFakeHistory(RcBool v, boolean initValue, int olderStamp);
 }

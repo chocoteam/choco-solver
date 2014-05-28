@@ -37,7 +37,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -90,7 +89,7 @@ public class AllDifferentTest {
             s.post(IntConstraintFactory.alldifferent(diag1, "BC"));
             s.post(IntConstraintFactory.alldifferent(diag2, "BC"));
         }
-        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
         s.set(strategy);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -140,7 +139,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
         //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -170,7 +169,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -243,20 +242,20 @@ public class AllDifferentTest {
                 }
                 break;
             case 1:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.NEQS));
+                lcstrs.add(ICF.alldifferent(vars, "NEQS"));
                 break;
             case 2:
-                lcstrs.add(IntConstraintFactory.alldifferent(vars, "BC"));
+                lcstrs.add(ICF.alldifferent(vars, "BC"));
                 break;
             case 3:
-                lcstrs.add(IntConstraintFactory.alldifferent(vars, "AC"));
+                lcstrs.add(ICF.alldifferent(vars, "AC"));
                 break;
         }
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        s.set(IntStrategyFactory.lexico_LB(vars));
         return s;
     }
 

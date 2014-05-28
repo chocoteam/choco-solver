@@ -54,7 +54,6 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     protected IntVar[] X, Y;
     protected RemProc rem_proc;
     protected IIntDeltaMonitor[] idms;
-    private final static int AWAKENING_MASK = EventType.INT_ALL_MASK();
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);
@@ -73,11 +72,6 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return AWAKENING_MASK;
     }
 
     @Override
@@ -149,13 +143,13 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     public ESat isEntailed() {
         boolean allInst = true;
         for (int i = 0; i < n; i++) {
-            if (!(vars[i].instantiated() && vars[i + n].instantiated())) {
+            if (!(vars[i].isInstantiated() && vars[i + n].isInstantiated())) {
                 allInst = false;
             }
-            if (X[i].instantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
+            if (X[i].isInstantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
                 return ESat.FALSE;
             }
-            if (Y[i].instantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
+            if (Y[i].isInstantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
                 return ESat.FALSE;
             }
         }

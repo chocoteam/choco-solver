@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -56,7 +57,7 @@ public class PropSymmetric extends Propagator<SetVar> {
     //***********************************************************************************
 
     private int n, currentSet, offSet;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure elementForced, elementRemoved;
 
     //***********************************************************************************
@@ -71,7 +72,7 @@ public class PropSymmetric extends Propagator<SetVar> {
         super(sets, PropagatorPriority.LINEAR, true);
         n = sets.length;
         this.offSet = offSet;
-        sdm = new SetDeltaMonitor[n];
+        sdm = new ISetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
@@ -92,11 +93,6 @@ public class PropSymmetric extends Propagator<SetVar> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {

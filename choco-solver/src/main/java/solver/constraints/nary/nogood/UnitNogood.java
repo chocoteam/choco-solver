@@ -80,7 +80,7 @@ public class UnitNogood implements INogood {
 
     public ESat isEntailed() {
         if (var.contains(value)) {
-            if (var.instantiated()) {
+            if (var.isInstantiated()) {
                 return ESat.FALSE;
             } else {
                 return ESat.UNDEFINED;

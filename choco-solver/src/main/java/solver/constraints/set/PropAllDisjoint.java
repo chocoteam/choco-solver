@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -56,7 +57,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
     //***********************************************************************************
 
     private int n, currentSet;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure elementForced;
 
     //***********************************************************************************
@@ -73,7 +74,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         super(sets, PropagatorPriority.LINEAR, true);
         n = sets.length;
         // delta monitors
-        sdm = new SetDeltaMonitor[n];
+        sdm = new ISetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
@@ -128,7 +129,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
     public ESat isEntailed() {
         boolean allInstantiated = true;
         for (int i = 0; i < n; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
             for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {

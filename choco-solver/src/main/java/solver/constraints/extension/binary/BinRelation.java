@@ -27,7 +27,7 @@
 
 package solver.constraints.extension.binary;
 
-public interface BinRelation {
+public abstract class BinRelation {
 
     /**
      * return true if couple (x,y) is feasible according
@@ -38,7 +38,7 @@ public interface BinRelation {
      * @param y
      * @return
      */
-    public boolean checkCouple(int x, int y);
+    public abstract boolean checkCouple(int x, int y);
 
     /**
      * Test whether the couple (x,y) is consistent
@@ -47,6 +47,10 @@ public interface BinRelation {
      * @param y
      * @return true if (x,y) is a consistent couple
      */
-    public boolean isConsistent(int x, int y);
+    public abstract boolean isConsistent(int x, int y);
+
+    protected static boolean between(int v, int low, int upp) {
+        return (low <= v) && (v <= upp);
+    }
 
 }

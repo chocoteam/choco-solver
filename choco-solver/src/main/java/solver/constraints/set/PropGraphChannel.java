@@ -41,6 +41,7 @@ import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import util.ESat;
@@ -62,7 +63,7 @@ public class PropGraphChannel extends Propagator<Variable> {
     //***********************************************************************************
 
     private int n, currentSet;
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private SetVar[] sets;
     private IGraphDeltaMonitor gdm;
     private GraphVar g;
@@ -89,7 +90,7 @@ public class PropGraphChannel extends Propagator<Variable> {
         n = sets.length;
         this.g = (GraphVar) vars[n];
         assert (n == g.getEnvelopGraph().getNbNodes());
-        sdm = new SetDeltaMonitor[n];
+        sdm = new ISetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
             sdm[i] = sets[i].monitorDelta(this);
         }

@@ -26,7 +26,7 @@
  */
 package solver.constraints.nary.lex;
 
-import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -47,7 +47,6 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
-@PropAnn(tested = {PropAnn.Status.CONSISTENCY, PropAnn.Status.CORRECTION, PropAnn.Status.BENCHMARK, PropAnn.Status.IDEMPOTENCE})
 public class PropLex extends Propagator<IntVar> {
 
     public final int n;            // size of both vectors
@@ -66,14 +65,10 @@ public class PropLex extends Propagator<IntVar> {
 
         this.strict = strict;
         this.n = X.length;
+		IEnvironment environment = solver.getEnvironment();
         alpha = environment.makeInt(0);
         beta = environment.makeInt(0);
         entailed = false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
     }
 
     @Override
@@ -119,7 +114,7 @@ public class PropLex extends Propagator<IntVar> {
 
     /////////////////////
     public boolean groundEq(IntVar x1, IntVar y1) {
-        return x1.instantiated() && y1.instantiated() && x1.getValue() == y1.getValue();
+        return x1.isInstantiated() && y1.isInstantiated() && x1.getValue() == y1.getValue();
     }
 
     public boolean leq(IntVar x1, IntVar y1) {

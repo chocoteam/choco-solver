@@ -39,6 +39,7 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -54,7 +55,7 @@ public class PropSubsetEq extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private SetDeltaMonitor[] sdm;
+    private ISetDeltaMonitor[] sdm;
     private IntProcedure elementForced, elementRemoved;
 
     //***********************************************************************************
@@ -70,7 +71,7 @@ public class PropSubsetEq extends Propagator<SetVar> {
     public PropSubsetEq(SetVar X, SetVar Y) {
         super(new SetVar[]{X, Y}, PropagatorPriority.LINEAR, true);
         // delta monitors
-        sdm = new SetDeltaMonitor[2];
+        sdm = new ISetDeltaMonitor[2];
         for (int i = 0; i < 2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }

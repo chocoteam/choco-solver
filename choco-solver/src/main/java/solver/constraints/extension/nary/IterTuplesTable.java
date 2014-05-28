@@ -27,15 +27,13 @@
 
 package solver.constraints.extension.nary;
 
+import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
-
-import java.util.Iterator;
-import java.util.List;
 
 /**
  *
  **/
-public class IterTuplesTable extends TuplesList implements IterLargeRelation, LargeRelation {
+class IterTuplesTable extends TuplesList{
 
     /**
      * table[i][j] gives the table of supports as an int[] for value j of variable i
@@ -57,46 +55,47 @@ public class IterTuplesTable extends TuplesList implements IterLargeRelation, La
      */
     protected int[] offsets;
 
-    public IterTuplesTable(List<int[]> tuples, int[] offsets, int[] domSizes) {
-        super(tuples);
+    public IterTuplesTable(Tuples tuples, int[] offsets, int[] domSizes) {
+        super(tuples, offsets, domSizes);
         nbVar = domSizes.length;
         dsizes = domSizes;
         this.offsets = offsets;
         table = new int[nbVar][][];
         for (int i = 0; i < domSizes.length; i++) {
             table[i] = new int[domSizes[i]][];
-            int[] nbsups = getNbSupportFor(tuples, i);
+            int[] nbsups = getNbSupportFor(i);
             for (int j = 0; j < nbsups.length; j++) {
                 table[i][j] = new int[nbsups[j]];
             }
         }
-        buildInitialListOfSupports(tuples);
+        buildInitialListOfSupports();
     }
 
     /**
      * return the number of tuples supporting each value of variable i
      *
-     * @param tups
-     * @param i    a variable
-     * @return
+     * @param i a variable
+     * @return nb supports
      */
-    public int[] getNbSupportFor(List<int[]> tups, int i) {
+    public int[] getNbSupportFor(int i) {
         int[] nbsup = new int[dsizes[i]];
-        for (Iterator it = tups.iterator(); it.hasNext(); ) {
-            int[] tuple = (int[]) it.next();
+        int nt = tuplesIndexes.length;
+        for (int j = 0; j < nt; j++) {
+            int[] tuple = tuplesIndexes[j];
             nbsup[tuple[i] - offsets[i]]++;
         }
         return nbsup;
     }
 
-    public void buildInitialListOfSupports(List<int[]> tuples) {
+    public void buildInitialListOfSupports() {
         int cpt = 0;
         int[][] level = new int[nbVar][];
         for (int i = 0; i < nbVar; i++) {
             level[i] = new int[dsizes[i]];
         }
-        for (Iterator<int[]> it = tuples.iterator(); it.hasNext(); ) {
-            int[] tuple = it.next();
+        int nt = tuplesIndexes.length;
+        for (int j = 0; j < nt; j++) {
+            int[] tuple = tuplesIndexes[j];
             for (int i = 0; i < tuple.length; i++) {
                 int value = tuple[i] - offsets[i];
                 table[i][value][level[i][value]] = cpt;
@@ -109,7 +108,7 @@ public class IterTuplesTable extends TuplesList implements IterLargeRelation, La
     /**
      * for fast access
      *
-     * @return
+     * @return table
      */
     public int[][][] getTableLists() {
         return table;
@@ -119,14 +118,11 @@ public class IterTuplesTable extends TuplesList implements IterLargeRelation, La
      * This relation do not take advantage of the knowledge of the
      * previous support ! so start from scratch
      *
-     * @param oldidx
-     * @param var
      * @param val    is the value assuming the offset has already been
      *               removed
-     * @return
      */
     public int seekNextTuple(int oldidx, int var, int val) {
-        int nidx = oldidx++;
+        int nidx = oldidx + 1;
         if (nidx < table[var][val].length) {
             return table[var][val][nidx];
         } else {
@@ -138,9 +134,6 @@ public class IterTuplesTable extends TuplesList implements IterLargeRelation, La
      * return the number of supports of the pair (var, val) assuming the
      * offset has already been removed
      *
-     * @param var
-     * @param val
-     * @return
      */
     public int getNbSupport(int var, int val) {
         return table[var][val].length;
@@ -152,9 +145,5 @@ public class IterTuplesTable extends TuplesList implements IterLargeRelation, La
 
     public boolean checkTuple(int[] tuple) {
         throw new SolverException("checkTuple should not be used on an IterRelation");
-    }
-
-    public boolean isConsistent(int[] tuple) {
-        return checkTuple(tuple);
     }
 }

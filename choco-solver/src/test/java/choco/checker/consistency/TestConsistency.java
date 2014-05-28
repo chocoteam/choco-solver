@@ -336,19 +336,33 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAmongAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
-//    @Test
-//    public void runner() throws ClassNotFoundException, IOException, ContradictionException {
-//        Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Choco3/SOLVER_ERROR.ser");
-//        s.getEnvironment().worldPopUntil(0);
-//        s.getEnvironment().worldPush();
-//        Constraint[] constraints = s.getCstrs();
-//        for (int c = 0; c < constraints.length; c++) {
-//            Propagator[] propagators = constraints[c].propagators;
-//            for (int p = 0; p < propagators.length; p++) {
-//                propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
-//            }
-//        }
-//        s.propagate();
-//    }
+    @Test(groups = "10s")
+    public void testSORT1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelSortBC, 6, 0, 10, null, seed + i, "bc");
+    }
+
+    @Test(groups = "10s")
+    public void testSORT2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelSortBC, 8, -20, 20, null, seed + i, "bc");
+    }
+
+    /*@Test
+    public void runner() throws ClassNotFoundException, IOException, ContradictionException {
+        Solver s = Solver.readFromFile("/Users/kyzrsoze/Sources/Choco3/SOLVER_ERROR.ser");
+        s.getEnvironment().worldPopUntil(0);
+        s.getEnvironment().worldPush();
+        Constraint[] constraints = s.getCstrs();
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] propagators = constraints[c].getPropagators();
+            for (int p = 0; p < propagators.length; p++) {
+                propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
+            }
+        }
+        s.propagate();
+    }*/
 }
 

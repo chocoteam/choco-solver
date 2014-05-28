@@ -25,43 +25,51 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 07/06/13
- * Time: 14:10
- */
-
 package solver.search.solution;
 
 import solver.Solver;
-
+import solver.search.loop.monitors.IMonitorSolution;
 import java.util.LinkedList;
+import java.util.List;
 
+/**
+ * Class to record all solutions found during the resolution process
+ *
+ * @author Jean-Guillaume Fages
+ */
 public class AllSolutionsRecorder implements ISolutionRecorder {
 
 	LinkedList<Solution> solutions;
 	Solver solver;
 
-	public AllSolutionsRecorder(Solver solver){
+	public AllSolutionsRecorder(final Solver solver){
 		this.solver = solver;
 		this.solutions = new LinkedList();
+		solver.plugMonitor(createRecMonitor());
 	}
 
-	@Override
-	public void onSolution() {
-		Solution solution = new Solution();
-		solution.record(solver);
-		solutions.add(solution);
+	protected IMonitorSolution createRecMonitor() {
+		return new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				Solution solution = new Solution();
+				solution.record(solver);
+				solutions.addLast(solution);
+			}
+		};
 	}
 
 	@Override
 	public Solution getLastSolution() {
-		return solutions.getLast();
+		if(solutions.isEmpty()){
+			return null;
+		}else{
+			return solutions.getLast();
+		}
 	}
 
 	@Override
-	public LinkedList<Solution> getAllSolutions() {
+	public List<Solution> getSolutions() {
 		return solutions;
 	}
 }

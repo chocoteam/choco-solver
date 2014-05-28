@@ -149,7 +149,7 @@ public class MarioKart extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		/* Listeners */
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void onSolution() {
@@ -157,7 +157,7 @@ public class MarioKart extends AbstractProblem {
 			}
 		});
 		/* Heuristic choices */
-		AbstractStrategy strat = IntStrategyFactory.firstFail_InDomainMin(next);
+		AbstractStrategy strat = IntStrategyFactory.minDom_LB(next);
 		solver.set(IntStrategyFactory.lastConflict(solver,strat));
 //		solver.set(strat);
 	}

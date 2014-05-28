@@ -27,7 +27,7 @@
 
 package solver.constraints.extension.nary;
 
-public interface LargeRelation {
+public abstract class LargeRelation {
 
     /**
      * return true if tuple is feasible according
@@ -36,14 +36,25 @@ public interface LargeRelation {
      *
      * @return
      */
-    public boolean checkTuple(int[] tuple);
+    public abstract boolean checkTuple(int[] tuple);
 
     /**
      * Test whether a tuple is consistent
      *
      * @return true if tuple is consistent.
      */
-    public boolean isConsistent(int[] tuple);
+    public abstract boolean isConsistent(int[] tuple);
+
+    protected boolean valid(int[] tuple, int[] offsets, int[] domSizes) {
+        for (int i = 0; i < tuple.length; i++) {
+                if (!between(tuple[i], offsets[i], offsets[i] + domSizes[i] - 1)) return false;
+            }
+            return true;
+        }
+
+    private static boolean between(int v, int low, int upp) {
+            return (low <= v) && (v <= upp);
+        }
 
 
 }

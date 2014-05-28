@@ -41,22 +41,23 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 10/05/11
  */
-public class Belong<V extends Variable> implements IMetric<V> {
+public class Belong implements IMetric {
 
-    final THashSet<V> set;
+    final THashSet set;
 
-    private Belong(Constraint<V, ? extends Propagator<V>> constraint) {
-        this.set = new THashSet<V>();
-        this.set.addAll(Arrays.asList(constraint.getVariables()));
+    private Belong(Constraint constraint) {
+        this.set = new THashSet();
+		for(Propagator p:constraint.getPropagators()){
+			this.set.addAll(Arrays.asList(p.getVars()));
+		}
     }
 
-    public static <V extends Variable> Belong build(Constraint<V, ? extends Propagator<V>> constraint) {
-        return new Belong<V>(constraint);
+    public static Belong build(Constraint constraint) {
+        return new Belong(constraint);
     }
-
 
     @Override
-    public int eval(V var) {
+    public int eval(Variable var) {
         if (set.contains(var)) {
             return 0;
         }

@@ -28,30 +28,27 @@ package solver.variables.delta.monitor;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.SetDelta;
+import solver.variables.delta.ISetDelta;
+import solver.variables.delta.ISetDeltaMonitor;
+import solver.search.loop.TimeStampedObject;
 import util.procedure.IntProcedure;
 
 /**
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class SetDeltaMonitor implements IDeltaMonitor {
+public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonitor {
 
-    protected final SetDelta delta;
+    protected final ISetDelta delta;
 
     protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
     protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
     protected ICause propagator;
 
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
-
-    public SetDeltaMonitor(SetDelta delta, ICause propagator) {
+    public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
+		super(delta.getSearchLoop());
         this.delta = delta;
-        loop = delta.getSearchLoop();
         this.first = new int[2];
         this.last = new int[2];
         this.frozenFirst = new int[2];
@@ -61,8 +58,12 @@ public class SetDeltaMonitor implements IDeltaMonitor {
 
     @Override
     public void freeze() {
-        assert delta.timeStamped() : "delta is not timestamped";
-        lazyClear();
+		if (needReset()) {
+			for (int i = 0; i < 2; i++) {
+				this.first[i] = last[i] = 0;
+			}
+			resetStamp();
+		}
         for (int i = 0; i < 2; i++) {
             this.frozenFirst[i] = first[i]; // freeze indices
             this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
@@ -71,36 +72,20 @@ public class SetDeltaMonitor implements IDeltaMonitor {
 
     @Override
     public void unfreeze() {
-        timestamp = loop.timeStamp;
+        delta.lazyClear();    // fix 27/07/12
+        resetStamp();
         for (int i = 0; i < 2; i++) {
             this.first[i] = last[i] = delta.getSize(i);
-        }
-
-        // VRAIMENT UTILE?
-        delta.lazyClear();    // fix 27/07/12
-        lazyClear();        // fix 27/07/12
-    }
-
-    public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
-            clear();
-            timestamp = loop.timeStamp;
         }
     }
 
     @Override
-    public void clear() {
-        for (int i = 0; i < 2; i++) {
-            this.first[i] = last[i] = 0;
-        }
-    }
-
     public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
         int x;
         if (evt == EventType.ADD_TO_KER) {
-            x = SetDelta.KERNEL;
+            x = ISetDelta.KERNEL;
         } else if (evt == EventType.REMOVE_FROM_ENVELOPE) {
-            x = SetDelta.ENVELOP;
+            x = ISetDelta.ENVELOP;
         } else {
             throw new UnsupportedOperationException("The event in parameter should be ADD_TO_KER or REMOVE_FROM_ENVELOPE");
         }

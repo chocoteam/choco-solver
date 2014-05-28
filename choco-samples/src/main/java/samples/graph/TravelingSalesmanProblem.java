@@ -33,13 +33,11 @@ import samples.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SMF;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -118,7 +116,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     public void configureSearch() {
 		final GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
 		strategy.configure(GraphStrategies.MIN_COST, true);
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+		solver.plugMonitor(new IMonitorSolution() {
 			@Override
 			public void onSolution() {
 				System.out.println("solution found, cost : "+totalCost.getValue());
@@ -131,12 +129,12 @@ public class TravelingSalesmanProblem extends AbstractProblem {
                 System.out.println("classical top-down minimization");
                 break;
             case 1:
-                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strategy));
+                solver.set(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strategy);
 				SMF.limitSolution(solver,2);
                 System.out.println("bottom-up minimization");
                 break;
             case 2:
-                solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC, true), strategy));
+                solver.set(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC, true), strategy);
                 System.out.println("dichotomic minimization");
                 break;
             default:
@@ -153,7 +151,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Override
     public void prettyOut() {
         System.out.println("optimum in ["
-                + ((IntObjectiveManager)solver.getSearchLoop().getObjectivemanager()).getBestLB() + ","
-                + ((IntObjectiveManager)solver.getSearchLoop().getObjectivemanager()).getBestUB() + "]");
+                + (solver.getObjectiveManager()).getBestLB() + ","
+                + (solver.getObjectiveManager()).getBestUB() + "]");
     }
 }

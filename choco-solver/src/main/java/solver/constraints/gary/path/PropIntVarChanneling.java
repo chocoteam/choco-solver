@@ -169,7 +169,7 @@ public class PropIntVarChanneling extends Propagator {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 return ESat.UNDEFINED;
             }
         }

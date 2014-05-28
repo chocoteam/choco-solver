@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;
@@ -85,27 +84,26 @@ public class SantaClaude extends AbstractProblem {
         }
         solver.post(IntConstraintFactory.sum(kid_price, total_cost));
 
-        RealConstraint ave_cons = new RealConstraint(solver);
-        StringBuilder function = new StringBuilder("(");
+        StringBuilder funBuilder = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {
-            function.append("+{").append(i).append('}');
+			funBuilder.append("+{").append(i).append('}');
         }
-        function.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
+		funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
         RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
+		String function = funBuilder.toString();
 
-        ave_cons.addFunction(function.toString(), all_vars);
-        solver.post(ave_cons);
+        solver.post(new RealConstraint(function, all_vars));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.random(kid_gift, 29091981));
+        solver.set(IntStrategyFactory.random_value(kid_gift, 29091981));
     }
 
     @Override
     public void solve() {
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+        solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 if (LoggerFactory.getLogger("solver").isInfoEnabled()) {

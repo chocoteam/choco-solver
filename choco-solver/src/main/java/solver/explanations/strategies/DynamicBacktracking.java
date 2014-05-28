@@ -55,13 +55,13 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
     }
 
     protected void updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
-        if (cause == mSolver.getSearchLoop().getObjectivemanager()) {
+        if (cause == mSolver.getObjectiveManager()) {
             super.updateVRExplainUponbacktracking(nworld, expl, cause);
         }
         cobdec.clearDecisionPath();
 
         // preliminary : compute where to jump back
-        Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
+        Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         int myworld = nworld;
         while (dec != RootDecision.ROOT && myworld > 1) {
             dec = dec.getPrevious();
@@ -73,7 +73,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
         }
 
         // now we can explicitly enforce the jump
-        dec = mSolver.getSearchLoop().decision; // the current decision to undo
+        dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {
 
             if (!dec.hasNext()) {
@@ -115,7 +115,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
             Deduction right = dec.getNegativeDeduction();
             mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
 
-            mSolver.getSearchLoop().decision = cobdec;
+            mSolver.getSearchLoop().setLastDecision(cobdec);
         }
         if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);

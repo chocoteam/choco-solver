@@ -27,9 +27,8 @@
 package solver.propagation;
 
 import solver.Solver;
-import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.propagation.hardcoded.VariableEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 
 /**
  * A factory to build a propagation engine.
@@ -45,32 +44,22 @@ import solver.propagation.hardcoded.VariableEngine;
 public enum PropagationEngineFactory {
 
     /**
-     * Create a variable oriented propagation engine
-     */
-    VARIABLEDRIVEN() {
-        @Override
-        public IPropagationEngine make(Solver solver) {
-            return new VariableEngine(solver);
-        }
-    },
-
-    /**
-     * Create a propagator-oriented propagation engine
-     */
-    PROPAGATORDRIVEN() {
-        @Override
-        public IPropagationEngine make(Solver solver) {
-            return new PropagatorEngine(solver);
-        }
-    },
-
-    /**
      * Create a seven queue dynamic propagator-oriented propagation engine
      */
     PROPAGATORDRIVEN_7QD() {
         @Override
         public IPropagationEngine make(Solver solver) {
             return new SevenQueuesPropagatorEngine(solver);
+        }
+    },
+
+    /**
+     * Create a propagation engine which handles both priority and separated coarse propagation.
+     */
+    TWOBUCKETPROPAGATIONENGINE() {
+        @Override
+        public IPropagationEngine make(Solver solver) {
+            return new TwoBucketPropagationEngine(solver);
         }
     },
 
@@ -87,7 +76,7 @@ public enum PropagationEngineFactory {
     DEFAULT() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return PROPAGATORDRIVEN.make(solver);
+            return TWOBUCKETPROPAGATIONENGINE.make(solver);
         }
     };
 

@@ -36,6 +36,7 @@ import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.tools.ArrayUtils;
+
 import java.util.Arrays;
 
 /**
@@ -87,7 +88,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		}
 		// awakes on instantiations only when FAST mode is set to true
 		awakeningMask = fast?EventType.INSTANTIATE.mask:EventType.BOUND.mask + EventType.INSTANTIATE.mask;
-		lastCapaMax = environment.makeInt(capa.getUB()+1);
+		lastCapaMax = solver.getEnvironment().makeInt(capa.getUB()+1);
 		allTasks = SetFactory.makeFullSet(n);
 	}
 
@@ -193,7 +194,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 		}
 		// check variables are instantiated
 		for (int i = 0; i < vars.length-1; i++) {
-			if(!vars[i].instantiated()){
+			if(!vars[i].isInstantiated()){
 				return ESat.UNDEFINED;
 			}
 		}

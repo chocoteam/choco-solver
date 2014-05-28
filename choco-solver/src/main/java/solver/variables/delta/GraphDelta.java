@@ -27,53 +27,33 @@
 
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
+import solver.search.loop.TimeStampedObject;
 
-public class GraphDelta implements IGraphDelta {
+public class GraphDelta extends TimeStampedObject implements IGraphDelta {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     private IEnumDelta[] deltaOfType;
-    private long timestamp;
-    private final AbstractSearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public GraphDelta(AbstractSearchLoop loop) {
+    public GraphDelta(ISearchLoop loop) {
+		super(loop);
         deltaOfType = new IEnumDelta[NB];
-        this.loop = loop;
         for (int i = 0; i < NB; i++) {
             deltaOfType[i] = new EnumDelta(loop);
         }
-        timestamp = loop.timeStamp;
     }
 
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException();
-    }
-
-    //***********************************************************************************
-    // ACCESSORS
-    //***********************************************************************************
-
-    @Override
-    public void clear() {
-        for (int i = 0; i < NB; i++) {
-            deltaOfType[i].clear();
-        }
-        timestamp = loop.timeStamp;
-    }
 
     @Override
     public int getSize(int i) {
@@ -82,16 +62,18 @@ public class GraphDelta implements IGraphDelta {
 
     @Override
     public void add(int element, int type, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
+		lazyClear();
         deltaOfType[type].add(element, cause);
     }
 
+	@Override
     public void lazyClear() {
-        if (timestamp != loop.timeStamp) {
-            clear();
-        }
+        if (needReset()) {
+			for (int i = 0; i < NB; i++) {
+				deltaOfType[i].lazyClear();
+			}
+			resetStamp();
+		}
     }
 
     @Override
@@ -102,15 +84,5 @@ public class GraphDelta implements IGraphDelta {
     @Override
     public ICause getCause(int index, int type) {
         return deltaOfType[type].getCause(index);
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
     }
 }

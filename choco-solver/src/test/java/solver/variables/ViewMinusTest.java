@@ -30,6 +30,7 @@ import choco.checker.DomainBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
@@ -56,8 +57,9 @@ public class ViewMinusTest {
         IntVar Y = VariableFactory.minus(X);
 
         try {
-//            solver.propagate();
-            Assert.assertFalse(Y.instantiated());
+			if(!Configuration.ENABLE_VIEWS)
+				solver.propagate();
+            Assert.assertFalse(Y.isInstantiated());
             Assert.assertEquals(Y.getLB(), -10);
             Assert.assertEquals(Y.getUB(), -1);
             Assert.assertTrue(Y.contains(-5));
@@ -69,18 +71,26 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.previousValue(-10), Integer.MIN_VALUE);
 
             Y.updateLowerBound(-9, Cause.Null);
+			if(!Configuration.ENABLE_VIEWS)
+				solver.propagate();
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 
             Y.updateUpperBound(-2, Cause.Null);
+			if(!Configuration.ENABLE_VIEWS)
+				solver.propagate();
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Cause.Null);
+			if(!Configuration.ENABLE_VIEWS)
+				solver.propagate();
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Cause.Null);
+			if(!Configuration.ENABLE_VIEWS)
+				solver.propagate();
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));
@@ -92,8 +102,10 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Cause.Null);
-            Assert.assertTrue(X.instantiated());
-            Assert.assertTrue(Y.instantiated());
+			if(!Configuration.ENABLE_VIEWS)
+				solver.propagate();
+            Assert.assertTrue(X.isInstantiated());
+            Assert.assertTrue(Y.isInstantiated());
             Assert.assertEquals(X.getValue(), 5);
             Assert.assertEquals(Y.getValue(), -5);
 
@@ -113,7 +125,7 @@ public class ViewMinusTest {
                 xs[0] = VariableFactory.bounded("x", 1, 15, ref);
                 xs[1] = VariableFactory.bounded("y", -15, -1, ref);
                 ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, ref)));
-                ref.set(IntStrategyFactory.random(xs, seed));
+                ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -121,7 +133,7 @@ public class ViewMinusTest {
                 xs[0] = VariableFactory.bounded("x", 1, 15, solver);
                 xs[1] = VariableFactory.minus(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, solver)));
-                solver.set(IntStrategyFactory.random(xs, seed));
+                solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -141,7 +153,7 @@ public class ViewMinusTest {
                 xs[0] = VariableFactory.enumerated("x", 1, 15, ref);
                 xs[1] = VariableFactory.enumerated("y", -15, -1, ref);
                 ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, ref)));
-                ref.set(IntStrategyFactory.random(xs, seed));
+                ref.set(IntStrategyFactory.random_value(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -149,7 +161,7 @@ public class ViewMinusTest {
                 xs[0] = VariableFactory.enumerated("x", 1, 15, solver);
                 xs[1] = VariableFactory.minus(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, solver)));
-                solver.set(IntStrategyFactory.random(xs, seed));
+                solver.set(IntStrategyFactory.random_value(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -201,6 +213,14 @@ public class ViewMinusTest {
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.enumerated("o", domains[0], solver);
             IntVar v = VariableFactory.minus(o);
+			if(!Configuration.ENABLE_VIEWS){
+				try {
+					solver.propagate();
+				}catch (Exception e){
+					e.printStackTrace();
+					throw new UnsupportedOperationException();
+				}
+			}
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(-vit.next()));

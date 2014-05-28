@@ -62,7 +62,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
      */
     public PropAtMost1Empty(SetVar[] sets) {
         super(sets, PropagatorPriority.UNARY, true);
-        emptySetIndex = environment.makeInt(-1);
+        emptySetIndex = solver.getEnvironment().makeInt(-1);
     }
 
     //***********************************************************************************
@@ -115,7 +115,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
                     return ESat.FALSE;
                 }
                 none = false;
-            } else if (!vars[i].instantiated()) {
+            } else if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
         }

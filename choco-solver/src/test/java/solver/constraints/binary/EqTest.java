@@ -26,7 +26,7 @@
  */
 package solver.constraints.binary;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
@@ -49,7 +49,7 @@ public class EqTest {
         IntVar two2 = VF.fixed(2, s);
         s.post(ICF.arithm(two1, "=", two2));
         Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isEntailed());
+        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
 
 
@@ -60,7 +60,7 @@ public class EqTest {
         IntVar two = VF.fixed(2, s);
         s.post(ICF.arithm(three, "-", two, "=", 1));
         Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isEntailed());
+        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
 
     @Test
@@ -70,6 +70,6 @@ public class EqTest {
         IntVar two = VF.fixed(2, s);
         s.post(ICF.arithm(three, "=", two, "+", 1));
         Assert.assertTrue(s.findSolution());
-        Assert.assertEquals(ESat.TRUE, s.isEntailed());
+        Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
 }

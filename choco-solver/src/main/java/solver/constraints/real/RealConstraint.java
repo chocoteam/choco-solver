@@ -26,7 +26,6 @@
  */
 package solver.constraints.real;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.variables.RealVar;
 
@@ -37,31 +36,89 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18/07/12
  */
-public class RealConstraint extends Constraint<RealVar,RealPropagator> {
+public class RealConstraint extends Constraint {
 
-    //***********************************************************************************
+	//***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Create a constraint on real variables.
-     * This is propagated using IBEX.
-     *
-     * @param solver the solver
-     */
-    public RealConstraint(Solver solver) {
-        super(solver);
-    }
+	/**
+	 * Make a new RealConstraint defined as a set of RealPropagators
+	 *
+	 * @param name        name of the constraint
+	 * @param propagators set of propagators defining the constraint
+	 */
+	public RealConstraint(String name, RealPropagator... propagators) {
+		super(name, propagators);
+	}
 
 	/**
-	 * Create a constraint on real variables.
-	 * This is propagated using IBEX.
+	 * Make a new RealConstraint to model one or more continuous functions, separated with semi-colon ";"
+	 * <br/>
+	 * A function is a string declared using the following format:
+	 * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+	 * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+	 * <br/> A complete list is available in the documentation of IBEX.
+	 * <p/>
+	 * <p/>
+	 * <blockquote><pre>
+	 * RealConstraint rc = new RealConstraint(solver);
+	 * rc.addFunction("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", Ibex.HC4, x,y);
+	 * </pre>
+	 * </blockquote>
 	 *
-	 * @param vars concerned variables
-	 * @param solver the solver
+	 * @param name		name of the constraint
+	 * @param functions	list of functions, separated by a semi-colon
+	 * @param option    propagation option index (Ibex.COMPO is DEFAULT)
+	 * @param rvars     a list of real variables
 	 */
-	public RealConstraint(RealVar[] vars, Solver solver) {
-		super(vars,solver);
+	public RealConstraint(String name, String functions, int option, RealVar... rvars) {
+		this(name, createPropagator(functions, option, rvars));
+	}
+
+	/**
+	 * Make a new RealConstraint to model one or more continuous functions, separated with semi-colon ";"
+	 * <br/>
+	 * A function is a string declared using the following format:
+	 * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+	 * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+	 * <br/> A complete list is available in the documentation of IBEX.
+	 * <p/>
+	 * <p/>
+	 * <blockquote><pre>
+	 * RealConstraint rc = new RealConstraint(solver);
+	 * rc.addFunction("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", Ibex.HC4, x,y);
+	 * </pre>
+	 * </blockquote>
+	 *
+	 * @param name		name of the constraint
+	 * @param functions	list of functions, separated by a semi-colon
+	 * @param rvars     a list of real variables
+	 */
+	public RealConstraint(String name, String functions, RealVar... rvars) {
+		this(name, functions, Ibex.COMPO, rvars);
+	}
+
+	/**
+	 * Make a new RealConstraint to model one or more continuous functions, separated with semi-colon ";"
+	 * <br/>
+	 * A function is a string declared using the following format:
+	 * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+	 * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+	 * <br/> A complete list is available in the documentation of IBEX.
+	 * <p/>
+	 * <p/>
+	 * <blockquote><pre>
+	 * RealConstraint rc = new RealConstraint(solver);
+	 * rc.addFunction("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", Ibex.HC4, x,y);
+	 * </pre>
+	 * </blockquote>
+	 *
+	 * @param functions	list of functions, separated by a semi-colon
+	 * @param rvars     a list of real variables
+	 */
+	public RealConstraint(String functions, RealVar... rvars) {
+		this("RealConstraint", functions, rvars);
 	}
 
     //***********************************************************************************
@@ -69,7 +126,7 @@ public class RealConstraint extends Constraint<RealVar,RealPropagator> {
     //***********************************************************************************
 
     /**
-     * add one or more functions, separated with semi-colon ";" to <code>this</code>.
+     * Creates a RealPropagator to propagate one or more continuous functions, separated with semi-colon ";"
      * <br/>
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
@@ -84,39 +141,18 @@ public class RealConstraint extends Constraint<RealVar,RealPropagator> {
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
-     * @param option    propagation option index (Ibex.COMPO is DEFAULT)
+	 * @param option    propagation option index (Ibex.COMPO is DEFAULT)
      * @param rvars     a list of real variables
+	 * @return a RealPropagator to propagate the given functions over given variable domains
      */
-    public void addFunction(String functions, int option, RealVar... rvars) {
-        addPropagators(new RealPropagator(functions, rvars, option));
-    }
-
-    /**
-     * add one or more functions, separated with semi-colon ";" to <code>this</code>.
-     * <br/>
-     * A function is a string declared using the following format:
-     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
-     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is available in the documentation of IBEX.
-     * <p/>
-     * <p/>
-     * <blockquote><pre>
-     * RealConstraint rc = new RealConstraint(solver);
-     * rc.addFunction("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,y);
-     * <p/>
-     * </pre>
-     * </blockquote>
-     *
-     * @param functions list of functions, separated by a semi-colon
-     * @param rvars     a list of real variables
-     */
-    public void addFunction(String functions, RealVar... rvars) {
-        addFunction(functions, Ibex.COMPO, rvars);
+    private static RealPropagator createPropagator(String functions, int option, RealVar... rvars) {
+    	return new RealPropagator(functions, rvars, option);
     }
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-		solver.getIbex().release();
+		if(propagators==null || propagators.length==0)throw new UnsupportedOperationException("Empty RealConstraint");
+		propagators[0].getSolver().getIbex().release();
     }
 }

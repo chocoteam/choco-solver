@@ -55,7 +55,7 @@ public class CountEqBuilder implements IBuilder {
             return new Constraint[]{IntConstraintFactory.count(y, x, c)};
         }
         IntVar y = exps.get(1).intVarValue(solver);
-        if (y.instantiated()) {
+        if (y.isInstantiated()) {
             return new Constraint[]{IntConstraintFactory.count(y.getValue(), x, c)};
         } else {
             int ylb = y.getLB();

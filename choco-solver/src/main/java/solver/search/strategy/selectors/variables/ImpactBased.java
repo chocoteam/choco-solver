@@ -35,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.search.loop.ISearchLoop;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
@@ -111,12 +112,12 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         random = new Random(seed);
         decisionPool = new PoolManager<FastDecision>();
         this.nodeImpact = nodeImpact;
-        if (!initOnly) solver.getSearchLoop().plugSearchMonitor(this);
+        if (!initOnly) solver.plugMonitor(this);
     }
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.instantiated()) {
+        if (variable == null || variable.isInstantiated()) {
             return null;
         }
         if (currentVar == -1 || vars[currentVar] != variable) {
@@ -169,7 +170,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         bests.clear();
         double bestImpact = -Double.MAX_VALUE;
         for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
+            if (!vars[i].isInstantiated()) {
                 double imp = computeImpact(i);
                 if (imp > bestImpact) {
                     bests.clear();
@@ -210,7 +211,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             int offset = v.getLB();
             int UB = v.getUB();
             int dsz = UB - offset + 1;//v.getDomainSize();
-            if (!v.instantiated()) { // if the variable is not instantiated
+            if (!v.isInstantiated()) { // if the variable is not instantiated
                 Ilabel[i] = new double[v.hasEnumeratedDomain() ? dsz : 1];
                 offsets[i] = offset;
 
@@ -263,13 +264,13 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             learnsAndFails = false;
             solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
         } else if (System.currentTimeMillis() > tl) {
-            LOGGER.debug("ImpactBased Search stops its init phase -- reach time limit!");
+            LOGGER.debug("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();
                 int UB = v.getUB();
                 int dsz = UB - offset + 1;//v.getDomainSize();
-                if (!v.instantiated() && Ilabel[i] == null) {
+                if (!v.isInstantiated() && Ilabel[i] == null) {
                     Ilabel[i] = new double[v.hasEnumeratedDomain() ? dsz : 1];
                     offsets[i] = offset;
                 }
@@ -407,7 +408,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             for (int i = 0; i < vars.length; i++) {
                 IntVar v = vars[i];
                 int dsz = v.getDomainSize();
-                if (!v.instantiated()) { // if the variable is not instantiated
+                if (!v.isInstantiated()) { // if the variable is not instantiated
                     int offset = v.getLB();
                     if (v.hasEnumeratedDomain()) {
                         if (v.getDomainSize() < split) { // try each value
@@ -446,11 +447,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             if (learnsAndFails) {
                 learnsAndFails = false;
-                solver.getSearchLoop().moveTo(solver.getSearchLoop().stateAfterFail);
+                solver.getSearchLoop().moveTo(ISearchLoop.UP_BRANCH);
                 //noinspection ThrowableResultOfMethodCallIgnored
-                solver.getSearchLoop().smList.onContradiction(
-                        solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
-                );
+                solver.getSearchLoop().getSMList().onContradiction(
+						solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
+				);
             }
         }
     }

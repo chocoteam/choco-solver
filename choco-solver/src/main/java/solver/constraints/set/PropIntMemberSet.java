@@ -34,6 +34,7 @@
 
 package solver.constraints.set;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -42,7 +43,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.delta.ISetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -59,7 +60,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     private IntVar iv;
     private SetVar set;
-    private SetDeltaMonitor sdm;
+    private ISetDeltaMonitor sdm;
     private IntProcedure elemRem;
 	private IStateInt watchLit1, watchLit2;
 
@@ -79,6 +80,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
         this.iv = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.sdm = set.monitorDelta(this);
+		IEnvironment environment = solver.getEnvironment();
 		watchLit1 = environment.makeInt(iv.getLB()-1);
 		watchLit2 = environment.makeInt(iv.getLB()-1);
         elemRem = new IntProcedure() {
@@ -100,7 +102,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (iv.instantiated()) {
+        if (iv.isInstantiated()) {
             set.addToKernel(iv.getValue(), aCause);
             setPassive();
             return;
@@ -125,7 +127,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
                 iv.removeValue(i, aCause);
             }
         }
-        if (iv.instantiated()) {
+        if (iv.isInstantiated()) {
             set.addToKernel(iv.getValue(), aCause);
             setPassive();
         }
@@ -135,7 +137,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 1) {
-			if(iv.instantiated()){
+			if(iv.isInstantiated()){
 				set.addToKernel(iv.getValue(), aCause);
 				setPassive();
 			}else{
@@ -145,7 +147,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
             sdm.freeze();
             sdm.forEach(elemRem, EventType.REMOVE_FROM_ENVELOPE);
             sdm.unfreeze();
-            if (iv.instantiated()) {
+            if (iv.isInstantiated()) {
                 set.addToKernel(iv.getValue(), aCause);
                 setPassive();
             }else{
@@ -183,11 +185,11 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
 	@Override
     public ESat isEntailed() {
-        if (iv.instantiated()) {
+        if (iv.isInstantiated()) {
             if (!set.envelopeContains(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.instantiated()) {
+                if (set.isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;

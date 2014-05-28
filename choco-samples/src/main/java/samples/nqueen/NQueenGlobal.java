@@ -59,7 +59,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
+        solver.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     public static void main(String[] args) {

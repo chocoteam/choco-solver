@@ -96,7 +96,7 @@ public class CliqueEnumeration extends AbstractProblem {
         // search strategy (lexicographic)
         solver.set(GraphStrategyFactory.graphLexico(graphvar));
         // log
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+        solver.plugMonitor(new IMonitorSolution() {
             public void onSolution() {
                 System.out.println("solution found : " + graphvar.getEnvelopGraph().getNeighborsOf(1));
             }

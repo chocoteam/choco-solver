@@ -27,35 +27,31 @@
 
 package solver.constraints.nary.alldifferent;
 
-import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.binary.PropNotEqualX_Y;
+import solver.constraints.nary.cnf.PropTrue;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.ESat;
 
 /**
  * Ensures that all variables from VARS take a different value.
  * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
  */
-public class AllDifferent extends IntConstraint<IntVar> {
+public class AllDifferent extends Constraint {
 
     public static enum Type {
         AC, BC, weak_BC, NEQS, DEFAULT
     }
 
-    public AllDifferent(IntVar[] vars, Solver solver) {
-        this(vars, solver, Type.BC);
+    public AllDifferent(IntVar[] vars, String type) {
+        super("AllDifferent",createPropagators(vars, type));
     }
 
-    public AllDifferent(IntVar[] vars, Solver solver, Type type) {
-        super(vars, solver);
-        setPropagators(createPropagators(vars, type));
-    }
-
-    public static Propagator<IntVar>[] createPropagators(IntVar[] VARS, Type consistency) {
-        switch (consistency) {
+	private static Propagator<IntVar>[] createPropagators(IntVar[] VARS, String consistency) {
+		if(VARS.length<=1){
+			return new Propagator[]{new PropTrue(VARS[0].getSolver().ONE)};
+		}
+        switch (AllDifferent.Type.valueOf(consistency)) {
             case NEQS: {
                 int s = VARS.length;
                 int k = 0;
@@ -88,58 +84,5 @@ public class AllDifferent extends IntConstraint<IntVar> {
                     return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS, false)};
                 }
         }
-    }
-
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < vars.length; i++) {
-            for (int j = 0; j < i; j++) {
-                if (tuple[i] == tuple[j]) {
-                    return ESat.FALSE;
-                }
-            }
-        }
-        return ESat.TRUE;
-    }
-
-    @Override
-    public ESat isEntailed() {
-        for (IntVar v : vars) {
-            if (v.instantiated()) {
-                int vv = v.getValue();
-                for (IntVar w : vars) {
-                    if (w != v) {
-                        if (w.instantiated()) {
-                            if (vv == w.getValue()) {
-                                return ESat.FALSE;
-                            }
-                        } else {
-                            return ESat.UNDEFINED;
-                        }
-                    }
-                }
-            } else {
-                return ESat.UNDEFINED;
-            }
-        }
-        return ESat.TRUE;
-    }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("AllDifferent({");
-        for (int i = 0; i < vars.length; i++) {
-            if (i > 0) sb.append(", ");
-            Variable var = vars[i];
-            sb.append(var);
-        }
-        sb.append("})");
-        return sb.toString();
     }
 }

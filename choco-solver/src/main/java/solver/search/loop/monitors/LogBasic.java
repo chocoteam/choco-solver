@@ -66,7 +66,7 @@ public final class LogBasic implements IMonitorInitialize, IMonitorClose {
     @Override
     public void beforeClose() {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(solver.getSearchLoop().getMeasures().toString());
+            LOGGER.info(solver.getMeasures().toString());
         }
     }
 

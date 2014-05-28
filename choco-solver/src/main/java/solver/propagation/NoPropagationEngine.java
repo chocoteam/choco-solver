@@ -48,6 +48,8 @@ public enum NoPropagationEngine implements IPropagationEngine {
         // METHODS
         //***********************************************************************************
 
+        private final ContradictionException e = new ContradictionException();
+
         @Override
         public boolean isInitialized() {
             return false;
@@ -64,16 +66,18 @@ public enum NoPropagationEngine implements IPropagationEngine {
 
         @Override
         public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-            throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
+            /*throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
                     "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
-                    "before starting resolution.");
+                  "before starting resolution.");*/
+            throw e.set(cause, variable, message);
         }
 
         @Override
         public ContradictionException getContradictionException() {
-            throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
+            return e;
+            /*throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
                     "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
-                    "before starting resolution.");
+                  "before starting resolution.");*/
         }
 
         @Override
@@ -85,6 +89,11 @@ public enum NoPropagationEngine implements IPropagationEngine {
         }
 
         @Override
+        public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+
+        }
+
+        @Override
         public void onPropagatorExecution(Propagator propagator) {
         }
 
@@ -93,7 +102,11 @@ public enum NoPropagationEngine implements IPropagationEngine {
         }
 
         @Override
-        public void dynamicAddition(Constraint c, boolean cut) {
+        public void dynamicAddition(Constraint c, boolean permanent) {
+        }
+
+        @Override
+        public void dynamicDeletion(Constraint c) {
         }
     };
 }

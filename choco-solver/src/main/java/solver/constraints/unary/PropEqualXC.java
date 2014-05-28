@@ -26,7 +26,6 @@
  */
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -46,7 +45,6 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropEqualXC extends Propagator<IntVar> {
 
     private final int constant;
@@ -58,12 +56,12 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+        return EventType.INSTANTIATE.mask;// TODO shouldn't it react to everythink (in case of views...)
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[0].instantiateTo(constant, aCause) || vars[0].instantiated()) {// view precaution
+        if (vars[0].instantiateTo(constant, aCause) || vars[0].isInstantiated()) {// view precaution
             setPassive();
         }
     }
@@ -75,7 +73,7 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (vars[0].instantiatedTo(constant)) {
+        if (vars[0].isInstantiatedTo(constant)) {
             return ESat.TRUE;
         } else if (vars[0].contains(constant)) {
             return ESat.UNDEFINED;

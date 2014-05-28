@@ -35,7 +35,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -51,7 +50,7 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
+public class MinusView extends IntView {
 
 
     public MinusView(final IntVar var, Solver solver) {
@@ -63,7 +62,6 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
-//            throw new UnsupportedOperationException();
         }
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
@@ -88,14 +86,13 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
                 e = EventType.DECUPP;
             }
             if (done) {
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
                 return true;
             }
         }
-//        }
         return false;
     }
 
@@ -130,7 +127,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateUpperBound(-value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -147,7 +144,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateLowerBound(-value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -155,7 +152,6 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
                 return true;
             }
         }
-//        }
         return false;
     }
 
@@ -165,9 +161,14 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(-value);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(-value);
     }
+
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
 
     @Override
     public int getValue() {

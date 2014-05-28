@@ -28,10 +28,8 @@
 package solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import util.ESat;
 
 /**
  * <br/>
@@ -41,24 +39,23 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class Scalar extends IntConstraint<IntVar> {
+public class Scalar extends Constraint {
 
     final int[] coeffs;
     final int b;
 
 
-    protected Scalar(IntVar[] vars, int[] coeffs, int pos, int b, Solver solver) {
-        super(vars, solver);
+    protected Scalar(IntVar[] vars, int[] coeffs, int pos, int b) {
+        super("Scalar",new PropScalarEq(vars, coeffs, pos, b));
         this.coeffs = coeffs.clone();
         this.b = b;
-		setPropagators(new PropScalarEq(vars, coeffs, pos, b));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static Scalar build(IntVar[] vars, int[] coeffs, Solver solver) {
+    private static Scalar build(IntVar[] vars, int[] coeffs) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
         for (int i = 0; i < vars.length; i++) {
             map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
@@ -82,7 +79,7 @@ public class Scalar extends IntConstraint<IntVar> {
             }
             map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
-        return new Scalar(tmpV, tmpC, b, 0, solver);
+        return new Scalar(tmpV, tmpC, b, 0);
     }
 
     /**
@@ -92,40 +89,19 @@ public class Scalar extends IntConstraint<IntVar> {
      * @param coeffs
      * @param b
      * @param c
-     * @param solver
      * @return a scalar product constraint
      */
-    public static Scalar buildScalar(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
+    public static Scalar buildScalar(IntVar[] vars, int[] coeffs, IntVar b, int c) {
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[x.length - 1] = b;
         int[] cs = new int[coeffs.length + 1];
         System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
         cs[cs.length - 1] = -c;
-        return build(x, cs, solver);
+        return build(x, cs);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int sum = 0;
-        for (int i = 0; i < tuple.length; i++) {
-            sum += coeffs[i] * tuple[i];
-        }
-        return ESat.eval(sum == b);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder linComb = new StringBuilder(20);
-        for (int i = 0; i < coeffs.length; i++) {
-            linComb.append(coeffs[i]).append('*').append(vars[i].getName()).append(coeffs[i] < coeffs.length ? " +" : " ");
-        }
-        linComb.append(" = ");
-        linComb.append(b);
-        return linComb.toString();
-    }
 
     public static int[] getScalarBounds(IntVar[] vars, int[] coefs) {
         int[] ext = new int[2];

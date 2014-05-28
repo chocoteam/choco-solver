@@ -27,13 +27,11 @@
 
 package solver.constraints.unary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -43,7 +41,6 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotMemberBound extends Propagator<IntVar> {
 
     final int lb, ub;
@@ -67,14 +64,6 @@ public class PropNotMemberBound extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         propagate(0);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override

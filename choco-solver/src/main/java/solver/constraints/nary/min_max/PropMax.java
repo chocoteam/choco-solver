@@ -58,7 +58,7 @@ public class PropMax extends Propagator<IntVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		int idx = -1;
-		int lb = vars[n].getLB();
+		int lb = vars[n].getLB()-1;
 		int ub = lb;
 		// update max
 		for(int i=0; i<n; i++){
@@ -83,11 +83,6 @@ public class PropMax extends Propagator<IntVar> {
 	}
 
 	@Override
-	public void propagate(int idx, int mask) throws ContradictionException {
-		propagate(0);
-	}
-
-	@Override
 	public ESat isEntailed() {
 		int ub = vars[n].getUB();
 		for(int i=0; i<n; i++){
@@ -100,9 +95,9 @@ public class PropMax extends Propagator<IntVar> {
 				return ESat.UNDEFINED;
 			}
 		}
-		if(vars[n].instantiated()){
+		if(vars[n].isInstantiated()){
 			for(int i=0; i<n; i++){
-				if(vars[i].instantiatedTo(ub)){
+				if(vars[i].isInstantiatedTo(ub)){
 					return ESat.TRUE;
 				}
 			}

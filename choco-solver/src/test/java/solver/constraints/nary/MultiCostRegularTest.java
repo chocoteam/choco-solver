@@ -118,7 +118,7 @@ public class MultiCostRegularTest {
         ICostAutomaton costAutomaton = CostAutomaton.makeMultiResources(auto, costMatrix, bounds);
         solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, costAutomaton));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        solver.set(IntStrategyFactory.random(ArrayUtils.append(sequence, bounds), seed));
+        solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(sequence, bounds), seed));
         return solver;
     }
 

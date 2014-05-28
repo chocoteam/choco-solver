@@ -46,24 +46,16 @@ public interface IGraphDeltaMonitor extends IDeltaMonitor {
     public static enum Default implements IGraphDeltaMonitor {
         NONE() {
             @Override
-            public void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException {
-            }
+            public void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException {}
 
             @Override
-            public void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException {
-            }
+            public void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException {}
 
             @Override
-            public void freeze() {
-            }
+            public void freeze() {}
 
             @Override
-            public void unfreeze() {
-            }
-
-            @Override
-            public void clear() {
-            }
+            public void unfreeze() {}
         }
     }
 }

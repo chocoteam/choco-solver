@@ -27,6 +27,7 @@
 
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -38,36 +39,11 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Smallest implements VariableSelector<IntVar> {
-
-    /* list of variables */
-    IntVar[] variables;
-
-    /* index of the smallest domain variable */
-    int small_idx;
-
-    public Smallest(IntVar[] variables) {
-        this.variables = variables.clone();
-        small_idx = 0;
-
-    }
+public class Smallest implements VariableSelector<IntVar>, VariableEvaluator<IntVar> {
 
     @Override
-    public IntVar[] getScope() {
-        return variables;
-    }
-
-    @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
-        int small_idx = 0;
+    public IntVar getVariable(IntVar[] variables) {
+        int small_idx = -1;
         int small_value = Integer.MAX_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
@@ -77,11 +53,11 @@ public class Smallest implements VariableSelector<IntVar> {
                 small_idx = idx;
             }
         }
-        this.small_idx = small_idx;
+        return small_idx > -1 ? variables[small_idx] : null;
     }
 
     @Override
-    public IntVar getVariable() {
-        return variables[small_idx];
+    public double evaluate(IntVar variable) {
+        return variable.getLB();
     }
 }

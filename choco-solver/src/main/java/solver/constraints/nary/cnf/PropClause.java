@@ -88,7 +88,7 @@ public class PropClause extends Propagator<BoolVar> {
         BoolVar bv;
         for (; i < nbvars; i++) {
             bv = vars[i];
-            if (bv.instantiated()) {
+            if (bv.isInstantiated()) {
                 if (bv.getValue() == 1) {
                     setPassive();
                     return;
@@ -121,7 +121,7 @@ public class PropClause extends Propagator<BoolVar> {
             int i = 0, wl = 0, cnt = 0;
             while (i < n && wl < 2) {
                 BoolVar bv = vars[i];
-                if (bv.instantiated()) {
+                if (bv.isInstantiated()) {
                     if (bv.getValue() == 1) {
                         setPassive();
                         return;
@@ -171,7 +171,7 @@ public class PropClause extends Propagator<BoolVar> {
     public ESat isEntailed() {
        int cnt = vars.length;
         for (int i = 0; i < nbvars; i++) {
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 if (vars[i].getValue() == 1) {
                     return ESat.TRUE;
                 } else {

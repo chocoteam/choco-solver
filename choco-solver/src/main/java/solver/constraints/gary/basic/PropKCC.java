@@ -30,7 +30,6 @@ package solver.constraints.gary.basic;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
@@ -120,20 +119,15 @@ public class PropKCC extends Propagator {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVENODE.mask + EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         env_CC_finder.findAllCC();
         int ee = env_CC_finder.getNBCC();
         if (k.getUB() < ee) {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             if (k.contains(ee)) {
-                if (k.instantiated()) {
+                if (k.isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;

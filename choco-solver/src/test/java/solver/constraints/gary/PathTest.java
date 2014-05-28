@@ -30,6 +30,7 @@ package solver.constraints.gary;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.Propagator;
 import solver.constraints.gary.arborescences.PropArborescence;
 import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.gary.degree.PropNodeDegree_AtMost;
@@ -41,6 +42,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
 import util.objects.graphs.Orientation;
 import util.objects.setDataStructures.SetType;
+import util.tools.ArrayUtils;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -58,28 +60,29 @@ public class PathTest {
                 g.getEnvelopGraph().addArc(i, j);
             }
         }
-        Constraint gc = new Constraint(s);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
             succs[i] = preds[i] = 1;
         }
         succs[n - 1] = preds[0] = 0;
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, Orientation.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, Orientation.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, Orientation.PREDECESSORS, preds));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, Orientation.PREDECESSORS, preds));
-        if (path) {
-            gc.addPropagators(new PropPathNoCycle(g, 0, n - 1));
+		Propagator[] props = new Propagator[]{
+				new PropNodeDegree_AtLeast(g, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtMost(g, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtLeast(g, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost(g, Orientation.PREDECESSORS, preds)
+		};
+		if (path) {
+			props = ArrayUtils.append(props,new Propagator[]{new PropPathNoCycle(g, 0, n - 1)});
         }
         if (arbo) {
-            gc.addPropagators(new PropArborescence(g, 0, true));
+			props = ArrayUtils.append(props,new Propagator[]{new PropArborescence(g, 0, true)});
         }
         if (RG) {
-            gc.addPropagators(new PropReducedPath(g));
+			props = ArrayUtils.append(props,new Propagator[]{new PropReducedPath(g)});
         }
         AbstractStrategy strategy = GraphStrategyFactory.graphLexico(g);
-        s.post(gc);
+        s.post(new Constraint("GTest",props));
         s.set(strategy);
         if (nbMaxSols > 0) {
             SearchMonitorFactory.limitSolution(s, nbMaxSols);

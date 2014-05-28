@@ -36,12 +36,13 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IDelta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.impl.AbstractVariable;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueBoundIterator;
@@ -59,23 +60,21 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extends AbstractVariable<ID, IntView<ID, IV>>
-        implements IView<ID>, IntVar<ID> {
+public abstract class IntView extends AbstractVariable implements IView, IntVar {
 
-    protected final IV var;
+    protected final IntVar var;
 
-    protected ID delta;
+    protected IntDelta delta;
 
     protected DisposableValueIterator _viterator;
 
     protected DisposableRangeIterator _riterator;
 
-    public IntView(String name, IV var, Solver solver) {
+    public IntView(String name, IntVar var, Solver solver) {
         super(name, solver);
         this.var = var;
-        this.delta = (ID) NoDelta.singleton;
+        this.delta = NoDelta.singleton;
         this.var.subscribeView(this);
-        this.solver.associates(this);
     }
 
     @Override
@@ -85,10 +84,11 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public final int getTypeAndKind() {
-        return Variable.VIEW | var.getTypeAndKind();
+    public int getTypeAndKind() {
+        return Variable.VIEW | Variable.INT;
     }
 
+	@Override
     public IntVar getVariable() {
         return var;
     }
@@ -104,11 +104,12 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public boolean instantiated() {
-        return var.instantiated();
+    public boolean isInstantiated() {
+        return var.isInstantiated();
     }
 
-    public ID getDelta() {
+	@Override
+    public IDelta getDelta() {
         return var.getDelta();
     }
 
@@ -122,17 +123,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
         return this.getId() - o.getId();
     }
 
-    @Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
-            //records.forEach(afterModification.set(this, event, cause));
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
+	@Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -141,7 +132,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyPropagators(evt, cause);
+        notifyPropagators(evt, this);
     }
 
     @Override
@@ -162,7 +153,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
@@ -180,6 +170,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
         return _viterator;
     }
 
+	@Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);

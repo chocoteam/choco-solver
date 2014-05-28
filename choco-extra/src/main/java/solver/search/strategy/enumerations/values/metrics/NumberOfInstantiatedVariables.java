@@ -61,7 +61,7 @@ public class NumberOfInstantiatedVariables extends Metric {
     public void doUpdate() {
         value = 0;
         for (int i = 0; i < variables.length; i++) {
-            if (variables[i].instantiated()) {
+            if (variables[i].isInstantiated()) {
                 value++;
             }
         }

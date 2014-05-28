@@ -132,7 +132,7 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
                 return ESat.FALSE;
             }
         }
-        if (!g.instantiated()) {
+        if (!g.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;

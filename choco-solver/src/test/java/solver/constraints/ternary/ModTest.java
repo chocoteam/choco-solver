@@ -26,7 +26,7 @@
  */
 package solver.constraints.ternary;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -60,7 +60,7 @@ public class ModTest extends AbstractTernaryTest {
         solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
         try {
             solver.propagate();
-            Assert.assertTrue(res.instantiatedTo(1));
+            Assert.assertTrue(res.isInstantiatedTo(1));
         } catch (ContradictionException e) {
             Assert.fail();
         }

@@ -27,15 +27,15 @@
 
 package solver.variables;
 
+import solver.Configuration;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.real.IntEqRealConstraint;
 import solver.exception.SolverException;
-import solver.variables.fast.BitsetArrayIntVarImpl;
-import solver.variables.fast.BitsetIntVarImpl;
-import solver.variables.fast.BooleanBoolVarImpl;
-import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.impl.*;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
 import util.tools.StringUtils;
@@ -58,6 +58,18 @@ public class VariableFactory {
 
     private static final String CSTE_NAME = "cste -- ";
 
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from underflow, but may avoid it, somehow.
+     */
+    public static final int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
+
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from overflow, but may avoid it, somehow.
+     */
+    public static final int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
+
     //TODO : build domain in Variable
 
     //*************************************************************************************
@@ -72,9 +84,7 @@ public class VariableFactory {
      * @return a BoolVar
      */
     public static BoolVar bool(String NAME, Solver SOLVER) {
-        BooleanBoolVarImpl var = new BooleanBoolVarImpl(NAME, SOLVER);
-        //var.setHeuristicVal(HeuristicValFactory.presetI(var));
-        return var;
+        return new BoolVarImpl(NAME, SOLVER);
     }
 
     /**
@@ -126,7 +136,7 @@ public class VariableFactory {
         if (MIN == MAX) {
             return fixed(NAME, MIN, SOLVER);
         } else if (MIN == 0 && MAX == 1) {
-            return new BooleanBoolVarImpl(NAME, SOLVER);
+            return new BoolVarImpl(NAME, SOLVER);
         } else {
             return new IntervalIntVarImpl(NAME, MIN, MAX, SOLVER);
         }
@@ -186,7 +196,7 @@ public class VariableFactory {
         if (MIN == MAX) {
             return fixed(NAME, MIN, SOLVER);
         } else if (MIN == 0 && MAX == 1) {
-            return new BooleanBoolVarImpl(NAME, SOLVER);
+            return new BoolVarImpl(NAME, SOLVER);
         } else {
             return new BitsetIntVarImpl(NAME, MIN, MAX, SOLVER);
         }
@@ -239,12 +249,13 @@ public class VariableFactory {
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
     public static IntVar enumerated(String NAME, int[] VALUES, Solver SOLVER) {
-		VALUES = sortIfNot(VALUES);
+        VALUES = sortIfNot(VALUES.clone());
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else {
-            if ((VALUES[VALUES.length - 1] - VALUES[0]) / VALUES.length > 5) {
+			int gap = VALUES[VALUES.length - 1] - VALUES[0];
+            if (gap > 30 && gap/VALUES.length > 5) {
                 return new BitsetArrayIntVarImpl(NAME, VALUES, SOLVER);
             } else {
                 return new BitsetIntVarImpl(NAME, VALUES, SOLVER);
@@ -293,7 +304,6 @@ public class VariableFactory {
     // REAL VARIABLES
     //*************************************************************************************
 
-
     /**
      * Build a real variable with a bounded domain initialized to [MIN,MAX]
      *
@@ -306,9 +316,7 @@ public class VariableFactory {
      */
     public static RealVar real(String NAME, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         checkRealVar(NAME, MIN, MAX);
-        RealVar var = new RealVarImpl(NAME, MIN, MAX, PRECISION, SOLVER);
-        //var.setHeuristicVal(HeuristicValFactory.presetI(var));
-        return var;
+        return new RealVarImpl(NAME, MIN, MAX, PRECISION, SOLVER);
     }
 
     /**
@@ -520,50 +528,51 @@ public class VariableFactory {
         }
     }
 
-	/**
-	 * Sorts the input array if it is not already sorted,
-	 * and removes multiple occurrences of the same value
-	 * @param values
-	 * @return a sorted array containing each value of values exactly once
-	 */
-	private static int[] sortIfNot(int[] values) {
-		int n = values.length;
-		boolean sorted = true;
-		boolean noDouble = true;
-		for(int i=0;i<n-1 && sorted;i++){
-			if(values[i]>values[i+1]){
-				sorted = false;
-				noDouble = false;// cannot be sure
-			}
-			if(values[i]==values[i+1]){
-				noDouble = false;
-			}
-		}
-		if(!sorted){
-			Arrays.sort(values);
-		}
-		if(!noDouble){
-			int nbVals = 1;
-			for(int i=0;i<n-1;i++){
-				assert values[i]<=values[i+1];
-				if(values[i]<values[i+1]){
-					nbVals++;
-				}
-			}
-			if(nbVals<n){
-				int[] correctValues = new int[nbVals];
-				int idx=0;
-				for(int i=0;i<n-1;i++){
-					if(values[i]<values[i+1]){
-						correctValues[idx++] = values[i];
-					}
-				}
-				correctValues[idx++] = values[n-1];
-				return correctValues;
-			}
-		}
-		return values;
-	}
+    /**
+     * Sorts the input array if it is not already sorted,
+     * and removes multiple occurrences of the same value
+     *
+     * @param values
+     * @return a sorted array containing each value of values exactly once
+     */
+    private static int[] sortIfNot(int[] values) {
+        int n = values.length;
+        boolean sorted = true;
+        boolean noDouble = true;
+        for (int i = 0; i < n - 1 && sorted; i++) {
+            if (values[i] > values[i + 1]) {
+                sorted = false;
+                noDouble = false;// cannot be sure
+            }
+            if (values[i] == values[i + 1]) {
+                noDouble = false;
+            }
+        }
+        if (!sorted) {
+            Arrays.sort(values);
+        }
+        if (!noDouble) {
+            int nbVals = 1;
+            for (int i = 0; i < n - 1; i++) {
+                assert values[i] <= values[i + 1];
+                if (values[i] < values[i + 1]) {
+                    nbVals++;
+                }
+            }
+            if (nbVals < n) {
+                int[] correctValues = new int[nbVals];
+                int idx = 0;
+                for (int i = 0; i < n - 1; i++) {
+                    if (values[i] < values[i + 1]) {
+                        correctValues[idx++] = values[i];
+                    }
+                }
+                correctValues[idx++] = values[n - 1];
+                return correctValues;
+            }
+        }
+        return values;
+    }
 
     /**
      * Checks domain range.
@@ -616,26 +625,59 @@ public class VariableFactory {
         return SOLVER.ONE;
     }
 
+    //*************************************************************************************
+    // CONSTANTS
+    //*************************************************************************************
 
     /**
      * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
      * <p/>
-     * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
+     * <b>Beware: if the name start with "cste -- ", the resulting variable will be cached.</b>
      *
      * @param NAME   name of the constant
      * @param VALUE  its value
      * @param SOLVER the solver to build the integer variable in.
      */
     public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
+        if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
-        ConstantView cste = new ConstantView(NAME, VALUE, SOLVER);
-        if (NAME.equals(Integer.toString(VALUE))) {
+        FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+        if (NAME.equals(CSTE_NAME + VALUE)) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
         return cste;
     }
+
+    /**
+     * get a specific boolean variable, whom domain is reduced to the singleton {VALUE}.
+     * This variable is unnamed as it is actually a solver constant
+     *
+     * @param VALUE  its value
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static IntVar fixed(boolean VALUE, Solver SOLVER) {
+        if (VALUE) {
+            return SOLVER.ONE;
+        } else {
+            return SOLVER.ZERO;
+        }
+    }
+
+    /**
+     * Create a specific set variable, named NAME whom domain is reduced to the singleton {VALUE}.
+     *
+     * @param NAME   name of the constant
+     * @param VALUE  its value, a set of integers (duplicates will be removed)
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static SetVar fixed(String NAME, int[] VALUE, Solver SOLVER) {
+        return new FixedSetVarImpl(NAME, VALUE, SOLVER);
+    }
+
+    //*************************************************************************************
+    // VIEWS
+    //*************************************************************************************
 
     /**
      * Create an offset view based on VAR, such that, the resulting view is defined on VAR + CSTE.
@@ -650,31 +692,76 @@ public class VariableFactory {
         if (CSTE == 0) {
             return VAR;
         }
-        return new OffsetView(VAR, CSTE, VAR.getSolver());
+		if(Configuration.ENABLE_VIEWS) {
+			return new OffsetView(VAR, CSTE, VAR.getSolver());
+		}else{
+			Solver s = VAR.getSolver();
+			int lb = VAR.getLB()+CSTE;
+			int ub = VAR.getUB()+CSTE;
+			String name = "("+VAR.getName()+"+"+CSTE+")";
+			IntVar ov;
+			if(VAR.hasEnumeratedDomain()){
+				ov = enumerated(name,lb,ub,s);
+			}else{
+				ov = bounded(name,lb,ub,s);
+			}
+			s.post(ICF.arithm(ov,"-",VAR,"=",CSTE));
+			return ov;
+		}
     }
 
-    /**
-     * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
-     * <p/>
-     * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-     * Any operations on this will transformed to operations on VAR following the offset rules.
-     *
-     * @param VAR an integer variable
-     */
-    public static IntVar eq(IntVar VAR) {
-        if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
-            return eqbool((BoolVar) VAR);
-        } else {
-            return eqint(VAR);
-        }
-    }
+	/**
+	 * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
+	 * <p/>
+	 * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
+	 * Any operations on this will transformed to operations on VAR following the offset rules.
+	 *
+	 * @param VAR an integer variable
+	 */
+	public static IntVar eq(IntVar VAR) {
+		// this part should remain (at least for Propagator.checkVariable())
+		if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
+			return eqbool((BoolVar) VAR);
+		} else {
+			return eqint(VAR);
+		}
+	}
+
+	/**
+	 * Create a kind of clone of VAR such that, the resulting view is defined on VAR.
+	 * <p/>
+	 * The resulting BoolVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
+	 * Any operations on this will transformed to operations on VAR.
+	 *
+	 * @param VAR an integer variable
+	 */
+	public static BoolVar eq(BoolVar VAR) {
+		return eqbool(VAR);
+	}
 
     private static IntVar eqint(IntVar ivar) {
-        return new EqView(ivar, ivar.getSolver());
+		if(Configuration.ENABLE_VIEWS) {
+			return new EqView(ivar, ivar.getSolver());
+		}else{
+			IntVar ov = ivar.duplicate();
+			ivar.getSolver().post(ICF.arithm(ov,"=",ivar));
+			return ov;
+		}
     }
 
-    private static BoolVar eqbool(BoolVar boolVar) {
-        return new BoolEqView(boolVar, boolVar.getSolver());
+    private static BoolVar eqbool(BoolVar BOOL) {
+		if(Configuration.ENABLE_VIEWS){
+			return new BoolEqView(BOOL, BOOL.getSolver());
+
+		}else{
+			BoolVar ov = BOOL.duplicate();
+			BOOL.getSolver().post(ICF.arithm(ov, "=", BOOL));
+			if(BOOL.hasNot()){
+				ov._setNot(BOOL.not());
+			}
+			ov.setNot(BOOL.isNot());
+			return ov;
+		}
     }
 
     /**
@@ -686,7 +773,21 @@ public class VariableFactory {
      * @param BOOL a boolean variable.
      */
     public static BoolVar not(BoolVar BOOL) {
-        return new BoolNotView(BOOL, BOOL.getSolver());
+		if(Configuration.ENABLE_VIEWS) {
+			return new BoolNotView(BOOL, BOOL.getSolver());
+		}else{
+			if(BOOL.hasNot()){
+				return BOOL.not();
+			}else {
+				Solver s = BOOL.getSolver();
+				BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
+				s.post(ICF.arithm(ov, "!=", BOOL));
+				BOOL._setNot(ov);
+				ov._setNot(BOOL);
+				ov.setNot(true);
+				return ov;
+			}
+		}
     }
 
     /**
@@ -699,7 +800,22 @@ public class VariableFactory {
      * @param VAR an integer variable
      */
     public static IntVar minus(IntVar VAR) {
-        return new MinusView(VAR, VAR.getSolver());
+		if(Configuration.ENABLE_VIEWS) {
+			return new MinusView(VAR, VAR.getSolver());
+		}else{
+			Solver s = VAR.getSolver();
+			int ub = -VAR.getLB();
+			int lb = -VAR.getUB();
+			String name = "-("+VAR.getName()+")";
+			IntVar ov;
+			if(VAR.hasEnumeratedDomain()){
+				ov = enumerated(name,lb,ub,s);
+			}else{
+				ov = bounded(name,lb,ub,s);
+			}
+			s.post(ICF.arithm(ov,"+",VAR,"=",0));
+			return ov;
+		}
     }
 
     /**
@@ -730,7 +846,22 @@ public class VariableFactory {
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
-                var = new ScaleView(VAR, CSTE, VAR.getSolver());
+				if(Configuration.ENABLE_VIEWS) {
+					var = new ScaleView(VAR, CSTE, VAR.getSolver());
+				}else{
+					Solver s = VAR.getSolver();
+					int lb = VAR.getLB()*CSTE;
+					int ub = VAR.getUB()*CSTE;
+					String name = "("+VAR.getName()+"*"+CSTE+")";
+					IntVar ov;
+					if(VAR.hasEnumeratedDomain()){
+						ov = enumerated(name,lb,ub,s);
+					}else{
+						ov = bounded(name,lb,ub,s);
+					}
+					s.post(ICF.times(VAR, CSTE, ov));
+					return ov;
+				}
             }
             return var;
         }
@@ -750,21 +881,23 @@ public class VariableFactory {
      * @param VAR an integer variable.
      */
     public static IntVar abs(IntVar VAR) {
-        if (VAR.instantiated()) {
+        if (VAR.isInstantiated()) {
             return fixed(Math.abs(VAR.getValue()), VAR.getSolver());
         } else if (VAR.getLB() >= 0) {
             return VAR;
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-			Solver s = VAR.getSolver();
+            Solver s = VAR.getSolver();
+			int ub = Math.max(-VAR.getLB(), VAR.getUB());
+			String name = "|"+VAR.getName()+"|";
             IntVar abs;
-            if(VAR.hasEnumeratedDomain()){
-                abs = enumerated(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
-            }else{
-                abs = bounded(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            if (VAR.hasEnumeratedDomain()) {
+                abs = enumerated(name, 0, ub, s);
+            } else {
+                abs = bounded(name, 0, ub, s);
             }
-			s.post(IntConstraintFactory.absolute(abs,VAR));
+            s.post(IntConstraintFactory.absolute(abs, VAR));
             return abs;
         }
     }
@@ -778,7 +911,16 @@ public class VariableFactory {
      * @param PRECISION used to evaluate the instantiation of the view.
      */
     public static RealVar real(IntVar VAR, double PRECISION) {
-        return new RealView(VAR, PRECISION);
+		if(Configuration.ENABLE_VIEWS) {
+			return new RealView(VAR, PRECISION);
+		}else{
+			Solver s = VAR.getSolver();
+			double lb = VAR.getLB();
+			double ub = VAR.getUB();
+			RealVar rv = real("(real)" + VAR.getName(), lb, ub, PRECISION, s);
+			s.post(new IntEqRealConstraint(VAR,rv,PRECISION));
+			return rv;
+		}
     }
 
     /**
@@ -791,10 +933,20 @@ public class VariableFactory {
      * @return
      */
     public static RealVar[] real(IntVar[] VARS, double PRECISION) {
-        RealVar[] reals = new RealVar[VARS.length];
-        for (int i = 0; i < VARS.length; i++) {
-            reals[i] = real(VARS[i], PRECISION);
-        }
-        return reals;
+		RealVar[] reals = new RealVar[VARS.length];
+		if(Configuration.ENABLE_VIEWS) {
+			for (int i = 0; i < VARS.length; i++) {
+				reals[i] = real(VARS[i], PRECISION);
+			}
+		}else{
+			Solver s = VARS[0].getSolver();
+			for (int i = 0; i < VARS.length; i++) {
+				double lb = VARS[i].getLB();
+				double ub = VARS[i].getUB();
+				reals[i] = real("(real)" + VARS[i].getName(), lb, ub, PRECISION, s);
+			}
+			s.post(new IntEqRealConstraint(VARS,reals,PRECISION));
+		}
+		return reals;
     }
 }

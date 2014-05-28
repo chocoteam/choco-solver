@@ -66,7 +66,6 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar> {
     /**
      * @param graph
      * @param sink  root of the antiarborescence
-     * @PropAnn(tested = {BENCHMARK,CORRECTION})
      * <p/>
      * Ensures that graph is an antiarborescence rooted in node sink
      */

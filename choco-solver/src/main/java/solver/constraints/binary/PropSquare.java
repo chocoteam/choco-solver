@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -48,7 +47,6 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
@@ -61,15 +59,6 @@ public class PropSquare extends Propagator<IntVar> {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
         rem_proc = new RemProc(this);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        } else {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-        }
     }
 
     @Override
@@ -123,8 +112,8 @@ public class PropSquare extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (vars[0].getUB() < 0) {
             return ESat.FALSE;
-        } else if (vars[0].instantiated()) {
-            if (vars[1].instantiated()) {
+        } else if (vars[0].isInstantiated()) {
+            if (vars[1].isInstantiated()) {
                 return ESat.eval(vars[0].getValue() == sqr(vars[1].getValue()));
             } else if (vars[1].getDomainSize() == 2 &&
                     vars[1].contains(-floor_sqrt(vars[0].getValue())) &&

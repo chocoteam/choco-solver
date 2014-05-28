@@ -84,7 +84,11 @@ public abstract class AbstractTernaryTest {
         }
         Constraint div = make(vars, s);
         s.post(div);
-        s.set(IntStrategyFactory.random(vars, seed));
+		if(bounded){
+			s.set(IntStrategyFactory.random_bound(vars, seed));
+		}else{
+			s.set(IntStrategyFactory.random_value(vars, seed));
+		}
         return s;
     }
 

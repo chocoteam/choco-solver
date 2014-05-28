@@ -25,21 +25,18 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 07/06/13
- * Time: 14:18
- */
-
 package solver.search.solution;
 
-import solver.search.loop.monitors.IMonitorSolution;
+import java.io.Serializable;
+import java.util.List;
 
-import java.util.LinkedList;
+/**
+ * Interface to record and store solutions of a problem
+ */
+public interface ISolutionRecorder extends Serializable{
 
-public interface ISolutionRecorder extends IMonitorSolution {
-
+	/** @return the last recorded solution, presumably the best one. Returns null if no solution has been found */
 	public Solution getLastSolution();
-	public LinkedList<Solution> getAllSolutions();
+	/** @return a list of all recorded solutions */
+	public List<Solution> getSolutions();
 }

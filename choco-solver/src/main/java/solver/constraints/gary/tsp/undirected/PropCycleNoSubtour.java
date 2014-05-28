@@ -34,7 +34,7 @@
 
 package solver.constraints.gary.tsp.undirected;
 
-import choco.annotations.PropAnn;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -50,7 +50,6 @@ import util.procedure.PairProcedure;
 /**
  * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case
  */
-@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
     //***********************************************************************************
@@ -82,6 +81,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         e1 = new IStateInt[n];
         e2 = new IStateInt[n];
         size = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             e1[i] = environment.makeInt(i);
             e2[i] = environment.makeInt(i);
@@ -136,7 +136,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         if (!cf.isBiconnected()) {
             return ESat.FALSE;
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

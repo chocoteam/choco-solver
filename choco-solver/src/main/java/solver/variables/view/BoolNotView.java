@@ -33,8 +33,8 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.Variable;
 import solver.variables.VariableFactory;
-import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import util.ESat;
@@ -46,10 +46,13 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
-public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
+public final class BoolNotView extends IntView implements BoolVar {
+
+	protected final BoolVar var;
 
     public BoolNotView(BoolVar var, Solver solver) {
         super("not(" + var.getName() + ")", var, solver);
+		this.var = var;
     }
 
     @Override
@@ -138,9 +141,14 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(1 - value);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(1 - value);
     }
+
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
 
     @Override
     public int getValue() {
@@ -150,14 +158,14 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
 
     @Override
     public int getLB() {
-        if (var.instantiated()) {
+        if (var.isInstantiated()) {
             return getValue();
         } else return 0;
     }
 
     @Override
     public int getUB() {
-        if (var.instantiated()) {
+        if (var.isInstantiated()) {
             return getValue();
         } else return 1;
     }
@@ -208,14 +216,19 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     }
 
     @Override
-    public BoolVar<IEnumDelta> not() {
+    public BoolVar not() {
         return var;
     }
 
     @Override
-    public void _setNot(BoolVar<IEnumDelta> not) {
+    public void _setNot(BoolVar not) {
         assert not == var;
     }
+
+	@Override
+	public boolean hasNot() {
+		return true;
+	}
 
     @Override
     public boolean isLit() {
@@ -226,4 +239,14 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     public boolean isNot() {
         return !var.isNot();
     }
+
+	@Override
+	public void setNot(boolean isNot){
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getTypeAndKind() {
+		return Variable.VIEW | Variable.BOOL;
+	}
 }

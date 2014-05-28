@@ -29,7 +29,6 @@ package solver.constraints.nary.cnf;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.variables.BoolVar;
 import util.ESat;
 
 /**
@@ -38,41 +37,32 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 22 nov. 2010
  */
-public class SatConstraint extends Constraint<BoolVar, PropSat> {
+public class SatConstraint extends Constraint {
 
-    final PropSat miniSat;
+	final PropSat miniSat;
 
-    public SatConstraint(Solver solver) {
-        super(solver);
-        miniSat = new PropSat(solver);
-        setPropagators(miniSat);
+	public SatConstraint(Solver solver) {
+		super("SatConstraint",new PropSat(solver));
+		miniSat = (PropSat) propagators[0];
+	}
 
-    }
+	@Override
+	public ESat isSatisfied() {
+		ESat so = ESat.UNDEFINED;
+		for (int i = 0; i < propagators.length; i++) {
+			so = propagators[i].isEntailed();
+			if (!so.equals(ESat.TRUE)) {
+				return so;
+			}
+		}
+		return so;
+	}
 
-    @Override
-    public ESat isSatisfied() {
-        ESat so = ESat.UNDEFINED;
-        for (int i = 0; i < propagators.length; i++) {
-            so = propagators[i].isEntailed();
-            if (!so.equals(ESat.TRUE)) {
-                return so;
-            }
-        }
-        return so;
-    }
+	public SatSolver getSatSolver() {
+		return miniSat.getSatSolver();
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append('(');
-        for (int p = 0; p < propagators.length; p++) {
-            st.append(propagators[p].toString()).append(") and (");
-        }
-        st.replace(st.length() - 6, st.length(), "");
-        return st.toString();
-    }
-
-    public SatSolver getSatSolver() {
-        return propagators[0].getSatSolver();
-    }
+	public PropSat getPropSat() {
+		return miniSat;
+	}
 }

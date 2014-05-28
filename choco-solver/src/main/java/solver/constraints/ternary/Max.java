@@ -28,11 +28,10 @@
 package solver.constraints.ternary;
 
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.fast.IntervalIntVarImpl;
-import util.ESat;
+import solver.variables.impl.IntervalIntVarImpl;
 import util.tools.StringUtils;
 
 /**
@@ -42,17 +41,10 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class Max extends IntConstraint<IntVar> {
+public class Max extends Constraint {
 
-    IntVar X, Y, Z;
-
-    public Max(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
-//        setPropagators(new PropMax(X, Y, Z, solver, this));
-        setPropagators(new PropMaxBC(X, Y, Z));
+    public Max(IntVar X, IntVar Y, IntVar Z) {
+        super("Max",new PropMaxBC(X, Y, Z));
     }
 
     public static IntVar var(IntVar a, IntVar b) {
@@ -67,15 +59,5 @@ public class Max extends IntConstraint<IntVar> {
             solver.post(IntConstraintFactory.maximum(z, a, b));
             return z;
         }
-    }
-
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] == Math.max(tuple[1], tuple[2]));
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s = MAX(%s, %s)", X.getName(), Y.getName(), Z.getName());
     }
 }

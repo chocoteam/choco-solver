@@ -32,6 +32,8 @@ import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
+import solver.constraints.Propagator;
 import solver.constraints.nary.cnf.PropFalse;
 import solver.constraints.nary.cnf.PropTrue;
 import solver.constraints.nary.cnf.SatConstraint;
@@ -39,21 +41,22 @@ import solver.constraints.real.Ibex;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
-import solver.objective.IntObjectiveManager;
-import solver.objective.RealObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
-import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.search.loop.AbstractSearchLoop;
+import solver.propagation.PropagationTrigger;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import solver.search.loop.ISearchLoop;
+import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
-import solver.search.solution.LastSolutionRecorder;
-import solver.search.solution.Solution;
+import solver.search.solution.*;
+import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 import solver.variables.graph.GraphVar;
-import solver.variables.view.BoolConstantView;
-import solver.variables.view.ConstantView;
+import solver.variables.impl.FixedBoolVarImpl;
+import solver.variables.impl.FixedIntVarImpl;
 import sun.reflect.Reflection;
 import util.ESat;
 
@@ -93,7 +96,7 @@ public class Solver implements Serializable {
     Constraint[] cstrs;
     int cIdx;
 
-    public TIntObjectHashMap<ConstantView> cachedConstants;
+    public TIntObjectHashMap<FixedIntVarImpl> cachedConstants;
 
     /**
      * Environment, based of the search tree (trailing or copying)
@@ -103,7 +106,7 @@ public class Solver implements Serializable {
     /**
      * Search loop of the solver
      */
-    protected AbstractSearchLoop search;
+    protected ISearchLoop search;
 
     protected IPropagationEngine engine;
 
@@ -111,6 +114,8 @@ public class Solver implements Serializable {
      * Solver's measures
      */
     protected final IMeasures measures;
+
+	protected ISolutionRecorder solutionRecorder;
 
     /**
      * Solver name
@@ -137,7 +142,7 @@ public class Solver implements Serializable {
     /**
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
-    public final BoolConstantView ZERO, ONE;
+    public final FixedBoolVarImpl ZERO, ONE;
 
 
     protected SatConstraint minisat;
@@ -161,22 +166,16 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this);
         solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
-        this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
+        this.cachedConstants = new TIntObjectHashMap<FixedIntVarImpl>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = new BoolConstantView("0", 0, this);
-        ONE = new BoolConstantView("1", 1, this);
+        ZERO = new FixedBoolVarImpl("0", 0, this);
+        ONE = new FixedBoolVarImpl("1", 1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
-        TRUE = new Constraint(this) {
-            {
-                setPropagators(new PropTrue(this.getSolver()));
-            }
-        };
-        FALSE = new Constraint(this) {
-            {
-                setPropagators(new PropFalse(this.getSolver()));
-            }
-        };
+        TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
+        FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
+		solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
+        set(ObjectiveManager.SAT());
     }
 
     /**
@@ -197,7 +196,6 @@ public class Solver implements Serializable {
         this(Environments.DEFAULT.make(), name, SolverProperties.DEFAULT);
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,8 +206,19 @@ public class Solver implements Serializable {
      *
      * @return the unique and internal <code>AbstractSearchLoop</code> object.
      */
-    public AbstractSearchLoop getSearchLoop() {
+    public ISearchLoop getSearchLoop() {
         return search;
+    }
+
+    /**
+     * Get the objective manager
+     */
+    public ObjectiveManager getObjectiveManager() {
+        return this.search.getObjectiveManager();
+    }
+
+    public AbstractStrategy getStrategy() {
+        return search.getStrategy();
     }
 
     /**
@@ -251,7 +260,7 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the IntVar only (including BoolVar).
+     * Iterate over the variable of <code>this</code> and build an array that contains the IntVar only (<b>excluding</b> BoolVar).
      * It also contains FIXED variables and VIEWS, if any.
      *
      * @return array of IntVars of <code>this</code>
@@ -260,7 +269,7 @@ public class Solver implements Serializable {
         IntVar[] ivars = new IntVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.INT) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.INT) {
                 ivars[k++] = (IntVar) vars[i];
             }
         }
@@ -277,7 +286,7 @@ public class Solver implements Serializable {
         BoolVar[] bvars = new BoolVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.BOOL) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
                 bvars[k++] = (BoolVar) vars[i];
             }
         }
@@ -294,7 +303,7 @@ public class Solver implements Serializable {
         SetVar[] bvars = new SetVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.SET) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.SET) {
                 bvars[k++] = (SetVar) vars[i];
             }
         }
@@ -311,7 +320,7 @@ public class Solver implements Serializable {
         RealVar[] bvars = new RealVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.REAL) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
                 bvars[k++] = (RealVar) vars[i];
             }
         }
@@ -328,7 +337,7 @@ public class Solver implements Serializable {
         GraphVar[] bvars = new GraphVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.GRAPH) != 0) {
+            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.GRAPH) {
                 bvars[k++] = (GraphVar) vars[i];
             }
         }
@@ -375,13 +384,17 @@ public class Solver implements Serializable {
         return measures;
     }
 
-
     /**
      * Return the explanation engine plugged into <code>this</code>.
      */
     public ExplanationEngine getExplainer() {
         return explainer;
     }
+
+	/**
+	 * Return the solution recorder
+	 */
+	public ISolutionRecorder getSolutionRecorder(){return solutionRecorder;}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
@@ -392,19 +405,32 @@ public class Solver implements Serializable {
      *
      * @param searchLoop the search loop to use
      */
-    public void set(AbstractSearchLoop searchLoop) {
+    public void set(ISearchLoop searchLoop) {
         this.search = searchLoop;
     }
 
     /**
-     * Override the default search strategy to use in <code>this</code>.
+     * Override the default search strategies to use in <code>this</code>.
+     * In case many strategies are given, they will be called in sequence:
+     * The first strategy in parameter is first called to compute a decision, if possible.
+     * If it cannot provide a new decision, the second strategy is called ...
+     * and so on, until the last strategy.
+     * <p/>
      * <p/>
      * <b>BEWARE:</b> the default strategy requires variables to be integer.
      *
-     * @param strategies the search strategy to use.
+     * @param strategies the search strategies to use.
      */
-    public void set(AbstractStrategy strategies) {
-        this.search.set(strategies);
+    public void set(AbstractStrategy... strategies) {
+        if (strategies == null || strategies.length == 0) {
+            throw new UnsupportedOperationException("no search strategy has been specified");
+        }
+        if (strategies.length == 1) {
+            search.set(strategies[0]);
+        } else {
+            search.set(ISF.sequencer(strategies));
+        }
+
     }
 
     /**
@@ -424,6 +450,30 @@ public class Solver implements Serializable {
         this.explainer = explainer;
     }
 
+    /**
+     * Override the objective manager
+     */
+    public void set(ObjectiveManager om) {
+        this.search.setObjectiveManager(om);
+    }
+
+	/**
+	 * Override the solution recorder.
+	 * Beware : multiple recorders which restore a solution might create a conflict.
+	 */
+	public void set(ISolutionRecorder sr){
+		this.solutionRecorder = sr;
+	}
+
+    /**
+     * Put a search monitor to react on search events (solutions, decisions, fails, ...)
+     *
+     * @param sm a search monitor to be plugged in the solver
+     */
+    public void plugMonitor(ISearchMonitor sm) {
+        search.plugSearchMonitor(sm);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,9 +486,9 @@ public class Solver implements Serializable {
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
-        if (getEngine() != null && getEngine().isInitialized()) {
-            throw new SolverException("Solver does not support dynamic variable addition");
-        }
+//        if (getEngine() != null && getEngine().isInitialized()) {
+//            throw new SolverException("Solver does not support dynamic variable addition");
+//        }
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
             vars = new Variable[tmp.length * 2];
@@ -462,7 +512,7 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Post a constraint <code>c</code> in the constraints network of <code>this</code>:
+     * Post permanently a constraint <code>c</code> in the constraints network of <code>this</code>:
      * - add it to the data structure,
      * - set the fixed idx,
      * - checks for restrictions
@@ -470,11 +520,11 @@ public class Solver implements Serializable {
      * @param c a Constraint
      */
     public void post(Constraint c) {
-        _post(false, c);
+        _post(true, c);
     }
 
     /**
-     * Post constraints <code>cs</code> in the constraints network of <code>this</code>:
+     * Post constraints <code>cs</code> permanently in the constraints network of <code>this</code>:
      * - add them to the data structure,
      * - set the fixed idx,
      * - checks for restrictions
@@ -482,25 +532,39 @@ public class Solver implements Serializable {
      * @param cs Constraints
      */
     public void post(Constraint... cs) {
-        _post(false, cs);
+        _post(true, cs);
     }
 
     /**
-     * Post a cut (permanent constraint) during the search has started, .
+     * Post a constraint temporary, that is, it will be unposted upon backtrack.
      *
      * @param c constraint to add
      */
-    public void postCut(Constraint c) {
-        _post(true, c);
+    public void postTemp(Constraint c) throws ContradictionException {
+        _post(false, c);
+        if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
+            throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
+                    "A call to Solver.post(Constraint) is more appropriate.");
+        }
+        for (Propagator propagator : c.getPropagators()) {
+            PropagationTrigger.execute(propagator, engine);
+        }
     }
 
 
-    private void _post(boolean cut, Constraint... cs) {
+    /**
+     * Add constraints to the model.
+     *
+     * @param permanent specify whether the constraints are added permanently (if set to true) or temporary (ie, should be removed on backtrack)
+     * @param cs        list of constraints
+     */
+    private void _post(boolean permanent, Constraint... cs) {
         boolean dynAdd = false;
+        // check if the resolution already started -> if true, dynamic addition
         if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
             dynAdd = true;
         }
-
+        // then store the constraints
         if (cIdx + cs.length >= cstrs.length) {
             int nsize = cstrs.length;
             while (cIdx + cs.length >= nsize) {
@@ -512,16 +576,45 @@ public class Solver implements Serializable {
         }
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
+        // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
-            cs[i].declare();
             if (dynAdd) {
-                engine.dynamicAddition(cs[i], cut);
+                engine.dynamicAddition(cs[i], permanent);
             }
             if (cs[i].isReified()) {
                 try {
                     cs[i].reif().setToTrue(Cause.Null);
                 } catch (ContradictionException e) {
                     throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove permanently the constraint <code>c</code> from the constraint network.
+     *
+     * @param c
+     */
+    public void unpost(Constraint c) {
+        // 1. look for the constraint c
+        int idx = 0;
+        while (idx < cIdx && cstrs[idx] != c) {
+            idx++;
+        }
+        // 2. remove it from the network
+        if (idx < cIdx) {
+            Constraint cm = cstrs[--cIdx];
+            cstrs[idx] = cm;
+            cstrs[cIdx] = null;
+            // 3. check if the resolution already started -> if true, dynamic deletion
+            if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+                engine.dynamicDeletion(c);
+            }
+            // 4. remove the propagators of the constraint from its variables
+            for (Propagator prop : c.getPropagators()) {
+                for (int v = 0; v < prop.getNbVars(); v++) {
+                    prop.getVar(v).unlink(prop);
                 }
             }
         }
@@ -579,13 +672,13 @@ public class Solver implements Serializable {
      * <p/>
      * Possible back values are:
      * <p/>
-     * <br/>- <code>true</code> : the resolution is complete and
+     * <br/>- <code>false</code> : the resolution is complete and
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
-     * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
+     * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
      */
     public boolean hasReachedLimit() {
         return search.hasReachedLimit();
@@ -600,11 +693,9 @@ public class Solver implements Serializable {
      * @return <code>true</code> if and only if a solution has been found.
      */
     public boolean findSolution() {
-        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(true);
         return measures.getSolutionCount() > 0;
     }
-
 
     /**
      * Once {@link Solver#findSolution()} has been called once, other solutions can be found using this method.
@@ -625,7 +716,6 @@ public class Solver implements Serializable {
      * @return the number of found solutions.
      */
     public long findAllSolutions() {
-        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(false);
         return measures.getSolutionCount();
     }
@@ -639,20 +729,88 @@ public class Solver implements Serializable {
      */
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
+            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new IntObjectiveManager(objective, policy, this));
-        search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
+        if (!getObjectiveManager().isOptimization()) {
+            set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
+        }
+		set(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 
+	/**
+	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+	 * Finds and stores all optimal solution
+	 * Restores the best solution found so far (if any)
+	 *
+	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+	 * @param objective the variable to optimize
+	 * @param twoSteps	When set to true it calls two resolution:
+	 *                  	1) It finds and prove the optimum
+	 *                  	2) It reset search and enumerates all solutions of optimal cost
+	 *                  When set to false, it performs only one resolution but which does impose to find strictly
+	 *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
+	 *                  the best cost found so far (but not necessarily optimal).
+	 */
+	public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
+		if(twoSteps){
+			findOptimalSolution(policy,objective);
+			if(getMeasures().getSolutionCount()>0){
+				int opt = getObjectiveManager().getBestSolutionValue().intValue();
+				getEngine().flush();
+				search.reset();
+				post(ICF.arithm(objective, "=", opt));
+				set(new AllSolutionsRecorder(this));
+				findAllSolutions();
+			}
+		}else{
+			if (policy == ResolutionPolicy.SATISFACTION) {
+				throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+			}
+			if (objective == null) {
+				throw new SolverException("No objective variable has been defined");
+			}
+			if (!getObjectiveManager().isOptimization()) {
+				set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
+			}
+			set(new BestSolutionsRecorder(objective));
+			solve(false);
+		}
+	}
 
-    /**
+	/**
+	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+	 * Finds and stores all optimal solution
+	 * Restores the best solution found so far (if any)
+	 *
+	 * @param policy    	optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+	 * @param objectives	the variables to optimize. BEWARE they should all respect the SAME optimization policy
+	 */
+	public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
+		if (policy == ResolutionPolicy.SATISFACTION) {
+			throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+		}
+		if (objectives==null || objectives.length==0) {
+			throw new SolverException("No objective variable has been defined");
+		}
+		if (objectives.length==1) {
+			throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
+		}
+		// BEWARE the usual optimization manager is only defined for mono-objective optimization
+		// so we use a satisfaction manager by default (it does nothing)
+		if (getObjectiveManager().isOptimization()) {
+			set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
+		}
+		set(new ParetoSolutionsRecorder(policy,objectives));
+		solve(false);
+	}
+
+	/**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the best solution found so far (if any)
+     * Restores the last solution found so far (if any)
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
@@ -664,8 +822,10 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this, precision));
-        search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
+        if (!getObjectiveManager().isOptimization()) {
+            set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
+        }
+        set(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 
@@ -674,7 +834,7 @@ public class Solver implements Serializable {
      */
     protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new SevenQueuesPropagatorEngine(this));
+            this.set(new TwoBucketPropagationEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
@@ -687,36 +847,10 @@ public class Solver implements Serializable {
      * @throws ContradictionException
      */
     public void propagate() throws ContradictionException {
-//        assert isValid();
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new SevenQueuesPropagatorEngine(this));
+            this.set(new TwoBucketPropagationEngine(this));
         }
         engine.propagate();
-    }
-
-    /**
-     * Return, whether or not, the current CSP is satisfied.
-     * <p/>
-     * Pre-requisite: this method assumes that all variables are instantiated.
-     * <p/>
-     * Otherwise, consider calling {@link Solver#isEntailed()}.
-     * <p/>
-     * Given the current assignments, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     */
-    public ESat isSatisfied() {
-        ESat check = ESat.TRUE;
-        for (int c = 0; c < cIdx; c++) {
-            ESat satC = cstrs[c].isSatisfied();
-            if (!ESat.TRUE.equals(satC)) {
-                if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
-                    LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
-                }
-                check = ESat.FALSE;
-            }
-        }
-        return check;
     }
 
     /**
@@ -729,10 +863,10 @@ public class Solver implements Serializable {
      * <p/>
      * Presumably, not all variables are instantiated.
      */
-    public ESat isEntailed() {
+    public ESat isSatisfied() {
         int OK = 0;
         for (int c = 0; c < cIdx; c++) {
-            ESat satC = cstrs[c].isEntailed();
+            ESat satC = cstrs[c].isSatisfied();
             if (ESat.FALSE == satC) {
                 if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
                     LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);

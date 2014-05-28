@@ -41,7 +41,6 @@ import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -183,7 +182,7 @@ public class AirPlanePara extends ParallelizedProblem {
     @Override
     public void configureSearch() {
 		if(searchIdx==1){
-			solver.set(ISF.ActivityBased(solver.retrieveIntVars(),0));
+			solver.set(ISF.activity(solver.retrieveIntVars(), 0));
 		}else{
 			Arrays.sort(planes, new Comparator<IntVar>() {
 				@Override
@@ -191,10 +190,10 @@ public class AirPlanePara extends ParallelizedProblem {
 					return maxCost.get(o2) - maxCost.get(o1);
 				}
 			});
-			solver.set(new StrategiesSequencer(solver.getEnvironment(),
-					IntStrategyFactory.random(bVars, seed),
-					IntStrategyFactory.inputOrder_InDomainMin(planes)
-			));
+			solver.set(
+					IntStrategyFactory.random_bound(bVars, seed),
+					IntStrategyFactory.lexico_LB(planes)
+			);
 		}
 		if(searchIdx>=2){
 			IntVar[] ivars = solver.retrieveIntVars();

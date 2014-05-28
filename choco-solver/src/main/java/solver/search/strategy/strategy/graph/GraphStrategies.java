@@ -106,7 +106,7 @@ public class GraphStrategies extends GraphStrategy {
 
     @Override
     public Decision getDecision() {
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return null;
         }
         GraphDecision dec = pool.getE();

@@ -74,18 +74,11 @@ public class PropRegular extends Propagator<IntVar> {
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
+		graph = initGraph(solver.getEnvironment(), vars, automaton);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((EventType.FULL_PROPAGATION.mask & evtmask) != 0) {
-            graph = initGraph(solver.getEnvironment(), vars, automaton);
-        }
         for (int i = 0; i < vars.length; i++) {
             graph.updateSupports(i, vars[i], this);
         }
@@ -111,8 +104,7 @@ public class PropRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int varIdx,
-                          int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         idms[varIdx].freeze();
         idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
         idms[varIdx].unfreeze();

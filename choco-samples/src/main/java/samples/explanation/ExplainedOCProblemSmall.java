@@ -65,7 +65,7 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
     @Override
     public void configureSearch() {
 //        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.lexico_LB(vars));
     }
 
     @Override

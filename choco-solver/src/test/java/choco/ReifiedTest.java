@@ -37,7 +37,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -78,7 +77,7 @@ public class ReifiedTest {
             Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
 
             s.post(LogicalConstraintFactory.ifThenElse(b, cons, oppCons));
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.lexico_LB(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -103,7 +102,7 @@ public class ReifiedTest {
 
         s.post(IntConstraintFactory.sum(new IntVar[]{a, b, c}, VariableFactory.bool("sum", s)));
 
-        s.set(IntStrategyFactory.presetI(new IntVar[]{x, y, z}));
+        s.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y, z}));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -128,7 +127,7 @@ public class ReifiedTest {
             Constraint cstr = LogicalConstraintFactory.ifThenElse(b, cons, oppCons);
 
             s.post(cstr);
-            s.set(IntStrategyFactory.presetI(vars));
+            s.set(IntStrategyFactory.lexico_LB(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -156,7 +155,7 @@ public class ReifiedTest {
 
         s1.post(IntConstraintFactory.alldifferent(vars1, "AC"));
 
-        s1.set(IntStrategyFactory.presetI(vars1));
+        s1.set(IntStrategyFactory.lexico_LB(vars1));
         return s1;
     }
 
@@ -222,7 +221,7 @@ public class ReifiedTest {
             }
         }
 
-        s2.set(IntStrategyFactory.presetI(X));
+        s2.set(IntStrategyFactory.lexico_LB(X));
         return s2;
     }
 
@@ -300,7 +299,6 @@ public class ReifiedTest {
                     IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp)));
         }
 
-        solver.set(new VariableEngine(solver));
         try {
             solver.propagate();
             cp.updateUpperBound(5, Cause.Null);
@@ -471,7 +469,7 @@ public class ReifiedTest {
                 LogicalConstraintFactory.ifThen(
                         b,
                         IntConstraintFactory.arithm(c, "=", 1))));
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(new BoolVar[]{a, b, c}));
+        solver.set(IntStrategyFactory.minDom_LB(new BoolVar[]{a, b, c}));
         if (solver.findSolution()) {
             int index = 0;
             do {

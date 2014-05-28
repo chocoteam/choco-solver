@@ -27,7 +27,7 @@
 
 package solver.constraints;
 
-import gnu.trove.set.hash.TIntHashSet;
+import solver.Solver;
 import solver.constraints.reification.PropReif;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
@@ -36,7 +36,8 @@ import solver.variables.Variable;
 import util.ESat;
 import util.tools.ArrayUtils;
 
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implication constraint: boolean b => constraint c
@@ -46,98 +47,90 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @since 02/2013
  */
-public class ReificationConstraint extends Constraint<Variable, Propagator<Variable>> {
-
-    // boolean variable of the reification
-    private final BoolVar bool;
-    // constraint to apply if bool = true
-    private final Constraint trueCons;
-    // constraint to apply if bool = false
-    private final Constraint falseCons;
-    // indices of propagators
-    private int[] indices;
-
-    private static Variable[] nonubiquity(Variable[] one, Variable[] two) {
-        Variable[] ret = new Variable[one.length + two.length];
-        TIntHashSet idx = new TIntHashSet();
-        int j = 0;
-        for (int i = 0; i < one.length; i++) {
-            if (!idx.contains(one[i].getId())) {
-                ret[j++] = one[i];
-                idx.add(one[i].getId());
-            }
-        }
-        for (int i = 0; i < two.length; i++) {
-            if (!idx.contains(two[i].getId())) {
-                ret[j++] = two[i];
-                idx.add(two[i].getId());
-            }
-        }
-        return Arrays.copyOf(ret, j);
-    }
-
-
-    protected ReificationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(ArrayUtils.append(new Variable[]{bVar}, nonubiquity(consIfBoolTrue.getVariables(), consIfBoolFalse.getVariables())),
-                bVar.getSolver());
-        trueCons = consIfBoolTrue;
-        falseCons = consIfBoolFalse;
-        bool = bVar;
-        indices = new int[3];
-        PropReif reifProp = new PropReif(this, trueCons, falseCons);
-        setPropagators(
-                ArrayUtils.append(new Propagator[]{reifProp},
-                        trueCons.getPropagators().clone(),
-                        falseCons.getPropagators().clone()));
-        indices[0] = 1;
-        indices[1] = indices[0] + trueCons.getPropagators().length;
-        indices[2] = indices[1] + falseCons.getPropagators().length;
-        for (int i = 1; i < propagators.length; i++) {
-            propagators[i].setReifiedSilent();
-        }
-    }
+public class ReificationConstraint extends Constraint {
 
     //***********************************************************************************
-    // METHODS
+    // VARIABLES
     //***********************************************************************************
 
-    public void activate(int idx) throws ContradictionException {
-        assert bool.instantiatedTo(1 - idx);
-        for (int p = indices[idx]; p < indices[idx + 1]; p++) {
-            assert (propagators[p].isReifiedAndSilent());
-            propagators[p].setReifiedTrue();
-            solver.getExplainer().activePropagator(bool, propagators[p]);
-            propagators[p].propagate(EventType.FULL_PROPAGATION.strengthened_mask);
-            solver.getEngine().onPropagatorExecution(propagators[p]);
-        }
-    }
+	// boolean variable of the reification
+	private final BoolVar bool;
+	// constraint to apply if bool = true
+	private final Constraint trueCons;
+	// constraint to apply if bool = false
+	private final Constraint falseCons;
+	// indices of propagators
+	private int[] indices;
+	// reification propagator;
+	private final PropReif propReif;
 
-    @Override
-    public ESat isSatisfied() {
-        if (bool.instantiated()) {
-            if (bool.getValue() == 1) {
-                return trueCons.isSatisfied();
-            } else {
-                return falseCons.isSatisfied();
-            }
-        }
-        return ESat.UNDEFINED;
-    }
+    //***********************************************************************************
+    // CONSTRUCTION
+    //***********************************************************************************
 
-    @Override
-    public ESat isEntailed() {
-        if (bool.instantiated()) {
-            if (bool.getValue() == 1) {
-                return trueCons.isEntailed();
-            } else {
-                return falseCons.isEntailed();
-            }
-        }
-        return ESat.UNDEFINED;
-    }
+	protected ReificationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+		super("ReificationConstraint",createProps(bVar,consIfBoolTrue,consIfBoolFalse));
+		this.propReif = (PropReif) propagators[0];
+		propReif.setReifCons(this);
+		trueCons = consIfBoolTrue;
+		falseCons = consIfBoolFalse;
+		bool = bVar;
+		indices = new int[3];
+		indices[0] = 1;
+		indices[1] = indices[0] + trueCons.getPropagators().length;
+		indices[2] = indices[1] + falseCons.getPropagators().length;
+		for (int i = 1; i < propagators.length; i++) {
+			propagators[i].setReifiedSilent();
+		}
+	}
 
-    @Override
-    public String toString() {
-        return bool.toString() + "=>" + trueCons.toString() + ", !" + bool.toString() + "=>" + falseCons.toString();
-    }
+	private static Propagator[] createProps(BoolVar bVar, Constraint trueCons, Constraint falseCons) {
+		Set<Variable> setOfVars = new HashSet<>();
+		for(Propagator p:trueCons.getPropagators()){
+			for(Variable v:p.getVars()){
+				if(v!=bVar){
+					setOfVars.add(v);
+				}
+			}
+		}
+		for(Propagator p:falseCons.getPropagators()){
+			for(Variable v:p.getVars()){
+				if(v!=bVar){
+					setOfVars.add(v);
+				}
+			}
+		}
+		Variable[] allVars = ArrayUtils.append(new Variable[]{bVar}, setOfVars.toArray(new Variable[0]));
+		PropReif reifProp = new PropReif(allVars, trueCons, falseCons);
+		return ArrayUtils.append(new Propagator[]{reifProp},
+						trueCons.getPropagators().clone(),
+						falseCons.getPropagators().clone()
+		);
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	public void activate(int idx) throws ContradictionException {
+		Solver solver = propagators[0].getSolver();
+		assert bool.isInstantiatedTo(1 - idx);
+		for (int p = indices[idx]; p < indices[idx + 1]; p++) {
+			assert (propagators[p].isReifiedAndSilent());
+			propagators[p].setReifiedTrue();
+			solver.getExplainer().activePropagator(bool, propagators[p]);
+			propagators[p].propagate(EventType.FULL_PROPAGATION.strengthened_mask);
+			solver.getEngine().onPropagatorExecution(propagators[p]);
+		}
+	}
+
+	@Override
+	public ESat isSatisfied() {
+		return propReif.isEntailed();
+	}
+
+	@Override
+	public String toString() {
+		return bool.toString() + "=>" + trueCons.toString() + ", !" + bool.toString() + "=>" + falseCons.toString();
+	}
 }

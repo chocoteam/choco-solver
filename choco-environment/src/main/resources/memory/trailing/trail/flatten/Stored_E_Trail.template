@@ -145,7 +145,7 @@ public class Stored#E#Trail implements IStored#E#Trail {
             final Stored#E# var = variableStack[level];
             final #e# val = valueStack[level];
             final int stamp = stampStack[level];
-            var.worldStamp = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
+            var.overrideTimeStamp(prevWorld);// update the stamp of the variable (current stamp refers to a world that no longer exists)
             if (stamp != prevWorld) {
                 // shift the update if needed
                 if (writeIdx != level) {
@@ -174,6 +174,46 @@ public class Stored#E#Trail implements IStored#E#Trail {
             resizeUpdateCapacity();
         }
     }
+
+    @Override
+    public void buildFakeHistory(Stored#E# v, #e# initValue, int olderStamp) {
+        // from world 0 to fromStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        Stored#E#[] _variableStack = variableStack;
+        #e#[] _valueStack = valueStack;
+        int[] _stampStack = stampStack;
+        int[] _worldStartLevels = worldStartLevels;
+        int _maxUpdates = variableStack.length + olderStamp;
+        int _currentLevel = currentLevel;
+
+        variableStack = new Stored#E#[_maxUpdates];
+        valueStack = new #e#[_maxUpdates];
+        stampStack = new int[_maxUpdates];
+        worldStartLevels = new int[worldStartLevels.length];
+        currentLevel = 0;
+
+        // then replay the history
+        for (int w = 1; w < olderStamp; w++) {
+            // copy the true history
+            rebuild(_worldStartLevels[w], _worldStartLevels[w + 1], _variableStack, _valueStack, _stampStack);
+            // add the fake one
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        // copy the true history
+        rebuild(_worldStartLevels[olderStamp], _currentLevel, _variableStack, _valueStack, _stampStack);
+
+        savePreviousState(v, initValue, olderStamp - 1);
+    }
+
+    private void rebuild(int f, int t, Stored#E#[] _variableStack, #e#[] _valueStack, int[] _stampStack) {
+        System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
+        System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
+        System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
+        currentLevel += (t - f);
+    }
+
 
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);

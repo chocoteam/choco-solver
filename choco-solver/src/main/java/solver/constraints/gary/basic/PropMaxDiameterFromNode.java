@@ -135,7 +135,7 @@ public class PropMaxDiameterFromNode extends Propagator<UndirectedGraphVar> {
                 }
             }
         }
-        if (g.instantiated()) {
+        if (g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

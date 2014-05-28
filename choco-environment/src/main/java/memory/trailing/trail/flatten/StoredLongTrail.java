@@ -37,14 +37,12 @@ public class StoredLongTrail implements IStoredLongTrail {
     /**
      * Stack of backtrackable search variables.
      */
-
     private StoredLong[] variableStack;
 
 
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
-
     private long[] valueStack;
 
 
@@ -52,28 +50,19 @@ public class StoredLongTrail implements IStoredLongTrail {
      * Stack of timestamps indicating the world where the former value
      * had been written.
      */
-
     private int[] stampStack;
 
 
     /**
      * Points the level of the last entry.
      */
-
     private int currentLevel;
 
 
     /**
      * A stack of pointers (for each start of a world).
      */
-
     private int[] worldStartLevels;
-
-    /**
-     * capacity of the trailing stack (in terms of number of updates that can be stored)
-     */
-    private int maxUpdates = 0;
-
 
     /**
      * Constructs a trail with predefined size.
@@ -81,13 +70,11 @@ public class StoredLongTrail implements IStoredLongTrail {
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
      */
-
     public StoredLongTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
-        maxUpdates = nUpdates;
-        variableStack = new StoredLong[maxUpdates];
-        valueStack = new long[maxUpdates];
-        stampStack = new int[maxUpdates];
+        variableStack = new StoredLong[nUpdates];
+        valueStack = new long[nUpdates];
+        stampStack = new int[nUpdates];
         worldStartLevels = new int[nWorlds];
     }
 
@@ -97,7 +84,6 @@ public class StoredLongTrail implements IStoredLongTrail {
      *
      * @param worldIndex
      */
-
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
     }
@@ -108,7 +94,6 @@ public class StoredLongTrail implements IStoredLongTrail {
      *
      * @param worldIndex
      */
-
     public void worldPop(int worldIndex) {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
@@ -122,16 +107,14 @@ public class StoredLongTrail implements IStoredLongTrail {
     /**
      * Returns the current size of the stack.
      */
-
     public int getSize() {
         return currentLevel;
     }
 
 
     /**
-     * Comits a world: merging it with the previous one.
+     * Commits a world: merging it with the previous one.
      */
-
     public void worldCommit(int worldIndex) {
         // principle:
         //   currentLevel decreases to end of previous world
@@ -164,19 +147,58 @@ public class StoredLongTrail implements IStoredLongTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-
     public void savePreviousState(StoredLong v, long oldValue, int oldStamp) {
         valueStack[currentLevel] = oldValue;
         variableStack[currentLevel] = v;
         stampStack[currentLevel] = oldStamp;
         currentLevel++;
-        if (currentLevel == maxUpdates) {
+        if (currentLevel == valueStack.length) {
             resizeUpdateCapacity();
         }
     }
 
+    @Override
+    public void buildFakeHistory(StoredLong v, long initValue, int olderStamp) {
+        // from world 0 to fromStamp (excluded), create a fake history based on initValue
+        // kind a copy of the current elements
+        // 1. make a copy of variableStack
+        StoredLong[] _variableStack = variableStack;
+        long[] _valueStack = valueStack;
+        int[] _stampStack = stampStack;
+        int[] _worldStartLevels = worldStartLevels;
+        int _maxUpdates = variableStack.length + olderStamp;
+        int _currentLevel = currentLevel;
+
+        variableStack = new StoredLong[_maxUpdates];
+        valueStack = new long[_maxUpdates];
+        stampStack = new int[_maxUpdates];
+        worldStartLevels = new int[worldStartLevels.length];
+        currentLevel = 0;
+
+        // then replay the history
+        for (int w = 1; w < olderStamp; w++) {
+            // copy the true history
+            rebuild(_worldStartLevels[w], _worldStartLevels[w + 1], _variableStack, _valueStack, _stampStack);
+            // add the fake one
+            savePreviousState(v, initValue, w - 1);
+            worldPush(w + 1);
+        }
+        // copy the true history
+        rebuild(_worldStartLevels[olderStamp], _currentLevel, _variableStack, _valueStack, _stampStack);
+
+        savePreviousState(v, initValue, olderStamp - 1);
+    }
+
+    private void rebuild(int f, int t, StoredLong[] _variableStack, long[] _valueStack, int[] _stampStack) {
+        System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
+        System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
+        System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
+        currentLevel += (t - f);
+    }
+
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((maxUpdates * 3) / 2);
+        final int newCapacity = ((variableStack.length * 3) / 2);
+		assert newCapacity>=variableStack.length;
         // first, copy the stack of variables
         final StoredLong[] tmp1 = new StoredLong[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
@@ -189,8 +211,6 @@ public class StoredLongTrail implements IStoredLongTrail {
         final int[] tmp3 = new int[newCapacity];
         System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
         stampStack = tmp3;
-        // last update the capacity
-        maxUpdates = newCapacity;
     }
 
     public void resizeWorldCapacity(int newWorldCapacity) {
@@ -198,5 +218,4 @@ public class StoredLongTrail implements IStoredLongTrail {
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;
     }
-
 }

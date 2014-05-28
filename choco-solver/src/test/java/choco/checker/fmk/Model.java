@@ -30,8 +30,8 @@ package choco.checker.fmk;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;
@@ -206,10 +206,9 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = new Constraint(s);
-            ctr.addPropagators(new PropBoolSum(bools, vars[n - 1]));
+            Constraint ctr = ICF.sum(bools, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -233,7 +232,7 @@ public interface Model {
             }
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -257,7 +256,7 @@ public interface Model {
             IntVar[] allvars = ArrayUtils.append(X, Y);
             Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
+            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(allvars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -281,7 +280,7 @@ public interface Model {
             }
             Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_BC");
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;

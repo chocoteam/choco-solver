@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -45,7 +44,6 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 13/06/12
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
     final IntVar x;

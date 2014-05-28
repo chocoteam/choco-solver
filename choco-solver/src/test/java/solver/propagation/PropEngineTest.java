@@ -40,7 +40,7 @@ import solver.variables.VariableFactory;
  */
 public class PropEngineTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         Solver solver = new Solver("t1");
         IntVar x = VariableFactory.bounded("X", 1, 3, solver);

@@ -29,7 +29,7 @@ package solver.variables.delta;
 
 import solver.ICause;
 import solver.exception.SolverException;
-import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.ISearchLoop;
 
 /**
  * <br/>
@@ -37,58 +37,60 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 10/02/11
  */
-public enum NoDelta implements IEnumDelta, IIntervalDelta {
+public enum NoDelta implements IEnumDelta, IIntervalDelta, ISetDelta {
     singleton;
 
     @Override
-    public void add(int value, ICause cause) {
+    public void add(int value, ICause cause) {}
+
+    @Override
+    public void lazyClear() {}
+
+    @Override
+    public ISearchLoop getSearchLoop() {
+        throw new SolverException("NoDelta#getSearchLoop(): forbidden call!");
     }
 
     @Override
-    public void clear() {
-    }
-
-    @Override
-    public void lazyClear() {
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        throw new SolverException("NoDelta#getSearchLoop(): fordidden call!");
-    }
-
-    @Override
-    public boolean timeStamped() {
-        throw new SolverException("NoDelta#timeStamped(): fordidden call!");
-    }
-
-    @Override
-    public void add(int lb, int ub, ICause cause) {
-    }
+    public void add(int lb, int ub, ICause cause) {}
 
     @Override
     public int getLB(int idx) throws IndexOutOfBoundsException {
-        throw new IndexOutOfBoundsException("NoDelta#getLB(): fordidden call, size must be checked before!");
+        throw new IndexOutOfBoundsException("NoDelta#getLB(): forbidden call, size must be checked before!");
     }
 
     @Override
     public int getUB(int idx) throws IndexOutOfBoundsException {
-        throw new IndexOutOfBoundsException("NoDelta#getUB(): fordidden call, size must be checked before!");
+        throw new IndexOutOfBoundsException("NoDelta#getUB(): forbidden call, size must be checked before!");
     }
-
 
     @Override
     public int get(int idx) {
-        throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
+        throw new IndexOutOfBoundsException("NoDelta#get(): forbidden call, size must be checked before!");
     }
 
     @Override
     public ICause getCause(int idx) {
-        throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
+        throw new IndexOutOfBoundsException("NoDelta#getCause(): forbidden call, size must be checked before!");
     }
 
     @Override
     public int size() {
         return 0;
     }
+
+	@Override
+	public int getSize(int kerOrEnv) {
+		return 0;
+	}
+
+	@Override
+	public int get(int index, int kerOrEnv) {
+		throw new IndexOutOfBoundsException("NoDelta#get(): forbidden call, size must be checked before!");
+	}
+
+	@Override
+	public ICause getCause(int index, int kerOrEnv) {
+		throw new IndexOutOfBoundsException("NoDelta#getCause(): forbidden call, size must be checked before!");
+	}
 }

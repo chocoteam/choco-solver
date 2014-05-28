@@ -84,7 +84,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      */
 
     public EnvironmentTrailing() {
-        super(Type.CHUNK);
+        super(Type.FLAT);
         trails = new ITrailStorage[0];
         trailSize = 0;
     }

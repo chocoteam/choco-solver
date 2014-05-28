@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store.flatten;
+package memory.copy.store;
 
 import memory.copy.Rc#E#;
 import memory.copy.store.IStored#E#Copy;
@@ -79,5 +79,16 @@ public class Stored#E#Copy implements IStored#E#Copy {
     @Override
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void buildFakeHistory(Rc#E# v, #e# initValue, int olderStamp) {
+        for (int i = 1; i <= olderStamp; i++) {
+            #e#[] _values = values[i];
+            int size = _values.length;
+            values[i] = new #e#[position];
+            System.arraycopy(_values, 0, values[i], 0, size);
+            values[i][size] = initValue;
+        }
     }
 }

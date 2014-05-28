@@ -27,6 +27,7 @@
 
 package solver.constraints.gary.basic;
 
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -66,6 +67,7 @@ public class PropKArcs extends Propagator {
         g = (GraphVar) vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.k = (IntVar) vars[1];
+		IEnvironment environment = solver.getEnvironment();
         nbInEnv = environment.makeInt();
         nbInKer = environment.makeInt();
         arcEnforced = new EnfArc();
@@ -113,7 +115,7 @@ public class PropKArcs extends Propagator {
     private void filter(int nbK, int nbE) throws ContradictionException {
         k.updateLowerBound(nbK, aCause);
         k.updateUpperBound(nbE, aCause);
-        if (nbK != nbE && k.instantiated()) {
+        if (nbK != nbE && k.isInstantiated()) {
             ISet nei;
             ISet env = g.getEnvelopGraph().getActiveNodes();
             if (k.getValue() == nbE) {
@@ -167,7 +169,7 @@ public class PropKArcs extends Propagator {
         if (nbK > k.getUB() || nbE < k.getLB()) {
             return ESat.FALSE;
         }
-        if (k.instantiated() && g.instantiated()) {
+        if (k.isInstantiated() && g.isInstantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

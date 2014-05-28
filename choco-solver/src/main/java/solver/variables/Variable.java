@@ -30,7 +30,6 @@ package solver.variables;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -44,7 +43,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends Identity, Serializable, Comparable<Variable> {
+public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -66,7 +65,17 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      *
      * @return <code>true</code> if <code>this</code> is instantiated
      */
-    boolean instantiated();
+    boolean isInstantiated();
+
+	/**
+	 * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
+	 * Deprecated use isInstantiated instead.
+	 * This method will be removed in the next release.
+	 *
+	 * @return <code>true</code> if <code>this</code> is instantiated
+	 */
+	@Deprecated
+	boolean instantiated();
 
     /**
      * Returns the name of <code>this</code>
@@ -74,20 +83,6 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @return a String representing the name of <code>this</code>
      */
     String getName();
-
-    /**
-     * Returns the array of constraints <code>this</code> appears in.
-     *
-     * @return array of constraints
-     */
-    Constraint[] getConstraints();
-
-    /**
-     * Link a constraint within a variable
-     *
-     * @param constraint a constraint
-     */
-    void declareIn(Constraint constraint);
 
     /**
      * Return the array of propagators this
@@ -119,7 +114,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @param pidx index of the propagator within the list of propagators of this
      * @return position of this in the propagator pidx
      */
-    int getIndiceInPropagator(int pidx);
+    int getIndexInPropagator(int pidx);
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -133,15 +128,6 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
     void removeMonitor(IVariableMonitor monitor);
 
     void subscribeView(IView view);
-
-    /**
-     * Returns the number of constraints involving <code>this</code>
-     * TODO: MostConstrained: count monitors instead of constraints
-     *
-     * @return the number of constraints of <code>this</code>
-     */
-    int nbConstraints();
-
 
     /**
      * returns an explanation of the current state of the Variable
@@ -159,7 +145,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      *
      * @return the delta domain of the variable
      */
-    D getDelta();
+    IDelta getDelta();
 
     /**
      * Create a delta, if necessary, in order to observe removed values of a this.
@@ -188,8 +174,9 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * SHOULD BE CONTAINED IN THIS.
      *
      * @param propagator the propagator to remove
+     *
      */
-    void unlink(Propagator propagator, int idxInProp);
+    void unlink(Propagator propagator);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
@@ -209,6 +196,12 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @throws ContradictionException
      */
     void notifyViews(EventType event, ICause cause) throws ContradictionException;
+
+	/**
+	 * Get the views observing this variables
+	 * @return views observing this variables
+	 */
+	IView[] getViews();
 
     /**
      * Notify monitors of observed variable modifications

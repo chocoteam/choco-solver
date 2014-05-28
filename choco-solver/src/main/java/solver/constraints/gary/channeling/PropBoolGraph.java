@@ -31,7 +31,6 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 import util.ESat;
 import util.tools.ArrayUtils;
@@ -86,15 +85,10 @@ public class PropBoolGraph extends Propagator<BoolVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                if (relations[i][j].instantiated()) {
+                if (relations[i][j].isInstantiated()) {
                     if (relations[i][j].getValue() == 1 && !graph.getEnvelopGraph().isArcOrEdge(i, j)) {
                         return ESat.FALSE;
                     }
@@ -103,7 +97,7 @@ public class PropBoolGraph extends Propagator<BoolVar> {
                 }
             }
         }
-        if (!graph.instantiated()) {
+        if (!graph.isInstantiated()) {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;
@@ -114,7 +108,7 @@ public class PropBoolGraph extends Propagator<BoolVar> {
     //***********************************************************************************
 
     private void updateGraph(int i, int j) throws ContradictionException {
-        if (relations[i][j].instantiated()) {
+        if (relations[i][j].isInstantiated()) {
             if (relations[i][j].getLB() == 0) {
                 graph.removeArc(i, j, aCause);
             } else {

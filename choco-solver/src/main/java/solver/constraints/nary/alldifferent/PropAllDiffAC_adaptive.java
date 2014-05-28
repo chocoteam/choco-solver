@@ -27,6 +27,7 @@
 package solver.constraints.nary.alldifferent;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IEnvironment;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -97,6 +98,7 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
 		period = 16;
         n = vars.length;
         matching = new IStateInt[n];
+		IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             matching[i] = environment.makeInt(-1);
         }
@@ -121,11 +123,6 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
     }
 
     //***********************************************************************************
@@ -165,10 +162,10 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
     public ESat isEntailed() {
         int nbInst = 0;
         for (int i = 0; i < n; i++) {
-            if (vars[i].instantiated()) {
+            if (vars[i].isInstantiated()) {
                 nbInst++;
                 for (int j = i + 1; j < n; j++) {
-                    if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
+                    if (vars[j].isInstantiated() && vars[i].getValue() == vars[j].getValue()) {
                         return ESat.FALSE;
                     }
                 }
@@ -307,7 +304,7 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
                     if (matching[i].get() == j) {
-						useful = !v.instantiated();
+						useful = !v.isInstantiated();
                         v.instantiateTo(k, aCause);
                     } else {
                         v.removeValue(k, aCause);

@@ -63,6 +63,7 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     // METHODS
     //***********************************************************************************
 
+	@Override
     public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
         if (kernel.edgeExists(x, y)) {
@@ -81,6 +82,7 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
         return false;
     }
 
+	@Override
     public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
         enforceNode(x, cause);
@@ -109,4 +111,26 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     public boolean isDirected() {
         return false;
     }
+
+	/**
+	 * Checks whether or not the edge (u,v) may belong to a solution or not
+	 * (i.e. if it is present in the envelop graph)
+	 * @param u the id of a node
+	 * @param v the id of a node
+	 * @return true iff edge (u,v) belongs to the envelop graph
+	 */
+	public boolean isEdgePossible(int u, int v){
+		return envelop.edgeExists(u,v);
+	}
+
+	/**
+	 * Checks whether or not the edge (u,v) must belong to every solution or not
+	 * (i.e. if it is present in the kernel graph)
+	 * @param u the id of a node
+	 * @param v the id of a node
+	 * @return true iff edge (u,v) belongs to the kernel graph
+	 */
+	public boolean isEdgeMandatory(int u, int v){
+		return kernel.edgeExists(u,v);
+	}
 }

@@ -35,7 +35,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -46,9 +45,9 @@ import util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<ID, IV> {
+public class EqView extends IntView {
 
-    public EqView(IV var, Solver solver) {
+    public EqView(IntVar var, Solver solver) {
         super("eq(" + var.getName() + ")", var, solver);
     }
 
@@ -72,7 +71,7 @@ public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<
                 } else if (value == sup) {
                     e = EventType.DECUPP;
                 }
-                if (this.instantiated()) {
+                if (this.isInstantiated()) {
                     e = EventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
@@ -117,7 +116,7 @@ public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<
         if (old < value) {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -136,7 +135,7 @@ public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<
         if (old > value) {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(value, this);
-            if (instantiated()) {
+            if (isInstantiated()) {
                 e = EventType.INSTANTIATE;
             }
             if (done) {
@@ -153,9 +152,14 @@ public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value);
+    public boolean isInstantiatedTo(int value) {
+        return var.isInstantiatedTo(value);
     }
+
+	@Override
+	public boolean instantiatedTo(int value) {
+		return isInstantiatedTo(value);
+	}
 
     @Override
     public int getValue() {

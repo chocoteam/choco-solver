@@ -41,7 +41,6 @@ import solver.search.limits.FailCounter;
 import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -190,17 +189,17 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-        solver.set(new StrategiesSequencer(solver.getEnvironment(),
-                IntStrategyFactory.random(bVars, seed),
-                IntStrategyFactory.inputOrder_InDomainMin(planes)
-        ));
+        solver.set(
+                IntStrategyFactory.random_bound(bVars, seed),
+                IntStrategyFactory.lexico_LB(planes)
+        );
     }
 
     @Override
     public void solve() {
         IntVar[] ivars = solver.retrieveIntVars();
         LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
-        SMF.limitTime(solver, 5000); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
+        SMF.limitTime(solver, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 

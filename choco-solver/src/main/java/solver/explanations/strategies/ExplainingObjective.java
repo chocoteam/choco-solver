@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.*;
 import solver.explanations.antidom.AntiDomain;
-import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.loop.lns.neighbors.ANeighbor;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.IMonitorUpBranch;
@@ -64,7 +64,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
     private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     protected ExplanationEngine mExplanationEngine;
-    private IntObjectiveManager om;
+    private ObjectiveManager<IntVar,Integer> om;
     private IntVar objective;
     private int LB, UB;
     protected final Random random;
@@ -121,10 +121,10 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         tmpValueDeductions = new HashSet<Deduction>(16);
 
 
-        aSolver.getSearchLoop().plugSearchMonitor(this);
+		aSolver.plugMonitor(this);
         notFrozen = new BitSet(16);
         geo4cluster = new GeometricalRestartStrategy(1, 1.2);
-        mSolver.getSearchLoop().plugSearchMonitor(this);
+        mSolver.plugMonitor(this);
     }
 
 
@@ -184,7 +184,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
                 notFrozen.clear(idx);
             }
         }
-        assert mSolver.getSearchLoop().decision == RootDecision.ROOT;
+        assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
         // add the first refuted decisions
         int first = notFrozen.nextSetBit(0);
         for (int i = (first>-1?refuted.nextSetBit(first):first); i > -1; i = refuted.nextSetBit(i + 1)) {
@@ -226,7 +226,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
 
     @Override
     public void afterInitialPropagation() {
-        om = (IntObjectiveManager) mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager();
+        om = mExplanationEngine.getSolver().getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
@@ -239,7 +239,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().decision.getId() == last.getId()) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
             mSolver.getSearchLoop().restart();
         }
     }
@@ -360,7 +360,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
      * Compute the initial fragment, ie set of decisions to keep.
      */
     private void clonePath() {
-        Decision dec = mSolver.getSearchLoop().decision;
+        Decision dec = mSolver.getSearchLoop().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();

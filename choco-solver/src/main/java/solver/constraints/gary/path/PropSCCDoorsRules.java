@@ -34,7 +34,6 @@
 
 package solver.constraints.gary.path;
 
-import choco.annotations.PropAnn;
 import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -54,7 +53,6 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
     //***********************************************************************************

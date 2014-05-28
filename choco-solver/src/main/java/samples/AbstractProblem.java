@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -131,8 +130,6 @@ public abstract class AbstractProblem {
             this.configureSearch();
 
             overrideExplanation();
-
-            solver.set(new PropagatorEngine(solver));
 
             if (level.getLevel() > Level.SILENT.getLevel()) {
                 SearchMonitorFactory.log(solver,

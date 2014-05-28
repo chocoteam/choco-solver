@@ -27,62 +27,37 @@
 
 package solver.search.strategy.selectors.variables;
 
+import solver.search.strategy.selectors.VariableEvaluator;
 import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
 import solver.variables.Variable;
 
 /**
  * <b>Occurrence</b> variable selector.
- * It chooses the variable with the largest number of attached constraints (instantiated variables are ignored).
+ * It chooses the variable with the largest number of attached propagators (instantiated variables are ignored).
  * <br/>
- * TODO: could be based on the number of not entailed constraints
+ * TODO: could be based on the number of not entailed propagators
  *
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Occurrence<V extends Variable> implements VariableSelector<V> {
-
-    /* list of variables */
-    V[] variables;
-
-    /* index of the smallest domain variable */
-    int large_idx;
-
-    public Occurrence(V[] variables) {
-        this.variables = variables.clone();
-        large_idx = 0;
-
-    }
+public class Occurrence<V extends Variable> implements VariableSelector<V>,VariableEvaluator<V> {
 
     @Override
-    public V[] getScope() {
-        return variables;
-    }
-
-    @Override
-    public boolean hasNext() {
-        int idx = 0;
-        for (; idx < variables.length && variables[idx].instantiated(); idx++) {
-        }
-        return idx < variables.length;
-    }
-
-    @Override
-    public void advance() {
-        int large_idx = 0;
+    public V getVariable(V[] variables) {
+        int large_idx = -1;
         int large_nb_cstrs = Integer.MIN_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
-            int nb_cstrs = variables[idx].nbConstraints();
-            if (!variables[idx].instantiated() && nb_cstrs > large_nb_cstrs) {
+            int nb_cstrs = variables[idx].getNbProps();
+            if (!variables[idx].isInstantiated() && nb_cstrs > large_nb_cstrs) {
                 large_nb_cstrs = nb_cstrs;
                 large_idx = idx;
             }
         }
-        this.large_idx = large_idx;
+        return large_idx > -1 ? variables[large_idx] : null;
     }
 
     @Override
-    public V getVariable() {
-        return variables[large_idx];
+    public double evaluate(V variable) {
+        return -(variable.getNbProps());
     }
 }

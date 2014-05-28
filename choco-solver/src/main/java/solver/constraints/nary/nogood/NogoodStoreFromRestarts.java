@@ -26,15 +26,14 @@
  */
 package solver.constraints.nary.nogood;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
+import solver.search.strategy.decision.fast.FastDecision;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -44,22 +43,34 @@ import java.util.Arrays;
  * <p/>
  * Related to "Nogood Recording from Restarts", C. Lecoutre et al.
  * <br/>
+ * Beware :
+ * - Must be posted as a constraint AND plugged as a monitor as well
+ * - Cannot be reified
+ * - Only works for integer variables
+ * - Only works if branching decisions are assignments (no domain split nor value removal)
  *
  * @author Charles Prud'homme
  * @since 20/06/13
  */
-public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore> implements IMonitorRestart {
-
-    static final Logger LOGGER = LoggerFactory.getLogger("solver");
+public class NogoodStoreFromRestarts extends Constraint implements IMonitorRestart {
 
     static final String MSG_NGOOD = "unit propagation failure (nogood)";
-
     CircularQueue<Decision<IntVar>> decisions;
     CircularQueue<INogood> nogoods;
+	final PropNogoodStore png;
 
-    public NogoodStoreFromRestarts(IntVar[] vars, Solver solver) {
-        super(vars, solver);
-        setPropagators(new PropNogoodStore(vars));
+	/**
+	 * A constraint for the specific Nogood store designed to store ONLY positive decisions.
+	 * Beware :
+	 * - Must be posted as a constraint AND plugged as a monitor as well
+	 * - Cannot be reified
+	 * - Only works for integer variables
+	 * - Only works if branching decisions are assignments (neither domain split nor value removal)
+	 * @param vars
+	 */
+    public NogoodStoreFromRestarts(IntVar[] vars) {
+        super("NogoodStoreFromRestarts",new PropNogoodStore(vars));
+		png = (PropNogoodStore) propagators[0];
         decisions = new CircularQueue<Decision<IntVar>>(16);
         nogoods = new CircularQueue<INogood>(16);
 
@@ -73,19 +84,23 @@ public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore>
     @Override
     public void afterRestart() {
         try {
+			// add newly created no goods
             while (!nogoods.isEmpty()) {
                 INogood ng = nogoods.pollFirst();
-                propagators[0].addNogood(ng);
+				png.addNogood(ng);
             }
-            propagators[0].unitPropagation();
+			// initial propagation of no goods
+			png.unitPropagation();
+			// forces to reach the fix-point of constraints
+			png.getSolver().getEngine().propagate();
         } catch (ContradictionException e) {
-            solver.getSearchLoop().interrupt(MSG_NGOOD);
+			png.getSolver().getSearchLoop().interrupt(MSG_NGOOD);
         }
     }
 
     private void extractNogoodFromPath() {
-        int d = solver.getSearchLoop().getCurrentDepth();
-        Decision<IntVar> decision = solver.getSearchLoop().decision;
+        int d = png.getSolver().getSearchLoop().getCurrentDepth();
+        Decision<IntVar> decision = png.getSolver().getSearchLoop().getLastDecision();
         while (decision != RootDecision.ROOT) {
             decisions.addLast(decision);
             decision = decision.getPrevious();
@@ -95,6 +110,8 @@ public class NogoodStoreFromRestarts extends Constraint<IntVar, PropNogoodStore>
         int i = 0;
         while (!decisions.isEmpty()) {
             decision = decisions.pollLast();
+			assert decision instanceof FastDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
+			assert decision.toString().contains(DecisionOperator.int_eq.toString()):"NogoodStoreFromRestarts is only valid for assignment decisions";
             if (decision.hasNext()) {
                 vars[i] = decision.getDecisionVariable();
                 values[i] = (Integer) decision.getDecisionValue();

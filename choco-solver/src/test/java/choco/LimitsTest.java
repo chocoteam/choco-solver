@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.search.loop.monitors.SMF;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -72,7 +73,7 @@ public class LimitsTest {
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
-        float tc = s.getMeasures().getTimeCount();
+		int tc = (int)(s.getMeasures().getTimeCount()*1000);
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
@@ -82,7 +83,7 @@ public class LimitsTest {
         long tl = 500;
         SearchMonitorFactory.limitThreadTime(s, tl);
         s.findAllSolutions();
-        float tc = s.getMeasures().getTimeCount();
+        int tc = (int)(s.getMeasures().getTimeCount()*1000);
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
 
@@ -124,6 +125,26 @@ public class LimitsTest {
         s.findAllSolutions();
         long sc = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sc, sl);
+    }
+
+    @Test
+    public void durationTest() {
+        long d = SMF.convertInMilliseconds("0.50s");
+        Assert.assertEquals(d, 500);
+        d += SMF.convertInMilliseconds("30s");
+        Assert.assertEquals(d, 30500);
+        d += SMF.convertInMilliseconds("30m");
+        Assert.assertEquals(d, 1830500);
+        d += SMF.convertInMilliseconds("12h");
+        Assert.assertEquals(d, 45030500);
+        d += SMF.convertInMilliseconds("2d");
+        Assert.assertEquals(d, 217830500);
+
+        long t = SMF.convertInMilliseconds("2d12h30m30.5s");
+        Assert.assertEquals(t, d);
+
+        d = SMF.convertInMilliseconds("71s");
+        Assert.assertEquals(d, 71000);
     }
 
 }

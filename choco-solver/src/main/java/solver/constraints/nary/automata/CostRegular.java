@@ -27,25 +27,21 @@
 package solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
 import org.jgrapht.graph.DirectedMultigraph;
-import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.costregular.Arc;
 import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.ESat;
-import util.iterators.DisposableIntIterator;
-import util.objects.StoredIndexedBipartiteSet;
 import util.tools.ArrayUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashSet;
 
 /**
  * COST_REGULAR constraint
@@ -54,110 +50,18 @@ import java.util.*;
  * @author Julien Menana, Charles Prud'homme
  * @since 06/06/11
  */
-public class CostRegular extends IntConstraint<IntVar> {
+public class CostRegular extends Constraint {
 
-    final StoredValuedDirectedMultiGraph graph;
-    final ICostAutomaton cautomaton;
-
-//    public CostRegular(IntVar[] vars, Solver solver, PropagatorPriority storeThreshold) {
-//        super(vars, solver, storeThreshold);
-//    }
-
-    public CostRegular(IntVar[] ivars, IntVar cost, ICostAutomaton cautomaton, Solver solver) {
-        super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
-        this.cautomaton = cautomaton;
-        graph = initGraph(vars, cautomaton, solver.getEnvironment());
-        setPropagators(new PropCostRegular(vars, cautomaton, graph));
+    public CostRegular(IntVar[] ivars, IntVar cost, ICostAutomaton cautomaton) {
+		super("CostRegular",new PropCostRegular(
+				ArrayUtils.append(ivars, new IntVar[]{cost}),
+				cautomaton,
+				initGraph(ArrayUtils.append(ivars, new IntVar[]{cost}), cautomaton)
+		));
     }
 
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        int first = this.graph.sourceIndex;
-        boolean found;
-        double cost = 0.0;
-        for (int i = 0; i < tuple.length - 1; i++) {
-            found = false;
-            StoredIndexedBipartiteSet bs = this.graph.GNodes.outArcs[first];
-            DisposableIntIterator it = bs.getIterator();
-            while (!found && it.hasNext()) {
-                int idx = it.next();
-                if (this.graph.GArcs.values[idx] == tuple[i]) {
-                    found = true;
-                    first = this.graph.GArcs.dests[idx];
-                    cost += this.graph.GArcs.costs[idx];
-                }
-            }
-            if (!found)
-                return ESat.FALSE;
-
-        }
-        int intCost = tuple[tuple.length - 1];
-        return ESat.eval(cost == intCost && cautomaton.run(Arrays.copyOf(tuple, tuple.length - 1)));
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("CostRegular({");
-        for (int i = 0; i < vars.length - 1; i++) {
-            if (i > 0) sb.append(", ");
-            Variable var = vars[i];
-            sb.append(var.getName());
-        }
-        sb.append("},");
-        sb.append(vars[vars.length - 1].getName());
-        sb.append(")");
-        return sb.toString();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private StoredValuedDirectedMultiGraph initGraph(DirectedMultigraph<Node, Arc> graph, Node source) {
-        int size = vars.length - 1;
-        int[] offsets = new int[size];
-        int[] sizes = new int[size];
-        int[] starts = new int[size];
-
-        int totalSizes = 0;
-
-        starts[0] = 0;
-        for (int i = 0; i < size; i++) {
-            offsets[i] = vars[i].getLB();
-            sizes[i] = vars[i].getUB() - vars[i].getLB() + 1;
-            if (i > 0) starts[i] = sizes[i - 1] + starts[i - 1];
-            totalSizes += sizes[i];
-        }
-
-        TIntArrayList[] layers = new TIntArrayList[size + 1];
-        for (int i = 0; i < layers.length; i++) {
-            layers[i] = new TIntArrayList();
-        }
-        Queue<Node> queue = new ArrayDeque<Node>();
-        source.layer = 0;
-        queue.add(source);
-
-        int nid = 0;
-        int aid = 0;
-        while (!queue.isEmpty()) {
-            Node n = queue.remove();
-            n.id = nid++;
-            layers[n.layer].add(n.id);
-            Set<Arc> tmp = graph.outgoingEdgesOf(n);
-            for (Arc a : tmp) {
-                a.id = aid++;
-                Node next = graph.getEdgeTarget(a);
-                next.layer = n.layer + 1;
-                queue.add(next);
-            }
-        }
-        int[][] lays = new int[layers.length][];
-        for (int i = 0; i < lays.length; i++) {
-            lays[i] = layers[i].toArray();
-        }
-        return new StoredValuedDirectedMultiGraph(solver.getEnvironment(), graph, lays, starts, offsets, totalSizes);
-    }
-
-    private static StoredValuedDirectedMultiGraph initGraph(IntVar[] vars, ICostAutomaton pi, IEnvironment environment) {
+    private static StoredValuedDirectedMultiGraph initGraph(IntVar[] vars, ICostAutomaton pi) {
+		IEnvironment environment = vars[0].getSolver().getEnvironment();
         int aid = 0;
         int nid = 0;
 
@@ -227,7 +131,6 @@ public class CostRegular extends IntConstraint<IntVar> {
         }
 
         //removing reachable non accepting states
-
         layerIter = layer.get(size).iterator();
         while (layerIter.hasNext()) {
             k = layerIter.next();
@@ -236,7 +139,6 @@ public class CostRegular extends IntConstraint<IntVar> {
             }
 
         }
-
 
         //backward pass, removing arcs that does not lead to an accepting state
         int nbNodes = pi.getNbStates();
@@ -331,5 +233,49 @@ public class CostRegular extends IntConstraint<IntVar> {
             throw new SolverException("intLayer[0].length <= 0");
     }
 
-
+//	private StoredValuedDirectedMultiGraph initGraph(DirectedMultigraph<Node, Arc> graph, Node source, IntVar[] vars) {
+//		int size = vars.length - 1;
+//		int[] offsets = new int[size];
+//		int[] sizes = new int[size];
+//		int[] starts = new int[size];
+//
+//		int totalSizes = 0;
+//
+//		starts[0] = 0;
+//		for (int i = 0; i < size; i++) {
+//			offsets[i] = vars[i].getLB();
+//			sizes[i] = vars[i].getUB() - vars[i].getLB() + 1;
+//			if (i > 0) starts[i] = sizes[i - 1] + starts[i - 1];
+//			totalSizes += sizes[i];
+//		}
+//
+//		TIntArrayList[] layers = new TIntArrayList[size + 1];
+//		for (int i = 0; i < layers.length; i++) {
+//			layers[i] = new TIntArrayList();
+//		}
+//		Queue<Node> queue = new ArrayDeque<Node>();
+//		source.layer = 0;
+//		queue.add(source);
+//
+//		int nid = 0;
+//		int aid = 0;
+//		while (!queue.isEmpty()) {
+//			Node n = queue.remove();
+//			n.id = nid++;
+//			layers[n.layer].add(n.id);
+//			Set<Arc> tmp = graph.outgoingEdgesOf(n);
+//			for (Arc a : tmp) {
+//				a.id = aid++;
+//				Node next = graph.getEdgeTarget(a);
+//				next.layer = n.layer + 1;
+//				queue.add(next);
+//			}
+//		}
+//		int[][] lays = new int[layers.length][];
+//		for (int i = 0; i < lays.length; i++) {
+//			lays[i] = layers[i].toArray();
+//		}
+//		IEnvironment environment = vars[0].getSolver().getEnvironment();
+//		return new StoredValuedDirectedMultiGraph(environment, graph, lays, starts, offsets, totalSizes);
+//	}
 }

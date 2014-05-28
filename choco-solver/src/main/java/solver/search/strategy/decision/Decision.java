@@ -104,7 +104,7 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
      * @return true if the decision can be refuted, false otherwise
      */
     public boolean hasNext() {
-        return branch < 2;
+        return branch < 2 && !once;
     }
 
     /**
@@ -112,7 +112,6 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
      */
     public void buildNext() {
         branch++;
-        if (once) branch++;
     }
 
     /**

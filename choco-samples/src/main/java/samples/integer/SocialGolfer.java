@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -120,14 +121,26 @@ public class SocialGolfer extends AbstractProblem {
             }
         }
 
+		// obvious filtering for M
+		for (int i = 0; i < p; i++) {
+			for (int l = 0; l < w; l++) {
+				for (int j = i+1; j < p; j++) {
+					solver.post(IntConstraintFactory.arithm(M[i][j][l],"=",M[j][i][l]));
+				}
+				solver.post(IntConstraintFactory.arithm(M[i][i][l],"=",1));
+			}
+		}
+
         // link the M and P variables
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                for (int k = 0; k < g; k++) {
-                    for (int l = 0; l < w; l++) {
-                        //P[i][k][l] + P[j][k][l] - M[i][j][l] <= 1;
-                        solver.post(IntConstraintFactory.scalar(new IntVar[]{P[i][k][l], P[j][k][l], M[i][j][l]}, new int[]{1, 1, -1}, VariableFactory.bounded("scal", -1, 1, solver)));
+				for (int l = 0; l < w; l++) {
+					BoolVar[] group = new BoolVar[g];
+					for (int k = 0; k < g; k++) {
+						group[k] = LogicalConstraintFactory.and(P[i][k][l], P[j][k][l]).reif();
+						solver.post(IntConstraintFactory.arithm(group[k], "<=", M[i][j][l]));
                     }
+					solver.post(IntConstraintFactory.sum(group,M[i][j][l]));
                 }
             }
         }
@@ -139,7 +152,7 @@ public class SocialGolfer extends AbstractProblem {
             }
         }
 
-        // break symetries on first group
+        // break symmetries on first group
         for (int i = 1; i < p; i++) {
             solver.post(IntConstraintFactory.lex_less_eq(P[i][0], P[i - 1][0]));
         }
@@ -148,7 +161,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
-        solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
+        solver.set(IntStrategyFactory.lexico_UB(vars));
     }
 
     @Override

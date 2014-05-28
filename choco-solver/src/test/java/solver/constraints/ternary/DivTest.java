@@ -26,10 +26,14 @@
  */
 package solver.constraints.ternary;
 
+import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.search.loop.monitors.SMF;
 import solver.variables.IntVar;
+import solver.variables.VF;
 
 /**
  * <br/>
@@ -48,4 +52,13 @@ public class DivTest extends AbstractTernaryTest {
     protected Constraint make(IntVar[] vars, Solver solver) {
         return IntConstraintFactory.eucl_div(vars[0], vars[1], vars[2]);
     }
+
+	@Test(groups = "1s")
+	public void testJL(){
+		Solver solver = new Solver();
+		IntVar i = VF.enumerated("i", 0, 2, solver);
+		solver.post(ICF.eucl_div(i, VF.one(solver), VF.zero(solver)).getOpposite());
+		SMF.log(solver,true,false);
+		solver.findAllSolutions();
+	}
 }

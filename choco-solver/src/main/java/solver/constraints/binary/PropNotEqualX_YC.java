@@ -26,7 +26,6 @@
  */
 package solver.constraints.binary;
 
-import choco.annotations.PropAnn;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,7 +55,6 @@ import util.ESat;
  * @version 0.01, june 2010
  * @since 0.01
  */
-@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     IntVar x;
@@ -83,9 +81,9 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (x.instantiated()) {
+        if (x.isInstantiated()) {
             removeValV1();
-        } else if (y.instantiated()) {
+        } else if (y.isInstantiated()) {
             removeValV0();
         } else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
             setPassive();
@@ -119,8 +117,8 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
         if ((x.getUB() < y.getLB() + this.cste) ||
                 (y.getUB() < x.getLB() - this.cste))
             return ESat.TRUE;
-        else if (x.instantiated()
-                && y.instantiated()
+        else if (x.isInstantiated()
+                && y.isInstantiated()
                 && x.getValue() == y.getValue() + this.cste)
             return ESat.FALSE;
         else
