@@ -90,6 +90,7 @@ zip)
     mv ./choco-solver/target/choco-solver-${VERSION}-sources.jar ./choco-${VERSION}
     mv ./choco-samples/target/choco-samples-${VERSION}-sources.jar ./choco-${VERSION}
     mv ./choco-parser/target/choco-parser-${VERSION}-jar-with-dependencies.jar ./choco-${VERSION}
+    mv ./user_guide.pdf ./choco-${VERSION}/user_guide-${VERSION}.pdf
 
     mvn javadoc:aggregate  || exit 1
     cd target/site/
