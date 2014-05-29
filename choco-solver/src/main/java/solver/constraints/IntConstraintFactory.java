@@ -600,18 +600,43 @@ public class IntConstraintFactory {
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
      *               (which counts from 1 to n instead of from 0 to n-1)
+	 * @param CONF	 filtering options
      * @return a circuit constraint
      */
-    public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        return new Constraint("Circuit", ArrayUtils.append(
-                alldifferent(VARS).propagators,
-                new Propagator[]{
-                        new PropNoSubtour(VARS, OFFSET),
-                        new PropCircuit_AntiArboFiltering(VARS, OFFSET),
-                        new PropCircuitSCC(VARS, OFFSET)
-                }
-        ));
+    public static Constraint circuit(IntVar[] VARS, int OFFSET, CircuitConf CONF) {
+		Propagator[] props;
+		if(CONF == CircuitConf.LIGHT){
+			props = new Propagator[]{new PropNoSubtour(VARS, OFFSET)};
+		}else{
+			props = new Propagator[]{
+					new PropNoSubtour(VARS, OFFSET),
+					new PropCircuit_ArboFiltering(VARS, OFFSET, CONF),
+					new PropCircuit_AntiArboFiltering(VARS, OFFSET, CONF),
+					new PropCircuitSCC(VARS, OFFSET, CONF)
+			};
+		}
+        return new Constraint("Circuit", ArrayUtils.append(alldifferent(VARS,"AC").propagators,props));
     }
+
+	/**
+	 * Creates a circuit constraint which ensures that
+	 * <p/> the elements of vars define a covering circuit
+	 * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
+	 * <p/>
+	 * Filtering algorithms:
+	 * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
+	 * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
+	 * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+	 *
+	 * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
+	 * @param OFFSET 0 by default but typically 1 if used within MiniZinc
+	 *               (which counts from 1 to n instead of from 0 to n-1)
+	 * @return a circuit constraint
+	 */
+	public static Constraint circuit(IntVar[] VARS, int OFFSET) {
+		return circuit(VARS, OFFSET, CircuitConf.LIGHT);
+	}
 
     /**
      * Ensures that the assignment of a sequence of variables is recognized by CAUTOMATON, a deterministic finite automaton,
