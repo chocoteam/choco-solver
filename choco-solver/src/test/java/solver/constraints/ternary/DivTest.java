@@ -31,9 +31,12 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import util.ESat;
 
 /**
  * <br/>
@@ -53,12 +56,34 @@ public class DivTest extends AbstractTernaryTest {
         return IntConstraintFactory.eucl_div(vars[0], vars[1], vars[2]);
     }
 
-	@Test(groups = "1s")
-	public void testJL(){
-		Solver solver = new Solver();
-		IntVar i = VF.enumerated("i", 0, 2, solver);
-		solver.post(ICF.eucl_div(i, VF.one(solver), VF.zero(solver)).getOpposite());
-		SMF.log(solver,true,false);
-		solver.findAllSolutions();
-	}
+    @Test(groups = "1s")
+    public void testJL() {
+        Solver solver = new Solver();
+        IntVar i = VF.enumerated("i", 0, 2, solver);
+        solver.post(ICF.eucl_div(i, VF.one(solver), VF.zero(solver)).getOpposite());
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testJL2() {
+        for (int i = 0; i < 100000; i++) {
+            final Solver s = new Solver();
+            IntVar a = VF.enumerated("a", new int[]{0, 2, 3, 4}, s);
+            IntVar b = VF.enumerated("b", new int[]{-1, 1, 3, 4}, s);
+            IntVar c = VF.enumerated("c", new int[]{-3, 1, 4}, s);
+            s.post(ICF.eucl_div(a, b, c));
+            s.set(ISF.random_value(new IntVar[]{a, b, c}, i));
+            //SMF.log(s, true, true);
+            s.plugMonitor(new IMonitorSolution() {
+                @Override
+                public void onSolution() {
+                    if (!ESat.TRUE.equals(s.isSatisfied())) {
+                        throw new Error(s.toString());
+                    }
+                }
+            });
+            s.findAllSolutions();
+        }
+    }
 }

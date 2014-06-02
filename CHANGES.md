@@ -94,7 +94,4 @@ The CHANGES.md file starts at this version.
 3.2.1-SNAPSHOT - 28 May 2014
 -------------------
 
-
-????
--------------------
-
+* Fix #206: fix lack of robustess in eucl_div
