@@ -32,8 +32,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.gary.arborescences.PropArborescence;
-import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.degree.PropNodeDegree_AtLeast_Coarse;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost_Incr;
 import solver.constraints.gary.path.PropPathNoCycle;
 import solver.constraints.gary.path.PropReducedPath;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -67,10 +67,10 @@ public class PathTest {
         }
         succs[n - 1] = preds[0] = 0;
 		Propagator[] props = new Propagator[]{
-				new PropNodeDegree_AtLeast(g, Orientation.SUCCESSORS, succs),
-				new PropNodeDegree_AtMost(g, Orientation.SUCCESSORS, succs),
-				new PropNodeDegree_AtLeast(g, Orientation.PREDECESSORS, preds),
-				new PropNodeDegree_AtMost(g, Orientation.PREDECESSORS, preds)
+				new PropNodeDegree_AtLeast_Coarse(g, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtMost_Incr(g, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtLeast_Coarse(g, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost_Incr(g, Orientation.PREDECESSORS, preds)
 		};
 		if (path) {
 			props = ArrayUtils.append(props,new Propagator[]{new PropPathNoCycle(g, 0, n - 1)});

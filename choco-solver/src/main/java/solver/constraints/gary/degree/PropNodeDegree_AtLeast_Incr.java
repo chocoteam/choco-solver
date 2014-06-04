@@ -32,6 +32,7 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
@@ -39,13 +40,15 @@ import util.ESat;
 import util.objects.graphs.IGraph;
 import util.objects.graphs.Orientation;
 import util.objects.setDataStructures.ISet;
+import util.procedure.IntProcedure;
+import util.procedure.PairProcedure;
 
 /**
  * Propagator that ensures that a node has at most N successors/predecessors/neighbors
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
+public class PropNodeDegree_AtLeast_Incr extends Propagator<GraphVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -54,40 +57,76 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     private GraphVar g;
     private int[] degrees;
     private IncidentSet target;
+	private IGraphDeltaMonitor gdm;
+	private PairProcedure proc;
+	private IntProcedure nodeProc;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNodeDegree_AtLeast(DirectedGraphVar graph, Orientation setType, int degree) {
+    public PropNodeDegree_AtLeast_Incr(DirectedGraphVar graph, Orientation setType, int degree) {
         this(graph, setType, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtLeast(DirectedGraphVar graph, Orientation setType, int[] degrees) {
+    public PropNodeDegree_AtLeast_Incr(DirectedGraphVar graph, Orientation setType, int[] degrees) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY, true);
         g = graph;
 		this.degrees = degrees;
         switch (setType) {
             case SUCCESSORS:
                 target = new SNIS();
+				proc = new PairProcedure() {
+					@Override
+					public void execute(int i, int j) throws ContradictionException {
+						checkAtLeast(i);
+					}
+				};
                 break;
             case PREDECESSORS:
                 target = new PIS();
+				proc = new PairProcedure() {
+					@Override
+					public void execute(int i, int j) throws ContradictionException {
+						checkAtLeast(j);
+					}
+				};
                 break;
             default:
                 throw new UnsupportedOperationException();
         }
+		nodeProc = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				checkAtLeast(i);
+			}
+		};
+		gdm = g.monitorDelta(this);
     }
 
-    public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int degree) {
+    public PropNodeDegree_AtLeast_Incr(UndirectedGraphVar graph, int degree) {
         this(graph, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int[] degrees) {
+    public PropNodeDegree_AtLeast_Incr(UndirectedGraphVar graph, int[] degrees) {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY, true);
         target = new SNIS();
         g = graph;
 		this.degrees = degrees;
+		gdm = g.monitorDelta(this);
+		proc = new PairProcedure() {
+			@Override
+			public void execute(int i, int j) throws ContradictionException {
+				checkAtLeast(i);
+				checkAtLeast(j);
+			}
+		};
+		nodeProc = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				checkAtLeast(i);
+			}
+		};
     }
 
     private static int[] buildArray(int degree, int n) {
@@ -108,11 +147,15 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
         for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
             checkAtLeast(node);
         }
+		gdm.unfreeze();
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		propagate(0);
+		gdm.freeze();
+		gdm.forEachNode(nodeProc,EventType.REMOVENODE);
+		gdm.forEachArc(proc,EventType.REMOVEARC);
+		gdm.unfreeze();
     }
 
     //***********************************************************************************

@@ -35,7 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.IGraphRelaxation;
-import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost_Incr;
 import solver.constraints.gary.trees.PropTreeCostScalar;
 import solver.constraints.gary.trees.lagrangianRelaxation.PropLagr_DCMST;
 import solver.objective.ObjectiveStrategy;
@@ -156,7 +156,7 @@ public class DCMST extends AbstractProblem {
 		solver.post(new GraphConstraintFactory().spanning_tree(graph));
         // max degree constraint
 		solver.post(new Constraint("Graph_deg",
-				new PropNodeDegree_AtMost(graph, dMax),
+				new PropNodeDegree_AtMost_Incr(graph, dMax),
 				new PropLowDegrees(graph, dMax))
 		);
         // (redundant) lagrangian propagator

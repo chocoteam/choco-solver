@@ -31,8 +31,9 @@ import solver.constraints.Propagator;
 import solver.constraints.gary.arborescences.PropAntiArborescence;
 import solver.constraints.gary.arborescences.PropArborescence;
 import solver.constraints.gary.basic.*;
-import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.degree.PropNodeDegree_AtLeast_Coarse;
+import solver.constraints.gary.degree.PropNodeDegree_AtLeast_Incr;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost_Incr;
 import solver.constraints.gary.path.PropAllDiffGraphIncremental;
 import solver.constraints.gary.path.PropPathNoCycle;
 import solver.constraints.gary.path.PropReducedPath;
@@ -106,11 +107,25 @@ public class GraphConstraintFactory {
      * @return a hamiltonian cycle constraint
      */
     public static Constraint hamiltonianCycle(UndirectedGraphVar GRAPHVAR) {
-		return new Constraint("Graph_HamiltonianCycle",
-				new PropNodeDegree_AtLeast(GRAPHVAR, 2),
-				new PropNodeDegree_AtMost(GRAPHVAR, 2),
-				new PropCycleNoSubtour(GRAPHVAR)
-		);
+		int m = 0;
+		int n = GRAPHVAR.getEnvelopGraph().getNbNodes();
+		for(int i=0;i<n;i++){
+			m += GRAPHVAR.getEnvelopGraph().getNeighborsOf(i).getSize();
+		}
+		m /= 2;
+		if(m<20*n){
+			return new Constraint("Graph_HamiltonianCycle",
+					new PropNodeDegree_AtLeast_Incr(GRAPHVAR, 2),
+					new PropNodeDegree_AtMost_Incr(GRAPHVAR, 2),
+					new PropCycleNoSubtour(GRAPHVAR)
+			);
+		}else{
+			return new Constraint("Graph_HamiltonianCycle",
+					new PropNodeDegree_AtLeast_Coarse(GRAPHVAR, 2),
+					new PropNodeDegree_AtMost_Incr(GRAPHVAR, 2),
+					new PropCycleNoSubtour(GRAPHVAR)
+			);
+		}
     }
 
 	/**
@@ -141,7 +156,7 @@ public class GraphConstraintFactory {
 	 */
 	public static Constraint tree(UndirectedGraphVar GRAPHVAR) {
 		return new Constraint("Graph_Tree",
-				new PropNodeDegree_AtLeast(GRAPHVAR, 1),
+				new PropNodeDegree_AtLeast_Coarse(GRAPHVAR, 1),
 				new PropTreeNoSubtour(GRAPHVAR),
 				new PropConnected(GRAPHVAR)
 		);
@@ -175,10 +190,10 @@ public class GraphConstraintFactory {
         }
         succs[DESTINATION] = preds[ORIGIN] = 0;
 		Propagator[] props = new Propagator[]{
-				new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.SUCCESSORS, succs),
-				new PropNodeDegree_AtMost(GRAPHVAR, Orientation.SUCCESSORS, succs),
-				new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.PREDECESSORS, preds),
-				new PropNodeDegree_AtMost(GRAPHVAR, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtLeast_Coarse(GRAPHVAR, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtMost_Incr(GRAPHVAR, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtLeast_Coarse(GRAPHVAR, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost_Incr(GRAPHVAR, Orientation.PREDECESSORS, preds),
 				new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION)
 		};
 		if (STRONG_FILTER) {

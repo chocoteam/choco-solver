@@ -36,8 +36,8 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.basic.PropKCC;
 import solver.constraints.gary.basic.PropKNodes;
-import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.degree.PropNodeDegree_AtLeast_Coarse;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost_Incr;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.selectors.graph.arcs.RandomArc;
@@ -111,10 +111,10 @@ public class SubCircuitProblem extends AbstractProblem {
 		solver.post(new Constraint("SubCircuit",
 				new PropKNodes(graph, circuitLength),
 				new PropKCC(graph,VariableFactory.fixed(1,solver)),
-				new PropNodeDegree_AtLeast(graph, Orientation.SUCCESSORS, 1),
-				new PropNodeDegree_AtLeast(graph, Orientation.PREDECESSORS, 1),
-				new PropNodeDegree_AtMost(graph, Orientation.SUCCESSORS, 1),
-				new PropNodeDegree_AtMost(graph, Orientation.PREDECESSORS, 1)
+				new PropNodeDegree_AtLeast_Coarse(graph, Orientation.SUCCESSORS, 1),
+				new PropNodeDegree_AtLeast_Coarse(graph, Orientation.PREDECESSORS, 1),
+				new PropNodeDegree_AtMost_Incr(graph, Orientation.SUCCESSORS, 1),
+				new PropNodeDegree_AtMost_Incr(graph, Orientation.PREDECESSORS, 1)
 		));
 	}
 

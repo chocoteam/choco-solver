@@ -30,8 +30,8 @@ package solver.constraints.gary;
 import solver.constraints.Constraint;
 import solver.constraints.gary.arborescences.PropNTree;
 import solver.constraints.gary.basic.PropKLoops;
-import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.degree.PropNodeDegree_AtLeast_Coarse;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost_Incr;
 import solver.variables.IntVar;
 import solver.variables.graph.DirectedGraphVar;
 import util.objects.graphs.Orientation;
@@ -60,8 +60,8 @@ public class NTree extends Constraint {
      */
     public NTree(DirectedGraphVar graph, IntVar nTree) {
         super("Graph_NTree",
-                new PropNodeDegree_AtLeast(graph, Orientation.SUCCESSORS, 1),
-                new PropNodeDegree_AtMost(graph, Orientation.SUCCESSORS, 1),
+                new PropNodeDegree_AtLeast_Coarse(graph, Orientation.SUCCESSORS, 1),
+                new PropNodeDegree_AtMost_Incr(graph, Orientation.SUCCESSORS, 1),
                 new PropKLoops(graph, nTree),
                 new PropNTree(graph, nTree)
 		);

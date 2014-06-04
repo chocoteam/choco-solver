@@ -33,8 +33,8 @@ import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.gary.arborescences.PropArborescence;
 import solver.constraints.gary.arborescences.PropArborescence_NaiveForm;
-import solver.constraints.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.gary.degree.PropNodeDegree_AtLeast_Coarse;
+import solver.constraints.gary.degree.PropNodeDegree_AtMost_Incr;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -64,8 +64,8 @@ public class ArborescenceTest {
         }
         preds[0] = 0;
 		Propagator[] props = new Propagator[]{
-				new PropNodeDegree_AtLeast(g, Orientation.PREDECESSORS, preds),
-				new PropNodeDegree_AtMost(g, Orientation.PREDECESSORS, preds)
+				new PropNodeDegree_AtLeast_Coarse(g, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost_Incr(g, Orientation.PREDECESSORS, preds)
 		};
         if (naive) {
 			props = ArrayUtils.append(props,new Propagator[]{new PropArborescence_NaiveForm(g, 0)});

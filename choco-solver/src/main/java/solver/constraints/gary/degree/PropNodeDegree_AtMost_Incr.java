@@ -47,7 +47,7 @@ import util.procedure.PairProcedure;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
+public class PropNodeDegree_AtMost_Incr extends Propagator<GraphVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -63,11 +63,11 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNodeDegree_AtMost(DirectedGraphVar graph, Orientation setType, int degree) {
+    public PropNodeDegree_AtMost_Incr(DirectedGraphVar graph, Orientation setType, int degree) {
         this(graph, setType, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtMost(DirectedGraphVar graph, Orientation setType, int[] degrees) {
+    public PropNodeDegree_AtMost_Incr(DirectedGraphVar graph, Orientation setType, int[] degrees) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY, true);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
@@ -94,11 +94,11 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
         }
     }
 
-    public PropNodeDegree_AtMost(UndirectedGraphVar graph, int degree) {
+    public PropNodeDegree_AtMost_Incr(UndirectedGraphVar graph, int degree) {
         this(graph, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtMost(final UndirectedGraphVar graph, int[] degrees) {
+    public PropNodeDegree_AtMost_Incr(final UndirectedGraphVar graph, int[] degrees) {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY, true);
         target = new SNIS();
         g = graph;
