@@ -37,7 +37,6 @@ package solver.constraints.nary.circuit;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 import util.graphOperations.connectivity.StrongConnectivityFinder;
@@ -68,25 +67,28 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
-	private final int NB_MAX_ITER = 10;
+	private CircuitConf conf;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropCircuitSCC(IntVar[] succs, int offSet) {
-		super(succs, PropagatorPriority.LINEAR, true);
+	public PropCircuitSCC(IntVar[] succs, int offSet, CircuitConf conf) {
+		super(succs, PropagatorPriority.LINEAR, false);
 		this.offSet = offSet;
 		n = vars.length;
 		n2 = n+1;
-		support = new DirectedGraph(n2,SetType.LINKED_LIST,true);
+		support = new DirectedGraph(n2,SetType.BITSET,true);
 		G_R = new DirectedGraph(n2,SetType.LINKED_LIST,false);
 		SCCfinder = new StrongConnectivityFinder(support);
 		mates = new ISet[n2];
 		for(int i=0;i<n2;i++){
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
-		rd = new Random(0);
+		this.conf = conf;
+		if(conf==CircuitConf.RD){
+			rd = new Random(0);
+		}
 	}
 
 	//***********************************************************************************
@@ -98,24 +100,17 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		return ESat.TRUE;// redundant propagator
 	}
 
-	public void propagate(int vIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
-
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if(rd.nextBoolean()){
-			filterFromSource(rd.nextInt(n));
-		}else{
-			if(n<NB_MAX_ITER){
-				for(int i=0;i<n;i++){
+		switch (conf){
+			case FIRST:
+				filterFromSource(0);break;
+			case RD:
+				filterFromSource(rd.nextInt(n));break;
+			case ALL:
+				for (int i = 0; i < n; i++) {
 					filterFromSource(i);
-				}
-			}else{
-				for(int i=0;i<NB_MAX_ITER;i++){
-					filterFromSource(rd.nextInt(n));
-				}
-			}
+				}break;
 		}
 	}
 

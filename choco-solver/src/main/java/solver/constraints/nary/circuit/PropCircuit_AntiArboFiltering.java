@@ -27,121 +27,54 @@
 
 package solver.constraints.nary.circuit;
 
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import util.ESat;
-import util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import util.graphOperations.dominance.SimpleDominatorsFinder;
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.SetType;
 
-import java.util.Random;
+public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 
-public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet, CircuitConf conf) {
+		super(succs,offSet,conf);
+	}
 
-    // flow graph
-    private DirectedGraph connectedGraph;
-    // number of nodes
-    private int n;
-    // dominators finder that contains the dominator tree
-    private AbstractLengauerTarjanDominatorsFinder domFinder;
-    // offset (usually 0 but 1 with MiniZinc)
-    private int offSet;
-    // random function
-    private Random rd = new Random(0);
-	private final int NB_MAX_ITER = 10;
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
-
-    public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet) {
-        super(succs, PropagatorPriority.QUADRATIC, true);
-        this.n = succs.length;
-        this.offSet = offSet;
-        this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
-        domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-    }
-
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            for (int i = 0; i < n; i++) {
-                vars[i].updateLowerBound(offSet, aCause);
-                vars[i].updateUpperBound(n - 1 + offSet, aCause);
-                vars[i].removeValue(i + offSet, aCause);
-            }
-        }
-        if (rd.nextBoolean()) {
-			if(n<NB_MAX_ITER){
-				for (int i = 0; i < n; i++) {
-					filterFromPostDom(i);
+	protected void filterFromDom(int duplicatedNode) throws ContradictionException {
+		for (int i = 0; i < n + 1; i++) {
+			connectedGraph.getSuccessorsOf(i).clear();
+			connectedGraph.getPredecessorsOf(i).clear();
+		}
+		for (int i = 0; i < n; i++) {
+			int ub = vars[i].getUB();
+			for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
+				if (y - offSet == duplicatedNode) {
+					connectedGraph.addArc(n, i);
+				}else {
+					connectedGraph.addArc(y - offSet, i);
 				}
-			}else{
-				for (int i = 0; i < NB_MAX_ITER; i++) {
-					filterFromPostDom(rd.nextInt(n));
+			}
+		}
+		if (domFinder.findDominators()) {
+			for (int x = 0; x < n; x++) {
+				int ub = vars[x].getUB();
+				for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
+					if(y-offSet!=duplicatedNode) {
+						if (domFinder.isDomminatedBy(y - offSet,x)) {
+							if(x==duplicatedNode) {
+								throw new UnsupportedOperationException();
+							}
+							vars[x].removeValue(y, aCause);
+						}
+					}
 				}
 			}
 		} else {
-            filterFromPostDom(rd.nextInt(n));
-        }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
-    }
-
-    private void filterFromPostDom(int duplicatedNode) throws ContradictionException {
-        for (int i = 0; i < n + 1; i++) {
-            connectedGraph.getSuccessorsOf(i).clear();
-            connectedGraph.getPredecessorsOf(i).clear();
-        }
-        for (int i = 0; i < n; i++) {
-            if (i == duplicatedNode) {
-                connectedGraph.addArc(i, n);
-            } else {
-                int ub = vars[i].getUB();
-                for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
-                    connectedGraph.addArc(i, y - offSet);
-                }
-            }
-        }
-        if (domFinder.findPostDominators()) {
-            for (int x = 0; x < n; x++) {
-                if (x != duplicatedNode) {
-                    int ub = vars[x].getUB();
-                    for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
-                        if (x != y) {
-                            if (domFinder.isDomminatedBy(y - offSet, x)) {
-                                vars[x].removeValue(y, aCause);
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            contradiction(vars[0], "the source cannot reach all nodes");
-        }
-    }
-
-    @Override
-    public ESat isEntailed() {
-        // redundant filtering
-        if (!isCompletelyInstantiated()) {
-            return ESat.UNDEFINED;
-        }
-        return ESat.TRUE;
-    }
+			contradiction(vars[0], "the source cannot reach all nodes");
+		}
+	}
 }

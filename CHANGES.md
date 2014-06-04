@@ -95,3 +95,4 @@ NEXT MILESTONE
 -------------------
 
 * Fix #206: fix lack of robustess in eucl_div
+- Better circuit constraint
