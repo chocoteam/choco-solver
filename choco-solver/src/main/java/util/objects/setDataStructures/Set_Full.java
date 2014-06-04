@@ -105,4 +105,9 @@ public class Set_Full implements ISet {
 	public SetType getSetType(){
 		return SetType.BITSET;
 	}
+
+	@Override
+	public String toString(){
+		return "["+0+","+(n-1)+"]";
+	}
 }

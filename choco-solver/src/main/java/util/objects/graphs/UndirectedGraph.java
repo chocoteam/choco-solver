@@ -111,7 +111,7 @@ public class UndirectedGraph implements IGraph {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("nodes : \n" + nodes+"\n");
-        sb.append("successors : \n");
+        sb.append("neighbors : \n");
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             sb.append(i + " -> {");
             for (int j = neighbors[i].getFirstElement(); j >= 0; j = neighbors[i].getNextElement()) {
