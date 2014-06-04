@@ -635,7 +635,7 @@ public class IntConstraintFactory {
 	 * @return a circuit constraint
 	 */
 	public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-		return circuit(VARS, OFFSET, CircuitConf.LIGHT);
+		return circuit(VARS, OFFSET, CircuitConf.RD);
 	}
 
     /**
