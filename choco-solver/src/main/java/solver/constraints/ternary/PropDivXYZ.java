@@ -296,7 +296,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     private boolean updateAbsX() throws ContradictionException {
-        return absX.updateLowerBound(absZ.getLB() * absY.getLB(), aCause) & absX.updateUpperBound((absZ.getUB() * absY.getUB()) + absY.getUB() - 1, aCause);
+        return absX.updateLowerBound(absZ.getLB() * absY.getLB(), aCause) | absX.updateUpperBound((absZ.getUB() * absY.getUB()) + absY.getUB() - 1, aCause);
     }
 
     /**
