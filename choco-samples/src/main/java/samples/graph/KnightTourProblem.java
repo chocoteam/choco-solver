@@ -57,11 +57,11 @@ public class KnightTourProblem extends AbstractProblem {
     //***********************************************************************************
 
     @Option(name = "-tl", usage = "time limit.", required = false)
-    private long limit = 10000;
+    private long limit = 20000;
     @Option(name = "-bl", usage = "Board length.", required = false)
-    private int boardLength = 80;
+    private int boardLength = 190;
     @Option(name = "-open", usage = "Open tour (path instead of cycle).", required = false)
-    private boolean closedTour = false;
+    private boolean closedTour = true;
 
     private UndirectedGraphVar graph;
 
@@ -75,6 +75,7 @@ public class KnightTourProblem extends AbstractProblem {
 
     @Override
     public void createSolver() {
+		level = Level.SILENT;
         solver = new Solver("solving the knight's tour problem with graph variables");
     }
 
@@ -105,6 +106,7 @@ public class KnightTourProblem extends AbstractProblem {
         // basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
         SearchMonitorFactory.limitTime(solver, limit);
+		SearchMonitorFactory.log(solver,false,false);
     }
 
     @Override
@@ -113,8 +115,7 @@ public class KnightTourProblem extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {
-    }
+    public void prettyOut() {}
 
     //***********************************************************************************
     // HEURISTICS
@@ -131,9 +132,9 @@ public class KnightTourProblem extends AbstractProblem {
         @Override
         public boolean computeNextArc() {
             ISet suc;
-            int from = -1;
             int size = n + 1;
             int sizi;
+			from = -1;
             for (int i = 0; i < n; i++) {
                 sizi = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
                 if (sizi < size && sizi > 0) {
@@ -145,19 +146,13 @@ public class KnightTourProblem extends AbstractProblem {
                 return false;
             }
             suc = g.getEnvelopGraph().getNeighborsOf(from);
-            this.from = from;
-            to = 2 * n;
             for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
                 if (!g.getKernelGraph().edgeExists(from, j)) {
-                    if (j < to) {
-                        to = j;
-                    }
+					to = j;
+					return true;
                 }
             }
-            if (to == 2 * n) {
-                throw new UnsupportedOperationException();
-            }
-            return true;
+			throw new UnsupportedOperationException();
         }
     }
 }

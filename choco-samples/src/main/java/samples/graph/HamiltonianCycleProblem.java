@@ -32,6 +32,8 @@ import samples.AbstractProblem;
 import samples.graph.input.HCP_Utils;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -58,8 +60,8 @@ public class HamiltonianCycleProblem extends AbstractProblem {
 
     @Option(name = "-tl", usage = "time limit.", required = false)
     private long limit = 10000;
-    @Option(name = "-inst", usage = "TSPLIB HCP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/) .", required = true)
-    private String instancePath;
+    @Option(name = "-inst", usage = "TSPLIB HCP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/) .", required = false)
+    private String instancePath = "/Users/jfages07/Documents/code/ALL_hcp/alb5000.hcp";
     // graph variable expected to form a Hamiltonian Cycle
     private UndirectedGraphVar graph;
 
@@ -73,6 +75,7 @@ public class HamiltonianCycleProblem extends AbstractProblem {
 
     @Override
     public void createSolver() {
+		level = Level.SILENT;
         solver = new Solver("solving the Hamiltonian Cycle Problem");
     }
 
@@ -95,9 +98,21 @@ public class HamiltonianCycleProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        // basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
         SearchMonitorFactory.limitTime(solver, limit);
+		SearchMonitorFactory.log(solver, false, false);
+		// restart search every 100 fails
+		solver.plugMonitor(new IMonitorContradiction() {
+			int count = 0;
+			@Override
+			public void onContradiction(ContradictionException cex) {
+				count ++;
+				if(count>=100){
+					count = 0;
+					solver.getSearchLoop().restart();
+				}
+			}
+		});
     }
 
     @Override
@@ -106,13 +121,13 @@ public class HamiltonianCycleProblem extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {
-    }
+    public void prettyOut() {}
 
     //***********************************************************************************
     // HEURISTICS
     //***********************************************************************************
 
+	// basically branch on sparse areas of the graph
     private static class MinNeigh extends ArcStrategy<UndirectedGraphVar> {
         int n;
 
@@ -124,31 +139,24 @@ public class HamiltonianCycleProblem extends AbstractProblem {
         @Override
         public boolean computeNextArc() {
             ISet suc;
-            int from = -1;
-            int size = n + 1;
-            int sizi;
+			to = -1;
+			int size = 2*n+2;
             for (int i = 0; i < n; i++) {
-                sizi = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
-                if (sizi < size && sizi > 0) {
-                    from = i;
-                    size = sizi;
-                }
+				suc = g.getEnvelopGraph().getNeighborsOf(i);
+				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						int deltai = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
+						int deltaj = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
+						if (deltai+deltaj < size && deltai+deltaj > 0) {
+							from = i;
+							to = j;
+							size = deltai+deltaj;
+						}
+					}
+				}
             }
-            if (from == -1) {
+            if (to == -1) {
                 return false;
-            }
-            suc = g.getEnvelopGraph().getNeighborsOf(from);
-            this.from = from;
-            to = 2 * n;
-            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-                if (!g.getKernelGraph().edgeExists(from, j)) {
-                    if (j < to) {
-                        to = j;
-                    }
-                }
-            }
-            if (to == 2 * n) {
-                throw new UnsupportedOperationException();
             }
             return true;
         }
