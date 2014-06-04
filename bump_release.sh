@@ -42,10 +42,10 @@ code)
 		sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/choco\-solver\-$VERSION\-jar\-with\-dependencies\.jar%" README.md
 	fi
 	## The CHANGES.md file
-	REGEX="s%????*%${VERSION} - ${d}%"
+	REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"
 	sedInPlace "${REGEX}" CHANGES.md
 
-    echo "\n????\n-------------------\n" >> CHANGES.md
+    echo "\nNEXT MILESTONE\n-------------------\n" >> CHANGES.md
 
     ## The configuration file
     sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  choco-solver/src/main/resources/configuration.properties
