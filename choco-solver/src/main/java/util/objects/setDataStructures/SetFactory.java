@@ -37,10 +37,7 @@ package util.objects.setDataStructures;
 import memory.IEnvironment;
 import memory.copy.EnvironmentCopying;
 import memory.trailing.EnvironmentTrailing;
-import util.objects.setDataStructures.linkedlist.Set_2LinkedList;
-import util.objects.setDataStructures.linkedlist.Set_LinkedList;
-import util.objects.setDataStructures.linkedlist.Set_Std_2LinkedList;
-import util.objects.setDataStructures.linkedlist.Set_Std_LinkedList;
+import util.objects.setDataStructures.linkedlist.*;
 import util.objects.setDataStructures.matrix.Set_Array;
 import util.objects.setDataStructures.matrix.Set_BitSet;
 import util.objects.setDataStructures.matrix.Set_Std_Array;
@@ -61,7 +58,8 @@ public class SetFactory {
     // FACTORY - STORED SET
     //***********************************************************************************
 
-    public static boolean HARD_CODED = true;
+	public static boolean HARD_CODED = true;
+	public static boolean RECYCLE = true;
 
     /**
      * Make a stored set of integers in the range [0,maximumSize-1]
@@ -80,7 +78,10 @@ public class SetFactory {
                 case SWAP_HASH:
                     return new Set_Std_Swap_Hash(environment, maximumSize);
                 case LINKED_LIST:
-                    return new Set_Std_LinkedList(environment);
+					if(RECYCLE)
+						return new Set_Std_LinkedList(environment);
+					else
+						return new Set_Std_LinkedList_NoRecycling(environment);
                 case DOUBLE_LINKED_LIST:
                     return new Set_Std_2LinkedList(environment);
                 case BITSET:

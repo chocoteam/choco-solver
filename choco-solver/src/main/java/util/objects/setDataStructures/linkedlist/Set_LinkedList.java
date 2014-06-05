@@ -37,7 +37,7 @@ import util.objects.setDataStructures.SetType;
  * remove: O(m)
  * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
+ * User: Jean-Guillaume Fages, chameau
  * Date: 9 fevr. 2011
  */
 public class Set_LinkedList implements ISet {

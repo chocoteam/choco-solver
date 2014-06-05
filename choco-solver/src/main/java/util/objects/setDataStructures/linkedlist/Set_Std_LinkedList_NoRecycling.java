@@ -28,6 +28,7 @@
 package util.objects.setDataStructures.linkedlist;
 
 import memory.IEnvironment;
+import memory.structure.Operation;
 
 /**
  * Backtrable LinkedList of m elements
@@ -39,36 +40,84 @@ import memory.IEnvironment;
  * User: Jean-Guillaume Fages, chameau
  * Date: 10 fevr. 2011
  */
-public class Set_Std_LinkedList extends Set_Std_LinkedList_NoRecycling {
+public class Set_Std_LinkedList_NoRecycling extends Set_LinkedList {
 
-	private ListOP[] operationPoolGC;
-	private int poolCurrentSize;
+	final IEnvironment environment;
+	protected final static boolean ADD = true;
+	protected final static boolean REMOVE = false;
 
-	public Set_Std_LinkedList(IEnvironment environment) {
-		super(environment);
-		operationPoolGC = new ListOP[16];
-		poolCurrentSize = 0;
+	public Set_Std_LinkedList_NoRecycling(IEnvironment environment) {
+		super();
+		this.environment = environment;
 	}
 
 	@Override
+	public boolean add(int element) {
+		this._add(element);
+		makeOperation(element, REMOVE);
+		return true;
+	}
+
+	protected void _add(int element) {
+		super.add(element);
+	}
+
+	@Override
+	public boolean remove(int element) {
+		boolean done = this._remove(element);
+		if (done) {
+			makeOperation(element, ADD);
+		}
+		return done;
+	}
+
+	protected boolean _remove(int element) {
+		return super.remove(element);
+	}
+
+	@Override
+	public void clear() {
+		for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
+			makeOperation(i, ADD);
+		}
+		super.clear();
+	}
+
 	protected void makeOperation(int element, boolean addOrRem){
 		if(environment.getWorldIndex()>0) {
-			if (poolCurrentSize<=0) {
-				new ListOP(element, addOrRem);
-			}else{
-				ListOP op = operationPoolGC[--poolCurrentSize];
-				op.set(element, addOrRem);
-			}
+			new ListOP(element, addOrRem);
 		}
 	}
 
-	@Override
-	protected void free(ListOP op){
-		if(poolCurrentSize==operationPoolGC.length){
-			ListOP[] tmp = new ListOP[poolCurrentSize*4/3+10];
-			System.arraycopy(operationPoolGC,0,tmp,0,poolCurrentSize);
-			operationPoolGC = tmp;
+	protected void free(ListOP op){}
+
+	//***********************************************************************************
+	// TRAILING OPERATIONS
+	//***********************************************************************************
+
+	protected class ListOP extends Operation {
+		int element;
+		boolean addOrRemove;
+
+		public ListOP(int i, boolean add) {
+			super();
+			set(i, add);
 		}
-		operationPoolGC[poolCurrentSize++] = op;
+
+		@Override
+		public void undo() {
+			if (addOrRemove) {
+				_add(element);
+			} else {
+				_remove(element);
+			}
+			free(this);
+		}
+
+		public void set(int i, boolean add) {
+			element = i;
+			addOrRemove = add;
+			environment.save(this);
+		}
 	}
 }

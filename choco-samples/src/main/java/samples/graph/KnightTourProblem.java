@@ -38,14 +38,16 @@ import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.UndirectedGraphVar;
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
 
 /**
  * Solves the Knight's Tour Problem
  * <p/>
  * Uses graph variables (light data structure)
- * Scales up to 170x170 in ten seconds
- * (requires -Xms2000m -Xmx2000m for memory allocation)
+ * Scales up to 200x200 in ten seconds
+ * requires -Xms1048m -Xmx2048m for memory allocation
+ *
  *
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
@@ -87,9 +89,10 @@ public class KnightTourProblem extends AbstractProblem {
         } else {
             matrix = HCP_Utils.generateOpenKingTourInstance(boardLength);
         }
-        int n = matrix.length;
         // variables
-        graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+		int n = matrix.length;
+		SetFactory.RECYCLE = false; //(optim)
+		graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (matrix[i][j]) {
@@ -106,12 +109,13 @@ public class KnightTourProblem extends AbstractProblem {
         // basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
         SearchMonitorFactory.limitTime(solver, limit);
-		SearchMonitorFactory.log(solver,false,false);
+//		SearchMonitorFactory.log(solver,false,false);
     }
 
     @Override
     public void solve() {
         solver.findSolution();
+		System.out.println(boardLength+" "+solver.getMeasures().getTimeCount());
     }
 
     @Override
