@@ -61,7 +61,7 @@ public class HamiltonianCycleProblem extends AbstractProblem {
     @Option(name = "-tl", usage = "time limit.", required = false)
     private long limit = 10000;
     @Option(name = "-inst", usage = "TSPLIB HCP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/) .", required = false)
-    private String instancePath = "/Users/jfages07/Documents/code/ALL_hcp/alb5000.hcp";
+    private String instancePath = "/Users/jfages07/Documents/code/ALL_hcp/alb1000.hcp";
     // graph variable expected to form a Hamiltonian Cycle
     private UndirectedGraphVar graph;
 
@@ -143,9 +143,9 @@ public class HamiltonianCycleProblem extends AbstractProblem {
 			int size = 2*n+2;
             for (int i = 0; i < n; i++) {
 				suc = g.getEnvelopGraph().getNeighborsOf(i);
+				int deltai = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
 				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 					if(!g.getKernelGraph().edgeExists(i,j)){
-						int deltai = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
 						int deltaj = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
 						if (deltai+deltaj < size && deltai+deltaj > 0) {
 							from = i;
