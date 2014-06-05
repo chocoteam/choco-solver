@@ -59,7 +59,7 @@ public class KnightTourProblem extends AbstractProblem {
     @Option(name = "-tl", usage = "time limit.", required = false)
     private long limit = 20000;
     @Option(name = "-bl", usage = "Board length.", required = false)
-    private int boardLength = 190;
+    private int boardLength = 120;
     @Option(name = "-open", usage = "Open tour (path instead of cycle).", required = false)
     private boolean closedTour = true;
 
