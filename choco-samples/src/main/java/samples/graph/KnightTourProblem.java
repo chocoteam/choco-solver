@@ -109,13 +109,12 @@ public class KnightTourProblem extends AbstractProblem {
         // basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
         SearchMonitorFactory.limitTime(solver, limit);
-//		SearchMonitorFactory.log(solver,false,false);
+		SearchMonitorFactory.log(solver,false,false);
     }
 
     @Override
     public void solve() {
         solver.findSolution();
-		System.out.println(boardLength+" "+solver.getMeasures().getTimeCount());
     }
 
     @Override
