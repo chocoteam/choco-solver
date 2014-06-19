@@ -222,7 +222,14 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             acsv.record(csv, instance, gc.getDescription(), solver.getMeasures().toArray());
         }
         userinterruption = false;
-        Runtime.getRuntime().removeShutdownHook(statOnKill);
+		try {
+			Runtime.getRuntime().removeShutdownHook(statOnKill);
+		}catch (IllegalStateException e){
+			if(LOGGER.isErrorEnabled()){
+				LOGGER.error("% IllegalStateException when removing hook");
+			}
+			// this error may happen if the JVM is too fast ! (it closes before having time to remove the hook)
+		}
     }
 
     public boolean isUserinterruption() {
