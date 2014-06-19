@@ -30,7 +30,6 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;
@@ -42,7 +41,7 @@ import util.tools.ArrayUtils;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNValues_Light extends Propagator<IntVar> {
+public class PropAtLeastNValues extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -50,7 +49,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
 
     private TIntArrayList concernedValues;
     private int n;
-    private int[] unusedValues, mate;
+    private int[] mate;
     private boolean allEnum; // all variables are enumerated
 
     //***********************************************************************************
@@ -66,12 +65,11 @@ public class PropNValues_Light extends Propagator<IntVar> {
      * @param concernedValues will be sorted!
      * @param nValues
      */
-    public PropNValues_Light(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+    public PropAtLeastNValues(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
         n = variables.length;
         concernedValues.sort();
         this.concernedValues = concernedValues;
-        unusedValues = new int[concernedValues.size()];
         mate = new int[concernedValues.size()];
         allEnum = true;
         for (int i = 0; i < n && allEnum; i++) {
@@ -85,20 +83,9 @@ public class PropNValues_Light extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateLowerBound(0, aCause);
         vars[n].updateUpperBound(n, aCause);
-        filter();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
-    }
-
-    private void filter() throws ContradictionException {
         int count = 0;
         int countMax = 0;
-        int idx = 0;
         for (int i = concernedValues.size() - 1; i >= 0; i--) {
             boolean possible = false;
             boolean mandatory = false;
@@ -128,47 +115,28 @@ public class PropNValues_Light extends Propagator<IntVar> {
             }
             if (mandatory) {
                 count++;
-            } else {
-                unusedValues[idx++] = value;
             }
         }
         // filtering cardinality variable
-        vars[n].updateLowerBound(count, aCause);
         vars[n].updateUpperBound(countMax, aCause);
         // filtering decision variables
-        if (count != countMax && vars[n].isInstantiated())
-            if (count == vars[n].getUB()) {
-                int val;
-                for (int i = 0; i < idx; i++) {
-                    val = unusedValues[i];
-                    for (int v = 0; v < n; v++) {
-                        vars[v].removeValue(val, aCause);
-                    }
-                }
-                for (int i = idx - 1; i >= 0; i--) {
-                    val = unusedValues[i];
-                    for (int v = 0; v < n; v++) {
-                        vars[v].removeValue(val, aCause);
-                    }
-                }
-                if (allEnum) setPassive();
-            } else if (countMax == vars[n].getLB()) {
-                for (int i = concernedValues.size() - 1; i >= 0; i--) {
-                    if (mate[i] >= 0) {
-                        vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
-                    }
-                }
-                if (allEnum) setPassive();
-            }
+		if (count != countMax && countMax == vars[n].getLB()) {
+			for (int i = concernedValues.size() - 1; i >= 0; i--) {
+				if (mate[i] >= 0) {
+					vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
+				}
+			}
+			if (allEnum) setPassive();
+		}
     }
 
-    //***********************************************************************************
+	//***********************************************************************************
     // INFO
     //***********************************************************************************
 
     @Override
     public ESat isEntailed() {
-        int count = 0;
+        int countMin = 0;
         int countMax = 0;
         for (int i = 0; i < concernedValues.size(); i++) {
             boolean possible = false;
@@ -186,17 +154,14 @@ public class PropNValues_Light extends Propagator<IntVar> {
                 countMax++;
             }
             if (mandatory) {
-                count++;
+				countMin++;
             }
         }
-        if (count > vars[n].getUB()) {
-            return ESat.FALSE;
+        if (countMin >= vars[n].getUB()) {
+            return ESat.TRUE;
         }
         if (countMax < vars[n].getLB()) {
             return ESat.FALSE;
-        }
-        if (count == countMax && vars[n].isInstantiated()) {
-            return ESat.TRUE;
         }
         return ESat.UNDEFINED;
     }

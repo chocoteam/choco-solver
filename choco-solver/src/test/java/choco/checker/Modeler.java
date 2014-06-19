@@ -32,6 +32,8 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.nary.nValue.PropAtLeastNValues_AC;
+import solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import solver.search.strategy.ISF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -510,7 +512,16 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            s.post(ICF.nvalues(decvars, vars[n - 1], (String[]) parameters));
+			s.post(ICF.atleast_nvalues(decvars, vars[n - 1],false));
+			s.post(ICF.atmost_nvalues(decvars, vars[n - 1],false));
+			for(String st : (String[]) parameters){
+				switch (st){
+					case "at_least_AC": s.post(new Constraint("atLeastNVAC",new PropAtLeastNValues_AC(decvars,vars[n - 1])));break;
+					case "at_most_BC" : s.post(new Constraint("atMostBC",new PropAtMostNValues_BC(decvars,vars[n - 1])));break;
+					case "at_most_greedy": s.post(ICF.nvalues(decvars, vars[n - 1]));break;
+					default : throw new UnsupportedOperationException();
+				}
+			}
             s.set(ISF.random_value(vars));
             return s;
         }

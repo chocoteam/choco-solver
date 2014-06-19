@@ -99,7 +99,7 @@ public class SMPTSP extends AbstractProblem {
 				}
 			}
 		}
-		solver.post(ICF.nvalues(assignment,nbValues,"AMNV<Gci|MDRk|R13>"));
+		solver.post(ICF.nvalues(assignment,nbValues));
 	}
 
 	@Override
