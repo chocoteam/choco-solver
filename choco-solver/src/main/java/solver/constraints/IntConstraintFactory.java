@@ -60,7 +60,13 @@ import solver.constraints.nary.lex.PropLex;
 import solver.constraints.nary.lex.PropLexChain;
 import solver.constraints.nary.min_max.PropMax;
 import solver.constraints.nary.min_max.PropMin;
-import solver.constraints.nary.nValue.NValues;
+import solver.constraints.nary.nValue.*;
+import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
+import solver.constraints.nary.nValue.amnv.graph.Gci;
+import solver.constraints.nary.nValue.amnv.mis.MD;
+import solver.constraints.nary.nValue.amnv.rules.R;
+import solver.constraints.nary.nValue.amnv.rules.R1;
+import solver.constraints.nary.nValue.amnv.rules.R3;
 import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.constraints.nary.sum.Scalar;
@@ -529,6 +535,52 @@ public class IntConstraintFactory {
         Arrays.sort(values);                              // sort
         return new Constraint("Among", new PropAmongGAC_GoodImpl(ArrayUtils.append(VARS, new IntVar[]{NVAR}), values));
     }
+
+	/**
+	 * Let N be the number of distinct values assigned to the variables of the VARS collection.
+	 * Enforce condition N >= NVALUES to hold.
+	 * <p/>
+	 * This embeds a light propagator by default.
+	 * Additional filtering algorithms can be added.
+	 *
+	 * @param VARS		collection of variables
+	 * @param NVALUES	limit variable
+	 * @param AC		additional filtering algorithm, domain filtering algorithm derivated from (Soft)AllDifferent
+	 */
+	public static Constraint atleast_nvalues(IntVar[] VARS, IntVar NVALUES, boolean AC) {
+		TIntArrayList vals = getDomainUnion(VARS);
+		if(AC){
+			return new Constraint("AtLeastNValues",new PropAtLeastNValues(VARS,vals,NVALUES),new PropAtLeastNValues_AC(VARS,NVALUES));
+		}else{
+			return new Constraint("AtLeastNValues",new PropAtLeastNValues(VARS,vals,NVALUES));
+		}
+	}
+
+	/**
+	 * Let N be the number of distinct values assigned to the variables of the VARS collection.
+	 * Enforce condition N <= NVALUES to hold.
+	 * <p/>
+	 * This embeds a light propagator by default.
+	 * Additional filtering algorithms can be added.
+	 *
+	 * @param VARS		collection of variables
+	 * @param NVALUES	limit variable
+	 * @param GREEDY	"AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
+	 *                  (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
+	 *                  automatically detects disequalities and alldifferent constraints.
+	 *                  Presumably useful when NVALUES must be minimized.
+	 */
+	public static Constraint atmost_nvalues(IntVar[] VARS, IntVar NVALUES, boolean GREEDY) {
+		TIntArrayList vals = getDomainUnion(VARS);
+		if(GREEDY){
+			Gci gci = new Gci(VARS,new AutoDiffDetection(VARS));
+			R[] rules = new R[]{new R1(),new R3(VARS.length,NVALUES.getSolver().getEnvironment())};
+			return new Constraint("AtMostNValues",new PropAtMostNValues(VARS,vals,NVALUES),
+					new PropAMNV(VARS,NVALUES,gci,new MD(gci),rules));
+		}else{
+			return new Constraint("AtMostNValues",new PropAtMostNValues(VARS,vals,NVALUES));
+		}
+	}
 
     /**
      * Bin Packing formulation:
@@ -1003,21 +1055,16 @@ public class IntConstraintFactory {
      * <p/>
      * This embeds a light propagator by default.
      * Additional filtering algorithms can be added.
+	 *
+	 * see atleast_nvalue and atmost_nvalue
      *
      * @param VARS    collection of variables
      * @param NVALUES limit variable
-     * @param ALGOS   additional filtering algorithms, among :
-     *                "at_most_BC", bound filtering alogorithm from Beldiceanu's for AtMostNValue
-     *                <p/>
-     *                "at_least_AC", domain filtering algorithm derivated from (Soft)AllDifferent for AtLeastNValue
-     *                <p/>
-     *                "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
-     *                (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
-     *                automatically detects disequalities and alldifferent constraints.
-     *                Presumably useful when NVALUES must be minimized.
+     *
+	 * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
-    public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES, String... ALGOS) {
-        return new NValues(VARS, NVALUES, ALGOS);
+    public static Constraint[] nvalues(IntVar[] VARS, IntVar NVALUES) {
+        return new Constraint[]{atleast_nvalues(VARS,NVALUES,false),atmost_nvalues(VARS,NVALUES,true)};
     }
 
     /**
@@ -1401,4 +1448,17 @@ public class IntConstraintFactory {
                 new PropKLoops(SUCCS, OFFSET, NBTREES)
         );
     }
+
+	public static TIntArrayList getDomainUnion(IntVar[] vars) {
+		TIntArrayList values = new TIntArrayList();
+		for (IntVar v : vars) {
+			int ub = v.getUB();
+			for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
+				if (!values.contains(i)) {
+					values.add(i);
+				}
+			}
+		}
+		return values;
+	}
 }

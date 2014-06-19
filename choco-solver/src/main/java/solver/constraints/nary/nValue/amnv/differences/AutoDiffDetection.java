@@ -45,6 +45,8 @@ public class AutoDiffDetection implements D {
 	// VARIABLES
 	//***********************************************************************************
 
+	public static boolean DYNAMIC_ADDITIONS = false;
+
 	protected Variable[] scope;
 
 	//***********************************************************************************
@@ -62,12 +64,14 @@ public class AutoDiffDetection implements D {
 	@Override
 	public boolean mustBeDifferent(int i1, int i2) {
 		// automatic detection of binary disequalities and alldifferent constraints
-		for(Propagator p:scope[i1].getPropagators())
-			if(p.isActive())
-				if(p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))
-					for(Variable v:p.getVars())
-						if(v==scope[i2])
-							return true;
+		if(DYNAMIC_ADDITIONS || scope[i1].getSolver().getEnvironment().getWorldIndex()<=1) {
+			for (Propagator p : scope[i1].getPropagators())
+				if (p.isActive())
+					if (p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))
+						for (Variable v : p.getVars())
+							if (v == scope[i2])
+								return true;
+		}
 		return false;
 	}
 }

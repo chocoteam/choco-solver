@@ -50,6 +50,6 @@ public class NValueBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar nValues = exps.get(0).intVarValue(solver);
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
-        return new Constraint[]{IntConstraintFactory.nvalues(vars, nValues, "at_most_BC", "at_least_AC", "at_most_greedy")};
+        return IntConstraintFactory.nvalues(vars, nValues);
     }
 }
