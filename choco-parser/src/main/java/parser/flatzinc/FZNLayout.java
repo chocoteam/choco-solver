@@ -135,7 +135,9 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                 }
             }
         } else {
-            LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
+			if(LOGGER.isErrorEnabled()) {
+				LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
+			}
             System.exit(-200);
         }
     }
@@ -284,7 +286,9 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                 st.append(esl.toString());
                 return esl.enumVal();
             default:
-                LOGGER.warn("output_array:: Unknow index {}", exp.getTypeOf());
+				if(LOGGER.isWarnEnabled()) {
+					LOGGER.warn("output_array:: Unknow index {}", exp.getTypeOf());
+				}
                 return new int[0];
         }
     }
@@ -305,7 +309,9 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             public void run() {
                 if (isUserinterruption()) {
                     beforeClose();
-                    LOGGER.info("% Unexpected resolution interruption!");
+					if(LOGGER.isInfoEnabled()) {
+						LOGGER.info("% Unexpected resolution interruption!");
+					}
                     if (acsv != null) {
                         acsv.record(csv, instance, ";**ERROR**;", new Number[0]);
                     }
