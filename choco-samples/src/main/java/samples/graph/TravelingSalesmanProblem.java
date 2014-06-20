@@ -62,12 +62,12 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     //***********************************************************************************
 
     @Option(name = "-tl", usage = "time limit.", required = false)
-    private long limit = 600000;
+    private long limit = 30000;
     // instance file path
     @Option(name = "-inst", usage = "TSPLIB TSP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/).", required = true)
     private String instancePath;
     @Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
-    private int policy = 1; // the lower bound of the Lagrangian relaxation is pretty good so Bottom-Up is a good choise
+    private int policy = 2; // the lower bound of the Lagrangian relaxation is pretty good so Bottom-Up is a good choise
 
 
 	public final static int MAX_SIZE = 200;
@@ -149,9 +149,5 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {
-        System.out.println("optimum in ["
-                + (solver.getObjectiveManager()).getBestLB() + ","
-                + (solver.getObjectiveManager()).getBestUB() + "]");
-    }
+    public void prettyOut() {}
 }

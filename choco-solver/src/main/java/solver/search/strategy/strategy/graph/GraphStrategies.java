@@ -73,6 +73,7 @@ public class GraphStrategies extends GraphStrategy {
     private GraphAssignment decisionType;
     private int from, to;
     private int value;
+	private boolean useLC;
 
     /**
      * Search strategy for graphs
@@ -104,6 +105,10 @@ public class GraphStrategies extends GraphStrategy {
         mode = policy;
     }
 
+	public void useLastConflict(){
+		useLC = true;
+	}
+
     @Override
     public Decision getDecision() {
         if (g.isInstantiated()) {
@@ -119,7 +124,14 @@ public class GraphStrategies extends GraphStrategy {
     }
 
     private void computeNextArc() {
-        from = to = -1;
+		to = -1;
+		if(useLC && from !=-1){
+			evaluateNeighbors(from);
+			if(to != -1) {
+				return;
+			}
+		}
+        from = -1;
         value = -1;
         for (int i = 0; i < n; i++) {
             if (evaluateNeighbors(i)) {
