@@ -486,11 +486,21 @@ public class IntStrategyFactory {
 	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
 	 *
 	 * @param SOLVER
+	 * @return last conflict strategy
+	 */
+	public static AbstractStrategy lastConflict(Solver SOLVER) {
+		return lastConflict(SOLVER, SOLVER.getStrategy());
+	}
+
+	/**
+	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
+	 *
+	 * @param SOLVER
 	 * @param STRAT
 	 * @return last conflict strategy
 	 */
 	public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
-		return new LastConflict(SOLVER, STRAT, 1);
+		return lastKConflicts(SOLVER, 1, STRAT);
 	}
 
 	/**
