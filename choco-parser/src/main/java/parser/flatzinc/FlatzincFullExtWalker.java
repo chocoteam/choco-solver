@@ -362,10 +362,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
 
-            	if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
-                    datas.plugLayout(mSolver);
-                }
-            	
+				datas.plugLayout(mSolver);
+
 
             }
 

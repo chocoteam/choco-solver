@@ -167,70 +167,67 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         return "";
     }
 
+	@Override
+	public void beforeClose() {
+		finalOutPut();
+		Runtime.getRuntime().removeShutdownHook(statOnKill);
+	}
 
-    @Override
-    public void beforeClose() {
-        if (LOGGER.isInfoEnabled()) {
-            if (solver.getMeasures().getSolutionCount() == 0) {
-                if ((wrongSolution && nbSolution == 0) || solver.hasReachedLimit()) {
-                    LOGGER.info("=====UNKNOWN=====");
-                } else {
-                    LOGGER.info("=====UNSATISFIABLE=====");
-                }
-            } else {
-                if (solver.hasReachedLimit()
-                        && (solver.getObjectiveManager().isOptimization())) {
-                    LOGGER.info("=====UNBOUNDED=====");
-                } else {
-                    LOGGER.info("==========");
-                }
-            }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("% - Search statistics");
-                LOGGER.debug("% \t Solutions : {}", solver.getMeasures().getSolutionCount());
-                if (solver.getMeasures().hasObjective()) {
-                    LOGGER.debug("% \t Objective : {}", solver.getMeasures().getBestSolutionValue().intValue());
-                }
-                LOGGER.debug("% \t Building time : {}ms", solver.getMeasures().getReadingTimeCount());
-                LOGGER.debug("% \t Initial propagation : {}ms", solver.getMeasures().getInitialPropagationTimeCount());
-                LOGGER.debug("% \t Resolution : {}ms", solver.getMeasures().getTimeCount());
-                LOGGER.debug("% \t Nodes : {}", solver.getMeasures().getNodeCount());
-                LOGGER.debug("% \t Backtracks : {}", solver.getMeasures().getBackTrackCount());
-                LOGGER.debug("% \t Fails : {}", solver.getMeasures().getFailCount());
-                LOGGER.debug("% \t Restarts : {}", solver.getMeasures().getRestartCount());
-                LOGGER.debug("% \t Max Depth : {}", solver.getMeasures().getMaxDepth());
-                LOGGER.debug("% \t Memory : {}", solver.getMeasures().getUsedMemory());
-                LOGGER.debug("% \t Variables : {}", solver.getVars().length);
-                LOGGER.debug("% \t Constraints : {}", solver.getCstrs().length);
-                LOGGER.debug("% \t Checks : {} + {}", solver.getMeasures().getEventsCount(),
-						solver.getMeasures().getPropagationsCount());
-            } else {
-                LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
-            }
-        }
-        if (sql != null) {
-            // query the database
-            sql.connect();
-            sql.insert(instance, dbbenchname,
+	public void finalOutPut() {
+		if (LOGGER.isInfoEnabled()) {
+			if (solver.getMeasures().getSolutionCount() == 0) {
+				if ((wrongSolution && nbSolution == 0) || solver.hasReachedLimit()) {
+					LOGGER.info("=====UNKNOWN=====");
+				} else {
+					LOGGER.info("=====UNSATISFIABLE=====");
+				}
+			} else {
+				if (solver.hasReachedLimit()
+						&& (solver.getObjectiveManager().isOptimization())) {
+					LOGGER.info("=====UNBOUNDED=====");
+				} else {
+					LOGGER.info("==========");
+				}
+			}
+			if(!LOGGER.isDebugEnabled()){
+				LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
+			}
+		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("% - Search statistics");
+			LOGGER.debug("% \t Solutions : {}", solver.getMeasures().getSolutionCount());
+			if (solver.getMeasures().hasObjective()) {
+				LOGGER.debug("% \t Objective : {}", solver.getMeasures().getBestSolutionValue().intValue());
+			}
+			LOGGER.debug("% \t Building time : {}ms", solver.getMeasures().getReadingTimeCount());
+			LOGGER.debug("% \t Initial propagation : {}ms", solver.getMeasures().getInitialPropagationTimeCount());
+			LOGGER.debug("% \t Resolution : {}ms", solver.getMeasures().getTimeCount());
+			LOGGER.debug("% \t Nodes : {}", solver.getMeasures().getNodeCount());
+			LOGGER.debug("% \t Backtracks : {}", solver.getMeasures().getBackTrackCount());
+			LOGGER.debug("% \t Fails : {}", solver.getMeasures().getFailCount());
+			LOGGER.debug("% \t Restarts : {}", solver.getMeasures().getRestartCount());
+			LOGGER.debug("% \t Max Depth : {}", solver.getMeasures().getMaxDepth());
+			LOGGER.debug("% \t Memory : {}", solver.getMeasures().getUsedMemory());
+			LOGGER.debug("% \t Variables : {}", solver.getVars().length);
+			LOGGER.debug("% \t Constraints : {}", solver.getCstrs().length);
+			LOGGER.debug("% \t Checks : {} + {}", solver.getMeasures().getEventsCount(),
+					solver.getMeasures().getPropagationsCount());
+		}
+		if (sql != null) {
+			// query the database
+			sql.connect();
+			sql.insert(instance, dbbenchname,
 					solver.getMeasures().toArray(),
 					solver.getObjectiveManager().getPolicy(),
 					solver.hasReachedLimit(),
 					solver.getMeasures().isObjectiveOptimal());
-        }
-        if (!csv.equals("")) {
-            assert acsv != null;
-            acsv.record(csv, instance, gc.getDescription(), solver.getMeasures().toArray());
-        }
-        userinterruption = false;
-		try {
-			Runtime.getRuntime().removeShutdownHook(statOnKill);
-		}catch (IllegalStateException e){
-			if(LOGGER.isErrorEnabled()){
-				LOGGER.error("% IllegalStateException when removing hook");
-			}
-			// this error may happen if the JVM is too fast ! (it closes before having time to remove the hook)
 		}
-    }
+		if (!csv.equals("")) {
+			assert acsv != null;
+			acsv.record(csv, instance, gc.getDescription(), solver.getMeasures().toArray());
+		}
+		userinterruption = false;
+	}
 
     public boolean isUserinterruption() {
         return userinterruption;
@@ -315,7 +312,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         statOnKill = new Thread() {
             public void run() {
                 if (isUserinterruption()) {
-                    beforeClose();
+                    finalOutPut();
 					if(LOGGER.isInfoEnabled()) {
 						LOGGER.info("% Unexpected resolution interruption!");
 					}

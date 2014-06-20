@@ -99,5 +99,4 @@ NEXT MILESTONE
 - incremental and coarse propagation of graph variable degrees
 - better samples for Hamiltonian cycle problems
 - NValue now split into atleast and atmost
-- fix LOGGER usage (parser)
-- catch IllegalStateException when removing hook (parser)
+- fix LOGGER usage in parser (allows different levels of logging)

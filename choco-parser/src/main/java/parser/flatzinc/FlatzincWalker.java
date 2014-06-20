@@ -278,10 +278,8 @@ public class FlatzincWalker extends TreeParser {
 
 
 
-            	if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
-                    datas.plugLayout(mSolver);
-                }
-            	
+				datas.plugLayout(mSolver);
+
 
             }
 
