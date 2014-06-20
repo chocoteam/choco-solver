@@ -231,7 +231,7 @@ public class ObjectiveTest {
 
 		SMF.log(solver, true, true);
 		solver.set(
-				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN,true),
+				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
 				ISF.minDom_LB(a));
 		SMF.restartAfterEachSolution(solver);
 		NogoodStoreFromSolutions ng = new NogoodStoreFromSolutions(new IntVar[]{a});

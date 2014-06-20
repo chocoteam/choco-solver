@@ -175,7 +175,7 @@ public class DCMST extends AbstractProblem {
         AbstractStrategy<GraphVar> nextSol = GraphStrategyFactory.graphStrategy(graph, null, new NextSol(graph, dMax, relax), GraphStrategy.NodeArcPriority.ARCS);
         AbstractStrategy<GraphVar> strat = new FindAndProve<>(new GraphVar[]{graph}, firstSol, nextSol);
         // bottom-up optimization
-        solver.set(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP, true), strat);
+        solver.set(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strat);
         SearchMonitorFactory.limitSolution(solver, 2);
         SearchMonitorFactory.limitTime(solver, TIMELIMIT);
     }
