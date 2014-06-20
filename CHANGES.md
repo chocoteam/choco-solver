@@ -100,3 +100,4 @@ NEXT MILESTONE
 - better samples for Hamiltonian cycle problems
 - NValue now split into atleast and atmost
 - fix LOGGER usage in parser (allows different levels of logging)
+- integer signature for the Lagrangian 1-tree relaxation constraint (good for solving the TSP)

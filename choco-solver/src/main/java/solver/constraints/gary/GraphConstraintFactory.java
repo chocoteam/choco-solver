@@ -90,7 +90,7 @@ public class GraphConstraintFactory {
 		Propagator[] props = ArrayUtils.append(hamiltonianCycle(GRAPHVAR).getPropagators(),
 				new Propagator[]{new PropCycleEvalObj(GRAPHVAR, COSTVAR, EDGE_COSTS)});
         if (HELD_KARP > 0) {
-            PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(GRAPHVAR, COSTVAR, EDGE_COSTS);
+            PropLagr_OneTree hk = new PropLagr_OneTree(GRAPHVAR, COSTVAR, EDGE_COSTS);
             hk.waitFirstSolution(HELD_KARP == 2);
 			props = ArrayUtils.append(props,new Propagator[]{hk});
         }

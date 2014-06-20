@@ -54,7 +54,8 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     // VARIABLES
     //***********************************************************************************
 
-    protected UndirectedGraphVar g;
+	protected UndirectedGraph g;
+	protected UndirectedGraphVar gV;
     protected IntVar obj;
     protected int n;
     protected int[][] originalCosts;
@@ -72,34 +73,30 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     // CONSTRUCTORS
     //***********************************************************************************
 
-    protected PropLagr_OneTree(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix) {
-        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC, true);
-        g = graph;
-        n = g.getEnvelopGraph().getNbNodes();
-        obj = cost;
-        originalCosts = costMatrix;
-        costs = new double[n][n];
-        totalPenalities = 0;
-        penalities = new double[n];
-        mandatoryArcsList = new TIntArrayList();
-        nbSprints = 30;
-    }
+	protected PropLagr_OneTree(Variable[] vars, int[][] costMatrix) {
+		super(vars, PropagatorPriority.CUBIC, false);
+		originalCosts = costMatrix;
+		n = originalCosts.length;
+		costs = new double[n][n];
+		totalPenalities = 0;
+		penalities = new double[n];
+		mandatoryArcsList = new TIntArrayList();
+		nbSprints = 30;
+		HK = new PrimOneTreeFinder(n, this);
+		HKfilter = new KruskalOneTree_GAC(n, this);
+	}
 
-    /**
-     * ONE TREE based HK
-     */
-    public static PropLagr_OneTree oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix) {
-        PropLagr_OneTree phk = new PropLagr_OneTree(graph, cost, costMatrix);
-        phk.HKfilter = new KruskalOneTree_GAC(phk.n, phk);
-        phk.HK = new PrimOneTreeFinder(phk.n, phk);
-        return phk;
+    public PropLagr_OneTree(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix) {
+        this(new Variable[]{graph, cost}, costMatrix);
+        g = graph.getEnvelopGraph();
+        obj = cost;
     }
 
     //***********************************************************************************
     // HK Algorithm(s)
     //***********************************************************************************
 
-    public void initNRun() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
         if (waitFirstSol && solver.getMeasures().getSolutionCount() == 0) {
             return;//the UB does not allow to prune
         }
@@ -119,7 +116,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
         double beta = 0.5;
         double bestHKB;
         bestHKB = 0;
-        HKfilter.computeMST(costs, g.getEnvelopGraph());
+        HKfilter.computeMST(costs, g);
         hkb = HKfilter.getBound() - totalPenalities;
         bestHKB = hkb;
         mst = HKfilter.getMST();
@@ -130,7 +127,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
         HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
         for (int iter = 5; iter > 0; iter--) {
             for (int i = nbSprints; i > 0; i--) {
-                HK.computeMST(costs, g.getEnvelopGraph());
+                HK.computeMST(costs, g);
                 hkb = HK.getBound() - totalPenalities;
                 if (hkb > bestHKB + 1) {
                     bestHKB = hkb;
@@ -146,7 +143,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
                 HKPenalities();
                 updateCostMatrix();
             }
-            HKfilter.computeMST(costs, g.getEnvelopGraph());
+            HKfilter.computeMST(costs, g);
             hkb = HKfilter.getBound() - totalPenalities;
             if (hkb > bestHKB + 1) {
                 bestHKB = hkb;
@@ -173,7 +170,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
         mandatoryArcsList.clear();
         ISet nei;
         for (int i = 0; i < n; i++) {
-            nei = g.getKernelGraph().getNeighborsOf(i);
+            nei = gV.getKernelGraph().getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     mandatoryArcsList.add(i * n + j);
@@ -185,7 +182,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     protected void setCosts() {
         ISet nei;
         for (int i = 0; i < n; i++) {
-            nei = g.getEnvelopGraph().getNeighborsOf(i);
+            nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
@@ -222,9 +219,8 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
         for (int i = 0; i < n; i++) {
             deg = mst.getNeighborsOf(i).getSize();
             penalities[i] += (deg - 2) * step;
-            if (penalities[i] > Double.MAX_VALUE / (n - 1) || penalities[i] < -Double.MAX_VALUE / (n - 1)) {
-                throw new UnsupportedOperationException("Extreme-value lagrangian multipliers. Numerical issue may happen");
-            }
+			assert !(penalities[i] > Double.MAX_VALUE / (n - 1) || penalities[i] < -Double.MAX_VALUE / (n - 1)) :
+					"Extreme-value lagrangian multipliers. Numerical issue may happen";
             sumPenalities += penalities[i];
         }
         this.totalPenalities = 2 * sumPenalities;
@@ -233,7 +229,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     protected void updateCostMatrix() {
         ISet nei;
         for (int i = 0; i < n; i++) {
-            nei = g.getEnvelopGraph().getNeighborsOf(i);
+            nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
@@ -248,30 +244,20 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     //***********************************************************************************
 
     public void remove(int from, int to) throws ContradictionException {
-        g.removeArc(from, to, aCause);
+        gV.removeArc(from, to, aCause);
     }
 
     public void enforce(int from, int to) throws ContradictionException {
-        g.enforceArc(from, to, aCause);
+        gV.enforceArc(from, to, aCause);
     }
 
     public void contradiction() throws ContradictionException {
-        contradiction(g, "mst failure");
+        contradiction(obj, "mst failure");
     }
 
     //***********************************************************************************
     // PROP METHODS
     //***********************************************************************************
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        initNRun();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        initNRun();
-    }
 
     @Override
     public int getPropagationConditions(int vIdx) {
@@ -292,7 +278,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     }
 
     public boolean isMandatory(int i, int j) {
-        return g.getKernelGraph().edgeExists(i, j);
+        return gV.getKernelGraph().edgeExists(i, j);
     }
 
     public void waitFirstSolution(boolean b) {
