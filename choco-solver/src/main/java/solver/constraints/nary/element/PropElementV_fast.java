@@ -158,11 +158,6 @@ public class PropElementV_fast extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    @Override
     public ESat isEntailed() {
         int lb = index.getLB();
         int ub = index.getUB();
