@@ -67,11 +67,6 @@ public class PropOpposite extends Propagator {
 	}
 
 	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
-
-	@Override
 	public ESat isEntailed() {
 		ESat op = original.isSatisfied();
 		if(op == ESat.TRUE){
