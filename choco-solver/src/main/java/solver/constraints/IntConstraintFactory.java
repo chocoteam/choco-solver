@@ -31,6 +31,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.binary.*;
+import solver.constraints.extension.PropTableStr2;
 import solver.constraints.extension.Tuples;
 import solver.constraints.extension.binary.*;
 import solver.constraints.extension.nary.*;
@@ -1384,8 +1385,10 @@ public class IntConstraintFactory {
      * - <b>GAC3rm</b>: Arc Consistency version AC3 rm for tuples,
      * <br/>
      * - <b>GAC3rm+</b> (default): Arc Consistency version 3rm for allowed tuples,
-     * <br/>
-     * - <b>GACSTR+</b>: Arc Consistency version STR for allowed tuples,
+	 * <br/>
+	 * - <b>GACSTR+</b>: Arc Consistency version STR for allowed tuples,
+	 * <br/>
+	 * - <b>STR2+</b>: Arc Consistency version STR2 for allowed tuples,
      * <br/>
      * - <b>FC</b>: Forward Checking.
      *
@@ -1395,7 +1398,6 @@ public class IntConstraintFactory {
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
         //TODO: vars.length == 2
-
         Propagator p;
         switch (ALGORITHM) {
             case "FC":
@@ -1425,6 +1427,12 @@ public class IntConstraintFactory {
                     throw new SolverException("GAC3rm+ cannot be used with forbidden tuples.");
                 }
                 p = new PropLargeGAC3rmPositive(VARS, TUPLES);
+				break;
+			case "STR2+":
+				if (!TUPLES.isFeasible()) {
+					throw new SolverException("STR2+ cannot be used with forbidden tuples.");
+				}
+				p = new PropTableStr2(VARS, TUPLES.toMatrix());
         }
         return new Constraint("Table(" + ALGORITHM + ")", p);
     }

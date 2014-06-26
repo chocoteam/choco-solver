@@ -94,10 +94,11 @@ The CHANGES.md file starts at this version.
 NEXT MILESTONE
 -------------------
 
-* Fix #206: fix lack of robustess in eucl_div
+* Fix #206: fix lack of robustness in eucl_div
 - Better circuit constraint
 - incremental and coarse propagation of graph variable degrees
 - better samples for Hamiltonian cycle problems
 - NValue now split into atleast and atmost
 - fix LOGGER usage in parser (allows different levels of logging)
 - integer signature for the Lagrangian 1-tree relaxation constraint (good for solving the TSP)
+- Table constraint refactoring (STR2+)

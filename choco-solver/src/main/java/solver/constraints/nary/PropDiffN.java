@@ -45,10 +45,18 @@ import util.tools.ArrayUtils;
  */
 public class PropDiffN extends Propagator<IntVar> {
 
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
     private int n;
     private UndirectedGraph overlappingBoxes;
     private ISet boxesToCompute;
 	private boolean fast;
+
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
     public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean fast) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, true);
@@ -61,6 +69,10 @@ public class PropDiffN extends Propagator<IntVar> {
         overlappingBoxes = new UndirectedGraph(environment, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
     }
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
     @Override
     public int getPropagationConditions(int idx) {

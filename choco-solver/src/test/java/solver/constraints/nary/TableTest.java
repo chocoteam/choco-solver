@@ -46,7 +46,7 @@ import solver.variables.VF;
 
 public class TableTest {
 
-    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm"};
+    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
 
     @Test(groups = "1s")
     public void test1() {

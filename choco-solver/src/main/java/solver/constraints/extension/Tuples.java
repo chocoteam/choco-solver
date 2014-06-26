@@ -41,16 +41,27 @@ import java.util.List;
  */
 public class Tuples {
 
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
     protected final boolean feasible;
     protected final List<int[]> tuples;
     protected int arity;
     protected int[] ranges;
 
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
     public Tuples(boolean feasible) {
         this.feasible = feasible;
         tuples = new ArrayList<>();
     }
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
     /**
      * Add a new tuple to the set of tuples
@@ -73,7 +84,6 @@ public class Tuples {
             ranges[i + arity] = Math.min(ranges[i + arity], tuple[i]);
         }
     }
-
 
     /**
      * Return true if these are allowed tuples, false otherwise
@@ -132,4 +142,16 @@ public class Tuples {
         return st.toString();
 
     }
+
+	/**
+	 * @return an array of tuples, each tuple is an int array
+	 */
+	public int[][] toMatrix(){
+		int i=0;
+		int[][] matrix = new int[tuples.size()][];
+		for(int[] tuple:tuples){
+			matrix[i++] = tuple.clone();
+		}
+		return matrix;
+	}
 }
