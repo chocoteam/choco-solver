@@ -74,6 +74,7 @@ public class GraphStrategies extends GraphStrategy {
     private int from, to;
     private int value;
 	private boolean useLC;
+	private int lastFrom=-1;
 
     /**
      * Search strategy for graphs
@@ -120,19 +121,19 @@ public class GraphStrategies extends GraphStrategy {
         }
         computeNextArc();
         dec.setArc(g, from, to, decisionType);
+		lastFrom = from;
         return dec;
     }
 
     private void computeNextArc() {
 		to = -1;
-		if(useLC && from !=-1){
-			evaluateNeighbors(from);
+		from = -1;
+		if(useLC && lastFrom !=-1){
+			evaluateNeighbors(lastFrom);
 			if(to != -1) {
 				return;
 			}
 		}
-        from = -1;
-        value = -1;
         for (int i = 0; i < n; i++) {
             if (evaluateNeighbors(i)) {
                 return;
