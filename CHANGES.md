@@ -101,4 +101,6 @@ NEXT MILESTONE
 - NValue now split into atleast and atmost
 - fix LOGGER usage in parser (allows different levels of logging)
 - integer signature for the Lagrangian 1-tree relaxation constraint (good for solving the TSP)
-- Table constraint refactoring (STR2+)
+- Table constraint refactoring (STR2+) (seems to be not idempotent however)
+- Table reformulation of small scalar products
+- Minimum and Maximum over boolean arrays
