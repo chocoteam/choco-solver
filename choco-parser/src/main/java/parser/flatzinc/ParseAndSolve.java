@@ -41,6 +41,7 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * <br/>
@@ -131,6 +133,16 @@ public class ParseAndSolve {
 
     public void doMain(String[] args) throws IOException, RecognitionException {
         parse(args);
+		if(ParserConfiguration.PRINT_CONSTRAINT && LOGGER.isInfoEnabled()){
+			ArrayList<String> l = new ArrayList<>();
+			LOGGER.info("% INVOLVED CONSTRAINTS (CHOCO) ");
+			for(Constraint c:solver.getCstrs()){
+				if(!l.contains(c.getName())) {
+					l.add(c.getName());
+					LOGGER.info("% {}", c.getName());
+				}
+			}
+		}
         solve();
     }
 
