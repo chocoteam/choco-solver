@@ -126,6 +126,23 @@ public class TuplesFactory {
         }, true, VAR1, VAR2);
     }
 
+	/**
+	 * Generate valid tuples for an element constraint : TABLE[INDEX-OFFSET] = VALUE
+	 * @param VALUE
+	 * @param TABLE
+	 * @param INDEX
+	 * @param OFFSET
+	 * @return a Tuples object, reserved for a table constraint
+	 */
+	public static Tuples element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET){
+		Tuples t = new Tuples(true);
+		for(int v=INDEX.getLB();v<=INDEX.getUB();v=INDEX.nextValue(v)){
+			if(v-OFFSET>=0 && v-OFFSET<TABLE.length && VALUE.contains(TABLE[v-OFFSET])) {
+				t.add(TABLE[v - OFFSET], v);
+			}
+		}
+		return t;
+	}
 
     /**
      * Generate valid tuples for absolute constraint: VAR1  = VAR2^POWER
