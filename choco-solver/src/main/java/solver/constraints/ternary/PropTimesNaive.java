@@ -67,11 +67,9 @@ public class PropTimesNaive extends Propagator<IntVar> {
             hasChanged |= div(v1, v2.getLB(), v2.getUB(), v0.getLB(), v0.getUB());
             hasChanged |= mul(v2, v0.getLB(), v0.getUB(), v1.getLB(), v1.getUB());
         }
-    }
-
-    @Override
-    public final void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
+		if(v2.isInstantiatedTo(0) && (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(1))){
+			setPassive();
+		}
     }
 
     @Override
