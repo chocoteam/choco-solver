@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.binary.*;
 import solver.constraints.extension.PropTableStr2;
 import solver.constraints.extension.Tuples;
+import solver.constraints.extension.TuplesFactory;
 import solver.constraints.extension.binary.*;
 import solver.constraints.extension.nary.*;
 import solver.constraints.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree_IntVar;
@@ -60,6 +61,8 @@ import solver.constraints.nary.element.PropElementV_fast;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.PropLex;
 import solver.constraints.nary.lex.PropLexChain;
+import solver.constraints.nary.min_max.PropBoolMax;
+import solver.constraints.nary.min_max.PropBoolMin;
 import solver.constraints.nary.min_max.PropMax;
 import solver.constraints.nary.min_max.PropMin;
 import solver.constraints.nary.nValue.*;
@@ -1019,6 +1022,16 @@ public class IntConstraintFactory {
         return new Constraint("Max", propagators);
     }
 
+	/**
+	 * MAX is the maximum value of the collection of boolean variables VARS
+	 *
+	 * @param MAX  a boolean variable
+	 * @param VARS a vector of boolean variables
+	 */
+	public static Constraint maximum(BoolVar MAX, BoolVar[] VARS) {
+		return new Constraint("MinOverBools", new PropBoolMax(VARS,MAX));
+	}
+
     /**
      * MIN is the minimum value of the collection of domain variables VARS
      *
@@ -1035,6 +1048,16 @@ public class IntConstraintFactory {
                 new Propagator[]{new PropMin(VARS, MIN)};
         return new Constraint("Min", propagators);
     }
+
+	/**
+	 * MIN is the minimum value of the collection of boolean variables VARS
+	 *
+	 * @param MIN  a boolean variable
+	 * @param VARS a vector of boolean variables
+	 */
+	public static Constraint minimum(BoolVar MIN, BoolVar[] VARS) {
+		return new Constraint("MinOverBools", new PropBoolMin(VARS,MIN));
+	}
 
     /**
      * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
@@ -1218,16 +1241,46 @@ public class IntConstraintFactory {
                 }
             }
         }
-        //
+        // scalar
+
         if (OPERATOR.equals("=")) {
-            return Scalar.buildScalar(VARS, COEFFS, SCALAR, 1);
+            return makeScalar(VARS, COEFFS, SCALAR, 1);
         }
         int[] b = Scalar.getScalarBounds(VARS, COEFFS);
         Solver s = VARS[0].getSolver();
         IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], s);
-        s.post(Scalar.buildScalar(VARS, COEFFS, p, 1));
+        s.post(makeScalar(VARS, COEFFS, p, 1));
         return arithm(p, OPERATOR, SCALAR);
     }
+
+	private static Constraint makeScalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR, int SCALAR_COEF){
+		int maxDomSize = SCALAR.getDomainSize();
+		int idx = -1;
+		int n = VARS.length;
+		for(int i=0;i<n;i++){
+			if(maxDomSize < VARS[i].getDomainSize()){
+				maxDomSize = VARS[i].getDomainSize();
+				idx = i;
+			}
+		}
+		if(idx!=-1){
+			IntVar[] VARS2 = VARS.clone();
+			int[] COEFFS2 = COEFFS.clone();
+			VARS2[idx] = SCALAR;
+			COEFFS2[idx] = -SCALAR_COEF;
+			return makeScalar(VARS2,COEFFS2,VARS[idx],-COEFFS[idx]);
+		}else{
+			long doms = 1;
+			for(IntVar v:VARS){
+				doms *= v.getDomainSize();
+			}
+			if(doms<10000){
+				return table(ArrayUtils.append(VARS,new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS,COEFFS,SCALAR, SCALAR_COEF),"");
+			}else{
+				return Scalar.buildScalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
+			}
+		}
+	}
 
     /**
      * Creates a sort constraint which ensures that the variables of SORTEDVARS correspond to the variables

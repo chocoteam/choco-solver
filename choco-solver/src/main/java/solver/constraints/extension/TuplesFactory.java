@@ -368,14 +368,43 @@ public class TuplesFactory {
         }, true, VARS);
     }
 
-    /**
-     * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
-     *
-     * @param VARS concerned variables
-     * @return a Tuples object, reserved for a table constraint
-     */
-    public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, final String OPERATOR, IntVar SCALAR) {
-        final Operator op = Operator.get(OPERATOR);
+	/**
+	 * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
+	 *
+	 * @param VARS concerned variables
+	 * @return a Tuples object, reserved for a table constraint
+	 */
+	public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, IntVar SCALAR, final int SCALAR_COEFF) {
+		Tuples left = generateTuples(TupleValidator.TRUE,true,VARS);
+		Tuples tuples = new Tuples(true);
+		int n = VARS.length;
+		for(int[] tleft:left.tuples){
+			int right = 0;
+			for (int i = 0; i < n; i++) {
+				right += tleft[i] * COEFFS[i];
+			}
+			if(right%SCALAR_COEFF==0 && SCALAR.contains(right/SCALAR_COEFF)) {
+				int[] t = new int[n+1];
+				for(int i=0;i<n;i++){
+					t[i] = tleft[i];
+				}t[n] = right;
+				tuples.add(t);
+			}
+		}
+		return tuples;
+	}
+
+	/**
+	 * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
+	 *
+	 * @param VARS concerned variables
+	 * @return a Tuples object, reserved for a table constraint
+	 */
+	public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, final String OPERATOR, IntVar SCALAR, final int SCALAR_COEFF) {
+		if(OPERATOR.equals("=")){
+			return scalar(VARS,COEFFS,SCALAR,SCALAR_COEFF);
+		}
+		final Operator op = Operator.get(OPERATOR);
         return generateTuples(new TupleValidator() {
             @Override
             public boolean valid(int... values) {
@@ -385,22 +414,22 @@ public class TuplesFactory {
                 }
                 switch (op) {
                     case LT:
-                        return scalar < values[values.length - 1];
+                        return scalar < values[values.length - 1]*SCALAR_COEFF;
                     case GT:
-                        return scalar > values[values.length - 1];
+                        return scalar > values[values.length - 1]*SCALAR_COEFF;
                     case LE:
-                        return scalar <= values[values.length - 1];
+                        return scalar <= values[values.length - 1]*SCALAR_COEFF;
                     case GE:
-                        return scalar >= values[values.length - 1];
+                        return scalar >= values[values.length - 1]*SCALAR_COEFF;
                     case NQ:
-                        return scalar != values[values.length - 1];
+                        return scalar != values[values.length - 1]*SCALAR_COEFF;
                     case EQ:
-                        return scalar == values[values.length - 1];
+                        return scalar == values[values.length - 1]*SCALAR_COEFF;
                 }
                 return false;
             }
         }, true, ArrayUtils.append(VARS, new IntVar[]{SCALAR}));
-    }
+	}
 
     /**
      * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM

@@ -90,7 +90,7 @@ public final class FConstraint {
                     throw new FZNException("Unknown constraint: " + id);
                 }
                 builder = (IBuilder) loadManager(name);
-                if (ParserConfiguration.PRINT_CONSTRAINT) LOGGER.info("% {}", name);
+                if (ParserConfiguration.PRINT_CONSTRAINT && LOGGER.isInfoEnabled()) LOGGER.info("% {}", name);
                 builders.put(id, builder);
             }
             last = id;
