@@ -51,7 +51,7 @@
             <!--<artifactId>antlr</artifactId>
             <version>3.4</version>-->
             <artifactId>antlr4</artifactId>
-            <version>4.2</version>
+            <version>4.3</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

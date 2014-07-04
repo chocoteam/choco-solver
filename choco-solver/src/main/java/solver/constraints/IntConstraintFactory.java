@@ -65,7 +65,10 @@ import solver.constraints.nary.min_max.PropBoolMax;
 import solver.constraints.nary.min_max.PropBoolMin;
 import solver.constraints.nary.min_max.PropMax;
 import solver.constraints.nary.min_max.PropMin;
-import solver.constraints.nary.nValue.*;
+import solver.constraints.nary.nValue.PropAMNV;
+import solver.constraints.nary.nValue.PropAtLeastNValues;
+import solver.constraints.nary.nValue.PropAtLeastNValues_AC;
+import solver.constraints.nary.nValue.PropAtMostNValues;
 import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
 import solver.constraints.nary.nValue.amnv.graph.Gci;
 import solver.constraints.nary.nValue.amnv.mis.MD;
@@ -1271,8 +1274,8 @@ public class IntConstraintFactory {
 			return makeScalar(VARS2,COEFFS2,VARS[idx],-COEFFS[idx]);
 		}else{
 			long doms = 1;
-			for(IntVar v:VARS){
-				doms *= v.getDomainSize();
+			for(int i = 0; i < VARS.length && doms < 10000; i++){
+				doms *= VARS[i].getDomainSize();
 			}
 			if(doms<10000){
 				return table(ArrayUtils.append(VARS,new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS,COEFFS,SCALAR, SCALAR_COEF),"");

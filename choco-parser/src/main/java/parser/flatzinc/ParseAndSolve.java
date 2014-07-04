@@ -30,6 +30,7 @@ package parser.flatzinc;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -133,16 +134,16 @@ public class ParseAndSolve {
 
     public void doMain(String[] args) throws IOException, RecognitionException {
         parse(args);
-		if(ParserConfiguration.PRINT_CONSTRAINT && LOGGER.isInfoEnabled()){
-			ArrayList<String> l = new ArrayList<>();
-			LOGGER.info("% INVOLVED CONSTRAINTS (CHOCO) ");
-			for(Constraint c:solver.getCstrs()){
-				if(!l.contains(c.getName())) {
-					l.add(c.getName());
-					LOGGER.info("% {}", c.getName());
-				}
-			}
-		}
+        if (ParserConfiguration.PRINT_CONSTRAINT && LOGGER.isInfoEnabled()) {
+            ArrayList<String> l = new ArrayList<>();
+            LOGGER.info("% INVOLVED CONSTRAINTS (CHOCO) ");
+            for (Constraint c : solver.getCstrs()) {
+                if (!l.contains(c.getName())) {
+                    l.add(c.getName());
+                    LOGGER.info("% {}", c.getName());
+                }
+            }
+        }
         solve();
     }
 
@@ -186,7 +187,7 @@ public class ParseAndSolve {
 
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
-        if(ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
+        if (ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
         solver.getSearchLoop().launch((!solver.getObjectiveManager().isOptimization()) && !gc.all);
     }
 
@@ -194,13 +195,16 @@ public class ParseAndSolve {
         try {
             // Create an input character stream from standard in
             ANTLRInputStream input = new ANTLRInputStream(is);
+//            CharStream input = new UnbufferedCharStream(is);
             // Create an ExprLexer that feeds from that stream
             Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
             // Create a stream of tokens fed by the lexer
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            TokenStream tokens = new CommonTokenStream(lexer);
             // Create a parser that feeds off the token stream
             Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
             parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
+            parser.setBuildParseTree(false);
+            parser.setTrimParseTree(false);
             parser.flatzinc_model(mSolver, datas);
         } catch (IOException io) {
             Exit.log(io.getMessage());
