@@ -26,7 +26,8 @@
  */
 package parser.flatzinc;
 
-import antlr.RecognitionException;
+
+import org.antlr.v4.runtime.RecognitionException;
 import parser.flatzinc.para.ParaserMaster;
 
 import java.io.IOException;
