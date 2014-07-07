@@ -39,6 +39,7 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.Propagator;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
@@ -162,8 +163,7 @@ public class ParseAndSolve {
         long creationTime = -System.nanoTime();
         Datas datas = new Datas(gc);
         buildLayout(datas);
-        boolean removeB2I = false;
-        if (removeB2I) {// pas forcement plus rapide mais facilite l'analyse
+        if (ParserConfiguration.REMOVE_B2I) {// pas forcement plus rapide mais facilite l'analyse
             PreprocessFZN.processB2I(instance);
             buildParser(new FileInputStream(new File(instance + "_")), solver, datas);
         } else {

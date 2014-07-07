@@ -64,7 +64,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y) {
-        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
         this.x = vars[0];
         this.y = vars[1];
     }
@@ -90,36 +90,23 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        // typical case: A=[1,4], B=[1,4] (bounded domains)
-        // A instantiated to 3 => nothing can be done on B
-        // then B dec supp to 3 => 3 can also be removed du to A = 3.
-        propagate(0);
-    }
-
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue(), aCause)
-                || !x.contains(y.getValue())) {
+        if (x.removeValue(y.getValue(), aCause) || !x.contains(y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue(), aCause)
-                || !y.contains(x.getValue())) {
+        if (y.removeValue(x.getValue(), aCause) || !y.contains(x.getValue())) {
             this.setPassive();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if ((x.getUB() < y.getLB()) ||
-                (y.getUB() < x.getLB()))
+        if ((x.getUB() < y.getLB()) || (y.getUB() < x.getLB()))
             return ESat.TRUE;
-        else if (x.isInstantiated()
-                && y.isInstantiated()
-                && x.getValue() == y.getValue())
+        else if (x.isInstantiated() && y.isInstantiated())
             return ESat.FALSE;
         else
             return ESat.UNDEFINED;

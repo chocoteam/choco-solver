@@ -50,25 +50,13 @@ public class PropEqualXC extends Propagator<IntVar> {
     private final int constant;
 
     public PropEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;// TODO shouldn't it react to everythink (in case of views...)
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[0].instantiateTo(constant, aCause) || vars[0].isInstantiated()) {// view precaution
-            setPassive();
-        }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
+		vars[0].instantiateTo(constant, aCause);
     }
 
     @Override
