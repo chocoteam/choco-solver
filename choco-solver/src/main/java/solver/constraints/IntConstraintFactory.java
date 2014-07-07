@@ -393,11 +393,11 @@ public class IntConstraintFactory {
         Solver solver = X.getSolver();
         IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
         IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
+        Constraint div = IntConstraintFactory.eucl_div(X, Y, t1);
+        Constraint tim = IntConstraintFactory.times(t1, Y, t2);
+        Constraint sum = IntConstraintFactory.sum(new IntVar[]{Z, t2}, X);
         return new Constraint("Mod",
-                new PropDivXYZ(X, Y, t1),
-                new PropTimesXY(t1, Y, t2),
-                new PropTimesZ(t1, Y, t2),
-                new PropSumEq(new IntVar[]{Z, t2}, X)
+                ArrayUtils.append(div.getPropagators(), tim.getPropagators(), sum.getPropagators())
         );
     }
 
@@ -413,6 +413,8 @@ public class IntConstraintFactory {
             return times(X, Y.getValue(), Z);
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
+        } else if (tupleIt(X, Y, Z)) {
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "");
         } else {
             return new Times(X, Y, Z);
         }
@@ -1565,6 +1567,7 @@ public class IntConstraintFactory {
 
     /**
      * Check whether the intension constraint to extension constraint substitution is enabled and can be achieved
+     *
      * @param VARS list of variables involved
      * @return a boolean
      */
