@@ -29,14 +29,13 @@ package parser.flatzinc;
  */
 
 
-import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.LexerATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Lexer extends Lexer {
@@ -190,7 +189,7 @@ public class Flatzinc4Lexer extends Lexer {
 		"\3\2\2\2\u0126R\3\2\2\2\u0127\u0128\t\13\2\2\u0128T\3\2\2\2\u0129\u012a"+
 		"\7^\2\2\u012a\u012b\7w\2\2\u012b\u012c\5S*\2\u012c\u012d\5S*\2\u012d\u012e"+
 		"\5S*\2\u012e\u012f\5S*\2\u012fV\3\2\2\2\17\2\u00df\u00e6\u00ea\u00f5\u00fa"+
-		"\u00ff\u0101\u0109\u010f\u0114\u011a\u0125\3\2\3\2";
+		"\u00ff\u0101\u0109\u010f\u0114\u011a\u0125\3\b\2\2";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
