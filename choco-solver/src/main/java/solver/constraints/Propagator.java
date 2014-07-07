@@ -134,7 +134,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.solver = vars[0].getSolver();
-        checkVariable(vars);
+		if(reactToFineEvt) {
+			checkVariable(vars);
+		}
         this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
