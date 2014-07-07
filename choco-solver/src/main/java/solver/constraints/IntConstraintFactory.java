@@ -309,12 +309,11 @@ public class IntConstraintFactory {
             case "AC3rm":
                 p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
                 break;
-            default:
+			default:
             case "AC3bit+rm":
                 p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
                 break;
         }
-
         return new Constraint("TableBin(" + ALGORITHM + ")", p);
     }
 
@@ -393,11 +392,11 @@ public class IntConstraintFactory {
         Solver solver = X.getSolver();
         IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
         IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
+        Constraint div = IntConstraintFactory.eucl_div(X, Y, t1);
+        Constraint tim = IntConstraintFactory.times(t1, Y, t2);
+        Constraint sum = IntConstraintFactory.sum(new IntVar[]{Z, t2}, X);
         return new Constraint("Mod",
-                new PropDivXYZ(X, Y, t1),
-                new PropTimesXY(t1, Y, t2),
-                new PropTimesZ(t1, Y, t2),
-                new PropSumEq(new IntVar[]{Z, t2}, X)
+                ArrayUtils.append(div.getPropagators(), tim.getPropagators(), sum.getPropagators())
         );
     }
 
@@ -413,6 +412,8 @@ public class IntConstraintFactory {
             return times(X, Y.getValue(), Z);
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
+        } else if (tupleIt(X, Y, Z)) {
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "");
         } else {
             return new Times(X, Y, Z);
         }
@@ -1273,7 +1274,7 @@ public class IntConstraintFactory {
             COEFFS2[idx] = -SCALAR_COEF;
             return makeScalar(VARS2, COEFFS2, VARS[idx], -COEFFS[idx]);
         } else {
-            if (tupleIt()) {
+            if (tupleIt(VARS) && SCALAR.hasEnumeratedDomain()) {
                 return table(ArrayUtils.append(VARS, new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS, COEFFS, SCALAR, SCALAR_COEF), "");
             } else {
                 return Scalar.buildScalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
@@ -1449,7 +1450,9 @@ public class IntConstraintFactory {
      * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
-        //TODO: vars.length == 2
+		if(VARS.length==2){
+			table(VARS[0],VARS[1],TUPLES,"");
+		}
         Propagator p;
         switch (ALGORITHM) {
             case "FC":
@@ -1565,12 +1568,19 @@ public class IntConstraintFactory {
 
     /**
      * Check whether the intension constraint to extension constraint substitution is enabled and can be achieved
+     *
      * @param VARS list of variables involved
      * @return a boolean
      */
     private static boolean tupleIt(IntVar... VARS) {
+		if(!Configuration.ENABLE_TABLE_SUBS){
+			return false;
+		}
         long doms = 1;
-        for (int i = 0; Configuration.ENABLE_TABLE_SUBS && i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
+        for (int i = 0; i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
+			if(!VARS[i].hasEnumeratedDomain()){
+				return false;
+			}
             doms *= VARS[i].getDomainSize();
         }
         return (doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS);
