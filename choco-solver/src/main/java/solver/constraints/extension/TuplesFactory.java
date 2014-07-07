@@ -387,7 +387,8 @@ public class TuplesFactory {
 				int[] t = new int[n+1];
 				for(int i=0;i<n;i++){
 					t[i] = tleft[i];
-				}t[n] = right;
+				}
+                t[n] = right/SCALAR_COEFF;
 				tuples.add(t);
 			}
 		}

@@ -81,7 +81,7 @@ public class Tuples {
         tuples.add(tuple);
         for (int i = 0; i < arity; i++) {
             ranges[i] = Math.min(ranges[i], tuple[i]);
-            ranges[i + arity] = Math.min(ranges[i + arity], tuple[i]);
+            ranges[i + arity] = Math.max(ranges[i + arity], tuple[i]);
         }
     }
 
