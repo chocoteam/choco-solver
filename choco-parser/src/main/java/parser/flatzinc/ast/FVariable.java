@@ -216,7 +216,7 @@ public final class FVariable {
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, solver);
         } else {
-            iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, -999999, 999999, solver);
+            iv = VariableFactory.integer(DEBUG ? name : NO_NAME, -999999, 999999, solver);
         }
         datas.register(name, iv);
         return iv;
@@ -239,13 +239,7 @@ public final class FVariable {
             int ub = type.getUpp();
             solver.post(IntConstraintFactory.member(iv, lb, ub));
         } else {
-            int size = type.getUpp() - type.getLow() + 1;
-            if (size < 256) {
-                iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
-            } else {
-                iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
-            }
-
+            iv = VariableFactory.integer(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
         }
         datas.register(name, iv);
         return iv;
