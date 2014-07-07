@@ -108,11 +108,6 @@ public class PropReif extends Propagator<Variable> {
     }
 
     @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public ESat isEntailed() {
         if (bVar.isInstantiated()) {
             if (bVar.getValue() == 1) {
