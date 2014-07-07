@@ -185,53 +185,20 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     }
 
     /**
-     * maintain the list by checking only the variable that has changed when
-     * checking if a tuple is valid.
-     *
-     * @param idx : the variable changed
-     */
-    public void maintainList(int idx) {
-        int cidx = 0;
-        int nLast = last.get();
-        while (cidx <= nLast) {
-            int idxt = listuples[cidx++];
-            int[] tuple = relation.getTuple(idxt);
-            if (valcheck.isValid(tuple, idx)) {
-                //extract the supports
-                for (int i = 0; i < futureVars.size(); i++) {
-                    int vIdx = futureVars.get(i);
-                    if (!gacValues[vIdx].get(tuple[vIdx] - offsets[vIdx])) {
-                        gacValues[vIdx].set(tuple[vIdx] - offsets[vIdx]);
-                        nbGacValues[vIdx]++;
-                        if (nbGacValues[vIdx] == vars[vIdx].getDomainSize()) {
-                            futureVars.removeAt(i);
-                            i--;
-                        }
-                    }
-                }
-            } else {
-                //remove the tuple from the current list
-                cidx--;
-                final int temp = listuples[nLast];
-                listuples[nLast] = listuples[cidx];
-                listuples[cidx] = temp;
-                last.add(-1);
-                nLast--;
-            }
-        }
-    }
-
-    /**
      * maintain the list by checking all variable within isValid
      */
-    public void maintainList() {
+    //maintain the list by checking only the variable that has changed when
+    //* checking if a tuple is valid.
+    //*
+    //* @param idx : the variable changed
+    public void maintainList(/*int idx*/) {
         int cidx = 0;
         int nLast = last.get();
         while (cidx <= nLast) {
             int idxt = listuples[cidx++];
             int[] tuple = relation.getTuple(idxt);
 
-            if (valcheck.isValid(tuple)) {
+            if (valcheck.isValid(tuple/*,idx*/)) {
                 //extract the supports
                 for (int i = 0; i < futureVars.size(); i++) {
                     int vIdx = futureVars.get(i);

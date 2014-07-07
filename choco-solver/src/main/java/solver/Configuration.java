@@ -66,7 +66,7 @@ public enum Configuration {
         }
         {
             String values = properties.getProperty("FINE_EVENT_QUEUES");
-            values = values.substring(1,values.length()-1);
+            values = values.substring(1, values.length() - 1);
             String[] values_ = values.split(",");
             short[] shorts = new short[values_.length];
             for (int i = 0; i < values_.length; i++) {
@@ -76,7 +76,7 @@ public enum Configuration {
         }
         {
             String values = properties.getProperty("COARSE_EVENT_QUEUES");
-            values = values.substring(1,values.length()-1);
+            values = values.substring(1, values.length() - 1);
             String[] values_ = values.split(",");
             short[] shorts = new short[values_.length];
             for (int i = 0; i < values_.length; i++) {
@@ -108,8 +108,8 @@ public enum Configuration {
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = Boolean.parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
 
-	// Set to true to allow the creation of views in the VariableFactory.
-	// Creates new variables with channeling constraints otherwise.
+    // Set to true to allow the creation of views in the VariableFactory.
+    // Creates new variables with channeling constraints otherwise.
     public static final boolean ENABLE_VIEWS = Boolean.parseBoolean(properties.getProperty("ENABLE_VIEWS"));
 
     public enum MOVP {
@@ -153,4 +153,17 @@ public enum Configuration {
     public static final short[] FINE_EVENT_QUEUES;
     // 2. For coarse events
     public static final short[] COARSE_EVENT_QUEUES;
+
+    // Define the maximum domain size to force integer variable to be enumerated
+    // instead of bounded while calling VariableFactory.integer
+    public static final int MAX_DOM_SIZE_FOR_ENUM = Integer.parseInt(properties.getProperty("MAX_DOM_SIZE_FOR_ENUM"));
+
+    // Set to true to allow intension constraint to extension constraint substitution
+    public static final boolean ENABLE_TABLE_SUBS = Boolean.parseBoolean(properties.getProperty("ENABLE_TABLE_SUBS"));
+
+    // Define the maximum domain size to enable intension constraint to extension constraint substitution
+    // Only checked when ENABLE_TABLE_SUBS is set to true
+    public static final int MAX_TUPLES_FOR_TABLE_SUBS = Integer.parseInt(properties.getProperty("MAX_TUPLES_FOR_TABLE_SUBS"));
+
+
 }
