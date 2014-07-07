@@ -1274,11 +1274,7 @@ public class IntConstraintFactory {
             COEFFS2[idx] = -SCALAR_COEF;
             return makeScalar(VARS2, COEFFS2, VARS[idx], -COEFFS[idx]);
         } else {
-<<<<<<< HEAD
-            if (tupleIt(VARS)) {
-=======
             if (tupleIt(VARS) && SCALAR.hasEnumeratedDomain()) {
->>>>>>> 2e8fdecd1474329bf621754beec1d3b4459c868e
                 return table(ArrayUtils.append(VARS, new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS, COEFFS, SCALAR, SCALAR_COEF), "");
             } else {
                 return Scalar.buildScalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
