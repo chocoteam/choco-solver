@@ -71,4 +71,7 @@ public class ParserConfiguration {
 
     // Set to true to log the resolution trace
     public static final boolean PRINT_SEARCH = Boolean.parseBoolean(properties.getProperty("PRINT_SEARCH"));
+
+    // Removes bool2int predicates
+    public static final boolean REMOVE_B2I = Boolean.parseBoolean(properties.getProperty("REMOVE_B2I"));
 }
