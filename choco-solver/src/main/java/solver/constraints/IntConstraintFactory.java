@@ -309,12 +309,11 @@ public class IntConstraintFactory {
             case "AC3rm":
                 p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
                 break;
-            default:
+			default:
             case "AC3bit+rm":
                 p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
                 break;
         }
-
         return new Constraint("TableBin(" + ALGORITHM + ")", p);
     }
 
@@ -1273,7 +1272,7 @@ public class IntConstraintFactory {
             COEFFS2[idx] = -SCALAR_COEF;
             return makeScalar(VARS2, COEFFS2, VARS[idx], -COEFFS[idx]);
         } else {
-            if (tupleIt()) {
+            if (tupleIt(VARS) && SCALAR.hasEnumeratedDomain()) {
                 return table(ArrayUtils.append(VARS, new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS, COEFFS, SCALAR, SCALAR_COEF), "");
             } else {
                 return Scalar.buildScalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
@@ -1449,7 +1448,9 @@ public class IntConstraintFactory {
      * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
-        //TODO: vars.length == 2
+		if(VARS.length==2){
+			table(VARS[0],VARS[1],TUPLES,"");
+		}
         Propagator p;
         switch (ALGORITHM) {
             case "FC":
@@ -1569,8 +1570,14 @@ public class IntConstraintFactory {
      * @return a boolean
      */
     private static boolean tupleIt(IntVar... VARS) {
+		if(!Configuration.ENABLE_TABLE_SUBS){
+			return false;
+		}
         long doms = 1;
-        for (int i = 0; Configuration.ENABLE_TABLE_SUBS && i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
+        for (int i = 0; i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
+			if(!VARS[i].hasEnumeratedDomain()){
+				return false;
+			}
             doms *= VARS[i].getDomainSize();
         }
         return (doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS);
