@@ -217,6 +217,12 @@ public class IntConstraintFactory {
      * @param VAR2 second variable
      */
     public static Constraint arithm(IntVar VAR1, String OP, IntVar VAR2) {
+		if(VAR2.isInstantiated()){
+			return arithm(VAR1,OP,VAR2.getValue());
+		}
+		if(VAR1.isInstantiated()){
+			return arithm(VAR2,Operator.getFlip(OP),VAR1.getValue());
+		}
         return new Arithmetic(VAR1, Operator.get(OP), VAR2);
     }
 
@@ -230,6 +236,22 @@ public class IntConstraintFactory {
      * @param CSTE an operator
      */
     public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
+		if(VAR2.isInstantiated()){
+			if(OP1.equals("+")){
+				return arithm(VAR1,OP2,CSTE-VAR2.getValue());
+			}else{
+				assert OP1.equals("-");
+				return arithm(VAR1,OP2,CSTE+VAR2.getValue());
+			}
+		}
+		if(VAR1.isInstantiated()){
+			if(OP1.equals("+")){
+				return arithm(VAR2,OP2,CSTE-VAR1.getValue());
+			}else{
+				assert OP1.equals("-");
+				return arithm(VAR2,Operator.getFlip(OP2),VAR1.getValue()-CSTE);
+			}
+		}
         Operator op1 = Operator.get(OP1);
         Operator op2 = Operator.get(OP2);
         return new Arithmetic(VAR1, op1, VAR2, op2, CSTE);
