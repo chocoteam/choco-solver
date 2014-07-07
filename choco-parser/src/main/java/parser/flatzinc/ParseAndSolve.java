@@ -27,10 +27,7 @@
 
 package parser.flatzinc;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -39,7 +36,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -192,23 +188,19 @@ public class ParseAndSolve {
     }
 
     public void buildParser(InputStream is, Solver mSolver, Datas datas) {
-        try {
-            // Create an input character stream from standard in
-            ANTLRInputStream input = new ANTLRInputStream(is);
-//            CharStream input = new UnbufferedCharStream(is);
-            // Create an ExprLexer that feeds from that stream
-            Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
-            // Create a stream of tokens fed by the lexer
-            TokenStream tokens = new CommonTokenStream(lexer);
-            // Create a parser that feeds off the token stream
-            Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
-            parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
-            parser.setBuildParseTree(false);
-            parser.setTrimParseTree(false);
-            parser.flatzinc_model(mSolver, datas);
-        } catch (IOException io) {
-            Exit.log(io.getMessage());
-        }
+        // Create an input character stream from standard in
+        CharStream input = new UnbufferedCharStream(is);
+        // Create an ExprLexer that feeds from that stream
+        Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
+        lexer.setTokenFactory(new CommonTokenFactory(true));
+        // Create a stream of tokens fed by the lexer
+        TokenStream tokens = new UnbufferedTokenStream<CommonToken>(lexer);
+        // Create a parser that feeds off the token stream
+        Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
+        parser.setBuildParseTree(false);
+        parser.setTrimParseTree(false);
+        parser.flatzinc_model(mSolver, datas);
     }
 
     protected void makeEngine(Solver solver, Datas datas) {

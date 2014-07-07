@@ -79,14 +79,14 @@ IDENTIFIER
 
 
 COMMENT
-    :   '%' ~('\n'|'\r')* '\r'? '\n' -> channel(HIDDEN)
+    :   '%' ~('\n'|'\r')* '\r'? '\n' -> skip
     ;
 
 WS  :   ( ' '
         | '\t'
         | '\r'
         | '\n'
-        ) -> channel(HIDDEN)
+        ) -> skip
     ;
 
 /*********************************************
