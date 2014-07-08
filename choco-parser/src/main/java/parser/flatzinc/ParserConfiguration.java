@@ -74,4 +74,7 @@ public class ParserConfiguration {
 
     // Removes bool2int predicates
     public static final boolean REMOVE_B2I = Boolean.parseBoolean(properties.getProperty("REMOVE_B2I"));
+
+    // Faster reification (but quite dirty)
+    public static final boolean HACK_REIFICATION = Boolean.parseBoolean(properties.getProperty("HACK_REIFICATION"));
 }
