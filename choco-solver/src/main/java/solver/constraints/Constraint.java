@@ -221,4 +221,15 @@ public class Constraint implements Serializable {
     public String getName() {
         return name;
     }
+
+	/**
+	 * @return the maximum priority of a propagator of this constraint
+	 */
+	public PropagatorPriority computeMaxPriority() {
+		int priority = 1;
+		for(Propagator p:propagators){
+			priority = Math.max(priority, p.getPriority().priority);
+		}
+		return PropagatorPriority.get(priority);
+	}
 }

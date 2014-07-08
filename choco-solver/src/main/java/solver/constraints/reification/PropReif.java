@@ -67,7 +67,7 @@ public class PropReif extends Propagator<Variable> {
     //***********************************************************************************
 
     public PropReif(Variable[] allVars, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(allVars, PropagatorPriority.LINEAR, false);
+        super(allVars, computePrority(consIfBoolTrue, consIfBoolFalse), false);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;
@@ -76,6 +76,11 @@ public class PropReif extends Propagator<Variable> {
 	public void setReifCons(ReificationConstraint reifCons){
 		assert this.reifCons==null:"cannot change the ReificationConstraint of a PropReif";
 		this.reifCons = reifCons;
+	}
+
+	private static PropagatorPriority computePrority(Constraint consIfBoolTrue, Constraint consIfBoolFalse){
+		int p = Math.min(consIfBoolTrue.computeMaxPriority().priority,consIfBoolFalse.computeMaxPriority().priority);
+		return PropagatorPriority.get(Math.min(p,PropagatorPriority.TERNARY.priority));
 	}
 
     //***********************************************************************************
