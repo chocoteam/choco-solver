@@ -113,8 +113,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         eventmasks = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
             int nbv = propagators[i].getNbVars();
-            eventsets[i] = new IntCircularQueue(nbv);
-            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+			if(propagators[i].reactToFineEvent()) {
+				eventsets[i] = new IntCircularQueue(nbv);
+				eventmasks[i] = new int[nbv];
+			}
         }
         notEmpty = 0;
         init = true;
@@ -149,22 +151,26 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 scheduled[aid] = 0;
-                evtset = eventsets[aid];
-                while (evtset.size() > 0) {
-                    int v = evtset.pollFirst();
-                    assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                    if (Configuration.PRINT_PROPAGATION) {
-                        IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
-                    }
-                    // clear event
-                    int vid = lastProp.reactToFineEvent() ? v : 0;
-                    mask = eventmasks[aid][vid];
-                    eventmasks[aid][vid] = 0;
-                    lastProp.decNbPendingEvt();
-                    // run propagation on the specific event
-                    lastProp.fineERcalls++;
-                    lastProp.propagate(v, mask);
-                }
+				if(lastProp.reactToFineEvent()) {
+					evtset = eventsets[aid];
+					while (evtset.size() > 0) {
+						int v = evtset.pollFirst();
+						assert lastProp.isActive() : "propagator is not active:" + lastProp;
+						if (Configuration.PRINT_PROPAGATION) {
+							IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
+						}
+						// clear event
+						int vid = lastProp.reactToFineEvent() ? v : 0;
+						mask = eventmasks[aid][vid];
+						eventmasks[aid][vid] = 0;
+						lastProp.decNbPendingEvt();
+						// run propagation on the specific event
+						lastProp.fineERcalls++;
+						lastProp.propagate(v, mask);
+					}
+				}else{
+					lastProp.propagate(EventType.FULL_PROPAGATION.getMask());
+				}
                 // This part is for debugging only!!
                 if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
                     FakeEngine.checkIdempotency(lastProp);
@@ -189,31 +195,34 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         IntCircularQueue evtset;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
-            evtset = eventsets[aid];
-            while (evtset.size() > 0) {
-                int v = evtset.pollFirst();
-                int vid = lastProp.reactToFineEvent() ? v : 0;
-                eventmasks[aid][vid] = 0;
-            }
-            evtset.clear();
+			if(lastProp.reactToFineEvent()) {
+				evtset = eventsets[aid];
+				while (evtset.size() > 0) {
+					int v = evtset.pollFirst();
+					int vid = lastProp.reactToFineEvent() ? v : 0;
+					eventmasks[aid][vid] = 0;
+				}
+				evtset.clear();
+				lastProp.flushPendingEvt();
+			}
             scheduled[aid] = 0;
-            lastProp.flushPendingEvt();
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
                 lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
-                evtset = eventsets[aid];
-                while (evtset.size() > 0) {
-                    int v = evtset.pollFirst();
-                    int vid = lastProp.reactToFineEvent() ? v : 0;
-                    eventmasks[aid][vid] = 0;
-                }
-                evtset.clear();
-                scheduled[aid] = 0;
-                lastProp.flushPendingEvt();
-
+				if(lastProp.reactToFineEvent()) {
+					evtset = eventsets[aid];
+					while (evtset.size() > 0) {
+						int v = evtset.pollFirst();
+						int vid = lastProp.reactToFineEvent() ? v : 0;
+						eventmasks[aid][vid] = 0;
+					}
+					evtset.clear();
+					lastProp.flushPendingEvt();
+				}
+				scheduled[aid] = 0;
             }
             notEmpty = notEmpty & ~(1 << i);
         }
@@ -235,18 +244,19 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             pindice = vindices[p];
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
-                int vid = prop.reactToFineEvent() ? pindice : 0;
-                boolean needSched = (eventmasks[aid][vid] == 0);
-                eventmasks[aid][vid] |= type.strengthened_mask;
-                if (needSched) {
-                    if (Configuration.PRINT_SCHEDULE) {
-                        IPropagationEngine.Trace.printSchedule(prop);
-                    }
-                    prop.incNbPendingEvt();
-                    eventsets[aid].addLast(pindice);
-                } else if (Configuration.PRINT_SCHEDULE) {
-                    IPropagationEngine.Trace.printAlreadySchedule(prop);
-                }
+				if(prop.reactToFineEvent()){
+					boolean needSched = (eventmasks[aid][pindice] == 0);
+					eventmasks[aid][pindice] |= type.strengthened_mask;
+					if (needSched) {
+						if (Configuration.PRINT_SCHEDULE) {
+							IPropagationEngine.Trace.printSchedule(prop);
+						}
+						prop.incNbPendingEvt();
+						eventsets[aid].addLast(pindice);
+					} else if (Configuration.PRINT_SCHEDULE) {
+						IPropagationEngine.Trace.printAlreadySchedule(prop);
+					}
+				}
                 if (scheduled[aid] == 0) {
                     int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
                     pro_queue[prio].addLast(prop);
@@ -276,20 +286,22 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void desactivatePropagator(Propagator propagator) {
-        int pid = propagator.getId();
-        int aid = p2i.get(pid);
-        if (aid > -1) {
-            assert aid > -1 : "try to desactivate an unknown constraint";
-            // we don't remove the element from its master to avoid costly operations
-            IntCircularQueue evtset = eventsets[aid];
-            while (evtset.size() > 0) {
-                int v = evtset.pollFirst();
-                int vid = propagator.reactToFineEvent() ? v : 0;
-                eventmasks[aid][vid] = 0;
-            }
-            evtset.clear();
-            propagator.flushPendingEvt();
-        }
+		if(propagator.reactToFineEvent()) {
+			int pid = propagator.getId();
+			int aid = p2i.get(pid);
+			if (aid > -1) {
+				assert aid > -1 : "try to desactivate an unknown constraint";
+				// we don't remove the element from its master to avoid costly operations
+				IntCircularQueue evtset = eventsets[aid];
+				while (evtset.size() > 0) {
+					int v = evtset.pollFirst();
+					int vid = propagator.reactToFineEvent() ? v : 0;
+					eventmasks[aid][vid] = 0;
+				}
+				evtset.clear();
+				propagator.flushPendingEvt();
+			}
+		}
     }
 
     @Override
@@ -324,9 +336,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         eventmasks = new int[nsize][];
         System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
         for (int i = osize; i < nsize; i++) {
-            int nbv = propagators[i].getNbVars();
-            eventsets[i] = new IntCircularQueue(nbv);
-            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+            if(propagators[i].reactToFineEvent()) {
+				int nbv = propagators[i].getNbVars();
+				eventsets[i] = new IntCircularQueue(nbv);
+				eventmasks[i] = new int[nbv];
+			}
         }
     }
 
