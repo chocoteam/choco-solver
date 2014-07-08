@@ -1424,6 +1424,19 @@ public class IntConstraintFactory {
         } else if (VARS.length == 2 && SUM.isInstantiated()) {
             return arithm(VARS[0], "+", VARS[1], OPERATOR, SUM.getValue());
         } else {
+			int nbBools=0;
+			for(IntVar left:VARS){
+				if((left.getTypeAndKind()&Variable.BOOL)!=0){
+					nbBools++;
+				}
+			}
+			if(nbBools == VARS.length){
+				BoolVar[] bvars = new BoolVar[nbBools];
+				for(int i=0;i<nbBools;i++){
+					bvars[i] = (BoolVar) VARS[i];
+				}
+				return sum(bvars,OPERATOR,SUM);
+			}
             if (OPERATOR.equals("=")) {
                 return new Constraint("Sum", new PropSumEq(VARS, SUM));
             }
@@ -1449,6 +1462,28 @@ public class IntConstraintFactory {
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
         return new Constraint("SumOfBool", new PropBoolSum(VARS, SUM));
     }
+
+	/**
+	 * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+	 * This constraint is much faster than the one over integer variables
+	 *
+	 * @param VARS a vector of boolean variables
+	 * @param SUM  a variable
+	 */
+	public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
+		if(OPERATOR.equals("=")){
+			return sum(VARS,SUM);
+		}
+		int lb = 0;
+		int ub = 0;
+		for (BoolVar v : VARS) {
+			lb += v.getLB();
+			ub += v.getUB();
+		}
+		IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
+		SUM.getSolver().post(sum(VARS,p));
+		return arithm(p, OPERATOR, SUM);
+	}
 
     /**
      * Create a table constraint, with the specified algorithm defined ALGORITHM
