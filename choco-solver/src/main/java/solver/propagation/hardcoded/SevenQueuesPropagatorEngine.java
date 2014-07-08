@@ -169,6 +169,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 						lastProp.propagate(v, mask);
 					}
 				}else{
+					assert lastProp.isActive() : "propagator is not active:" + lastProp;
+					if (Configuration.PRINT_PROPAGATION) {
+						IPropagationEngine.Trace.printPropagation(null, lastProp);
+					}
 					lastProp.propagate(EventType.FULL_PROPAGATION.getMask());
 				}
                 // This part is for debugging only!!
