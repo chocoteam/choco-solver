@@ -47,8 +47,8 @@ import java.util.Comparator;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @revision 04/03/12 : change sort
  * @since 07/02/11
- *        <p/>
- *        TODO: useless awakeonbounds?
+ * <p/>
+ * TODO: useless awakeonbounds?
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
@@ -121,8 +121,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     /**
      * Build internal structure of the propagator, if necessary
      *
-     * @throws solver.exception.ContradictionException
-     *          if initialisation encounters a contradiction
+     * @throws solver.exception.ContradictionException if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
         if (allEnum) {
@@ -292,11 +291,13 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         if (infBoundModified || supBoundModified) {
             initSort();
-            do {
-                sortIt();
-                infBoundModified = filterLower();
-                supBoundModified = filterUpper();
-            } while (infBoundModified || supBoundModified);
+            sortIt();
+            infBoundModified = filterLower();
+            while (filterUpper()) {
+                if (!filterLower()) {
+                    return;
+                }
+            }
         }
     }
 

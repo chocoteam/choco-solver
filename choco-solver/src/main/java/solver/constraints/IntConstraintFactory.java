@@ -1426,7 +1426,7 @@ public class IntConstraintFactory {
         } else {
 			int nbBools=0;
 			for(IntVar left:VARS){
-				if((left.getTypeAndKind()&Variable.BOOL)!=0){
+				if((left.getTypeAndKind() & Variable.KIND) == Variable.BOOL){
 					nbBools++;
 				}
 			}
