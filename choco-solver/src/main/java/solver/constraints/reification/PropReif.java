@@ -67,7 +67,7 @@ public class PropReif extends Propagator<Variable> {
     //***********************************************************************************
 
     public PropReif(Variable[] allVars, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(allVars, PropagatorPriority.LINEAR, false);
+        super(allVars, computePrority(consIfBoolTrue, consIfBoolFalse), false);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;
@@ -76,6 +76,11 @@ public class PropReif extends Propagator<Variable> {
 	public void setReifCons(ReificationConstraint reifCons){
 		assert this.reifCons==null:"cannot change the ReificationConstraint of a PropReif";
 		this.reifCons = reifCons;
+	}
+
+	private static PropagatorPriority computePrority(Constraint consIfBoolTrue, Constraint consIfBoolFalse){
+		int p = Math.min(consIfBoolTrue.computeMaxPriority().priority,consIfBoolFalse.computeMaxPriority().priority);
+		return PropagatorPriority.get(Math.min(p,PropagatorPriority.TERNARY.priority));
 	}
 
     //***********************************************************************************
@@ -93,23 +98,28 @@ public class PropReif extends Propagator<Variable> {
             setPassive();
         } else {
             ESat sat = trueCons.isSatisfied();
-            if (sat == ESat.FALSE) {
-                bVar.setToFalse(aCause);
-                reifCons.activate(1);
-                setPassive();
-            }
-            sat = falseCons.isSatisfied();
-            if (sat == ESat.FALSE) {
-                bVar.setToTrue(aCause);
-                reifCons.activate(0);
-                setPassive();
-            }
+			if (sat == ESat.TRUE) {
+				bVar.setToTrue(aCause);
+				reifCons.activate(0);
+				setPassive();
+			} else if (sat == ESat.FALSE) {
+				bVar.setToFalse(aCause);
+				reifCons.activate(1);
+				setPassive();
+			}
+//			else {// in case the entailment has not the same implementation
+//				sat = falseCons.isSatisfied();
+//				if (sat == ESat.FALSE) {
+//					bVar.setToTrue(aCause);
+//					reifCons.activate(0);
+//					setPassive();
+//				}else if(sat == ESat.TRUE){
+//					bVar.setToFalse(aCause);
+//					reifCons.activate(1);
+//					setPassive();
+//				}
+//			}
         }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override

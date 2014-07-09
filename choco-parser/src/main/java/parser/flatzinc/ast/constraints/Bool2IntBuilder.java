@@ -47,30 +47,38 @@ import java.util.List;
  */
 public class Bool2IntBuilder implements IBuilder {
 
-//    private static Constraint[] NO_CSTR = new Constraint[0];
+    private static Constraint[] NO_CSTR = new Constraint[0];
+    private static final String defines_var = "def";//"defines_var";
 
     @Override
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        IntVar b = exps.get(1).intVarValue(solver);
-        String vname = b.getName();
-        return new Constraint[]{ICF.arithm(a, "=", b)};
-        /*
-        TODO: fix
-        if (b.getNbProps() > 0) {
-            //throw new FZNException("unable to remove " + b + ": it already exists in propagator(s).");
-        }
-        LoggerFactory.getLogger("solver").info("{} -> {} // {}: {}", new Object[]{a, b, vname, datas.get(vname)});
-        solver.unassociates(b);
-        datas.register(vname, a);
-        LoggerFactory.getLogger("solver").info("{} -> {} // {}: {}", new Object[]{a, b, vname, datas.get(vname)});
-        if (b.instantiated()) {
-            try {
-                a.instantiateTo(b.getValue(), Cause.Null);
-            } catch (ContradictionException e) {
-                throw new FZNException("unable to instantiate " + a + " to " + b.getValue() + ".");
+        BoolVar bVar = exps.get(0).boolVarValue(solver);
+        IntVar iVar = exps.get(1).intVarValue(solver);
+        // 1. an annotation specify which variable is a defined one
+        if (annotations.size() > 0 && annotations.get(0).id.value.startsWith(defines_var)) {
+            IntVar defvar = (IntVar) datas.get(annotations.get(0).exps.get(0).toString());
+            if (defvar != null && defvar.getNbProps() == 0) {
+                if (defvar == iVar) {
+                    // then iVar can be removed and bVar now refers to iVar
+                    substitute(iVar, bVar, solver, datas);
+                    return NO_CSTR;
+                } else if (defvar == bVar) {
+                    // then bVar can be removed and iVar now refers to bVar
+                    substitute(bVar, iVar, solver, datas);
+                    return NO_CSTR;
+                }
             }
         }
-        return NO_CSTR;*/
+        // otherwise, well post the constraint
+        return new Constraint[]{ICF.arithm(bVar, "=", iVar)};
     }
+
+    private void substitute(IntVar REMOVE, IntVar KEEP, Solver SOLVER, Datas datas) {
+        SOLVER.unassociates(REMOVE);
+        datas.register(REMOVE.getName(), KEEP);
+        if (REMOVE.isInstantiated()) {
+            SOLVER.post(ICF.member(KEEP, REMOVE.getValue(), REMOVE.getValue()));
+        }
+    }
+
 }
