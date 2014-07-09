@@ -231,7 +231,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 			IntCircularQueue evtset = event_f[aid];
 			while (!evtset.isEmpty()) {
 				int v = evtset.pollFirst();
-				assert lastProp.isActive() : "propagator is not active";
+                assert lastProp.isActive() : "propagator is not active:" + lastProp;
 				if (Configuration.PRINT_PROPAGATION) {
 					Trace.printPropagation(lastProp.getVar(v), lastProp);
 				}
@@ -244,7 +244,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 				lastProp.propagate(v, mask);
 			}
 		}else{
-			assert lastProp.isActive() : "propagator is not active";
+            assert lastProp.isActive() : "propagator is not active:" + lastProp;
 			if (Configuration.PRINT_PROPAGATION) {
 				Trace.printPropagation(null, lastProp);
 			}
@@ -263,7 +263,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         schedule_c[aid] = false;
         EventType evt = event_c[aid];
         event_c[aid] = EventType.VOID;
-        assert lastProp.isActive() : "propagator is not active";
+        assert lastProp.isActive() : "propagator is not active:" + lastProp;
         if (Configuration.PRINT_PROPAGATION) {
             Trace.printPropagation(null, lastProp);
         }
