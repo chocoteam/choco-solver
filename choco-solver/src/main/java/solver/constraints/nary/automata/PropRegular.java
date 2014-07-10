@@ -74,31 +74,14 @@ public class PropRegular extends Propagator<IntVar> {
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
-		graph = initGraph(solver.getEnvironment(), vars, automaton);
+        graph = initGraph(solver.getEnvironment(), vars, automaton);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < vars.length; i++) {
-            graph.updateSupports(i, vars[i], this);
-        }
-        int left, right;
-        for (int i = 0; i < vars.length; i++) {
-            left = right = Integer.MIN_VALUE;
-            for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
-                StoredIndexedBipartiteSet sup = graph.getSupport(i, j);
-                if (sup == null || sup.isEmpty()) {
-                    if (j == right + 1) {
-                        right = j;
-                    } else {
-                        vars[i].removeInterval(left, right, aCause);
-                        left = right = j;
-                    }
-                }
-            }
-            vars[i].removeInterval(left, right, aCause);
-        }
         for (int i = 0; i < idms.length; i++) {
+            idms[i].freeze();
+            idms[i].forEach(rem_proc.set(i), EventType.REMOVE);
             idms[i].unfreeze();
         }
     }
