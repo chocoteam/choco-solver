@@ -56,6 +56,7 @@ import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.channeling.PropInverseChannelAC;
 import solver.constraints.nary.channeling.PropInverseChannelBC;
 import solver.constraints.nary.circuit.*;
+import solver.constraints.nary.count.PropCountVar;
 import solver.constraints.nary.count.PropCount_AC;
 import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.element.PropElementV_fast;
@@ -741,7 +742,6 @@ public class IntConstraintFactory {
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
      * <p/>
-     * Based on GlobalCardinality constraint, ensures GAC.
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
@@ -750,6 +750,33 @@ public class IntConstraintFactory {
     public static Constraint count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
         return new Constraint("Count", new PropCount_AC(VARS, VALUE, LIMIT));
     }
+
+	/**
+	 * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
+	 * Enforce condition N = LIMIT to hold.
+	 * <p/>
+	 *
+	 * @param VALUE a variable
+	 * @param VARS  a vector of variables
+	 * @param LIMIT a variable
+	 */
+	public static Constraint[] count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
+		return new Constraint[]{new Constraint("Count",new PropCountVar(VARS,VALUE,LIMIT))};
+//		Solver solver = LIMIT.getSolver();
+//		int size = VALUE.getUB()-VALUE.getLB()+1;
+//		IntVar[] valCount = new IntVar[size];
+//		ArrayList<Constraint> cstrs = new ArrayList<>();
+//		for(int i=0;i<size;i++){
+//			if(VALUE.contains(i+VALUE.getLB())){
+//				valCount[i] = VF.bounded(StringUtils.randomName(), 0, VARS.length, solver);
+//				cstrs.add(count(i+VALUE.getLB(), VARS, valCount[i]));
+//			}else {
+//				valCount[i] = solver.ZERO;
+//			}
+//		}
+//		cstrs.add(element(LIMIT, valCount, VALUE, VALUE.getLB()));
+//		return cstrs.toArray(new Constraint[0]);
+	}
 
     /**
      * Cumulative constraint: Enforces that at each point in time,

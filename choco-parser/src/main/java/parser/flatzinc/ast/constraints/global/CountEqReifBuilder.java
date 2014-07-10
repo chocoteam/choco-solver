@@ -29,14 +29,12 @@ package parser.flatzinc.ast.constraints.global;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.EInt;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.constraints.ICF;
+import solver.variables.*;
+import util.tools.StringUtils;
 
 import java.util.List;
 
@@ -47,33 +45,22 @@ import java.util.List;
  * @since 26/07/12
  */
 public class CountEqReifBuilder implements IBuilder {
-    @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-		IntVar[] x = exps.get(0).toIntVarArray(solver);
-        IntVar c = exps.get(2).intVarValue(solver);
-        if (exps.get(1) instanceof EInt) {
-            int y = exps.get(1).intValue();
-            return new Constraint[]{IntConstraintFactory.count(y, x, c)};
-        }
-        IntVar y = exps.get(1).intVarValue(solver);
+	@Override
+	public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+		IntVar[] decVars = exps.get(0).toIntVarArray(solver);
+		IntVar valVar = exps.get(1).intVarValue(solver);
+		IntVar countVar = exps.get(2).intVarValue(solver);
 		BoolVar b = exps.get(3).boolVarValue(solver);
-        if (y.isInstantiated()) {
-			Constraint cstr = IntConstraintFactory.count(y.getValue(), x, c);
-			cstr.reifyWith(b);
-            return new Constraint[]{};
-        } else {
-            int ylb = y.getLB();
-            int yub = y.getUB();
-            int nb = yub - ylb + 1;
-			IntVar[] cs = VariableFactory.boundedArray("cs", nb, 0, nb, solver);
-            Constraint[] cstrs = new Constraint[yub - ylb + 1];
-            int k = 0;
-            for (int i = ylb; i <= yub; i++) {
-                cstrs[k++] = IntConstraintFactory.count(i, x, cs[i - ylb]);
-            }
-			Constraint cstr = IntConstraintFactory.element(c, cs, y, ylb);
-			cstr.reifyWith(b);
-            return cstrs;
-        }
-    }
+		Constraint[] cstrs;
+		if (valVar.isInstantiated()) {
+			IntVar nbOcc = VF.bounded(StringUtils.randomName(), 0, decVars.length, countVar.getSolver());
+			cstrs = new Constraint[]{ICF.count(valVar.getValue(), decVars, nbOcc)};
+			ICF.arithm(nbOcc,"=",countVar).reifyWith(b);
+		}else{
+			IntVar value = VF.integer(StringUtils.randomName(), valVar.getLB(), valVar.getUB(), countVar.getSolver());
+			cstrs = ICF.count(value, decVars, countVar);
+			ICF.arithm(value,"=",valVar).reifyWith(b);
+		}
+		return cstrs;
+	}
 }
