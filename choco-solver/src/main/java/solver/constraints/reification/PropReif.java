@@ -59,7 +59,7 @@ public class PropReif extends Propagator<Variable> {
     private final Constraint trueCons;
     // constraint to apply if bVar = false
     private final Constraint falseCons;
-	// constraint in charge of the reification process (constraint of this propagator)
+    // constraint in charge of the reification process (constraint of this propagator)
     private ReificationConstraint reifCons;
 
     //***********************************************************************************
@@ -73,15 +73,15 @@ public class PropReif extends Propagator<Variable> {
         this.falseCons = consIfBoolFalse;
     }
 
-	public void setReifCons(ReificationConstraint reifCons){
-		assert this.reifCons==null:"cannot change the ReificationConstraint of a PropReif";
-		this.reifCons = reifCons;
-	}
+    public void setReifCons(ReificationConstraint reifCons) {
+        assert this.reifCons == null : "cannot change the ReificationConstraint of a PropReif";
+        this.reifCons = reifCons;
+    }
 
-	private static PropagatorPriority computePrority(Constraint consIfBoolTrue, Constraint consIfBoolFalse){
-		int p = Math.min(consIfBoolTrue.computeMaxPriority().priority,consIfBoolFalse.computeMaxPriority().priority);
-		return PropagatorPriority.get(Math.min(p,PropagatorPriority.TERNARY.priority));
-	}
+    private static PropagatorPriority computePrority(Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+        int p = Math.min(consIfBoolTrue.computeMaxPriority().priority, consIfBoolFalse.computeMaxPriority().priority);
+        return PropagatorPriority.get(Math.min(p, PropagatorPriority.TERNARY.priority));
+    }
 
     //***********************************************************************************
     // METHODS
@@ -90,23 +90,23 @@ public class PropReif extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (bVar.isInstantiated()) {
+            setPassive();
             if (bVar.getBooleanValue() == ESat.TRUE) {
                 reifCons.activate(0);
             } else {
                 reifCons.activate(1);
             }
-            setPassive();
         } else {
             ESat sat = trueCons.isSatisfied();
-			if (sat == ESat.TRUE) {
-				bVar.setToTrue(aCause);
-				reifCons.activate(0);
-				setPassive();
-			} else if (sat == ESat.FALSE) {
-				bVar.setToFalse(aCause);
-				reifCons.activate(1);
-				setPassive();
-			}
+            if (sat == ESat.TRUE) {
+                setPassive();
+                bVar.setToTrue(aCause);
+                reifCons.activate(0);
+            } else if (sat == ESat.FALSE) {
+                setPassive();
+                bVar.setToFalse(aCause);
+                reifCons.activate(1);
+            }
 //			else {// in case the entailment has not the same implementation
 //				sat = falseCons.isSatisfied();
 //				if (sat == ESat.FALSE) {
@@ -130,16 +130,16 @@ public class PropReif extends Propagator<Variable> {
             } else {
                 return falseCons.isSatisfied();
             }
-        }else{
-			// a constraint an its opposite can neither be both true nor both false
-			ESat tie = trueCons.isSatisfied();
-			if(tie!=ESat.UNDEFINED){
-				ESat fie = falseCons.isSatisfied();
-				if(tie==fie){
-					return ESat.FALSE;
-				}
-			}
-		}
+        } else {
+            // a constraint an its opposite can neither be both true nor both false
+            ESat tie = trueCons.isSatisfied();
+            if (tie != ESat.UNDEFINED) {
+                ESat fie = falseCons.isSatisfied();
+                if (tie == fie) {
+                    return ESat.FALSE;
+                }
+            }
+        }
         return ESat.UNDEFINED;
     }
 
@@ -160,6 +160,6 @@ public class PropReif extends Propagator<Variable> {
 
     @Override
     public String toString() {
-        return bVar.toString() + "=>" + trueCons.toString()+", !"+bVar.toString() + "=>" + falseCons.toString();
+        return bVar.toString() + "=>" + trueCons.toString() + ", !" + bVar.toString() + "=>" + falseCons.toString();
     }
 }
