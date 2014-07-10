@@ -57,51 +57,107 @@ public class IntEqReifBuilder implements IBuilder {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         final BoolVar r = exps.get(2).boolVarValue(solver);
-		// this constraint is not poster, hence not returned, because it is reified
-		if(ParserConfiguration.HACK_REIFICATION) {
-			if (a.isInstantiated() || b.isInstantiated()) {
-				IntVar x;
-				int c;
-				if (a.isInstantiated()) {
-					x = b;
-					c = a.getValue();
-				} else {
-					x = a;
-					c = b.getValue();
-				}
-				final IntVar var = x;
-				final int cste = c;
-				return new Constraint[]{new Constraint("reif(a=cste,r)", new Propagator<IntVar>(new IntVar[]{x, r}, PropagatorPriority.BINARY, false) {
-					@Override
-					public void propagate(int evtmask) throws ContradictionException {
-						if (r.getLB() == 1) {
-							var.instantiateTo(cste, aCause);
-							setPassive();
-						} else {
-							if (r.getUB() == 0) {
-								if (var.removeValue(cste, aCause) || !var.contains(cste)) {
-									setPassive();
-								}
-							} else {
-								if (var.isInstantiatedTo(cste)) {
-									r.setToTrue(aCause);
-									setPassive();
-								} else if (!var.contains(cste)) {
-									r.setToFalse(aCause);
-									setPassive();
-								}
-							}
-						}
-					}
+        // this constraint is not poster, hence not returned, because it is reified
+        if (ParserConfiguration.HACK_REIFICATION) {
+            if (a.isInstantiated() || b.isInstantiated()) {
+                IntVar x;
+                int c;
+                if (a.isInstantiated()) {
+                    x = b;
+                    c = a.getValue();
+                } else {
+                    x = a;
+                    c = b.getValue();
+                }
+                final IntVar var = x;
+                final int cste = c;
+                return new Constraint[]{new Constraint("reif(a=cste,r)", new Propagator<IntVar>(new IntVar[]{x, r}, PropagatorPriority.BINARY, false) {
+                    @Override
+                    public void propagate(int evtmask) throws ContradictionException {
+                        if (r.getLB() == 1) {
+                            var.instantiateTo(cste, aCause);
+                            setPassive();
+                        } else {
+                            if (r.getUB() == 0) {
+                                if (var.removeValue(cste, aCause) || !var.contains(cste)) {
+                                    setPassive();
+                                }
+                            } else {
+                                if (var.isInstantiatedTo(cste)) {
+                                    r.setToTrue(aCause);
+                                    setPassive();
+                                } else if (!var.contains(cste)) {
+                                    r.setToFalse(aCause);
+                                    setPassive();
+                                }
+                            }
+                        }
+                    }
 
-					@Override
-					public ESat isEntailed() {
-						throw new UnsupportedOperationException("isEntailed not implemented ");
-					}
-				})};
-			}
-		}
-		ICF.arithm(a,"=",b).reifyWith(r);
-		return new Constraint[]{};
+                    @Override
+                    public ESat isEntailed() {
+                        throw new UnsupportedOperationException("isEntailed not implemented ");
+                    }
+                })};
+            } else {
+                return new Constraint[]{new Constraint("reif(a=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+                    @Override
+                    public void propagate(int evtmask) throws ContradictionException {
+                        if (r.getLB() == 1) {
+                            if (vars[0].isInstantiated()) {
+                                setPassive();
+                                vars[1].instantiateTo(vars[0].getValue(), aCause);
+                            } else if (vars[1].isInstantiated()) {
+                                setPassive();
+                                vars[0].instantiateTo(vars[1].getValue(), aCause);
+                            }
+                        } else {
+                            if (r.getUB() == 0) {
+                                if (vars[0].isInstantiated()) {
+                                    if (vars[1].removeValue(vars[0].getValue(), aCause)) {
+                                        setPassive();
+                                    }
+                                } else if (vars[1].isInstantiated()) {
+                                    if (vars[0].removeValue(vars[1].getValue(), aCause)) {
+                                        setPassive();
+                                    }
+                                }
+                                // TODO: deal with disjoint domain?
+                            } else {
+                                if (vars[0].isInstantiated()) {
+                                    if (vars[1].isInstantiated()) {
+                                        if (vars[0].getValue() == vars[1].getValue()) {
+                                            r.setToTrue(aCause);
+                                        } else {
+                                            r.setToFalse(aCause);
+                                        }
+                                        setPassive();
+                                    } else {
+                                        if (!vars[1].contains(vars[0].getValue())) {
+                                            r.setToFalse(aCause);
+                                            setPassive();
+                                        }
+                                    }
+                                } else {
+                                    if (vars[1].isInstantiated()) {
+                                        if (!vars[0].contains(vars[1].getValue())) {
+                                            r.setToFalse(aCause);
+                                            setPassive();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public ESat isEntailed() {
+                        throw new UnsupportedOperationException("isEntailed not implemented ");
+                    }
+                })};
+            }
+        }
+        ICF.arithm(a, "=", b).reifyWith(r);
+        return new Constraint[]{};
     }
 }
