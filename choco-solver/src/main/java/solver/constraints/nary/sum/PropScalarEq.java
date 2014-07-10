@@ -203,18 +203,12 @@ public class PropScalarEq extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        filter(true, 2);
-//        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override
-    public final ESat isEntailed() {
+    public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
         for (; i < pos; i++) { // first the positive coefficients
             sumLB += vars[i].getLB() * c[i];

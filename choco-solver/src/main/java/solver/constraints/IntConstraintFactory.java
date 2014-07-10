@@ -1222,6 +1222,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
+        // detect unaries and binaries
         if (VARS.length == 0) {
             return arithm(VF.fixed(0, SCALAR.getSolver()), OPERATOR, SCALAR);
         }
@@ -1297,11 +1298,11 @@ public class IntConstraintFactory {
                 }
             }
         }
+		System.out.println(OPERATOR);
         // scalar
-
         if (OPERATOR.equals("=")) {
             return makeScalar(VARS, COEFFS, SCALAR, 1);
-        }
+		}
         int[] b = Scalar.getScalarBounds(VARS, COEFFS);
         Solver s = VARS[0].getSolver();
         IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], s);
@@ -1329,7 +1330,7 @@ public class IntConstraintFactory {
             if (tupleIt(VARS) && SCALAR.hasEnumeratedDomain()) {
                 return table(ArrayUtils.append(VARS, new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS, COEFFS, SCALAR, SCALAR_COEF), "");
             } else {
-                return Scalar.buildScalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
+                return new Scalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
             }
         }
     }
