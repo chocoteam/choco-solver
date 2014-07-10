@@ -760,8 +760,11 @@ public class IntConstraintFactory {
 	 * @param VARS  a vector of variables
 	 * @param LIMIT a variable
 	 */
-	public static Constraint[] count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
-		return new Constraint[]{new Constraint("Count",new PropCountVar(VARS,VALUE,LIMIT))};
+	public static Constraint count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
+		if(VALUE.isInstantiated()){
+			return count(VALUE.getValue(),VARS,LIMIT);
+		}
+		return new Constraint("Count",new PropCountVar(VARS,VALUE,LIMIT));
 //		Solver solver = LIMIT.getSolver();
 //		int size = VALUE.getUB()-VALUE.getLB()+1;
 //		IntVar[] valCount = new IntVar[size];

@@ -51,16 +51,16 @@ public class CountEqReifBuilder implements IBuilder {
 		IntVar valVar = exps.get(1).intVarValue(solver);
 		IntVar countVar = exps.get(2).intVarValue(solver);
 		BoolVar b = exps.get(3).boolVarValue(solver);
-		Constraint[] cstrs;
+		Constraint cstr;
 		if (valVar.isInstantiated()) {
 			IntVar nbOcc = VF.bounded(StringUtils.randomName(), 0, decVars.length, countVar.getSolver());
-			cstrs = new Constraint[]{ICF.count(valVar.getValue(), decVars, nbOcc)};
+			cstr = ICF.count(valVar.getValue(), decVars, nbOcc);
 			ICF.arithm(nbOcc,"=",countVar).reifyWith(b);
 		}else{
 			IntVar value = VF.integer(StringUtils.randomName(), valVar.getLB(), valVar.getUB(), countVar.getSolver());
-			cstrs = ICF.count(value, decVars, countVar);
+			cstr = ICF.count(value, decVars, countVar);
 			ICF.arithm(value,"=",valVar).reifyWith(b);
 		}
-		return cstrs;
+		return new Constraint[]{cstr};
 	}
 }
