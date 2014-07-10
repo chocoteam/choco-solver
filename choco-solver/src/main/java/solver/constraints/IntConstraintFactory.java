@@ -1298,7 +1298,6 @@ public class IntConstraintFactory {
                 }
             }
         }
-		System.out.println(OPERATOR);
         // scalar
         if (OPERATOR.equals("=")) {
             return makeScalar(VARS, COEFFS, SCALAR, 1);
