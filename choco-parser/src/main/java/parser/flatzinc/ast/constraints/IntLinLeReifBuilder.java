@@ -60,7 +60,7 @@ public class IntLinLeReifBuilder implements IBuilder {
         if (bs.length > 0) {
 			int[] tmp = Scalar.getScalarBounds(bs,as);
 			IntVar scal = VF.bounded(StringUtils.randomName(),tmp[0],tmp[1],solver);
-            Constraint cstr = ICF.scalar(bs, as, "<=", scal);
+            Constraint cstr = ICF.scalar(bs, as, "=", scal);
             ICF.arithm(scal,"<=",c).reifyWith(r);
 			return new Constraint[]{cstr};
         }
