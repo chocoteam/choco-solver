@@ -32,10 +32,10 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.SatFactory;
+import solver.constraints.*;
+import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import util.ESat;
 
 import java.util.List;
 
@@ -48,16 +48,32 @@ import java.util.List;
  */
 public class BoolLtReifBuilder implements IBuilder {
 
-    @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        BoolVar b = exps.get(1).boolVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-        if (ParserConfiguration.ENABLE_CLAUSE) {
-            SatFactory.addBoolIsLtVar(a, b, r);
-        } else {
-            ICF.arithm(a, "<", b).reifyWith(r);
-        }
-        return new Constraint[0];
-    }
+	@Override
+	public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+		BoolVar a = exps.get(0).boolVarValue(solver);
+		BoolVar b = exps.get(1).boolVarValue(solver);
+		BoolVar r = exps.get(2).boolVarValue(solver);
+		if (ParserConfiguration.HACK_REIFICATION) {
+			return new Constraint[]{new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+				@Override
+				public void propagate(int evtmask) throws ContradictionException {
+					if(!(vars[0].contains(0)) && (vars[1].contains(1))){
+						vars[2].setToFalse(aCause);
+					}
+					if (vars[2].getLB() == 1) {
+						vars[0].setToFalse(aCause);
+						vars[1].setToTrue(aCause);
+					}
+				}
+				@Override
+				public ESat isEntailed() {throw new UnsupportedOperationException("isEntailed not implemented ");}
+			})};
+		}
+		if (ParserConfiguration.ENABLE_CLAUSE) {
+			SatFactory.addBoolIsLtVar(a, b, r);
+		} else {
+			ICF.arithm(a, "<", b).reifyWith(r);
+		}
+		return new Constraint[0];
+	}
 }
