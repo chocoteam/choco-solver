@@ -27,14 +27,19 @@
 
 package parser.flatzinc.ast.constraints;
 
+import parser.flatzinc.ParserConfiguration;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.Propagator;
+import solver.constraints.PropagatorPriority;
+import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import util.ESat;
 
 import java.util.List;
 
@@ -51,9 +56,86 @@ public class IntLeReifBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-		// this constraint is not poster, hence not returned, because it is reified
-		ICF.arithm(a,"<=",b).reifyWith(r);
-		return new Constraint[]{};
+        final BoolVar r = exps.get(2).boolVarValue(solver);
+        // this constraint is not poster, hence not returned, because it is reified
+        if (ParserConfiguration.HACK_REIFICATION) {
+            if (a.isInstantiated() || b.isInstantiated()) {
+                IntVar x;
+                int c;
+                if (a.isInstantiated()) {
+                    x = b;
+                    c = a.getValue();
+                } else {
+                    x = a;
+                    c = b.getValue();
+                }
+                final IntVar var = x;
+                final int cste = c;
+                return new Constraint[]{new Constraint("reif(a<=cste,r)", new Propagator<IntVar>(new IntVar[]{x, r}, PropagatorPriority.BINARY, false) {
+                    @Override
+                    public void propagate(int evtmask) throws ContradictionException {
+                        if (r.getLB() == 1) {
+                            setPassive();
+                            var.updateUpperBound(cste, aCause);
+                        } else {
+                            if (r.getUB() == 0) {
+                                if (var.updateLowerBound(cste + 1, aCause)) {
+                                    setPassive();
+                                }
+                            } else {
+                                if (var.getUB() <= cste) {
+                                    setPassive();
+                                    r.setToTrue(aCause);
+                                } else if (var.getLB() > cste) {
+                                    setPassive();
+                                    r.setToFalse(aCause);
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public ESat isEntailed() {
+                        throw new UnsupportedOperationException("isEntailed not implemented ");
+                    }
+                })};
+            } else {
+                return new Constraint[]{new Constraint("reif(a<=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+                    @Override
+                    public void propagate(int evtmask) throws ContradictionException {
+                        if (r.getLB() == 1) {
+                            vars[0].updateUpperBound(vars[1].getUB(), aCause);
+                            vars[1].updateLowerBound(vars[0].getLB(), aCause);
+                            if (vars[0].getUB() <= vars[1].getLB()) {
+                                this.setPassive();
+                            }
+                        } else {
+                            if (r.getUB() == 0) {
+                                vars[0].updateLowerBound(vars[1].getLB() + 1, aCause);
+                                vars[1].updateUpperBound(vars[0].getUB() - 1, aCause);
+                                if (vars[0].getLB() > vars[1].getUB()) {
+                                    setPassive();
+                                }
+                            } else {
+                                if (vars[0].getUB() <= vars[1].getLB()) {
+                                    setPassive();
+                                    r.setToTrue(aCause);
+                                } else if (vars[0].getLB() > vars[1].getUB()) {
+                                    setPassive();
+                                    r.setToFalse(aCause);
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public ESat isEntailed() {
+                        throw new UnsupportedOperationException("isEntailed not implemented ");
+                    }
+                })};
+            }
+        }
+        ICF.arithm(a, "<=", b).reifyWith(r);
+        return new Constraint[]{};
     }
 }
