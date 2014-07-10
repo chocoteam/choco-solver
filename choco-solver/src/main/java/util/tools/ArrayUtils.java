@@ -152,6 +152,31 @@ public enum ArrayUtils {
         return ret;
     }
 
+	/**
+	 * Append int arrays
+	 *
+	 * @param toAppend array of arrays to append
+	 * @return a new Array composed of those given in parameters.
+	 */
+	@SuppressWarnings("unchecked")
+	public static int[] append(int[]... toAppend) {
+		int total = 0;
+		for(int[] tab:toAppend){
+			if(tab!=null) {
+				total += tab.length;
+			}
+		}
+		int[] ret = new int[total];
+		int pos = 0;
+		for (int[] tab : toAppend) {
+			if (tab != null) {
+				System.arraycopy(tab, 0, ret, pos, tab.length);
+				pos += tab.length;
+			}
+		}
+		return ret;
+	}
+
     /**
      * Reverse all signs of the a given int table.
      *
