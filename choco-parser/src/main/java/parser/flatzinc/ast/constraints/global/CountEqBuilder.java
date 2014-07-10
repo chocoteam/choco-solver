@@ -49,28 +49,8 @@ public class CountEqBuilder implements IBuilder {
     @Override
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
 		IntVar[] x = exps.get(0).toIntVarArray(solver);
+		IntVar y = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        if (exps.get(1) instanceof EInt) {
-            int y = exps.get(1).intValue();
-            return new Constraint[]{IntConstraintFactory.count(y, x, c)};
-        }
-        IntVar y = exps.get(1).intVarValue(solver);
-        if (y.isInstantiated()) {
-            return new Constraint[]{IntConstraintFactory.count(y.getValue(), x, c)};
-        } else {
-            int ylb = y.getLB();
-            int yub = y.getUB();
-            int nb = yub - ylb + 1;
-
-			IntVar[] cs = VariableFactory.boundedArray("cs", nb, 0, nb, solver);
-
-            Constraint[] cstrs = new Constraint[yub - ylb + 2];
-            int k = 0;
-            for (int i = ylb; i <= yub; i++) {
-                cstrs[k++] = IntConstraintFactory.count(i, x, cs[i - ylb]);
-            }
-            cstrs[k] = IntConstraintFactory.element(c, cs, y, ylb);
-            return cstrs;
-        }
+		return new Constraint[]{IntConstraintFactory.count(y, x, c)};
     }
 }
