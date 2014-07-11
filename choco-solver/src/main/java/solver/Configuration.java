@@ -120,14 +120,6 @@ public enum Configuration {
         duplicate // detect each occurrence, duplicate the variable and post and EQ constraint
     }
 
-    // Define what answer should be given when a variable occurs more than once in a propagator
-    // disabled : throws an error when a variable occurs more than once
-    // silent : do not do anything
-    // warn : print a warning message when a variable occurs more than once
-    // view: detect each occurrence, replace additional occurrences with an EQ view
-    // duplicate: detect each occurrence, duplicate the variable and post and EQ constraint
-    public static final MOVP MUL_OCC_VAR_PROP = MOVP.valueOf(properties.getProperty("MUL_OCC_VAR_PROP"));
-
     public enum Idem {
         disabled, // does not anything
         error, // print an error message when a propagator is not guaranteed to be idempotent -- fir debug only

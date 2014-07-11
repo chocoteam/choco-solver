@@ -32,17 +32,16 @@ import gnu.trove.set.hash.TIntHashSet;
 import memory.structure.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
-import solver.constraints.set.SCF;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.*;
+import solver.variables.EventType;
+import solver.variables.Variable;
 import util.ESat;
 
 import java.io.Serializable;
@@ -134,10 +133,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.solver = vars[0].getSolver();
-		if(reactToFineEvt) {
-			checkVariable(vars);
-		}
-        this.reactToFineEvt = reactToFineEvt;
+		this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
         this.aCause = this;
@@ -184,56 +180,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     // METHODS
     //***********************************************************************************
 
-    // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
-    private <V extends Variable> void checkVariable(V[] vars) {
-		if(Configuration.MUL_OCC_VAR_PROP == Configuration.MOVP.silent){
-			return;
-		}
-        set.get().clear();
-        for (int i = 0; i < vars.length; i++) {
-            Variable v = vars[i];
-            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                if (set.get().contains(v.getId())) {
-                    switch (Configuration.MUL_OCC_VAR_PROP) {
-                        case disabled:
-                            throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator.\n" +
-                                    "See configurations.property to change this policy.");
-                        case warn:
-                            LOGGER.warn(v.toString() + " occurs more than one time in this propagator.");
-                            break;
-                        case view:
-                            if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                                vars[i] = (V) VariableFactory.eq((IntVar) v);
-                            } else {
-                                throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                        "However, this type of variable cannot be declared in a view.");
-                            }
-                            break;
-                        case duplicate:
-                            if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                                Solver solver = v.getSolver();
-                                vars[i] = (V) v.duplicate();
-                                solver.post(IntConstraintFactory.arithm((IntVar) v, "=", (IntVar) vars[i]));
-                            } else {
-                                if ((v.getTypeAndKind() & Variable.SET) != 0) {
-                                    Solver solver = v.getSolver();
-                                    vars[i] = (V) v.duplicate();
-                                    solver.post(SCF.all_equal(new SetVar[]{(SetVar) v, (SetVar) vars[i]}));
-                                } else {
-                                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                            "However, this type of variable does not allow to post an EQ constraint over it.");
-                                }
-                            }
-                            break;
-                        default: throw new UnsupportedOperationException("This should never occur");
-                    }
-
-                }
-                set.get().add(vars[i].getId());
-            }
-        }
-    }
-
     /**
      * Enlarges the variable scope of this propagator
      * Should not be called by the user.
@@ -241,7 +187,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param nvars variables to be added to this propagator
      */
     protected void addVariable(V... nvars) {
-        checkVariable(vars);
         V[] tmp = vars;
         vars = Arrays.copyOf(vars, vars.length + nvars.length);
         System.arraycopy(tmp, 0, vars, 0, tmp.length);
