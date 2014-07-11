@@ -24,45 +24,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.alldifferent;
+package solver.constraints.nary.alldifferent.algo;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
+import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import util.ESat;
 import util.graphOperations.connectivity.StrongConnectivityFinder;
 import util.objects.graphs.DirectedGraph;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
-import java.util.Random;
 
 /**
- * Propagator for AllDifferent AC constraint for integer variables
- * <p/>
- * Uses Regin algorithm
- * Runs in O(m.n) worst case time for the initial propagation
- * but has a good average behavior in practice
- *
- * SHOULD NOT BE USED ALONE (use BC in addition) because it is not always apply
- * <p/>
- * Runs incrementally for maintaining a matching
- * <p/>
- * Extra features:
- * - Probabilistic call
- * - Adaptive probability distribution
- *
- * ! redundant propagator!
- *
- * @author Jean-Guillaume Fages
+ * Algorithm of Alldifferent with AC
  */
-public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
+public class AlgoAllDiffAC {
 
     //***********************************************************************************
     // VARIABLES
@@ -70,7 +48,7 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
 
     protected int n, n2;
     protected DirectedGraph digraph;
-    private IStateInt[] matching;
+    private int[] matching;
     private int[] nodeSCC;
     protected BitSet free;
     private StrongConnectivityFinder SCCfinder;
@@ -79,28 +57,20 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
     private BitSet in;
     private TIntIntHashMap map;
     int[] fifo;
-	private Random rd;
-	private int period;
+	IntVar[] vars;
+	ICause aCause;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * AllDifferent constraint for integer variables
-     * enables to control the cardinality of the matching
-     *
-     * @param variables
-     */
-    public PropAllDiffAC_adaptive(IntVar[] variables, int seed) {
-        super(variables, PropagatorPriority.QUADRATIC, true);
-		rd = new Random(seed);
-		period = 16;
+    public AlgoAllDiffAC(IntVar[] variables, ICause cause) {
+        this.vars = variables;
+		aCause = cause;
         n = vars.length;
-        matching = new IStateInt[n];
-		IEnvironment environment = solver.getEnvironment();
+        matching = new int[n];
         for (int i = 0; i < n; i++) {
-            matching[i] = environment.makeInt(-1);
+            matching[i] = -1;
         }
         map = new TIntIntHashMap();
         IntVar v;
@@ -129,74 +99,16 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
     // PROPAGATION
     //***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        if (n2 < n * 2) {
-            contradiction(null, "not enough values");
-        }
-		period = Math.max(period,1);
-		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0 || rd.nextInt(period)==0){
-			if(findMaximumMatching()){
-				if(filter()){
-					period --;
-				}else{
-					period ++;
-				}
-			}else{
-				period = (period+1)/2;
-				contradiction(vars[0],"no matching");
-			}
-		}
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
-
-	@Override
-    public ESat isEntailed() {
-        int nbInst = 0;
-        for (int i = 0; i < n; i++) {
-            if (vars[i].isInstantiated()) {
-                nbInst++;
-                for (int j = i + 1; j < n; j++) {
-                    if (vars[j].isInstantiated() && vars[i].getValue() == vars[j].getValue()) {
-                        return ESat.FALSE;
-                    }
-                }
-            }
-        }
-        if (nbInst == vars.length) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append("PropAllDiffAC_Random(");
-        int i = 0;
-        for (; i < Math.min(4, vars.length); i++) {
-            st.append(vars[i].getName()).append(", ");
-        }
-        if (i < vars.length - 2) {
-            st.append("...,");
-        }
-        st.append(vars[vars.length - 1].getName()).append(")");
-        return st.toString();
+    public void propagate() throws ContradictionException {
+        findMaximumMatching();
+        filter();
     }
 
     //***********************************************************************************
     // Initialization
     //***********************************************************************************
 
-    protected boolean findMaximumMatching() {
+    protected void findMaximumMatching() throws ContradictionException {
         for (int i = 0; i < n2; i++) {
             digraph.getSuccessorsOf(i).clear();
             digraph.getPredecessorsOf(i).clear();
@@ -207,7 +119,7 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            int mate = matching[i].get();
+            int mate = matching[i];
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 int j = map.get(k);
                 if (mate == j) {
@@ -221,17 +133,16 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
             }
         }
         for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
-            if(!tryToMatch(i))return false;
+            tryToMatch(i);
         }
         int p;
         for (int i = 0; i < n; i++) {
             p = digraph.getPredecessorsOf(i).getFirstElement();
-            matching[i].set(p);
+            matching[i] = p;
         }
-		return true;
     }
 
-    private boolean tryToMatch(int i) {
+    private void tryToMatch(int i) throws ContradictionException {
         int mate = augmentPath_BFS(i);
         if (mate != -1) {
             free.clear(mate);
@@ -242,9 +153,8 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
                 digraph.addArc(tmp, father[tmp]);
                 tmp = father[tmp];
             }
-			return true;
         } else {
-            return false;
+            vars[0].instantiateTo(vars[0].getLB()-1,aCause);
         }
     }
 
@@ -292,28 +202,43 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
         digraph.desactivateNode(n2);
     }
 
-    protected boolean filter() throws ContradictionException {
+    protected void filter() throws ContradictionException {
         buildSCC();
         int j, ub;
         IntVar v;
-		boolean useful = false;
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (matching[i].get() == j) {
-						useful = !v.isInstantiated();
+                    if (matching[i] == j) {
                         v.instantiateTo(k, aCause);
                     } else {
                         v.removeValue(k, aCause);
                         digraph.removeArc(i, j);
-						useful = true;
                     }
                 }
             }
         }
-		return useful;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            if (!v.hasEnumeratedDomain()) {
+                ub = v.getUB();
+                for (int k = v.getLB(); k <= ub; k++) {
+                    j = map.get(k);
+                    if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
+                        v.removeValue(k, aCause);
+                    }
+                }
+                int lb = v.getLB();
+                for (int k = v.getUB(); k >= lb; k--) {
+                    j = map.get(k);
+                    if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
+                        v.removeValue(k, aCause);
+                    }
+                }
+            }
+        }
     }
 }

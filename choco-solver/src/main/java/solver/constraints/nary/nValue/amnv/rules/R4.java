@@ -28,7 +28,7 @@
 package solver.constraints.nary.nValue.amnv.rules;
 
 import solver.constraints.Propagator;
-import solver.constraints.nary.alldifferent.conditions.AlgoAllDiffBC;
+import solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import solver.constraints.nary.nValue.amnv.graph.G;
 import solver.constraints.nary.nValue.amnv.mis.F;
 import solver.exception.ContradictionException;

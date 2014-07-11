@@ -28,6 +28,7 @@ package solver.constraints.nary.alldifferent.conditions;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
+import solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -43,7 +44,7 @@ import util.ESat;
 public class PropCondAllDiff_AC extends Propagator<IntVar> {
 
 	private Condition condition;
-	private AllDiffACAlgorithm filter;
+	private AlgoAllDiffAC filter;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -81,7 +82,7 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
 				vs[nb] = v;
 			}
 		}
-		filter = new AllDiffACAlgorithm(vs,aCause);
+		filter = new AlgoAllDiffAC(vs,aCause);
 		filter.propagate();
 	}
 
