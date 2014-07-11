@@ -106,7 +106,6 @@ public class StoredDirectedMultiGraph {
                 sups[idx] = new TIntHashSet();
             sups[idx].add(a.id);
 
-
         }
 
         for (int i = 0; i < sups.length; i++) {
