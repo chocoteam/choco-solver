@@ -82,6 +82,12 @@ public class PropRegular extends Propagator<IntVar> {
         for (int i = 0; i < idms.length; i++) {
             idms[i].freeze();
             idms[i].forEach(rem_proc.set(i), EventType.REMOVE);
+            for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
+                StoredIndexedBipartiteSet sup = graph.getSupport(i, j);
+                if (sup == null || sup.isEmpty()) {
+                    vars[i].removeValue(j, aCause);
+                }
+            }
             idms[i].unfreeze();
         }
     }
