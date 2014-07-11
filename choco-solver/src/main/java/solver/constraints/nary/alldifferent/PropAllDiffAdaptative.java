@@ -26,23 +26,30 @@
  */
 package solver.constraints.nary.alldifferent;
 
-import gnu.trove.stack.array.TIntArrayStack;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import util.ESat;
+import java.util.Random;
 
 /**
- * Propagator for AllDifferent that only reacts on instantiation
+ * Propagator for AllDifferent AC constraint for integer variables
+ * <p/>
+ * Uses Regin algorithm
+ * Runs in O(m.n) worst case time for the initial propagation
+ * but has a good average behavior in practice
+ * <p/>
+ * Runs incrementally for maintaining a matching
+ * <p/>
  *
- * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  */
-public class PropAllDiffInst extends Propagator<IntVar> {
+public class PropAllDiffAdaptative extends PropAllDiffAC {
 
-	protected final int n;
-	protected TIntArrayStack toCheck = new TIntArrayStack();
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
+	Random rd;
+	int period;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -54,81 +61,45 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      *
      * @param variables
      */
-    public PropAllDiffInst(IntVar[] variables) {
-        super(variables, PropagatorPriority.UNARY, true);
-        n = vars.length;
-    }
-
-
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+    public PropAllDiffAdaptative(IntVar[] variables) {
+        super(variables);
+		rd = new Random(0);
+		period = -1;
     }
 
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
 
-	@Override
+    @Override
     public void propagate(int evtmask) throws ContradictionException {
-        toCheck.clear();
-        for (int v = 0; v < n; v++) {
-            if (vars[v].isInstantiated()) {
-                toCheck.push(v);
-            }
-        }
-        fixpoint();
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        toCheck.push(varIdx);
-        fixpoint();
-    }
-
-	protected void fixpoint() throws ContradictionException {
-        try {
-            while (toCheck.size() > 0) {
-                int vidx = toCheck.pop();
-                int val = vars[vidx].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != vidx) {
-                        if (vars[i].removeValue(val, aCause)) {
-                            if (vars[i].isInstantiated()) {
-                                toCheck.push(i);
-                            }
-                        }
-
-                    }
-                }
-            }
-        } catch (ContradictionException cex) {
-            toCheck.clear();
-            throw cex;
-        }
-    }
-
-
-    @Override
-    public ESat isEntailed() {
-		int nbInst = 0;
-		for (int i = 0; i < n; i++) {
-			if (vars[i].isInstantiated()) {
-				nbInst++;
-				for (int j = i + 1; j < n; j++) {
-					if (vars[j].isInstantiatedTo(vars[i].getValue())) {
-						return ESat.FALSE;
-					}
+		if(period==-1){
+			period = 1;
+			filter.propagate();
+		}else{
+			period = Math.max(period,1);
+			if(rd.nextInt(period)==0) {
+				int domSize = 0;
+				for (IntVar v : vars) {
+					domSize += v.getDomainSize();
+				}
+				try {
+					filter.propagate();
+				}catch (ContradictionException e) {
+					// strongly decrease period if propagation triggers failure
+					period = (period+1)/2;
+					throw e;
+				}
+				for (IntVar v : vars) {
+					domSize -= v.getDomainSize();
+				}
+				// slightly decrease / increase period if propagation triggers filtering / no filtering
+				if(domSize>0) {
+					period --;
+				} else {
+					period ++;
 				}
 			}
 		}
-		if (nbInst == vars.length) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
     }
 }

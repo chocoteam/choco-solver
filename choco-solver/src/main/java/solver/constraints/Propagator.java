@@ -559,4 +559,19 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public final boolean reactToFineEvent() {
         return reactToFineEvt;
     }
+
+	@Override
+	public String toString() {
+		StringBuilder st = new StringBuilder();
+		st.append(getClass().getSimpleName()+"(");
+		int i = 0;
+		for (; i < Math.min(4, vars.length); i++) {
+			st.append(vars[i].getName()).append(", ");
+		}
+		if (i < vars.length - 2) {
+			st.append("...,");
+		}
+		st.append(vars[vars.length - 1].getName()).append(")");
+		return st.toString();
+	}
 }

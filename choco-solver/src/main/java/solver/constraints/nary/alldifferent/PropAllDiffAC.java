@@ -24,50 +24,62 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.constraints.nary.alldifferent;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
-import solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
+import solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
 /**
- * Based on: </br>
- * "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
- * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
- * <br/>
- *
- * @author Hadrien Cambazard, Charles Prud'homme, Jean-Guillaume fages
- * @revision 04/03/12 : change sort
- * @since 07/02/11
+ * Propagator for AllDifferent AC constraint for integer variables
  * <p/>
+ * Uses Regin algorithm
+ * Runs in O(m.n) worst case time for the initial propagation
+ * but has a good average behavior in practice
+ * <p/>
+ * Runs incrementally for maintaining a matching
+ * <p/>
+ *
+ * @author Jean-Guillaume Fages
  */
-public class PropAllDiffBC extends Propagator<IntVar> {
+public class PropAllDiffAC extends Propagator<IntVar> {
 
-	AlgoAllDiffBC filter;
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-    public PropAllDiffBC(IntVar[] variables) {
-        super(variables, PropagatorPriority.LINEAR, false);
-        filter = new AlgoAllDiffBC(aCause);
-		filter.reset(vars);
+	AlgoAllDiffAC filter;
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
+
+    /**
+     * AllDifferent constraint for integer variables
+     * enables to control the cardinality of the matching
+     *
+     * @param variables
+     */
+    public PropAllDiffAC(IntVar[] variables) {
+        super(variables, PropagatorPriority.QUADRATIC, false);
+		this.filter = new AlgoAllDiffAC(variables,aCause);
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-    }
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		filter.filter();
+        filter.propagate();
     }
 
     @Override
     public ESat isEntailed() {
-		return ESat.TRUE; // redundant propagator (use PropAllDiffInst)
+		return ESat.TRUE; // redundant propagator (used with PropAllDiffInst)
     }
 }
