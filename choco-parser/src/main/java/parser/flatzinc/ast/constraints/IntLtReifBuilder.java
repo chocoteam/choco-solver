@@ -60,25 +60,47 @@ public class IntLtReifBuilder implements IBuilder {
         // this constraint is not poster, hence not returned, because it is reified
         if (ParserConfiguration.HACK_REIFICATION) {
             if (a.isInstantiated() || b.isInstantiated()) {
-                IntVar x;
-                int c;
+                final IntVar var;
+                final int cste;
                 if (a.isInstantiated()) {
-                    x = b;
-                    c = a.getValue();
+                    var = b;
+                    cste = a.getValue();
+                    return new Constraint[]{new Constraint("reif(b>cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
+                        @Override
+                        public void propagate(int evtmask) throws ContradictionException {
+                            if (r.getLB() == 1) {
+                                setPassive();
+                                var.updateLowerBound(cste + 1, aCause);
+                            } else if (r.getUB() == 0) {
+                                if (var.updateUpperBound(cste, aCause)) {
+                                    setPassive();
+                                }
+                            } else {
+                                if (var.getLB() > cste) {
+                                    setPassive();
+                                    r.setToTrue(aCause);
+                                } else if (var.getUB() <= cste) {
+                                    setPassive();
+                                    r.setToFalse(aCause);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public ESat isEntailed() {
+                            throw new UnsupportedOperationException("isEntailed not implemented ");
+                        }
+                    })};
                 } else {
-                    x = a;
-                    c = b.getValue();
-                }
-                final IntVar var = x;
-                final int cste = c;
-                return new Constraint[]{new Constraint("reif(a<cste,r)", new Propagator<IntVar>(new IntVar[]{x, r}, PropagatorPriority.BINARY, false) {
-                    @Override
-                    public void propagate(int evtmask) throws ContradictionException {
-                        if (r.getLB() == 1) {
-                            setPassive();
-                            var.updateUpperBound(cste - 1, aCause);
-                        } else {
-                            if (r.getUB() == 0) {
+                    var = a;
+                    cste = b.getValue();
+                    return new Constraint[]{new Constraint("reif(a<cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
+                        @Override
+                        public void propagate(int evtmask) throws ContradictionException {
+                            if (r.getLB() == 1) {
+                                setPassive();
+                                var.updateUpperBound(cste - 1, aCause);
+                            } else if (r.getUB() == 0) {
                                 if (var.updateLowerBound(cste, aCause)) {
                                     setPassive();
                                 }
@@ -92,13 +114,13 @@ public class IntLtReifBuilder implements IBuilder {
                                 }
                             }
                         }
-                    }
 
-                    @Override
-                    public ESat isEntailed() {
-                        throw new UnsupportedOperationException("isEntailed not implemented ");
-                    }
-                })};
+                        @Override
+                        public ESat isEntailed() {
+                            throw new UnsupportedOperationException("isEntailed not implemented ");
+                        }
+                    })};
+                }
             } else {
                 return new Constraint[]{new Constraint("reif(a<b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
                     @Override
@@ -109,21 +131,19 @@ public class IntLtReifBuilder implements IBuilder {
                             if (vars[0].getUB() < vars[1].getLB()) {
                                 this.setPassive();
                             }
+                        } else if (r.getUB() == 0) {
+                            vars[0].updateLowerBound(vars[1].getLB(), aCause);
+                            vars[1].updateUpperBound(vars[0].getUB(), aCause);
+                            if (vars[0].getLB() >= vars[1].getUB()) {
+                                setPassive();
+                            }
                         } else {
-                            if (r.getUB() == 0) {
-                                vars[0].updateLowerBound(vars[1].getLB(), aCause);
-                                vars[1].updateUpperBound(vars[0].getUB(), aCause);
-                                if (vars[0].getLB() >= vars[1].getUB()) {
-                                    setPassive();
-                                }
-                            } else {
-                                if (vars[0].getUB() < vars[1].getLB()) {
-                                    setPassive();
-                                    r.setToTrue(aCause);
-                                } else if (vars[0].getLB() >= vars[1].getUB()) {
-                                    setPassive();
-                                    r.setToFalse(aCause);
-                                }
+                            if (vars[0].getUB() < vars[1].getLB()) {
+                                setPassive();
+                                r.setToTrue(aCause);
+                            } else if (vars[0].getLB() >= vars[1].getUB()) {
+                                setPassive();
+                                r.setToFalse(aCause);
                             }
                         }
                     }

@@ -111,39 +111,42 @@ public class IntEqReifBuilder implements IBuilder {
                                 setPassive();
                                 vars[0].instantiateTo(vars[1].getValue(), aCause);
                             }
+                        } else if (r.getUB() == 0) {
+                            if (vars[0].isInstantiated()) {
+                                if (vars[1].removeValue(vars[0].getValue(), aCause)) {
+                                    setPassive();
+                                }
+                            } else if (vars[1].isInstantiated()) {
+                                if (vars[0].removeValue(vars[1].getValue(), aCause)) {
+                                    setPassive();
+                                }
+                            }
                         } else {
-                            if (r.getUB() == 0) {
-                                if (vars[0].isInstantiated()) {
-                                    if (vars[1].removeValue(vars[0].getValue(), aCause)) {
-                                        setPassive();
+                            if (vars[0].isInstantiated()) {
+                                if (vars[1].isInstantiated()) {
+                                    if (vars[0].getValue() == vars[1].getValue()) {
+                                        r.setToTrue(aCause);
+                                    } else {
+                                        r.setToFalse(aCause);
                                     }
-                                } else if (vars[1].isInstantiated()) {
-                                    if (vars[0].removeValue(vars[1].getValue(), aCause)) {
+                                    setPassive();
+                                } else {
+                                    if (!vars[1].contains(vars[0].getValue())) {
                                         setPassive();
+                                        r.setToFalse(aCause);
                                     }
                                 }
-                                // TODO: deal with disjoint domain?
                             } else {
-                                if (vars[0].isInstantiated()) {
-                                    if (vars[1].isInstantiated()) {
-                                        if (vars[0].getValue() == vars[1].getValue()) {
-                                            r.setToTrue(aCause);
-                                        } else {
-                                            r.setToFalse(aCause);
-                                        }
+                                if (vars[1].isInstantiated()) {
+                                    if (!vars[0].contains(vars[1].getValue())) {
                                         setPassive();
-                                    } else {
-                                        if (!vars[1].contains(vars[0].getValue())) {
-                                            r.setToFalse(aCause);
-                                            setPassive();
-                                        }
+                                        r.setToFalse(aCause);
                                     }
                                 } else {
-                                    if (vars[1].isInstantiated()) {
-                                        if (!vars[0].contains(vars[1].getValue())) {
-                                            r.setToFalse(aCause);
-                                            setPassive();
-                                        }
+                                    if (vars[0].getLB() > vars[1].getUB()
+                                            || vars[1].getLB() > vars[0].getUB()) {
+                                        setPassive();
+                                        r.setToFalse(aCause);
                                     }
                                 }
                             }
