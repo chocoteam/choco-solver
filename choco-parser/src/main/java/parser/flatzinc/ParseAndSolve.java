@@ -39,7 +39,6 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.Propagator;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
@@ -89,15 +88,6 @@ public class ParseAndSolve {
 
     @Option(name = "-seed", usage = "Seed for randomness", required = false)
     protected long seed = 29091981L;
-
-    @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
-    public String csv = "";
-
-    @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
-    public String dbproperties = "";
-
-    @Option(name = "-dbbn", aliases = {"--database-bench-name"}, usage = "Benchmark name", required = false)
-    public String dbbenchname = "";
 
     @Option(name = "-bbss", usage = "Black box search strategy:\n1(*): activity based\n2: impact based\n3: dom/wdeg", required = false)
     protected int bbss = 1;
@@ -220,7 +210,7 @@ public class ParseAndSolve {
     }
 
     public void buildLayout(Datas datas) {
-        FZNLayout fl = new FZNLayout(instance, csv, gc, dbproperties, dbbenchname);
+        FZNLayout fl = new FZNLayout(instance, gc);
         datas.setmLayout(fl);
         fl.makeup();
     }

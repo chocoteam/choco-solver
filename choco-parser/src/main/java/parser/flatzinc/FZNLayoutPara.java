@@ -41,8 +41,8 @@ public class FZNLayoutPara extends FZNLayout {
 
     final ParaserMaster master;
 
-    public FZNLayoutPara(ParaserMaster master, String instance, String csv, GoalConf gc, String dbproperties, String dbbenchname) {
-        super(instance, csv, gc, dbproperties, dbbenchname);
+    public FZNLayoutPara(ParaserMaster master, String instance, GoalConf gc) {
+        super(instance, gc);
         this.master = master;
     }
 
