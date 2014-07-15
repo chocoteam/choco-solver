@@ -64,7 +64,7 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
         PAS = new ParseAndSolve() {
             @Override
             public void buildLayout(Datas datas) {
-                datas.setmLayout(new FZNLayoutPara(master, PAS.instance, PAS.csv, PAS.gc, PAS.dbproperties, PAS.dbbenchname));
+                datas.setmLayout(new FZNLayoutPara(master, PAS.instance, PAS.gc));
             }
         };
         try {// sequential parsing (safer)

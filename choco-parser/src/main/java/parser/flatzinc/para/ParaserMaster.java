@@ -28,16 +28,12 @@
 package parser.flatzinc.para;
 
 
-import database.MySQLAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ParseAndSolve;
 import solver.ResolutionPolicy;
-import solver.search.loop.monitors.AverageCSV;
 import solver.thread.AbstractParallelMaster;
 import util.tools.ArrayUtils;
-
-import java.io.File;
 
 public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
 
@@ -115,21 +111,6 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
         Number[] nbs = slaves[0].solver.getMeasures().toArray();
         nbs[0] = nbSol;
         nbs[5] = policy != ResolutionPolicy.SATISFACTION ? bestVal : 0;
-        if (!aPas.csv.equals("")) {
-            AverageCSV acsv = new AverageCSV();
-            acsv.record(aPas.csv, aPas.instance, aPas.gc.getDescription(),
-                    nbs);
-        }
-        if (!aPas.dbproperties.equals("")) {
-            MySQLAccess sql = new MySQLAccess(new File(aPas.dbproperties));
-            // query the database
-            sql.connect();
-            sql.insert(aPas.instance, aPas.dbbenchname,
-                    nbs,
-                    policy,
-                    nbSol > 0 || closeWithSuccess,
-                    nbSol > 0 && closeWithSuccess);
-        }
         System.exit(0);
     }
 

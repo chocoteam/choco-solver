@@ -27,7 +27,6 @@
 
 package parser.flatzinc;
 
-import database.MySQLAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
@@ -39,12 +38,13 @@ import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.search.loop.monitors.AverageCSV;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
+import solver.search.solution.LastSolutionRecorder;
+import solver.search.solution.Solution;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +68,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     StringBuilder stringBuilder = new StringBuilder();
 
-	Solver solver;
+    Solver solver;
 
     boolean wrongSolution;
     int nbSolution;
@@ -76,32 +76,24 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
 
     protected final String instance;
-    protected String csv;
-    protected AverageCSV acsv;
-    protected String dbproperties;
-    protected String dbbenchname;
-    protected MySQLAccess sql;
     protected GoalConf gc;
     private Thread statOnKill;
 
-    public FZNLayout(final String instance, final String csv, GoalConf gc, String dbproperties, String dbbenchname) {
+    public FZNLayout(final String instance, GoalConf gc) {
         super();
-        output_vars = new ArrayList<IntVar>();
-        output_names = new ArrayList<String>();
-        output_types = new ArrayList<Declaration.DType>();
-        output_arrays_names = new ArrayList<String>();
-        output_arrays_vars = new ArrayList<IntVar[]>();
-        output_arrays_types = new ArrayList<Declaration.DType>();
+        output_vars = new ArrayList<>();
+        output_names = new ArrayList<>();
+        output_types = new ArrayList<>();
+        output_arrays_names = new ArrayList<>();
+        output_arrays_vars = new ArrayList<>();
+        output_arrays_types = new ArrayList<>();
 
         this.instance = instance;
-        this.csv = csv;
-        this.dbproperties = dbproperties;
-        this.dbbenchname = dbbenchname;
         this.gc = gc;
     }
 
     public FZNLayout() {
-        this("", "", null, "", "");
+        this("", null);
     }
 
     @Override
@@ -109,37 +101,41 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         if (check()) {
             wrongSolution = false;
             nbSolution++;
-            if (LOGGER.isInfoEnabled()) {
-                for (int i = 0; i < output_names.size(); i++) {
-                    LOGGER.info("{} = {};", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
-
-                }
-                for (int i = 0; i < output_arrays_names.size(); i++) {
-                    String name = output_arrays_names.get(i);
-                    IntVar[] ivars = output_arrays_vars.get(i);
-                    if (ivars.length > 0) {
-                        Declaration.DType type = output_arrays_types.get(i);
-                        stringBuilder.append(value(ivars[0], type));
-                        for (int j = 1; j < ivars.length; j++) {
-                            stringBuilder.append(", ").append(value(ivars[j], type));
-                        }
-                        LOGGER.info(name, stringBuilder.toString());
-                        stringBuilder.setLength(0);
-                    } else {
-                        LOGGER.info(name);
-                    }
-                }
-                LOGGER.info("----------");
+            if (LOGGER.isInfoEnabled() && gc.all) {
+                printSolution();
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("% " + solver.getMeasures().toOneShortLineString());
                 }
             }
         } else {
-			if(LOGGER.isErrorEnabled()) {
-				LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
-			}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
+            }
             System.exit(-200);
         }
+    }
+
+    private void printSolution() {
+        for (int i = 0; i < output_names.size(); i++) {
+            LOGGER.info("{} = {};", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
+
+        }
+        for (int i = 0; i < output_arrays_names.size(); i++) {
+            String name = output_arrays_names.get(i);
+            IntVar[] ivars = output_arrays_vars.get(i);
+            if (ivars.length > 0) {
+                Declaration.DType type = output_arrays_types.get(i);
+                stringBuilder.append(value(ivars[0], type));
+                for (int j = 1; j < ivars.length; j++) {
+                    stringBuilder.append(", ").append(value(ivars[j], type));
+                }
+                LOGGER.info(name, stringBuilder.toString());
+                stringBuilder.setLength(0);
+            } else {
+                LOGGER.info(name);
+            }
+        }
+        LOGGER.info("----------");
     }
 
     private boolean check() {
@@ -167,67 +163,58 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         return "";
     }
 
-	@Override
-	public void beforeClose() {
-		finalOutPut();
-		Runtime.getRuntime().removeShutdownHook(statOnKill);
-	}
+    @Override
+    public void beforeClose() {
+        finalOutPut();
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
+    }
 
-	public void finalOutPut() {
-		if (LOGGER.isInfoEnabled()) {
-			if (solver.getMeasures().getSolutionCount() == 0) {
-				if ((wrongSolution && nbSolution == 0) || solver.hasReachedLimit()) {
-					LOGGER.info("=====UNKNOWN=====");
-				} else {
-					LOGGER.info("=====UNSATISFIABLE=====");
-				}
-			} else {
-				if (solver.hasReachedLimit()
-						&& (solver.getObjectiveManager().isOptimization())) {
-					LOGGER.info("=====UNBOUNDED=====");
-				} else {
-					LOGGER.info("==========");
-				}
-			}
-			if(!LOGGER.isDebugEnabled()){
-				LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
-			}
-		}
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("% - Search statistics");
-			LOGGER.debug("% \t Solutions : {}", solver.getMeasures().getSolutionCount());
-			if (solver.getMeasures().hasObjective()) {
-				LOGGER.debug("% \t Objective : {}", solver.getMeasures().getBestSolutionValue().intValue());
-			}
-			LOGGER.debug("% \t Building time : {}ms", solver.getMeasures().getReadingTimeCount());
-			LOGGER.debug("% \t Initial propagation : {}ms", solver.getMeasures().getInitialPropagationTimeCount());
-			LOGGER.debug("% \t Resolution : {}ms", solver.getMeasures().getTimeCount());
-			LOGGER.debug("% \t Nodes : {}", solver.getMeasures().getNodeCount());
-			LOGGER.debug("% \t Backtracks : {}", solver.getMeasures().getBackTrackCount());
-			LOGGER.debug("% \t Fails : {}", solver.getMeasures().getFailCount());
-			LOGGER.debug("% \t Restarts : {}", solver.getMeasures().getRestartCount());
-			LOGGER.debug("% \t Max Depth : {}", solver.getMeasures().getMaxDepth());
-			LOGGER.debug("% \t Memory : {}", solver.getMeasures().getUsedMemory());
-			LOGGER.debug("% \t Variables : {}", solver.getVars().length);
-			LOGGER.debug("% \t Constraints : {}", solver.getCstrs().length);
-			LOGGER.debug("% \t Checks : {} + {}", solver.getMeasures().getEventsCount(),
-					solver.getMeasures().getPropagationsCount());
-		}
-		if (sql != null) {
-			// query the database
-			sql.connect();
-			sql.insert(instance, dbbenchname,
-					solver.getMeasures().toArray(),
-					solver.getObjectiveManager().getPolicy(),
-					solver.hasReachedLimit(),
-					solver.getMeasures().isObjectiveOptimal());
-		}
-		if (!csv.equals("")) {
-			assert acsv != null;
-			acsv.record(csv, instance, gc.getDescription(), solver.getMeasures().toArray());
-		}
-		userinterruption = false;
-	}
+    public void finalOutPut() {
+        if (LOGGER.isInfoEnabled()) {
+            if (solver.getMeasures().getSolutionCount() == 0) {
+                if ((wrongSolution && nbSolution == 0) || solver.hasReachedLimit()) {
+                    LOGGER.info("=====UNKNOWN=====");
+                } else {
+                    LOGGER.info("=====UNSATISFIABLE=====");
+                }
+            } else {
+                if (!gc.all) { // print the first/best solution when -a is not enabled
+                    printSolution();
+                }
+
+                if (solver.hasReachedLimit()
+                        && (solver.getObjectiveManager().isOptimization())) {
+                    LOGGER.info("=====UNBOUNDED=====");
+                } else {
+                    LOGGER.info("==========");
+                }
+            }
+            if (!LOGGER.isDebugEnabled()) {
+                LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
+            }
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("% - Search statistics");
+            LOGGER.debug("% \t Solutions : {}", solver.getMeasures().getSolutionCount());
+            if (solver.getMeasures().hasObjective()) {
+                LOGGER.debug("% \t Objective : {}", solver.getMeasures().getBestSolutionValue().intValue());
+            }
+            LOGGER.debug("% \t Building time : {}ms", solver.getMeasures().getReadingTimeCount());
+            LOGGER.debug("% \t Initial propagation : {}ms", solver.getMeasures().getInitialPropagationTimeCount());
+            LOGGER.debug("% \t Resolution : {}ms", solver.getMeasures().getTimeCount());
+            LOGGER.debug("% \t Nodes : {}", solver.getMeasures().getNodeCount());
+            LOGGER.debug("% \t Backtracks : {}", solver.getMeasures().getBackTrackCount());
+            LOGGER.debug("% \t Fails : {}", solver.getMeasures().getFailCount());
+            LOGGER.debug("% \t Restarts : {}", solver.getMeasures().getRestartCount());
+            LOGGER.debug("% \t Max Depth : {}", solver.getMeasures().getMaxDepth());
+            LOGGER.debug("% \t Memory : {}", solver.getMeasures().getUsedMemory());
+            LOGGER.debug("% \t Variables : {}", solver.getVars().length);
+            LOGGER.debug("% \t Constraints : {}", solver.getCstrs().length);
+            LOGGER.debug("% \t Checks : {} + {}", solver.getMeasures().getEventsCount(),
+                    solver.getMeasures().getPropagationsCount());
+        }
+        userinterruption = false;
+    }
 
     public boolean isUserinterruption() {
         return userinterruption;
@@ -290,9 +277,9 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                 st.append(esl.toString());
                 return esl.enumVal();
             default:
-				if(LOGGER.isWarnEnabled()) {
-					LOGGER.warn("output_array:: Unknow index {}", exp.getTypeOf());
-				}
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("output_array:: Unknow index {}", exp.getTypeOf());
+                }
                 return new int[0];
         }
     }
@@ -300,24 +287,18 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void set(Solver solver) {
         solver.plugMonitor(this);
         this.solver = solver;
+        if (!gc.all) {
+            solver.set(new LastSolutionRecorder(new Solution(), true, solver));
+        }
     }
 
     public void makeup() {
-        if (!csv.equals("")) {
-            acsv = new AverageCSV();
-        }
-        if (dbproperties != "") {
-            sql = new MySQLAccess(new File(dbproperties));
-        }
         statOnKill = new Thread() {
             public void run() {
                 if (isUserinterruption()) {
                     finalOutPut();
-					if(LOGGER.isInfoEnabled()) {
-						LOGGER.info("% Unexpected resolution interruption!");
-					}
-                    if (acsv != null) {
-                        acsv.record(csv, instance, ";**ERROR**;", new Number[0]);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("% Unexpected resolution interruption!");
                     }
                 }
             }
