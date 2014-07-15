@@ -53,25 +53,28 @@ public class BoolLeReifBuilder implements IBuilder {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-		if (ParserConfiguration.HACK_REIFICATION) {
-			return new Constraint[]{new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-				@Override
-				public void propagate(int evtmask) throws ContradictionException {
-					if(vars[0].contains(0) || vars[1].contains(1)){
-						vars[2].setToTrue(aCause);
-					}
-					if (vars[2].getUB() == 0) {
-						vars[0].setToTrue(aCause);
-						vars[1].setToFalse(aCause);
-					}
-				}
-				@Override
-				public ESat isEntailed() {throw new UnsupportedOperationException("isEntailed not implemented ");}
-			})};
-		}
         if (ParserConfiguration.ENABLE_CLAUSE) {
             SatFactory.addBoolIsLeVar(a, b, r);
         } else {
+            if (ParserConfiguration.HACK_REIFICATION) {
+                return new Constraint[]{new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+                    @Override
+                    public void propagate(int evtmask) throws ContradictionException {
+                        if (vars[0].contains(0) || vars[1].contains(1)) {
+                            vars[2].setToTrue(aCause);
+                        }
+                        if (vars[2].getUB() == 0) {
+                            vars[0].setToTrue(aCause);
+                            vars[1].setToFalse(aCause);
+                        }
+                    }
+
+                    @Override
+                    public ESat isEntailed() {
+                        throw new UnsupportedOperationException("isEntailed not implemented ");
+                    }
+                })};
+            }
             ICF.arithm(a, "<=", b).reifyWith(r);
         }
         return new Constraint[0];
