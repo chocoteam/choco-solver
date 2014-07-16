@@ -51,7 +51,7 @@ public class Member extends Constraint {
     }
 
     public Member(IntVar var, int lowerbound, int upperbound) {
-        super("Member",new PropMemberBound(var, lowerbound, upperbound, false));
+        super("Member",new PropMemberBound(var, lowerbound, upperbound));
         this.values = null;
 		this.var = var;
         this.lb = lowerbound;
