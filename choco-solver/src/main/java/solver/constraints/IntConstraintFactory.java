@@ -77,7 +77,7 @@ import solver.constraints.nary.nValue.amnv.mis.MD;
 import solver.constraints.nary.nValue.amnv.rules.R;
 import solver.constraints.nary.nValue.amnv.rules.R1;
 import solver.constraints.nary.nValue.amnv.rules.R3;
-import solver.constraints.nary.sum.PropBoolSum;
+import solver.constraints.nary.sum.PropBoolSumBrutForce;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.constraints.nary.sum.Scalar;
 import solver.constraints.nary.tree.PropAntiArborescences;
@@ -1490,7 +1490,7 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-        return new Constraint("SumOfBool", new PropBoolSum(VARS, SUM));
+        return new Constraint("SumOfBool", new PropBoolSumBrutForce(VARS, SUM));
     }
 
 	/**

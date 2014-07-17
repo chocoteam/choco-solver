@@ -31,7 +31,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -45,10 +44,10 @@ import java.util.List;
  */
 public class MaximumBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         // var int: m, array[int] of var int: x
         IntVar m = exps.get(0).intVarValue(solver);
         IntVar[] x = exps.get(1).toIntVarArray(solver);
-        return new Constraint[]{IntConstraintFactory.maximum(m, x)};
+        solver.post(IntConstraintFactory.maximum(m, x));
     }
 }

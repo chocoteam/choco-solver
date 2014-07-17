@@ -49,7 +49,7 @@ import java.util.List;
 public class BoolLeReifBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
@@ -57,7 +57,7 @@ public class BoolLeReifBuilder implements IBuilder {
             SatFactory.addBoolIsLeVar(a, b, r);
         } else {
             if (ParserConfiguration.HACK_REIFICATION) {
-                return new Constraint[]{new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+                solver.post(new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
                     @Override
                     public void propagate(int evtmask) throws ContradictionException {
                         if (vars[0].contains(0) || vars[1].contains(1)) {
@@ -73,10 +73,10 @@ public class BoolLeReifBuilder implements IBuilder {
                     public ESat isEntailed() {
                         throw new UnsupportedOperationException("isEntailed not implemented ");
                     }
-                })};
+                }));
+            } else {
+                ICF.arithm(a, "<=", b).reifyWith(r);
             }
-            ICF.arithm(a, "<=", b).reifyWith(r);
         }
-        return new Constraint[0];
     }
 }

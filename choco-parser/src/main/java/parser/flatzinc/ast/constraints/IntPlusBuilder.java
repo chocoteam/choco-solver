@@ -31,7 +31,6 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -47,11 +46,11 @@ import java.util.List;
 public class IntPlusBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] vars = new IntVar[2];
         vars[0] = exps.get(0).intVarValue(solver);
         vars[1] = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return new Constraint[]{IntConstraintFactory.sum(vars, c)};
+        solver.post(IntConstraintFactory.sum(vars, c));
     }
 }

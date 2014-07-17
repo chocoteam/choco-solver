@@ -32,7 +32,6 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -49,7 +48,7 @@ import java.util.List;
 public class SetInReifBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar a = exps.get(0).intVarValue(solver);
 		BoolVar r = exps.get(2).boolVarValue(solver);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
@@ -62,6 +61,5 @@ public class SetInReifBuilder implements IBuilder {
         } else {
             Exit.log("SetVar unavailable");
         }
-		return new Constraint[0];
     }
 }

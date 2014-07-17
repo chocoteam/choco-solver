@@ -32,7 +32,6 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
@@ -49,14 +48,13 @@ import java.util.List;
 public class BoolLeBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         if (ParserConfiguration.ENABLE_CLAUSE) {
             SatFactory.addBoolLe(a, b);
-            return new Constraint[0];
         } else {
-            return new Constraint[]{IntConstraintFactory.arithm(a, "<=", b)};
+            solver.post(IntConstraintFactory.arithm(a, "<=", b));
         }
     }
 }

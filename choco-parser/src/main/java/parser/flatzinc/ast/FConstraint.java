@@ -95,8 +95,7 @@ public final class FConstraint {
             }
             last = id;
         }
-        Constraint[] c = builder.build(aSolver, id, exps, annotations, datas);
-        aSolver.post(c);
+        builder.build(aSolver, id, exps, annotations, datas);
         //readAnnotations(datas, annotations, c);
     }
 

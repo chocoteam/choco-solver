@@ -33,7 +33,9 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.variables.*;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.VF;
 import util.tools.StringUtils;
 
 import java.util.List;
@@ -46,21 +48,21 @@ import java.util.List;
  */
 public class CountEqReifBuilder implements IBuilder {
 	@Override
-	public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-		IntVar[] decVars = exps.get(0).toIntVarArray(solver);
-		IntVar valVar = exps.get(1).intVarValue(solver);
-		IntVar countVar = exps.get(2).intVarValue(solver);
-		BoolVar b = exps.get(3).boolVarValue(solver);
-		Constraint cstr;
-		if (valVar.isInstantiated()) {
-			IntVar nbOcc = VF.bounded(StringUtils.randomName(), 0, decVars.length, countVar.getSolver());
-			cstr = ICF.count(valVar.getValue(), decVars, nbOcc);
-			ICF.arithm(nbOcc,"=",countVar).reifyWith(b);
-		}else{
-			IntVar value = VF.integer(StringUtils.randomName(), valVar.getLB(), valVar.getUB(), countVar.getSolver());
-			cstr = ICF.count(value, decVars, countVar);
-			ICF.arithm(value,"=",valVar).reifyWith(b);
-		}
-		return new Constraint[]{cstr};
-	}
+	public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] decVars = exps.get(0).toIntVarArray(solver);
+        IntVar valVar = exps.get(1).intVarValue(solver);
+        IntVar countVar = exps.get(2).intVarValue(solver);
+        BoolVar b = exps.get(3).boolVarValue(solver);
+        Constraint cstr;
+        if (valVar.isInstantiated()) {
+            IntVar nbOcc = VF.bounded(StringUtils.randomName(), 0, decVars.length, countVar.getSolver());
+            cstr = ICF.count(valVar.getValue(), decVars, nbOcc);
+            ICF.arithm(nbOcc, "=", countVar).reifyWith(b);
+        } else {
+            IntVar value = VF.integer(StringUtils.randomName(), valVar.getLB(), valVar.getUB(), countVar.getSolver());
+            cstr = ICF.count(value, decVars, countVar);
+            ICF.arithm(value, "=", valVar).reifyWith(b);
+        }
+        solver.post(cstr);
+    }
 }

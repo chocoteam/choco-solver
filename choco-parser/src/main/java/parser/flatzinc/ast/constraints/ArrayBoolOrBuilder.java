@@ -31,7 +31,6 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
@@ -46,14 +45,12 @@ import java.util.List;
  */
 public class ArrayBoolOrBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar r = exps.get(1).boolVarValue(solver);
 
         if (as.length > 0) {
-//            SatFactory.addClauses(LogOp.reified(r, LogOp.or(as)), solver);
             SatFactory.addBoolOrArrayEqVar(as, r);
         }
-        return new Constraint[0];
     }
 }

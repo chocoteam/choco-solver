@@ -31,7 +31,6 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -49,7 +48,7 @@ import java.util.List;
  */
 public class ArrayBoolXorBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
 
         int[] values = new int[as.length % 2 == 0 ? as.length / 2 : (as.length + 1) / 2];
@@ -57,6 +56,6 @@ public class ArrayBoolXorBuilder implements IBuilder {
             values[i] = j;
         }
         IntVar res = VariableFactory.enumerated(StringUtils.randomName(), values, solver);
-        return new Constraint[]{IntConstraintFactory.sum(as, res)};
+        solver.post(IntConstraintFactory.sum(as, res));
     }
 }

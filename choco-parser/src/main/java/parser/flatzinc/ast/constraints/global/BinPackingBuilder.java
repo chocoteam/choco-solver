@@ -32,7 +32,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -48,7 +47,7 @@ import java.util.List;
 public class BinPackingBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int c = exps.get(0).intValue();
 		IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
 		int[] item_size = exps.get(2).toIntArray();
@@ -59,6 +58,6 @@ public class BinPackingBuilder implements IBuilder {
 			max = Math.max(max, item_bin[i].getUB());
 		}
 		IntVar[] loads = VF.boundedArray("TMPload",max-min+1,0,c,solver);
-		return ICF.bin_packing(item_bin,item_size,loads,min);
+		solver.post(ICF.bin_packing(item_bin,item_size,loads,min));
     }
 }

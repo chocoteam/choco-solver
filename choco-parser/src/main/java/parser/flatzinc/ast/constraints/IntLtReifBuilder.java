@@ -32,13 +32,11 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
+import solver.constraints.*;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import util.ESat;
 
 import java.util.List;
@@ -53,19 +51,23 @@ import java.util.List;
 public class IntLtReifBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         final BoolVar r = exps.get(2).boolVarValue(solver);
         // this constraint is not poster, hence not returned, because it is reified
-        if (ParserConfiguration.HACK_REIFICATION) {
+        if (ParserConfiguration.ENABLE_CLAUSE
+                && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            SatFactory.addBoolIsLtVar((BoolVar) a, (BoolVar) b, r);
+
+        } else if (ParserConfiguration.HACK_REIFICATION) {
             if (a.isInstantiated() || b.isInstantiated()) {
                 final IntVar var;
                 final int cste;
                 if (a.isInstantiated()) {
                     var = b;
                     cste = a.getValue();
-                    return new Constraint[]{new Constraint("reif(b>cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
+                    solver.post(new Constraint("reif(b>cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
                         @Override
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
@@ -90,11 +92,11 @@ public class IntLtReifBuilder implements IBuilder {
                         public ESat isEntailed() {
                             throw new UnsupportedOperationException("isEntailed not implemented ");
                         }
-                    })};
+                    }));
                 } else {
                     var = a;
                     cste = b.getValue();
-                    return new Constraint[]{new Constraint("reif(a<cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
+                    solver.post(new Constraint("reif(a<cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
                         @Override
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
@@ -119,10 +121,10 @@ public class IntLtReifBuilder implements IBuilder {
                         public ESat isEntailed() {
                             throw new UnsupportedOperationException("isEntailed not implemented ");
                         }
-                    })};
+                    }));
                 }
             } else {
-                return new Constraint[]{new Constraint("reif(a<b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+                solver.post(new Constraint("reif(a<b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
                     @Override
                     public void propagate(int evtmask) throws ContradictionException {
                         if (r.getLB() == 1) {
@@ -152,10 +154,10 @@ public class IntLtReifBuilder implements IBuilder {
                     public ESat isEntailed() {
                         throw new UnsupportedOperationException("isEntailed not implemented ");
                     }
-                })};
+                }));
             }
+        } else {
+            ICF.arithm(a, "<", b).reifyWith(r);
         }
-        ICF.arithm(a, "<", b).reifyWith(r);
-        return new Constraint[]{};
     }
 }

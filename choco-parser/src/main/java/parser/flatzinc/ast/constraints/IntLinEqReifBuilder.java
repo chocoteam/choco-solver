@@ -51,19 +51,18 @@ import java.util.List;
 public class IntLinEqReifBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         IntVar c = exps.get(2).intVarValue(solver);
         BoolVar r = exps.get(3).boolVarValue(solver);
 
         if (bs.length > 0) {
-			int[] tmp = Scalar.getScalarBounds(bs, as);
-			IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
+            int[] tmp = Scalar.getScalarBounds(bs, as);
+            IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
             Constraint cstr = ICF.scalar(bs, as, "=", scal);
-            ICF.arithm(scal,"=",c).reifyWith(r);
-			return new Constraint[]{cstr};
+            ICF.arithm(scal, "=", c).reifyWith(r);
+            solver.post(cstr);
         }
-        return new Constraint[0];
     }
 }
