@@ -31,7 +31,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -46,11 +45,11 @@ import java.util.List;
  */
 public class ExactlyBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         //int: n, array[int] of var int: x, int: v
         int n = exps.get(0).intValue();
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
-        return new Constraint[]{IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, new int[]{v})};
+        solver.post(IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, new int[]{v}));
     }
 }

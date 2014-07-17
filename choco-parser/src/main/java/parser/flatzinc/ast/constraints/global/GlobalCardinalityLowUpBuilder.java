@@ -32,7 +32,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -48,7 +47,7 @@ import java.util.List;
 public class GlobalCardinalityLowUpBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
         int[] low = exps.get(2).toIntArray();
@@ -58,6 +57,6 @@ public class GlobalCardinalityLowUpBuilder implements IBuilder {
         for (int i = 0; i < low.length; i++) {
             cards[i] = VariableFactory.bounded("card of val " + values[i], low[i], up[i], solver);
         }
-        return new Constraint[]{IntConstraintFactory.global_cardinality(vars, values, cards, closed)};
+        solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, closed));
     }
 }

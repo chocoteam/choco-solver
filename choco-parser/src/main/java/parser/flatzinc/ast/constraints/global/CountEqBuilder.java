@@ -29,13 +29,10 @@ package parser.flatzinc.ast.constraints.global;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.EInt;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -47,10 +44,10 @@ import java.util.List;
  */
 public class CountEqBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-		IntVar[] x = exps.get(0).toIntVarArray(solver);
-		IntVar y = exps.get(1).intVarValue(solver);
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] x = exps.get(0).toIntVarArray(solver);
+        IntVar y = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-		return new Constraint[]{IntConstraintFactory.count(y, x, c)};
+        solver.post(IntConstraintFactory.count(y, x, c));
     }
 }

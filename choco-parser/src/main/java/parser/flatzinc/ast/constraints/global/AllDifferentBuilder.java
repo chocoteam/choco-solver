@@ -32,7 +32,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -47,12 +46,11 @@ import java.util.List;
 public class AllDifferentBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         if (vars.length > 1) {
-            return new Constraint[]{IntConstraintFactory.alldifferent(vars)};
+            solver.post(IntConstraintFactory.alldifferent(vars));
         }
-        return new Constraint[0];
     }
 }
 

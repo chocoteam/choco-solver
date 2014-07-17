@@ -31,7 +31,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.extension.Tuples;
@@ -49,7 +48,7 @@ import java.util.List;
  */
 public class TableBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         // array[int] of var int: x, array[int, int] of int: t
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         int[] f_t = exps.get(1).toIntArray();
@@ -64,9 +63,9 @@ public class TableBuilder implements IBuilder {
             tuples.add(couple);
         }
         if (x.length == 2) {
-            return new Constraint[]{ICF.table(x[0], x[1], tuples, "AC3bit+rm")};
+            solver.post(ICF.table(x[0], x[1], tuples, "AC3bit+rm"));
         } else {
-            return new Constraint[]{IntConstraintFactory.table(x, tuples, "GACSTR+")};
+            solver.post(IntConstraintFactory.table(x, tuples, "GACSTR+"));
         }
     }
 }

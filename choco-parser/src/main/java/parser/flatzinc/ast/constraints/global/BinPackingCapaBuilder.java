@@ -44,33 +44,34 @@ import java.util.List;
 /**
  * <br/>
  * bin_packing_capa(array[int] of int: c, array[int] of var int: bin, array[int] of int: w)
+ *
  * @author Jean-Guillaume Fages
  * @since 04/06/2013
  */
 public class BinPackingCapaBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] c = exps.get(0).toIntArray();
-		IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
-		int[] item_size = exps.get(2).toIntArray();
-		LinkedList<Constraint> addCons = new LinkedList();
-		for(int i=0; i<item_bin.length; i++){
-			if(item_bin[i].getLB()<1){
-				addCons.add(ICF.arithm(item_bin[i],">=",1));
-			}
-			if(item_bin[i].getUB()>c.length){
-				addCons.add(ICF.arithm(item_bin[i],"<=",c.length));
-			}
-		}
-		IntVar[] loads = new IntVar[c.length];
-		for(int i=0; i<c.length; i++){
-			loads[i] = VF.bounded("load_"+i,0,c[i],solver);
-		}
-		if(addCons.size()>0){
-			return ArrayUtils.append(ICF.bin_packing(item_bin, item_size, loads, 1), (Constraint[])addCons.toArray());
-		}else{
-			return ICF.bin_packing(item_bin,item_size,loads,1);
-		}
+        IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
+        int[] item_size = exps.get(2).toIntArray();
+        LinkedList<Constraint> addCons = new LinkedList<>();
+        for (int i = 0; i < item_bin.length; i++) {
+            if (item_bin[i].getLB() < 1) {
+                addCons.add(ICF.arithm(item_bin[i], ">=", 1));
+            }
+            if (item_bin[i].getUB() > c.length) {
+                addCons.add(ICF.arithm(item_bin[i], "<=", c.length));
+            }
+        }
+        IntVar[] loads = new IntVar[c.length];
+        for (int i = 0; i < c.length; i++) {
+            loads[i] = VF.bounded("load_" + i, 0, c[i], solver);
+        }
+        if (addCons.size() > 0) {
+            solver.post(ArrayUtils.append(ICF.bin_packing(item_bin, item_size, loads, 1), (Constraint[]) addCons.toArray()));
+        } else {
+            solver.post(ICF.bin_packing(item_bin, item_size, loads, 1));
+        }
     }
 }

@@ -49,11 +49,11 @@ import java.util.List;
 public class BinPackingLoadBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
 		IntVar[] loads = exps.get(0).toIntVarArray(solver);
 		IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
 		int[] item_size = exps.get(2).toIntArray();
-		LinkedList<Constraint> addCons = new LinkedList();
+		LinkedList<Constraint> addCons = new LinkedList<>();
 		for(int i=0; i<item_bin.length; i++){
 			if(item_bin[i].getLB()<1){
 				addCons.add(ICF.arithm(item_bin[i],">=",1));
@@ -63,9 +63,9 @@ public class BinPackingLoadBuilder implements IBuilder {
 			}
 		}
 		if(addCons.size()>0){
-			return ArrayUtils.append(ICF.bin_packing(item_bin, item_size, loads, 1), (Constraint[])addCons.toArray());
+			solver.post(ArrayUtils.append(ICF.bin_packing(item_bin, item_size, loads, 1), (Constraint[])addCons.toArray()));
 		}else{
-			return ICF.bin_packing(item_bin, item_size, loads, 1);
+			solver.post(ICF.bin_packing(item_bin, item_size, loads, 1));
 		}
     }
 }

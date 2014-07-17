@@ -32,7 +32,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.variables.IntVar;
@@ -48,7 +47,7 @@ import java.util.List;
 public class RegularBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
 //        array[int] of var int: x, int: Q, int: S,
 //        array[int,int] of int: d, int: q0, set of int: F
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
@@ -73,6 +72,6 @@ public class RegularBuilder implements IBuilder {
 //        auto.removeDeadTransitions();
 //        auto.minimize();
 
-        return new Constraint[]{IntConstraintFactory.regular(vars, auto)};
+        solver.post(IntConstraintFactory.regular(vars, auto));
     }
 }

@@ -31,7 +31,6 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 
 import java.util.List;
 
@@ -43,5 +42,5 @@ import java.util.List;
  */
 public interface IBuilder {
 
-    Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas);
+    void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas);
 }
