@@ -115,7 +115,7 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
-	protected ISolutionRecorder solutionRecorder;
+    protected ISolutionRecorder solutionRecorder;
 
     /**
      * Solver name
@@ -174,7 +174,7 @@ public class Solver implements Serializable {
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
         FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
-		solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
+        solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
         set(ObjectiveManager.SAT());
     }
 
@@ -391,10 +391,12 @@ public class Solver implements Serializable {
         return explainer;
     }
 
-	/**
-	 * Return the solution recorder
-	 */
-	public ISolutionRecorder getSolutionRecorder(){return solutionRecorder;}
+    /**
+     * Return the solution recorder
+     */
+    public ISolutionRecorder getSolutionRecorder() {
+        return solutionRecorder;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
@@ -457,13 +459,13 @@ public class Solver implements Serializable {
         this.search.setObjectiveManager(om);
     }
 
-	/**
-	 * Override the solution recorder.
-	 * Beware : multiple recorders which restore a solution might create a conflict.
-	 */
-	public void set(ISolutionRecorder sr){
-		this.solutionRecorder = sr;
-	}
+    /**
+     * Override the solution recorder.
+     * Beware : multiple recorders which restore a solution might create a conflict.
+     */
+    public void set(ISolutionRecorder sr) {
+        this.solutionRecorder = sr;
+    }
 
     /**
      * Put a search monitor to react on search events (solutions, decisions, fails, ...)
@@ -503,12 +505,15 @@ public class Solver implements Serializable {
      * @param variable
      */
     public void unassociates(Variable variable) {
+        if (variable.getNbProps() > 0) {
+            throw new SolverException("Try to remove a variable (" + variable.getName() + ")which is still involved in at least one constraint");
+        }
         int idx = 0;
         for (; idx < vIdx; idx++) {
             if (variable == vars[idx]) break;
         }
-        if (idx == vIdx) return;
-        vars[idx] = vars[--vIdx];
+        System.arraycopy(vars, idx + 1, vars, idx + 1 - 1, vIdx - (idx + 1));
+        vars[--vIdx] = null;
     }
 
     /**
@@ -737,78 +742,78 @@ public class Solver implements Serializable {
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
         }
-		set(new LastSolutionRecorder(new Solution(), true, this));
+        set(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 
-	/**
-	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-	 * Finds and stores all optimal solution
-	 * Restores the best solution found so far (if any)
-	 *
-	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-	 * @param objective the variable to optimize
-	 * @param twoSteps	When set to true it calls two resolution:
-	 *                  	1) It finds and prove the optimum
-	 *                  	2) It reset search and enumerates all solutions of optimal cost
-	 *                  When set to false, it performs only one resolution but which does impose to find strictly
-	 *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
-	 *                  the best cost found so far (but not necessarily optimal).
-	 */
-	public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
-		if(twoSteps){
-			findOptimalSolution(policy,objective);
-			if(getMeasures().getSolutionCount()>0){
-				int opt = getObjectiveManager().getBestSolutionValue().intValue();
-				getEngine().flush();
-				search.reset();
-				post(ICF.arithm(objective, "=", opt));
-				set(new AllSolutionsRecorder(this));
-				findAllSolutions();
-			}
-		}else{
-			if (policy == ResolutionPolicy.SATISFACTION) {
-				throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-			}
-			if (objective == null) {
-				throw new SolverException("No objective variable has been defined");
-			}
-			if (!getObjectiveManager().isOptimization()) {
-				set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
-			}
-			set(new BestSolutionsRecorder(objective));
-			solve(false);
-		}
-	}
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Finds and stores all optimal solution
+     * Restores the best solution found so far (if any)
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objective the variable to optimize
+     * @param twoSteps  When set to true it calls two resolution:
+     *                  1) It finds and prove the optimum
+     *                  2) It reset search and enumerates all solutions of optimal cost
+     *                  When set to false, it performs only one resolution but which does impose to find strictly
+     *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
+     *                  the best cost found so far (but not necessarily optimal).
+     */
+    public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
+        if (twoSteps) {
+            findOptimalSolution(policy, objective);
+            if (getMeasures().getSolutionCount() > 0) {
+                int opt = getObjectiveManager().getBestSolutionValue().intValue();
+                getEngine().flush();
+                search.reset();
+                post(ICF.arithm(objective, "=", opt));
+                set(new AllSolutionsRecorder(this));
+                findAllSolutions();
+            }
+        } else {
+            if (policy == ResolutionPolicy.SATISFACTION) {
+                throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+            }
+            if (objective == null) {
+                throw new SolverException("No objective variable has been defined");
+            }
+            if (!getObjectiveManager().isOptimization()) {
+                set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
+            }
+            set(new BestSolutionsRecorder(objective));
+            solve(false);
+        }
+    }
 
-	/**
-	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-	 * Finds and stores all optimal solution
-	 * Restores the best solution found so far (if any)
-	 *
-	 * @param policy    	optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-	 * @param objectives	the variables to optimize. BEWARE they should all respect the SAME optimization policy
-	 */
-	public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-		if (policy == ResolutionPolicy.SATISFACTION) {
-			throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-		}
-		if (objectives==null || objectives.length==0) {
-			throw new SolverException("No objective variable has been defined");
-		}
-		if (objectives.length==1) {
-			throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
-		}
-		// BEWARE the usual optimization manager is only defined for mono-objective optimization
-		// so we use a satisfaction manager by default (it does nothing)
-		if (getObjectiveManager().isOptimization()) {
-			set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
-		}
-		set(new ParetoSolutionsRecorder(policy,objectives));
-		solve(false);
-	}
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Finds and stores all optimal solution
+     * Restores the best solution found so far (if any)
+     *
+     * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
+     */
+    public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+        }
+        if (objectives == null || objectives.length == 0) {
+            throw new SolverException("No objective variable has been defined");
+        }
+        if (objectives.length == 1) {
+            throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
+        }
+        // BEWARE the usual optimization manager is only defined for mono-objective optimization
+        // so we use a satisfaction manager by default (it does nothing)
+        if (getObjectiveManager().isOptimization()) {
+            set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
+        }
+        set(new ParetoSolutionsRecorder(policy, objectives));
+        solve(false);
+    }
 
-	/**
+    /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
      * Restores the last solution found so far (if any)
      *

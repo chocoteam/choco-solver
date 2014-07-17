@@ -54,9 +54,9 @@ public class Bool2IntBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar bVar = exps.get(0).boolVarValue(solver);
         IntVar iVar = exps.get(1).intVarValue(solver);
-        // 1. an annotation specify which variable is a defined one
+        /*// 1. an annotation specify which variable is a defined one
         if (annotations.size() > 0 && annotations.get(0).id.value.startsWith(defines_var)) {
-            IntVar defvar = (IntVar) datas.get(annotations.get(0).exps.get(0).toString());
+            IntVar defvar = datas.getVariable(annotations.get(0).exps.get(0).toString());
             if (defvar != null && defvar.getNbProps() == 0) {
                 if (defvar == iVar) {
                     // then iVar can be removed and bVar now refers to iVar
@@ -69,7 +69,7 @@ public class Bool2IntBuilder implements IBuilder {
                 }
             }
         }
-        // otherwise, well post the constraint
+        // otherwise, well post the constraint*/
         return new Constraint[]{ICF.arithm(bVar, "=", iVar)};
     }
 

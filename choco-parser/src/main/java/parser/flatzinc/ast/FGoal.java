@@ -327,6 +327,17 @@ public class FGoal {
                 public void free() {
                     created = false;
                 }
+
+                @Override
+                public String toString() {
+                    StringBuilder st = new StringBuilder("(once)");
+                    for (int i = 0; i < ivars.length; i++) {
+                        if (!ivars[i].isInstantiated()) {
+                            st.append(ivars[i]).append("=").append(ivars[i].getLB()).append(", ");
+                        }
+                    }
+                    return st.toString();
+                }
             };
 
             @Override

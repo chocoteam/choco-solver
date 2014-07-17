@@ -370,7 +370,7 @@ public class OneWordS32BitSet implements IStateBitSet {
             fromIndex = 0;
         }
 
-        if (fromIndex >= 64)
+        if (fromIndex >= 32)
             return fromIndex;
 
         int word = ~this.word.get() & (WORD_MASK << fromIndex);
@@ -436,7 +436,7 @@ public class OneWordS32BitSet implements IStateBitSet {
             return -1;
         }
 
-        if (fromIndex >= 64)
+        if (fromIndex >= 32)
             return fromIndex;
 
         int word = ~this.word.get() & (WORD_MASK >>> -(fromIndex + 1));
@@ -559,7 +559,7 @@ public class OneWordS32BitSet implements IStateBitSet {
     public int hashCode() {
         int h = 1234;
         h ^= word.get();
-        return (h >> 16) ^ h;
+        return (h >> 14) ^ h;
     }
 
     /**
