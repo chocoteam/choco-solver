@@ -47,7 +47,7 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
     private final int constant;
 
     public PropGreaterOrEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }
 
@@ -62,11 +62,6 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
         if (vars[0].updateLowerBound(constant, aCause) || vars[0].getLB() >= constant) {
             this.setPassive();
         }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override

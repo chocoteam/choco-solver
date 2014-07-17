@@ -74,7 +74,7 @@ public class PropRegular extends Propagator<IntVar> {
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
-        graph = initGraph(solver.getEnvironment(), vars, automaton);
+		graph = initGraph(solver.getEnvironment(), vars, automaton);
     }
 
     @Override
@@ -83,8 +83,7 @@ public class PropRegular extends Propagator<IntVar> {
             idms[i].freeze();
             idms[i].forEach(rem_proc.set(i), EventType.REMOVE);
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
-                StoredIndexedBipartiteSet sup = graph.getSupport(i, j);
-                if (sup == null || sup.isEmpty()) {
+                if (!graph.hasSupport(i, j)) {
                     vars[i].removeValue(j, aCause);
                 }
             }
@@ -130,8 +129,7 @@ public class PropRegular extends Propagator<IntVar> {
 
         @Override
         public void execute(int i) throws ContradictionException {
-            StoredIndexedBipartiteSet sup = p.graph.getSupport(idxVar, i);
-            p.graph.clearSupports(sup, p);
+			p.graph.clearSupports(idxVar,i , p);
         }
     }
 
@@ -148,6 +146,7 @@ public class PropRegular extends Propagator<IntVar> {
         //        sb.append(propagators[0].toString());
         return sb.toString();
     }
+
     //////////////////////
 
     private static StoredDirectedMultiGraph initGraph(IEnvironment environment, IntVar[] vars, IAutomaton auto) {
@@ -182,47 +181,39 @@ public class PropRegular extends Propagator<IntVar> {
         TIntIterator layerIter;
         TIntIterator qijIter;
 
-        ArrayList<TIntHashSet> layer = new ArrayList<TIntHashSet>();
-        TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
-        // DLList[vars.length+1];
-
-        for (i = 0; i <= n; i++) {
-            layer.add(new TIntHashSet());// = new DLList(nbNodes);
-        }
 
         //forward pass, construct all paths described by the automaton for word of length nbVars.
-        layer.get(0).add(auto.getInitialState());
+		TIntHashSet[] layer = new TIntHashSet[n+1];
+		TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
+		for (i = 0; i <= n; i++) {
+			layer[i] = new TIntHashSet();
+		}
+        layer[0].add(auto.getInitialState());
         TIntHashSet nexts = new TIntHashSet();
-
         for (i = 0; i < n; i++) {
             int ub = vars[i].getUB();
             for (j = vars[i].getLB(); j <= ub; j = vars[i].nextValue(j)) {
-                layerIter = layer.get(i).iterator();//getIterator();
+                layerIter = layer[i].iterator();
                 while (layerIter.hasNext()) {
                     k = layerIter.next();
                     nexts.clear();
-
                     auto.delta(k, j, nexts);
                     for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
                         int succ = it.next();
-                        layer.get(i + 1).add(succ);
-                        //incrQ(i,j,);
+                        layer[i+1].add(succ);
                     }
                     if (!nexts.isEmpty()) {
                         int idx = starts[i] + j - offsets[i];
                         if (tmpQ[idx] == null)
                             tmpQ[idx] = new TIntHashSet();
-
                         tmpQ[idx].add(k);
-
-
                     }
                 }
             }
         }
 
         //removing reachable non accepting states
-        layerIter = layer.get(n).iterator();
+        layerIter = layer[n].iterator();
         while (layerIter.hasNext()) {
             k = layerIter.next();
             if (!auto.isFinal(k)) {
@@ -250,7 +241,7 @@ public class PropRegular extends Propagator<IntVar> {
                         boolean added = false;
                         for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
                             int qn = it.next();
-                            if (layer.get(i + 1).contains(qn)) {
+                            if (layer[i+1].contains(qn)) {
 
                                 added = true;
                                 Node a = in[i * auto.getNbStates() + k];
@@ -280,8 +271,7 @@ public class PropRegular extends Propagator<IntVar> {
                     }
                 }
             }
-            layerIter = layer.get(i).iterator();
-
+            layerIter = layer[i].iterator();
             // If no more arcs go out of a given state in the layer, then we remove the state from that layer
             while (layerIter.hasNext())
                 if (!mark.get(layerIter.next()))

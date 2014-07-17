@@ -47,9 +47,8 @@ public class PropMemberBound extends Propagator<IntVar> {
     final int lb, ub;
 
 
-    public PropMemberBound(IntVar var, int lb, int ub,
-                           boolean reactOnPromotion) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+    public PropMemberBound(IntVar var, int lb, int ub) {
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.lb = lb;
         this.ub = ub;
     }
@@ -62,11 +61,6 @@ public class PropMemberBound extends Propagator<IntVar> {
         if (lb <= vars[0].getLB() && ub >= vars[0].getUB()) {
             this.setPassive();
         }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override
