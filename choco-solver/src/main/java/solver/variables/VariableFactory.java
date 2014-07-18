@@ -713,7 +713,12 @@ public class VariableFactory {
         if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
-        FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+		IntVar cste;
+		if(VALUE == 0 || VALUE == 1){
+			cste = new FixedBoolVarImpl(NAME, VALUE, SOLVER);
+		}else {
+			cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+		}
         if (NAME.equals(CSTE_NAME + VALUE)) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }

@@ -334,4 +334,9 @@ public interface IntVar extends Variable {
 
 
     AntiDomain antiDomain();
+
+	/**
+	 * @return true iff the variable has a binary domain
+	 */
+	boolean isBool();
 }

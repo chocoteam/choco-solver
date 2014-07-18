@@ -96,7 +96,7 @@ public class Solver implements Serializable {
     Constraint[] cstrs;
     int cIdx;
 
-    public TIntObjectHashMap<FixedIntVarImpl> cachedConstants;
+    public TIntObjectHashMap<IntVar> cachedConstants;
 
     /**
      * Environment, based of the search tree (trailing or copying)
@@ -142,7 +142,7 @@ public class Solver implements Serializable {
     /**
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
-    public final FixedBoolVarImpl ZERO, ONE;
+    public final BoolVar ZERO, ONE;
 
 
     protected SatConstraint minisat;
@@ -166,10 +166,10 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this);
         solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
-        this.cachedConstants = new TIntObjectHashMap<FixedIntVarImpl>(16, 1.5f, Integer.MAX_VALUE);
+        this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = new FixedBoolVarImpl("0", 0, this);
-        ONE = new FixedBoolVarImpl("1", 1, this);
+        ZERO = (BoolVar) VF.fixed(0,this);
+        ONE = (BoolVar) VF.fixed(1,this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
