@@ -49,7 +49,7 @@ import util.tools.ArrayUtils;
  * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
  * Works incrementally in O(1) per instantiation event
  */
-public class PropBoolSum extends Propagator<IntVar> {
+public class PropBoolSumIncremental extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -70,7 +70,7 @@ public class PropBoolSum extends Propagator<IntVar> {
      * @param variables
      * @param sum
      */
-    public PropBoolSum(BoolVar[] variables, IntVar sum) {
+    public PropBoolSumIncremental(BoolVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, true);
         n = variables.length;
         this.sum = vars[n];
@@ -161,7 +161,7 @@ public class PropBoolSum extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("PropBoolSum(");
+        sb.append("PropBoolSumIncremental(");
         for (int i = 0; i < vars.length - 2; i++) {
             sb.append(vars[i] + "+");
         }

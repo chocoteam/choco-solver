@@ -45,9 +45,8 @@ import util.tools.ArrayUtils;
 
 /**
  * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
- * Works incrementally in O(1) per instantiation event
  */
-public class PropBoolSumBrutForce extends Propagator<IntVar> {
+public class PropBoolSumCoarse extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -63,12 +62,11 @@ public class PropBoolSumBrutForce extends Propagator<IntVar> {
 
     /**
      * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
-     * Works in O(1) per instantiation event
      *
      * @param variables
      * @param sum
      */
-    public PropBoolSumBrutForce(BoolVar[] variables, IntVar sum) {
+    public PropBoolSumCoarse(BoolVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
         n = variables.length;
         this.sum = vars[n];
@@ -137,7 +135,7 @@ public class PropBoolSumBrutForce extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("PropBoolSum(");
+        sb.append("PropBoolSumCoarse(");
         for (int i = 0; i < vars.length - 2; i++) {
             sb.append(vars[i] + "+");
         }
