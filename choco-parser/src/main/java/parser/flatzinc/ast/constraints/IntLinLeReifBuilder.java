@@ -32,14 +32,15 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.*;
+import solver.constraints.Constraint;
+import solver.constraints.ICF;
+import solver.constraints.Propagator;
 import solver.constraints.nary.sum.Scalar;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
 import util.ESat;
-import util.tools.ArrayUtils;
 import util.tools.StringUtils;
 
 import java.util.List;
@@ -54,81 +55,82 @@ import java.util.List;
  */
 public class IntLinLeReifBuilder implements IBuilder {
 
-	@Override
-	public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-		int[] as = exps.get(0).toIntArray();
-		IntVar[] bs = exps.get(1).toIntVarArray(solver);
-		IntVar c = exps.get(2).intVarValue(solver);
-		BoolVar r = exps.get(3).boolVarValue(solver);
-		if (bs.length > 0) {
-			if (ParserConfiguration.HACK_REIFICATION) {
-				// detect boolSumLeq 0 reified
-				int n = bs.length;
-				boolean boolSum = c.isBool();
-				for (int i = 0; i < n; i++) {
-					boolSum &= bs[i].isBool();
-					boolSum &= as[i] == 1;
-				}
-				if (boolSum && c.isInstantiatedTo(0)) {
-					BoolVar[] bbs = new BoolVar[n + 1];
-					for (int i = 0; i < n; i++) {
-						bbs[i] = (BoolVar) bs[i];
-					}
-					bbs[bs.length] = r;
-					solver.post(new Constraint("BoolSumLeq0Reif", new PropBoolSumLeq0Reif(bbs)));
-				}
-			} else {
-				int[] tmp = Scalar.getScalarBounds(bs, as);
-				IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
-				Constraint cstr = ICF.scalar(bs, as, "=", scal);
-				ICF.arithm(scal, "<=", c).reifyWith(r);
-				solver.post(cstr);
-			}
-		}
-	}
+    @Override
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        int[] as = exps.get(0).toIntArray();
+        IntVar[] bs = exps.get(1).toIntVarArray(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
+        BoolVar r = exps.get(3).boolVarValue(solver);
+        if (bs.length > 0) {
+            if (ParserConfiguration.HACK_REIFICATION && c.isInstantiatedTo(0)) {
+                // detect boolSumLeq 0 reified
+                int n = bs.length;
+                boolean boolSum = c.isBool();
+                for (int i = 0; i < n; i++) {
+                    boolSum &= bs[i].isBool();
+                    boolSum &= as[i] == 1;
+                }
+                if (boolSum) {
+                    BoolVar[] bbs = new BoolVar[n + 1];
+                    for (int i = 0; i < n; i++) {
+                        bbs[i] = (BoolVar) bs[i];
+                    }
+                    bbs[bs.length] = r;
+                    solver.post(new Constraint("BoolSumLeq0Reif", new PropBoolSumLeq0Reif(bbs)));
+                    return;
+                }
+            }
+            int[] tmp = Scalar.getScalarBounds(bs, as);
+            IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
+            Constraint cstr = ICF.scalar(bs, as, "=", scal);
+            ICF.arithm(scal, "<=", c).reifyWith(r);
+            solver.post(cstr);
+        }
+    }
 
-	private static class PropBoolSumLeq0Reif extends Propagator<BoolVar> {
+    private static class PropBoolSumLeq0Reif extends Propagator<BoolVar> {
 
-		public PropBoolSumLeq0Reif(BoolVar... vs){
-			super(vs);
-		}
+        public PropBoolSumLeq0Reif(BoolVar... vs) {
+            super(vs);
+        }
 
-		@Override
-		public void propagate(int evtmask) throws ContradictionException {
-			int n = vars.length-1;
-			if(vars[n].getLB()==1){
-				for(int i=0;i<n;i++){
-					vars[i].setToFalse(aCause);
-				}
-				setPassive();
-				return;
-			}
-			int firstOne = -1;
-			int secondOne = -1;
-			for(int i=0;i<n;i++){
-				if(vars[i].getLB()==1){
-					vars[n].setToFalse(aCause);
-					setPassive();
-					return;
-				}
-				if(vars[i].getUB()==1){
-					if(firstOne==-1){
-						firstOne = i;
-					}else if(secondOne==-1){
-						secondOne = i;
-					}
-				}
-			}
-			if(firstOne == -1){
-				vars[n].setToTrue(aCause);
-				setPassive();
-			}else if(secondOne == -1 && vars[n].getUB()==0){
-				vars[firstOne].setToTrue(aCause);
-			}
-		}
-		@Override
-		public ESat isEntailed() {
-			return ESat.TRUE;
-		}
-	}
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            int n = vars.length - 1;
+            if (vars[n].getLB() == 1) {
+                for (int i = 0; i < n; i++) {
+                    vars[i].setToFalse(aCause);
+                }
+                setPassive();
+                return;
+            }
+            int firstOne = -1;
+            int secondOne = -1;
+            for (int i = 0; i < n; i++) {
+                if (vars[i].getLB() == 1) {
+                    vars[n].setToFalse(aCause);
+                    setPassive();
+                    return;
+                }
+                if (vars[i].getUB() == 1) {
+                    if (firstOne == -1) {
+                        firstOne = i;
+                    } else if (secondOne == -1) {
+                        secondOne = i;
+                    }
+                }
+            }
+            if (firstOne == -1) {
+                vars[n].setToTrue(aCause);
+                setPassive();
+            } else if (secondOne == -1 && vars[n].getUB() == 0) {
+                vars[firstOne].setToTrue(aCause);
+            }
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.TRUE;
+        }
+    }
 }

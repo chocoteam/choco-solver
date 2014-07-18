@@ -98,7 +98,8 @@ public class IntEqReifBuilder implements IBuilder {
 
                         @Override
                         public ESat isEntailed() {
-                            throw new UnsupportedOperationException("isEntailed not implemented ");
+//                            throw new UnsupportedOperationException("isEntailed not implemented ");
+                            return ESat.TRUE;
                         }
                     }));
                 } else {
