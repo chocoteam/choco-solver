@@ -110,8 +110,8 @@ public class ParseAndSolve {
     @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
     protected boolean fexp = false;
 
-    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs\n4: fast variable", required = false)
-    protected byte eng = 0;
+    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: 7 queue dynamic\n2: 2 buckets", required = false)
+    protected byte eng = 2;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -129,8 +129,8 @@ public class ParseAndSolve {
                     l.add(c.getName());
                     LOGGER.info("% {}", c.getName());
                 }
-            }
-        }
+                    }
+                }
         solve();
     }
 
@@ -195,12 +195,12 @@ public class ParseAndSolve {
 
     protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
+            case 2:
+            solver.set(new SevenQueuesPropagatorEngine(solver));
+            break;
+            default:
             case 1:
                 solver.set(new TwoBucketPropagationEngine(solver));
-                break;
-            default:
-            case 2:
-                solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;
         }
     }
