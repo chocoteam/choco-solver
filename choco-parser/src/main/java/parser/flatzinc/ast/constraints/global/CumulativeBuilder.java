@@ -62,6 +62,6 @@ public class CumulativeBuilder implements IBuilder {
                     solver);
             tasks[i] = new Task(starts[i], durations[i], ends[i]);
         }
-        solver.post(IntConstraintFactory.cumulative(tasks, resources, limit, true));
+        solver.post(IntConstraintFactory.cumulative(tasks, resources, limit));
     }
 }
