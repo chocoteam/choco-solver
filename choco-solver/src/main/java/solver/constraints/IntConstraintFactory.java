@@ -241,16 +241,14 @@ public class IntConstraintFactory {
 		if(VAR2.isInstantiated()){
 			if(OP1.equals("+")){
 				return arithm(VAR1,OP2,CSTE-VAR2.getValue());
-			}else{
-				assert OP1.equals("-");
+			}else if(OP1.equals("-")){
 				return arithm(VAR1,OP2,CSTE+VAR2.getValue());
 			}
 		}
 		if(VAR1.isInstantiated()){
 			if(OP1.equals("+")){
 				return arithm(VAR2,OP2,CSTE-VAR1.getValue());
-			}else{
-				assert OP1.equals("-");
+			}else if(OP1.equals("-")){
 				return arithm(VAR2,Operator.getFlip(OP2),VAR1.getValue()-CSTE);
 			}
 		}
