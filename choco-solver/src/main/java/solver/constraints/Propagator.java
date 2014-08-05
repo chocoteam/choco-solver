@@ -326,11 +326,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-        assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
-        state = PASSIVE;
-        solver.getEnvironment().save(operations[ACTIVE]);
-        //TODO: update var mask back
-        solver.getEngine().desactivatePropagator(this);
+		if(!isCompletelyInstantiated()) {// useless call to setPassive if all vars are instantiated
+			assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
+			state = PASSIVE;
+			solver.getEnvironment().save(operations[ACTIVE]);
+			//TODO: update var mask back
+			solver.getEngine().desactivatePropagator(this);
+		}
     }
 
     /**
