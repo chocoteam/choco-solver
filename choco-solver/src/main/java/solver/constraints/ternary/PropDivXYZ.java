@@ -142,7 +142,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     if ((vz != val)) {
                         contradiction(Z, "");
                     } else {
-                        setPassive();
                         return;
                     }
                     break;
