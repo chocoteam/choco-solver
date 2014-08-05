@@ -1295,7 +1295,16 @@ public class IntConstraintFactory {
                     }
                     return sum(v2, Operator.getFlip(OPERATOR), VF.offset(s2, -SCALAR.getValue()));
                 }
-            }
+            } else if (n==2){
+				if(COEFFS[0]==1){
+					assert COEFFS[1] == -1;
+					return sum(new IntVar[]{VARS[1],SCALAR},Operator.getFlip(OPERATOR),VARS[0]);
+				}else{
+					assert COEFFS[0] == -1;
+					assert COEFFS[1] == 1;
+					return sum(new IntVar[]{VARS[0],SCALAR},Operator.getFlip(OPERATOR),VARS[1]);
+				}
+			}
         }
         // scalar
         if (OPERATOR.equals("=")) {
