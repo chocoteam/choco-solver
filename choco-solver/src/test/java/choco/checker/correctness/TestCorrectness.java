@@ -54,12 +54,14 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testTIMES() {
+		for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+			CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, 1407157364513l, null);
+		}
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 8) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, seed, null);
             }
-
         }
     }
 

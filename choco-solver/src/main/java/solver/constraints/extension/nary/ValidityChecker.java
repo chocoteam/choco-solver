@@ -30,6 +30,7 @@ package solver.constraints.extension.nary;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.variables.IntVar;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -38,7 +39,7 @@ import java.util.Comparator;
  * tuple is valid i.e. if it is ok regarding the current domain
  * of the variables
  */
-public class ValidityChecker implements Comparator<IntVar> {
+public class ValidityChecker implements Comparator<IntVar>, Serializable {
 
     //variables sorted from the minimum domain to the max
     protected IntVar[] sortedvs;

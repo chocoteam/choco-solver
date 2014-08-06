@@ -30,8 +30,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.sum.Scalar;
 import solver.constraints.set.SCF;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
@@ -75,18 +77,18 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, 1}, z, 1));
                 ref.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -102,17 +104,17 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1a() {
         // Z = X + Y (bounded)
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, ref);
                 IntVar y = VariableFactory.bounded("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, 1}, z, 1));
                 ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
 
             }
@@ -128,10 +130,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void testa() {
         // Z = max(X + Y)
-        for (int seed = 0; seed < 99999; seed += 1) {
+        for (int seed = 0; seed < 9999; seed += 1) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -153,10 +155,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1b() {
         // Z = |X|
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -176,10 +178,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1bb() {
         // Z = X + c
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -199,10 +201,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1bbb() {
         // Z = X * c
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -222,10 +224,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1c() {
         // Z = -X
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -274,7 +276,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "30s")
+    @Test(groups = "1s")
     public void test1f() {
         // Z = MAX(X,Y)
         Solver ref = new Solver();
@@ -300,14 +302,16 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test2() {
         // Z = X - Y
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+				Constraint cstr = new Scalar(new IntVar[]{x, y}, new int[]{1, -1}, z, 1);
+//				System.out.println(cstr);
+                ref.post(cstr);
                 ref.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -315,7 +319,9 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, x));
+				Constraint cstr = IntConstraintFactory.sum(new IntVar[]{z, y}, x);
+                solver.post(cstr);
+//				System.out.println(cstr);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -323,10 +329,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test3() {
         // Z = |X - Y|
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -334,7 +340,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, -1}, z, 1));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
             }
@@ -350,10 +356,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test4() {
         // Z = |X - Y| + AllDiff
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -361,7 +367,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, -1}, z, 1));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
                 ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
@@ -391,7 +397,7 @@ public class ViewsTest {
                 IntVar[] y = VariableFactory.enumeratedArray("y", k - 1, -(k - 1), k - 1, ref);
                 IntVar[] t = VariableFactory.enumeratedArray("t", k - 1, 0, k - 1, ref);
                 for (int i = 0; i < k - 1; i++) {
-                    ref.post(IntConstraintFactory.scalar(new IntVar[]{x[i + 1], x[i]}, new int[]{1, -1}, y[i]));
+                    ref.post(new Scalar(new IntVar[]{x[i + 1], x[i]}, new int[]{1, -1}, y[i], 1));
                     ref.post(IntConstraintFactory.absolute(t[i], y[i]));
                 }
                 ref.post(IntConstraintFactory.alldifferent(x, "BC"));

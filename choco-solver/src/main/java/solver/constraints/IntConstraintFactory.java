@@ -241,16 +241,14 @@ public class IntConstraintFactory {
 		if(VAR2.isInstantiated()){
 			if(OP1.equals("+")){
 				return arithm(VAR1,OP2,CSTE-VAR2.getValue());
-			}else{
-				assert OP1.equals("-");
+			}else if(OP1.equals("-")){
 				return arithm(VAR1,OP2,CSTE+VAR2.getValue());
 			}
 		}
 		if(VAR1.isInstantiated()){
 			if(OP1.equals("+")){
 				return arithm(VAR2,OP2,CSTE-VAR1.getValue());
-			}else{
-				assert OP1.equals("-");
+			}else if(OP1.equals("-")){
 				return arithm(VAR2,Operator.getFlip(OP2),VAR1.getValue()-CSTE);
 			}
 		}
@@ -1297,7 +1295,16 @@ public class IntConstraintFactory {
                     }
                     return sum(v2, Operator.getFlip(OPERATOR), VF.offset(s2, -SCALAR.getValue()));
                 }
-            }
+            } else if (n==2){
+				if(COEFFS[0]==1){
+					assert COEFFS[1] == -1;
+					return sum(new IntVar[]{VARS[1],SCALAR},Operator.getFlip(OPERATOR),VARS[0]);
+				}else{
+					assert COEFFS[0] == -1;
+					assert COEFFS[1] == 1;
+					return sum(new IntVar[]{VARS[0],SCALAR},Operator.getFlip(OPERATOR),VARS[1]);
+				}
+			}
         }
         // scalar
         if (OPERATOR.equals("=")) {

@@ -86,13 +86,13 @@ public class PropTimesNaive extends Propagator<IntVar> {
         if (a <= 0 && b >= 0 && c <= 0 && d >= 0) { // case 1
             min = MIN;
             max = MAX;
-            return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         } else if (c == 0 && d == 0 && (a > 0 || b < 0)) // case 2
             this.contradiction(var, "");
         else if (c < 0 && d > 0 && (a > 0 || b < 0)) { // case 3
             max = Math.max(Math.abs(a), Math.abs(b));
             min = -max;
-            return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         } else if (c == 0 && d != 0 && (a > 0 || b < 0)) // case 4 a
             return div(var, a, b, 1, d);
         else if (c != 0 && d == 0 && (a > 0 || b < 0)) // case 4 b
@@ -105,7 +105,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             min = (int) Math.round(Math.ceil(low));
             max = (int) Math.round(Math.floor(high));
             if (min > max) this.contradiction(var, "");
-            return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         }
         return false;
     }
@@ -113,7 +113,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
     private boolean mul(IntVar var, int a, int b, int c, int d) throws ContradictionException {
         int min = Math.min(Math.min(multiply(a, c), multiply(a, d)), Math.min(multiply(b, c), multiply(b, d)));
         int max = Math.max(Math.max(multiply(a, c), multiply(a, d)), Math.max(multiply(b, c), multiply(b, d)));
-        return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+        return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
     }
 
     public final static int multiply(int a, int b) {

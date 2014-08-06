@@ -27,7 +27,9 @@
 
 package solver.constraints.extension.nary;
 
-public abstract class LargeRelation {
+import java.io.Serializable;
+
+public abstract class LargeRelation implements Serializable{
 
     /**
      * return true if tuple is feasible according
