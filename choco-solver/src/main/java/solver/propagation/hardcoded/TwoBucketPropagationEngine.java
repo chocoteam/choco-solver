@@ -226,7 +226,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         lastProp = pro_queue_f.pollFirst();
         // revision of the variable
         int aid = p2i.get(lastProp.getId());
-        assert schedule_f[aid] : "try to propagate an unscheduled propagator";
+        //assert schedule_f[aid] : "try to propagate an unscheduled propagator";
         schedule_f[aid] = false;
         if (lastProp.reactToFineEvent()) {
             IntCircularQueue evtset = event_f[aid];
