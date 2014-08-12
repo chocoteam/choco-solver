@@ -45,7 +45,7 @@ import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.PropagationTrigger;
-import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.ISearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
@@ -55,8 +55,6 @@ import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 import solver.variables.graph.GraphVar;
-import solver.variables.impl.FixedBoolVarImpl;
-import solver.variables.impl.FixedIntVarImpl;
 import sun.reflect.Reflection;
 import util.ESat;
 
@@ -839,7 +837,7 @@ public class Solver implements Serializable {
      */
     protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new SevenQueuesPropagatorEngine(this));
+            this.set(new TwoBucketPropagationEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
@@ -853,7 +851,7 @@ public class Solver implements Serializable {
      */
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new SevenQueuesPropagatorEngine(this));
+            this.set(new TwoBucketPropagationEngine(this));
         }
         engine.propagate();
     }

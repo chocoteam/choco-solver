@@ -167,8 +167,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         lastProp.fineERcalls++;
                         lastProp.propagate(v, mask);
                     }
-                } else {
-                    assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                } else if(lastProp.isActive()){ // need to be checked due to views
+                    //assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     if (Configuration.PRINT_PROPAGATION) {
                         IPropagationEngine.Trace.printPropagation(null, lastProp);
                     }
@@ -288,8 +288,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         if (propagator.reactToFineEvent()) {
-            int pid = propagator.getId();
-            int aid = p2i.get(pid);
+        int pid = propagator.getId();
+        int aid = p2i.get(pid);
             if (aid > -1) {
                 assert aid > -1 : "try to desactivate an unknown constraint";
                 // we don't remove the element from its master to avoid costly operations

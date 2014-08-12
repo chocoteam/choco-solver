@@ -226,7 +226,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         lastProp = pro_queue_f.pollFirst();
         // revision of the variable
         int aid = p2i.get(lastProp.getId());
-        assert schedule_f[aid] : "try to propagate an unscheduled propagator";
+        //assert schedule_f[aid] : "try to propagate an unscheduled propagator";
         schedule_f[aid] = false;
         if (lastProp.reactToFineEvent()) {
             IntCircularQueue evtset = event_f[aid];
@@ -243,8 +243,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 lastProp.fineERcalls++;
                 lastProp.propagate(v, mask);
             }
-        } else {
-            assert lastProp.isActive() : "propagator is not active:" + lastProp;
+        } else if(lastProp.isActive()){ // need to be checked due to views
+            //assert lastProp.isActive() : "propagator is not active:" + lastProp;
             if (Configuration.PRINT_PROPAGATION) {
                 Trace.printPropagation(null, lastProp);
             }
