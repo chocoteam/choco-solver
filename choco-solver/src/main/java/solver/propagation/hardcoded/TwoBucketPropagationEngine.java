@@ -243,8 +243,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 lastProp.fineERcalls++;
                 lastProp.propagate(v, mask);
             }
-        } else {
-            assert lastProp.isActive() : "propagator is not active:" + lastProp;
+        } else if(lastProp.isActive()){ // need to be checked due to views
+            //assert lastProp.isActive() : "propagator is not active:" + lastProp;
             if (Configuration.PRINT_PROPAGATION) {
                 Trace.printPropagation(null, lastProp);
             }
