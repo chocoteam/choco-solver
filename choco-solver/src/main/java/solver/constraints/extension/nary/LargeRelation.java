@@ -29,7 +29,7 @@ package solver.constraints.extension.nary;
 
 import java.io.Serializable;
 
-public abstract class LargeRelation implements Serializable{
+public abstract class LargeRelation implements Serializable {
 
     /**
      * return true if tuple is feasible according
@@ -48,15 +48,15 @@ public abstract class LargeRelation implements Serializable{
     public abstract boolean isConsistent(int[] tuple);
 
     protected boolean valid(int[] tuple, int[] offsets, int[] domSizes) {
-        for (int i = 0; i < tuple.length; i++) {
+        /*for (int i = 0; i < tuple.length; i++) {
                 if (!between(tuple[i], offsets[i], offsets[i] + domSizes[i] - 1)) return false;
-            }
-            return true;
-        }
+            }*/
+        return true;
+    }
 
     private static boolean between(int v, int low, int upp) {
-            return (low <= v) && (v <= upp);
-        }
+        return (low <= v) && (v <= upp);
+    }
 
 
 }
