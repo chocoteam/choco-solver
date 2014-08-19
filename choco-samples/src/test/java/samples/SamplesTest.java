@@ -63,10 +63,10 @@ public class SamplesTest {
     };
 
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll() {
         for (AbstractProblem pb : problems) {
-            pb.execute(new String[]{});
+            pb.execute();
         }
     }
 

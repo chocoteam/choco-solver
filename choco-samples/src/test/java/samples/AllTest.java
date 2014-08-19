@@ -26,19 +26,14 @@
  */
 package samples;
 
-import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.AbsoluteEvaluation;
 import solver.Configuration;
 import solver.ISolverProperties;
 import solver.Solver;
-import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
-import solver.search.loop.SearchLoops;
-import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.util.Arrays;
 
@@ -58,16 +53,6 @@ public class AllTest {
     PropagationEngineFactory strat;
 
 
-    public AllTest() {
-//        this(new AllIntervalSeries(), new String[]{"-o", "5"},
-        this(new AbsoluteEvaluation(), null,
-                Environments.TRAIL.make(),
-                new AllSolverProp(
-                        SearchLoops.BINARY,
-                        ExplanationFactory.CBJ, false),
-                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE, 6);
-    }
-
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
                    ISolverProperties properties,
@@ -78,12 +63,10 @@ public class AllTest {
 		if(args==null){
 			args=new String[0];
 		}
-//        args = ArrayUtils.append(args, new String[]{"-engine", strat.name()});
         this.environment = env;
         this.properties = properties;
         this.strat = strat;
         this.nbSol = nbSol;
-        //prob.solver.
     }
 
     @Test(groups = "1m")
@@ -94,8 +77,6 @@ public class AllTest {
             prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
             prob.buildModel();
             prob.configureSearch();
-            //  prob.overrideExplanation();
-            SearchMonitorFactory.log(prob.solver, true, true);
             prob.solver.findAllSolutions();
 
             Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
@@ -104,11 +85,6 @@ public class AllTest {
 
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append(prob.getClass().getSimpleName()).append(" ");
-        st.append(Arrays.toString(args)).append(" ");
-        st.append(environment.getClass().getSimpleName()).append(" ");
-        st.append(properties).append(" ");
-        return st.toString();
+        return prob.getClass().getSimpleName() + " " + Arrays.toString(args) + " " + environment.getClass().getSimpleName() + " " + properties + " ";
     }
 }

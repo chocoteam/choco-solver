@@ -53,8 +53,8 @@ public class AllTestFactory {
 
     String[][] arguments = new String[][]{
 
-            {"-s", "1234"},
-            {"-s", "1236"},
+            {"-seed", "1234"},
+            {"-seed", "1236"},
 
 
     };
@@ -65,9 +65,7 @@ public class AllTestFactory {
 
     Environments[] envFact = new Environments[]{
             Environments.TRAIL,
-//            Environments.COPY,
-//            Environments.BUFFER,
-//            Environments.BUFFER_UNSAFE
+            Environments.COPY
     };
 
     ExplanationFactory[] expFact = new ExplanationFactory[]{
@@ -77,15 +75,13 @@ public class AllTestFactory {
     };
 
     SearchLoops[] slFact = new SearchLoops[]{
-            SearchLoops.BINARY,
-            //SearchLoops.ADVANCED_BINARY,
-            //SearchLoops.BINARY_WITH_RECOMPUTATION
+            SearchLoops.BINARY
     };
 
 
     @Factory
     public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+        List<Object> lresult = new ArrayList<>(12);
 
         PropagationEngineFactory[] pol = PropagationEngineFactory.values();
 
