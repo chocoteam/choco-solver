@@ -246,4 +246,18 @@ public class DynamicPostTest {
         }
         Assert.assertEquals(9, nbSolution);
     }
+
+    @Test
+    public void testIssue214() {
+        Solver solver = new Solver();
+        IntVar x = VariableFactory.enumerated("x", 1, 2, solver);
+        IntVar y = VariableFactory.enumerated("y", 1, 2, solver);
+        IntVar z = VariableFactory.enumerated("z", 1, 2, solver);
+        Constraint c = LCF.or(
+                ICF.arithm(x, "<", y),
+                ICF.arithm(x, "<", z));
+        solver.post(c);
+        solver.findSolution();
+        solver.unpost(c);
+    }
 }

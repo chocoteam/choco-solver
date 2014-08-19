@@ -105,3 +105,4 @@ NEXT MILESTONE
 - Table reformulation of small scalar products
 - Minimum and Maximum over boolean arrays
 - Issue #215: Fix generation of relation based on tuples
+- Fix #214: Fix problems related to propagators dynamic addition and deletion
