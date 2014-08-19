@@ -87,15 +87,18 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
             valcheck = new FastValidityChecker(size, vars);
     }
 
-    protected LargeRelation makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        int totalSize = 1;
-        for (int i = 0; i < offsets.length; i++) {
-            totalSize *= dsizes[i];
+    protected LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
+        long totalSize = 1;
+        for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
+            totalSize *= vars[i].getDomainSize();
         }
-        if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
-            return new TuplesLargeTable(tuples, offsets, dsizes);
+        if (totalSize < 0) {
+            throw new SolverException("Tuples required too much memory ...");
         }
-        return new TuplesTable(tuples, offsets, dsizes);
+        if (totalSize / 8 > 50 * 1024 * 1024) {
+            return new TuplesLargeTable(tuples, vars);
+        }
+        return new TuplesTable(tuples, vars);
     }
 
     @Override
@@ -216,7 +219,6 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
     /**
      * t is a consistent tuple not valid anymore, we need to go to the first valid tuple
      * greater than t before searching among the valid tuples
-     *
      */
     public int[] getFirstValidTupleFrom(int[] t, int indexVar) {
         int k = 0;

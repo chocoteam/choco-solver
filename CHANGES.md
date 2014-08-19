@@ -104,3 +104,5 @@ NEXT MILESTONE
 - Table constraint refactoring (STR2+) (seems to be not idempotent however)
 - Table reformulation of small scalar products
 - Minimum and Maximum over boolean arrays
+- Issue #215: Fix generation of relation based on tuples
+- Fix #214: Fix problems related to propagators dynamic addition and deletion

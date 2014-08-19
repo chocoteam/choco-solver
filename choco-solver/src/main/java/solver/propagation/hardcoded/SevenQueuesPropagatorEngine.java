@@ -82,7 +82,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
-        List<Propagator> _propagators = new ArrayList<Propagator>();
+        List<Propagator> _propagators = new ArrayList<>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = 0;
@@ -105,7 +105,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         }
         pro_queue = new CircularQueue[8];
         for (int i = 0; i < 8; i++) {
-            pro_queue[i] = new CircularQueue<Propagator>(16);
+            pro_queue[i] = new CircularQueue<>(16);
         }
 
         scheduled = new short[nbProp];
@@ -369,7 +369,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
             // 3. remove eventsets
             IntCircularQueue estm = eventsets[idtm];
-            assert eventsets[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
+            assert !toDelete.reactToFineEvent() || eventsets[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
             IntCircularQueue[] _eventsets = eventsets;
             eventsets = new IntCircularQueue[nsize];
             System.arraycopy(_eventsets, 0, eventsets, 0, nsize);

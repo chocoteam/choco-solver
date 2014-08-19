@@ -121,7 +121,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
-        List<Propagator> _propagators = new ArrayList<Propagator>();
+        List<Propagator> _propagators = new ArrayList<>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = 0;
@@ -460,7 +460,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
             // 4. remove event_f
             IntCircularQueue icqtm = event_f[idtm];
-            assert event_f[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
+            assert !toDelete.reactToFineEvent() || event_f[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
             IntCircularQueue[] _event_f = event_f;
             event_f = new IntCircularQueue[nsize];
             System.arraycopy(_event_f, 0, event_f, 0, nsize);

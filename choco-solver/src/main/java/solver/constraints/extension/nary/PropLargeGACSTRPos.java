@@ -127,8 +127,8 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     }
 
     @Override
-    protected TuplesList makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        return new TuplesList(tuples, offsets, dsizes);
+    protected TuplesList makeRelation(Tuples tuples, IntVar[] vars) {
+        return new TuplesList(tuples, vars);
     }
 
     @Override

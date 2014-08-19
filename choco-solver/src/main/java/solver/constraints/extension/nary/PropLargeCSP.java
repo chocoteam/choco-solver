@@ -44,16 +44,10 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
 
     protected PropLargeCSP(IntVar[] vars, Tuples tuples) {
         super(vars, PropagatorPriority.QUADRATIC, true);
-        int[] offsets = new int[vars.length];
-        int[] dsizes = new int[vars.length];
-        for (int i = 0; i < vars.length; i++) {
-            offsets[i] = vars[i].getLB();
-            dsizes[i] = vars[i].getDomainSize();
-        }
-        this.relation = makeRelation(tuples, offsets, dsizes);
+        this.relation = makeRelation(tuples, vars);
     }
 
-    protected abstract R makeRelation(Tuples tuples, int[] offsets, int[] dsizes);
+    protected abstract R makeRelation(Tuples tuples, IntVar[] vars);
 
 
     public final LargeRelation getRelation() {

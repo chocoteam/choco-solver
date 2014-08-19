@@ -69,15 +69,15 @@ public abstract class PropConditionnal extends Propagator<Variable> {
     public void propagate(int evtmask) throws ContradictionException {
         ESat condition = checkCondition();
         if (condition == ESat.TRUE) {
+            setPassive();
             for (Constraint cstr : condTrue) {
                 postTemp(cstr);
             }
-            setPassive();
         } else if (condition == ESat.FALSE) {
+            setPassive();
             for (Constraint cstr : condFalse) {
                 postTemp(cstr);
             }
-            setPassive();
         }
     }
 
