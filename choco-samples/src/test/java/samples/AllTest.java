@@ -26,14 +26,18 @@
  */
 package samples;
 
+import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import samples.integer.AbsoluteEvaluation;
 import solver.Configuration;
 import solver.ISolverProperties;
 import solver.Solver;
+import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
+import solver.search.loop.SearchLoops;
 
 import java.util.Arrays;
 
@@ -52,6 +56,16 @@ public class AllTest {
     ISolverProperties properties;
     PropagationEngineFactory strat;
 
+
+    public AllTest() {
+//        this(new AllIntervalSeries(), new String[]{"-o", "5"},
+        this(new AbsoluteEvaluation(), null,
+                Environments.TRAIL.make(),
+                new AllSolverProp(
+                        SearchLoops.BINARY,
+                        ExplanationFactory.CBJ, false),
+                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE, 6);
+    }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,

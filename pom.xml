@@ -185,7 +185,7 @@
                 <configuration>
                     <groups>1s,10s,1m,10m,30m</groups>
                     <parallel>methods</parallel>
-                    <threadCount>2</threadCount>
+                    <threadCount>4</threadCount>
                 </configuration>
             </plugin>
         </plugins>

@@ -48,9 +48,4 @@ public abstract class BinRelation {
      * @return true if (x,y) is a consistent couple
      */
     public abstract boolean isConsistent(int x, int y);
-
-    protected static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
-    }
-
 }

@@ -49,7 +49,7 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset1;
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {
-        super(x, y, new CouplesTable(tuples, x.getLB(), x.getUB(), y.getLB(), y.getUB()));
+        super(x, y, new CouplesTable(tuples, x, y));
         offset0 = x.getLB();
         offset1 = y.getLB();
         currentSupport0 = new IStateInt[x.getUB() - offset0 + 1];

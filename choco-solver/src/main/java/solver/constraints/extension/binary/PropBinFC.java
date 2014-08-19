@@ -42,7 +42,7 @@ import util.iterators.DisposableValueIterator;
 public class PropBinFC extends PropBinCSP {
 
     public PropBinFC(IntVar x, IntVar y, Tuples tuples) {
-        super(x, y, new CouplesTable(tuples, x.getLB(), x.getUB(), y.getLB(), y.getUB()));
+        super(x, y, new CouplesTable(tuples, x, y));
     }
 
     @Override

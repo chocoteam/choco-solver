@@ -59,6 +59,13 @@ public class NQueenTest {
 
     private int size;
 
+    public NQueenTest() {
+        this.peType = 0;
+        this.piType = 0;
+        this.slType = 0;
+        this.size = 12;
+    }
+
     public NQueenTest(int peType, int piType, int slType, int size) {
         this.peType = peType;
         this.piType = piType;

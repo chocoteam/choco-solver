@@ -51,7 +51,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
     protected int initDomSize1;
 
     public PropBinAC3bitrm(IntVar x0, IntVar x1, Tuples tuples) {
-        super(x0, x1, new CouplesBitSetTable(tuples, x0.getLB(), x0.getUB(), x1.getLB(), x1.getUB()));
+        super(x0, x1, new CouplesBitSetTable(tuples, x0, x1));
     }
 
     @Override

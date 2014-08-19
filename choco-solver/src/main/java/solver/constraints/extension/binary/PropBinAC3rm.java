@@ -58,7 +58,7 @@ public class PropBinAC3rm extends PropBinCSP {
 
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
-        super(x, y, new CouplesBitSetTable(tuples, x.getLB(), x.getUB(), x.getLB(), x.getUB()));
+        super(x, y, new CouplesBitSetTable(tuples, x, y));
     }
 
     @Override
