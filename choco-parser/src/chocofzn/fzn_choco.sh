@@ -5,7 +5,7 @@ FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
 JAVA_ARGS="-server"
-CHOCO_JAR=./choco-parser-13.04-SNAPSHOT-jar-with-dependencies.jar
+CHOCO_JAR=./choco.jar
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
@@ -48,9 +48,14 @@ EXAMPLES:
 
 "
 
+if test $# -eq 0
+then
+    echo "%% No flatzinc file found"
+    exit 1
+fi
+
 while test $# -gt 0
 do
-
     case "$1" in
 
         -h|--help)
@@ -93,7 +98,7 @@ do
         ;;
 
         *)
-            break
+           break
         ;;
 
     esac
@@ -101,27 +106,21 @@ do
 done
 
 #CHOCO_JAR=$1
-FILE=$1
 
+ARGS="$1 -tl $TIME_LIMIT -p $NB_NODES"
 
-if test $# -eq 0
-then
-    echo "%% No flatzinc file found"
-    exit 1
-else
-    ARGS="$FILE -tl $TIME_LIMIT -p $NB_NODES"
-fi
-
-if test "$STOP_AT_FIRST" = "no"
+if test "${STOP_AT_FIRST}" = "no"
 then
     ARGS=$ARGS" -a"
 fi
 
-if test "$FREE_SEARCH" = "yes"
+if test "${FREE_SEARCH}" = "yes"
 then
-    echo "%% FREE_SEARCH"
-#    ARGS=$ARGS" -f"
     ARGS=$ARGS" -lf"
 fi
 
-java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}
+CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}"
+
+echo $CMD
+exec $CMD
+
