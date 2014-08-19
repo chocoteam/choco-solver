@@ -56,7 +56,7 @@ public class GolombRulerTest {
         return pb.getSolver();
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testSmall() {
         Solver sol;
         for (int j = 0; j < 4; j++) {
@@ -75,7 +75,7 @@ public class GolombRulerTest {
         }
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll() {
         Solver sol;
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {

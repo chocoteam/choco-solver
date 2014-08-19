@@ -56,7 +56,7 @@ public class MagicSquareTest {
         return pb.getSolver();
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll() {
         Solver sol;
         for (int j = 3; j < 7; j++) {
@@ -101,7 +101,7 @@ public class MagicSquareTest {
             solver.propagate();
             LoggerFactory.getLogger("test").error("************************");
             Assert.fail("should fail");
-        } catch (ContradictionException e) {
+        } catch (ContradictionException ignored) {
         }
         LoggerFactory.getLogger("test").error("************************");
     }

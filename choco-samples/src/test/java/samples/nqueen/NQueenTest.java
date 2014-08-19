@@ -59,13 +59,6 @@ public class NQueenTest {
 
     private int size;
 
-    public NQueenTest() {
-        this.peType = 0;
-        this.piType = 0;
-        this.slType = 0;
-        this.size = 12;
-    }
-
     public NQueenTest(int peType, int piType, int slType, int size) {
         this.peType = peType;
         this.piType = piType;
@@ -74,13 +67,7 @@ public class NQueenTest {
     }
 
     private String parameters() {
-        StringBuilder st = new StringBuilder();
-        st.append("(s:").append(size);
-        st.append(" pe:").append(peType);
-        st.append(" pi:").append(piType);
-        st.append(" sl:").append(slType);
-        st.append(")");
-        return st.toString();
+        return "(s:" + size + " pe:" + peType + " pi:" + piType + " sl:" + slType + ")";
     }
 
     private void assertIt(Solver s) {
@@ -146,7 +133,7 @@ public class NQueenTest {
         assertIt(s);
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll1() {
         Solver sol;
         for (int j = 4; j < 23; j++) {
@@ -165,7 +152,7 @@ public class NQueenTest {
         }
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll2() {
         Solver sol;
         for (int j = 4; j < 23; j++) {

@@ -39,14 +39,7 @@ import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
  */
 public class TestConsistency {
 
-    private SearchLoops slType; // search loop type default value
-
-    public TestConsistency() {
-        this.slType = SearchLoops.BINARY;
-    }
-
     public TestConsistency(SearchLoops peType) {
-        this.slType = peType;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +97,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, null, seed + i, "ac");
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "30m")
     public void testALLDIFFERENT4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)

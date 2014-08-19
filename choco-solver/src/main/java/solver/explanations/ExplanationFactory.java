@@ -97,7 +97,7 @@ public enum ExplanationFactory {
 
 
     private static void plugExpl(Solver solver, boolean flattened) {
-        assert !solver.getExplainer().isActive() : "Explanations are already turn on!";
+        assert solver.getExplainer()==null || !solver.getExplainer().isActive() : "Explanations are already turn on!";
         solver.set(flattened ? new FlattenedRecorderExplanationEngine(solver)
                 : new RecorderExplanationEngine(solver));
     }
