@@ -28,6 +28,7 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -47,15 +48,18 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
         this.currentTuple = new int[vars.length];
     }
 
-    protected LargeRelation makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        int totalSize = 1;
-        for (int i = 0; i < offsets.length; i++) {
-            totalSize *= dsizes[i];
-        }
-        if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
-            return new TuplesLargeTable(tuples, offsets, dsizes);
-        }
-        return new TuplesTable(tuples, offsets, dsizes);
+    protected LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
+        long totalSize = 1;
+                for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
+                    totalSize *= vars[i].getDomainSize();
+                }
+                if (totalSize < 0) {
+                    throw new SolverException("Tuples required too much memory ...");
+                }
+                if (totalSize / 8 > 50 * 1024 * 1024) {
+                    return new TuplesLargeTable(tuples, vars);
+                }
+                return new TuplesTable(tuples, vars);
     }
 
 

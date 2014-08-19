@@ -28,6 +28,7 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
+import solver.variables.IntVar;
 
 import java.util.BitSet;
 
@@ -49,14 +50,14 @@ public class TuplesTable extends LargeRelation {
     protected BitSet table;
 
     /**
-     * offset (lower bound) of each variable
+     * lower bound of each variable
      */
-    protected int[] offsets;
+    protected final int[] lowerbounds;
 
     /**
-     * domain size of each variable
+     * upper bound of each variable
      */
-    protected int[] sizes;
+    protected final int[] upperbounds;
 
     protected boolean feasible;
 
@@ -66,30 +67,28 @@ public class TuplesTable extends LargeRelation {
      */
     protected int[] blocks;
 
-    public TuplesTable(int n) {
-        this.n = n;
-    }
-
-    public TuplesTable(Tuples tuples, int[] offsetTable, int[] sizesTable) {
-        offsets = offsetTable;
-        sizes = sizesTable;
-        n = offsetTable.length;
+    public TuplesTable(Tuples tuples, IntVar[] vars) {
+        n = vars.length;
+        lowerbounds = new int[n];
+        upperbounds = new int[n];
         feasible = tuples.isFeasible();
+
         int totalSize = 1;
         blocks = new int[n];
         for (int i = 0; i < n; i++) {
             blocks[i] = totalSize;
-            totalSize *= sizes[i];
+            lowerbounds[i] = vars[i].getLB();
+            upperbounds[i] = vars[i].getUB();
+            totalSize *= upperbounds[i] - lowerbounds[i] + 1;
         }
-
         if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
-            throw new SolverException("Tuples requiered over 50Mo of memory...");
+            throw new SolverException("Tuples required over 50Mo of memory...");
         }
         table = new BitSet(totalSize);
         int nt = tuples.nbTuples();
         for (int i = 0; i < nt; i++) {
             int[] tuple = tuples.get(i);
-            if (valid(tuple, offsets, sizes)) {
+            if (valid(tuple, vars)) {
                 setTuple(tuple);
             }
         }
@@ -99,10 +98,10 @@ public class TuplesTable extends LargeRelation {
     public boolean checkTuple(int[] tuple) {
         int address = 0;
         for (int i = (n - 1); i >= 0; i--) {
-            if ((tuple[i] < offsets[i]) || (tuple[i] > (offsets[i] + sizes[i] - 1))) {
+            if ((tuple[i] < lowerbounds[i]) || (tuple[i] > upperbounds[i])) {
                 return false;
             }
-            address += (tuple[i] - offsets[i]) * blocks[i];
+            address += (tuple[i] - lowerbounds[i]) * blocks[i];
         }
         return table.get(address);
     }
@@ -114,7 +113,7 @@ public class TuplesTable extends LargeRelation {
     void setTuple(int[] tuple) {
         int address = 0;
         for (int i = (n - 1); i >= 0; i--) {
-            address += (tuple[i] - offsets[i]) * blocks[i];
+            address += (tuple[i] - lowerbounds[i]) * blocks[i];
         }
         table.set(address);
     }

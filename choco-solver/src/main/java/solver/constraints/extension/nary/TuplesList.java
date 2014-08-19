@@ -29,6 +29,7 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
+import solver.variables.IntVar;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -58,13 +59,13 @@ public class TuplesList extends LargeRelation {
     };
 
 
-    public TuplesList(Tuples tuples, int[] offsets, int[] domSizes) {
+    public TuplesList(Tuples tuples, IntVar[] vars) {
         int nb = tuples.nbTuples();
         int[][] _tuplesIndexes = new int[nb][];
         int k = 0;
         for (int i = 0; i < nb; i++) {
             int[] tuple = tuples.get(i);
-            if (valid(tuple, offsets, domSizes)) {
+            if (valid(tuple, vars)) {
                 _tuplesIndexes[k++] = tuple;
             }
         }
