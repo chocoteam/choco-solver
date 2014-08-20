@@ -96,10 +96,7 @@ public class TestSolveur {
 
             s.post(cstrs);
             s.set(IntStrategyFactory.lexico_LB(vars));
-            long t = System.currentTimeMillis();
-//            System.out.println("nb solutions : " + s.findAllSolutions());
-            t = System.currentTimeMillis() - t;
-//            System.out.println("time : " + t);
+            s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
     }

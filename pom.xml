@@ -183,7 +183,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.17</version>
                 <configuration>
-                    <groups>1s,10s,1m,10m,30m</groups>
+                    <!--<groups>1s,10s,1m,10m,30m</groups>-->
                     <parallel>methods</parallel>
                     <threadCount>4</threadCount>
                 </configuration>
