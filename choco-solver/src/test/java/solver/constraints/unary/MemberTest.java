@@ -131,7 +131,7 @@ public class MemberTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_alxpgr() {
         Solver s = new Solver();
         IntVar vars = VariableFactory.enumerated("v", 0, 10, s);

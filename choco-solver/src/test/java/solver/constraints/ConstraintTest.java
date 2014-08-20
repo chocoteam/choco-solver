@@ -42,7 +42,7 @@ import solver.variables.VF;
  */
 public class ConstraintTest {
 
-    @Test
+    @Test(groups = "1s")
     public void testBooleanChannelingJL() {
         //#issue 190
         Solver solver = new Solver();

@@ -46,7 +46,7 @@ public class CPVizTest {
 
     private String dir = System.getProperty("user.dir");
 
-    @Test
+    @Test(groups = "1s")
     public void testNoLog() {
         int n = 4;
 
@@ -64,7 +64,7 @@ public class CPVizTest {
         s.findAllSolutions();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testVector() {
         int n = 4;
 
@@ -96,7 +96,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testVectorSize() {
         int n = 13;
 
@@ -128,7 +128,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testVectorWaterfall() {
         int n = 4;
 
@@ -160,7 +160,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testAllDifferent() {
         IntVar S, E, N, D, M, O, R, Y;
         IntVar[] SEND, MORE, MONEY;
@@ -208,7 +208,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testElement() {
         Solver s = new Solver();
         int[] values = new int[]{1, 2, 0, 4, -10};
@@ -228,7 +228,7 @@ public class CPVizTest {
         s.findSolution();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBinaryVector() {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
@@ -251,7 +251,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testDomainMatrix() {
         Solver s = new Solver();
         int n = 3;
@@ -294,7 +294,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testAllDifferentMatrix() {
         Solver s = new Solver();
         int n = 3;
@@ -338,7 +338,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBinaryMatrix() {
         Solver solver = new Solver();
         int n = 4;
@@ -364,7 +364,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBoolChanneling() {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
@@ -415,7 +415,7 @@ public class CPVizTest {
 //
 //    }
 
-    @Test
+    @Test(groups = "1s")
     public void testLexLe() {
         Solver s = new Solver();
 
@@ -434,7 +434,7 @@ public class CPVizTest {
         s.findSolution();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testInverse() {
         Solver s = new Solver();
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 2, s);
@@ -455,7 +455,7 @@ public class CPVizTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testGcc() {
         Solver s = new Solver();
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 4, s);
@@ -481,7 +481,7 @@ public class CPVizTest {
         s.findSolution();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testCumulative() {
 //        Solver s = new Solver();
 //        // data

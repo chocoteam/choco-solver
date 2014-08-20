@@ -127,7 +127,7 @@ public class LimitsTest {
         Assert.assertEquals(sc, sl);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void durationTest() {
         long d = SMF.convertInMilliseconds("0.50s");
         Assert.assertEquals(d, 500);

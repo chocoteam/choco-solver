@@ -43,7 +43,7 @@ import solver.variables.VariableFactory;
  * @since 29/06/12
  */
 public class ExplorerTest {
-    @Test
+    @Test(groups = "1m")
     public void test1() throws ContradictionException {
         int n = 8;
         Solver solver = new Solver();
