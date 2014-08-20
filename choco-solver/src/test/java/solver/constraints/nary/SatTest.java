@@ -31,7 +31,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.SatFactory;
-import solver.search.loop.monitors.SMF;
 import solver.variables.BoolVar;
 import solver.variables.VF;
 
@@ -132,7 +131,7 @@ public class SatTest {
         b2 = VF.bool("b2", solver);
         r = VF.bool("r", solver);
         SatFactory.addBoolIsLeVar(b1, b2, r);
-        SMF.log(solver, true, true);
+//        SMF.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -145,7 +144,7 @@ public class SatTest {
         b2 = VF.bool("b2", solver);
         r = VF.bool("r", solver);
         SatFactory.addBoolIsLtVar(b1, b2, r);
-        SMF.log(solver, true, true);
+//        SMF.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }

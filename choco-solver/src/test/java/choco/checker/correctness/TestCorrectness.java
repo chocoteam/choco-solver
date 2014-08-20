@@ -392,8 +392,8 @@ public class TestCorrectness {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 30; i++) {
                 long seed = System.currentTimeMillis();
-                System.out.println("n = " + n);
-                System.out.println("seed = " + seed);
+//                System.out.println("n = " + n);
+//                System.out.println("seed = " + seed);
                 CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
             }
         }

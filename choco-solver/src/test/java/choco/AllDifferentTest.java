@@ -279,7 +279,7 @@ public class AllDifferentTest {
         } catch (ContradictionException ignored) {
 
         }
-        System.out.printf("%s\n", solver.toString());
+//        System.out.printf("%s\n", solver.toString());
 
 
     }

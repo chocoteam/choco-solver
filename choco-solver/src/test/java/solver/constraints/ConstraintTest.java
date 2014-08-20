@@ -26,6 +26,7 @@
  */
 package solver.constraints;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.set.SCF;
@@ -49,11 +50,8 @@ public class ConstraintTest {
         SetVar s1 = VF.set("s1", -3, 3, solver);
         SetVar s2 = VF.set("s2", -3, 3, solver);
         solver.post(LCF.or(SCF.all_equal(new SetVar[]{s1, s2}), SCF.bool_channel(bs, s1, 0)));
-        if (solver.findSolution()) {
-            do {
-                System.out.println(s1 + " : " + s2);
-            } while (solver.nextSolution());
-        }
+        solver.findAllSolutions();
+        Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
     }
 
 }

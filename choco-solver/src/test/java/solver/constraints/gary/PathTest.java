@@ -92,14 +92,14 @@ public class PathTest {
     }
 
     public static void test(int s, int n, int nbMax) {
-        System.out.println("Test n=" + n + ", with seed=" + s);
+//        System.out.println("Test n=" + n + ", with seed=" + s);
         Solver path = model(n, s, true, false, false, nbMax);
         Solver pathArbo = model(n, s, true, true, false, nbMax);
         Solver pathArboRG = model(n, s, true, true, true, nbMax);
         Solver arbo = model(n, s, false, true, false, nbMax);
         Solver arboRG = model(n, s, false, true, true, nbMax);
         // NbSolutions
-        System.out.println("nbSols : " + path.getMeasures().getSolutionCount());
+//        System.out.println("nbSols : " + path.getMeasures().getSolutionCount());
         assertEquals(path.getMeasures().getSolutionCount(), arbo.getMeasures().getSolutionCount());
         assertEquals(path.getMeasures().getSolutionCount(), pathArbo.getMeasures().getSolutionCount());
         assertEquals(path.getMeasures().getSolutionCount(), arboRG.getMeasures().getSolutionCount());

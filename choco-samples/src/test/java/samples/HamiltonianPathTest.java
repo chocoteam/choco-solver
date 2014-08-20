@@ -72,7 +72,7 @@ public class HamiltonianPathTest {
 			for (int nb : nbVoisins) {
 				for (int ks = 0; ks < 50; ks++) {
 					s = System.currentTimeMillis();
-					System.out.println("n:" + n + " nbVoisins:" + nb + " s:" + s);
+//					System.out.println("n:" + n + " nbVoisins:" + nb + " s:" + s);
 					GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = transformMatrix(gg.neighborBasedGenerator(nb));
 					testProblem(matrix, s, true, false);
@@ -86,7 +86,7 @@ public class HamiltonianPathTest {
 				}
 			}
 		}
-		System.out.println("it took "+(System.currentTimeMillis()-time)+" ms");
+//		System.out.println("it took "+(System.currentTimeMillis()-time)+" ms");
 	}
 
 	private static void testProblem(boolean[][] matrix, long s, boolean rd, boolean strongFilter) {

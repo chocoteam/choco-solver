@@ -46,7 +46,7 @@ public class TestConsistencyFactory {
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
         for (SearchLoops sl : SearchLoops.values()) {
-            System.out.println("CONSISTENCY : " + sl.name());
+//            System.out.println("CONSISTENCY : " + sl.name());
             lresult.add(new TestConsistency(sl));
         }
         return lresult.toArray();

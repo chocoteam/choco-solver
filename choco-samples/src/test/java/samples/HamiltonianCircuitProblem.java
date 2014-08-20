@@ -184,10 +184,10 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 		for (int n : sizes) {
 			for (double d : densities) {
 				for (int s : seeds) {
-					System.out.println("n:" + n + " d:" + d + " s:" + s);
+//					System.out.println("n:" + n + " d:" + d + " s:" + s);
 					GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = gg.arcBasedGenerator(d);
-					System.out.println("graph generated");
+//					System.out.println("graph generated");
 					testModels(matrix, s);
 				}
 			}
@@ -222,7 +222,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 		matrix[7][5] = true;
 		long nbSols = referencemodel(matrix,0);
 		assert nbSols == referencemodel(matrix,12);
-		System.out.println(nbSols);
+//		System.out.println(nbSols);
 		testModels(matrix, 0);
 	}
 
@@ -235,10 +235,10 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 		for (int n : sizes) {
 			for (double d : densities) {
 				for (int s : seeds) {
-					System.out.println("n:" + n + " d:" + d + " s:" + s);
+//					System.out.println("n:" + n + " d:" + d + " s:" + s);
 					GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = gg.arcBasedGenerator(d);
-					System.out.println("graph generated");
+//					System.out.println("graph generated");
 					testModels(matrix, s);
 				}
 			}
@@ -254,10 +254,10 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 			for (double d : densities) {
 				for (int ks = 0; ks < 10; ks++) {
 					long s = System.currentTimeMillis();
-					System.out.println("n:" + n + " d:" + d + " s:" + s);
+//					System.out.println("n:" + n + " d:" + d + " s:" + s);
 					GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = gg.arcBasedGenerator(d);
-					System.out.println("graph generated");
+//					System.out.println("graph generated");
 					testModels(matrix, s);
 				}
 			}
@@ -270,7 +270,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 			throw new UnsupportedOperationException();
 		}
 		assert nbSols == referencemodel(m,12);
-		System.out.println(nbSols + " sols expected");
+//		System.out.println(nbSols + " sols expected");
 		boolean[][] matrix = transformMatrix(m);
 		boolean[] vls = new boolean[]{false, true};
 		gt = SetType.SWAP_ARRAY;

@@ -26,11 +26,7 @@
  */
 package solver.constraints.binary;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -54,15 +50,11 @@ public class BinTableTest {
 
     private static String[] ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger("test");
     private Solver s;
     private IntVar v1, v2;
     Tuples feasible, infeasible;
 
-    @BeforeMethod
     public void setUp() {
-        s = new Solver();
-
         feasible = new Tuples(true);
         feasible.add(1, 2);
         feasible.add(1, 3);
@@ -79,7 +71,6 @@ public class BinTableTest {
 
     }
 
-    @AfterMethod
     public void tearDown() {
         v1 = null;
         v2 = null;
@@ -90,6 +81,7 @@ public class BinTableTest {
 
     @Test(groups = "1s")
     public void testFeas1() {
+        setUp();
         for (String a : ALGOS) {
             s = new Solver();
             v1 = VF.enumerated("v1", 1, 4, s);
@@ -99,11 +91,13 @@ public class BinTableTest {
             s.findAllSolutions();
             assertEquals(5, s.getMeasures().getSolutionCount());
         }
+        tearDown();
     }
 
 
     @Test(groups = "1s")
     public void testInfeas1() {
+        setUp();
         for (String a : ALGOS) {
             s = new Solver();
             v1 = VF.enumerated("v1", 1, 4, s);
@@ -113,6 +107,7 @@ public class BinTableTest {
             s.findAllSolutions();
             assertEquals((16 - 5), s.getMeasures().getSolutionCount());
         }
+        tearDown();
     }
 
 

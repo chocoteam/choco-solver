@@ -433,22 +433,22 @@ public class ViewsTest {
         IntVar z = VariableFactory.abs(VariableFactory.abs(x));
 
         for (int j = 0; j < 200; j++) {
-            long t = -System.nanoTime();
+//            long t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (y.getLB() == x.getUB()) {
                     y.updateLowerBound(0, Cause.Null);
                 }
             }
-            t += System.nanoTime();
-            System.out.printf("%.2fms vs. ", t / 1000 / 1000f);
-            t = -System.nanoTime();
+//            t += System.nanoTime();
+//            System.out.printf("%.2fms vs. ", t / 1000 / 1000f);
+//            t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (z.getLB() == x.getUB()) {
                     z.updateLowerBound(0, Cause.Null);
                 }
             }
-            t += System.nanoTime();
-            System.out.printf("%.2fms\n", t / 1000 / 1000f);
+//            t += System.nanoTime();
+//            System.out.printf("%.2fms\n", t / 1000 / 1000f);
         }
     }
 
@@ -474,9 +474,10 @@ public class ViewsTest {
         solver.set(SetStrategyFactory.force_first(new SetVar[]{v1, v2}));
         if (solver.findSolution()) {
             do {
-                System.out.println(v1 + " subseteq " + v2);
+//                System.out.println(v1 + " subseteq " + v2);
             } while (solver.nextSolution());
         }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
 	@Test(groups = "1s")
@@ -488,9 +489,10 @@ public class ViewsTest {
 				VF.minus(VF.bool("bool", solver))));
 		if(solver.findSolution()) {
 			do{
-				System.out.println(solver);
+//				System.out.println(solver);
 			}while(solver.nextSolution());
 		}
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
 	}
 
 	@Test(groups = "1s")
@@ -504,9 +506,10 @@ public class ViewsTest {
 	    s.set(ISF.minDom_UB(bool));
 	    if (s.findSolution()) {
 	        do {
-	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
+//	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
 	        } while (s.nextSolution());
 	    }
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
 	}
 
 	@Test(groups = "1s")

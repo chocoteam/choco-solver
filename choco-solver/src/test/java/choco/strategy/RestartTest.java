@@ -58,7 +58,7 @@ public class RestartTest {
             }
 			SMF.restartAfterEachSolution(solver);
             solver.set(ISF.lexico_LB(X));
-            SMF.log(solver, false, false);
+//            SMF.log(solver, false, false);
             SMF.limitSolution(solver, 100);
             solver.findAllSolutions();
             //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());

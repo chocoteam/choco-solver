@@ -196,13 +196,13 @@ public class NQueenTest {
         ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
         solver.propagate();
         LoggerFactory.getLogger("test").error("*******************************************");
-        System.out.printf("%s\n", solver.toString());
+//        System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {
             solver.propagate();
             Assert.fail();
         } catch (ContradictionException ex) {
-            System.out.printf("%s\n", ex.getMessage());
+//            System.out.printf("%s\n", ex.getMessage());
         }
     }
 }

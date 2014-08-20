@@ -161,15 +161,15 @@ public class CumulativeTest {
 		SMF.limitTime(solver,5000);
 		switch (mode){
 			case 0:	solver.findSolution();
-				print(solver,last,graph,f);
+//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			case 1:	solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,last);
-				print(solver,last,graph,f);
+//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getBestSolutionValue().longValue();
 			case 2:	solver.findAllSolutions();// too many solutions to be used
-				print(solver,last,graph,f);
+//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			default:throw new UnsupportedOperationException();
