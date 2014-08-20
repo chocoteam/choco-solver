@@ -114,7 +114,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test2() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -142,7 +142,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test3() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -170,7 +170,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -204,7 +204,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

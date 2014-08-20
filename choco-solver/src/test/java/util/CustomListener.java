@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,48 +24,41 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package util;
 
+import org.testng.ITestResult;
+import org.testng.TestListenerAdapter;
 
 /**
- * @author Jean-Guillaume Fages
- * @since 07/04/14
- * Created by IntelliJ IDEA.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @version choco
+ * @since 20/08/2014
  */
-package solver;
+public class CustomListener extends TestListenerAdapter {
+    private int m_count = 0;
 
-import org.testng.annotations.Test;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.ArrayUtils;
-import util.tools.StringUtils;
+    @Override
+    public void onTestFailure(ITestResult tr) {
+        log(tr, "FAILURE");
+    }
 
-public class EnvironmentTest {
+    @Override
+    public void onTestSkipped(ITestResult tr) {
+        log(tr, "SKIP");
+    }
 
-	@Test(groups = "10s")
-	public void testSize(){
-		int n = 14;
-		IntVar[] vars, vectors;
-		Solver solver = new Solver("CostasArrays");
-		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
-		vectors = new IntVar[n * n - n];
-		int idx = 0;
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				if (i != j) {
-					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
-					// just to create many variables
-					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, vars[j]).reif();
-					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
-					idx++;
-				}
-			}
-		}
-		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
-		solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
-		solver.set(ISF.domOverWDeg(ArrayUtils.append(vectors, vars), 0));
-		solver.findSolution();
-	}
+    @Override
+    public void onTestSuccess(ITestResult tr) {
+        log(tr, "SUCCESS");
+    }
+
+    private void log(ITestResult tr, String RESULT) {
+        System.out.print(String.format("\t%s.%s %s (%dms)\n", tr.getTestClass().getName(), tr.getName(), RESULT, tr.getEndMillis() - tr.getStartMillis()));
+        if (++m_count % 40 == 0) {
+            System.out.println("");
+        }
+    }
+
 }

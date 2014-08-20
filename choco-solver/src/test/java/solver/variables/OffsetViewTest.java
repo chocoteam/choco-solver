@@ -28,7 +28,6 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
-import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
@@ -178,7 +177,7 @@ public class OffsetViewTest {
 
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -212,7 +211,7 @@ public class OffsetViewTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

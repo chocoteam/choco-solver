@@ -44,7 +44,7 @@ import solver.variables.VF;
  */
 public class RestartTest {
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void test1() {
 
         for (int j = 1; j < 5; j++) {

@@ -76,7 +76,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testAllEquals() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {10, 2, 4}, {5, 0, 20}};
         for (int p = 0; p < params.length; p++) {
@@ -108,7 +108,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testAllDifferent() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {7, 0, 7}};
 

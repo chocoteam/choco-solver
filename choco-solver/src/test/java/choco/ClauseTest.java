@@ -53,7 +53,7 @@ public class ClauseTest {
 
     Logger log = LoggerFactory.getLogger("test");
 
-    @Test(groups = "30s")
+    @Test(groups = "1m")
     public void test1() {
         int nSol = 1;
         for (int n = 1; n < 20; n++) {

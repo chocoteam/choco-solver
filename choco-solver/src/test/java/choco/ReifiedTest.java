@@ -229,7 +229,7 @@ public class ReifiedTest {
      * C. Bessiere, G. Katsirelos, N. Narodytska, C.G. Quimper, T. Walsh.
      * Proceedings IJCAI'09, Pasadena CA, pages 419-424.
      */
-    @Test(groups = {"10s"})
+    @Test(groups = {"1m"})
     public void testAllDifferentDecomp() {
 
         for (int i = 1; i < 12; i++) {

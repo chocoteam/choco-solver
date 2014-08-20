@@ -143,7 +143,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void test3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
@@ -153,7 +153,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {

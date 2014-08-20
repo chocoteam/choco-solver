@@ -53,7 +53,7 @@ import java.util.Random;
  */
 public class AmongTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1m")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -68,7 +68,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1m")
     public void testRandomProblems2() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -78,7 +78,7 @@ public class AmongTest {
             nbsol = randomOcc2(realNbSol, bigseed, true, 3, false);
             //b solutions of occurrences + bound
             nbsol2 = randomOcc2(realNbSol, bigseed, false, 3, false);
-//            Assert.assertEquals(nbsol, nbsol2);
+            Assert.assertEquals(nbsol, nbsol2);
             Assert.assertEquals(nbsol2, realNbSol);
         }
     }

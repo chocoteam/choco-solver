@@ -95,7 +95,7 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test1() {
         model(true, 8, 92);
         model(false, 8, 92);

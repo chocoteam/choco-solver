@@ -77,7 +77,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
@@ -104,7 +104,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test1a() {
         // Z = X + Y (bounded)
         for (int seed = 0; seed < 9999; seed++) {
@@ -130,7 +130,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void testa() {
         // Z = max(X + Y)
         for (int seed = 0; seed < 9999; seed += 1) {
@@ -155,7 +155,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test1b() {
         // Z = |X|
         for (int seed = 0; seed < 9999; seed++) {
@@ -178,7 +178,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test1bb() {
         // Z = X + c
         for (int seed = 0; seed < 9999; seed++) {
@@ -201,7 +201,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test1bbb() {
         // Z = X * c
         for (int seed = 0; seed < 9999; seed++) {
@@ -329,7 +329,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test3() {
         // Z = |X - Y|
         for (int seed = 0; seed < 9999; seed++) {
@@ -356,7 +356,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test4() {
         // Z = |X - Y| + AllDiff
         for (int seed = 0; seed < 9999; seed++) {
@@ -425,7 +425,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 0, 10, solver);

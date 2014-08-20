@@ -72,7 +72,7 @@ public class NTreeTest {
         assertTrue(s.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "30s")
+    @Test(groups = "1m")
     public static void debug() {
         for (int n = 5; n < 7; n++) {
             for (int t1 = 1; t1 < n; t1++) {
@@ -84,7 +84,7 @@ public class NTreeTest {
         }
     }
 
-    @Test(groups = "30s")
+    @Test(groups = "1m")
     public static void testAllDataStructure() {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;

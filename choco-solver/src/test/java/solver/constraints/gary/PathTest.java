@@ -123,7 +123,7 @@ public class PathTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public static void bigTrees() {
         for (int s = 0; s < 3; s++) {
             for (int n = 100; n < 400; n += 100) {
@@ -132,7 +132,7 @@ public class PathTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public static void testAllDataStructure() {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;

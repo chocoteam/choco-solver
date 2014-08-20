@@ -53,7 +53,7 @@ public class ModTest extends AbstractTernaryTest {
         return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test2() {
         Solver solver = new Solver();
         IntVar res = VariableFactory.bounded("r", 1, 2, solver);

@@ -92,7 +92,7 @@ public class CumulativeTest {
 		test(32,3,2,4,1,0);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "10s")
 	public void test6(){
 		// this tests raises an exception which is in fact due to the time limit
 		// and unlucky random heuristic (fixed by adding last conflict)

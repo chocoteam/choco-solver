@@ -156,14 +156,14 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffBC, 5, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testALLDIFFERENTBC4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testALLDIFFERENTGRAPHBC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -193,14 +193,14 @@ public class TestConsistency {
 //            checkConsistency(Modeler.modelTimes, 3, -50, -3, null, seed + i, "bc");
 //    }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testABSOLUTEBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAbsolute, 2, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testABSOLUTEBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -251,7 +251,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelCountAC, 2, 2, 50, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testCOUNTBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 999; i++)
@@ -265,14 +265,14 @@ public class TestConsistency {
             checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testLEX1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, true, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testLEX2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
@@ -286,7 +286,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelLexChainAC, 9, -10, 10, true, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testLEXC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
@@ -336,7 +336,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelSortBC, 6, 0, 10, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testSORT2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)

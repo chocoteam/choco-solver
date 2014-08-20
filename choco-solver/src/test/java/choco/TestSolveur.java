@@ -75,7 +75,7 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testOneAllDiff() {
         int nbSol = 1;
         for (int k = 2; k <= 9; k++) {
@@ -242,7 +242,7 @@ public class TestSolveur {
     }
 
 
-    @Test(groups = {"1s"})
+    @Test(groups = {"10s"})
     public void testDO3to6() {
         int[] nbSol = {0, 0, 0, 0, 1, 768, 354294};
         int[] nbNod = {0, 0, 0, 0, 1, 1535, 708587};

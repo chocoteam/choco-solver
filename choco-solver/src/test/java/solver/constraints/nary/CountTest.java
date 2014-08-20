@@ -84,7 +84,7 @@ public class CountTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;

@@ -104,7 +104,7 @@ public class EqualXYCExplTest {
         Assert.assertTrue(sol.getMeasures().getBackTrackCount() <= ref.getMeasures().getBackTrackCount());
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test1() {
         if (Configuration.PLUG_EXPLANATION) {
             model(125, 4);

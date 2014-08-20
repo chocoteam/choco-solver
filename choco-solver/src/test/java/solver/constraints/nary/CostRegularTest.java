@@ -128,7 +128,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9280);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void ccostregular2() {
         Solver solver = new Solver();
 
@@ -177,7 +177,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void ccostregular2WithCostAutomaton() {
         Solver solver = new Solver();
 
@@ -229,7 +229,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrect() {
         Solver solver = new Solver();
 
@@ -271,7 +271,7 @@ public class CostRegularTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrectWithCostAutomaton() {
         Solver solver = new Solver();
 
@@ -314,7 +314,7 @@ public class CostRegularTest {
 //        assertEquals(124927, s.getNodeCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrect2() {
         Solver solver = new Solver();
 
@@ -351,7 +351,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrect2WithCostAutomaton() {
 
         Solver solver = new Solver();
@@ -391,7 +391,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void compareVersionSpeedNew() {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");

@@ -108,7 +108,7 @@ public class ViewSumXYTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test2() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -139,7 +139,7 @@ public class ViewSumXYTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test3() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {

@@ -64,7 +64,7 @@ public class DivTest extends AbstractTernaryTest {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1m")
     public void testJL2() {
         for (int i = 0; i < 100000; i++) {
             final Solver s = new Solver();

@@ -117,7 +117,7 @@ public class ArborescenceTest {
         }
     }
 
-    @Test(groups = "30s")
+    @Test(groups = "1m")
     public static void testAllDataStructure() {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;

@@ -92,7 +92,7 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testRight() {
         boolean alive = true;
         int cas = 0;
@@ -133,7 +133,7 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testWrong() {
         boolean alive = true;
         int cas = 0;
