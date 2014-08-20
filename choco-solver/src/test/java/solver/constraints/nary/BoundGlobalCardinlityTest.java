@@ -78,7 +78,7 @@ public class BoundGlobalCardinlityTest {
         Random random = new Random();
 //        int seed= 108;{
         for (int seed = 0; seed < 200; seed++) {
-            System.out.println(seed);
+//            System.out.println(seed);
             random.setSeed(seed);
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);

@@ -228,7 +228,7 @@ public interface Model {
                     if (rvars[i] == null) rvars[i] = vars[i];
                 }
             } catch (ArrayIndexOutOfBoundsException ce) {
-                System.out.printf("");
+//                System.out.printf("");
             }
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};

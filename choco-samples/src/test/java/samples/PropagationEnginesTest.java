@@ -87,7 +87,7 @@ public class PropagationEnginesTest {
             //System.out.printf("%s", problem.getClass().getName());
             for (int i = 0; i < 1; i++) {
                 for (PropagationEngineFactory pe : engines) {
-                    System.out.printf(".");
+//                    System.out.printf(".");
                     problem.createSolver();
                     Solver solver = problem.getSolver();
                     problem.buildModel();

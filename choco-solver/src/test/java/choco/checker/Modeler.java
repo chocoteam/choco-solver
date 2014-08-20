@@ -66,7 +66,7 @@ public interface Modeler {
                     if (map != null) map.put(domains[i], vars[i]);
                 }
             } catch (ArrayIndexOutOfBoundsException ce) {
-                System.out.printf("");
+//                System.out.printf("");
             }
             s.post(ICF.arithm(vars[0], "=", vars[1]));
             s.set(ISF.random_value(vars));

@@ -57,10 +57,10 @@ public class ExplorerTest {
         long t = -System.nanoTime();
         Assert.assertTrue(exp.explore(true));
         t += System.nanoTime();
-        System.out.printf("%.3fms\n", t / 1000 / 1000f);
+//        System.out.printf("%.3fms\n", t / 1000 / 1000f);
         t = -System.nanoTime();
         solver.findAllSolutions();
         t += System.nanoTime();
-        System.out.printf("%.3fms\n", t / 1000 / 1000f);
+//        System.out.printf("%.3fms\n", t / 1000 / 1000f);
     }
 }

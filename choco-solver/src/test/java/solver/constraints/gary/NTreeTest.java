@@ -77,7 +77,7 @@ public class NTreeTest {
         for (int n = 5; n < 7; n++) {
             for (int t1 = 1; t1 < n; t1++) {
                 for (int t2 = t1; t2 < n; t2++) {
-                    System.out.println("tree : n=" + n + " nbTrees = [" + t1 + "," + t2 + "]");
+//                    System.out.println("tree : n=" + n + " nbTrees = [" + t1 + "," + t2 + "]");
                     model(n, t1, t2, (int) System.currentTimeMillis());
                 }
             }
@@ -89,7 +89,7 @@ public class NTreeTest {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;
             graphTypeKer = ge;
-            System.out.println("env:" + ge + " ker :" + ge);
+//            System.out.println("env:" + ge + " ker :" + ge);
             debug();
         }
     }

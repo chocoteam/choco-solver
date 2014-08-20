@@ -37,7 +37,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -117,7 +116,7 @@ public class ClauseTest {
 
         BoolVar[] bs = new BoolVar[]{b};
         s.set(IntStrategyFactory.lexico_LB(bs));
-        SMF.log(s, true, true);
+//        SMF.log(s, true, true);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);

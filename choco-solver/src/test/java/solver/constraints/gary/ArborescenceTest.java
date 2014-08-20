@@ -86,11 +86,11 @@ public class ArborescenceTest {
     public static void smallTrees() {
         for (int s = 0; s < 3; s++) {
             for (int n = 3; n < 8; n++) {
-                System.out.println("Test n=" + n + ", with seed=" + s);
+//                System.out.println("Test n=" + n + ", with seed=" + s);
                 Solver naive = model(n, s, true, false, -1);
                 Solver efficientA = model(n, s, false, true, -1);
                 Solver efficientN = model(n, s, false, false, -1);
-                System.out.println(naive.getMeasures().getSolutionCount() + " sols");
+//                System.out.println(naive.getMeasures().getSolutionCount() + " sols");
                 assertEquals(naive.getMeasures().getFailCount(), 0);
                 assertEquals(naive.getMeasures().getSolutionCount(), efficientA.getMeasures().getSolutionCount());
                 assertEquals(naive.getMeasures().getFailCount(), efficientA.getMeasures().getFailCount());
@@ -104,11 +104,11 @@ public class ArborescenceTest {
     public static void bigTrees() {
         for (int s = 0; s < 3; s++) {
             int n = 60;
-            System.out.println("Test n=" + n + ", with seed=" + s);
+//            System.out.println("Test n=" + n + ", with seed=" + s);
             Solver naive = model(n, s, true, false, 10);
             Solver efficientA = model(n, s, false, true, 10);
             Solver efficientN = model(n, s, false, false, 10);
-            System.out.println(naive.getMeasures().getSolutionCount() + " sols");
+//            System.out.println(naive.getMeasures().getSolutionCount() + " sols");
             assertEquals(naive.getMeasures().getFailCount(), 0);
             assertEquals(naive.getMeasures().getSolutionCount(), efficientA.getMeasures().getSolutionCount());
             assertEquals(naive.getMeasures().getFailCount(), efficientA.getMeasures().getFailCount());
@@ -122,7 +122,7 @@ public class ArborescenceTest {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;
             graphTypeKer = ge;
-            System.out.println("env:" + ge + " ker :" + ge);
+//            System.out.println("env:" + ge + " ker :" + ge);
             smallTrees();
         }
     }

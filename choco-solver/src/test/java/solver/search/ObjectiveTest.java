@@ -187,12 +187,14 @@ public class ObjectiveTest {
         BoolVar v = ICF.arithm(iv, "<=", 2).reif();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
+//        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
+        Assert.assertEquals(ESat.TRUE, solver.isSatisfied());
 
         solver.getSearchLoop().reset();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
+        Assert.assertEquals(ESat.TRUE, solver.isSatisfied());
+//        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
     @Test(groups = "1s")
@@ -201,7 +203,7 @@ public class ObjectiveTest {
         BoolVar b1 = VF.bool("b1", solver);
         BoolVar b2 = VF.bool("b2", solver);
         solver.post(ICF.arithm(b1, "<=", b2));
-        SMF.log(solver, true, true);
+//        SMF.log(solver, true, true);
         solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
@@ -209,7 +211,7 @@ public class ObjectiveTest {
         }
         solver.getMeasures().setReadingTimeCount(System.nanoTime());
         solver.getSearchLoop().launch(false);
-        System.out.println(b1 + " " + b2);
+//        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         solver.getSearchLoop().reset();
         solver.post(ICF.arithm(b1, "=", bestvalue));
@@ -218,7 +220,7 @@ public class ObjectiveTest {
         if (solver.findSolution()) {
             do {
                 count++;
-                System.out.println(b1 + " " + b2);
+//                System.out.println(b1 + " " + b2);
             } while (solver.nextSolution());
         }
         Assert.assertEquals(count, 2);
@@ -229,7 +231,7 @@ public class ObjectiveTest {
 		Solver solver = new Solver();
 		IntVar a = VF.enumerated("a", -2, 2, solver);
 
-		SMF.log(solver, true, true);
+//		SMF.log(solver, true, true);
 		solver.set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
 				ISF.minDom_LB(a));

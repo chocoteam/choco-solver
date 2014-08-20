@@ -32,7 +32,6 @@ import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -61,7 +60,7 @@ public class DivTest extends AbstractTernaryTest {
         Solver solver = new Solver();
         IntVar i = VF.enumerated("i", 0, 2, solver);
         solver.post(ICF.eucl_div(i, VF.one(solver), VF.zero(solver)).getOpposite());
-        SMF.log(solver, true, false);
+//        SMF.log(solver, true, false);
         solver.findAllSolutions();
     }
 

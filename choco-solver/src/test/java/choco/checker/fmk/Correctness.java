@@ -127,7 +127,7 @@ public class Correctness {
                 }
             }
         }
-        System.out.printf("loop: %d\n", loop);
+//        System.out.printf("loop: %d\n", loop);
     }
 
     private static Solver referencePropagation(Model modeler, int nbVar, Variable[] rvars, Domain[] domains, Object parameters) {
