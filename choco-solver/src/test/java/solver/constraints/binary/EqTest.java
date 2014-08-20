@@ -42,7 +42,7 @@ import util.ESat;
  */
 public class EqTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         Solver s = new Solver();
         IntVar two1 = VF.fixed(2, s);
@@ -53,7 +53,7 @@ public class EqTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         Solver s = new Solver();
         IntVar three = VF.fixed(3, s);
@@ -63,7 +63,7 @@ public class EqTest {
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() {
         Solver s = new Solver();
         IntVar three = VF.fixed(3, s);

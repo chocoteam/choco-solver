@@ -1,7 +1,12 @@
 language: java
 before_script:
   - "export MAVEN_OPTS='-Xmx4096m -Xms1024 -Xss64m -server'"
-script: mvn clean install -DtestFailureIgnore=true
+env:
+  - GROUP=1s,10s
+  - GROUP=1m,10m
+  - GROUP=30m
+
+script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
     - master

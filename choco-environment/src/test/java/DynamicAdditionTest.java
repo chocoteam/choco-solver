@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
  */
 public class DynamicAdditionTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         IEnvironment environment = new EnvironmentTrailing();
         IStateInt a = environment.makeInt(10);

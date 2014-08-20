@@ -185,7 +185,7 @@ public class SolverTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testFH1() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);

@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 public class BasicIndexBipartiteSetTest {
 
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         IEnvironment env = new EnvironmentTrailing();
         BasicIndexedBipartiteSet set = new BasicIndexedBipartiteSet(env, 2);

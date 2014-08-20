@@ -247,7 +247,7 @@ public class DynamicPostTest {
         Assert.assertEquals(9, nbSolution);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testIssue214() {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 1, 2, solver);

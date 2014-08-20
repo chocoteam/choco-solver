@@ -51,14 +51,14 @@ public class BitsetIntVarImplTest {
         var = new BitsetIntVarImpl("test", new int[]{-5, 0, 3, 4, 5}, new Solver());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRemoveValue() throws Exception {
         Assert.assertFalse(var.removeValue(7, Cause.Null));
         Assert.assertTrue(var.removeValue(0, Cause.Null));
         Assert.assertFalse(var.contains(0));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRemoveInterval() throws Exception {
         Assert.assertFalse(var.removeInterval(7, 8, Cause.Null));
         Assert.assertTrue(var.removeInterval(0, 3, Cause.Null));
@@ -66,7 +66,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(var.contains(3));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testUpdateLowerBound() throws Exception {
         Assert.assertFalse(var.updateLowerBound(-6, Cause.Null));
         Assert.assertTrue(var.updateLowerBound(0, Cause.Null));
@@ -75,7 +75,7 @@ public class BitsetIntVarImplTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testUpdateUpperBound() throws Exception {
         Assert.assertFalse(var.updateUpperBound(6, Cause.Null));
         Assert.assertTrue(var.updateUpperBound(0, Cause.Null));
@@ -84,47 +84,47 @@ public class BitsetIntVarImplTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void testGetLB() throws Exception {
         Assert.assertEquals(-5, var.getLB());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testGetUB() throws Exception {
         Assert.assertEquals(5, var.getUB());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testGetDomainSize() throws Exception {
         Assert.assertEquals(5, var.getDomainSize());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testNextValue() throws Exception {
         Assert.assertEquals(-5, var.nextValue(-6));
         Assert.assertEquals(0, var.nextValue(-5));
         Assert.assertEquals(Integer.MAX_VALUE, var.nextValue(5));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testPreviousValue() throws Exception {
         Assert.assertEquals(5, var.previousValue(6));
         Assert.assertEquals(0, var.previousValue(3));
         Assert.assertEquals(Integer.MIN_VALUE, var.previousValue(-5));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testHasEnumeratedDomain() throws Exception {
         Assert.assertTrue(var.hasEnumeratedDomain());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testGetTypeAndKind() throws Exception {
         Assert.assertTrue((Variable.INT & var.getTypeAndKind()) != 0);
         Assert.assertTrue((Variable.VAR & var.getTypeAndKind()) != 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testGetValueIterator() throws Exception {
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
@@ -155,7 +155,7 @@ public class BitsetIntVarImplTest {
         vit.dispose();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testGetRangeIterator() throws Exception {
         DisposableRangeIterator rit = var.getRangeIterator(true);
         Assert.assertTrue(rit.hasNext());
