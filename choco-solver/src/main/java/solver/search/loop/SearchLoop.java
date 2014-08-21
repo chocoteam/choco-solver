@@ -96,7 +96,7 @@ public class SearchLoop implements ISearchLoop {
 	protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
 
 	// keep an int, that's faster than a long, and the domain of definition is large enough
-	public int timeStamp;
+	int timeStamp;
 
 	/* Reference to the solver */
 	final Solver solver;
