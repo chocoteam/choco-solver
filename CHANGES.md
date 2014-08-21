@@ -106,3 +106,4 @@ NEXT MILESTONE
 - Minimum and Maximum over boolean arrays
 - Issue #215: Fix generation of relation based on tuples
 - Fix #214: Fix problems related to propagators dynamic addition and deletion
+- Add a GenerateAndTest search strategy which can be combined with others
