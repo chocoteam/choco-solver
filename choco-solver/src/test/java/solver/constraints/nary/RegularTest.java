@@ -119,7 +119,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 25980);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void isCorrect() {
         Solver solver = new Solver();
 

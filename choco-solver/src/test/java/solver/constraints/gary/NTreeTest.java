@@ -72,7 +72,7 @@ public class NTreeTest {
         assertTrue(s.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public static void debug() {
         for (int n = 5; n < 7; n++) {
             for (int t1 = 1; t1 < n; t1++) {

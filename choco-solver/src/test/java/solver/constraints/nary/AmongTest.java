@@ -53,7 +53,7 @@ import java.util.Random;
  */
 public class AmongTest {
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;

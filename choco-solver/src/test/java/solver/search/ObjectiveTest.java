@@ -58,7 +58,7 @@ import java.util.Random;
  */
 public class ObjectiveTest {
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1() {
         Solver solver = new Solver();
 
