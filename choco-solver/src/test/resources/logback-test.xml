@@ -8,13 +8,6 @@
 
     <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
 
-    <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>CHOCO3.LOG</file>
-        <encoder>
-            <pattern>%msg%n</pattern>
-        </encoder>
-    </appender>-->
-
     <logger name="choco" level="error"/>
 
     <logger name="test" level="error"/>
@@ -26,14 +19,6 @@
     <logger name="solver" level="info"/>
 
     <logger name="explainer" level="error"/>
-
-    <logger name="fzn" level="error"/>
-
-    <logger name="configuration" level="error"/>
-
-    <logger name="tree" level="error"/>
-
-    <logger name="visualization" level="error"/>
 
     <root level="warn">
         <appender-ref ref="STDOUT"/>
