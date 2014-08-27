@@ -42,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import util.ESat;
-import util.objects.StoredIndexedBipartiteSet;
 import util.procedure.UnaryIntProcedure;
 
 import java.util.ArrayList;

@@ -27,7 +27,6 @@
 
 package solver.constraints.binary;
 
-import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
