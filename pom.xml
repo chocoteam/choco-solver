@@ -23,7 +23,6 @@
     <modules>
         <module>choco-solver</module>
         <module>choco-samples</module>
-        <module>choco-parser</module>
     </modules>
     <dependencies>
         <dependency>
