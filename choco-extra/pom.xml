@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>choco</groupId>
     <artifactId>choco-extra</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>Extra work based on Choco-${project.version}</name>
 
     <dependencies>

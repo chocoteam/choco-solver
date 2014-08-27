@@ -28,38 +28,24 @@ package parser.flatzinc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gnu.trove.list.array.TIntArrayList;
-
+import parser.flatzinc.ast.*;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
-import parser.flatzinc.FZNException;
-import parser.flatzinc.FZNLayout;
-import parser.flatzinc.ast.FConstraint;
-import parser.flatzinc.ast.FGoal;
-import parser.flatzinc.ast.FParameter;
-import parser.flatzinc.ast.FVariable;
-import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.FGoal;
-
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.ResolutionPolicy;
+import solver.Solver;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import org.antlr.v4.runtime.atn.*;
-import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
-import java.util.List;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Parser extends Parser {
@@ -67,11 +53,11 @@ public class Flatzinc4Parser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		RB=20, RP=31, LS=22, LP=30, BOOL=1, CHAR=37, INT_CONST=35, DO=18, SET=6, 
-		FLOAT=5, INT=4, MINIMIZE=15, OF=7, DD=17, TRUE=2, PREDICATE=11, SC=27, 
-		WS=34, DC=29, MN=26, IDENTIFIER=32, MAXIMIZE=16, SATISFY=14, PL=25, RS=23, 
-		PAR=10, LB=19, VAR=9, EQ=24, COMMENT=33, FALSE=3, CONSTRAINT=12, SOLVE=13, 
-		ARRAY=8, CM=21, STRING=36, CL=28;
+		PAR=10, DD=17, RS=23, FLOAT=5, SET=6, ARRAY=8, LP=30, VAR=9, LS=22, CHAR=37, 
+		DO=18, CONSTRAINT=12, INT=4, MAXIMIZE=16, COMMENT=33, INT_CONST=35, SC=27, 
+		SATISFY=14, OF=7, IDENTIFIER=32, WS=34, MN=26, TRUE=2, PREDICATE=11, SOLVE=13, 
+		CL=28, CM=21, EQ=24, RB=20, BOOL=1, LB=19, STRING=36, FALSE=3, MINIMIZE=15, 
+		PL=25, RP=31, DC=29;
 	public static final String[] tokenNames = {
 		"<INVALID>", "BOOL", "'true'", "'false'", "'int'", "'float'", "'set'", 
 		"'of'", "'array'", "'var'", "'par'", "'predicate'", "'constraint'", "'solve'", 
@@ -124,8 +110,11 @@ public class Flatzinc4Parser extends Parser {
 	public static class Flatzinc_modelContext extends ParserRuleContext {
 		public Solver aSolver;
 		public Datas datas;
-		public ConstraintContext constraint(int i) {
-			return getRuleContext(ConstraintContext.class,i);
+		public Pred_declContext pred_decl(int i) {
+			return getRuleContext(Pred_declContext.class,i);
+		}
+		public Param_declContext param_decl(int i) {
+			return getRuleContext(Param_declContext.class,i);
 		}
 		public List<ConstraintContext> constraint() {
 			return getRuleContexts(ConstraintContext.class);
@@ -133,23 +122,20 @@ public class Flatzinc4Parser extends Parser {
 		public List<Pred_declContext> pred_decl() {
 			return getRuleContexts(Pred_declContext.class);
 		}
+		public List<Param_declContext> param_decl() {
+			return getRuleContexts(Param_declContext.class);
+		}
 		public Var_declContext var_decl(int i) {
 			return getRuleContext(Var_declContext.class,i);
 		}
-		public Param_declContext param_decl(int i) {
-			return getRuleContext(Param_declContext.class,i);
-		}
-		public Pred_declContext pred_decl(int i) {
-			return getRuleContext(Pred_declContext.class,i);
+		public Solve_goalContext solve_goal() {
+			return getRuleContext(Solve_goalContext.class,0);
 		}
 		public List<Var_declContext> var_decl() {
 			return getRuleContexts(Var_declContext.class);
 		}
-		public List<Param_declContext> param_decl() {
-			return getRuleContexts(Param_declContext.class);
-		}
-		public Solve_goalContext solve_goal() {
-			return getRuleContext(Solve_goalContext.class,0);
+		public ConstraintContext constraint(int i) {
+			return getRuleContext(ConstraintContext.class,i);
 		}
 		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
 		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState, Solver aSolver, Datas datas) {
@@ -257,23 +243,23 @@ public class Flatzinc4Parser extends Parser {
 		public Declaration decl;
 		public Index_setContext d;
 		public Par_type_uContext p;
+		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
+		}
+		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
+		public Index_setContext index_set(int i) {
+			return getRuleContext(Index_setContext.class,i);
 		}
 		public Par_type_uContext par_type_u() {
 			return getRuleContext(Par_type_uContext.class,0);
 		}
-		public Index_setContext index_set(int i) {
-			return getRuleContext(Index_setContext.class,i);
-		}
-		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
 		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public List<Index_setContext> index_set() {
 			return getRuleContexts(Index_setContext.class);
 		}
-		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public Par_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -357,11 +343,11 @@ public class Flatzinc4Parser extends Parser {
 
 	public static class Par_type_uContext extends ParserRuleContext {
 		public Declaration decl;
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
 		public TerminalNode BOOL() { return getToken(Flatzinc4Parser.BOOL, 0); }
-		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
-		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
 		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
+		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
+		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
 		public Par_type_uContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -439,24 +425,24 @@ public class Flatzinc4Parser extends Parser {
 		public Declaration decl;
 		public Index_setContext d;
 		public Var_type_uContext vt;
+		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
 		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
-		public Index_setContext index_set(int i) {
-			return getRuleContext(Index_setContext.class,i);
-		}
-		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
 		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
 		public Var_type_uContext var_type_u() {
 			return getRuleContext(Var_type_uContext.class,0);
 		}
+		public Index_setContext index_set(int i) {
+			return getRuleContext(Index_setContext.class,i);
+		}
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
 		public List<Index_setContext> index_set() {
 			return getRuleContexts(Index_setContext.class);
 		}
-		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public Var_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -542,22 +528,22 @@ public class Flatzinc4Parser extends Parser {
 		public Token i1;
 		public Token i2;
 		public Token i;
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
+		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
 		public TerminalNode BOOL() { return getToken(Flatzinc4Parser.BOOL, 0); }
-		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
-		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
-		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
-		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
-		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
 		public TerminalNode INT_CONST(int i) {
 			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
+		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
+		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
+		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
+		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
 		public Var_type_uContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -715,12 +701,12 @@ public class Flatzinc4Parser extends Parser {
 		public Declaration decl;
 		public Token i1;
 		public Token i2;
-		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
 		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
 		public TerminalNode INT_CONST(int i) {
 			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
+		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
 		public Index_setContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -785,31 +771,31 @@ public class Flatzinc4Parser extends Parser {
 		public ExprContext e;
 		public Id_exprContext ie;
 		public Token STRING;
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
 		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
-		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
-		public Bool_constContext bool_const() {
-			return getRuleContext(Bool_constContext.class,0);
-		}
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public Id_exprContext id_expr() {
-			return getRuleContext(Id_exprContext.class,0);
 		}
 		public TerminalNode INT_CONST(int i) {
 			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
+		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public Id_exprContext id_expr() {
+			return getRuleContext(Id_exprContext.class,0);
+		}
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
 		public TerminalNode STRING() { return getToken(Flatzinc4Parser.STRING, 0); }
+		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public Bool_constContext bool_const() {
+			return getRuleContext(Bool_constContext.class,0);
+		}
+		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public ExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -986,6 +972,7 @@ public class Flatzinc4Parser extends Parser {
 		public Token IDENTIFIER;
 		public ExprContext e;
 		public Token i;
+		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
@@ -993,14 +980,13 @@ public class Flatzinc4Parser extends Parser {
 			return getRuleContexts(ExprContext.class);
 		}
 		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode INT_CONST() { return getToken(Flatzinc4Parser.INT_CONST, 0); }
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode INT_CONST() { return getToken(Flatzinc4Parser.INT_CONST, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public Id_exprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1097,16 +1083,16 @@ public class Flatzinc4Parser extends Parser {
 		public Par_typeContext pt;
 		public Token IDENTIFIER;
 		public ExprContext e;
+		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
+		public TerminalNode EQ() { return getToken(Flatzinc4Parser.EQ, 0); }
 		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Par_typeContext par_type() {
 			return getRuleContext(Par_typeContext.class,0);
 		}
-		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
-		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
-		public TerminalNode EQ() { return getToken(Flatzinc4Parser.EQ, 0); }
 		public Param_declContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1156,19 +1142,19 @@ public class Flatzinc4Parser extends Parser {
 		public AnnotationsContext anns;
 		public Token eq;
 		public ExprContext e;
+		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
-		}
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
-		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
-		public AnnotationsContext annotations() {
-			return getRuleContext(AnnotationsContext.class,0);
 		}
 		public Var_typeContext var_type() {
 			return getRuleContext(Var_typeContext.class,0);
 		}
-		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
+		public AnnotationsContext annotations() {
+			return getRuleContext(AnnotationsContext.class,0);
+		}
 		public TerminalNode EQ() { return getToken(Flatzinc4Parser.EQ, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Var_declContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1224,6 +1210,7 @@ public class Flatzinc4Parser extends Parser {
 		public Token IDENTIFIER;
 		public ExprContext e;
 		public AnnotationsContext anns;
+		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
@@ -1231,15 +1218,14 @@ public class Flatzinc4Parser extends Parser {
 			return getRuleContexts(ExprContext.class);
 		}
 		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode CONSTRAINT() { return getToken(Flatzinc4Parser.CONSTRAINT, 0); }
 		public AnnotationsContext annotations() {
 			return getRuleContext(AnnotationsContext.class,0);
 		}
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public ConstraintContext(ParserRuleContext parent, int invokingState) {
@@ -1309,14 +1295,14 @@ public class Flatzinc4Parser extends Parser {
 	public static class Solve_goalContext extends ParserRuleContext {
 		public AnnotationsContext anns;
 		public ResolutionContext res;
-		public TerminalNode SOLVE() { return getToken(Flatzinc4Parser.SOLVE, 0); }
 		public AnnotationsContext annotations() {
 			return getRuleContext(AnnotationsContext.class,0);
 		}
-		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public ResolutionContext resolution() {
 			return getRuleContext(ResolutionContext.class,0);
 		}
+		public TerminalNode SOLVE() { return getToken(Flatzinc4Parser.SOLVE, 0); }
+		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Solve_goalContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1361,11 +1347,11 @@ public class Flatzinc4Parser extends Parser {
 		public ResolutionPolicy rtype;
 		public Expression exp;
 		public ExprContext e;
+		public TerminalNode MAXIMIZE() { return getToken(Flatzinc4Parser.MAXIMIZE, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
 		public TerminalNode SATISFY() { return getToken(Flatzinc4Parser.SATISFY, 0); }
-		public TerminalNode MAXIMIZE() { return getToken(Flatzinc4Parser.MAXIMIZE, 0); }
 		public TerminalNode MINIMIZE() { return getToken(Flatzinc4Parser.MINIMIZE, 0); }
 		public ResolutionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1437,16 +1423,16 @@ public class Flatzinc4Parser extends Parser {
 	public static class AnnotationsContext extends ParserRuleContext {
 		public List<EAnnotation> anns;
 		public AnnotationContext e;
-		public AnnotationContext annotation(int i) {
-			return getRuleContext(AnnotationContext.class,i);
-		}
-		public List<TerminalNode> DC() { return getTokens(Flatzinc4Parser.DC); }
 		public List<AnnotationContext> annotation() {
 			return getRuleContexts(AnnotationContext.class);
 		}
 		public TerminalNode DC(int i) {
 			return getToken(Flatzinc4Parser.DC, i);
 		}
+		public AnnotationContext annotation(int i) {
+			return getRuleContext(AnnotationContext.class,i);
+		}
+		public List<TerminalNode> DC() { return getTokens(Flatzinc4Parser.DC); }
 		public AnnotationsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1503,6 +1489,7 @@ public class Flatzinc4Parser extends Parser {
 		public EAnnotation ann;
 		public Token IDENTIFIER;
 		public ExprContext e;
+		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
@@ -1510,11 +1497,10 @@ public class Flatzinc4Parser extends Parser {
 			return getRuleContexts(ExprContext.class);
 		}
 		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public AnnotationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1585,8 +1571,8 @@ public class Flatzinc4Parser extends Parser {
 
 	public static class Bool_constContext extends ParserRuleContext {
 		public boolean value;
-		public TerminalNode TRUE() { return getToken(Flatzinc4Parser.TRUE, 0); }
 		public TerminalNode FALSE() { return getToken(Flatzinc4Parser.FALSE, 0); }
+		public TerminalNode TRUE() { return getToken(Flatzinc4Parser.TRUE, 0); }
 		public Bool_constContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1638,19 +1624,19 @@ public class Flatzinc4Parser extends Parser {
 
 	public static class Pred_declContext extends ParserRuleContext {
 		public Token IDENTIFIER;
+		public List<Pred_paramContext> pred_param() {
+			return getRuleContexts(Pred_paramContext.class);
+		}
+		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
+		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public TerminalNode PREDICATE() { return getToken(Flatzinc4Parser.PREDICATE, 0); }
 		public Pred_paramContext pred_param(int i) {
 			return getRuleContext(Pred_paramContext.class,i);
 		}
-		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
-		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
-		public List<Pred_paramContext> pred_param() {
-			return getRuleContexts(Pred_paramContext.class);
-		}
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Pred_declContext(ParserRuleContext parent, int invokingState) {
@@ -1711,11 +1697,11 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Pred_paramContext extends ParserRuleContext {
+		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
 		public Pred_param_typeContext pred_param_type() {
 			return getRuleContext(Pred_param_typeContext.class,0);
 		}
 		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
-		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
 		public Pred_paramContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1806,34 +1792,34 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Par_pred_param_typeContext extends ParserRuleContext {
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
 		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
-		public TerminalNode OF(int i) {
-			return getToken(Flatzinc4Parser.OF, i);
+		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public TerminalNode INT_CONST(int i) {
+			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
 		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
-		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
 		public Index_setContext index_set(int i) {
 			return getRuleContext(Index_setContext.class,i);
 		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
-		public Par_typeContext par_type() {
-			return getRuleContext(Par_typeContext.class,0);
-		}
-		public TerminalNode INT_CONST(int i) {
-			return getToken(Flatzinc4Parser.INT_CONST, i);
+		public TerminalNode OF(int i) {
+			return getToken(Flatzinc4Parser.OF, i);
 		}
 		public List<Index_setContext> index_set() {
 			return getRuleContexts(Index_setContext.class);
 		}
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
+		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
+		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
+		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
-		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
+		public Par_typeContext par_type() {
+			return getRuleContext(Par_typeContext.class,0);
+		}
 		public Par_pred_param_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2087,29 +2073,29 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Var_pred_param_typeContext extends ParserRuleContext {
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
-		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
-		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
+		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
 		public Index_setContext index_set(int i) {
 			return getRuleContext(Index_setContext.class,i);
 		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode OF(int i) {
-			return getToken(Flatzinc4Parser.OF, i);
-		}
-		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
-		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
 		public Var_typeContext var_type() {
 			return getRuleContext(Var_typeContext.class,0);
 		}
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode OF(int i) {
+			return getToken(Flatzinc4Parser.OF, i);
+		}
 		public List<Index_setContext> index_set() {
 			return getRuleContexts(Index_setContext.class);
 		}
-		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
+		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
+		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
+		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
 		public Var_pred_param_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}

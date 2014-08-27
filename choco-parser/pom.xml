@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 1999-2012, Ecole des Mines de Nantes
+  ~ Copyright (c) 1999-2014, Ecole des Mines de Nantes
   ~ All rights reserved.
   ~ Redistribution and use in source and binary forms, with or without
   ~ modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,8 @@
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>choco</groupId>
         <artifactId>choco</artifactId>
@@ -42,70 +43,54 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-            <version>3.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.antlr</groupId>
-            <!--<artifactId>antlr</artifactId>
-            <version>3.4</version>-->
             <artifactId>antlr4</artifactId>
             <version>4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.0.28</version>
         </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.1</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>parser.flatzinc.ChocoFZN</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <!-- this is used for inheritance merges -->
                         <phase>package</phase>
-                        <!-- bind to the packaging phase -->
                         <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--<plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr3-maven-plugin</artifactId>
-                <version>3.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>antlr</goal>
+                            <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <report>false</report>
-                            <printGrammar>false</printGrammar>
-                            <debug>false</debug>
-                            <profile>false</profile>
-                            <nfa>false</nfa>
-                            <dfa>false</dfa>
-                            <trace>false</trace>
-                            <messageFormat>antlr</messageFormat>
-                            <verbose>true</verbose>
-                            <outputDirectory>src/main/java</outputDirectory>
-                            &lt;!&ndash;<libDirectory>src/main/antlr3/imports</libDirectory>&ndash;&gt;
+                            <minimizeJar>true</minimizeJar>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>parser.flatzinc.ChocoFZN</mainClass>
+                                </transformer>
+                            </transformers>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.testng:testng</exclude>
+                                    <exclude>choco:choco-solver</exclude>
+                                    <exclude>choco:choco-environment</exclude>
+                                    <exclude>jgrapht:jgrapht</exclude>
+                                    <exclude>dk.brics:automaton</exclude>
+                                    <exclude>org.easymock:easymock</exclude>
+                                    <!--<exclude>net.sf.trove4j:trove4j</exclude> INCLUDED because of THash being excluded with shade:minimize-->
+                                    <exclude>org.slf4j:slf4j-api</exclude>
+                                    <exclude>ch.qos.logback:logback-core</exclude>
+                                    <exclude>ch.qos.logback:logback-classic</exclude>
+                                </excludes>
+                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
