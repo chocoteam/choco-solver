@@ -1,4 +1,4 @@
-/**
+package memory; /**
  *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import memory.IEnvironment;
-import memory.IStateInt;
 import memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;

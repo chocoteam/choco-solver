@@ -77,7 +77,6 @@
                                 <excludes>
                                     <exclude>org.testng:testng</exclude>
                                     <exclude>choco:choco-solver</exclude>
-                                    <exclude>choco:choco-environment</exclude>
                                     <exclude>jgrapht:jgrapht</exclude>
                                     <exclude>dk.brics:automaton</exclude>
                                     <exclude>org.easymock:easymock</exclude>

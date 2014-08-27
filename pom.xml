@@ -21,7 +21,6 @@
     </scm>
 
     <modules>
-        <module>choco-environment</module>
         <module>choco-solver</module>
         <module>choco-samples</module>
         <module>choco-parser</module>
