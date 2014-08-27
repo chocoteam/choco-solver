@@ -35,16 +35,16 @@
     <packaging>jar</packaging>
     <name>A FlatZinc parser for Choco3</name>
     
-    <url>https://github.com/chocoteam/Parsers</url>
+    <url>https://github.com/chocoteam/choco-parsers</url>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
     <scm>
-        <connection>scm:git:git@github.com:chocoteam/Parsers.git</connection>
-        <url>scm:git:git://github.com/chocoteam/Parsers</url>
-        <developerConnection>scm:git:git@github.com:chocoteam/Parsers.git</developerConnection>
+        <connection>scm:git:git@github.com:chocoteam/choco-parsers.git</connection>
+        <url>scm:git:git://github.com/chocoteam/choco-parsers</url>
+        <developerConnection>scm:git:git@github.com:chocoteam/choco-parsers.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     
@@ -127,18 +127,6 @@
                     <arguments>-DskipTests</arguments>
                     <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
                     <pushChanges>true</pushChanges>
-                    <localCheckout>true</localCheckout>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <arguments>-DskipTests</arguments>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                    <!-- release.sh will perform the pushes -->
-                    <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                 </configuration>
             </plugin>
