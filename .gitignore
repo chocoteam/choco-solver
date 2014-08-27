@@ -1,0 +1,11 @@
+*/target/*
+*.iml
+*.ipr
+*.iws
+*/fzn_choco
+*.jar
+/lib/*
+*.DS_Store
+
+*/mysql.properties
+*/logback-test.xml

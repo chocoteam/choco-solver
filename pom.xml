@@ -1,0 +1,196 @@
+<!--
+  ~ Copyright (c) 1999-2014, Ecole des Mines de Nantes
+  ~ All rights reserved.
+  ~ Redistribution and use in source and binary forms, with or without
+  ~ modification, are permitted provided that the following conditions are met:
+  ~
+  ~     * Redistributions of source code must retain the above copyright
+  ~       notice, this list of conditions and the following disclaimer.
+  ~     * Redistributions in binary form must reproduce the above copyright
+  ~       notice, this list of conditions and the following disclaimer in the
+  ~       documentation and/or other materials provided with the distribution.
+  ~     * Neither the name of the Ecole des Mines de Nantes nor the
+  ~       names of its contributors may be used to endorse or promote products
+  ~       derived from this software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+  ~ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~ DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+  ~ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  ~ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  ~ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ~ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ~ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>choco</groupId>
+    <artifactId>choco-parser</artifactId>
+    <version>3.2.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>A FlatZinc parser for Choco3</name>
+    
+    <url>https://github.com/chocoteam/Parsers</url>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <scm>
+        <connection>scm:git:git@github.com:chocoteam/Parsers.git</connection>
+        <url>scm:git:git://github.com/chocoteam/Parsers</url>
+        <developerConnection>scm:git:git@github.com:chocoteam/Parsers.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>choco</groupId>
+            <artifactId>choco-solver</artifactId>
+            <version>3.2.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.0.28</version>
+        </dependency>
+    </dependencies>
+    
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>choco-releases</id>
+            <name>Private Maven Repository</name>
+            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
+            <layout>default</layout>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>choco-releases</id>
+            <name>Private Maven Repository</name>
+            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
+            <layout>default</layout>
+        </snapshotRepository>
+    </distributionManagement>
+    
+    <repositories>
+        <repository>
+            <id>choco.repo</id>
+            <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
+        </repository>
+    </repositories>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <arguments>-DskipTests</arguments>
+                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+                    <!-- release.sh will perform the pushes -->
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>true</localCheckout>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <encoding>ISO-8859-1</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <minimizeJar>true</minimizeJar>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>parser.flatzinc.ChocoFZN</mainClass>
+                                </transformer>
+                            </transformers>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.testng:testng</exclude>
+                                    <exclude>choco:choco-solver</exclude>
+                                    <exclude>jgrapht:jgrapht</exclude>
+                                    <exclude>dk.brics:automaton</exclude>
+                                    <exclude>org.easymock:easymock</exclude>
+                                    <!--<exclude>net.sf.trove4j:trove4j</exclude> INCLUDED because of THash being excluded with shade:minimize-->
+                                    <exclude>org.slf4j:slf4j-api</exclude>
+                                    <exclude>ch.qos.logback:logback-core</exclude>
+                                    <exclude>ch.qos.logback:logback-classic</exclude>
+                                </excludes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/java</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
