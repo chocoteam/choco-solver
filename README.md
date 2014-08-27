@@ -1,7 +1,7 @@
-Parsers
-=======
+choco-parsers
+=============
 
-Parsers is an extension library for [Choco3](https://github.com/chocoteam/choco3).
+choco-parsers is an extension library for [Choco3](https://github.com/chocoteam/choco3).
 It provides a parser for the FlatZinc language, a low-level solver input language that is the target language for [MiniZinc](http://www.minizinc.org/).
 
 Instructions
@@ -13,7 +13,7 @@ There are two ways to parse and solve a fzn file with Choco3:
 
 * ###### Java front-end
 
-  ```java -cp .:choco-solver-3.2.0.jar:choco-parser-3.2.0.jar parser.flatzinc.ChocoFZN [<options>] [<file>]```
+  ```java -cp .:choco-solver-X.Y.Z.jar:choco-parsers-X.Y.Z.jar parser.flatzinc.ChocoFZN [<options>] [<file>]```
   
   
 * ###### In a terminal (shell for Linux based OS)
@@ -28,4 +28,4 @@ Common options are:
 * other Choco-specific options are available
 
 The shell requires another option:
-* ```-jar <j>```: Set the classpath, should be something like: ```choco-solver-3.2.0.jar:choco-parser-3.2.0.jar```
+* ```-jar <j>```: Set the classpath, should be something like: ```choco-solver-X.Y.Z.jar:choco-parsers-X.Y.Z.jar```
