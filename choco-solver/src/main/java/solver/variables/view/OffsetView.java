@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -176,10 +177,10 @@ public final class OffsetView extends IntView {
         return var.isInstantiatedTo(value - cste);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -222,6 +223,15 @@ public final class OffsetView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.offset(this.var, this.cste);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            OffsetView clone = new OffsetView((IntVar) identitymap.get(this.var), this.cste, solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

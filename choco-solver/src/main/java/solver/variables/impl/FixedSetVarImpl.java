@@ -1,5 +1,6 @@
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.ICause;
@@ -14,76 +15,76 @@ import solver.variables.Variable;
 import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.view.IView;
+import util.tools.StringUtils;
 
 import java.util.Arrays;
 
 /**
- *
  * @author jimmy
  */
 public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
-    private final int[] value;
+    private final int[] values;
     private int kerIndex;
     private int envIndex;
 
-    public FixedSetVarImpl(String name, TIntSet value, Solver solver) {
-		super(name,solver);
-        this.value = value.toArray();
-        Arrays.sort(this.value);
+    public FixedSetVarImpl(String name, TIntSet values, Solver solver) {
+        super(name, solver);
+        this.values = values.toArray();
+        Arrays.sort(this.values);
     }
 
-    public FixedSetVarImpl(String name, int[] value, Solver solver) {
+    public FixedSetVarImpl(String name, int[] values, Solver solver) {
         // Remove duplicates
-        this(name, new TIntHashSet(value), solver);
+        this(name, new TIntHashSet(values), solver);
     }
 
     @Override
     public int getKernelFirst() {
-        return value.length == 0
+        return values.length == 0
                 ? SetVar.END
-                : value[kerIndex = 0];
+                : values[kerIndex = 0];
     }
 
     @Override
     public int getKernelNext() {
-        return ++kerIndex >= value.length
+        return ++kerIndex >= values.length
                 ? SetVar.END
-                : value[kerIndex];
+                : values[kerIndex];
     }
 
     @Override
     public int getKernelSize() {
-        return value.length;
+        return values.length;
     }
 
     @Override
     public boolean kernelContains(int element) {
-        return Arrays.binarySearch(value, element) >= 0;
+        return Arrays.binarySearch(values, element) >= 0;
     }
 
     @Override
     public int getEnvelopeFirst() {
-        return value.length == 0
+        return values.length == 0
                 ? SetVar.END
-                : value[envIndex = 0];
+                : values[envIndex = 0];
     }
 
     @Override
     public int getEnvelopeNext() {
-        return ++envIndex >= value.length
+        return ++envIndex >= values.length
                 ? SetVar.END
-                : value[envIndex];
+                : values[envIndex];
     }
 
     @Override
     public int getEnvelopeSize() {
-        return value.length;
+        return values.length;
     }
 
     @Override
     public boolean envelopeContains(int element) {
-        return Arrays.binarySearch(value, element) >= 0;
+        return Arrays.binarySearch(values, element) >= 0;
     }
 
     @Override
@@ -104,7 +105,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
-        if (value.length != this.value.length) {
+        if (value.length != this.values.length) {
             contradiction(cause, null, "");
         }
         for (int v : value) {
@@ -116,8 +117,8 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public int[] getValue() {
-        return value;
+    public int[] getValues() {
+        return values;
     }
 
     @Override
@@ -126,11 +127,12 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void createDelta() {}
+    public void createDelta() {
+    }
 
     @Override
     public ISetDeltaMonitor monitorDelta(ICause propagator) {
-		return ISetDeltaMonitor.Default.NONE;
+        return ISetDeltaMonitor.Default.NONE;
     }
 
     @Override
@@ -139,13 +141,16 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override//void (a constant receives no event)
-    public void addMonitor(IVariableMonitor monitor) {}
+    public void addMonitor(IVariableMonitor monitor) {
+    }
 
     @Override//void (a constant receives no event)
-    public void removeMonitor(IVariableMonitor monitor) {}
+    public void removeMonitor(IVariableMonitor monitor) {
+    }
 
     @Override//void (a constant receives no event)
-    public void subscribeView(IView view) {}
+    public void subscribeView(IView view) {
+    }
 
     @Override
     public void explain(VariableState what, Explanation to) {
@@ -158,16 +163,20 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override//void (a constant receives no event)
-    public void recordMask(int mask) {}
+    public void recordMask(int mask) {
+    }
 
     @Override//void (a constant receives no event)
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {}
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+    }
 
     @Override//void (a constant receives no event)
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {}
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+    }
 
     @Override//void (a constant receives no event)
-    public void notifyMonitors(EventType event) throws ContradictionException {}
+    public void notifyMonitors(EventType event) throws ContradictionException {
+    }
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
@@ -180,7 +189,15 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public <V extends Variable> V duplicate() {
-        throw new UnsupportedOperationException("Cannot duplicate a constant view");
+    public SetVar duplicate() {
+        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), this.getSolver());
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            FixedSetVarImpl clone = new FixedSetVarImpl(this.name, this.values, solver);
+            identitymap.put(this, clone);
+        }
     }
 }

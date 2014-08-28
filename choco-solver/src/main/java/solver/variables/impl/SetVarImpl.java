@@ -27,6 +27,7 @@
 
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
@@ -59,7 +60,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 
     protected ISet envelope, kernel;
     protected SetDelta delta;
-	protected int min, max;
+    protected int min, max;
     ///////////// Attributes related to Variable ////////////
     protected boolean reactOnModification;
 
@@ -67,78 +68,79 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Creates a Set variable
-	 *
-	 * @param name		name of the variable
-	 * @param env		initial envelope domain
-	 * @param envType	data structure of the envelope
-	 * @param ker		initial kernel domain
-	 * @param kerType	data structure of the kernel
-	 * @param solver	solver of the variable.
-	 */
-	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
-		super(name, solver);
-		int min = Integer.MAX_VALUE;
-		int max = Integer.MIN_VALUE;
-		for(int i:env){
-			if(i==Integer.MIN_VALUE || i==Integer.MAX_VALUE){
-				throw new UnsupportedOperationException("too large (infinite) integers within the set variable. " +
-						"Integer.MIN_VALUE and i==Integer.MAX_VALUE are not handled.");
-			}
-			min = Math.min(min,i);
-			max = Math.max(max,i);
-		}
-		check(env,ker,max,min);
-		IEnvironment environment = solver.getEnvironment();
-		envelope = SetFactory.makeStoredSet(envType, max-min+1, environment);
-		kernel = SetFactory.makeStoredSet(kerType, max-min+1, environment);
-		for(int i:env){
-			envelope.add(i-min);
-		}
-		for(int i:ker){
-			kernel.add(i-min);
-		}
-		this.min = min;
-		this.max = max;
-	}
+    /**
+     * Creates a Set variable
+     *
+     * @param name    name of the variable
+     * @param env     initial envelope domain
+     * @param envType data structure of the envelope
+     * @param ker     initial kernel domain
+     * @param kerType data structure of the kernel
+     * @param solver  solver of the variable.
+     */
+    public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
+        super(name, solver);
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+        for (int i : env) {
+            if (i == Integer.MIN_VALUE || i == Integer.MAX_VALUE) {
+                throw new UnsupportedOperationException("too large (infinite) integers within the set variable. " +
+                        "Integer.MIN_VALUE and i==Integer.MAX_VALUE are not handled.");
+            }
+            min = Math.min(min, i);
+            max = Math.max(max, i);
+        }
+        check(env, ker, max, min);
+        IEnvironment environment = solver.getEnvironment();
+        envelope = SetFactory.makeStoredSet(envType, max - min + 1, environment);
+        kernel = SetFactory.makeStoredSet(kerType, max - min + 1, environment);
+        for (int i : env) {
+            envelope.add(i - min);
+        }
+        for (int i : ker) {
+            kernel.add(i - min);
+        }
+        this.min = min;
+        this.max = max;
+    }
 
-	/**
-	 * Creates a Set variable
-	 *
-	 * @param name		name of the variable
-	 * @param min		first envelope value
-	 * @param max		last envelope value
-	 * @param solver	solver of the variable.
-	 */
-	public SetVarImpl(String name, int min, int max, Solver solver) {
-		super(name, solver);
-		IEnvironment environment = solver.getEnvironment();
-		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
-		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
-		for(int i=min; i<=max; i++){
-			envelope.add(i-min);
-		}
-		this.min = min;
-		this.max = max;
-	}
+    /**
+     * Creates a Set variable
+     *
+     * @param name   name of the variable
+     * @param min    first envelope value
+     * @param max    last envelope value
+     * @param solver solver of the variable.
+     */
+    public SetVarImpl(String name, int min, int max, Solver solver) {
+        super(name, solver);
+        IEnvironment environment = solver.getEnvironment();
+        envelope = SetFactory.makeStoredSet(SetType.BITSET, max - min + 1, environment);
+        kernel = SetFactory.makeStoredSet(SetType.BITSET, max - min + 1, environment);
+        for (int i = min; i <= max; i++) {
+            envelope.add(i - min);
+        }
+        this.min = min;
+        this.max = max;
+    }
 
-	private static void check(int[] env, int[] ker, int max, int min) {
-		BitSet b = new BitSet(max-min);
-		for(int i:env){
-			if(b.get(i-min)){
-				throw new UnsupportedOperationException("Invalid envelope definition. "+i+" is added twice.");
-			}b.set(i-min);
-		}
-		for(int i:ker){
-			if(!b.get(i-min)){
-				throw new UnsupportedOperationException("Invalid envelope/kernel definition. "
-						+i+" is in the kernel but not in the envelope.");
-			}
-		}
-	}
+    private static void check(int[] env, int[] ker, int max, int min) {
+        BitSet b = new BitSet(max - min);
+        for (int i : env) {
+            if (b.get(i - min)) {
+                throw new UnsupportedOperationException("Invalid envelope definition. " + i + " is added twice.");
+            }
+            b.set(i - min);
+        }
+        for (int i : ker) {
+            if (!b.get(i - min)) {
+                throw new UnsupportedOperationException("Invalid envelope/kernel definition. "
+                        + i + " is in the kernel but not in the envelope.");
+            }
+        }
+    }
 
-	//***********************************************************************************
+    //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
@@ -147,17 +149,17 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         return envelope.getSize() == kernel.getSize();
     }
 
-	@Override
+    @Override
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (element<min || element>max || !envelope.contain(element-min)) {
+        if (element < min || element > max || !envelope.contain(element - min)) {
             contradiction(cause, null, "");
             return true;
         }
-        if (kernel.contain(element-min)) {
+        if (kernel.contain(element - min)) {
             return false;
         }
-        kernel.add(element-min);
+        kernel.add(element - min);
         if (reactOnModification) {
             delta.add(element, SetDelta.KERNEL, cause);
         }
@@ -169,12 +171,12 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-		if(element<min || element>max)return false;
-        if (kernel.contain(element-min)) {
+        if (element < min || element > max) return false;
+        if (kernel.contain(element - min)) {
             contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
             return true;
         }
-        if (!envelope.remove(element-min)) {
+        if (!envelope.remove(element - min)) {
             return false;
         }
         if (reactOnModification) {
@@ -205,11 +207,11 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public int[] getValue() {
+    public int[] getValues() {
         int[] lb = new int[kernel.getSize()];
         int k = 0;
         for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
-            lb[k++] = i+min;
+            lb[k++] = i + min;
         }
         return lb;
     }
@@ -218,53 +220,53 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     // ITERATIONS
     //***********************************************************************************
 
-	@Override
-	public int getKernelFirst() {
-		int i = kernel.getFirstElement();
-		return (i==-1)?END:i+min;
-	}
+    @Override
+    public int getKernelFirst() {
+        int i = kernel.getFirstElement();
+        return (i == -1) ? END : i + min;
+    }
 
-	@Override
-	public int getKernelNext() {
-		int i = kernel.getNextElement();
-		return (i==-1)?END:i+min;
-	}
+    @Override
+    public int getKernelNext() {
+        int i = kernel.getNextElement();
+        return (i == -1) ? END : i + min;
+    }
 
-	@Override
-	public int getKernelSize(){
-		return kernel.getSize();
-	}
+    @Override
+    public int getKernelSize() {
+        return kernel.getSize();
+    }
 
-	@Override
-	public boolean kernelContains(int i){
-		if(i<min || i>max)return false;
-		return kernel.contain(i-min);
-	}
+    @Override
+    public boolean kernelContains(int i) {
+        if (i < min || i > max) return false;
+        return kernel.contain(i - min);
+    }
 
-	@Override
-	public int getEnvelopeFirst() {
-		int i = envelope.getFirstElement();
-		return (i==-1)?END:i+min;
-	}
+    @Override
+    public int getEnvelopeFirst() {
+        int i = envelope.getFirstElement();
+        return (i == -1) ? END : i + min;
+    }
 
-	@Override
-	public int getEnvelopeNext() {
-		int i = envelope.getNextElement();
-		return (i==-1)?END:i+min;
-	}
+    @Override
+    public int getEnvelopeNext() {
+        int i = envelope.getNextElement();
+        return (i == -1) ? END : i + min;
+    }
 
-	@Override
-	public int getEnvelopeSize(){
-		return envelope.getSize();
-	}
+    @Override
+    public int getEnvelopeSize() {
+        return envelope.getSize();
+    }
 
-	@Override
-	public boolean envelopeContains(int i){
-		if(i<min || i>max)return false;
-		return envelope.contain(i-min);
-	}
+    @Override
+    public boolean envelopeContains(int i) {
+        if (i < min || i > max) return false;
+        return envelope.contain(i - min);
+    }
 
-	//***********************************************************************************
+    //***********************************************************************************
     // VARIABLE STUFF
     //***********************************************************************************
 
@@ -290,42 +292,60 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public SetVar duplicate() {
-		int[] env = new int[getEnvelopeSize()];
-		int idx=0;
-		for(int i=getEnvelopeFirst();i!=END;i=getEnvelopeNext()){
-			env[idx++] = i;
-		}
-		int[] ker = new int[getKernelSize()];
-		idx=0;
-		for(int i=getKernelFirst();i!=END;i=getKernelNext()){
-			ker[idx++] = i;
-		}
-		return new SetVarImpl(StringUtils.randomName(this.name),env,envelope.getSetType(),ker,kernel.getSetType(),solver);
+        int[] env = new int[getEnvelopeSize()];
+        int idx = 0;
+        for (int i = getEnvelopeFirst(); i != END; i = getEnvelopeNext()) {
+            env[idx++] = i;
+        }
+        int[] ker = new int[getKernelSize()];
+        idx = 0;
+        for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
+            ker[idx++] = i;
+        }
+        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), solver);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int[] env = new int[getEnvelopeSize()];
+            int idx = 0;
+            for (int i = getEnvelopeFirst(); i != END; i = getEnvelopeNext()) {
+                env[idx++] = i;
+            }
+            int[] ker = new int[getKernelSize()];
+            idx = 0;
+            for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
+                ker[idx++] = i;
+            }
+            SetVarImpl clone = new SetVarImpl(this.name, env, envelope.getSetType(), ker, kernel.getSetType(), solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override
     public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getName());
-		sb.append(" Envelope : {");
-		int s = envelope.getSize();
-		for(int i=envelope.getFirstElement();i>=0;i=envelope.getNextElement()){
-			sb.append(i+min);
-			s--;
-			if(s>0){
-				sb.append(",");
-			}
-		}
-		sb.append("} Kernel : {");
-		s = kernel.getSize();
-		for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
-			sb.append(i+min);
-			s--;
-			if(s>0){
-				sb.append(",");
-			}
-		}
-		sb.append("}");
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName());
+        sb.append(" Envelope : {");
+        int s = envelope.getSize();
+        for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
+            sb.append(i + min);
+            s--;
+            if (s > 0) {
+                sb.append(",");
+            }
+        }
+        sb.append("} Kernel : {");
+        s = kernel.getSize();
+        for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
+            sb.append(i + min);
+            s--;
+            if (s > 0) {
+                sb.append(",");
+            }
+        }
+        sb.append("}");
         return sb.toString();
     }
 
@@ -343,7 +363,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         return new SetDeltaMonitor(delta, propagator);
     }
 
-	@Override
+    @Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

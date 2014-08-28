@@ -27,6 +27,7 @@
 
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IStateBool;
 import solver.Configuration;
 import solver.ICause;
@@ -36,15 +37,13 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
-import solver.variables.IntVar;
-import solver.variables.Variable;
+import solver.variables.*;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.view.IView;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
+import util.tools.StringUtils;
 
 /**
  * A IntVar with one domain value.
@@ -58,14 +57,14 @@ import util.iterators.DisposableValueIterator;
  */
 public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     protected final int constante;
     protected IStateBool empty;
     private DisposableValueIterator _viterator;
     private DisposableRangeIterator _riterator;
 
     public FixedIntVarImpl(String name, int constante, Solver solver) {
-		super(name,solver);
+        super(name, solver);
         this.constante = constante;
         this.empty = solver.getEnvironment().makeBool(false);
     }
@@ -135,10 +134,10 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         return constante == value;
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -194,7 +193,8 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void addMonitor(IVariableMonitor monitor) {}
+    public void addMonitor(IVariableMonitor monitor) {
+    }
 
     @Override
     public AntiDomain antiDomain() {
@@ -216,10 +216,12 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void subscribeView(IView view) {}
+    public void subscribeView(IView view) {
+    }
 
     @Override//void (a constant receives no event)
-    public void recordMask(int mask) {}
+    public void recordMask(int mask) {
+    }
 
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
@@ -227,16 +229,20 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void createDelta() {}
+    public void createDelta() {
+    }
 
     @Override//void (a constant receives no event)
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {}
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+    }
 
     @Override//void (a constant receives no event)
-    public void notifyMonitors(EventType event) throws ContradictionException {}
+    public void notifyMonitors(EventType event) throws ContradictionException {
+    }
 
     @Override//void (a constant receives no event)
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {}
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+    }
 
     @Override
     public String toString() {
@@ -256,7 +262,14 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        throw new UnsupportedOperationException("Cannot duplicate a constant");
+        return VF.fixed(StringUtils.randomName(), this.constante, this.getSolver());
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, VF.fixed(this.name, this.constante, solver));
+        }
     }
 
     @Override

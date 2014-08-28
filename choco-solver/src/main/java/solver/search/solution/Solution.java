@@ -89,7 +89,7 @@ public class Solution implements ICause {
                     break;
                 case Variable.SET:
                     SetVar s = (SetVar) vars[i];
-                    setmap.put(s, s.getValue());
+                    setmap.put(s, s.getValues());
                     break;
                 case Variable.GRAPH:
                     GraphVar g = (GraphVar) vars[i];

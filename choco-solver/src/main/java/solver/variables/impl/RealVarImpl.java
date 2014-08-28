@@ -26,6 +26,7 @@
  */
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IStateDouble;
 import solver.ICause;
 import solver.Solver;
@@ -161,7 +162,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         }
     }
 
-	@Override
+    @Override
     public void explain(VariableState what, Explanation to) {
     }
 
@@ -179,7 +180,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         throw new SolverException("Unable to create delta for RealVar!");
     }
 
-	@Override
+    @Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -202,7 +203,15 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
     }
 
-	@Override
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            RealVarImpl clone = new RealVarImpl(this.name, this.LB.get(), this.UB.get(), this.precision, solver);
+            identitymap.put(this, clone);
+        }
+    }
+
+    @Override
     public String toString() {
         return String.format("%s = [%.16f,%.16f]", name, getLB(), getUB());
     }

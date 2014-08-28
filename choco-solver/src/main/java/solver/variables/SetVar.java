@@ -169,7 +169,7 @@ public interface SetVar extends Variable {
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    int[] getValue();
+    int[] getValues();
 
     /**
      * Allow propagator to monitor element removal/enforcing of this

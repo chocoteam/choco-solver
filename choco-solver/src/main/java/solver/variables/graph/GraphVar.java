@@ -27,6 +27,7 @@
 
 package solver.variables.graph;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
@@ -262,6 +263,11 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable {
 
     @Override
     public GraphVar duplicate() {
+        throw new UnsupportedOperationException("Cannot duplicate GraphVar");
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         throw new UnsupportedOperationException("Cannot duplicate GraphVar");
     }
 
