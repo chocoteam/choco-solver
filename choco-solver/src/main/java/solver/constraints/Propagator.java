@@ -581,7 +581,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Duplicate the current propagator.
      * A restriction is that the resolution process should have not begun yet.
-     * That's why state of the propagator may not be duplicate.
+     * That's why state of the propagator may not be duplicated.
      *
      * @param solver      the target solver
      * @param identitymap a map to ensure uniqueness of objects

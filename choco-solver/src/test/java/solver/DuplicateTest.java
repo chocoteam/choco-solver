@@ -28,8 +28,11 @@ package solver;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.binary.PropScale;
 import solver.constraints.extension.TuplesFactory;
+import solver.constraints.ternary.PropTimesNaive;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -47,7 +50,7 @@ public class DuplicateTest {
     @Test(groups = "1s")
     public void test1() {
         Solver solver = new Solver("ocohc");
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
         Assert.assertEquals(copy.toString(), solver.toString());
@@ -73,7 +76,7 @@ public class DuplicateTest {
         VF.real("real", 1.1, 2.2, .001, solver);
         VF.real(VF.bounded("bounded", 2, 4, solver), 0.01);
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
         Assert.assertEquals(copy.toString(), solver.toString());
@@ -93,7 +96,7 @@ public class DuplicateTest {
         VF.eq(e);
         VF.task(e, solver.ONE, VF.offset(e, 1));
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
         Assert.assertEquals(copy.toString(), solver.toString());
@@ -104,7 +107,7 @@ public class DuplicateTest {
         Solver solver = new Solver("Choco");
         solver.post(ICF.TRUE(solver));
         solver.post(ICF.FALSE(solver));
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
         Assert.assertEquals(copy.toString(), solver.toString());
@@ -117,7 +120,7 @@ public class DuplicateTest {
             IntVar v = VF.enumerated("v", 1, 4, solver);
             solver.post(ICF.arithm(v, op, 3));
 
-            Solver copy = solver.duplicate();
+            Solver copy = solver.duplicateModel();
 
             solver.findAllSolutions();
             copy.findAllSolutions();
@@ -134,7 +137,7 @@ public class DuplicateTest {
         IntVar v = VF.enumerated("v", 1, 4, solver);
         ICF.arithm(v, "=", 3).reif();
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
 
         solver.findAllSolutions();
         copy.findAllSolutions();
@@ -156,7 +159,7 @@ public class DuplicateTest {
         solver.post(ICF.not_member(v, new int[]{7}));
 
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
 
         solver.findAllSolutions();
         copy.findAllSolutions();
@@ -174,7 +177,7 @@ public class DuplicateTest {
         IntVar w = VF.enumerated("v", -6, 4, solver);
         solver.post(ICF.absolute(v, w));
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
 
         solver.findAllSolutions();
         copy.findAllSolutions();
@@ -193,7 +196,7 @@ public class DuplicateTest {
             IntVar w = VF.enumerated("v", 1, 4, solver);
             solver.post(ICF.arithm(v, op, w));
 
-            Solver copy = solver.duplicate();
+            Solver copy = solver.duplicateModel();
 
             solver.findAllSolutions();
             copy.findAllSolutions();
@@ -213,7 +216,7 @@ public class DuplicateTest {
                 IntVar w = VF.enumerated("v", 1, 4, solver);
                 solver.post(ICF.arithm(v, op1, w, op2, 1));
 
-                Solver copy = solver.duplicate();
+                Solver copy = solver.duplicateModel();
 
                 solver.findAllSolutions();
                 copy.findAllSolutions();
@@ -234,7 +237,7 @@ public class DuplicateTest {
                 IntVar w = VF.enumerated("v", 1, 4, solver);
                 solver.post(ICF.arithm(v, op2, w, op1, 1));
 
-                Solver copy = solver.duplicate();
+                Solver copy = solver.duplicateModel();
 
                 solver.findAllSolutions();
                 copy.findAllSolutions();
@@ -254,7 +257,7 @@ public class DuplicateTest {
             IntVar w = VF.enumerated("v", -6, 4, solver);
             solver.post(ICF.distance(v, w, op, 1));
 
-            Solver copy = solver.duplicate();
+            Solver copy = solver.duplicateModel();
 
             solver.findAllSolutions();
             copy.findAllSolutions();
@@ -273,7 +276,7 @@ public class DuplicateTest {
         IntVar w = VF.enumerated("v", 0, 3, solver);
         solver.post(ICF.element(v, new int[]{4, 3, 2, 1}, w));
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
 
         solver.findAllSolutions();
         copy.findAllSolutions();
@@ -291,7 +294,7 @@ public class DuplicateTest {
         IntVar w = VF.enumerated("v", 1, 16, solver);
         solver.post(ICF.square(w, v));
 
-        Solver copy = solver.duplicate();
+        Solver copy = solver.duplicateModel();
 
         solver.findAllSolutions();
         copy.findAllSolutions();
@@ -310,7 +313,7 @@ public class DuplicateTest {
             IntVar w = VF.enumerated("v", -6, 4, solver);
             solver.post(ICF.table(v, w, TuplesFactory.allEquals(v, w), op));
 
-            Solver copy = solver.duplicate();
+            Solver copy = solver.duplicateModel();
 
             solver.findAllSolutions();
             copy.findAllSolutions();
@@ -320,6 +323,158 @@ public class DuplicateTest {
             Assert.assertEquals(copy.toString(), solver.toString());
             Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
         }
+    }
+
+    @Test(groups = "1s")
+    public void test16() {
+        for (String op : new String[]{"=", ">", "<"}) {
+            Solver solver = new Solver("Choco");
+            IntVar v = VF.enumerated("v", 1, 4, solver);
+            IntVar w = VF.enumerated("v", -6, 4, solver);
+            IntVar x = VF.enumerated("v", 2, 4, solver);
+            solver.post(ICF.distance(v, w, op, x));
+
+            Solver copy = solver.duplicateModel();
+
+            solver.findAllSolutions();
+            copy.findAllSolutions();
+
+            Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+            Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+            Assert.assertEquals(copy.toString(), solver.toString());
+            Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+        }
+    }
+
+    @Test(groups = "1s")
+    public void test17() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar w = VF.enumerated("v", 1, 2, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(ICF.eucl_div(v, w, x));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test18() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar w = VF.enumerated("v", 1, 2, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(ICF.maximum(v, w, x));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test19() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar w = VF.enumerated("v", 1, 2, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(ICF.minimum(v, w, x));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test20() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar w = VF.enumerated("v", 1, 2, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(ICF.mod(v, w, x));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test21() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar w = VF.enumerated("v", 1, 2, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(new Constraint("times", new PropTimesNaive(v, w, x)));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test22() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(new Constraint("times", new PropScale(v, 3, x)));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test23() {
+        Solver solver = new Solver("Choco");
+        IntVar v = VF.enumerated("v", 1, 4, solver);
+        IntVar x = VF.enumerated("v", 0, 3, solver);
+        solver.post(new Constraint("times", new PropScale(v, 3, x)));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
     }
 
 }
