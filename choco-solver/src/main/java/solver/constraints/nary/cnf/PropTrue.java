@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.cnf;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -64,5 +66,12 @@ public class PropTrue extends Propagator<BoolVar> {
     @Override
     public ESat isEntailed() {
         return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropTrue(solver.ONE));
+        }
     }
 }

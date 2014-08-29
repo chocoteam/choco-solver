@@ -77,8 +77,8 @@ import solver.constraints.nary.nValue.amnv.mis.MD;
 import solver.constraints.nary.nValue.amnv.rules.R;
 import solver.constraints.nary.nValue.amnv.rules.R1;
 import solver.constraints.nary.nValue.amnv.rules.R3;
-import solver.constraints.nary.sum.PropBoolSumIncremental;
 import solver.constraints.nary.sum.PropBoolSumCoarse;
+import solver.constraints.nary.sum.PropBoolSumIncremental;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.constraints.nary.sum.Scalar;
 import solver.constraints.nary.tree.PropAntiArborescences;
@@ -229,7 +229,7 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="} or {"+", "-"}
      *
      * @param VAR1 first variable
      * @param OP1  an operator

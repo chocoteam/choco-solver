@@ -68,11 +68,25 @@ class CouplesTable extends BinRelation {
         }
     }
 
+    private CouplesTable(BitSet table, int offset1, int offset2, int range1, int range2, boolean feasible) {
+        this.table = table;
+        this.offset1 = offset1;
+        this.offset2 = offset2;
+        this.range1 = range1;
+        this.range2 = range2;
+        this.feasible = feasible;
+    }
+
     public boolean isConsistent(int x, int y) {
         return table.get((x - offset1) * range1 + y - offset2) == feasible;
     }
 
     public boolean checkCouple(int x, int y) {
         return table.get((x - offset1) * range1 + y - offset2);
+    }
+
+    @Override
+    public BinRelation duplicate() {
+        return new CouplesTable((BitSet) table.clone(), offset1, offset2, range1, range2, feasible);
     }
 }
