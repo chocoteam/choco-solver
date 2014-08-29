@@ -66,4 +66,6 @@ public class Member extends Constraint {
 			return new NotMember(var,values);
 		}
 	}
+
+
 }

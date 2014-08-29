@@ -28,6 +28,7 @@
 package solver.constraints;
 
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.structure.Operation;
 import org.slf4j.Logger;
@@ -133,7 +134,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.solver = vars[0].getSolver();
-		this.reactToFineEvt = reactToFineEvt;
+        this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
         this.aCause = this;
@@ -326,13 +327,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-		if(!isCompletelyInstantiated()) {// useless call to setPassive if all vars are instantiated
-			assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
-			state = PASSIVE;
-			solver.getEnvironment().save(operations[ACTIVE]);
-			//TODO: update var mask back
-			solver.getEngine().desactivatePropagator(this);
-		}
+        if (!isCompletelyInstantiated()) {// useless call to setPassive if all vars are instantiated
+            assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
+            state = PASSIVE;
+            solver.getEnvironment().save(operations[ACTIVE]);
+            //TODO: update var mask back
+            solver.getEngine().desactivatePropagator(this);
+        }
     }
 
     /**
@@ -562,18 +563,30 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return reactToFineEvt;
     }
 
-	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder();
-		st.append(getClass().getSimpleName()+"(");
-		int i = 0;
-		for (; i < Math.min(4, vars.length); i++) {
-			st.append(vars[i].getName()).append(", ");
-		}
-		if (i < vars.length - 2) {
-			st.append("...,");
-		}
-		st.append(vars[vars.length - 1].getName()).append(")");
-		return st.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append(getClass().getSimpleName() + "(");
+        int i = 0;
+        for (; i < Math.min(4, vars.length); i++) {
+            st.append(vars[i].getName()).append(", ");
+        }
+        if (i < vars.length - 2) {
+            st.append("...,");
+        }
+        st.append(vars[vars.length - 1].getName()).append(")");
+        return st.toString();
+    }
+
+    /**
+     * Duplicate the current propagator.
+     * A restriction is that the resolution process should have not begun yet.
+     * That's why state of the propagator may not be duplicate.
+     *
+     * @param solver      the target solver
+     * @param identitymap a map to ensure uniqueness of objects
+     */
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap){
+        throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
+    }
 }
