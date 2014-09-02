@@ -40,12 +40,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>choco</groupId>
-            <artifactId>choco-environment</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>dk.brics</groupId>
             <artifactId>automaton</artifactId>
             <version>1.11-2</version>
