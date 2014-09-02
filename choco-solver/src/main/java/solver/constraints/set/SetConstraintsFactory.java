@@ -34,8 +34,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.GraphVar;
 import util.tools.ArrayUtils;
 
 /**
@@ -283,40 +281,6 @@ public class SetConstraintsFactory {
 		return new Constraint("SetIntChanneling",
 				new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),
                 new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),new PropAllDisjoint(SETS)
-		);
-    }
-
-    /**
-     * Channeling between a graph variable GRAPH and set variables SETS
-     * representing either node neighbors or node successors
-     * <p/> arc (i,j) in GRAPH <=> j in SETS[i]
-     *
-     * @param SETS  set variables representing nodes neighbors (or successors if directed) in GRAPH
-     * @param GRAPH a graph variable
-     * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SETS[i]
-     */
-    public static Constraint graph_channel(SetVar[] SETS, GraphVar GRAPH) {
-        if (GRAPH.isDirected()) {
-			return new Constraint("SetUndirectedGraphChannel",new PropSymmetric(SETS, 0),new PropGraphChannel(SETS, GRAPH));
-        }else{
-			return new Constraint("SetDirectedGraphChannel",new PropGraphChannel(SETS, GRAPH));
-		}
-    }
-
-    /**
-     * Channeling between a directed graph variable GRAPH and set variables SUCCESSORS and PREDECESSORS
-     * representing node successors and predecessors:
-     * <p/> arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
-     *
-     * @param SUCCESSORS   set variables representing nodes' successors in GRAPH
-     * @param PREDECESSORS set variables representing nodes' predecessors in GRAPH
-     * @param GRAPH        a graph variable
-     * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
-     */
-    public static Constraint graph_channel(SetVar[] SUCCESSORS, SetVar[] PREDECESSORS, DirectedGraphVar GRAPH) {
-		return new Constraint("SetPartition",ArrayUtils.append(
-				graph_channel(SUCCESSORS, GRAPH).getPropagators(),
-				new Propagator[]{new PropInverse(SUCCESSORS, PREDECESSORS, 0, 0)})
 		);
     }
 

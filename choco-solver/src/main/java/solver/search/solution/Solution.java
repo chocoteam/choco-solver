@@ -36,8 +36,6 @@ import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
-
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -54,7 +52,6 @@ public class Solution implements ICause {
     HashMap<IntVar, Integer> intmap = new HashMap<>();
     HashMap<RealVar, double[]> realmap = new HashMap<>();
     HashMap<SetVar, int[]> setmap = new HashMap<>();
-    HashMap<GraphVar, boolean[][]> graphmap = new HashMap<>();
     boolean empty = true;
 
     public Solution() {
@@ -71,7 +68,6 @@ public class Solution implements ICause {
         intmap.clear();
         realmap.clear();
         setmap.clear();
-        graphmap.clear();
         Variable[] vars = solver.getVars();
         for (int i = 0; i < vars.length; i++) {
             int kind = vars[i].getTypeAndKind() & Variable.KIND;
@@ -90,10 +86,6 @@ public class Solution implements ICause {
                 case Variable.SET:
                     SetVar s = (SetVar) vars[i];
                     setmap.put(s, s.getValue());
-                    break;
-                case Variable.GRAPH:
-                    GraphVar g = (GraphVar) vars[i];
-                    graphmap.put(g, g.getValue());
                     break;
             }
         }
@@ -116,9 +108,6 @@ public class Solution implements ICause {
         for (SetVar s : setmap.keySet()) {
             s.instantiateTo(setmap.get(s), this);
         }
-        for (GraphVar g : graphmap.keySet()) {
-            g.instantiateTo(graphmap.get(g), this);
-        }
         for (RealVar r : realmap.keySet()) {
             double[] bounds = realmap.get(r);
             r.updateBounds(bounds[0], bounds[1], this);
@@ -138,9 +127,6 @@ public class Solution implements ICause {
         }
         for (SetVar s : setmap.keySet()) {
             st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s))).append(", ");
-        }
-        for (GraphVar g : graphmap.keySet()) {
-            st.append(g.getName()).append("=").append(Arrays.toString(graphmap.get(g))).append(", ");
         }
         for (RealVar r : realmap.keySet()) {
             double[] bounds = realmap.get(r);
@@ -176,21 +162,6 @@ public class Solution implements ICause {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
         return setmap.get(s);
-    }
-
-    ;
-
-    /**
-     * Get the value of variable g in this solution
-     *
-     * @param g GraphVar
-     * @return the value of variable g in this solution
-     */
-    public boolean[][] getGraphVal(GraphVar g) {
-        if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution found");
-        }
-        return graphmap.get(g);
     }
 
     ;
