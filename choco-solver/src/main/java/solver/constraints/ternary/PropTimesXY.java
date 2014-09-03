@@ -27,6 +27,8 @@
 
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -119,6 +121,19 @@ public class PropTimesXY extends Propagator<IntVar> {
             int b = X.getValue() * Y.getUB();
             Z.updateLowerBound(Math.min(a, b), aCause);
             Z.updateUpperBound(Math.max(a, b), aCause);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = vars.length;
+            IntVar[] ivars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                vars[i].duplicate(solver, identitymap);
+                ivars[i] = (IntVar) identitymap.get(vars[i]);
+            }
+            identitymap.put(this, new PropTimesXY(ivars[0], ivars[1], ivars[2]));
         }
     }
 }

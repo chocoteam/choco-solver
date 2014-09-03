@@ -26,11 +26,12 @@
  */
 package solver.constraints.nary.alldifferent;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -52,7 +53,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-	AlgoAllDiffAC filter;
+    AlgoAllDiffAC filter;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -66,7 +67,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      */
     public PropAllDiffAC(IntVar[] variables) {
         super(variables, PropagatorPriority.QUADRATIC, false);
-		this.filter = new AlgoAllDiffAC(variables,aCause);
+        this.filter = new AlgoAllDiffAC(variables, aCause);
     }
 
     //***********************************************************************************
@@ -80,6 +81,19 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		return ESat.TRUE; // redundant propagator (used with PropAllDiffInst)
+        return ESat.TRUE; // redundant propagator (used with PropAllDiffInst)
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntVar[] aVars = new IntVar[this.vars.length];
+            for (int i = 0; i < this.vars.length; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+
+            identitymap.put(this, new PropAllDiffAC(aVars));
+        }
     }
 }

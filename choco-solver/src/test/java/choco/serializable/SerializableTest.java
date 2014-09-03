@@ -189,9 +189,7 @@ public class SerializableTest {
         s = null;
         try {
             s = (Solver) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(s);
@@ -199,4 +197,27 @@ public class SerializableTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 92, "nb sol incorrect");
     }
 
+
+    @Test(groups = {"1s"})
+    public void testBigNQueen() {
+        Solver s = new Solver();
+        int n = 9;
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, s);
+        }
+
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                s.post(neq);
+                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        Solver clone = s.duplicateModel();
+        Assert.assertNotNull(s);
+    }
 }

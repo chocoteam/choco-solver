@@ -52,5 +52,5 @@ public enum OptimizationPolicy {
     /**
      * Split the domain of the objective variable
      */
-    DICHOTOMIC;
+    DICHOTOMIC
 }

@@ -29,7 +29,6 @@ package samples;
 import memory.Environments;
 import org.testng.annotations.Factory;
 import samples.integer.AbsoluteEvaluation;
-import solver.ISolverProperties;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
 import solver.search.loop.SearchLoops;
@@ -88,10 +87,9 @@ public class AllTestFactory {
         for (int p = 0; p < problems.length; p++)
             for (ExplanationFactory x : expFact)
                 for (SearchLoops sl : slFact) {
-                    ISolverProperties pr = new AllSolverProp(sl, x, false);
                     for (Environments e : envFact)
                         for (PropagationEngineFactory st : pol)
-                            lresult.add(new AllTest(problems[p], arguments[p], e.make(), pr, st, nbSol[p]));
+                            lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, x, sl, nbSol[p]));
                 }
         return lresult.toArray();
     }

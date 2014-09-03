@@ -51,7 +51,7 @@ public class NotMember extends Constraint {
     }
 
     public NotMember(IntVar var, int lowerbound, int upperbound) {
-        super("NotMember",new PropNotMemberBound(var, lowerbound, upperbound, false));
+        super("NotMember",new PropNotMemberBound(var, lowerbound, upperbound));
         this.values = null;
 		this.var = var;
         this.lb = lowerbound;

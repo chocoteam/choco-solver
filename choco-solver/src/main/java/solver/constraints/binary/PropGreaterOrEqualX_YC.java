@@ -26,6 +26,8 @@
  */
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -71,8 +73,8 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-            x.updateLowerBound(y.getLB() + this.cste, aCause);
-            y.updateUpperBound(x.getUB() - this.cste, aCause);
+        x.updateLowerBound(y.getLB() + this.cste, aCause);
+        y.updateUpperBound(x.getUB() - this.cste, aCause);
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
         }
@@ -121,6 +123,18 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
             x.explain(VariableState.UB, e);
         } else {
             super.explain(d, e);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropGreaterOrEqualX_YC(new IntVar[]{X, Y}, this.cste));
         }
     }
 }

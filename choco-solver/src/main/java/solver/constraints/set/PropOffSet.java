@@ -27,13 +27,14 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -85,19 +86,19 @@ public class PropOffSet extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         // kernel
-        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
+        for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
             vars[1].addToKernel(j + offSet, aCause);
         }
-        for (int j=vars[1].getKernelFirst(); j!=SetVar.END; j=vars[1].getKernelNext()) {
+        for (int j = vars[1].getKernelFirst(); j != SetVar.END; j = vars[1].getKernelNext()) {
             vars[0].addToKernel(j - offSet, aCause);
         }
         // envelope
-        for (int j = vars[0].getEnvelopeFirst(); j!=SetVar.END; j = vars[0].getEnvelopeNext()) {
+        for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
             if (!vars[1].envelopeContains(j + offSet)) {
                 vars[0].removeFromEnvelope(j, aCause);
             }
         }
-        for (int j=vars[1].getEnvelopeFirst(); j!=SetVar.END; j=vars[1].getEnvelopeNext()) {
+        for (int j = vars[1].getEnvelopeFirst(); j != SetVar.END; j = vars[1].getEnvelopeNext()) {
             if (!vars[0].envelopeContains(j - offSet)) {
                 vars[1].removeFromEnvelope(j, aCause);
             }
@@ -123,12 +124,12 @@ public class PropOffSet extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
+        for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
             if (!vars[1].envelopeContains(j + offSet)) {
                 return ESat.FALSE;
             }
         }
-        for (int j=vars[1].getKernelFirst(); j!=SetVar.END; j=vars[1].getKernelNext()) {
+        for (int j = vars[1].getKernelFirst(); j != SetVar.END; j = vars[1].getKernelNext()) {
             if (!vars[0].envelopeContains(j - offSet)) {
                 return ESat.FALSE;
             }
@@ -137,5 +138,18 @@ public class PropOffSet extends Propagator<SetVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            vars[0].duplicate(solver, identitymap);
+            SetVar s1 = (SetVar) identitymap.get(vars[0]);
+
+            vars[1].duplicate(solver, identitymap);
+            SetVar s2 = (SetVar) identitymap.get(vars[1]);
+
+            identitymap.put(this, new PropOffSet(s1, s2, offSet));
+        }
     }
 }

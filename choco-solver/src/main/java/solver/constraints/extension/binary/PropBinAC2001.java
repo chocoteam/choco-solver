@@ -26,8 +26,10 @@
  */
 package solver.constraints.extension.binary;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -49,7 +51,11 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset1;
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {
-        super(x, y, new CouplesTable(tuples, x, y));
+        this(x, y, new CouplesTable(tuples, x, y));
+    }
+
+    private PropBinAC2001(IntVar x, IntVar y, CouplesTable table) {
+        super(x, y, table);
         offset0 = x.getLB();
         offset1 = y.getLB();
         currentSupport0 = new IStateInt[x.getUB() - offset0 + 1];
@@ -63,6 +69,7 @@ public class PropBinAC2001 extends PropBinCSP {
             currentSupport1[i] = environment.makeInt();
             currentSupport1[i].set(-1);
         }
+
     }
 
     @Override
@@ -139,6 +146,18 @@ public class PropBinAC2001 extends PropBinCSP {
     @Override
     public String toString() {
         return "Bin_AC2001(" + vars[0].getName() + ", " + vars[1].getName() + ", " + this.relation.getClass().getSimpleName() + ")";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropBinAC2001(X, Y, (CouplesTable) relation.duplicate()));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

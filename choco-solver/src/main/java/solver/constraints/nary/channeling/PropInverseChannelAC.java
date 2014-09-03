@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.channeling;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -160,5 +162,23 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return "Inverse_AC({" + X[0] + "...}{" + Y[0] + "...})";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.n;
+            IntVar[] X = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            IntVar[] Y = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i + n].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
+            }
+            identitymap.put(this, new PropInverseChannelAC(X, Y, this.minX, this.minY));
+        }
     }
 }

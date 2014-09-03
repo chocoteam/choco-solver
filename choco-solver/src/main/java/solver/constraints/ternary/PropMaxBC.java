@@ -27,6 +27,8 @@
 
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -187,5 +189,19 @@ public class PropMaxBC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return MAX.toString() + ".MAX(" + v1.toString() + "," + v2.toString() + ")";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+            this.vars[2].duplicate(solver, identitymap);
+            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
+
+            identitymap.put(this, new PropMaxBC(X, Y, Z));
+        }
     }
 }

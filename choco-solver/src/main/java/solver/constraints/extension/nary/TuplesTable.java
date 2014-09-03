@@ -43,11 +43,11 @@ public class TuplesTable extends LargeRelation {
     /**
      * the number of dimensions of the considered tuples
      */
-    protected int n;
+    protected final int n;
     /**
      * The consistency matrix
      */
-    protected BitSet table;
+    protected final BitSet table;
 
     /**
      * lower bound of each variable
@@ -59,13 +59,13 @@ public class TuplesTable extends LargeRelation {
      */
     protected final int[] upperbounds;
 
-    protected boolean feasible;
+    protected final boolean feasible;
 
     /**
      * in order to speed up the computation of the index of a tuple
      * in the table, blocks[i] stores the product of the size of variables j with j < i.
      */
-    protected int[] blocks;
+    protected final int[] blocks;
 
     public TuplesTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;
@@ -92,6 +92,16 @@ public class TuplesTable extends LargeRelation {
                 setTuple(tuple);
             }
         }
+    }
+
+    // required for duplicate method, should not be called by default
+    private TuplesTable(int n, BitSet table, int[] lowerbounds, int[] upperbounds, boolean feasible, int[] blocks) {
+        this.n = n;
+        this.table = table;
+        this.lowerbounds = lowerbounds;
+        this.upperbounds = upperbounds;
+        this.feasible = feasible;
+        this.blocks = blocks;
 
     }
 
@@ -116,5 +126,10 @@ public class TuplesTable extends LargeRelation {
             address += (tuple[i] - lowerbounds[i]) * blocks[i];
         }
         table.set(address);
+    }
+
+    @Override
+    public LargeRelation duplicate() {
+        return new TuplesTable(n, (BitSet) table.clone(), lowerbounds.clone(), upperbounds.clone(), feasible, blocks.clone());
     }
 }

@@ -53,7 +53,7 @@ public interface IPropagationEngine extends Serializable {
         }
 
         public static void printModification(Variable v, EventType e, ICause c) {
-            LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", new Object[]{v, e, c});
+            LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", v, e, c);
         }
 
 

@@ -26,6 +26,8 @@
  */
 package solver.constraints.unary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -79,4 +81,10 @@ public class PropNotEqualXC extends Propagator<IntVar> {
         e.add(aCause);
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropNotEqualXC((IntVar) identitymap.get(vars[0]), constant));
+        }
+    }
 }

@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.circuit;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -68,7 +70,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
         domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-		rootCandidates = new int[n];
+        rootCandidates = new int[n];
     }
 
     //***********************************************************************************
@@ -90,7 +92,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
             }
         }
         if (size > 0) {
-			filterFromPostDom(rootCandidates[rd.nextInt(size)]);
+            filterFromPostDom(rootCandidates[rd.nextInt(size)]);
         }
     }
 
@@ -140,5 +142,18 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropSubcircuit_AntiArboFiltering(aVars, this.offSet));
+        }
     }
 }

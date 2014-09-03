@@ -27,6 +27,7 @@
 
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import memory.structure.BasicIndexedBipartiteSet;
 import solver.Configuration;
 import solver.ICause;
@@ -450,6 +451,19 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         return VariableFactory.bool(StringUtils.randomName(this.name), this.getSolver());
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            BoolVarImpl clone = new BoolVarImpl(this.name, solver);
+            identitymap.put(this, clone);
+            if (this.not != null) {
+                this.not.duplicate(solver, identitymap);
+                clone._setNot((BoolVar) identitymap.get(this.not));
+                clone.not._setNot(clone);
+            }
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -492,25 +506,25 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         return not;
     }
 
-	@Override
-	public boolean hasNot() {
-		return not!=null;
-	}
+    @Override
+    public boolean hasNot() {
+        return not != null;
+    }
 
     @Override
     public boolean isLit() {
         return true;
     }
 
-	private boolean isNot = false;
+    private boolean isNot = false;
 
     @Override
     public boolean isNot() {
         return isNot;
     }
 
-	@Override
-	public void setNot(boolean isNot){
-		this.isNot = isNot;
-	}
+    @Override
+    public void setNot(boolean isNot) {
+        this.isNot = isNot;
+    }
 }

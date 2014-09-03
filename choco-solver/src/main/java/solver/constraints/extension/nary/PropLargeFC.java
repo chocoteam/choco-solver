@@ -26,6 +26,8 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -43,23 +45,27 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     protected final int[] currentTuple;
 
-    public PropLargeFC(IntVar[] vars, Tuples tuples) {
-        super(vars, tuples);
+    private PropLargeFC(IntVar[] vars, LargeRelation relation) {
+        super(vars, relation);
         this.currentTuple = new int[vars.length];
     }
 
-    protected LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
+    public PropLargeFC(IntVar[] vars, Tuples tuples) {
+        this(vars, makeRelation(tuples, vars));
+    }
+
+    private static LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
         long totalSize = 1;
-                for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
-                    totalSize *= vars[i].getDomainSize();
-                }
-                if (totalSize < 0) {
-                    throw new SolverException("Tuples required too much memory ...");
-                }
-                if (totalSize / 8 > 50 * 1024 * 1024) {
-                    return new TuplesLargeTable(tuples, vars);
-                }
-                return new TuplesTable(tuples, vars);
+        for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
+            totalSize *= vars[i].getDomainSize();
+        }
+        if (totalSize < 0) {
+            throw new SolverException("Tuples required too much memory ...");
+        }
+        if (totalSize / 8 > 50 * 1024 * 1024) {
+            return new TuplesLargeTable(tuples, vars);
+        }
+        return new TuplesTable(tuples, vars);
     }
 
 
@@ -141,6 +147,19 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
                     this.contradiction(null, "not consistent");
                 }
             }
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeFC(aVars, relation.duplicate()));
         }
     }
 }

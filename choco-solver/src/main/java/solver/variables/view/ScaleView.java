@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -71,7 +72,7 @@ public final class ScaleView extends IntView {
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
             protected int transform(int value) {
-                return cste*value;
+                return cste * value;
             }
         };
     }
@@ -179,10 +180,10 @@ public final class ScaleView extends IntView {
         return value % cste == 0 && var.isInstantiatedTo(value / cste);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -201,7 +202,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public int nextValue(int v) {
-        int value = var.nextValue(MathUtils.divFloor(v , cste));
+        int value = var.nextValue(MathUtils.divFloor(v, cste));
         if (value == Integer.MAX_VALUE) {
             return value;
         }
@@ -225,6 +226,15 @@ public final class ScaleView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.scale(this.var, this.cste);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            ScaleView clone = new ScaleView((IntVar) identitymap.get(this.var), this.cste, solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

@@ -422,7 +422,7 @@ public class FiniteAutomaton implements IAutomaton {
     }
 
     public boolean run(int[] word) {
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         for (int i : word) {
             char c = getCharFromInt(i);
             b.append(c);

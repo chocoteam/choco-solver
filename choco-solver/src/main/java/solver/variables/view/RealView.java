@@ -27,7 +27,9 @@
 package solver.variables.view;
 
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -153,7 +155,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     public void createDelta() {
     }
 
-	@Override
+    @Override
     public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
@@ -173,6 +175,15 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public RealVar duplicate() {
         return VariableFactory.real(this.var, this.precision);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            RealView clone = new RealView((IntVar) identitymap.get(this.var), this.precision);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

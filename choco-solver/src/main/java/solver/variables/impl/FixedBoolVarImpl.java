@@ -27,13 +27,16 @@
 
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.Variable;
 import util.ESat;
+import util.tools.StringUtils;
 
 /**
  * A constant view specific to boolean variable
@@ -46,12 +49,12 @@ import util.ESat;
  */
 public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private BoolVar not;
 
     public FixedBoolVarImpl(String name, int constant, Solver solver) {
         super(name, constant, solver);
-		assert constant==0||constant==1:"FixedBoolVarImpl value should be taken in {0,1}";
+        assert constant == 0 || constant == 1 : "FixedBoolVarImpl value should be taken in {0,1}";
     }
 
     @Override
@@ -93,23 +96,35 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
         return true;
     }
 
-	@Override
-	public boolean hasNot() {
-		return not!=null;
-	}
+    @Override
+    public boolean hasNot() {
+        return not != null;
+    }
 
     @Override
     public boolean isNot() {
         return constante == 0;
     }
 
-	@Override
-	public void setNot(boolean isNot){
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void setNot(boolean isNot) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public IntVar duplicate() {
+        return VF.fixed(StringUtils.randomName(), this.constante, this.getSolver());
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, VF.fixed(this.name, this.constante, solver));
+        }
     }
 }

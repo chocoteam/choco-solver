@@ -27,6 +27,8 @@
 
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -186,6 +188,18 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             }
         } else {
             super.explain(d, e);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropEqualX_Y(X, Y));
         }
     }
 }

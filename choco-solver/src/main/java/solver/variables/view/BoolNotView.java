@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -48,11 +49,11 @@ import util.ESat;
  */
 public final class BoolNotView extends IntView implements BoolVar {
 
-	protected final BoolVar var;
+    protected final BoolVar var;
 
     public BoolNotView(BoolVar var, Solver solver) {
         super("not(" + var.getName() + ")", var, solver);
-		this.var = var;
+        this.var = var;
     }
 
     @Override
@@ -145,10 +146,10 @@ public final class BoolNotView extends IntView implements BoolVar {
         return var.isInstantiatedTo(1 - value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -172,7 +173,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int nextValue(int v) {
-        if(v < 0 && contains(0)) {
+        if (v < 0 && contains(0)) {
             return 0;
         }
         return v <= 0 && contains(1) ? 1 : Integer.MAX_VALUE;
@@ -180,7 +181,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int previousValue(int v) {
-        if(v > 1 && contains(1)) {
+        if (v > 1 && contains(1)) {
             return 1;
         }
         return v >= 1 && contains(0) ? 0 : Integer.MIN_VALUE;
@@ -216,6 +217,15 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            BoolNotView clone = new BoolNotView((BoolVar) identitymap.get(this.var), solver);
+            identitymap.put(this, clone);
+        }
+    }
+
+    @Override
     public BoolVar not() {
         return var;
     }
@@ -225,10 +235,10 @@ public final class BoolNotView extends IntView implements BoolVar {
         assert not == var;
     }
 
-	@Override
-	public boolean hasNot() {
-		return true;
-	}
+    @Override
+    public boolean hasNot() {
+        return true;
+    }
 
     @Override
     public boolean isLit() {
@@ -240,13 +250,13 @@ public final class BoolNotView extends IntView implements BoolVar {
         return !var.isNot();
     }
 
-	@Override
-	public void setNot(boolean isNot){
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void setNot(boolean isNot) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public int getTypeAndKind() {
-		return Variable.VIEW | Variable.BOOL;
-	}
+    @Override
+    public int getTypeAndKind() {
+        return Variable.VIEW | Variable.BOOL;
+    }
 }
