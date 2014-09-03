@@ -56,4 +56,6 @@ public abstract class LargeRelation implements Serializable {
         }
         return true;
     }
+
+    public abstract LargeRelation duplicate();
 }

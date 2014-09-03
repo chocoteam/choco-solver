@@ -26,7 +26,9 @@
  */
 package solver.constraints.nary.alldifferent;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.stack.array.TIntArrayStack;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -41,8 +43,8 @@ import util.ESat;
  */
 public class PropAllDiffInst extends Propagator<IntVar> {
 
-	protected final int n;
-	protected TIntArrayStack toCheck = new TIntArrayStack();
+    protected final int n;
+    protected TIntArrayStack toCheck = new TIntArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -73,7 +75,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     // PROPAGATION
     //***********************************************************************************
 
-	@Override
+    @Override
     public void propagate(int evtmask) throws ContradictionException {
         toCheck.clear();
         for (int v = 0; v < n; v++) {
@@ -90,7 +92,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
         fixpoint();
     }
 
-	protected void fixpoint() throws ContradictionException {
+    protected void fixpoint() throws ContradictionException {
         try {
             while (toCheck.size() > 0) {
                 int vidx = toCheck.pop();
@@ -115,20 +117,33 @@ public class PropAllDiffInst extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		int nbInst = 0;
-		for (int i = 0; i < n; i++) {
-			if (vars[i].isInstantiated()) {
-				nbInst++;
-				for (int j = i + 1; j < n; j++) {
-					if (vars[j].isInstantiatedTo(vars[i].getValue())) {
-						return ESat.FALSE;
-					}
-				}
-			}
-		}
-		if (nbInst == vars.length) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
+        int nbInst = 0;
+        for (int i = 0; i < n; i++) {
+            if (vars[i].isInstantiated()) {
+                nbInst++;
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[j].isInstantiatedTo(vars[i].getValue())) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+        }
+        if (nbInst == vars.length) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntVar[] aVars = new IntVar[this.vars.length];
+            for(int i = 0 ; i < this.vars.length; i++){
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+
+            identitymap.put(this, new PropAllDiffInst(aVars));
+        }
     }
 }

@@ -89,7 +89,7 @@ public class Solution implements ICause {
                     break;
                 case Variable.SET:
                     SetVar s = (SetVar) vars[i];
-                    setmap.put(s, s.getValue());
+                    setmap.put(s, s.getValues());
                     break;
                 case Variable.GRAPH:
                     GraphVar g = (GraphVar) vars[i];
@@ -163,8 +163,6 @@ public class Solution implements ICause {
         return intmap.get(v);
     }
 
-    ;
-
     /**
      * Get the value of variable s in this solution
      *
@@ -177,8 +175,6 @@ public class Solution implements ICause {
         }
         return setmap.get(s);
     }
-
-    ;
 
     /**
      * Get the value of variable g in this solution
@@ -193,8 +189,6 @@ public class Solution implements ICause {
         return graphmap.get(g);
     }
 
-    ;
-
     /**
      * Get the bounds of r in this solution
      *
@@ -207,8 +201,6 @@ public class Solution implements ICause {
         }
         return realmap.get(r);
     }
-
-    ;
 
     /**
      * @return true iff this is a valid solution

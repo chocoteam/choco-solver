@@ -48,4 +48,6 @@ public abstract class BinRelation {
      * @return true if (x,y) is a consistent couple
      */
     public abstract boolean isConsistent(int x, int y);
+
+    public abstract BinRelation duplicate();
 }

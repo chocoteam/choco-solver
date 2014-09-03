@@ -109,7 +109,7 @@ public class SatSolver {
         assert 0 == trailMarker();
         if (!ok_) return false;
 
-        // Check if clause is satisfied and remove false/duplicate literals:
+        // Check if clause is satisfied and remove false/duplicated literals:
         ps.sort();
         int lit = kUndefinedLiteral;
         int j = 0;

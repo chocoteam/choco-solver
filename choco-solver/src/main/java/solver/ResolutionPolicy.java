@@ -37,5 +37,5 @@ package solver;
  */
 public enum ResolutionPolicy {
 
-    SATISFACTION, MINIMIZE, MAXIMIZE;
+    SATISFACTION, MINIMIZE, MAXIMIZE
 }

@@ -26,7 +26,9 @@
  */
 package solver.constraints.nary;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -45,55 +47,55 @@ import util.tools.ArrayUtils;
  */
 public class PropDiffN extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     private int n;
     private UndirectedGraph overlappingBoxes;
     private ISet boxesToCompute;
-	private boolean fast;
+    private boolean fast;
 
-	//***********************************************************************************
-	// CONSTRUCTOR
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean fast) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, true);
-		this.fast = fast;
+        this.fast = fast;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
         }
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         overlappingBoxes = new UndirectedGraph(environment, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
     }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int idx) {
-		if(fast) return EventType.INSTANTIATE.mask;
+        if (fast) return EventType.INSTANTIATE.mask;
         return EventType.INSTANTIATE.mask + +EventType.BOUND.mask;
     }
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		int v = varIdx % n;
-		ISet s = overlappingBoxes.getNeighborsOf(v);
-		for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
-			if (!mayOverlap(v, i)) {
-				overlappingBoxes.removeEdge(v, i);
-			}
-		}
-		if (!boxesToCompute.contain(v)) {
-			boxesToCompute.add(v);
-		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        int v = varIdx % n;
+        ISet s = overlappingBoxes.getNeighborsOf(v);
+        for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
+            if (!mayOverlap(v, i)) {
+                overlappingBoxes.removeEdge(v, i);
+            }
+        }
+        if (!boxesToCompute.contain(v)) {
+            boxesToCompute.add(v);
+        }
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -153,49 +155,49 @@ public class PropDiffN extends Propagator<IntVar> {
                 contradiction(vars[i], "");
             }
         }
-		// mandatory part based filtering
-		boolean horizontal = true;
-		boolean vertical   = false;
-		for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-			if(doOverlap(i,j,horizontal)){
-				filter(i, j, vertical);
-			}
-			if(doOverlap(i,j,vertical)){
-				filter(i,j,horizontal);
-			}
-			assert !(doOverlap(i,j,horizontal) && doOverlap(i,j,vertical));
-		}
+        // mandatory part based filtering
+        boolean horizontal = true;
+        boolean vertical = false;
+        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+            if (doOverlap(i, j, horizontal)) {
+                filter(i, j, vertical);
+            }
+            if (doOverlap(i, j, vertical)) {
+                filter(i, j, horizontal);
+            }
+            assert !(doOverlap(i, j, horizontal) && doOverlap(i, j, vertical));
+        }
     }
 
-	private boolean doOverlap(int i, int j, boolean hori){
-		int offSet = hori?0:n;
-		int S_i = vars[i+offSet].getUB();
-		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
-		int S_j = vars[j+offSet].getUB();
-		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
-		return (S_i<e_i && e_j>S_i && S_j<e_i)
-				|| (S_j<e_j && e_i>S_j && S_i<e_j);
-	}
+    private boolean doOverlap(int i, int j, boolean hori) {
+        int offSet = hori ? 0 : n;
+        int S_i = vars[i + offSet].getUB();
+        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB();
+        int S_j = vars[j + offSet].getUB();
+        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
+        return (S_i < e_i && e_j > S_i && S_j < e_i)
+                || (S_j < e_j && e_i > S_j && S_i < e_j);
+    }
 
-	private void filter(int i, int j, boolean hori) throws ContradictionException {
-		int offSet = hori?0:n;
-		int S_i = vars[i+offSet].getUB();
-		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
-		int S_j = vars[j+offSet].getUB();
-		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
-		if(S_i<e_i || S_j<e_j){
-			if(e_j>S_i){
-				vars[j+offSet].updateLowerBound(e_i,aCause);
-				vars[i+offSet].updateUpperBound(S_j-vars[i+2*n+offSet].getLB(),aCause);
-				vars[i+offSet+2*n].updateUpperBound(S_j-vars[i+offSet].getLB(),aCause);
-			}
-			if(S_j<e_i){
-				vars[i+offSet].updateLowerBound(e_j,aCause);
-				vars[j+offSet].updateUpperBound(S_i-vars[j+2*n+offSet].getLB(),aCause);
-				vars[j+offSet+2*n].updateUpperBound(S_i-vars[j+offSet].getLB(),aCause);
-			}
-		}
-	}
+    private void filter(int i, int j, boolean hori) throws ContradictionException {
+        int offSet = hori ? 0 : n;
+        int S_i = vars[i + offSet].getUB();
+        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB();
+        int S_j = vars[j + offSet].getUB();
+        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
+        if (S_i < e_i || S_j < e_j) {
+            if (e_j > S_i) {
+                vars[j + offSet].updateLowerBound(e_i, aCause);
+                vars[i + offSet].updateUpperBound(S_j - vars[i + 2 * n + offSet].getLB(), aCause);
+                vars[i + offSet + 2 * n].updateUpperBound(S_j - vars[i + offSet].getLB(), aCause);
+            }
+            if (S_j < e_i) {
+                vars[i + offSet].updateLowerBound(e_j, aCause);
+                vars[j + offSet].updateUpperBound(S_i - vars[j + 2 * n + offSet].getLB(), aCause);
+                vars[j + offSet + 2 * n].updateUpperBound(S_i - vars[j + offSet].getLB(), aCause);
+            }
+        }
+    }
 
     @Override
     public ESat isEntailed() {
@@ -233,5 +235,27 @@ public class PropDiffN extends Propagator<IntVar> {
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.n;
+            IntVar[] X = new IntVar[size];
+            IntVar[] Y = new IntVar[size];
+            IntVar[] dX = new IntVar[size];
+            IntVar[] dY = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.vars[i]);
+                this.vars[i + n].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
+                this.vars[i + 2 * n].duplicate(solver, identitymap);
+                dX[i] = (IntVar) identitymap.get(this.vars[i + 2 * n]);
+                this.vars[i + 3 * n].duplicate(solver, identitymap);
+                dY[i] = (IntVar) identitymap.get(this.vars[i + 3 * n]);
+            }
+            identitymap.put(this, new PropDiffN(X, Y, dX, dY, this.fast));
+        }
     }
 }

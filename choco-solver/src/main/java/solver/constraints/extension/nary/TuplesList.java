@@ -44,7 +44,7 @@ import java.util.Comparator;
 public class TuplesList extends LargeRelation {
 
     // each tuple (a int[]) has its own index
-    protected int[][] tuplesIndexes;
+    protected final int[][] tuplesIndexes;
 
     protected static final Comparator<int[]> TCOMP = new Comparator<int[]>() {
         @Override
@@ -58,6 +58,11 @@ public class TuplesList extends LargeRelation {
         }
     };
 
+    // required for duplicate method, should not be called by default
+    TuplesList(int[][] tuplesIndexes) {
+        this.tuplesIndexes = tuplesIndexes;
+        Arrays.sort(tuplesIndexes, TCOMP);
+    }
 
     public TuplesList(Tuples tuples, IntVar[] vars) {
         int nb = tuples.nbTuples();
@@ -91,4 +96,8 @@ public class TuplesList extends LargeRelation {
         return Arrays.binarySearch(tuplesIndexes, tuple, TCOMP) >= 0;
     }
 
+    @Override
+    public LargeRelation duplicate() {
+        return new TuplesList(this.tuplesIndexes.clone());
+    }
 }

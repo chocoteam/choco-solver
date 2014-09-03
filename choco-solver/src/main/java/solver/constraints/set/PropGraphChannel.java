@@ -34,6 +34,8 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,7 +44,6 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.monitor.SetDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
@@ -137,14 +138,14 @@ public class PropGraphChannel extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
+            for (int j = sets[i].getKernelFirst(); j != SetVar.END; j = sets[i].getKernelNext()) {
                 g.enforceArc(i, j, aCause);
             }
             ISet tmp = g.getKernelGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 sets[i].addToKernel(j, aCause);
             }
-            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
+            for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
                 if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
@@ -181,7 +182,7 @@ public class PropGraphChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
+            for (int j = sets[i].getKernelFirst(); j != SetVar.END; j = sets[i].getKernelNext()) {
                 if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     return ESat.FALSE;
                 }
@@ -197,5 +198,21 @@ public class PropGraphChannel extends Propagator<Variable> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            SetVar[] aVars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
+            }
+            g.duplicate(solver, identitymap);
+            GraphVar G = (GraphVar) identitymap.get(g);
+
+            identitymap.put(this, new PropGraphChannel(aVars, G));
+        }
     }
 }

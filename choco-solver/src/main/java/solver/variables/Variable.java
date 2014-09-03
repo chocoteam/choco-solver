@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -260,4 +261,11 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @return a copy of <code>this</code>
      */
     <V extends Variable> V duplicate();
+
+    /**
+     * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
+     * @param solver target solver
+     * @param identitymap a map to guarantee uniqueness of objects
+     */
+    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
 }

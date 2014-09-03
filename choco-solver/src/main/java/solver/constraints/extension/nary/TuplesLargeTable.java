@@ -98,6 +98,15 @@ public class TuplesLargeTable extends LargeRelation {
         }
     }
 
+    private TuplesLargeTable(int n, TIntObjectHashMap<TIntSet> tables, int[] lowerbounds, int[] upperbounds, boolean feasible, long[] blocks) {
+        this.n = n;
+        this.tables = tables;
+        this.lowerbounds = lowerbounds;
+        this.upperbounds = upperbounds;
+        this.feasible = feasible;
+        this.blocks = blocks;
+    }
+
     public boolean checkTuple(int[] tuple) {
         long address = 0;
         for (int i = (n - 1); i >= 0; i--) {
@@ -131,4 +140,12 @@ public class TuplesLargeTable extends LargeRelation {
         ts.add(a);
     }
 
+    @Override
+    public LargeRelation duplicate() {
+        TIntObjectHashMap<TIntSet> ntables = new TIntObjectHashMap<>();
+        for (int t : tables.keys()) {
+            ntables.put(t, new TIntHashSet(tables.get(t)));
+        }
+        return new TuplesLargeTable(n, ntables, lowerbounds.clone(), upperbounds.clone(), feasible, blocks.clone());
+    }
 }

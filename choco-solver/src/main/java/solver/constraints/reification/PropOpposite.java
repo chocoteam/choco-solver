@@ -27,11 +27,13 @@
 
 package solver.constraints.reification;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
+import solver.exception.SolverException;
 import solver.variables.Variable;
 import util.ESat;
 
@@ -39,7 +41,7 @@ import util.ESat;
  * Constraint representing the negation of a given constraint
  * does not filter but fails if the given constraint is satisfied
  * Can be used within any constraint
- *
+ * <p/>
  * Should not be called by the user
  *
  * @author Jean-Guillaume Fages
@@ -47,34 +49,39 @@ import util.ESat;
  */
 public class PropOpposite extends Propagator {
 
-	// constraint to negate
-	Constraint original;
+    // constraint to negate
+    Constraint original;
 
-	public PropOpposite(Constraint original, Variable[] vars) {
-		super(vars, PropagatorPriority.LINEAR, false);
-		this.original = original;
-	}
+    public PropOpposite(Constraint original, Variable[] vars) {
+        super(vars, PropagatorPriority.LINEAR, false);
+        this.original = original;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ESat op = original.isSatisfied();
-		if(op == ESat.TRUE){
-			contradiction(vars[0],"");
-		}
-		if(op == ESat.FALSE){
-			setPassive();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ESat op = original.isSatisfied();
+        if (op == ESat.TRUE) {
+            contradiction(vars[0], "");
+        }
+        if (op == ESat.FALSE) {
+            setPassive();
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ESat op = original.isSatisfied();
-		if(op == ESat.TRUE){
-			return ESat.FALSE;
-		}
-		if(op == ESat.FALSE){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        ESat op = original.isSatisfied();
+        if (op == ESat.TRUE) {
+            return ESat.FALSE;
+        }
+        if (op == ESat.FALSE) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap identitymap) {
+        throw new SolverException("PropOpposite cannot be duplicated!");
+    }
 }

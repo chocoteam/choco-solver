@@ -29,7 +29,6 @@ package choco.strategy;
 import memory.Environments;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.SolverProperties;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
@@ -49,7 +48,7 @@ public class RestartTest {
 
         for (int j = 1; j < 5; j++) {
             int n = 200;
-            Solver solver = new Solver(Environments.COPY.make(), "Test", SolverProperties.DEFAULT);
+            Solver solver = new Solver(Environments.TRAIL.make(), "Test");
             IntVar[] X = VF.enumeratedArray("X", n, 1, n, solver);
             IntVar[] Y = VF.enumeratedArray("Y", n, n + 1, 2 * (n + 1), solver);
             solver.post(ICF.alldifferent(X));

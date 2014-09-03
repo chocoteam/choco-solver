@@ -76,6 +76,15 @@ class IterTuplesTable extends TuplesList {
         buildInitialListOfSupports();
     }
 
+    // required for duplicate method, should not be called by default
+    private IterTuplesTable(int[][] tuplesIndexes, int n, int[] lowerbounds, int[] ranges, int[][][] table) {
+        super(tuplesIndexes);
+        this.nbVar = n;
+        this.lowerbounds = lowerbounds;
+        this.ranges = ranges;
+        this.table = table;
+    }
+
     /**
      * return the number of tuples supporting each value of variable i
      *
@@ -149,5 +158,10 @@ class IterTuplesTable extends TuplesList {
 
     public boolean checkTuple(int[] tuple) {
         throw new SolverException("checkTuple should not be used on an IterRelation");
+    }
+
+    @Override
+    public LargeRelation duplicate() {
+        return new IterTuplesTable(this.tuplesIndexes.clone(), this.nbVar, this.lowerbounds.clone(), this.ranges.clone(), this.table.clone());
     }
 }

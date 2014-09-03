@@ -35,5 +35,5 @@
 package util.objects.graphs;
 
 public enum Orientation {
-    SUCCESSORS, PREDECESSORS;
+    SUCCESSORS, PREDECESSORS
 }

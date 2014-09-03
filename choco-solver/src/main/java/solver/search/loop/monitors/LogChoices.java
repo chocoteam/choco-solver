@@ -58,9 +58,8 @@ public class LogChoices implements IMonitorDownBranch {
     @Override
     public void beforeDownLeftBranch() {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("{}[L]{} //{}", new Object[]{
-                    StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.getLastDecision().toString(), message.print()});
+            LOGGER.info("{}[L]{} //{}", StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
+                    searchLoop.getLastDecision().toString(), message.print());
         }
     }
 
@@ -71,9 +70,8 @@ public class LogChoices implements IMonitorDownBranch {
     @Override
     public void beforeDownRightBranch() {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("{}[R]{} //{}", new Object[]{
-                    StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.getLastDecision().toString(), message.print()});
+            LOGGER.info("{}[R]{} //{}", StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
+                    searchLoop.getLastDecision().toString(), message.print());
         }
     }
 

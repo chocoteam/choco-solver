@@ -84,7 +84,7 @@ public class CorrectnessChecker {
                             try {
                                 if (test.findSolution()) {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                            new Object[]{ds, ide, h, rvars[d], val, loop, seed});
+                                            ds, ide, h, rvars[d], val, loop, seed);
                                     LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
                                     ref.getEnvironment().worldPop();
                                     LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
@@ -100,7 +100,7 @@ public class CorrectnessChecker {
                             } catch (Exception e) {
                                 LoggerFactory.getLogger("test").error(e.getMessage());
                                 LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                        new Object[]{ds, ide, h, rvars[d], val, loop, seed});
+                                        ds, ide, h, rvars[d], val, loop, seed);
                                 LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
                                 File f = new File("SOLVER_ERROR.ser");
                                 try {

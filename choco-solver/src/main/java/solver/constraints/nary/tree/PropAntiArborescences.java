@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.tree;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -161,5 +163,18 @@ public class PropAntiArborescences extends Propagator<IntVar> {
             y = vars[x].getValue();
         }
         return false;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropAntiArborescences(aVars, this.offSet, (this.domFinder instanceof AlphaDominatorsFinder)));
+        }
     }
 }

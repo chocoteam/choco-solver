@@ -26,6 +26,8 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -57,8 +59,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
     protected DisposableValueIterator[] seekIter;
 
 
-    public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {
-        super(vs, tuples);
+    private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
+        super(vs, relation);
         this.size = vs.length;
         this.blocks = new int[size];
         this.offsets = new int[size];
@@ -79,10 +81,13 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             seekIter[i] = vars[i].getValueIterator(true);
         }
         Arrays.fill(supports, Integer.MIN_VALUE);
-
     }
 
-    protected LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
+    public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {
+        this(vs, makeRelation(tuples, vs));
+    }
+
+    private static LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
         long totalSize = 1;
         for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
             totalSize *= vars[i].getDomainSize();
@@ -324,4 +329,16 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         return null;
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeGAC3rm(aVars, relation.duplicate()));
+        }
+    }
 }

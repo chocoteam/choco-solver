@@ -33,7 +33,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.integer.AbsoluteEvaluation;
 import solver.Configuration;
-import solver.ISolverProperties;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
@@ -53,34 +52,37 @@ public class AllTest {
     String[] args;
     long nbSol;
     IEnvironment environment;
-    ISolverProperties properties;
     PropagationEngineFactory strat;
+    SearchLoops sloop;
+    ExplanationFactory efact;
 
 
     public AllTest() {
 //        this(new AllIntervalSeries(), new String[]{"-o", "5"},
         this(new AbsoluteEvaluation(), null,
                 Environments.TRAIL.make(),
-                new AllSolverProp(
-                        SearchLoops.BINARY,
-                        ExplanationFactory.CBJ, false),
-                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE, 6);
+                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE,
+                ExplanationFactory.NONE,
+                SearchLoops.BINARY,
+                6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
-                   ISolverProperties properties,
                    PropagationEngineFactory strat,
+                   ExplanationFactory e,
+                   SearchLoops sloop,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
-		if(args==null){
-			args=new String[0];
-		}
+        if (args == null) {
+            args = new String[0];
+        }
         this.environment = env;
-        this.properties = properties;
         this.strat = strat;
         this.nbSol = nbSol;
+        this.efact = e;
+        this.sloop = sloop;
     }
 
     @Test(groups = "1m")
@@ -88,9 +90,11 @@ public class AllTest {
         if (Configuration.PLUG_EXPLANATION) {
             LoggerFactory.getLogger("test").info(this.toString());
             prob.readArgs(args);
-            prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
+            prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
+            sloop.make(prob.solver);
             prob.buildModel();
             prob.configureSearch();
+            efact.plugin(prob.solver, true);
             prob.solver.findAllSolutions();
 
             Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
@@ -99,6 +103,6 @@ public class AllTest {
 
     @Override
     public String toString() {
-        return prob.getClass().getSimpleName() + " " + Arrays.toString(args) + " " + environment.getClass().getSimpleName() + " " + properties + " ";
+        return prob.getClass().getSimpleName() + " " + Arrays.toString(args) + " " + environment.getClass().getSimpleName() + " ";
     }
 }

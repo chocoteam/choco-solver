@@ -34,13 +34,14 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -103,7 +104,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             for (int i = 0; i < n; i++) {
-                for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
+                for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
                         if (i2 != i) {
                             vars[i2].removeFromEnvelope(j, aCause);
@@ -132,7 +133,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
             if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
-            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
+            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                 for (int i2 = 0; i2 < n; i2++) {
                     if (i2 != i && vars[i2].kernelContains(j)) {
                         return ESat.FALSE;
@@ -144,5 +145,18 @@ public class PropAllDisjoint extends Propagator<SetVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            SetVar[] aVars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropAllDisjoint(aVars));
+        }
     }
 }

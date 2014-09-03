@@ -26,6 +26,8 @@
  */
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Operator;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -407,6 +409,19 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     p.vars[0].removeValue(i - p.cste, this.p);
                 }
             }
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropDistanceXYC(aVars, operator, cste));
         }
     }
 }
