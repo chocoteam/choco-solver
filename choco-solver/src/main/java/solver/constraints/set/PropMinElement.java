@@ -34,6 +34,8 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -59,7 +61,7 @@ public class PropMinElement extends Propagator<Variable> {
     private SetVar set;
     private int offSet;
     private int[] weights;
-	private final boolean notEmpty;
+    private final boolean notEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -71,8 +73,8 @@ public class PropMinElement extends Propagator<Variable> {
      *
      * @param setVar
      * @param min
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if so, the MIN constraint is not applied)
+     * @param notEmpty true : the set variable cannot be empty
+     *                 false : the set may be empty (if so, the MIN constraint is not applied)
      */
     public PropMinElement(SetVar setVar, IntVar min, boolean notEmpty) {
         this(setVar, null, 0, min, notEmpty);
@@ -86,8 +88,8 @@ public class PropMinElement extends Propagator<Variable> {
      * @param weights
      * @param offSet
      * @param min
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if so, the MIN constraint is not applied)
+     * @param notEmpty true : the set variable cannot be empty
+     *                 false : the set may be empty (if so, the MIN constraint is not applied)
      */
     public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, boolean notEmpty) {
         super(new Variable[]{setVar, min}, PropagatorPriority.BINARY, false);
@@ -95,7 +97,7 @@ public class PropMinElement extends Propagator<Variable> {
         this.set = (SetVar) vars[0];
         this.weights = weights;
         this.offSet = offSet;
-		this.notEmpty = notEmpty;
+        this.notEmpty = notEmpty;
     }
 
     //***********************************************************************************
@@ -110,12 +112,12 @@ public class PropMinElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             min.updateUpperBound(get(j), aCause);
         }
         int minVal = Integer.MAX_VALUE;
         int lb = min.getLB();
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             int k = get(j);
             if (k < lb) {
                 set.removeFromEnvelope(j, aCause);
@@ -125,34 +127,34 @@ public class PropMinElement extends Propagator<Variable> {
                 }
             }
         }
-		if(notEmpty || set.getKernelSize()>0){
-			min.updateLowerBound(minVal, aCause);
-		}
+        if (notEmpty || set.getKernelSize() > 0) {
+            min.updateLowerBound(minVal, aCause);
+        }
     }
 
     @Override
     public ESat isEntailed() {
-		if(set.getEnvelopeSize()==0){
-			if(notEmpty){
-				return ESat.FALSE;
-			}else{
-				return ESat.TRUE;
-			}
-		}
+        if (set.getEnvelopeSize() == 0) {
+            if (notEmpty) {
+                return ESat.FALSE;
+            } else {
+                return ESat.TRUE;
+            }
+        }
         int lb = min.getLB();
         int ub = min.getUB();
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             if (get(j) < lb) {
                 return ESat.FALSE;
             }
         }
         int minVal = Integer.MAX_VALUE;
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             if (minVal > get(j)) {
                 minVal = get(j);
             }
         }
-        if (minVal > ub && (notEmpty || set.getKernelSize()>0)) {
+        if (minVal > ub && (notEmpty || set.getKernelSize() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {
@@ -163,5 +165,18 @@ public class PropMinElement extends Propagator<Variable> {
 
     private int get(int j) {
         return (weights == null) ? j : weights[j - offSet];
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            set.duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(set);
+
+            min.duplicate(solver, identitymap);
+            IntVar M = (IntVar) identitymap.get(min);
+
+            identitymap.put(this, new PropMinElement(S, M, notEmpty));
+        }
     }
 }

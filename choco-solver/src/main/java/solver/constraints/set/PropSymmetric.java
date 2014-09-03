@@ -34,13 +34,14 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -97,12 +98,12 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j=vars[i].getEnvelopeFirst(); j!=SetVar.END; j=vars[i].getEnvelopeNext()) {
+            for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext()) {
                 if (j < offSet || j >= n + offSet || !vars[j - offSet].envelopeContains(i + offSet)) {
                     vars[i].removeFromEnvelope(j, aCause);
                 }
             }
-            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
+            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                 vars[j - offSet].addToKernel(i + offSet, aCause);
             }
         }
@@ -123,7 +124,7 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
+            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                 if (!vars[j - offSet].envelopeContains(i + offSet)) {
                     return ESat.FALSE;
                 }
@@ -133,5 +134,19 @@ public class PropSymmetric extends Propagator<SetVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int n = vars.length;
+            SetVar[] svars = new SetVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i].duplicate(solver, identitymap);
+                svars[i] = (SetVar) identitymap.get(vars[i]);
+            }
+
+            identitymap.put(this, new PropSymmetric(svars, offSet));
+        }
     }
 }

@@ -33,9 +33,11 @@ import solver.constraints.ICF;
 import solver.constraints.binary.PropScale;
 import solver.constraints.extension.TuplesFactory;
 import solver.constraints.nary.circuit.CircuitConf;
+import solver.constraints.set.SCF;
 import solver.constraints.ternary.PropTimesNaive;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.VF;
 import util.objects.setDataStructures.SetType;
 
@@ -1149,7 +1151,7 @@ public class DuplicateTest {
             Solver solver = new Solver("Choco");
             IntVar[] X = VF.boundedArray("vs", 5, 1, 5, solver);
             IntVar S = VF.bounded("S", 0, 3, solver);
-            solver.post(ICF.tsp(X, S, new int[][]{{0,1,2,3,4},{1,0,1,2,3},{2,1,0,1,2},{3,2,1,0,1},{4,3,2,1,0}}, strong));
+            solver.post(ICF.tsp(X, S, new int[][]{{0, 1, 2, 3, 4}, {1, 0, 1, 2, 3}, {2, 1, 0, 1, 2}, {3, 2, 1, 0, 1}, {4, 3, 2, 1, 0}}, strong));
 
             Solver copy = solver.duplicateModel();
 
@@ -1162,4 +1164,458 @@ public class DuplicateTest {
             Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
         }
     }
+
+    @Test(groups = "1s")
+    public void test61() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+
+        solver.post(SCF.union(S, U));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test62() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+
+        solver.post(SCF.intersection(S, U));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test63() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+
+        solver.post(SCF.subsetEq(S));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test64() {
+        Solver solver = new Solver("Choco");
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+        IntVar I = VF.enumerated("I", 1, 4, solver);
+
+        solver.post(SCF.cardinality(U, I));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test65() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        IntVar I = VF.enumerated("I", 1, 4, solver);
+
+        solver.post(SCF.nbEmpty(S, I));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test66() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[2];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+
+        solver.post(SCF.offSet(S[0], S[1], 1));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test67() {
+        Solver solver = new Solver("Choco");
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+
+        solver.post(SCF.notEmpty(U));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test68() {
+        Solver solver = new Solver("Choco");
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+        IntVar I = VF.enumerated("I", 1, 4, solver);
+
+        solver.post(SCF.sum(U, I, false));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test69() {
+        Solver solver = new Solver("Choco");
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+        IntVar I = VF.enumerated("I", 1, 4, solver);
+
+        solver.post(SCF.max(U, I, false));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test70() {
+        Solver solver = new Solver("Choco");
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+        IntVar I = VF.enumerated("I", 1, 4, solver);
+
+        solver.post(SCF.min(U, I, false));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test71() {
+        Solver solver = new Solver("Choco");
+        BoolVar[] bvars = VF.boolArray("b", 4, solver);
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+
+        solver.post(SCF.bool_channel(bvars, U, 1));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test72() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[2];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        IntVar[] I = VF.enumeratedArray("I", 4, 1, 5, solver);
+
+        solver.post(SCF.int_channel(S, I, 1, 1));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test73() {
+        Solver solver = new Solver("Choco");
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+        SetVar V = VF.set("V", new int[]{1, 2, 3}, solver);
+
+        solver.post(SCF.disjoint(U, V));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+
+    @Test(groups = "1s")
+    public void test74() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        solver.post(SCF.all_disjoint(S));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test75() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        solver.post(SCF.all_different(S));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test76() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        solver.post(SCF.all_equal(S));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test77() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        SetVar U = VF.set("U", new int[]{2, 3}, solver);
+        solver.post(SCF.partition(S, U));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test78() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+
+        SetVar[] T = new SetVar[4];
+        for (int i = 0; i < T.length; i++) {
+            T[i] = VF.set("T_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        solver.post(SCF.inverse_set(S, T, 1, 1));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test79() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[4];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        solver.post(SCF.symmetric(S, -1));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test80() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[2];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        IntVar I = VF.enumerated("I", 1, 5, solver);
+        SetVar T = VF.set("T", 1, 3, solver);
+
+        solver.post(SCF.element(I, S, 1, T));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test81() {
+        Solver solver = new Solver("Choco");
+        SetVar[] S = new SetVar[2];
+        for (int i = 0; i < S.length; i++) {
+            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+        }
+        SetVar T = VF.set("T", 1, 3, solver);
+
+        solver.post(SCF.member(S, T));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test82() {
+        Solver solver = new Solver("Choco");
+        IntVar I = VF.enumerated("I", 1, 5, solver);
+        SetVar T = VF.set("T", 1, 3, solver);
+
+        solver.post(SCF.member(I, T));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
 }
+

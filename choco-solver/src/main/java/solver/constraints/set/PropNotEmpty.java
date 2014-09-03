@@ -27,10 +27,11 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import util.ESat;
 
@@ -76,4 +77,14 @@ public class PropNotEmpty extends Propagator<SetVar> {
 		}
 		return ESat.UNDEFINED;
 	}
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            vars[0].duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(vars[0]);
+
+            identitymap.put(this, new PropNotEmpty(S));
+        }
+    }
 }
