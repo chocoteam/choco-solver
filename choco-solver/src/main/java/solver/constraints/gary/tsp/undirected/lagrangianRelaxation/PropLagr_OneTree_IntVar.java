@@ -27,6 +27,8 @@
 
 package solver.constraints.gary.tsp.undirected.lagrangianRelaxation;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.ESat;
@@ -43,83 +45,98 @@ import util.tools.ArrayUtils;
  */
 public class PropLagr_OneTree_IntVar extends PropLagr_OneTree {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected IntVar[] succ;
+    protected IntVar[] succ;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropLagr_OneTree_IntVar(IntVar[] graph, IntVar cost, int[][] costMatrix, boolean waitFirstSol) {
-		super(ArrayUtils.append(graph,new IntVar[]{cost}), costMatrix);
-		this.succ = graph;
-		g = new UndirectedGraph(n, SetType.SWAP_ARRAY,true);
-		obj = cost;
-		this.waitFirstSol = waitFirstSol;
-		assert checkSymmetry(costMatrix) : "TSP matrix should be symmetric";
-	}
+    public PropLagr_OneTree_IntVar(IntVar[] graph, IntVar cost, int[][] costMatrix, boolean waitFirstSol) {
+        super(ArrayUtils.append(graph, new IntVar[]{cost}), costMatrix);
+        this.succ = graph;
+        g = new UndirectedGraph(n, SetType.SWAP_ARRAY, true);
+        obj = cost;
+        this.waitFirstSol = waitFirstSol;
+        assert checkSymmetry(costMatrix) : "TSP matrix should be symmetric";
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	protected void rebuild() {
-		mandatoryArcsList.clear();
-		for (int i = 0; i < n; i++) {
-			g.getNeighborsOf(i).clear();
-			if(succ[i].isInstantiated()){
-				int j = succ[i].getValue();
-				mandatoryArcsList.add(i * n + j); // todo check no need to have i < j
-			}
-		}
-		for (int i = 0; i < n; i++) {
-			IntVar v = succ[i];
-			int ub = v.getUB();
-			for(int j=v.getLB();j<=ub;j=v.nextValue(j)){
-				g.addEdge(i,j);
-			}
-		}
-	}
+    @Override
+    protected void rebuild() {
+        mandatoryArcsList.clear();
+        for (int i = 0; i < n; i++) {
+            g.getNeighborsOf(i).clear();
+            if (succ[i].isInstantiated()) {
+                int j = succ[i].getValue();
+                mandatoryArcsList.add(i * n + j); // todo check no need to have i < j
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            IntVar v = succ[i];
+            int ub = v.getUB();
+            for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
+                g.addEdge(i, j);
+            }
+        }
+    }
 
-	@Override
-	public void remove(int from, int to) throws ContradictionException {
-		succ[from].removeValue(to,aCause);
-		succ[to].removeValue(from,aCause);
-	}
+    @Override
+    public void remove(int from, int to) throws ContradictionException {
+        succ[from].removeValue(to, aCause);
+        succ[to].removeValue(from, aCause);
+    }
 
-	@Override
-	public void enforce(int from, int to) throws ContradictionException {
-		if(!succ[from].contains(to)){
-			succ[to].instantiateTo(from,aCause);
-		}
-		if(!succ[to].contains(from)){
-			succ[from].instantiateTo(to,aCause);
-		}
-	}
+    @Override
+    public void enforce(int from, int to) throws ContradictionException {
+        if (!succ[from].contains(to)) {
+            succ[to].instantiateTo(from, aCause);
+        }
+        if (!succ[to].contains(from)) {
+            succ[from].instantiateTo(to, aCause);
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.TRUE;// it is just implied filtering
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.TRUE;// it is just implied filtering
+    }
 
-	@Override
-	public boolean isMandatory(int i, int j) {
-		return succ[i].isInstantiatedTo(j) || succ[j].isInstantiatedTo(i);
-	}
+    @Override
+    public boolean isMandatory(int i, int j) {
+        return succ[i].isInstantiatedTo(j) || succ[j].isInstantiatedTo(i);
+    }
 
-	public static boolean checkSymmetry(int[][] costMatrix){
-		int n = costMatrix.length;
-		for (int i = 0; i < n; i++) {
-			for (int j = i+1; j < n; j++) {
-				if(costMatrix[i][j] != costMatrix[j][i]){
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+    public static boolean checkSymmetry(int[][] costMatrix) {
+        int n = costMatrix.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (costMatrix[i][j] != costMatrix[j][i]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropLagr_OneTree_IntVar(aVars, aVar, this.originalCosts, waitFirstSol));
+        }
+    }
 }

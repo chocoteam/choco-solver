@@ -34,6 +34,8 @@
 
 package solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -142,5 +144,20 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
         sb.append(vars[vars.length - 2] + ")");
         sb.append(" = " + vars[vars.length - 1]);
         return sb.toString();
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            BoolVar[] aVars = new BoolVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (BoolVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar S = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropBoolSumCoarse(aVars, S));
+        }
     }
 }

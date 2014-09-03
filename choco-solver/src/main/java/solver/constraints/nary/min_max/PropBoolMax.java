@@ -26,7 +26,9 @@
  */
 package solver.constraints.nary.min_max;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,117 +44,132 @@ import util.tools.ArrayUtils;
  */
 public class PropBoolMax extends Propagator<BoolVar> {
 
-	final int n;
-	final IStateInt x1,x2;
+    final int n;
+    final IStateInt x1, x2;
 
-	public PropBoolMax(BoolVar[] variables, BoolVar maxVar) {
-		super(ArrayUtils.append(variables,new BoolVar[]{maxVar}), PropagatorPriority.UNARY, true);
-		n = variables.length;
-		x1 = solver.getEnvironment().makeInt(-1);
-		x2 = solver.getEnvironment().makeInt(-1);
-		assert n>0;
-	}
+    public PropBoolMax(BoolVar[] variables, BoolVar maxVar) {
+        super(ArrayUtils.append(variables, new BoolVar[]{maxVar}), PropagatorPriority.UNARY, true);
+        n = variables.length;
+        x1 = solver.getEnvironment().makeInt(-1);
+        x2 = solver.getEnvironment().makeInt(-1);
+        assert n > 0;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		x1.set(-1);
-		x2.set(-1);
-		for(int i=0; i<n; i++){
-			if(!vars[i].isInstantiated()){
-				if(x1.get()==-1) {
-					x1.set(i);
-				}else if(x2.get()==-1){
-					x2.set(i);
-				}
-			}else if(vars[i].getValue()==1){
-				if(vars[n].instantiateTo(1, aCause)){
-					setPassive();
-					return;
-				}
-			}
-		}
-		filter();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        x1.set(-1);
+        x2.set(-1);
+        for (int i = 0; i < n; i++) {
+            if (!vars[i].isInstantiated()) {
+                if (x1.get() == -1) {
+                    x1.set(i);
+                } else if (x2.get() == -1) {
+                    x2.set(i);
+                }
+            } else if (vars[i].getValue() == 1) {
+                if (vars[n].instantiateTo(1, aCause)) {
+                    setPassive();
+                    return;
+                }
+            }
+        }
+        filter();
+    }
 
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp == n){
-			filter();
-		} else{
-			if(vars[idxVarInProp].isInstantiatedTo(1)){
-				if(vars[n].instantiateTo(1, aCause)){
-					setPassive();
-					return;
-				}
-			}else if(idxVarInProp == x1.get() || idxVarInProp == x2.get()){
-				if(idxVarInProp == x1.get()) {
-					x1.set(x2.get());
-				}
-				x2.set(-1);
-				for(int i=0; i<n; i++){
-					if(i != x1.get() && !vars[i].isInstantiated()){
-						x2.set(i);
-						break;
-					}
-				}
-				filter();
-			}
-		}
-	}
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if (idxVarInProp == n) {
+            filter();
+        } else {
+            if (vars[idxVarInProp].isInstantiatedTo(1)) {
+                if (vars[n].instantiateTo(1, aCause)) {
+                    setPassive();
+                    return;
+                }
+            } else if (idxVarInProp == x1.get() || idxVarInProp == x2.get()) {
+                if (idxVarInProp == x1.get()) {
+                    x1.set(x2.get());
+                }
+                x2.set(-1);
+                for (int i = 0; i < n; i++) {
+                    if (i != x1.get() && !vars[i].isInstantiated()) {
+                        x2.set(i);
+                        break;
+                    }
+                }
+                filter();
+            }
+        }
+    }
 
-	public void filter() throws ContradictionException {
-		if(x1.get()==-1){
-			if(vars[n].instantiateTo(0,aCause)) {
-				setPassive();
-				return;
-			}
-		}
-		if(x2.get()==-1 && vars[n].isInstantiatedTo(1)){
-			if(vars[x1.get()].instantiateTo(1, aCause)) {
-				setPassive();
-				return;
-			}
-		}
-		if(vars[n].isInstantiatedTo(0)){
-			for(int i=0; i<n; i++){
-				vars[i].instantiateTo(0,aCause);
-			}
-		}
-	}
+    public void filter() throws ContradictionException {
+        if (x1.get() == -1) {
+            if (vars[n].instantiateTo(0, aCause)) {
+                setPassive();
+                return;
+            }
+        }
+        if (x2.get() == -1 && vars[n].isInstantiatedTo(1)) {
+            if (vars[x1.get()].instantiateTo(1, aCause)) {
+                setPassive();
+                return;
+            }
+        }
+        if (vars[n].isInstantiatedTo(0)) {
+            for (int i = 0; i < n; i++) {
+                vars[i].instantiateTo(0, aCause);
+            }
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int ub = vars[n].getUB();
-		for(int i=0; i<n; i++){
-			if(vars[i].getLB()>ub){
-				return ESat.FALSE;
-			}
-		}
-		for(int i=0; i<n; i++){
-			if(vars[i].getUB()>ub){
-				return ESat.UNDEFINED;
-			}
-		}
-		if(vars[n].isInstantiated()){
-			for(int i=0; i<n; i++){
-				if(vars[i].isInstantiatedTo(ub)){
-					return ESat.TRUE;
-				}
-			}
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int ub = vars[n].getUB();
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getLB() > ub) {
+                return ESat.FALSE;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getUB() > ub) {
+                return ESat.UNDEFINED;
+            }
+        }
+        if (vars[n].isInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                if (vars[i].isInstantiatedTo(ub)) {
+                    return ESat.TRUE;
+                }
+            }
+        }
+        return ESat.UNDEFINED;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("PropBoolMin ");
-		sb.append(vars[n]).append(" = min({");
-		sb.append(vars[0]);
-		for (int i = 1; i < n; i++) {
-			sb.append(", ");
-			sb.append(vars[i]);
-		}
-		sb.append("})");
-		return sb.toString();
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("PropBoolMin ");
+        sb.append(vars[n]).append(" = min({");
+        sb.append(vars[0]);
+        for (int i = 1; i < n; i++) {
+            sb.append(", ");
+            sb.append(vars[i]);
+        }
+        sb.append("})");
+        return sb.toString();
 
-	}
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            BoolVar[] aVars = new BoolVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (BoolVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            BoolVar M = (BoolVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropBoolMax(aVars, M));
+        }
+    }
 }

@@ -26,8 +26,11 @@
  */
 package solver.constraints.nary.alldifferent;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+
 import java.util.Random;
 
 /**
@@ -48,8 +51,8 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
     // VARIABLES
     //***********************************************************************************
 
-	Random rd;
-	int period;
+    Random rd;
+    int period;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -63,8 +66,8 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
      */
     public PropAllDiffAdaptative(IntVar[] variables) {
         super(variables);
-		rd = new Random(0);
-		period = -1;
+        rd = new Random(0);
+        period = -1;
     }
 
     //***********************************************************************************
@@ -73,33 +76,46 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		if(period==-1){
-			period = 1;
-			filter.propagate();
-		}else{
-			period = Math.max(period,1);
-			if(rd.nextInt(period)==0) {
-				int domSize = 0;
-				for (IntVar v : vars) {
-					domSize += v.getDomainSize();
-				}
-				try {
-					filter.propagate();
-				}catch (ContradictionException e) {
-					// strongly decrease period if propagation triggers failure
-					period = (period+1)/2;
-					throw e;
-				}
-				for (IntVar v : vars) {
-					domSize -= v.getDomainSize();
-				}
-				// slightly decrease / increase period if propagation triggers filtering / no filtering
-				if(domSize>0) {
-					period --;
-				} else {
-					period ++;
-				}
-			}
-		}
+        if (period == -1) {
+            period = 1;
+            filter.propagate();
+        } else {
+            period = Math.max(period, 1);
+            if (rd.nextInt(period) == 0) {
+                int domSize = 0;
+                for (IntVar v : vars) {
+                    domSize += v.getDomainSize();
+                }
+                try {
+                    filter.propagate();
+                } catch (ContradictionException e) {
+                    // strongly decrease period if propagation triggers failure
+                    period = (period + 1) / 2;
+                    throw e;
+                }
+                for (IntVar v : vars) {
+                    domSize -= v.getDomainSize();
+                }
+                // slightly decrease / increase period if propagation triggers filtering / no filtering
+                if (domSize > 0) {
+                    period--;
+                } else {
+                    period++;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntVar[] aVars = new IntVar[this.vars.length];
+            for (int i = 0; i < this.vars.length; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+
+            identitymap.put(this, new PropAllDiffAdaptative(aVars));
+        }
     }
 }

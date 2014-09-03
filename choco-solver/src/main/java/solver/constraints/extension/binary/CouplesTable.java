@@ -68,6 +68,7 @@ class CouplesTable extends BinRelation {
         }
     }
 
+    // required for duplicate method, should not be called by default
     private CouplesTable(BitSet table, int offset1, int offset2, int range1, int range2, boolean feasible) {
         this.table = table;
         this.offset1 = offset1;
