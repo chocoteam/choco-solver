@@ -52,7 +52,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
     public enum NodeArcPriority {
         NODES_THEN_ARCS,
-        ARCS;
+        ARCS
     }
 
     public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as, NodeArcPriority priority) {

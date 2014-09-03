@@ -108,5 +108,5 @@ public enum NoPropagationEngine implements IPropagationEngine {
         @Override
         public void dynamicDeletion(Constraint c) {
         }
-    };
+    }
 }

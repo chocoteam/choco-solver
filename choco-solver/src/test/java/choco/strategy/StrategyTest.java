@@ -121,7 +121,7 @@ public class StrategyTest {
         IntVar[] variables = new IntVar[n];
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
-            asgs[i] = IntStrategyFactory.lexico_LB(new IntVar[]{variables[i]});
+            asgs[i] = IntStrategyFactory.lexico_LB(variables[i]);
         }
 
         AbstractStrategy sts = ISF.sequencer(asgs);
