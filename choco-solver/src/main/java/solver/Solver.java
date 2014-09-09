@@ -198,7 +198,7 @@ public class Solver implements Serializable {
 
 
     /**
-     * Returns the unique and internal seach loop.
+     * Returns the unique and internal search loop.
      *
      * @return the unique and internal <code>AbstractSearchLoop</code> object.
      */
@@ -414,8 +414,6 @@ public class Solver implements Serializable {
      * If it cannot provide a new decision, the second strategy is called ...
      * and so on, until the last strategy.
      * <p/>
-     * <p/>
-     * <b>BEWARE:</b> the default strategy requires variables to be integer.
      *
      * @param strategies the search strategies to use.
      */
@@ -484,9 +482,6 @@ public class Solver implements Serializable {
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
-//        if (getEngine() != null && getEngine().isInitialized()) {
-//            throw new SolverException("Solver does not support dynamic variable addition");
-//        }
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
             vars = new Variable[tmp.length * 2];
@@ -595,7 +590,7 @@ public class Solver implements Serializable {
     /**
      * Remove permanently the constraint <code>c</code> from the constraint network.
      *
-     * @param c
+     * @param c the constraint to remove
      */
     public void unpost(Constraint c) {
         // 1. look for the constraint c

@@ -1,5 +1,5 @@
 Propagation
-~~~~~~~~~~~
+===========
 
 One may want to propagate each constraint manually.
 This can be achieved by calling ``solver.propagate()``.

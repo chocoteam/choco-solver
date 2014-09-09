@@ -1,5 +1,39 @@
+Available constraints in Choco |release|
+========================================
+
+.. _61_constraints_label:
+
+
+.. _61_constraints_unaries_label:
+
+Unary constraints
+-----------------
+
+Constraint involving only one variable.
+
+.. _61_constraints_binaries_label:
+
+Binary constraints
+------------------
+
+Constraint involving only two variables.
+
+.. _61_constraints_ternaries_label:
+
+Ternary constraints
+-------------------
+
+Constraint involving only three variables.
+
+.. _61_constraints_global_label:
+
+Global constraints
+------------------
+
+Constraint involving an unfixed number of variables.
+
 Graph constraints
-~~~~~~~~~~~~~~~~~
+-----------------
 
 **Reification graph**
 

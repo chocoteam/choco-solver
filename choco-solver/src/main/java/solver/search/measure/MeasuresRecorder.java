@@ -429,7 +429,16 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
-        st.append("- Search statistics\n");
+//        st.append("- Search statistics\n");
+        if(solver.hasReachedLimit()){
+            st.append("- Incomplete search - Limit reached.\n");
+        }else{
+            st.append("- Complete search - ");
+            if(solutionCount == 0){
+                st.append("No solution.");
+            }
+            st.append('\n');
+        }
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
             st.append("\t").append(solver.getObjectiveManager()).append(",\n");

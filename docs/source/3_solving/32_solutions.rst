@@ -6,16 +6,16 @@ Otherwise, an exception will be thrown if assertions are turned on (when ``-ea``
 Choco |version| includes several ways to record solutions.
 
 Solution storage
-~~~~~~~~~~~~~~~~
+----------------
 
 A solution is usually stored through a ``Solution`` object which maps every variable with its current value.
 Such an object can be erased to store new solutions.
 
 Solution recording
-~~~~~~~~~~~~~~~~~~
+------------------
 
 Built-in solution recorders
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A solution recorder (``ISolutionRecorder``) is an object in charge of recording variable values in solutions.
 There exists many built-in solution recorders:
@@ -36,7 +36,7 @@ This may be used to enumerate all optimal (or at least, best) solutions of a pro
 ``ParetoSolutionsRecorder`` records all solutions of the pareto front of the multi-objective problem.
 
 Custom recorder
----------------
+^^^^^^^^^^^^^^^
 
 You can build you own way of manipulating and recording solutions by either implementing your own ``ISolutionRecorder`` object
 or by simply using an ``ISolutionMonitor``, as follows:
@@ -47,19 +47,20 @@ or by simply using an ``ISolutionMonitor``, as follows:
    :linenos:
 
 Solution restoration
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 A ``Solution`` object can be restored, i.e. variables are fixed back to their values in that solution.
 For this purpose, we recommend to restore initial domains and then restore the solution,
 with the following code: ::
- try{
-    solver.getSearchLoop().restoreRootNode();
-    solver.getEnvironment().worldPush();
-    solution.restore();
- }catch (ContradictionException e){
-    throw new UnsupportedOperationException("restoring the solution ended in a failure");
- }
- solver.getEngine().flush();
+
+    try{
+       solver.getSearchLoop().restoreRootNode();
+       solver.getEnvironment().worldPush();
+       solution.restore();
+    }catch (ContradictionException e){
+       throw new UnsupportedOperationException("restoring the solution ended in a failure");
+    }
+    solver.getEngine().flush();
 
 Note that if initial domains are not restored, then the solution restoration may lead to a failure.
 This would happen when trying to restore out of the current domain.

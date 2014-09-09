@@ -1,3 +1,5 @@
+.. _31_solving_label:
+
 Finding solutions
 =================
 
@@ -13,10 +15,10 @@ Before everything, there are two methods which help interpreting the results.
 
 
 **Limitation**:
-  When the resolution is limited (See Limits_ for details and examples), one may guess if a limit has been reached.
+  When the resolution is limited (See :ref:`Limiting the resolution <33_searches_limit_label>` for details and examples), one may guess if a limit has been reached.
   The ``solver.hasReachedLimit()`` method returns ``true`` if a limit has bypassed the search process, ``false`` if it has ended *naturally*.
 
-.. _Limits: 3_solving.html#limiting-the-resolution
+.. _Limits: 31_solving.html#limiting-the-resolution
 
 .. warning::
 
@@ -26,10 +28,10 @@ Before everything, there are two methods which help interpreting the results.
  In those cases, the search may never stop or the two above methods may not be sufficient to confirm the lack of solution.
 
 Satisfaction problems
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Finding a solution
-------------------
+^^^^^^^^^^^^^^^^^^
 
 A call to ``solver.findSolution()`` launches a resolution which stops on the first solution found, if any.
 
@@ -56,7 +58,7 @@ It returns ``true`` if a limit has been reached, ``false`` otherwise.
 
 
 Enumerating solutions
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Once the resolution has been started by a call to ``solver.findSolution()`` and if the problem is feasible,
 the resolution can be resumed using ``solver.nextSolution()`` from the last solution found.
@@ -74,13 +76,23 @@ One may enumerate all solution like this::
 
 ``solver.findSolution()`` and  ``solver.nextSolution()`` are the only ways to resume a resolution process which has already began.
 
+.. tip::
+
+    On a solution, one can get the value assigned to each variable by calling ::
+
+        ivar.getValue(); // instantiation value of an IntVar, return a int
+        svar.getValues(); // instantiation values of a SerVar, return a int[]
+        rvar.getLB(); // lower bound of a RealVar, return a double
+        rvar.getUB(); // upper bound of a RealVar, return a double
+
+
 
 An alternative is to call ``solver.findAllSolutions()``. It attempts to find all solutions of the problem.
 It returns the number of solutions found (in the given limit if any).
 
 
 Optimization problems
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Choco |version| enables to solve optimization problems, that is, in which a variable must be optimized.
 
@@ -95,7 +107,7 @@ Choco |version| enables to solve optimization problems, that is, in which a vari
 
 
 Finding one optimal solution
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Finding one optimal solution is made through a call to the ``solver.findOptimalSolution(ResolutionPolicy, IntVar)`` method.
 The first argument defines the kind of optimization required: minimization (``ResolutionPolicy.MINIMIZE``)
@@ -122,7 +134,7 @@ The cut is an additional constraint which states that the next solution must be 
 ie in minimization, strictly smaller.
 
 Finding all optimal solutions
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There could be more than one optimal solutions.
 To find them all, one can call ``findAllOptimalSolutions(ResolutionPolicy, IntVar, boolean)``.
@@ -138,10 +150,10 @@ Setting the boolean to ``false`` allow finding non-optimal intermediary solution
 
 
 Multi-objective optimization problems
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 Finding the pareto front
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 It is possible to solve a multi-objective optimization problems with Choco |version|,
 using ``solver.findParetoFront(ResolutionPolicy policy, IntVar... objectives)``.
@@ -165,3 +177,17 @@ Here is a simple illustration:
    :language: java
    :lines: 71,72,73,75,83,88-92
    :linenos:
+
+Propagation
+-----------
+
+One may want to propagate each constraint manually.
+This can be achieved by calling ``solver.propagate()``.
+This method runs, in turn, the domain reduction algorithms of the constraints until it reaches a fix point.
+It may throw a ``ContradictionException`` if a contradiction occurs.
+In that case, the propagation engine must be flushed calling ``solver.getEngine().flush()``
+to ensure there is no pending events.
+
+.. warning::
+
+ If there are still pending events in the propagation engine, the propagation may results in unexpected results.
