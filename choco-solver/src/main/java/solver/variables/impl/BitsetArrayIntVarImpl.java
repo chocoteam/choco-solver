@@ -677,7 +677,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 public void next() {
                     this.from = indexes.nextSetBit(this.to + 1);
                     this.to = from;
-                    while (indexes.get(to + 1)
+                    while (to > -1 && indexes.get(to + 1)
                             && (values[to] == values[to + 1] - 1)) {
                         to++;
                     }
@@ -687,7 +687,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 public void previous() {
                     this.to = indexes.prevSetBit(this.from - 1);
                     this.from = to;
-                    while (indexes.get(from - 1)
+                    while (from > -1 && indexes.get(from - 1)
                             && (values[from - 1] == values[from] - 1)) {
                         from--;
                     }

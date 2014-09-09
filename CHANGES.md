@@ -107,3 +107,5 @@ NEXT MILESTONE
 - Issue #215: Fix generation of relation based on tuples
 - Fix #214: Fix problems related to propagators dynamic addition and deletion
 - Add a GenerateAndTest search strategy which can be combined with others
+- Fix #218: return null when all variables are instantiated
+- Fix #219: fix range iterator of enumerated integer variable
