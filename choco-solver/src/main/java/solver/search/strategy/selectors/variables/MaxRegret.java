@@ -55,7 +55,7 @@ public class MaxRegret implements VariableSelector<IntVar>,VariableEvaluator<Int
                 small_idx = idx;
             }
         }
-        return variables[small_idx];
+        return small_idx > -1 ? variables[small_idx] : null;
     }
 
     @Override
