@@ -605,7 +605,7 @@ public class IntConstraintFactory {
         TIntArrayList vals = getDomainUnion(VARS);
         if (GREEDY) {
             Gci gci = new Gci(VARS, new AutoDiffDetection(VARS));
-            R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver().getEnvironment())};
+            R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver())};
             return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES),
                     new PropAMNV(VARS, NVALUES, gci, new MD(gci), rules));
         } else {

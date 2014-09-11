@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.nValue.amnv.mis;
 
-import solver.constraints.nary.nValue.amnv.graph.G;
+import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
@@ -44,7 +44,7 @@ public class MD implements F{
 	// VARIABLES
 	//***********************************************************************************
 
-	protected G graph;
+	protected UndirectedGraph graph;
 	protected int n;
 	protected BitSet out, inMIS;
 	protected int[] nbNeighbours, fifo;
@@ -57,7 +57,7 @@ public class MD implements F{
 	 * Creates an instance of the Min Degree heuristic to compute independent sets on graph
 	 * @param graph
 	 */
-	public MD(G graph){
+	public MD(UndirectedGraph graph){
 		this.graph = graph;
 		n = graph.getNbNodes();
 		out = new BitSet(n);

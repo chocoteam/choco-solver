@@ -76,7 +76,7 @@ public class PropKLoops extends Propagator<IntVar> {
 		this.n = succs.length;
 		this.offSet = offSet;
 		IEnvironment environment = solver.getEnvironment();
-		this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+		this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, solver);
 		this.nbMinLoops = environment.makeInt();
 	}
 

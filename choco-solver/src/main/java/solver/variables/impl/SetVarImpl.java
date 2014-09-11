@@ -90,9 +90,8 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 			max = Math.max(max,i);
 		}
 		check(env,ker,max,min);
-		IEnvironment environment = solver.getEnvironment();
-		envelope = SetFactory.makeStoredSet(envType, max-min+1, environment);
-		kernel = SetFactory.makeStoredSet(kerType, max-min+1, environment);
+		envelope = SetFactory.makeStoredSet(envType, max-min+1, solver);
+		kernel = SetFactory.makeStoredSet(kerType, max-min+1, solver);
 		for(int i:env){
 			envelope.add(i-min);
 		}
@@ -113,9 +112,8 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 */
 	public SetVarImpl(String name, int min, int max, Solver solver) {
 		super(name, solver);
-		IEnvironment environment = solver.getEnvironment();
-		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
-		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
+		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
+		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
 		for(int i=min; i<=max; i++){
 			envelope.add(i-min);
 		}

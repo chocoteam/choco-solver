@@ -28,6 +28,7 @@
 package util.objects.graphs;
 
 import memory.IEnvironment;
+import solver.Solver;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
@@ -89,24 +90,24 @@ public class DirectedGraph implements IGraph {
      * Allocates memory for n nodes (but they should then be added explicitely,
      * unless allNodes is true).
      *
-     * @param env      storing environment
+     * @param solver   solver providing the backtracking environment
      * @param n        maximum number of nodes
      * @param type     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph
      */
-    public DirectedGraph(IEnvironment env, int n, SetType type, boolean allNodes) {
+    public DirectedGraph(Solver solver, int n, SetType type, boolean allNodes) {
         this.n = n;
         this.type = type;
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeStoredSet(type, n, env);
-            successors[i] = SetFactory.makeStoredSet(type, n, env);
+            predecessors[i] = SetFactory.makeStoredSet(type, n, solver);
+            successors[i] = SetFactory.makeStoredSet(type, n, solver);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, env);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
         }
     }
 

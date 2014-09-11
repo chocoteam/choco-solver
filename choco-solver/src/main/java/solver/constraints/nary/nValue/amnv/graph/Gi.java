@@ -53,7 +53,7 @@ public class Gi extends G{
 	 * @param X		integer variable
 	 */
 	public Gi(IntVar[] X) {
-		super(X[0].getSolver().getEnvironment(), X.length);
+		super(X[0].getSolver(), X.length);
 		this.X = X;
 	}
 

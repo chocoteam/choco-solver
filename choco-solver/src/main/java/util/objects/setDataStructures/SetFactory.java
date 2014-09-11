@@ -37,6 +37,7 @@ package util.objects.setDataStructures;
 import memory.IEnvironment;
 import memory.copy.EnvironmentCopying;
 import memory.trailing.EnvironmentTrailing;
+import solver.Solver;
 import util.objects.setDataStructures.linkedlist.*;
 import util.objects.setDataStructures.matrix.Set_Array;
 import util.objects.setDataStructures.matrix.Set_BitSet;
@@ -67,10 +68,11 @@ public class SetFactory {
      *
      * @param type        of set data structure
      * @param maximumSize of the set (maximum value -1)
-     * @param environment solver environment
+     * @param solver	  solver providing the backtracking environment
      * @return a new set which can be restored during search, after some backtracks
      */
-    public static ISet makeStoredSet(SetType type, int maximumSize, IEnvironment environment) {
+    public static ISet makeStoredSet(SetType type, int maximumSize, Solver solver) {
+		IEnvironment environment = solver.getEnvironment();
         if (HARD_CODED)
             switch (type) {
                 case SWAP_ARRAY:

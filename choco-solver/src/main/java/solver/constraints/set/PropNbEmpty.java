@@ -76,8 +76,8 @@ public class PropNbEmpty extends Propagator<Variable> {
         }
         this.nbEmpty = (IntVar) vars[n];
 		IEnvironment environment = solver.getEnvironment();
-        this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
-        this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+        this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, solver);
+        this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, solver);
         this.nbAlreadyEmpty = environment.makeInt();
         this.nbMaybeEmpty = environment.makeInt();
     }

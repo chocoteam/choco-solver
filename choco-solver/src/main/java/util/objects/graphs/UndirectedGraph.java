@@ -28,6 +28,7 @@
 package util.objects.graphs;
 
 import memory.IEnvironment;
+import solver.Solver;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
@@ -62,22 +63,22 @@ public class UndirectedGraph implements IGraph {
      * Allocates memory for n nodes (but they should then be added explicitely,
      * unless allNodes is true).
      *
-     * @param env      solver environment
+     * @param solver   solver providing the backtracking environment
      * @param n        max number of nodes
      * @param type     data structure storing for node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(IEnvironment env, int n, SetType type, boolean allNodes) {
+    public UndirectedGraph(Solver solver, int n, SetType type, boolean allNodes) {
         this.type = type;
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeStoredSet(type, n, env);
+            neighbors[i] = SetFactory.makeStoredSet(type, n, solver);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, env);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
         }
     }
 

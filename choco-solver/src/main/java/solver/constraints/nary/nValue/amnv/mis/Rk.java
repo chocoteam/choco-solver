@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.nValue.amnv.mis;
 
-import solver.constraints.nary.nValue.amnv.graph.G;
+import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
@@ -45,7 +45,7 @@ public class Rk implements F{
 	// VARIABLES
 	//***********************************************************************************
 
-	protected G graph;
+	protected UndirectedGraph graph;
 	protected int n, k, iter;
 	protected BitSet out, inMIS;
 	protected Random rd;
@@ -59,7 +59,7 @@ public class Rk implements F{
 	 * @param graph	on which IS have to be computed
 	 * @param k		number of iterations (i.e. number of expected IS per propagation)
 	 */
-	public Rk(G graph, int k){
+	public Rk(UndirectedGraph graph, int k){
 		this.graph = graph;
 		this.k = k;
 		n = graph.getNbNodes();
@@ -73,7 +73,7 @@ public class Rk implements F{
 	 * uses the default setting k=30
 	 * @param graph	on which IS have to be computed
 	 */
-	public Rk(G graph){
+	public Rk(UndirectedGraph graph){
 		this(graph,30);
 	}
 
