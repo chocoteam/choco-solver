@@ -89,7 +89,7 @@ public class R3 implements R {
 				for (int k = lb; k <= ub; k = vars[i].nextValue(k)) {
 					valToRem[last++] = k;
 				}
-				nei = graph.getNeighborsOf(i);
+				nei = graph.getNeighOf(i);
 				for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 					if (mis.get(j)) {
 						if (mate == -1) {

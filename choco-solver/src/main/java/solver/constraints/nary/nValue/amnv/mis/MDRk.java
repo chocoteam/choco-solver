@@ -93,7 +93,7 @@ public class MDRk extends MD{
 			}
 			inMIS.set(idx);
 			out.set(idx);
-			ISet nei = graph.getNeighborsOf(idx);
+			ISet nei = graph.getNeighOf(idx);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				out.set(j);
 			}

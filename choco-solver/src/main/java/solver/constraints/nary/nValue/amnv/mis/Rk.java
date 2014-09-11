@@ -62,7 +62,7 @@ public class Rk implements F{
 	public Rk(UndirectedGraph graph, int k){
 		this.graph = graph;
 		this.k = k;
-		n = graph.getNbNodes();
+		n = graph.getNbMaxNodes();
 		out = new BitSet(n);
 		inMIS = new BitSet(n);
 		rd = new Random(0);
@@ -100,7 +100,7 @@ public class Rk implements F{
 			}
 			inMIS.set(idx);
 			out.set(idx);
-			ISet nei = graph.getNeighborsOf(idx);
+			ISet nei = graph.getNeighOf(idx);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				out.set(j);
 			}

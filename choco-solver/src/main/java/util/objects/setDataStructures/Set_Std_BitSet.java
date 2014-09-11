@@ -40,11 +40,13 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 
     protected int current;    //enables to iterate
     protected IStateInt card;    // enables to get the cardinality in O(1)
+	protected int n;
 
     public Set_Std_BitSet(IEnvironment environment, int nbits) {
         super(environment, nbits);
         current = 0;
         card = environment.makeInt(0);
+		n = nbits;
     }
 
     @Override
@@ -98,5 +100,20 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	@Override
 	public SetType getSetType(){
 		return SetType.BITSET;
+	}
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i=getFirstElement();i>=0;i=getNextElement()){
+			a[idx++] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return n;
 	}
 }

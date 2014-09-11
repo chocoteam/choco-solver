@@ -143,4 +143,14 @@ public class Set_Copy extends RcObject implements ISet {
 	public SetType getSetType(){
 		return set.getSetType();
 	}
+
+	@Override
+	public int[] toArray(){
+		return set.toArray();
+	}
+
+	@Override
+	public int getMaxSize(){
+		return set.getMaxSize();
+	}
 }

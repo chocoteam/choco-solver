@@ -94,14 +94,14 @@ public class PropGraphCumulative extends PropFullCumulative {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			super.propagate(evtmask);
 			for (int i = 0; i < n; i++) {
-				g.getNeighborsOf(i).clear();
+				g.getNeighOf(i).clear();
 			}
 //			naiveGraphComputation();
 			sweepBasedGraphComputation();
 		}else{
 			int count = 0;
 			for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
-				count += g.getNeighborsOf(i).getSize();
+				count += g.getNeighOf(i).getSize();
 			}
 			if(count>=2*n){
 				filter(allTasks);
@@ -140,7 +140,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 	protected void filterAround(int taskIndex) throws ContradictionException {
 		tasks.clear();
 		tasks.add(taskIndex);
-		ISet env = g.getNeighborsOf(taskIndex);
+		ISet env = g.getNeighOf(taskIndex);
 		for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
 			if (disjoint(taskIndex, i)) {
 //				g.removeEdge(taskIndex, i);

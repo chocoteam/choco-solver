@@ -101,8 +101,8 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
 
     private void filterFromPostDom(int duplicatedNode) throws ContradictionException {
         for (int i = 0; i < n + 1; i++) {
-            connectedGraph.getSuccessorsOf(i).clear();
-            connectedGraph.getPredecessorsOf(i).clear();
+            connectedGraph.getSuccOf(i).clear();
+            connectedGraph.getPredOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             if (i == duplicatedNode || vars[i].contains(i + offSet)) {

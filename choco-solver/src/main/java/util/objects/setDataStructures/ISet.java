@@ -103,4 +103,16 @@ public interface ISet extends Serializable {
 	 * @return the implementation type of this set
 	 */
 	SetType getSetType();
+
+	/**
+	 * Copies the set in an array if integers
+	 * @return an array containing every integer of the set
+	 */
+	int[] toArray();
+
+	/**
+	 * Gets the maximum size of the set, or -1 if it is unbounded.
+	 * @return the maximum size of the set, or -1 if it is unbounded
+	 */
+	int getMaxSize();
 }

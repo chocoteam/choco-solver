@@ -46,8 +46,8 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 
 	protected void filterFromDom(int duplicatedNode) throws ContradictionException {
 		for (int i = 0; i < n + 1; i++) {
-			connectedGraph.getSuccessorsOf(i).clear();
-			connectedGraph.getPredecessorsOf(i).clear();
+			connectedGraph.getSuccOf(i).clear();
+			connectedGraph.getPredOf(i).clear();
 		}
 		for (int i = 0; i < n; i++) {
 			int ub = vars[i].getUB();

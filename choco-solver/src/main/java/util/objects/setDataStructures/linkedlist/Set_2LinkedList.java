@@ -220,6 +220,21 @@ public class Set_2LinkedList implements ISet {
         return el;
     }
 
+	@Override
+	public int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i=getFirstElement();i>=0;i=getNextElement()){
+			a[idx++] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return -1;
+	}
+
     //***********************************************************************************
     // STRUCTURE
     //***********************************************************************************

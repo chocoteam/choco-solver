@@ -122,13 +122,13 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int last = -1;
 		int n_R = SCCfinder.getNbSCC();
 		for (int i = 0; i < n_R; i++) {
-			if (G_R.getPredecessorsOf(i).isEmpty()) {
+			if (G_R.getPredOf(i).isEmpty()) {
 				if(first!=-1){
 					contradiction(vars[0],"");
 				}
 				first = i;
 			}
-			if (G_R.getSuccessorsOf(i).isEmpty()) {
+			if (G_R.getSuccOf(i).isEmpty()) {
 				if(last!=-1){
 					contradiction(vars[0],"");
 				}
@@ -153,12 +153,12 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	public void rebuild(int source) {
 		for(int i=0;i<n2;i++){
 			mates[i].clear();
-			support.getSuccessorsOf(i).clear();
-			support.getPredecessorsOf(i).clear();
-			G_R.getPredecessorsOf(i).clear();
-			G_R.getSuccessorsOf(i).clear();
+			support.getSuccOf(i).clear();
+			support.getPredOf(i).clear();
+			G_R.getPredOf(i).clear();
+			G_R.getSuccOf(i).clear();
 		}
-		G_R.getActiveNodes().clear();
+		G_R.getNodes().clear();
 		for(int i=0;i<n;i++){
 			IntVar v = vars[i];
 			int lb = v.getLB();
@@ -174,14 +174,14 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		SCCfinder.findAllSCC();
 		int n_R = SCCfinder.getNbSCC();
 		for (int i = 0; i < n_R; i++) {
-			G_R.getActiveNodes().add(i);
+			G_R.getNodes().add(i);
 		}
 		sccOf = SCCfinder.getNodesSCC();
 		ISet succs;
 		int x;
 		for (int i = 0; i < n; i++) {
 			x = sccOf[i];
-			succs = support.getSuccessorsOf(i);
+			succs = support.getSuccOf(i);
 			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 				if (x != sccOf[j]) {
 					G_R.addArc(x, sccOf[j]);
@@ -199,9 +199,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			return 1;
 		}
 		int next = -1;
-		ISet succs = G_R.getSuccessorsOf(node);
+		ISet succs = G_R.getSuccOf(node);
 		for (int x = succs.getFirstElement(); x >= 0; x = succs.getNextElement()) {
-			if (G_R.getPredecessorsOf(x).getSize() == 1) {
+			if (G_R.getPredOf(x).getSize() == 1) {
 				if (next != -1) {
 					return 0;
 				}
@@ -275,7 +275,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			forceOutDoor(outDoor);
 			// If 1 in and 1 out and |scc| > 2 then forbid in->out
 			// Is only 1 in ?
-			int p = G_R.getPredecessorsOf(sccFrom).getFirstElement();
+			int p = G_R.getPredOf(sccFrom).getFirstElement();
 			if (p != -1) {
 				int in = -1;
 				for (int i = mates[p].getFirstElement(); i >= 0; i = mates[p].getNextElement()) {

@@ -125,14 +125,14 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     private void buildDigraph() {
         for (int i = 0; i < n2; i++) {
-            digraph.getSuccessorsOf(i).clear();
-            digraph.getPredecessorsOf(i).clear();
+            digraph.getSuccOf(i).clear();
+            digraph.getPredOf(i).clear();
         }
         free.set(0, n2);
         int j, k, ub;
         IntVar v;
         for (int i = 0; i < n2 + 2; i++) {
-            digraph.desactivateNode(i);
+            digraph.removeNode(i);
         }
         for (int i = 0; i < n; i++) {
             v = vars[i];
@@ -154,7 +154,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
         int card = 0;
         for (int i = 0; i < n; i++) {
-            if (digraph.getPredecessorsOf(i).getFirstElement() != -1) {
+            if (digraph.getPredOf(i).getFirstElement() != -1) {
                 card++;
             }
         }
@@ -183,7 +183,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         ISet succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
-            succs = digraph.getSuccessorsOf(x);
+            succs = digraph.getSuccOf(x);
             for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
                 if (!in.get(y)) {
                     father[y] = x;
@@ -203,10 +203,10 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     //***********************************************************************************
 
     private void buildSCC() {
-        digraph.desactivateNode(n2);
-        digraph.desactivateNode(n2 + 1);
-        digraph.activateNode(n2);
-        digraph.activateNode(n2 + 1);
+        digraph.removeNode(n2);
+        digraph.removeNode(n2 + 1);
+        digraph.addNode(n2);
+        digraph.addNode(n2 + 1);
         //TODO CHECK THIS PART
         for (int i = 0; i < n; i++) {
             if (free.get(i)) {
@@ -224,8 +224,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
         SCCfinder.findAllSCC();
         nodeSCC = SCCfinder.getNodesSCC();
-        digraph.desactivateNode(n2);
-        digraph.desactivateNode(n2 + 1);
+        digraph.removeNode(n2);
+        digraph.removeNode(n2 + 1);
     }
 
     private void filter() throws ContradictionException {
@@ -238,7 +238,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (digraph.getPredecessorsOf(i).getFirstElement() == j) {
+                    if (digraph.getPredOf(i).getFirstElement() == j) {
                         v.instantiateTo(k, aCause);
                     } else {
                         v.removeValue(k, aCause);
@@ -281,16 +281,16 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             }
             buildDigraph();
         }
-        digraph.desactivateNode(n2);
-        digraph.desactivateNode(n2 + 1);
+        digraph.removeNode(n2);
+        digraph.removeNode(n2 + 1);
         free.clear();
         for (int i = 0; i < n; i++) {
-            if (digraph.getPredecessorsOf(i).getSize() == 0) {
+            if (digraph.getPredOf(i).getSize() == 0) {
                 free.set(i);
             }
         }
         for (int i = n; i < n2; i++) {
-            if (digraph.getSuccessorsOf(i).getSize() == 0) {
+            if (digraph.getSuccOf(i).getSize() == 0) {
                 free.set(i);
             }
         }

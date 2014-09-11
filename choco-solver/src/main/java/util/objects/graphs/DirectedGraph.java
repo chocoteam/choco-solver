@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,19 +27,14 @@
 
 package util.objects.graphs;
 
-import memory.IEnvironment;
 import solver.Solver;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
- * Date: 9 fevr. 2011
- * <p/>
- * *
  * Directed graph implementation : arcs are indexed per endpoints
+ * @author Jean-Guillaume Fages, Xavier Lorca
  */
 public class DirectedGraph implements IGraph {
 
@@ -49,9 +44,6 @@ public class DirectedGraph implements IGraph {
 
     ISet[] successors;
     ISet[] predecessors;
-    /**
-     * activeIdx represents the nodes available in the graph
-     */
     ISet nodes;
     int n;
     SetType type;
@@ -62,12 +54,13 @@ public class DirectedGraph implements IGraph {
 
     /**
      * Creates an empty graph.
-     * Allocates memory for n nodes (but they should then be added explicitely,
+     * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
      * @param n        maximum number of nodes
      * @param type     data structure to use for representing node successors and predecessors
-     * @param allNodes true iff all nodes must always remain present in the graph
+     * @param allNodes true iff all nodes must always remain present in the graph.
+	 *                 i.e. The node set is fixed to [0,n-1] and will never change
      */
     public DirectedGraph(int n, SetType type, boolean allNodes) {
         this.type = type;
@@ -87,7 +80,7 @@ public class DirectedGraph implements IGraph {
 
     /**
      * Creates an empty backtrable graph of n nodes
-     * Allocates memory for n nodes (but they should then be added explicitely,
+     * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
      * @param solver   solver providing the backtracking environment
@@ -130,31 +123,22 @@ public class DirectedGraph implements IGraph {
     }
 
     @Override
-    /**
-     * @inheritedDoc
-     */
-    public int getNbNodes() {
+    public int getNbMaxNodes() {
         return n;
     }
 
     @Override
-    /**
-     * @inheritedDoc
-     */
-    public ISet getActiveNodes() {
+    public ISet getNodes() {
         return nodes;
     }
 
     @Override
-    /**
-     * @inheritedDoc
-     */
     public SetType getType() {
         return type;
     }
 
     @Override
-    public boolean activateNode(int x) {
+    public boolean addNode(int x) {
         if (!nodes.contain(x)) {
             return nodes.add(x);
         } else {
@@ -163,7 +147,7 @@ public class DirectedGraph implements IGraph {
     }
 
     @Override
-    public boolean desactivateNode(int x) {
+    public boolean removeNode(int x) {
         if (nodes.remove(x)) {
             for (int j = successors[x].getFirstElement(); j >= 0; j = successors[x].getNextElement()) {
                 predecessors[j].remove(x);
@@ -230,8 +214,8 @@ public class DirectedGraph implements IGraph {
      * @return true iff arc (from,to) was not already in the graph
      */
     public boolean addArc(int from, int to) {
-        activateNode(from);
-        activateNode(to);
+        addNode(from);
+        addNode(to);
         if (!successors[from].contain(to)) {
             assert (!predecessors[to].contain(from)) : "incoherent directed graph";
             successors[from].add(to);
@@ -247,12 +231,12 @@ public class DirectedGraph implements IGraph {
      * @param x node index
      * @return successors of x
      */
-    public ISet getSuccessorsOf(int x) {
+    public ISet getSuccOf(int x) {
         return successors[x];
     }
 
     @Override
-    public ISet getSuccsOrNeigh(int x) {
+    public ISet getSuccOrNeighOf(int x) {
         return successors[x];
     }
 
@@ -262,12 +246,12 @@ public class DirectedGraph implements IGraph {
      * @param x node index
      * @return predecessors of x
      */
-    public ISet getPredecessorsOf(int x) {
+    public ISet getPredOf(int x) {
         return predecessors[x];
     }
 
     @Override
-    public ISet getPredsOrNeigh(int x) {
+    public ISet getPredOrNeighOf(int x) {
         return predecessors[x];
     }
 }

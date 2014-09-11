@@ -127,10 +127,10 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		int n_R = SCCfinder.getNbSCC();
 		// forces variables that cannot connect source to n, to be loops
 		for(int i=0;i<n_R;i++){
-			if(i!=first && G_R.getPredecessorsOf(i).isEmpty()){
+			if(i!=first && G_R.getPredOf(i).isEmpty()){
 				makeLoops(source,i,false);
 			}
-			else if(i!=last && G_R.getSuccessorsOf(i).isEmpty()){
+			else if(i!=last && G_R.getSuccOf(i).isEmpty()){
 				makeLoops(source,i,true);
 			}
 		}
@@ -144,12 +144,12 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		mandSCC.clear();
 		for(int i=0;i<n2;i++){
 			mates[i].clear();
-			support.getSuccessorsOf(i).clear();
-			support.getPredecessorsOf(i).clear();
-			G_R.getPredecessorsOf(i).clear();
-			G_R.getSuccessorsOf(i).clear();
+			support.getSuccOf(i).clear();
+			support.getPredOf(i).clear();
+			G_R.getPredOf(i).clear();
+			G_R.getSuccOf(i).clear();
 		}
-		G_R.getActiveNodes().clear();
+		G_R.getNodes().clear();
 		for(int i=0;i<n;i++){
 			IntVar v = vars[i];
 			int lb = v.getLB();
@@ -165,7 +165,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		SCCfinder.findAllSCC();
 		int n_R = SCCfinder.getNbSCC();
 		for (int i = 0; i < n_R; i++) {
-			G_R.getActiveNodes().add(i);
+			G_R.getNodes().add(i);
 		}
 		sccOf = SCCfinder.getNodesSCC();
 		ISet succs;
@@ -175,7 +175,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 			if(!vars[i].contains(i+offSet)){
 				mandSCC.set(x);
 			}
-			succs = support.getSuccessorsOf(i);
+			succs = support.getSuccOf(i);
 			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 				if (x != sccOf[j]) {
 					G_R.addArc(x, sccOf[j]);
@@ -208,18 +208,18 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		}
 		mates[cc].clear();
 		if(sink){
-			ISet ps = G_R.getPredecessorsOf(cc);
+			ISet ps = G_R.getPredOf(cc);
 			for(int p=ps.getFirstElement();p>=0;p=ps.getNextElement()){
 				G_R.removeArc(p,cc);
-				if(G_R.getSuccessorsOf(p).isEmpty()){
+				if(G_R.getSuccOf(p).isEmpty()){
 					makeLoops(source,p,sink);
 				}
 			}
 		}else{
-			ISet ss = G_R.getSuccessorsOf(cc);
+			ISet ss = G_R.getSuccOf(cc);
 			for(int s=ss.getFirstElement();s>=0;s=ss.getNextElement()){
 				G_R.removeArc(cc,s);
-				if(G_R.getPredecessorsOf(s).isEmpty()){
+				if(G_R.getPredOf(s).isEmpty()){
 					makeLoops(source,s,sink);
 				}
 			}
@@ -254,7 +254,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 	}
 
 	private void checkSCCLink() throws ContradictionException {
-		for (int sccFrom=G_R.getActiveNodes().getFirstElement(); sccFrom>=0; sccFrom=G_R.getActiveNodes().getNextElement()) {
+		for (int sccFrom=G_R.getNodes().getFirstElement(); sccFrom>=0; sccFrom=G_R.getNodes().getNextElement()) {
 			int door = -1;
 			for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
 				if(door == -1){
