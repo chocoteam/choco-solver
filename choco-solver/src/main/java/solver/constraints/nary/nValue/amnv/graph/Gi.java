@@ -53,7 +53,7 @@ public class Gi extends G{
 	 * @param X		integer variable
 	 */
 	public Gi(IntVar[] X) {
-		super(X[0].getSolver().getEnvironment(), X.length);
+		super(X[0].getSolver(), X.length);
 		this.X = X;
 	}
 
@@ -62,9 +62,9 @@ public class Gi extends G{
 	//***********************************************************************************
 
 	public void build() {
-		int n = getNbNodes();
+		int n = getNbMaxNodes();
 		for (int i = 0; i < n; i++) {
-			getNeighborsOf(i).clear();
+			getNeighOf(i).clear();
 		}
 		for (int i = 0; i < n; i++) {
 			for (int i2 = i + 1; i2 < n; i2++) {
@@ -76,14 +76,14 @@ public class Gi extends G{
 	}
 
 	public void update() {
-		int n = getNbNodes();
+		int n = getNbMaxNodes();
 		for (int i = 0; i < n; i++) {
 			update(i);
 		}
 	}
 
 	public void update(int i) {
-		ISet nei = getNeighborsOf(i);
+		ISet nei = getNeighOf(i);
 		for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 			if (!intersect(i, j)) {
 				removeEdge(i, j);

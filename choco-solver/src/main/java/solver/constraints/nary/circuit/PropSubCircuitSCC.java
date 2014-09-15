@@ -121,71 +121,72 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
         }
     }
 
-    public void filterFromSource(int source) throws ContradictionException {
-        assert (!vars[source].contains(source + offSet));
-        // reset data structures
-        rebuild(source);
-        int first = sccOf[source];
-        int last = sccOf[n];
-        int n_R = SCCfinder.getNbSCC();
-        // forces variables that cannot connect source to n, to be loops
-        for (int i = 0; i < n_R; i++) {
-            if (i != first && G_R.getPredecessorsOf(i).isEmpty()) {
-                makeLoops(source, i, false);
-            } else if (i != last && G_R.getSuccessorsOf(i).isEmpty()) {
-                makeLoops(source, i, true);
-            }
-        }
-        // additional filter (based on instantiated arcs)
-        filterFromInst(source);
-        // ad hoc filtering rules
-        checkSCCLink();
-    }
+	public void filterFromSource(int source) throws ContradictionException {
+		assert (!vars[source].contains(source+offSet));
+		// reset data structures
+		rebuild(source);
+		int first = sccOf[source];
+		int last = sccOf[n];
+		int n_R = SCCfinder.getNbSCC();
+		// forces variables that cannot connect source to n, to be loops
+		for(int i=0;i<n_R;i++){
+			if(i!=first && G_R.getPredOf(i).isEmpty()){
+				makeLoops(source,i,false);
+			}
+			else if(i!=last && G_R.getSuccOf(i).isEmpty()){
+				makeLoops(source,i,true);
+			}
+		}
+		// additional filter (based on instantiated arcs)
+		filterFromInst(source);
+		// ad hoc filtering rules
+		checkSCCLink();
+	}
 
-    public void rebuild(int source) {
-        mandSCC.clear();
-        for (int i = 0; i < n2; i++) {
-            mates[i].clear();
-            support.getSuccessorsOf(i).clear();
-            support.getPredecessorsOf(i).clear();
-            G_R.getPredecessorsOf(i).clear();
-            G_R.getSuccessorsOf(i).clear();
-        }
-        G_R.getActiveNodes().clear();
-        for (int i = 0; i < n; i++) {
-            IntVar v = vars[i];
-            int lb = v.getLB();
-            int ub = v.getUB();
-            for (int j = lb; j <= ub; j = v.nextValue(j)) {
-                if (j - offSet == source) {
-                    support.addArc(i, n);
-                } else {
-                    support.addArc(i, j - offSet);
-                }
-            }
-        }
-        SCCfinder.findAllSCC();
-        int n_R = SCCfinder.getNbSCC();
-        for (int i = 0; i < n_R; i++) {
-            G_R.getActiveNodes().add(i);
-        }
-        sccOf = SCCfinder.getNodesSCC();
-        ISet succs;
-        int x;
-        for (int i = 0; i < n; i++) {
-            x = sccOf[i];
-            if (!vars[i].contains(i + offSet)) {
-                mandSCC.set(x);
-            }
-            succs = support.getSuccessorsOf(i);
-            for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-                if (x != sccOf[j]) {
-                    G_R.addArc(x, sccOf[j]);
-                    mates[x].add((i + 1) * n2 + j);
-                }
-            }
-        }
-    }
+	public void rebuild(int source) {
+		mandSCC.clear();
+		for(int i=0;i<n2;i++){
+			mates[i].clear();
+			support.getSuccOf(i).clear();
+			support.getPredOf(i).clear();
+			G_R.getPredOf(i).clear();
+			G_R.getSuccOf(i).clear();
+		}
+		G_R.getNodes().clear();
+		for(int i=0;i<n;i++){
+			IntVar v = vars[i];
+			int lb = v.getLB();
+			int ub = v.getUB();
+			for(int j=lb;j<=ub;j=v.nextValue(j)){
+				if(j-offSet==source){
+					support.addArc(i,n);
+				}else{
+					support.addArc(i,j-offSet);
+				}
+			}
+		}
+		SCCfinder.findAllSCC();
+		int n_R = SCCfinder.getNbSCC();
+		for (int i = 0; i < n_R; i++) {
+			G_R.getNodes().add(i);
+		}
+		sccOf = SCCfinder.getNodesSCC();
+		ISet succs;
+		int x;
+		for (int i = 0; i < n; i++) {
+			x = sccOf[i];
+			if(!vars[i].contains(i+offSet)){
+				mandSCC.set(x);
+			}
+			succs = support.getSuccOf(i);
+			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+				if (x != sccOf[j]) {
+					G_R.addArc(x, sccOf[j]);
+					mates[x].add((i + 1) * n2 + j);
+				}
+			}
+		}
+	}
 
     private void makeLoops(int source, int cc, boolean sink) throws ContradictionException {
         if (cc == sccOf[source]) {
@@ -205,28 +206,28 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 //		if((sink && cc==sccOf[source]) || (cc==sccOf[n] && !sink)){
 //			contradiction(vars[0],"");
 //		}
-        for (int i = SCCfinder.getSCCFirstNode(cc); i >= 0; i = SCCfinder.getNextNode(i)) {
-            vars[i].instantiateTo(i + offSet, aCause);
-        }
-        mates[cc].clear();
-        if (sink) {
-            ISet ps = G_R.getPredecessorsOf(cc);
-            for (int p = ps.getFirstElement(); p >= 0; p = ps.getNextElement()) {
-                G_R.removeArc(p, cc);
-                if (G_R.getSuccessorsOf(p).isEmpty()) {
-                    makeLoops(source, p, sink);
-                }
-            }
-        } else {
-            ISet ss = G_R.getSuccessorsOf(cc);
-            for (int s = ss.getFirstElement(); s >= 0; s = ss.getNextElement()) {
-                G_R.removeArc(cc, s);
-                if (G_R.getPredecessorsOf(s).isEmpty()) {
-                    makeLoops(source, s, sink);
-                }
-            }
-        }
-    }
+		for(int i=SCCfinder.getSCCFirstNode(cc); i>=0; i=SCCfinder.getNextNode(i)){
+			vars[i].instantiateTo(i+offSet,aCause);
+		}
+		mates[cc].clear();
+		if(sink){
+			ISet ps = G_R.getPredOf(cc);
+			for(int p=ps.getFirstElement();p>=0;p=ps.getNextElement()){
+				G_R.removeArc(p,cc);
+				if(G_R.getSuccOf(p).isEmpty()){
+					makeLoops(source,p,sink);
+				}
+			}
+		}else{
+			ISet ss = G_R.getSuccOf(cc);
+			for(int s=ss.getFirstElement();s>=0;s=ss.getNextElement()){
+				G_R.removeArc(cc,s);
+				if(G_R.getPredOf(s).isEmpty()){
+					makeLoops(source,s,sink);
+				}
+			}
+		}
+	}
 
     private void filterFromInst(int source) throws ContradictionException {
         int to, arc, x;
@@ -255,29 +256,29 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
         }
     }
 
-    private void checkSCCLink() throws ContradictionException {
-        for (int sccFrom = G_R.getActiveNodes().getFirstElement(); sccFrom >= 0; sccFrom = G_R.getActiveNodes().getNextElement()) {
-            int door = -1;
-            for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
-                if (door == -1) {
-                    door = i / n2 - 1;
-                } else if (door != i / n2 - 1) {
-                    return;
-                }
-            }
-            if (door >= 0) {
-                int lb = vars[door].getLB();
-                int ub = vars[door].getUB();
-                for (int v = lb; v <= ub; v = vars[door].nextValue(v)) {
-                    if (sccOf[v - offSet] == sccFrom) {
-                        if (v - offSet != door || mandSCC.get(sccFrom)) {
-                            vars[door].removeValue(v, aCause);
-                        }
-                    }
-                }
-            }
-        }
-    }
+	private void checkSCCLink() throws ContradictionException {
+		for (int sccFrom=G_R.getNodes().getFirstElement(); sccFrom>=0; sccFrom=G_R.getNodes().getNextElement()) {
+			int door = -1;
+			for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
+				if(door == -1){
+					door = i/n2-1;
+				}else if(door!=i/n2-1){
+					return;
+				}
+			}
+			if(door>=0){
+				int lb = vars[door].getLB();
+				int ub = vars[door].getUB();
+				for(int v=lb;v<=ub;v=vars[door].nextValue(v)){
+					if(sccOf[v-offSet]==sccFrom){
+						if(v-offSet!=door || mandSCC.get(sccFrom)){
+							vars[door].removeValue(v,aCause);
+						}
+					}
+				}
+			}
+		}
+	}
 
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {

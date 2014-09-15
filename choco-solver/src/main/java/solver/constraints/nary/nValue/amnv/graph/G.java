@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.nValue.amnv.graph;
 
-import memory.IEnvironment;
+import solver.Solver;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.SetType;
 
@@ -45,11 +45,11 @@ public abstract class G extends UndirectedGraph{
 
 	/**
 	 * Creates a backtrackable undirected graph of nbNodes nodes
-	 * @param env		backtracking environment
+	 * @param solver	solver providing the backtracking environment
 	 * @param nbNodes	size of the graph (number of nodes)
 	 */
-	public G(IEnvironment env, int nbNodes) {
-		super(env, nbNodes, SetType.SWAP_ARRAY, true);
+	public G(Solver solver, int nbNodes) {
+		super(solver, nbNodes, SetType.BIPARTITESET, true);
 	}
 
 	//***********************************************************************************

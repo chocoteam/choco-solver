@@ -68,79 +68,76 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Creates a Set variable
-     *
-     * @param name    name of the variable
-     * @param env     initial envelope domain
-     * @param envType data structure of the envelope
-     * @param ker     initial kernel domain
-     * @param kerType data structure of the kernel
-     * @param solver  solver of the variable.
-     */
-    public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
-        super(name, solver);
-        int min = Integer.MAX_VALUE;
-        int max = Integer.MIN_VALUE;
-        for (int i : env) {
-            if (i == Integer.MIN_VALUE || i == Integer.MAX_VALUE) {
-                throw new UnsupportedOperationException("too large (infinite) integers within the set variable. " +
-                        "Integer.MIN_VALUE and i==Integer.MAX_VALUE are not handled.");
-            }
-            min = Math.min(min, i);
-            max = Math.max(max, i);
-        }
-        check(env, ker, max, min);
-        IEnvironment environment = solver.getEnvironment();
-        envelope = SetFactory.makeStoredSet(envType, max - min + 1, environment);
-        kernel = SetFactory.makeStoredSet(kerType, max - min + 1, environment);
-        for (int i : env) {
-            envelope.add(i - min);
-        }
-        for (int i : ker) {
-            kernel.add(i - min);
-        }
-        this.min = min;
-        this.max = max;
-    }
+	/**
+	 * Creates a Set variable
+	 *
+	 * @param name		name of the variable
+	 * @param env		initial envelope domain
+	 * @param envType	data structure of the envelope
+	 * @param ker		initial kernel domain
+	 * @param kerType	data structure of the kernel
+	 * @param solver	solver of the variable.
+	 */
+	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
+		super(name, solver);
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
+		for(int i:env){
+			if(i==Integer.MIN_VALUE || i==Integer.MAX_VALUE){
+				throw new UnsupportedOperationException("too large (infinite) integers within the set variable. " +
+						"Integer.MIN_VALUE and i==Integer.MAX_VALUE are not handled.");
+			}
+			min = Math.min(min,i);
+			max = Math.max(max,i);
+		}
+		check(env,ker,max,min);
+		envelope = SetFactory.makeStoredSet(envType, max-min+1, solver);
+		kernel = SetFactory.makeStoredSet(kerType, max-min+1, solver);
+		for(int i:env){
+			envelope.add(i-min);
+		}
+		for(int i:ker){
+			kernel.add(i-min);
+		}
+		this.min = min;
+		this.max = max;
+	}
 
-    /**
-     * Creates a Set variable
-     *
-     * @param name   name of the variable
-     * @param min    first envelope value
-     * @param max    last envelope value
-     * @param solver solver of the variable.
-     */
-    public SetVarImpl(String name, int min, int max, Solver solver) {
-        super(name, solver);
-        IEnvironment environment = solver.getEnvironment();
-        envelope = SetFactory.makeStoredSet(SetType.BITSET, max - min + 1, environment);
-        kernel = SetFactory.makeStoredSet(SetType.BITSET, max - min + 1, environment);
-        for (int i = min; i <= max; i++) {
-            envelope.add(i - min);
-        }
-        this.min = min;
-        this.max = max;
-    }
+	/**
+	 * Creates a Set variable
+	 *
+	 * @param name		name of the variable
+	 * @param min		first envelope value
+	 * @param max		last envelope value
+	 * @param solver	solver of the variable.
+	 */
+	public SetVarImpl(String name, int min, int max, Solver solver) {
+		super(name, solver);
+		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
+		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
+		for(int i=min; i<=max; i++){
+			envelope.add(i-min);
+		}
+		this.min = min;
+		this.max = max;
+	}
 
-    private static void check(int[] env, int[] ker, int max, int min) {
-        BitSet b = new BitSet(max - min);
-        for (int i : env) {
-            if (b.get(i - min)) {
-                throw new UnsupportedOperationException("Invalid envelope definition. " + i + " is added twice.");
-            }
-            b.set(i - min);
-        }
-        for (int i : ker) {
-            if (!b.get(i - min)) {
-                throw new UnsupportedOperationException("Invalid envelope/kernel definition. "
-                        + i + " is in the kernel but not in the envelope.");
-            }
-        }
-    }
+	private static void check(int[] env, int[] ker, int max, int min) {
+		BitSet b = new BitSet(max-min);
+		for(int i:env){
+			if(b.get(i-min)){
+				throw new UnsupportedOperationException("Invalid envelope definition. "+i+" is added twice.");
+			}b.set(i-min);
+		}
+		for(int i:ker){
+			if(!b.get(i-min)){
+				throw new UnsupportedOperationException("Invalid envelope/kernel definition. "
+						+i+" is in the kernel but not in the envelope.");
+			}
+		}
+	}
 
-    //***********************************************************************************
+	//***********************************************************************************
     // METHODS
     //***********************************************************************************
 

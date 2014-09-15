@@ -35,7 +35,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.*;
-import solver.variables.graph.GraphVar;
 
 import java.text.MessageFormat;
 
@@ -192,8 +191,6 @@ public class SolverTest {
         IntVar i = VF.bounded("i", VF.MIN_INT_BOUND, VF.MAX_INT_BOUND, solver);
         SetVar s = VF.set("s", 2, 3, solver);
         RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
-        GraphVar g = VF.directedGraph("g", 2, solver);
-
 
         BoolVar[] bvars = solver.retrieveBoolVars();
         Assert.assertEquals(bvars, new BoolVar[]{solver.ZERO, solver.ONE, b});
@@ -207,8 +204,6 @@ public class SolverTest {
         RealVar[] rvars = solver.retrieveRealVars();
         Assert.assertEquals(rvars, new RealVar[]{r});
 
-        GraphVar[] gvars = solver.retrieveGraphVars();
-        Assert.assertEquals(gvars, new GraphVar[]{g});
     }
 
 }

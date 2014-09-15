@@ -27,12 +27,12 @@
 
 package solver.constraints.nary.nValue.amnv.rules;
 
-import memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Propagator;
-import solver.constraints.nary.nValue.amnv.graph.G;
 import solver.constraints.nary.nValue.amnv.mis.F;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
@@ -60,12 +60,12 @@ public class R3 implements R {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public R3(int nbDecVars, IEnvironment environment){
+	public R3(int nbDecVars, Solver solver){
 		n = nbDecVars;
 		valToRem = new int[31];
 		learntEqualities = new ISet[n];
 		for(int i=0;i<n;i++){
-			learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET,n,environment);
+			learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET,n,solver);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class R3 implements R {
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(IntVar[] vars, G graph, F heur, Propagator aCause) throws ContradictionException{
+	public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException{
 		assert  n == vars.length-1;
 		BitSet mis = heur.getMIS();
 		if(mis.cardinality()==vars[n].getUB()){
@@ -89,7 +89,7 @@ public class R3 implements R {
 				for (int k = lb; k <= ub; k = vars[i].nextValue(k)) {
 					valToRem[last++] = k;
 				}
-				nei = graph.getNeighborsOf(i);
+				nei = graph.getNeighOf(i);
 				for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 					if (mis.get(j)) {
 						if (mate == -1) {

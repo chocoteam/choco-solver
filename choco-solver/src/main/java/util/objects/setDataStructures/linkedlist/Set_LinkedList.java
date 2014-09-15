@@ -206,4 +206,19 @@ public class Set_LinkedList implements ISet {
 	public SetType getSetType(){
 		return SetType.LINKED_LIST;
 	}
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i=getFirstElement();i>=0;i=getNextElement()){
+			a[idx++] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return -1;
+	}
 }

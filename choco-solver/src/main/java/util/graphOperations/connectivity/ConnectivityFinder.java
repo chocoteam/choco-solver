@@ -59,7 +59,7 @@ public class ConnectivityFinder {
 	 */
 	public ConnectivityFinder(IGraph g) {
 		graph = g;
-		n = g.getNbNodes();
+		n = g.getNbMaxNodes();
 		p = new int[n];
 		fifo = new int[n];
 	}
@@ -96,7 +96,7 @@ public class ConnectivityFinder {
 			CC_nextNode = new int[n];
 			node_CC = new int[n];
 		}
-		ISet act = graph.getActiveNodes();
+		ISet act = graph.getNodes();
 		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
 			p[i] = -1;
 		}
@@ -123,7 +123,7 @@ public class ConnectivityFinder {
 		add(start,cc);
 		while(first<last){
 			int i = fifo[first++];
-			ISet s = graph.getSuccsOrNeigh(i);
+			ISet s = graph.getSuccOrNeighOf(i);
 			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
 				if(p[j]==-1){
 					p[j] = i;
@@ -132,7 +132,7 @@ public class ConnectivityFinder {
 				}
 			}
 			if(graph.isDirected()){
-				s = graph.getPredsOrNeigh(i);
+				s = graph.getPredOrNeighOf(i);
 				for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
 					if(p[j]==-1){
 						p[j] = i;
@@ -163,7 +163,7 @@ public class ConnectivityFinder {
 			numOfNode = new int[n];
 			inf = new int[n];
 		}
-		ISet act = graph.getActiveNodes();
+		ISet act = graph.getNodes();
 		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
 			inf[i] = Integer.MAX_VALUE;
 			p[i] = -1;
@@ -180,10 +180,10 @@ public class ConnectivityFinder {
 		boolean first = true;
 		while (true) {
 			if (first) {
-				j = graph.getSuccsOrNeigh(i).getFirstElement();
+				j = graph.getSuccOrNeighOf(i).getFirstElement();
 				first = false;
 			} else {
-				j = graph.getSuccsOrNeigh(i).getNextElement();
+				j = graph.getSuccOrNeighOf(i).getNextElement();
 			}
 			if (j < 0) {
 				if (i == start) {
@@ -242,7 +242,7 @@ public class ConnectivityFinder {
 			L = new int[n];
 			H = new int[n];
 		}
-		ISet act = graph.getActiveNodes();
+		ISet act = graph.getNodes();
 		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
 			p[i] = -1;
 		}
@@ -260,10 +260,10 @@ public class ConnectivityFinder {
 		boolean first = true;
 		while (true) {
 			if (first) {
-				j = graph.getSuccsOrNeigh(i).getFirstElement();
+				j = graph.getSuccOrNeighOf(i).getFirstElement();
 				first = false;
 			} else {
-				j = graph.getSuccsOrNeigh(i).getNextElement();
+				j = graph.getSuccOrNeighOf(i).getNextElement();
 			}
 			if (j < 0) {
 				if (i == start) {
@@ -295,7 +295,7 @@ public class ConnectivityFinder {
 			ND[currentNode] = 1;
 			L[currentNode] = i;
 			H[currentNode] = i;
-			ISet nei = graph.getSuccsOrNeigh(currentNode);
+			ISet nei = graph.getSuccOrNeighOf(currentNode);
 			for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
 				if (p[s] == currentNode) {
 					ND[currentNode] += ND[s];
@@ -324,7 +324,7 @@ public class ConnectivityFinder {
 //	 * @return a ConnectivityObject that encapsulates all connected components, articulation points and isthmus of the given graph
 //	 */
 //	private static ConnectivityObject findAll(IGraph graph){
-//		int nb = graph.getNbNodes();
+//		int nb = graph.getNbMaxNodes();
 //		ConnectivityObject co = new ConnectivityObject();
 //		int[] p = new int[nb];
 //		int[] numOfNode = new int[nb];
@@ -336,12 +336,12 @@ public class ConnectivityFinder {
 //		INeighbors[] neighbors = new INeighbors[nb];
 //		BitSet notOpenedNodes = new BitSet(nb);
 //		BitSet notFirst = new BitSet(nb);
-//		IActiveNodes act = graph.getActiveNodes();
+//		IActiveNodes act = graph.getNodes();
 //		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 //			inf[i] = Integer.MAX_VALUE;
 //			p[i] = -1;
 //			notOpenedNodes.set(i);
-//			neighbors[i] = graph.getNeighborsOf(i);
+//			neighbors[i] = graph.getNeighOf(i);
 //		}
 //		int first = 0;
 //		first = notOpenedNodes.nextSetBit(first);
@@ -422,7 +422,7 @@ public class ConnectivityFinder {
 //	}
 //
 //	public static boolean isBiconnectedNaive(IGraph graph){
-//		int n = graph.getNbNodes();
+//		int n = graph.getNbMaxNodes();
 //		int i,j;
 //		for(int k=0;k<n;k++){
 //			int[] list = new int[n];
@@ -439,7 +439,7 @@ public class ConnectivityFinder {
 //			while(indexFirst!=indexTo){
 //				i = list[indexFirst];
 //				indexFirst++;
-//				nei = graph.getNeighborsOf(i);
+//				nei = graph.getNeighOf(i);
 //				for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 //					if(j!=k && !inList.get(j)){
 //						inList.set(j);
@@ -448,10 +448,10 @@ public class ConnectivityFinder {
 //					}
 //				}
 //			}
-//			if(indexTo>graph.getActiveNodes().getSize()-1){
+//			if(indexTo>graph.getNodes().getSize()-1){
 //				throw new UnsupportedOperationException();
 //			}
-//			if(indexTo<graph.getActiveNodes().getSize()-1){
+//			if(indexTo<graph.getNodes().getSize()-1){
 //				return false;
 //			}
 //		}

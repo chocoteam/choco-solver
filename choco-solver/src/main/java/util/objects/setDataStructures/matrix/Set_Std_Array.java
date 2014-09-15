@@ -147,4 +147,19 @@ public class Set_Std_Array implements ISet {
 	public SetType getSetType(){
 		return SetType.BOOL_ARRAY;
 	}
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i=getFirstElement();i>=0;i=getNextElement()){
+			a[idx++] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return n;
+	}
 }

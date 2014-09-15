@@ -46,39 +46,39 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
     // METHODS
     //***********************************************************************************
 
-    protected void filterFromDom(int duplicatedNode) throws ContradictionException {
-        for (int i = 0; i < n + 1; i++) {
-            connectedGraph.getSuccessorsOf(i).clear();
-            connectedGraph.getPredecessorsOf(i).clear();
-        }
-        for (int i = 0; i < n; i++) {
-            int ub = vars[i].getUB();
-            for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
-                if (y - offSet == duplicatedNode) {
-                    connectedGraph.addArc(n, i);
-                } else {
-                    connectedGraph.addArc(y - offSet, i);
-                }
-            }
-        }
-        if (domFinder.findDominators()) {
-            for (int x = 0; x < n; x++) {
-                int ub = vars[x].getUB();
-                for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
-                    if (y - offSet != duplicatedNode) {
-                        if (domFinder.isDomminatedBy(y - offSet, x)) {
-                            if (x == duplicatedNode) {
-                                throw new UnsupportedOperationException();
-                            }
-                            vars[x].removeValue(y, aCause);
-                        }
-                    }
-                }
-            }
-        } else {
-            contradiction(vars[0], "the source cannot reach all nodes");
-        }
-    }
+	protected void filterFromDom(int duplicatedNode) throws ContradictionException {
+		for (int i = 0; i < n + 1; i++) {
+			connectedGraph.getSuccOf(i).clear();
+			connectedGraph.getPredOf(i).clear();
+		}
+		for (int i = 0; i < n; i++) {
+			int ub = vars[i].getUB();
+			for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
+				if (y - offSet == duplicatedNode) {
+					connectedGraph.addArc(n, i);
+				}else {
+					connectedGraph.addArc(y - offSet, i);
+				}
+			}
+		}
+		if (domFinder.findDominators()) {
+			for (int x = 0; x < n; x++) {
+				int ub = vars[x].getUB();
+				for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
+					if(y-offSet!=duplicatedNode) {
+						if (domFinder.isDomminatedBy(y - offSet,x)) {
+							if(x==duplicatedNode) {
+								throw new UnsupportedOperationException();
+							}
+							vars[x].removeValue(y, aCause);
+						}
+					}
+				}
+			}
+		} else {
+			contradiction(vars[0], "the source cannot reach all nodes");
+		}
+	}
 
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {

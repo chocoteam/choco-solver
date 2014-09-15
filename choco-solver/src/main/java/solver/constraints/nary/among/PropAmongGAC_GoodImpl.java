@@ -84,8 +84,8 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
         this.setValues = new TIntHashSet(values);
         this.values = setValues.toArray();
         Arrays.sort(this.values);
-        poss = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, nb_vars, environment);
-        nbSure = environment.makeInt(0);
+		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET,nb_vars,solver);
+		nbSure = environment.makeInt(0);
     }
 
     //***********************************************************************************

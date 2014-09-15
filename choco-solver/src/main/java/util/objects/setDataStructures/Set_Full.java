@@ -110,4 +110,18 @@ public class Set_Full implements ISet {
 	public String toString(){
 		return "["+0+","+(n-1)+"]";
 	}
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[n];
+		for(int i=0;i<n;i++){
+			a[i] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return n;
+	}
 }

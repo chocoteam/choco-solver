@@ -36,7 +36,6 @@ import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.constraints.extension.binary.*;
 import solver.constraints.extension.nary.*;
-import solver.constraints.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree_IntVar;
 import solver.constraints.nary.PropDiffN;
 import solver.constraints.nary.PropKLoops;
 import solver.constraints.nary.PropKnapsack;
@@ -605,7 +604,7 @@ public class IntConstraintFactory {
         TIntArrayList vals = getDomainUnion(VARS);
         if (GREEDY) {
             Gci gci = new Gci(VARS, new AutoDiffDetection(VARS));
-            R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver().getEnvironment())};
+            R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver())};
             return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES),
                     new PropAMNV(VARS, NVALUES, gci, new MD(gci), rules));
         } else {
@@ -1610,9 +1609,6 @@ public class IntConstraintFactory {
      * @param SUCCS       successors variables
      * @param COST        cost of the cycle
      * @param COST_MATRIX symmetric cost matrix
-     * @param STRONG      applies strong filtering based on a Lagrangian relaxation
-     *                    (see Held&Karp and Benchimol et. al.)
-     *                    The strong filter will only occur after a first solution has been found
      * @return a CP model for the TSP
      */
     public static Constraint[] tsp(IntVar[] SUCCS, IntVar COST, int[][] COST_MATRIX, boolean STRONG) {
@@ -1629,15 +1625,6 @@ public class IntConstraintFactory {
         }
         model[n] = sum(costOf, COST);
         model[n + 1] = circuit(SUCCS, 0);
-        if (STRONG) {
-            boolean symmetric = PropLagr_OneTree_IntVar.checkSymmetry(COST_MATRIX);
-            assert symmetric : "TSP matrix should be symmetric";
-            if (symmetric) {
-                return ArrayUtils.append(model, new Constraint[]{
-                        new Constraint("HeldKarpFilter", new PropLagr_OneTree_IntVar(SUCCS, COST, COST_MATRIX, true))
-                });
-            }
-        }
         return model;
     }
 

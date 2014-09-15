@@ -41,7 +41,8 @@ import util.objects.setDataStructures.ISet;
  */
 public abstract class Set_Swap implements ISet {
 
-    protected int arrayLength, sizeMax, currentIdx, size;
+    protected int arrayLength, currentIdx, size;
+	protected final int sizeMax;
     protected int[] array;
 
     public Set_Swap(int n) {
@@ -106,4 +107,19 @@ public abstract class Set_Swap implements ISet {
         }
         return array[currentIdx];
     }
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i=getFirstElement();i>=0;i=getNextElement()){
+			a[idx++] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return sizeMax;
+	}
 }

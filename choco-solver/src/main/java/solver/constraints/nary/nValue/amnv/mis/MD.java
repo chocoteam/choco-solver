@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.nValue.amnv.mis;
 
-import solver.constraints.nary.nValue.amnv.graph.G;
+import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
@@ -44,7 +44,7 @@ public class MD implements F{
 	// VARIABLES
 	//***********************************************************************************
 
-	protected G graph;
+	protected UndirectedGraph graph;
 	protected int n;
 	protected BitSet out, inMIS;
 	protected int[] nbNeighbours, fifo;
@@ -57,9 +57,9 @@ public class MD implements F{
 	 * Creates an instance of the Min Degree heuristic to compute independent sets on graph
 	 * @param graph
 	 */
-	public MD(G graph){
+	public MD(UndirectedGraph graph){
 		this.graph = graph;
-		n = graph.getNbNodes();
+		n = graph.getNbMaxNodes();
 		out = new BitSet(n);
 		inMIS = new BitSet(n);
 		nbNeighbours = new int[n];
@@ -78,7 +78,7 @@ public class MD implements F{
 		out.clear();
 		inMIS.clear();
 		for (int i = 0; i < n; i++) {
-			nbNeighbours[i] = graph.getNeighborsOf(i).getSize();
+			nbNeighbours[i] = graph.getNeighOf(i).getSize();
 		}
 		int idx = out.nextClearBit(0);
 		while (idx < n) {
@@ -93,7 +93,7 @@ public class MD implements F{
 	}
 
 	protected void addToMIS(int node) {
-		ISet nei = graph.getNeighborsOf(node);
+		ISet nei = graph.getNeighOf(node);
 		inMIS.set(node);
 		out.set(node);
 		int sizeFifo=0;
@@ -104,7 +104,7 @@ public class MD implements F{
 			}
 		}
 		for (int i=0; i<sizeFifo; i++) {
-			nei = graph.getNeighborsOf(fifo[i]);
+			nei = graph.getNeighOf(fifo[i]);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				nbNeighbours[j]--;
 			}

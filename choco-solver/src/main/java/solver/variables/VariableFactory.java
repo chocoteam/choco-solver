@@ -33,8 +33,6 @@ import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.real.IntEqRealConstraint;
 import solver.exception.SolverException;
-import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.impl.*;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
@@ -488,44 +486,6 @@ public class VariableFactory {
      */
     public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
         return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
-    }
-
-    //*************************************************************************************
-    // GRAPH VARIABLES
-    //*************************************************************************************
-
-    /**
-     * Builds a non-directed graph variable with an empty domain
-     * but allocates memory to deal with at most NB_NODES nodes.
-     * <p/>
-     * The domain of a graph variable is defined by two graphs:
-     * <p/> The envelope graph denotes nodes and edges that may belong to a solution
-     * <p/> The kernel graph denotes nodes and edges that must belong to any solution
-     *
-     * @param NAME     name of the variable
-     * @param NB_NODES maximal number of nodes
-     * @param SOLVER   solver involving the variable
-     * @return a graph variable with an empty domain
-     */
-    public static UndirectedGraphVar undirectedGraph(String NAME, int NB_NODES, Solver SOLVER) {
-        return new UndirectedGraphVar(NAME, SOLVER, NB_NODES, false);
-    }
-
-    /**
-     * Builds a directed graph variable with an empty domain
-     * but allocates memory to deal with at most NB_NODES nodes.
-     * <p/>
-     * The domain of a graph variable is defined by two graphs:
-     * <p/> The envelope graph denotes nodes and arcs that may belong to a solution
-     * <p/> The kernel graph denotes nodes and arcs that must belong to any solution
-     *
-     * @param NAME     name of the variable
-     * @param NB_NODES maximal number of nodes
-     * @param SOLVER   solver involving the variable
-     * @return a graph variable with an empty domain
-     */
-    public static DirectedGraphVar directedGraph(String NAME, int NB_NODES, Solver SOLVER) {
-        return new DirectedGraphVar(NAME, SOLVER, NB_NODES, false);
     }
 
     //*************************************************************************************

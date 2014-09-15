@@ -27,17 +27,15 @@
 
 package util.objects.graphs;
 
-import memory.IEnvironment;
+import solver.Solver;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
- * Date: 9 fevr. 2011
- * <p/>
  * Specific implementation of an undirected graph
+ *
+ * @author Jean-Guillaume Fages, Xavier Lorca
  */
 public class UndirectedGraph implements IGraph {
 
@@ -46,9 +44,6 @@ public class UndirectedGraph implements IGraph {
     //***********************************************************************************
 
     ISet[] neighbors;
-    /**
-     * activeIdx represents the nodes available in the graph
-     */
     ISet nodes;
     int n;
     SetType type;
@@ -59,31 +54,31 @@ public class UndirectedGraph implements IGraph {
 
     /**
      * Creates an empty backtrable undirected graph.
-     * Allocates memory for n nodes (but they should then be added explicitely,
+     * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
-     * @param env      solver environment
+     * @param solver   solver providing the backtracking environment
      * @param n        max number of nodes
      * @param type     data structure storing for node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(IEnvironment env, int n, SetType type, boolean allNodes) {
+    public UndirectedGraph(Solver solver, int n, SetType type, boolean allNodes) {
         this.type = type;
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeStoredSet(type, n, env);
+            neighbors[i] = SetFactory.makeStoredSet(type, n, solver);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, env);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
         }
     }
 
     /**
-     * Creates an empty undirected graph.
-     * Allocates memory for n nodes (but they should then be added explicitely,
+     * Creates an empty (non-backtrackable) undirected graph.
+     * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
      * @param n        max number of nodes
@@ -126,7 +121,7 @@ public class UndirectedGraph implements IGraph {
     /**
      * @inheritedDoc
      */
-    public int getNbNodes() {
+    public int getNbMaxNodes() {
         return n;
     }
 
@@ -134,7 +129,7 @@ public class UndirectedGraph implements IGraph {
     /**
      * @inheritedDoc
      */
-    public ISet getActiveNodes() {
+    public ISet getNodes() {
         return nodes;
     }
 
@@ -147,14 +142,14 @@ public class UndirectedGraph implements IGraph {
     }
 
     @Override
-    public boolean activateNode(int x) {
+    public boolean addNode(int x) {
         return nodes.add(x);
     }
 
     @Override
-    public boolean desactivateNode(int x) {
+    public boolean removeNode(int x) {
         if (nodes.remove(x)) {
-            ISet nei = getNeighborsOf(x);
+            ISet nei = getNeighOf(x);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 neighbors[j].remove(x);
             }
@@ -232,17 +227,17 @@ public class UndirectedGraph implements IGraph {
      * @param x node index
      * @return neighbors of x (predecessors and/or successors)
      */
-    public ISet getNeighborsOf(int x) {
+    public ISet getNeighOf(int x) {
         return neighbors[x];
     }
 
     @Override
-    public ISet getPredsOrNeigh(int x) {
+    public ISet getPredOrNeighOf(int x) {
         return neighbors[x];
     }
 
     @Override
-    public ISet getSuccsOrNeigh(int x) {
+    public ISet getSuccOrNeighOf(int x) {
         return neighbors[x];
     }
 

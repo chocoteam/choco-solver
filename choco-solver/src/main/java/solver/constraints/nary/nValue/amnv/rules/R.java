@@ -28,10 +28,10 @@
 package solver.constraints.nary.nValue.amnv.rules;
 
 import solver.constraints.Propagator;
-import solver.constraints.nary.nValue.amnv.graph.G;
 import solver.constraints.nary.nValue.amnv.mis.F;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.objects.graphs.UndirectedGraph;
 
 /**
  * Interface to represent a filtering rule
@@ -41,6 +41,6 @@ import solver.variables.IntVar;
  */
 public interface R {
 
-	void filter(IntVar[] vars, G graph, F heur, Propagator aCause) throws ContradictionException;
+	void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException;
 
 }

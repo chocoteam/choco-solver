@@ -41,11 +41,13 @@ public class Set_BitSet extends BitSet implements ISet {
 
     private int current;//enables to iterate
     private int card;    // enable to get the cardinality in O(1)
+	private int n;
 
     public Set_BitSet(int nbits) {
         super(nbits);
         card = 0;
         current = 0;
+		n = nbits;
     }
 
     @Override
@@ -104,5 +106,20 @@ public class Set_BitSet extends BitSet implements ISet {
 	@Override
 	public SetType getSetType(){
 		return SetType.BITSET;
+	}
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i=getFirstElement();i>=0;i=getNextElement()){
+			a[idx++] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return n;
 	}
 }
