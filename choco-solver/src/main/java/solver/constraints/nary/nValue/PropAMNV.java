@@ -32,8 +32,9 @@ import solver.constraints.nary.nValue.amnv.graph.G;
 import solver.constraints.nary.nValue.amnv.mis.F;
 import solver.constraints.nary.nValue.amnv.rules.R;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -76,13 +77,14 @@ public class PropAMNV extends Propagator<IntVar> {
 
 	@Override
 	protected int getPropagationConditions(int i) {
-		return EventType.INT_ALL_MASK();
+		return IntEventType.INT_ALL_MASK();
 	}
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0)
-		graph.update();
+		if(PropagatorEventType.isFullPropagation(evtmask)) {
+			graph.update();
+		}
 		heur.prepare();
 		do{
 			heur.computeMIS();
@@ -97,7 +99,7 @@ public class PropAMNV extends Propagator<IntVar> {
 		if(idxVarInProp<vars.length-1){
 			graph.update(idxVarInProp);
 		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
 	}
 
 	//***********************************************************************************

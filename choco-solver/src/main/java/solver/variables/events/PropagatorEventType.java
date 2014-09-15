@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,30 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+
+package solver.variables.events;
 
 /**
- * An interface to define event to categorize the filtering algorithm to apply.
- * <br/>Event can promoted or strengthened (cf. "CHOCO : implementing a CP kernel" -- F. Laburthe, 2000).
- * <br/>
+ * An enum defining the propagator event types:
+ * <ul>
+ * <li><code>FULL_PROPAGATION</code>: Propagation from scratch (as in initial propagation),</li>
+ * <li><code>CUSTOM_PROPAGATION</code>: custom propagation triggered by the developer (partially incremental propagation)</li>
+ * </ul>
+ * <p/>
  *
- * @author Charles Prud'homme
- * @since 01/12/11
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public interface IEventType {
+public enum PropagatorEventType implements IEventType {
 
-    /**
-     * Return the value of the mask associated with the event.
-     *
-     * @return the mask of the event.
-     */
-    int getMask();
+	VOID(0,0),
+	CUSTOM_PROPAGATION(1, 1),
+	FULL_PROPAGATION(2, 3);
 
-    /**
-     * Return the strengthened mask associated to the event.
-     * This can be equal to the mask.
-     *
-     * @return the mask of the strenghtened event.
-     */
-    int getStrengthenedMask();
+	private final int mask;
+	private final int strengthened_mask;
+
+	private PropagatorEventType(int mask, int fullmask) {
+		this.mask = mask;
+		this.strengthened_mask = fullmask;
+	}
+
+	@Override
+	public int getMask() {
+		return mask;
+	}
+
+	@Override
+	public int getStrengthenedMask() {
+		return strengthened_mask;
+	}
+
+	//******************************************************************************************************************
+	//******************************************************************************************************************
+
+	public static boolean isFullPropagation(int mask) {
+		return (mask & FULL_PROPAGATION.mask) != 0;
+	}
+
+	public static boolean isCustomPropagation(int mask) {
+		return (mask & CUSTOM_PROPAGATION.mask) != 0;
+	}
 }

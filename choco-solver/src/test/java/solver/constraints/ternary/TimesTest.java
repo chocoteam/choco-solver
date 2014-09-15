@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -35,9 +35,9 @@ import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import solver.variables.events.PropagatorEventType;
 
 /**
  * <br/>
@@ -71,7 +71,7 @@ public class TimesTest extends AbstractTernaryTest {
 			s.propagate();
 			Assert.assertFalse(a.contains(0));
 			for (Propagator p : c.getPropagators()) {
-				p.propagate(EventType.FULL_PROPAGATION.mask);
+				p.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
 			}
 			Assert.assertFalse(a.contains(0));
 		}catch (ContradictionException e){

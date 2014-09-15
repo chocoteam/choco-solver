@@ -8,12 +8,13 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IEventType;
+import solver.variables.events.SetEventType;
 import solver.variables.view.IView;
 import util.tools.StringUtils;
 
@@ -90,7 +91,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         if (!kernelContains(element)) {
-            contradiction(cause, EventType.ADD_TO_KER, "");
+            contradiction(cause, SetEventType.ADD_TO_KER, "");
         }
         return false;
     }
@@ -98,7 +99,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
         if (envelopeContains(element)) {
-            contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
+            contradiction(cause, SetEventType.REMOVE_FROM_ENVELOPE, "");
         }
         return false;
     }
@@ -167,19 +168,19 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+    public void notifyViews(IEventType event, ICause cause) throws ContradictionException {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         solver.getEngine().fails(cause, this, message);
     }
 

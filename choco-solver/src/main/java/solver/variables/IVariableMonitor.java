@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,6 +28,7 @@ package solver.variables;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.variables.events.IEventType;
 
 import java.io.Serializable;
 
@@ -51,10 +52,9 @@ public interface IVariableMonitor<V extends Variable> extends Serializable, ICau
 
     /**
      * Operations to execute after updating the domain variable
-     *
-     * @param var variable concerned
+     *  @param var variable concerned
      * @param evt modification event
-     */
-    void onUpdate(V var, EventType evt) throws ContradictionException;
+	 */
+    void onUpdate(V var, IEventType evt) throws ContradictionException;
 
 }

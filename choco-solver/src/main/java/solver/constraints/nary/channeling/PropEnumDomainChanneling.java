@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,9 +32,9 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -99,7 +99,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == n) {
             idm.freeze();
-            idm.forEach(rem_proc, EventType.REMOVE);
+            idm.forEach(rem_proc, IntEventType.REMOVE);
             idm.unfreeze();
         } else {
             if (vars[varIdx].getValue() == 1) {

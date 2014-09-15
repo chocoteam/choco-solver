@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,11 +33,11 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -64,7 +64,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
         if (var.setToFalse(this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -73,7 +73,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
         if (var.setToTrue(this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -82,7 +82,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (var.removeValue(1 - value, this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -108,7 +108,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (var.instantiateTo(1 - value, this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -118,7 +118,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > 0) {
             if (var.instantiateTo(1 - value, this)) {
-                notifyPropagators(EventType.INSTANTIATE, cause);
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             }
         }
@@ -129,7 +129,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < 1) {
             if (var.instantiateTo(1 - value, this)) {
-                notifyPropagators(EventType.INSTANTIATE, cause);
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             }
         }

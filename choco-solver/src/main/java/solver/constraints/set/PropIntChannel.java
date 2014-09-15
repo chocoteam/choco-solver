@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -39,12 +39,13 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.IntEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -161,8 +162,8 @@ public class PropIntChannel extends Propagator<Variable> {
         if (idx < nSets) {
             idx += offSet1;
             sdm[idxVarInProp].freeze();
-            sdm[idxVarInProp].forEach(elementForced, EventType.ADD_TO_KER);
-            sdm[idxVarInProp].forEach(elementRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm[idxVarInProp].forEach(elementForced, SetEventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
             sdm[idxVarInProp].unfreeze();
         } else {
             idx -= nSets;
@@ -171,7 +172,7 @@ public class PropIntChannel extends Propagator<Variable> {
             }
             idx += offSet2;
             idm[idxVarInProp - nSets].freeze();
-            idm[idxVarInProp - nSets].forEach(valRem, EventType.REMOVE);
+            idm[idxVarInProp - nSets].forEach(valRem, IntEventType.REMOVE);
             idm[idxVarInProp - nSets].unfreeze();
         }
     }

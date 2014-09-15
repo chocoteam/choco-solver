@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,9 +34,9 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -64,9 +64,9 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0) {
-            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
+            return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask();
         } else {
-            return EventType.INSTANTIATE.mask + EventType.INCLOW.mask;
+            return IntEventType.INSTANTIATE.getMask() + IntEventType.INCLOW.getMask();
         }
     }
 

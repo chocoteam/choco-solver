@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,9 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPropagationEngine;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 
 /**
  * An fake propagation engine for debugging uses only.
@@ -76,12 +77,12 @@ class FakeEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
         throw new SolverException("The Propagator " + cause + " is not idempotent!");
     }
 
     @Override
-    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+    public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
 
     }
 
@@ -109,14 +110,14 @@ class FakeEngine implements IPropagationEngine {
         switch (Configuration.IDEMPOTENCY) {
             case force:
                 if (lastProp.isActive()) {
-                    lastProp.propagate(EventType.FULL_PROPAGATION.mask);
+                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 break;
             case error:
                 IPropagationEngine engine = lastProp.getSolver().getEngine();
                 lastProp.getSolver().set(singleton);
                 if (lastProp.isActive()) {
-                    lastProp.propagate(EventType.FULL_PROPAGATION.mask);
+                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 lastProp.getSolver().set(engine);
                 break;

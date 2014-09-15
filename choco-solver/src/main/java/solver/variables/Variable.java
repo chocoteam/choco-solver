@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.IDelta;
+import solver.variables.events.IEventType;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -188,7 +189,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs during notification
      */
-    void notifyPropagators(EventType event, ICause cause) throws ContradictionException;
+    void notifyPropagators(IEventType event, ICause cause) throws ContradictionException;
 
     /**
      * Notify views of observed variable modifications
@@ -196,7 +197,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @param event the event which occurred on the variable
      * @throws ContradictionException
      */
-    void notifyViews(EventType event, ICause cause) throws ContradictionException;
+    void notifyViews(IEventType event, ICause cause) throws ContradictionException;
 
 	/**
 	 * Get the views observing this variables
@@ -210,16 +211,15 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @param event the event which occurred on the variable
      * @throws ContradictionException
      */
-    void notifyMonitors(EventType event) throws ContradictionException;
+    void notifyMonitors(IEventType event) throws ContradictionException;
 
     /**
      * Throws a contradiction exception based on <cause, message>
-     *
-     * @param cause   ICause causing the exception
+     *  @param cause   ICause causing the exception
      * @param event   event causing the contradiction
-     * @param message the detailed message  @throws ContradictionException expected behavior
-     */
-    void contradiction(ICause cause, EventType event, String message) throws ContradictionException;
+	 * @param message the detailed message  @throws ContradictionException expected behavior
+	 */
+    void contradiction(ICause cause, IEventType event, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

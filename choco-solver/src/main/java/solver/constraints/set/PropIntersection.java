@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -39,9 +39,10 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.PropagatorEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -134,7 +135,7 @@ public class PropIntersection extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         SetVar intersection = vars[k];
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
@@ -161,9 +162,8 @@ public class PropIntersection extends Propagator<SetVar> {
                 }
             }
             // ------------------
-            if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0)
-                for (int i = 0; i <= k; i++)
-                    sdm[i].unfreeze();
+			for (int i = 0; i <= k; i++)
+				sdm[i].unfreeze();
         }
     }
 
@@ -171,11 +171,11 @@ public class PropIntersection extends Propagator<SetVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         sdm[idxVarInProp].freeze();
         if (idxVarInProp < k) {
-            sdm[idxVarInProp].forEach(setForced, EventType.ADD_TO_KER);
-            sdm[idxVarInProp].forEach(setRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm[idxVarInProp].forEach(setForced, SetEventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(setRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         } else {
-            sdm[idxVarInProp].forEach(intersectionForced, EventType.ADD_TO_KER);
-            sdm[idxVarInProp].forEach(intersectionRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm[idxVarInProp].forEach(intersectionForced, SetEventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(intersectionRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         }
         sdm[idxVarInProp].unfreeze();
     }

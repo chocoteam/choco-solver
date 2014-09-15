@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,9 +36,9 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -77,9 +77,9 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (bothEnumerated)
-            return EventType.INT_ALL_MASK();
+            return IntEventType.INT_ALL_MASK();
         else
-            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+            return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask() + IntEventType.INCLOW.getMask();
     }
 
     private void updateBounds() throws ContradictionException {
@@ -125,7 +125,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
         } else if (bothEnumerated) {
             indexToFilter = 1 - varIdx;
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+            idms[varIdx].forEach(rem_proc, IntEventType.REMOVE);
             idms[varIdx].unfreeze();
         }
     }

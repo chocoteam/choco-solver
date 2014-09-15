@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,13 +27,13 @@
 package solver.constraints.nary;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
@@ -77,8 +77,8 @@ public class PropDiffN extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int idx) {
-        if (fast) return EventType.INSTANTIATE.mask;
-        return EventType.INSTANTIATE.mask + +EventType.BOUND.mask;
+        if (fast) return IntEventType.INSTANTIATE.getMask();
+        return IntEventType.INSTANTIATE.getMask() + +IntEventType.BOUND.getMask();
     }
 
 	@Override
@@ -93,12 +93,12 @@ public class PropDiffN extends Propagator<IntVar> {
 		if (!boxesToCompute.contain(v)) {
 			boxesToCompute.add(v);
 		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
 	}
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
                 overlappingBoxes.getNeighOf(i).clear();
             }

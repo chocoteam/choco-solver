@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,68 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
-
-import solver.IEventType;
+package solver.variables.events;
 
 /**
- * An enum defining the variable event type:
+ * An enum defining the real variable event types:
  * <ul>
- * <li><code>REMOVE</code>: value removal event,</li>
- * <li><code>INSTANTIATE</code>: variable instantiation event,</li>
- * <li><code>PROPAGATE</code>: propagation event</li>
+ * <li><code>INCLOW</code>: lower bound increase event,</li>
+ * <li><code>DECUPP</code>: upper bound decrease event,</li>
+ * <li><code>BOUND</code>: lower bound increase and/or upper bound decrease event,</li>
  * </ul>
  * <p/>
- * Each type includes a <code>mask</code> to speeds up comparisons between this <code>EventType</code> and
- * the filtered event mask of <code>Constraint</code> objects.
- *
- * @author Xavier Lorca
- * @author Charles Prud'homme
- * @version 0.01, june 2010
- * @see solver.constraints.Constraint
- * @since 0.01
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public enum EventType implements IEventType {
+public enum RealEventType implements IEventType {
 
     VOID(0),
-    //PROPAGATORS
-    CUSTOM_PROPAGATION(1),
-    FULL_PROPAGATION(2, 3),
-    // INTVAR EVENT
-    REMOVE(4),
-    INCLOW(8, 12),
-    DECUPP(16, 20),
-    BOUND(24, 28),
-    INSTANTIATE(32, 60),
+    INCLOW(1),
+    DECUPP(2),
+    BOUND(3);
 
-    // GRAPHVAR EVENT
-    REMOVENODE(64),
-    ENFORCENODE(128),
-    REMOVEARC(256),
-    ENFORCEARC(512),
+    private final int mask;
 
-    // SET VARIABLE
-    ADD_TO_KER(1024),
-    REMOVE_FROM_ENVELOPE(2048),
-
-    // META VARIABLE
-    META(4096),
-
-    //ALL FINE EVENTS (INTVAR+GRAPHVAR+SETVAR+METAVAR)
-    ALL_FINE_EVENTS(8188);
-
-    public final int mask;
-    public final int strengthened_mask;
-
-    EventType(int mask, int fullmask) {
+	private RealEventType(int mask) {
         this.mask = mask;
-        this.strengthened_mask = fullmask;
     }
-
-    EventType(int mask) {
-        this(mask, mask);
-    }
-
 
     @Override
     public int getMask() {
@@ -95,23 +57,11 @@ public enum EventType implements IEventType {
 
     @Override
     public int getStrengthenedMask() {
-        return strengthened_mask;
+        return mask;
     }
 
     //******************************************************************************************************************
     //******************************************************************************************************************
-
-    public static int INT_ALL_MASK() {
-        return INSTANTIATE.strengthened_mask;
-    }
-
-    public static boolean isInstantiate(int mask) {
-        return (mask & INSTANTIATE.mask) != 0;
-    }
-
-    public static boolean isRemove(int mask) {
-        return (mask & REMOVE.mask) != 0;
-    }
 
     public static boolean isBound(int mask) {
         return (mask & BOUND.mask) != 0;
@@ -123,9 +73,5 @@ public enum EventType implements IEventType {
 
     public static boolean isDecupp(int mask) {
         return (mask & DECUPP.mask) != 0;
-    }
-
-    public static boolean anInstantiationEvent(int mask) {
-        return (mask & INSTANTIATE.mask) != 0;
     }
 }

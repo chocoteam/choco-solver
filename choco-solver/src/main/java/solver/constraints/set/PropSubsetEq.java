@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -39,9 +39,9 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -97,9 +97,9 @@ public class PropSubsetEq extends Propagator<SetVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0)
-            return EventType.ADD_TO_KER.mask;
+            return SetEventType.ADD_TO_KER.getMask();
         else
-            return EventType.REMOVE_FROM_ENVELOPE.mask;
+            return SetEventType.REMOVE_FROM_ENVELOPE.getMask();
     }
 
     @Override
@@ -119,9 +119,9 @@ public class PropSubsetEq extends Propagator<SetVar> {
     public void propagate(int i, int mask) throws ContradictionException {
         sdm[i].freeze();
         if (i == 0)
-            sdm[i].forEach(elementForced, EventType.ADD_TO_KER);
+            sdm[i].forEach(elementForced, SetEventType.ADD_TO_KER);
         else
-            sdm[i].forEach(elementRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm[i].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         sdm[i].unfreeze();
     }
 

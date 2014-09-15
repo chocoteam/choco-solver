@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,9 +46,10 @@ import solver.constraints.nary.automata.structure.multicostregular.Arc;
 import solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.iterators.DisposableIntIterator;
 import util.objects.StoredIndexedBipartiteSet;
@@ -246,8 +247,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return (vIdx < vs.length ?
-                EventType.INT_ALL_MASK() :
-                EventType.BOUND.mask + EventType.INSTANTIATE.mask);
+                IntEventType.INT_ALL_MASK() :
+                IntEventType.BOUND.getMask() + IntEventType.INSTANTIATE.getMask());
     }
 
     /**
@@ -281,7 +282,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             initialize();
         }
         filter();
@@ -295,13 +296,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (varIdx < offset) {
             checkWorld();
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
             idms[varIdx].unfreeze();
         } else {// if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(varIdx - offset);
             computed = false;
         }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

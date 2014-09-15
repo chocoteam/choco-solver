@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,10 +28,10 @@ package solver.variables.delta.monitor;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.delta.ISetDelta;
 import solver.variables.delta.ISetDeltaMonitor;
 import solver.search.loop.TimeStampedObject;
+import solver.variables.events.SetEventType;
 import util.procedure.IntProcedure;
 
 /**
@@ -80,11 +80,11 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
     }
 
     @Override
-    public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
+    public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
         int x;
-        if (evt == EventType.ADD_TO_KER) {
+        if (evt == SetEventType.ADD_TO_KER) {
             x = ISetDelta.KERNEL;
-        } else if (evt == EventType.REMOVE_FROM_ENVELOPE) {
+        } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
             x = ISetDelta.ENVELOP;
         } else {
             throw new UnsupportedOperationException("The event in parameter should be ADD_TO_KER or REMOVE_FROM_ENVELOPE");

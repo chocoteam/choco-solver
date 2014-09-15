@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,8 +41,9 @@ import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 
 import java.io.Serializable;
@@ -221,7 +222,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     protected int getPropagationConditions(int vIdx) {
-        return EventType.ALL_FINE_EVENTS.mask;
+        return IEventType.MAX;
     }
 
     /**
@@ -258,7 +259,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * of index idxVarInProp has changed. This method calls a CUSTOM_PROPAGATION (coarse-grained) by default.
      * <p/>
      * This method should be overridden if the argument <code>reactToFineEvt</code> is set to <code>true</code> in the constructor.
-     * Otherwise, it executes <code>propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
+     * Otherwise, it executes <code>propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
      *
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
@@ -273,7 +274,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
                     "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
         }
-        propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());
+        propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());
     }
 
     /**
@@ -283,7 +284,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param evt event type
      */
-    public final void forcePropagate(EventType evt) throws ContradictionException {
+    public final void forcePropagate(PropagatorEventType evt) throws ContradictionException {
         solver.getEngine().delayedPropagation(this, evt);
     }
 
