@@ -81,7 +81,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
 		this.conf = conf;
-		if(conf==CircuitConf.RD){
+		if(conf==CircuitConf.RD){ 
 			rd = new Random(0);
 		}
 	}
