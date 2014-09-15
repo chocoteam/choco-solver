@@ -222,7 +222,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     protected int getPropagationConditions(int vIdx) {
-        return IEventType.MAX;
+        return IEventType.ALL_EVENTS;
     }
 
     /**

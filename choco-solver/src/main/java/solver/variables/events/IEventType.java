@@ -36,7 +36,7 @@ package solver.variables.events;
  */
 public interface IEventType {
 
-	public static final int MAX = 256;
+	public static final int ALL_EVENTS = 255;
 
     /**
      * Return the value of the mask associated with the event.
