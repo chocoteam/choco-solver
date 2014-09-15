@@ -26,6 +26,7 @@
  */
 package samples.integer;
 
+import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -181,6 +182,19 @@ public class Grocery extends AbstractProblem {
                 return ESat.TRUE;
             } else {
                 return ESat.UNDEFINED;
+            }
+        }
+
+        @Override
+        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+            if (!identitymap.containsKey(this)) {
+                int size = vars.length;
+                IntVar[] ivars = new IntVar[size];
+                for (int i = 0; i < size; i++) {
+                    vars[i].duplicate(solver, identitymap);
+                    ivars[i] = (IntVar) identitymap.get(vars[i]);
+                }
+                identitymap.put(this, new PropLargeProduct(ivars, target));
             }
         }
     }
