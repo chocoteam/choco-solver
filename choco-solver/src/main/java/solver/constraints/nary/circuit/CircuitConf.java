@@ -38,6 +38,6 @@ public enum  CircuitConf {
 	LIGHT,
 	FIRST,
 	RD,
-	ALL;
+	ALL
 
 }

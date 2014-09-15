@@ -27,11 +27,14 @@
 
 package solver.constraints.reification;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.constraints.ReificationConstraint;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -161,5 +164,10 @@ public class PropReif extends Propagator<Variable> {
     @Override
     public String toString() {
         return bVar.toString() + "=>" + trueCons.toString() + ", !" + bVar.toString() + "=>" + falseCons.toString();
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new SolverException("PropReif cannot be duplicated!");
     }
 }

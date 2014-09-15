@@ -26,6 +26,8 @@
  */
 package solver.constraints.nary.min_max;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,80 +44,95 @@ import util.tools.ArrayUtils;
  */
 public class PropMax extends Propagator<IntVar> {
 
-	final int n;
+    final int n;
 
-	public PropMax(IntVar[] variables, IntVar maxVar) {
-		super(ArrayUtils.append(variables,new IntVar[]{maxVar}), PropagatorPriority.LINEAR, false);
-		n = variables.length;
-		assert n>0;
-	}
+    public PropMax(IntVar[] variables, IntVar maxVar) {
+        super(ArrayUtils.append(variables, new IntVar[]{maxVar}), PropagatorPriority.LINEAR, false);
+        n = variables.length;
+        assert n > 0;
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int idx = -1;
-		int lb = vars[n].getLB()-1;
-		int ub = lb;
-		// update max
-		for(int i=0; i<n; i++){
-			lb = Math.max(lb,vars[i].getLB());
-			ub = Math.max(ub,vars[i].getUB());
-		}
-		vars[n].updateLowerBound(lb,aCause);
-		vars[n].updateUpperBound(ub,aCause);
-		ub = vars[n].getUB();
-		// back-propagation
-		for(int i=0; i<n; i++){
-			if(vars[i].getUB()>=lb){
-				idx=idx==-1?i:-2;
-				vars[i].updateUpperBound(ub,aCause);
-			}
-		}
-		if(idx>=0){
-			if(vars[idx].updateLowerBound(lb,aCause) && lb==ub){ // entailed
-				setPassive();
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int idx = -1;
+        int lb = vars[n].getLB() - 1;
+        int ub = lb;
+        // update max
+        for (int i = 0; i < n; i++) {
+            lb = Math.max(lb, vars[i].getLB());
+            ub = Math.max(ub, vars[i].getUB());
+        }
+        vars[n].updateLowerBound(lb, aCause);
+        vars[n].updateUpperBound(ub, aCause);
+        ub = vars[n].getUB();
+        // back-propagation
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getUB() >= lb) {
+                idx = idx == -1 ? i : -2;
+                vars[i].updateUpperBound(ub, aCause);
+            }
+        }
+        if (idx >= 0) {
+            if (vars[idx].updateLowerBound(lb, aCause) && lb == ub) { // entailed
+                setPassive();
+            }
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int ub = vars[n].getUB();
-		for(int i=0; i<n; i++){
-			if(vars[i].getLB()>ub){
-				return ESat.FALSE;
-			}
-		}
-		for(int i=0; i<n; i++){
-			if(vars[i].getUB()>ub){
-				return ESat.UNDEFINED;
-			}
-		}
-		if(vars[n].isInstantiated()){
-			for(int i=0; i<n; i++){
-				if(vars[i].isInstantiatedTo(ub)){
-					return ESat.TRUE;
-				}
-			}
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int ub = vars[n].getUB();
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getLB() > ub) {
+                return ESat.FALSE;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getUB() > ub) {
+                return ESat.UNDEFINED;
+            }
+        }
+        if (vars[n].isInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                if (vars[i].isInstantiatedTo(ub)) {
+                    return ESat.TRUE;
+                }
+            }
+        }
+        return ESat.UNDEFINED;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("PropMax ");
-		sb.append(vars[n]).append(" = max({");
-		sb.append(vars[0]);
-		for (int i = 1; i < n; i++) {
-			sb.append(", ");
-			sb.append(vars[i]);
-		}
-		sb.append("})");
-		return sb.toString();
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("PropMax ");
+        sb.append(vars[n]).append(" = max({");
+        sb.append(vars[0]);
+        for (int i = 1; i < n; i++) {
+            sb.append(", ");
+            sb.append(vars[i]);
+        }
+        sb.append("})");
+        return sb.toString();
 
-	}
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar M = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropMax(aVars, M));
+        }
+    }
 }

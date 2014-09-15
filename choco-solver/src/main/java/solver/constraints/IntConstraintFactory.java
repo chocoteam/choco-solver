@@ -32,7 +32,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;
 import solver.Solver;
 import solver.constraints.binary.*;
-import solver.constraints.extension.PropTableStr2;
 import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.constraints.extension.binary.*;
@@ -76,8 +75,8 @@ import solver.constraints.nary.nValue.amnv.mis.MD;
 import solver.constraints.nary.nValue.amnv.rules.R;
 import solver.constraints.nary.nValue.amnv.rules.R1;
 import solver.constraints.nary.nValue.amnv.rules.R3;
-import solver.constraints.nary.sum.PropBoolSumIncremental;
 import solver.constraints.nary.sum.PropBoolSumCoarse;
+import solver.constraints.nary.sum.PropBoolSumIncremental;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.constraints.nary.sum.Scalar;
 import solver.constraints.nary.tree.PropAntiArborescences;
@@ -218,17 +217,17 @@ public class IntConstraintFactory {
      * @param VAR2 second variable
      */
     public static Constraint arithm(IntVar VAR1, String OP, IntVar VAR2) {
-		if(VAR2.isInstantiated()){
-			return arithm(VAR1,OP,VAR2.getValue());
-		}
-		if(VAR1.isInstantiated()){
-			return arithm(VAR2,Operator.getFlip(OP),VAR1.getValue());
-		}
+        if (VAR2.isInstantiated()) {
+            return arithm(VAR1, OP, VAR2.getValue());
+        }
+        if (VAR1.isInstantiated()) {
+            return arithm(VAR2, Operator.getFlip(OP), VAR1.getValue());
+        }
         return new Arithmetic(VAR1, Operator.get(OP), VAR2);
     }
 
     /**
-     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="} or {"+", "-"}
      *
      * @param VAR1 first variable
      * @param OP1  an operator
@@ -237,20 +236,20 @@ public class IntConstraintFactory {
      * @param CSTE an operator
      */
     public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
-		if(VAR2.isInstantiated()){
-			if(OP1.equals("+")){
-				return arithm(VAR1,OP2,CSTE-VAR2.getValue());
-			}else if(OP1.equals("-")){
-				return arithm(VAR1,OP2,CSTE+VAR2.getValue());
-			}
-		}
-		if(VAR1.isInstantiated()){
-			if(OP1.equals("+")){
-				return arithm(VAR2,OP2,CSTE-VAR1.getValue());
-			}else if(OP1.equals("-")){
-				return arithm(VAR2,Operator.getFlip(OP2),VAR1.getValue()-CSTE);
-			}
-		}
+        if (VAR2.isInstantiated()) {
+            if (OP1.equals("+")) {
+                return arithm(VAR1, OP2, CSTE - VAR2.getValue());
+            } else if (OP1.equals("-")) {
+                return arithm(VAR1, OP2, CSTE + VAR2.getValue());
+            }
+        }
+        if (VAR1.isInstantiated()) {
+            if (OP1.equals("+")) {
+                return arithm(VAR2, OP2, CSTE - VAR1.getValue());
+            } else if (OP1.equals("-")) {
+                return arithm(VAR2, Operator.getFlip(OP2), VAR1.getValue() - CSTE);
+            }
+        }
         Operator op1 = Operator.get(OP1);
         Operator op2 = Operator.get(OP2);
         return new Arithmetic(VAR1, op1, VAR2, op2, CSTE);
@@ -330,7 +329,7 @@ public class IntConstraintFactory {
             case "AC3rm":
                 p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
                 break;
-			default:
+            default:
             case "AC3bit+rm":
                 p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
                 break;
@@ -749,35 +748,27 @@ public class IntConstraintFactory {
         return new Constraint("Count", new PropCount_AC(VARS, VALUE, LIMIT));
     }
 
-	/**
-	 * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
-	 * Enforce condition N = LIMIT to hold.
-	 * <p/>
-	 *
-	 * @param VALUE a variable
-	 * @param VARS  a vector of variables
-	 * @param LIMIT a variable
-	 */
-	public static Constraint count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
-		if(VALUE.isInstantiated()){
-			return count(VALUE.getValue(),VARS,LIMIT);
-		}
-		return new Constraint("Count",new PropCountVar(VARS,VALUE,LIMIT));
-//		Solver solver = LIMIT.getSolver();
-//		int size = VALUE.getUB()-VALUE.getLB()+1;
-//		IntVar[] valCount = new IntVar[size];
-//		ArrayList<Constraint> cstrs = new ArrayList<>();
-//		for(int i=0;i<size;i++){
-//			if(VALUE.contains(i+VALUE.getLB())){
-//				valCount[i] = VF.bounded(StringUtils.randomName(), 0, VARS.length, solver);
-//				cstrs.add(count(i+VALUE.getLB(), VARS, valCount[i]));
-//			}else {
-//				valCount[i] = solver.ZERO;
-//			}
-//		}
-//		cstrs.add(element(LIMIT, valCount, VALUE, VALUE.getLB()));
-//		return cstrs.toArray(new Constraint[0]);
-	}
+    /**
+     * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
+     * Enforce condition N = LIMIT to hold.
+     * <p/>
+     *
+     * @param VALUE a variable
+     * @param VARS  a vector of variables
+     * @param LIMIT a variable
+     */
+    public static Constraint count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
+        if (VALUE.isInstantiated()) {
+            return count(VALUE.getValue(), VARS, LIMIT);
+        } else if (VALUE.hasEnumeratedDomain()) {
+            return new Constraint("Count", new PropCountVar(VARS, VALUE, LIMIT));
+        } else {
+            IntVar EVALUE = VF.enumerated(StringUtils.randomName(), VALUE.getLB(), VALUE.getUB(), VALUE.getSolver());
+            return new Constraint("Count",
+                    new PropEqualX_Y(EVALUE, VALUE),
+                    new PropCountVar(VARS, EVALUE, LIMIT));
+        }
+    }
 
     /**
      * Cumulative constraint: Enforces that at each point in time,
@@ -1294,21 +1285,21 @@ public class IntConstraintFactory {
                     }
                     return sum(v2, Operator.getFlip(OPERATOR), VF.offset(s2, -SCALAR.getValue()));
                 }
-            } else if (n==2){
-				if(COEFFS[0]==1){
-					assert COEFFS[1] == -1;
-					return sum(new IntVar[]{VARS[1],SCALAR},Operator.getFlip(OPERATOR),VARS[0]);
-				}else{
-					assert COEFFS[0] == -1;
-					assert COEFFS[1] == 1;
-					return sum(new IntVar[]{VARS[0],SCALAR},Operator.getFlip(OPERATOR),VARS[1]);
-				}
-			}
+            } else if (n == 2) {
+                if (COEFFS[0] == 1) {
+                    assert COEFFS[1] == -1;
+                    return sum(new IntVar[]{VARS[1], SCALAR}, Operator.getFlip(OPERATOR), VARS[0]);
+                } else {
+                    assert COEFFS[0] == -1;
+                    assert COEFFS[1] == 1;
+                    return sum(new IntVar[]{VARS[0], SCALAR}, Operator.getFlip(OPERATOR), VARS[1]);
+                }
+            }
         }
         // scalar
         if (OPERATOR.equals("=")) {
             return makeScalar(VARS, COEFFS, SCALAR, 1);
-		}
+        }
         int[] b = Scalar.getScalarBounds(VARS, COEFFS);
         Solver s = VARS[0].getSolver();
         IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], s);
@@ -1461,19 +1452,19 @@ public class IntConstraintFactory {
         } else if (VARS.length == 2 && SUM.isInstantiated()) {
             return arithm(VARS[0], "+", VARS[1], OPERATOR, SUM.getValue());
         } else {
-			int nbBools=0;
-			for(IntVar left:VARS){
-				if((left.getTypeAndKind() & Variable.KIND) == Variable.BOOL){
-					nbBools++;
-				}
-			}
-			if(nbBools == VARS.length){
-				BoolVar[] bvars = new BoolVar[nbBools];
-				for(int i=0;i<nbBools;i++){
-					bvars[i] = (BoolVar) VARS[i];
-				}
-				return sum(bvars,OPERATOR,SUM);
-			}
+            int nbBools = 0;
+            for (IntVar left : VARS) {
+                if ((left.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
+                    nbBools++;
+                }
+            }
+            if (nbBools == VARS.length) {
+                BoolVar[] bvars = new BoolVar[nbBools];
+                for (int i = 0; i < nbBools; i++) {
+                    bvars[i] = (BoolVar) VARS[i];
+                }
+                return sum(bvars, OPERATOR, SUM);
+            }
             if (OPERATOR.equals("=")) {
                 return new Constraint("Sum", new PropSumEq(VARS, SUM));
             }
@@ -1497,34 +1488,34 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-		if(VARS.length>10){
-			return new Constraint("SumOfBool", new PropBoolSumIncremental(VARS, SUM));
-		} else {
-			return new Constraint("SumOfBool", new PropBoolSumCoarse(VARS, SUM));
-		}
+        if (VARS.length > 10) {
+            return new Constraint("SumOfBool", new PropBoolSumIncremental(VARS, SUM));
+        } else {
+            return new Constraint("SumOfBool", new PropBoolSumCoarse(VARS, SUM));
+        }
     }
 
-	/**
-	 * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
-	 * This constraint is much faster than the one over integer variables
-	 *
-	 * @param VARS a vector of boolean variables
-	 * @param SUM  a variable
-	 */
-	public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
-		if(OPERATOR.equals("=")){
-			return sum(VARS,SUM);
-		}
-		int lb = 0;
-		int ub = 0;
-		for (BoolVar v : VARS) {
-			lb += v.getLB();
-			ub += v.getUB();
-		}
-		IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
-		SUM.getSolver().post(sum(VARS,p));
-		return arithm(p, OPERATOR, SUM);
-	}
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+     * This constraint is much faster than the one over integer variables
+     *
+     * @param VARS a vector of boolean variables
+     * @param SUM  a variable
+     */
+    public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
+        if (OPERATOR.equals("=")) {
+            return sum(VARS, SUM);
+        }
+        int lb = 0;
+        int ub = 0;
+        for (BoolVar v : VARS) {
+            lb += v.getLB();
+            ub += v.getUB();
+        }
+        IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
+        SUM.getSolver().post(sum(VARS, p));
+        return arithm(p, OPERATOR, SUM);
+    }
 
     /**
      * Create a table constraint, with the specified algorithm defined ALGORITHM
@@ -1545,12 +1536,12 @@ public class IntConstraintFactory {
      *
      * @param VARS      first variable
      * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
-     * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC"}
+     * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
-		if(VARS.length==2){
-			table(VARS[0],VARS[1],TUPLES,"");
-		}
+        if (VARS.length == 2) {
+            table(VARS[0], VARS[1], TUPLES, "");
+        }
         Propagator p;
         switch (ALGORITHM) {
             case "FC":
@@ -1659,14 +1650,14 @@ public class IntConstraintFactory {
      * @return a boolean
      */
     private static boolean tupleIt(IntVar... VARS) {
-		if(!Configuration.ENABLE_TABLE_SUBS){
-			return false;
-		}
+        if (!Configuration.ENABLE_TABLE_SUBS) {
+            return false;
+        }
         long doms = 1;
         for (int i = 0; i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
-			if(!VARS[i].hasEnumeratedDomain()){
-				return false;
-			}
+            if (!VARS[i].hasEnumeratedDomain()) {
+                return false;
+            }
             doms *= VARS[i].getDomainSize();
         }
         return (doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS);

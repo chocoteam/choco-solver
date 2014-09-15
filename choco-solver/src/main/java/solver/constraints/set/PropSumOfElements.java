@@ -34,6 +34,8 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -58,7 +60,7 @@ public class PropSumOfElements extends Propagator<Variable> {
     private SetVar set;
     private int offSet;
     private int[] weights;
-	private final boolean notEmpty;
+    private final boolean notEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -72,8 +74,8 @@ public class PropSumOfElements extends Propagator<Variable> {
      * @param weights
      * @param offset
      * @param sum
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if so, the SUM constraint is not applied)
+     * @param notEmpty true : the set variable cannot be empty
+     *                 false : the set may be empty (if so, the SUM constraint is not applied)
      */
     public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum, boolean notEmpty) {
         super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY, true);
@@ -81,7 +83,7 @@ public class PropSumOfElements extends Propagator<Variable> {
         this.set = (SetVar) vars[0];
         this.weights = weights;
         this.offSet = offset;
-		this.notEmpty = notEmpty;
+        this.notEmpty = notEmpty;
     }
 
     /**
@@ -90,8 +92,8 @@ public class PropSumOfElements extends Propagator<Variable> {
      *
      * @param setVar
      * @param sum
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if so, the SUM constraint is not applied)
+     * @param notEmpty true : the set variable cannot be empty
+     *                 false : the set may be empty (if so, the SUM constraint is not applied)
      */
     public PropSumOfElements(SetVar setVar, IntVar sum, boolean notEmpty) {
         this(setVar, null, 0, sum, notEmpty);
@@ -110,7 +112,7 @@ public class PropSumOfElements extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (weights != null) {
-            for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+            for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
                 if (j < offSet || j >= weights.length + offSet) {
                     set.removeFromEnvelope(j, aCause);
                 }
@@ -123,32 +125,32 @@ public class PropSumOfElements extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         int sK = 0;
         int sE = 0;
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             sK += get(j);
         }
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             sE += get(j);
         }
-		if(notEmpty || set.getKernelSize()>0){
-			sum.updateLowerBound(sK, aCause);
-			sum.updateUpperBound(sE, aCause);
-		}
+        if (notEmpty || set.getKernelSize() > 0) {
+            sum.updateLowerBound(sK, aCause);
+            sum.updateUpperBound(sE, aCause);
+        }
         boolean again = false;
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
-			if(!set.kernelContains(j)){
-				if (sE - get(j) < lb) {
-					if (set.addToKernel(j, aCause)) {
-						again = true;
-					}
-				} else if (sK + get(j) > ub) {
-					if (set.removeFromEnvelope(j, aCause)) {
-						again = true;
-					}
-				}
-			}
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+            if (!set.kernelContains(j)) {
+                if (sE - get(j) < lb) {
+                    if (set.addToKernel(j, aCause)) {
+                        again = true;
+                    }
+                } else if (sK + get(j) > ub) {
+                    if (set.removeFromEnvelope(j, aCause)) {
+                        again = true;
+                    }
+                }
+            }
         }
         if (again) {
             propagate(0, 0);
@@ -157,25 +159,25 @@ public class PropSumOfElements extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-		if(set.getEnvelopeSize()==0){
-			if(notEmpty){
-				return ESat.FALSE;
-			}else {
-				return ESat.TRUE;
-			}
-		}
+        if (set.getEnvelopeSize() == 0) {
+            if (notEmpty) {
+                return ESat.FALSE;
+            } else {
+                return ESat.TRUE;
+            }
+        }
         int sK = 0;
         int sE = 0;
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             sK += get(j);
         }
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             sE += get(j);
         }
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        if ((lb > sE || ub < sK) && (notEmpty || set.getKernelSize()>0)) {
+        if ((lb > sE || ub < sK) && (notEmpty || set.getKernelSize() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {
@@ -186,5 +188,18 @@ public class PropSumOfElements extends Propagator<Variable> {
 
     private int get(int j) {
         return (weights == null) ? j : weights[j - offSet];
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            set.duplicate(solver, identitymap);
+            SetVar se = (SetVar) identitymap.get(set);
+
+            sum.duplicate(solver, identitymap);
+            IntVar su = (IntVar) identitymap.get(sum);
+
+            identitymap.put(this, new PropSumOfElements(se, weights == null ? null : weights.clone(), offSet, su, notEmpty));
+        }
     }
 }

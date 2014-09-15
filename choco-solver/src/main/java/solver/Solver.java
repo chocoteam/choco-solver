@@ -27,6 +27,7 @@
 
 package solver;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.Environments;
 import memory.IEnvironment;
@@ -47,6 +48,7 @@ import solver.propagation.NoPropagationEngine;
 import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.ISearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -64,7 +66,6 @@ import java.util.Arrays;
  * The <code>Solver</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
  * and a <code>IPropagationEngine</code> to pilot the propagation.<br/>
- * It reads default properties in {@link SolverProperties} (it can be overriden).<br/>
  * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: apply decisions and propagate,
  * run backups and rollbacks and store solutions.
  *
@@ -77,7 +78,7 @@ import java.util.Arrays;
  */
 public class Solver implements Serializable {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 1L;
 
     private ExplanationEngine explainer;
 
@@ -149,24 +150,24 @@ public class Solver implements Serializable {
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
-     * @param environment      a backtracking environment
-     * @param name             a name
-     * @param solverProperties default properties to load
+     * @param environment a backtracking environment
+     * @param name        a name
      */
-    public Solver(IEnvironment environment, String name, ISolverProperties solverProperties) {
+    public Solver(IEnvironment environment, String name) {
         this.name = name;
         this.vars = new Variable[32];
         vIdx = 0;
         this.cstrs = new Constraint[32];
         cIdx = 0;
         this.environment = environment;
-        this.measures = new MeasuresRecorder(this);
-        solverProperties.loadPropertiesIn(this);
+        this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
+        this.search = new SearchLoop(this);
+        this.explainer = new ExplanationEngine(this);
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = (BoolVar) VF.fixed(0,this);
-        ONE = (BoolVar) VF.fixed(1,this);
+        ZERO = (BoolVar) VF.fixed(0, this);
+        ONE = (BoolVar) VF.fixed(1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
@@ -177,20 +178,17 @@ public class Solver implements Serializable {
 
     /**
      * Create a solver object with default parameters.
-     * Default settings are declared in {@link SolverProperties}.
      */
     public Solver() {
         this(Environments.DEFAULT.make(),
-                Reflection.getCallerClass(2).getSimpleName(),
-                SolverProperties.DEFAULT);
+                Reflection.getCallerClass(2).getSimpleName());
     }
 
     /**
      * Create a solver object with default parameters, named <code>name</code>.
-     * Default settings are declared in {@link SolverProperties}.
      */
     public Solver(String name) {
-        this(Environments.DEFAULT.make(), name, SolverProperties.DEFAULT);
+        this(Environments.DEFAULT.make(), name);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -950,45 +948,62 @@ public class Solver implements Serializable {
         return model;
     }
 
-    /**
-     * Cloning process based on serialization.
-     * <p/>
-     * Return a clone of <code>solver</code>.
-     *
-     * @param solver solver to clone.
-     */
-    public static Solver serializeClone(Solver solver) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream out;
-        try {
-            out = new ObjectOutputStream(baos);
-            out.writeObject(solver);
-            out.close();
-            byte[] buf = baos.toByteArray();
 
-            ByteArrayInputStream bin = new ByteArrayInputStream(buf);
-            ObjectInputStream in = new ObjectInputStream(bin);
-            return (Solver) in.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+    /**
+     * Duplicate the model declares within <code>this</code>, ie only variables and constraints.
+     * Some parameters are reset to default value: search loop (set to binary), explanation engine (set to NONE),
+     * propagation engine (set to NONE), objective manager (set to SAT), solution recorder (set to LastSolutionRecorder) and
+     * feasibility (set to UNDEFINED).
+     * The search strategies and search monitors are simply not reported in the copy.
+     * <p/>
+     * Note that a new instance of the environment is made, preserving the initial choice.
+     * <p/>
+     * Duplicating a solver is only possible before any resolution process began.
+     * This is a strong restriction which may be removed in the future.
+     * Indeed, duplicating a solver should only be considered while dealing with multi-threading.
+     *
+     * @return a copy of <code>this</code>
+     * @throws solver.exception.SolverException if the search has already begun.
+     */
+    public Solver duplicateModel() {
+        if (environment.getWorldIndex() > 0) {
+            throw new SolverException("Duplicating a solver cannot be achieved once the resolution has begun.");
         }
-        return null;
+        // Create a fresh solver
+        Solver clone;
+        try {
+            clone = new Solver(this.environment.getClass().newInstance(), this.name);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new SolverException("The current solver cannot be duplicated:\n" + e.getMessage());
+        }
+
+        THashMap<Object, Object> identitymap = new THashMap<>();
+        // duplicate variables
+        for (int i = 0; i < this.vIdx; i++) {
+            this.vars[i].duplicate(clone, identitymap);
+        }
+        // duplicate constraints
+        for (int i = 0; i < this.cIdx; i++) {
+            this.cstrs[i].duplicate(clone, identitymap);
+            //TODO How to deal with temporary constraints ?
+            clone.post((Constraint) identitymap.get(this.cstrs[i]));
+        }
+
+        return clone;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * <b>This methods should be called by the user.</b>
+     * <b>This methods should not be called by the user.</b>
      */
     public int getNbIdElt() {
         return id;
     }
 
     /**
-     * <b>This methods should be called by the user.</b>
+     * <b>This methods should not be called by the user.</b>
      */
     public int nextId() {
         return id++;

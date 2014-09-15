@@ -27,8 +27,10 @@
 package solver.constraints.nary.globalcardinality;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -293,5 +295,24 @@ public class PropFastGCC extends Propagator<IntVar> {
             }
         }
         return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.n;
+            IntVar[] X = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            size = this.n2;
+            IntVar[] Y = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i + n].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
+            }
+            identitymap.put(this, new PropFastGCC(X, this.values.clone(), new TIntIntHashMap(this.map), Y));
+        }
     }
 }

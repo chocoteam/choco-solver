@@ -27,7 +27,9 @@
 
 package solver.constraints.unary;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,7 +53,7 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     public PropMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
-		this.values = new TIntHashSet(values);
+        this.values = new TIntHashSet(values);
     }
 
     @Override
@@ -65,14 +67,14 @@ public class PropMemberEnum extends Propagator<IntVar> {
                 if (val == right + 1) {
                     right = val;
                 } else {
-                    if(left  > Integer.MIN_VALUE){
+                    if (left > Integer.MIN_VALUE) {
                         rall &= vars[0].removeInterval(left, right, aCause);
                     }
                     left = right = val;
                 }
             }
         }
-        if(left  > Integer.MIN_VALUE){
+        if (left > Integer.MIN_VALUE) {
             rall &= vars[0].removeInterval(left, right, aCause);
         }
         if (rall) {
@@ -108,5 +110,12 @@ public class PropMemberEnum extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(aCause);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropMemberEnum((IntVar) identitymap.get(vars[0]), values.toArray()));
+        }
     }
 }

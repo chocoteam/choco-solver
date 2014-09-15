@@ -34,6 +34,8 @@
 
 package solver.constraints.nary.circuit;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,72 +53,73 @@ import java.util.Random;
 
 /**
  * Filters subcircuit based on strongly connected components
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropSubCircuitSCC extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n,n2;
-	private DirectedGraph support;
-	private StrongConnectivityFinder SCCfinder;
-	private DirectedGraph G_R;
-	private int[] sccOf;
-	private ISet[] mates;
-	// proba
-	private Random rd;
-	private int offSet;
-	private BitSet mandSCC;
-	private int[] possibleSources;
+    private int n, n2;
+    private DirectedGraph support;
+    private StrongConnectivityFinder SCCfinder;
+    private DirectedGraph G_R;
+    private int[] sccOf;
+    private ISet[] mates;
+    // proba
+    private Random rd;
+    private int offSet;
+    private BitSet mandSCC;
+    private int[] possibleSources;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropSubCircuitSCC(IntVar[] succs, int offSet) {
-		super(succs, PropagatorPriority.LINEAR, true);
-		this.offSet = offSet;
-		n = vars.length;
-		n2 = n+1;
-		support = new DirectedGraph(n2,SetType.LINKED_LIST,true);
-		G_R = new DirectedGraph(n2,SetType.LINKED_LIST,false);
-		SCCfinder = new StrongConnectivityFinder(support);
-		mates = new ISet[n2];
-		for(int i=0;i<n2;i++){
-			mates[i] = SetFactory.makeLinkedList(false);
-		}
-		rd = new Random(0);
-		mandSCC = new BitSet(n2);
-		possibleSources = new int[n];
-	}
+    public PropSubCircuitSCC(IntVar[] succs, int offSet) {
+        super(succs, PropagatorPriority.LINEAR, true);
+        this.offSet = offSet;
+        n = vars.length;
+        n2 = n + 1;
+        support = new DirectedGraph(n2, SetType.LINKED_LIST, true);
+        G_R = new DirectedGraph(n2, SetType.LINKED_LIST, false);
+        SCCfinder = new StrongConnectivityFinder(support);
+        mates = new ISet[n2];
+        for (int i = 0; i < n2; i++) {
+            mates[i] = SetFactory.makeLinkedList(false);
+        }
+        rd = new Random(0);
+        mandSCC = new BitSet(n2);
+        possibleSources = new int[n];
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.TRUE;// redundant propagator
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.TRUE;// redundant propagator
+    }
 
-	public void propagate(int vIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
+    public void propagate(int vIdx, int mask) throws ContradictionException {
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int size = 0;
-		for(int i=0;i<n;i++){
-			if(!vars[i].contains(i+offSet)){
-				possibleSources[size++] = i;
-			}
-		}
-		if(size>0){
-			filterFromSource(possibleSources[rd.nextInt(size)]);
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int size = 0;
+        for (int i = 0; i < n; i++) {
+            if (!vars[i].contains(i + offSet)) {
+                possibleSources[size++] = i;
+            }
+        }
+        if (size > 0) {
+            filterFromSource(possibleSources[rd.nextInt(size)]);
+        }
+    }
 
 	public void filterFromSource(int source) throws ContradictionException {
 		assert (!vars[source].contains(source+offSet));
@@ -185,21 +188,21 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		}
 	}
 
-	private void makeLoops(int source, int cc, boolean sink) throws ContradictionException {
-		if(cc==sccOf[source]){
-			if(sink){
-				contradiction(vars[0],"");
-			}else{
-				return;
-			}
-		}
-		if(cc==sccOf[n]){
-			if(sink){
-				return;
-			}else{
-				contradiction(vars[0],"");
-			}
-		}
+    private void makeLoops(int source, int cc, boolean sink) throws ContradictionException {
+        if (cc == sccOf[source]) {
+            if (sink) {
+                contradiction(vars[0], "");
+            } else {
+                return;
+            }
+        }
+        if (cc == sccOf[n]) {
+            if (sink) {
+                return;
+            } else {
+                contradiction(vars[0], "");
+            }
+        }
 //		if((sink && cc==sccOf[source]) || (cc==sccOf[n] && !sink)){
 //			contradiction(vars[0],"");
 //		}
@@ -226,32 +229,32 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		}
 	}
 
-	private void filterFromInst(int source) throws ContradictionException {
-		int to, arc, x;
-		for (int i = 0; i < n; i++) {
-			if(vars[i].isInstantiated()){
-				to = vars[i].getValue()-offSet;
-				x = sccOf[i];
-				if(to==source){
-					to = n;
-				}
-				if (to != -1 && sccOf[to] != x && mates[x].getSize() > 1) {
-					arc = (i + 1) * n2 + to;
-					for (int a = mates[x].getFirstElement(); a >= 0; a = mates[x].getNextElement()) {
-						if (a != arc) {
-							int val = a%n2;
-							if(val==n){
-								val = source;
-							}
-							vars[a/n2-1].removeValue(val+offSet,aCause);
-						}
-					}
-					mates[x].clear();
-					mates[x].add(arc);
-				}
-			}
-		}
-	}
+    private void filterFromInst(int source) throws ContradictionException {
+        int to, arc, x;
+        for (int i = 0; i < n; i++) {
+            if (vars[i].isInstantiated()) {
+                to = vars[i].getValue() - offSet;
+                x = sccOf[i];
+                if (to == source) {
+                    to = n;
+                }
+                if (to != -1 && sccOf[to] != x && mates[x].getSize() > 1) {
+                    arc = (i + 1) * n2 + to;
+                    for (int a = mates[x].getFirstElement(); a >= 0; a = mates[x].getNextElement()) {
+                        if (a != arc) {
+                            int val = a % n2;
+                            if (val == n) {
+                                val = source;
+                            }
+                            vars[a / n2 - 1].removeValue(val + offSet, aCause);
+                        }
+                    }
+                    mates[x].clear();
+                    mates[x].add(arc);
+                }
+            }
+        }
+    }
 
 	private void checkSCCLink() throws ContradictionException {
 		for (int sccFrom=G_R.getNodes().getFirstElement(); sccFrom>=0; sccFrom=G_R.getNodes().getNextElement()) {
@@ -276,4 +279,17 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 			}
 		}
 	}
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropSubCircuitSCC(aVars, this.offSet));
+        }
+    }
 }

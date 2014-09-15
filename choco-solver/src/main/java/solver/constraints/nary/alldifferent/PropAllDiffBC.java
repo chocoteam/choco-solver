@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.alldifferent;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
@@ -48,12 +50,12 @@ import util.ESat;
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
-	AlgoAllDiffBC filter;
+    AlgoAllDiffBC filter;
 
     public PropAllDiffBC(IntVar[] variables) {
         super(variables, PropagatorPriority.LINEAR, false);
         filter = new AlgoAllDiffBC(aCause);
-		filter.reset(vars);
+        filter.reset(vars);
     }
 
     @Override
@@ -63,11 +65,24 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		filter.filter();
+        filter.filter();
     }
 
     @Override
     public ESat isEntailed() {
-		return ESat.TRUE; // redundant propagator (use PropAllDiffInst)
+        return ESat.TRUE; // redundant propagator (use PropAllDiffInst)
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntVar[] aVars = new IntVar[this.vars.length];
+            for (int i = 0; i < this.vars.length; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+
+            identitymap.put(this, new PropAllDiffBC(aVars));
+        }
     }
 }

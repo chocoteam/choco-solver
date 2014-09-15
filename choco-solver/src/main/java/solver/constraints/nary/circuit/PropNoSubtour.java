@@ -35,8 +35,10 @@
 package solver.constraints.nary.circuit;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -49,6 +51,7 @@ import java.util.BitSet;
 
 /**
  * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropNoSubtour extends Propagator<IntVar> {
@@ -78,7 +81,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
@@ -120,17 +123,17 @@ public class PropNoSubtour extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     private void varInstantiated(int var, int val) throws ContradictionException {
-		if(isPassive()){
-			return;
-		}
+        if (isPassive()) {
+            return;
+        }
         int last = end[val].get(); // last in [0,n-1]
         int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
-		if (end[var].get() != var) {
-			contradiction(vars[var], "");
-		}
+        if (end[var].get() != var) {
+            contradiction(vars[var], "");
+        }
         if (val == start) {
             if (size[start].get() != n) {
                 contradiction(vars[var], "");
@@ -139,7 +142,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
                 vars[last].instantiateTo(start + offset, aCause);
-				setPassive();
+                setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < n) {
@@ -188,5 +191,18 @@ public class PropNoSubtour extends Propagator<IntVar> {
     @Override
     public String toString() {
         return "PropNoSubTour(" + Arrays.toString(vars) + ")";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropNoSubtour(aVars, this.offset));
+        }
     }
 }

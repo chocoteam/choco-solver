@@ -26,10 +26,12 @@
  */
 package solver.constraints.nary.among;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
 import memory.IStateBitSet;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -81,7 +83,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);
         UB = environment.makeInt(0);
@@ -323,6 +325,19 @@ public class PropAmongGAC extends Propagator<IntVar> {
         sb.append("},");
         sb.append(vars[nb_vars].toString()).append(")");
         return sb.toString();
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropAmongGAC(aVars, this.values));
+        }
     }
 
 }

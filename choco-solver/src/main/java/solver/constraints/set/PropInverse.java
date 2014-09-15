@@ -34,13 +34,14 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -170,5 +171,26 @@ public class PropInverse extends Propagator<SetVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int s1 = sets.length;
+            SetVar[] set1 = new SetVar[s1];
+            for (int i = 0; i < s1; i++) {
+                sets[i].duplicate(solver, identitymap);
+                set1[i] = (SetVar) identitymap.get(sets[i]);
+            }
+
+            int s2 = invsets.length;
+            SetVar[] set2 = new SetVar[s2];
+            for (int i = 0; i < s2; i++) {
+                invsets[i].duplicate(solver, identitymap);
+                set2[i] = (SetVar) identitymap.get(invsets[i]);
+            }
+
+            identitymap.put(this, new PropInverse(set1, set2, offSet1, offSet2));
+        }
     }
 }

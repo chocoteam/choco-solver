@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -165,10 +166,10 @@ public class MinusView extends IntView {
         return var.isInstantiatedTo(-value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -207,6 +208,15 @@ public class MinusView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.minus(this.var);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            MinusView clone = new MinusView((IntVar) identitymap.get(this.var), solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

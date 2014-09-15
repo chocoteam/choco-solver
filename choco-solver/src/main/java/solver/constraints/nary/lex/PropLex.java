@@ -26,8 +26,10 @@
  */
 package solver.constraints.nary.lex;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,7 +67,7 @@ public class PropLex extends Propagator<IntVar> {
 
         this.strict = strict;
         this.n = X.length;
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         alpha = environment.makeInt(0);
         beta = environment.makeInt(0);
         entailed = false;
@@ -111,6 +113,24 @@ public class PropLex extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.x.length;
+            IntVar[] X = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.x[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.x[i]);
+            }
+            size = this.y.length;
+            IntVar[] Y = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.y[i].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.y[i]);
+            }
+            identitymap.put(this, new PropLex(X, Y, this.strict));
+        }
+    }
 
     /////////////////////
     public boolean groundEq(IntVar x1, IntVar y1) {
@@ -189,8 +209,7 @@ public class PropLex extends Propagator<IntVar> {
     /**
      * Build internal structure of the propagator, if necessary
      *
-     * @throws solver.exception.ContradictionException
-     *          if initialisation encounters a contradiction
+     * @throws solver.exception.ContradictionException if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
         entailed = false;

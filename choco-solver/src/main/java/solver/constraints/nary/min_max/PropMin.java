@@ -26,6 +26,8 @@
  */
 package solver.constraints.nary.min_max;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -118,4 +120,19 @@ public class PropMin extends Propagator<IntVar> {
 		return sb.toString();
 
 	}
+
+    @Override
+        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+            if (!identitymap.containsKey(this)) {
+                int size = this.vars.length - 1;
+                IntVar[] aVars = new IntVar[size];
+                for (int i = 0; i < size; i++) {
+                    this.vars[i].duplicate(solver, identitymap);
+                    aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+                }
+                this.vars[size].duplicate(solver, identitymap);
+                IntVar M = (IntVar) identitymap.get(this.vars[size]);
+                identitymap.put(this, new PropMin(aVars, M));
+            }
+    }
 }

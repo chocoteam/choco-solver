@@ -28,7 +28,6 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
-import solver.constraints.extension.Tuples;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -42,15 +41,12 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
 
     protected final R relation;
 
-    protected PropLargeCSP(IntVar[] vars, Tuples tuples) {
+    protected PropLargeCSP(IntVar[] vars, R relation) {
         super(vars, PropagatorPriority.QUADRATIC, true);
-        this.relation = makeRelation(tuples, vars);
+        this.relation = relation;
     }
 
-    protected abstract R makeRelation(Tuples tuples, IntVar[] vars);
-
-
-    public final LargeRelation getRelation() {
+    public final R getRelation() {
         return relation;
     }
 

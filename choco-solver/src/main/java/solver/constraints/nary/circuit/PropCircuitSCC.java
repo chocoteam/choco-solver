@@ -25,15 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 16/11/11
- * Time: 10:42
- */
-
 package solver.constraints.nary.circuit;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -319,6 +314,19 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			if(sccOf[v-offSet]==sx){
 				vars[x].removeValue(v,aCause);
 			}
+		}
+	}
+
+	@Override
+	public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+		if (!identitymap.containsKey(this)) {
+			int size = this.vars.length;
+			IntVar[] aVars = new IntVar[size];
+			for (int i = 0; i < size; i++) {
+				this.vars[i].duplicate(solver, identitymap);
+				aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+			}
+			identitymap.put(this, new PropCircuitSCC(aVars, this.offSet, this.conf));
 		}
 	}
 }

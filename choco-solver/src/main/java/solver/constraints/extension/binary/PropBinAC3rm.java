@@ -26,6 +26,8 @@
  */
 package solver.constraints.extension.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -58,8 +60,13 @@ public class PropBinAC3rm extends PropBinCSP {
 
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
-        super(x, y, new CouplesBitSetTable(tuples, x, y));
+        this(x, y, new CouplesBitSetTable(tuples, x, y));
     }
+
+    private PropBinAC3rm(IntVar x, IntVar y, CouplesBitSetTable table) {
+        super(x, y, table);
+    }
+
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -78,6 +85,18 @@ public class PropBinAC3rm extends PropBinCSP {
             reviseV1();
         } else {
             reviseV0();
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropBinAC3rm(X, Y, (CouplesBitSetTable) relation.duplicate()));
         }
     }
 

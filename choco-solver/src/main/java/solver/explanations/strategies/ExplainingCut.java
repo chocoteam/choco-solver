@@ -294,7 +294,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
                     related2cut.set(idx);
                 }
 
-                // 4. need to replace the duplicate decision with the correct one
+                // 4. need to replace the duplicated decision with the correct one
                 for (int i = 0; i < path.size(); i++) {
                     Decision dec = path.get(i);
                     boolean forceNext = !dec.hasNext();

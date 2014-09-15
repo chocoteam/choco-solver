@@ -34,6 +34,8 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -117,12 +119,12 @@ public class PropBoolChannel extends Propagator<Variable> {
                 bools[i].setToFalse(aCause);
             }
         }
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             if (j < offSet || j >= n + offSet) {
                 set.removeFromEnvelope(j, aCause);
             }
         }
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             bools[j - offSet].setToTrue(aCause);
         }
         sdm.unfreeze();
@@ -146,9 +148,9 @@ public class PropBoolChannel extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             int i = j - offSet;
-            if (i < 0  || i >= bools.length || bools[i].isInstantiatedTo(0)) {
+            if (i < 0 || i >= bools.length || bools[i].isInstantiatedTo(0)) {
                 return ESat.FALSE;
             }
         }
@@ -163,5 +165,20 @@ public class PropBoolChannel extends Propagator<Variable> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.bools.length;
+            BoolVar[] aVars = new BoolVar[size];
+            for (int i = 0; i < size; i++) {
+                this.bools[i].duplicate(solver, identitymap);
+                aVars[i] = (BoolVar) identitymap.get(this.bools[i]);
+            }
+            this.set.duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(this.set);
+            identitymap.put(this, new PropBoolChannel(S, aVars, this.offSet));
+        }
     }
 }

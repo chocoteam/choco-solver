@@ -195,7 +195,7 @@ public class IntLinCombTest {
             Assert.assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
             Assert.assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
             LoggerFactory.getLogger("test").info("({}) {}ms vs {}ms",
-                    new Object[]{op, sum.getMeasures().getTimeCount(), intlincomb.getMeasures().getTimeCount()});
+                    op, sum.getMeasures().getTimeCount(), intlincomb.getMeasures().getTimeCount());
         }
     }
 

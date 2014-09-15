@@ -26,6 +26,8 @@
  */
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -41,20 +43,24 @@ import util.ESat;
 public class PropDivXYZ extends Propagator<IntVar> {
 
     // Z = X/Y
-    IntVar X, Y, Z;
+    final IntVar X, Y, Z;
 
     // Abs views of respectively X, Y and Z
-    IntVar absX, absY, absZ;
+    final IntVar absX, absY, absZ;
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
+        this(x, y, z, VariableFactory.abs(x), VariableFactory.abs(y), VariableFactory.abs(z));
+    }
+
+    private PropDivXYZ(IntVar x, IntVar y, IntVar z, IntVar ax, IntVar ay, IntVar az) {
         super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
-        this.X = vars[0];
-        this.Y = vars[1];
-        this.Z = vars[2];
-        this.absX = VariableFactory.abs(X);
-        this.absY = VariableFactory.abs(Y);
-        this.absZ = VariableFactory.abs(Z);
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
+        this.absX = ax;
+        this.absY = ay;
+        this.absZ = az;
     }
 
     /**
@@ -166,60 +172,60 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		// forbid Y=0
-		if(Y.isInstantiatedTo(0)){
-			return ESat.FALSE;
-		}
-		// X=0 => Z=0
-		if(X.isInstantiatedTo(0) && !Z.contains(0)){
-			return ESat.FALSE;
-		}
-		// check sign
-		boolean pos = (X.getLB()>=0 && Y.getLB()>=0) || (X.getUB()<0 && Y.getUB()<0);
-		if(pos && Z.getUB()<0){
-			return ESat.FALSE;
-		}
-		boolean neg = (X.getLB()>=0 && Y.getUB()<0) || (X.getUB()<0 && Y.getLB()>=0);
-		if(neg && Z.getLB()>0){
-			return ESat.FALSE;
-		}
-		// compute absolute bounds
-		int minAbsX;
-		if(X.getLB()>0){
-			minAbsX = X.getLB();
-		} else if(X.getUB()<0){
-			minAbsX = -X.getUB();
-		} else{
-			minAbsX = 0;
-		}
-		int maxAbsX = Math.max(X.getUB(),-X.getLB());
-		int minAbsY;
-		if(Y.getLB()>0){
-			minAbsY = Y.getLB();
-		} else if(Y.getUB()<0){
-			minAbsY = -Y.getUB();
-		} else{
-			minAbsY = 1;
-		}
-		int maxAbsY = Math.max(Y.getUB(),-Y.getLB());
-		int minAbsZ;
-		if(Z.getLB()>0){
-			minAbsZ = Z.getLB();
-		} else if(Z.getUB()<0){
-			minAbsZ = -Z.getUB();
-		} else{
-			minAbsZ = 0;
-		}
-		int maxAbsZ = Math.max(Z.getUB(),-Z.getLB());
-		// check absolute bounds
-		if((minAbsZ>maxAbsX/minAbsY) || (maxAbsZ<minAbsX/maxAbsY)){
-			return ESat.FALSE;
-		}
-		// check case Z=0
-		if((Z.isInstantiatedTo(0) && minAbsX > maxAbsY) || (maxAbsX < minAbsY && !Z.contains(0))){
-			return ESat.FALSE;
-		}
-		// check tuple
+        // forbid Y=0
+        if (Y.isInstantiatedTo(0)) {
+            return ESat.FALSE;
+        }
+        // X=0 => Z=0
+        if (X.isInstantiatedTo(0) && !Z.contains(0)) {
+            return ESat.FALSE;
+        }
+        // check sign
+        boolean pos = (X.getLB() >= 0 && Y.getLB() >= 0) || (X.getUB() < 0 && Y.getUB() < 0);
+        if (pos && Z.getUB() < 0) {
+            return ESat.FALSE;
+        }
+        boolean neg = (X.getLB() >= 0 && Y.getUB() < 0) || (X.getUB() < 0 && Y.getLB() >= 0);
+        if (neg && Z.getLB() > 0) {
+            return ESat.FALSE;
+        }
+        // compute absolute bounds
+        int minAbsX;
+        if (X.getLB() > 0) {
+            minAbsX = X.getLB();
+        } else if (X.getUB() < 0) {
+            minAbsX = -X.getUB();
+        } else {
+            minAbsX = 0;
+        }
+        int maxAbsX = Math.max(X.getUB(), -X.getLB());
+        int minAbsY;
+        if (Y.getLB() > 0) {
+            minAbsY = Y.getLB();
+        } else if (Y.getUB() < 0) {
+            minAbsY = -Y.getUB();
+        } else {
+            minAbsY = 1;
+        }
+        int maxAbsY = Math.max(Y.getUB(), -Y.getLB());
+        int minAbsZ;
+        if (Z.getLB() > 0) {
+            minAbsZ = Z.getLB();
+        } else if (Z.getUB() < 0) {
+            minAbsZ = -Z.getUB();
+        } else {
+            minAbsZ = 0;
+        }
+        int maxAbsZ = Math.max(Z.getUB(), -Z.getLB());
+        // check absolute bounds
+        if ((minAbsZ > maxAbsX / minAbsY) || (maxAbsZ < minAbsX / maxAbsY)) {
+            return ESat.FALSE;
+        }
+        // check case Z=0
+        if ((Z.isInstantiatedTo(0) && minAbsX > maxAbsY) || (maxAbsX < minAbsY && !Z.contains(0))) {
+            return ESat.FALSE;
+        }
+        // check tuple
         if (isCompletelyInstantiated()) {
             return ESat.eval(X.getValue() / Y.getValue() == Z.getValue());
         }
@@ -377,5 +383,27 @@ public class PropDivXYZ extends Propagator<IntVar> {
             res |= a.removeValue(0, aCause);
         }
         return res;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+            this.vars[2].duplicate(solver, identitymap);
+            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
+
+            this.absX.duplicate(solver, identitymap);
+            IntVar absX = (IntVar) identitymap.get(this.absX);
+            this.absY.duplicate(solver, identitymap);
+            IntVar absY = (IntVar) identitymap.get(this.absY);
+            this.absZ.duplicate(solver, identitymap);
+            IntVar absZ = (IntVar) identitymap.get(this.absZ);
+
+
+            identitymap.put(this, new PropDivXYZ(X, Y, Z, absX, absY, absZ));
+        }
     }
 }

@@ -27,6 +27,8 @@
 
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,9 +69,9 @@ public class PropTimesNaive extends Propagator<IntVar> {
             hasChanged |= div(v1, v2.getLB(), v2.getUB(), v0.getLB(), v0.getUB());
             hasChanged |= mul(v2, v0.getLB(), v0.getUB(), v1.getLB(), v1.getUB());
         }
-		if(v2.isInstantiatedTo(0) && (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(1))){
-			setPassive();
-		}
+        if (v2.isInstantiatedTo(0) && (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(1))) {
+            setPassive();
+        }
     }
 
     @Override
@@ -78,6 +80,20 @@ public class PropTimesNaive extends Propagator<IntVar> {
             return ESat.eval(v0.getValue() * v1.getValue() == v2.getValue());
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+            this.vars[2].duplicate(solver, identitymap);
+            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
+
+            identitymap.put(this, new PropTimesNaive(X, Y, Z));
+        }
     }
 
     private boolean div(IntVar var, int a, int b, int c, int d) throws ContradictionException {

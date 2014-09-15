@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -247,7 +249,7 @@ public class PropScalarEq extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(this);
-        if (d!=null && d.getmType() == Deduction.Type.ValRem) {
+        if (d != null && d.getmType() == Deduction.Type.ValRem) {
             ValueRemoval vr = (ValueRemoval) d;
             IntVar var = (IntVar) vr.getVar();
             int val = vr.getVal();
@@ -295,6 +297,19 @@ public class PropScalarEq extends Propagator<IntVar> {
 
         } else {
             super.explain(d, e);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropScalarEq(aVars, this.c, this.pos, this.b));
         }
     }
 

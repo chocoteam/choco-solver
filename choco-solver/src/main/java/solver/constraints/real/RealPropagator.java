@@ -26,6 +26,8 @@
  */
 package solver.constraints.real;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -143,5 +145,18 @@ public class RealPropagator extends Propagator<RealVar> {
 			return ESat.TRUE;
 		}
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = vars.length;
+            RealVar[] rvars = new RealVar[size];
+            for (int i = 0; i < size; i++) {
+                vars[i].duplicate(solver, identitymap);
+                rvars[i] = (RealVar) identitymap.get(vars[i]);
+            }
+            identitymap.put(this, new RealPropagator(functions, rvars, option));
+        }
     }
 }

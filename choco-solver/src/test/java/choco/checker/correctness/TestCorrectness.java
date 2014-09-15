@@ -312,7 +312,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "5m")
+    @Test(groups = "10m")
     public void testNVALUES() {
         String[][] filters = new String[][]{
                 {"at_most_BC"},

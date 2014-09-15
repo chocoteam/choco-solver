@@ -27,22 +27,24 @@
 
 package solver.constraints.nary.circuit;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
 public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet, CircuitConf conf) {
-		super(succs,offSet,conf);
-	}
+    public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet, CircuitConf conf) {
+        super(succs, offSet, conf);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
 	protected void filterFromDom(int duplicatedNode) throws ContradictionException {
 		for (int i = 0; i < n + 1; i++) {
@@ -77,4 +79,17 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 			contradiction(vars[0], "the source cannot reach all nodes");
 		}
 	}
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropCircuit_AntiArboFiltering(aVars, this.offSet, this.conf));
+        }
+    }
 }

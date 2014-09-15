@@ -27,6 +27,8 @@
 
 package solver.constraints.unary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -46,8 +48,7 @@ public class PropNotMemberBound extends Propagator<IntVar> {
     final int lb, ub;
 
 
-    public PropNotMemberBound(IntVar var, int lb, int ub,
-                              boolean reactOnPromotion) {
+    public PropNotMemberBound(IntVar var, int lb, int ub) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
         this.lb = lb;
         this.ub = ub;
@@ -91,4 +92,10 @@ public class PropNotMemberBound extends Propagator<IntVar> {
         e.add(aCause);
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropNotMemberBound((IntVar) identitymap.get(vars[0]), lb, ub));
+        }
+    }
 }

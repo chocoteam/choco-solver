@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -156,10 +157,10 @@ public class EqView extends IntView {
         return var.isInstantiatedTo(value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -194,6 +195,15 @@ public class EqView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.eq(this.var);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            EqView clone = new EqView((IntVar) identitymap.get(this.var), solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

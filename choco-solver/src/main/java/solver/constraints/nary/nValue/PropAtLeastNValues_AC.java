@@ -26,7 +26,9 @@
  */
 package solver.constraints.nary.nValue;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,8 +53,9 @@ import java.util.BitSet;
  * In practice it is more like O(m) where m is the number of variable-value pairs
  * <p/>
  * BEWARE UNSAFE : BUG DETECTED THROUGH DOBBLE(3,4,6)
- *
+ * <p/>
  * !redundant propagator!
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropAtLeastNValues_AC extends Propagator<IntVar> {
@@ -356,6 +359,21 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         public UnaryIntProcedure set(Integer integer) {
             this.idx = integer;
             return this;
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropAtLeastNValues_AC(aVars, aVar));
         }
     }
 }

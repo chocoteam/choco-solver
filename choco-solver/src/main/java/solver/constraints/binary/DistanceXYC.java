@@ -26,6 +26,8 @@
  */
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.exception.SolverException;
@@ -43,18 +45,18 @@ import util.tools.ArrayUtils;
  */
 public class DistanceXYC extends Constraint {
 
-	final IntVar X,Y;
+    final IntVar X, Y;
     final int C;
     final Operator operator;
 
 
     public DistanceXYC(IntVar X, IntVar Y, Operator operator, int C) {
-        super("DistanceXYC "+ operator.name(),new PropDistanceXYC(ArrayUtils.toArray(X, Y), operator, C));
+        super("DistanceXYC " + operator.name(), new PropDistanceXYC(ArrayUtils.toArray(X, Y), operator, C));
         if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
             throw new SolverException("Unexpected operator for distance");
         }
-		this.X = X;
-		this.Y = Y;
+        this.X = X;
+        this.Y = Y;
         this.C = C;
         this.operator = operator;
     }
@@ -63,4 +65,18 @@ public class DistanceXYC extends Constraint {
 //	public Constraint makeOpposite(){
 //		return new DistanceXYC(X,Y,Operator.getOpposite(operator),C);
 //	}
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.X.duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.X);
+            this.Y.duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.Y);
+
+            Constraint clone = new DistanceXYC(X, Y, this.operator, this.C);
+            identitymap.put(this.propagators[0], clone.getPropagator(0));
+            identitymap.put(this, clone);
+        }
+    }
 }

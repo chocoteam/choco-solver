@@ -34,6 +34,8 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -92,13 +94,13 @@ public class PropCardinality extends Propagator<Variable> {
         if (card.isInstantiated()) {
             int c = card.getValue();
             if (c == k) {
-                for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+                for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
                     if (!set.kernelContains(j)) {
                         set.removeFromEnvelope(j, aCause);
                     }
                 }
             } else if (c == e) {
-                for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+                for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
                     set.addToKernel(j, aCause);
                 }
             }
@@ -116,5 +118,18 @@ public class PropCardinality extends Propagator<Variable> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            set.duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(set);
+
+            card.duplicate(solver, identitymap);
+            IntVar C = (IntVar) identitymap.get(card);
+
+            identitymap.put(this, new PropCardinality(S, C));
+        }
     }
 }

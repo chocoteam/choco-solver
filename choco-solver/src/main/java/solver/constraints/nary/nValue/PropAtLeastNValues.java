@@ -27,6 +27,8 @@
 package solver.constraints.nary.nValue;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -120,17 +122,17 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         // filtering cardinality variable
         vars[n].updateUpperBound(countMax, aCause);
         // filtering decision variables
-		if (count != countMax && countMax == vars[n].getLB()) {
-			for (int i = concernedValues.size() - 1; i >= 0; i--) {
-				if (mate[i] >= 0) {
-					vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
-				}
-			}
-			if (allEnum) setPassive();
-		}
+        if (count != countMax && countMax == vars[n].getLB()) {
+            for (int i = concernedValues.size() - 1; i >= 0; i--) {
+                if (mate[i] >= 0) {
+                    vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
+                }
+            }
+            if (allEnum) setPassive();
+        }
     }
 
-	//***********************************************************************************
+    //***********************************************************************************
     // INFO
     //***********************************************************************************
 
@@ -154,7 +156,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                 countMax++;
             }
             if (mandatory) {
-				countMin++;
+                countMin++;
             }
         }
         if (countMin >= vars[n].getUB()) {
@@ -164,5 +166,20 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropAtLeastNValues(aVars, this.concernedValues, aVar));
+        }
     }
 }

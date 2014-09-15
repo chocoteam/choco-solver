@@ -43,7 +43,7 @@ class CouplesBitSetTable extends BinRelation {
      * table[0][i] gives the supports of value i of variable 0
      * table[1][i] gives the supports of value i of variable 1
      */
-    protected BitSet[][] table;
+    protected final BitSet[][] table;
 
     /**
      * first value of x, and y
@@ -51,7 +51,7 @@ class CouplesBitSetTable extends BinRelation {
     protected final int[] offsets;
 
 
-    protected boolean feasible;
+    protected final boolean feasible;
 
     /**
      * Create a tuple list for AC3bit+rm
@@ -91,6 +91,14 @@ class CouplesBitSetTable extends BinRelation {
         }
     }
 
+    // required for duplicate method, should not be called by default
+    private CouplesBitSetTable(BitSet[][] table, int[] offsets, boolean feasible) {
+        this.table = table;
+        this.offsets = offsets;
+        this.feasible = feasible;
+
+    }
+
     public boolean isConsistent(int x, int y) {
         return table[0][x - offsets[0]].get(y - offsets[1]);
     }
@@ -113,5 +121,17 @@ class CouplesBitSetTable extends BinRelation {
             }
         }
         return false;
+    }
+
+    @Override
+    public BinRelation duplicate() {
+        BitSet[][] nTables = new BitSet[table.length][];
+        for (int i = 0; i < table.length; i++) {
+            nTables[i] = new BitSet[table[i].length];
+            for (int j = 0; j < table[i].length; j++) {
+                nTables[i][j] = (BitSet) table[i][j].clone();
+            }
+        }
+        return new CouplesBitSetTable(nTables, offsets.clone(), feasible);
     }
 }
