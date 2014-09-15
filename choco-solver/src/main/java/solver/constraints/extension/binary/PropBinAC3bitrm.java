@@ -30,8 +30,9 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.iterators.DisposableValueIterator;
 
 /**
@@ -62,7 +63,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             offset0 = v0.getLB();
             offset1 = v1.getLB();
 
@@ -114,7 +115,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
+        if (IntEventType.isInstantiate(mask)) {
             onInstantiationOf(idxVarInProp);
         } else if (idxVarInProp == 0) {
             reviseV1();

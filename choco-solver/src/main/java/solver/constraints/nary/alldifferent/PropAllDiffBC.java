@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -60,7 +60,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
     }
 
     @Override

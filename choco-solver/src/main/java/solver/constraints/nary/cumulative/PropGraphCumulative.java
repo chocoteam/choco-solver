@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,8 +27,8 @@
 package solver.constraints.nary.cumulative;
 
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -91,7 +91,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			super.propagate(evtmask);
 			for (int i = 0; i < n; i++) {
 				g.getNeighOf(i).clear();
@@ -134,7 +134,7 @@ public class PropGraphCumulative extends PropFullCumulative {
 				toCompute.add(i);
 			}
 		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
 	}
 
 	protected void filterAround(int taskIndex) throws ContradictionException {

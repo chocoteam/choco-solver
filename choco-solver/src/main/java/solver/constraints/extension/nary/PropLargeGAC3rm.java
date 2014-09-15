@@ -31,8 +31,8 @@ import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -103,7 +103,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if ((evtmask & PropagatorEventType.FULL_PROPAGATION.getMask()) != 0) {
             for (int i = 0; i < vars.length; i++) {
                 initializeSupports(i);
             }

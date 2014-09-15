@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,8 +38,9 @@ import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.hardcoded.util.MId2AbId;
 import solver.propagation.queues.CircularQueue;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 import util.objects.IntCircularQueue;
 
 import java.util.ArrayList;
@@ -172,7 +173,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     if (Configuration.PRINT_PROPAGATION) {
                         IPropagationEngine.Trace.printPropagation(null, lastProp);
                     }
-                    lastProp.propagate(EventType.FULL_PROPAGATION.getMask());
+                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 // This part is for debugging only!!
                 if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
@@ -230,7 +231,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
             IPropagationEngine.Trace.printModification(variable, type, cause);
         }
@@ -243,11 +244,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         for (int p = nbp - 1; p >= 0; p--) {
             prop = vpropagators[p];
             pindice = vindices[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
                 int aid = p2i.get(prop.getId());
                 if (prop.reactToFineEvent()) {
                     boolean needSched = (eventmasks[aid][pindice] == 0);
-                    eventmasks[aid][pindice] |= type.strengthened_mask;
+                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
                     if (needSched) {
                         if (Configuration.PRINT_SCHEDULE) {
                             IPropagationEngine.Trace.printSchedule(prop);
@@ -270,7 +271,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+    public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         if (propagator.getNbPendingEvt() == 0) {
             if (Configuration.PRINT_PROPAGATION) {
                 IPropagationEngine.Trace.printPropagation(null, propagator);

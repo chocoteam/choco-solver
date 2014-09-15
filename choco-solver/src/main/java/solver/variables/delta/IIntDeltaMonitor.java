@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,7 @@
 package solver.variables.delta;
 
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
+import solver.variables.events.IntEventType;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -39,9 +39,9 @@ import util.procedure.SafeIntProcedure;
  */
 public interface IIntDeltaMonitor extends IDeltaMonitor {
 
-    void forEach(SafeIntProcedure proc, EventType eventType);
+    void forEach(SafeIntProcedure proc, IntEventType eventType);
 
-    void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
+    void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException;
 
     public static enum Default implements IIntDeltaMonitor {
         NONE() {
@@ -52,10 +52,10 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
             public void unfreeze() {}
 
             @Override
-            public void forEach(SafeIntProcedure proc, EventType eventType) {}
+            public void forEach(SafeIntProcedure proc, IntEventType eventType) {}
 
             @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {}
+            public void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException {}
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,9 +35,9 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.procedure.UnaryIntProcedure;
 import util.tools.ArrayUtils;
@@ -82,13 +82,13 @@ public class PropSquare extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) { // filter from X to Y
-            if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
+            if (IntEventType.isInstantiate(mask) || IntEventType.isBound(mask)) {
                 updateLowerBoundofY();
                 updateUpperBoundofY();
                 updateHolesinY();
             } else {
                 idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
                 idms[varIdx].unfreeze();
 //                updateHolesinY();
             }
@@ -97,13 +97,13 @@ public class PropSquare extends Propagator<IntVar> {
 //            if (EventType.isRemove(mask) && EventType.isRemove(getPropagationConditions(idxVarInProp))) {
             // this led to a nasty bug due to event promotion
 
-            if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
+            if (IntEventType.isInstantiate(mask) || IntEventType.isBound(mask)) {
                 updateLowerBoundofX();
                 updateUpperBoundofX();
                 updateHolesinX();
             } else {
                 idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
                 idms[varIdx].unfreeze();
 //                updateHolesinX();
             }

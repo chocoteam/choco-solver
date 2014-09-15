@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -41,11 +41,12 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.IntEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -99,7 +100,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.INT_ALL_MASK();
+        return SetEventType.REMOVE_FROM_ENVELOPE.getMask() + IntEventType.INT_ALL_MASK();
     }
 
     @Override
@@ -147,7 +148,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
             }
         } else {
             sdm.freeze();
-            sdm.forEach(elemRem, EventType.REMOVE_FROM_ENVELOPE);
+            sdm.forEach(elemRem, SetEventType.REMOVE_FROM_ENVELOPE);
             sdm.unfreeze();
             if (iv.isInstantiated()) {
                 set.addToKernel(iv.getValue(), aCause);

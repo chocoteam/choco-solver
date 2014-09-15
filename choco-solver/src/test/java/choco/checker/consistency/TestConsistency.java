@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -352,7 +352,7 @@ public class TestConsistency {
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] propagators = constraints[c].getPropagators();
             for (int p = 0; p < propagators.length; p++) {
-                propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
+                propagators[p].forcePropagate(PropagatorEventType.FULL_PROPAGATION);
             }
         }
         s.propagate();

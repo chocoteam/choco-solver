@@ -35,9 +35,10 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPropagationEngine;
 import solver.search.strategy.decision.Decision;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -290,11 +291,11 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
         }
 
         @Override
-        public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
         }
 
         @Override
-        public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+        public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
 
         }
 

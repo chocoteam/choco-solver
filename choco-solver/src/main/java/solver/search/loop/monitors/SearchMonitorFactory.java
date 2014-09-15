@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -258,15 +258,6 @@ public class SearchMonitorFactory {
      */
     public static void prop_count(Solver solver) {
         solver.plugMonitor(new LogPropagationCount(solver));
-    }
-
-    /**
-     * Print the total number of events per variable
-     *
-     * @param solver
-     */
-    public static void event_count(Solver solver) {
-        solver.plugMonitor(new LogEventCount(solver));
     }
 
     /**

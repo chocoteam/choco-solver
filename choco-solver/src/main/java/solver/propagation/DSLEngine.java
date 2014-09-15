@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,8 +38,9 @@ import solver.exception.SolverException;
 import solver.propagation.generator.Arc;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,7 +187,7 @@ public class DSLEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
             IPropagationEngine.Trace.printModification(variable, type, cause);
         }
@@ -195,14 +196,14 @@ public class DSLEngine implements IPropagationEngine {
         Arc arc;
         for (int i = 0; i < to; i++) {
             arc = fines_v[id][i];
-            if (arc.prop != cause && arc.prop.isActive() && arc.prop.advise(arc.idxVinP, type.mask)) {
+            if (arc.prop != cause && arc.prop.isActive() && arc.prop.advise(arc.idxVinP, type.getMask())) {
                 arc.update(type);
             }
         }
     }
 
     @Override
-    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+    public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         if (propagator.getNbPendingEvt() == 0) {
             if (Configuration.PRINT_PROPAGATION) {
                 IPropagationEngine.Trace.printPropagation(null, propagator);

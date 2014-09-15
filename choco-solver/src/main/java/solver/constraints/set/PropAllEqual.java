@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -39,9 +39,10 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.PropagatorEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -101,7 +102,7 @@ public class PropAllEqual extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
@@ -119,8 +120,8 @@ public class PropAllEqual extends Propagator<SetVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         sdm[idxVarInProp].freeze();
-        sdm[idxVarInProp].forEach(elementForced, EventType.ADD_TO_KER);
-        sdm[idxVarInProp].forEach(elementRemoved, EventType.REMOVE_FROM_ENVELOPE);
+        sdm[idxVarInProp].forEach(elementForced, SetEventType.ADD_TO_KER);
+        sdm[idxVarInProp].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         sdm[idxVarInProp].unfreeze();
     }
 

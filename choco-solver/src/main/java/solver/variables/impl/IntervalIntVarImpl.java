@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,13 +38,14 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomInterval;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IIntervalDelta;
 import solver.variables.delta.IntervalDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntervalDeltaMonitor;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueBoundIterator;
@@ -110,34 +111,34 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().removeValue(this, value, cause);
             }
-            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+            this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
-            EventType e;
+			IntEventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
                 }
                 SIZE.add(-1);
                 LB.set(value + 1);
-                e = EventType.INCLOW;
+                e = IntEventType.INCLOW;
             } else {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
                 }
                 SIZE.add(-1);
                 UB.set(value - 1);
-                e = EventType.DECUPP;
+                e = IntEventType.DECUPP;
             }
             if (SIZE.get() > 0) {
                 if (this.isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().removeValue(this, value, cause);
                 }
-                this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
+                this.contradiction(cause, IntEventType.REMOVE, MSG_EMPTY);
             }
             if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().removeValue(this, value, cause);
@@ -185,11 +186,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
-            EventType e = EventType.INSTANTIATE;
+			IntEventType e = IntEventType.INSTANTIATE;
 
             int lb = 0;
             int ub = 0;
@@ -215,7 +216,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -247,9 +248,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
                 }
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-                EventType e = EventType.INCLOW;
+				IntEventType e = IntEventType.INCLOW;
 
                 if (reactOnRemoval) {
                     if (old <= value - 1) delta.add(old, value - 1, cause);
@@ -257,7 +258,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(old - value);
                 LB.set(value);
                 if (isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
 
@@ -298,9 +299,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
                 }
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-                EventType e = EventType.DECUPP;
+				IntEventType e = IntEventType.DECUPP;
 
                 if (reactOnRemoval) {
                     if (value + 1 <= old) delta.add(value + 1, old, cause);
@@ -309,7 +310,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 UB.set(value);
 
                 if (isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
                 if (Configuration.PLUG_EXPLANATION) {
@@ -446,7 +447,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
@@ -480,7 +481,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,13 +25,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package solver.constraints.set;
 
 import gnu.trove.map.hash.THashMap;
@@ -39,9 +32,10 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.PropagatorEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -97,12 +91,12 @@ public class PropAllDisjoint extends Propagator<SetVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.ADD_TO_KER.mask;
+        return SetEventType.ADD_TO_KER.getMask();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
@@ -122,7 +116,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         currentSet = idxVarInProp;
         sdm[currentSet].freeze();
-        sdm[currentSet].forEach(elementForced, EventType.ADD_TO_KER);
+        sdm[currentSet].forEach(elementForced, SetEventType.ADD_TO_KER);
         sdm[currentSet].unfreeze();
     }
 

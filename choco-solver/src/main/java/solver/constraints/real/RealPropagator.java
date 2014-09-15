@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,8 +31,8 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.RealVar;
+import solver.variables.events.RealEventType;
 import util.ESat;
 
 /**
@@ -90,7 +90,7 @@ public class RealPropagator extends Propagator<RealVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.BOUND.mask;
+        return RealEventType.BOUND.getMask();
     }
 
     @Override
@@ -119,11 +119,6 @@ public class RealPropagator extends Propagator<RealVar> {
             default:
         }
 	}
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
 
     @Override
     public ESat isEntailed() {

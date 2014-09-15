@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,30 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+
+package solver.variables.events;
 
 /**
- * An interface to define event to categorize the filtering algorithm to apply.
- * <br/>Event can promoted or strengthened (cf. "CHOCO : implementing a CP kernel" -- F. Laburthe, 2000).
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 01/12/11
+ * An enum defining the real variable event types:
+ * <ul>
+ * <li><code>INCLOW</code>: lower bound increase event,</li>
+ * <li><code>DECUPP</code>: upper bound decrease event,</li>
+ * <li><code>BOUND</code>: lower bound increase and/or upper bound decrease event,</li>
+ * </ul>
+ * <p/>
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public interface IEventType {
+public enum RealEventType implements IEventType {
 
-    /**
-     * Return the value of the mask associated with the event.
-     *
-     * @return the mask of the event.
-     */
-    int getMask();
+    VOID(0),
+    INCLOW(1),
+    DECUPP(2),
+    BOUND(3);
 
-    /**
-     * Return the strengthened mask associated to the event.
-     * This can be equal to the mask.
-     *
-     * @return the mask of the strenghtened event.
-     */
-    int getStrengthenedMask();
+    private final int mask;
+
+	private RealEventType(int mask) {
+        this.mask = mask;
+    }
+
+    @Override
+    public int getMask() {
+        return mask;
+    }
+
+    @Override
+    public int getStrengthenedMask() {
+        return mask;
+    }
+
+    //******************************************************************************************************************
+    //******************************************************************************************************************
+
+    public static boolean isBound(int mask) {
+        return (mask & BOUND.mask) != 0;
+    }
+
+    public static boolean isInclow(int mask) {
+        return (mask & INCLOW.mask) != 0;
+    }
+
+    public static boolean isDecupp(int mask) {
+        return (mask & DECUPP.mask) != 0;
+    }
 }

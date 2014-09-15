@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -32,8 +32,8 @@ import solver.Solver;
 import solver.constraints.reification.PropReif;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -120,7 +120,7 @@ public class ReificationConstraint extends Constraint {
             assert (propagators[p].isReifiedAndSilent());
             propagators[p].setReifiedTrue();
             solver.getExplainer().activePropagator(bool, propagators[p]);
-            propagators[p].propagate(EventType.FULL_PROPAGATION.strengthened_mask);
+            propagators[p].propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());
             solver.getEngine().onPropagatorExecution(propagators[p]);
         }
     }

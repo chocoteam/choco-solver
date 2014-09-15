@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -30,9 +30,9 @@ import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.TimeStampedObject;
-import solver.variables.EventType;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IIntervalDelta;
+import solver.variables.events.IntEventType;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -77,8 +77,8 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     }
 
     @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType) {
-        if (EventType.isRemove(eventType.mask)) {
+    public void forEach(SafeIntProcedure proc, IntEventType eventType) {
+        if (IntEventType.isRemove(eventType.getMask())) {
             for (int i = frozenFirst; i < frozenLast; i++) {
                 if (propagator == Cause.Null || propagator != delta.getCause(i)) {
                     int lb = delta.getLB(i);
@@ -94,8 +94,8 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     }
 
     @Override
-    public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
+    public void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException {
+        if (IntEventType.isRemove(eventType.getMask())) {
             for (int i = frozenFirst; i < frozenLast; i++) {
                 if (propagator == Cause.Null || propagator != delta.getCause(i)) {
                     int lb = delta.getLB(i);

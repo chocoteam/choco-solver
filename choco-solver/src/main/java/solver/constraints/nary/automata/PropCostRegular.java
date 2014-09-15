@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,9 +36,10 @@ import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.iterators.DisposableIntIterator;
 import util.objects.StoredIndexedBipartiteSet;
@@ -84,7 +85,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return (vIdx != zIdx ? EventType.INT_ALL_MASK() : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
+        return (vIdx != zIdx ? IntEventType.INT_ALL_MASK() : IntEventType.BOUND.getMask() + IntEventType.INSTANTIATE.getMask());
     }
 
     /**
@@ -102,7 +103,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             initialize();
         }
         filter();
@@ -118,10 +119,10 @@ public class PropCostRegular extends Propagator<IntVar> {
             boundChange.set(true);
         } else { // other variables only deals with removal events
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
             idms[varIdx].unfreeze();
         }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     @Override

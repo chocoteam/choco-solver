@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,12 +36,12 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IDelta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IEventType;
 import solver.variables.impl.AbstractVariable;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
@@ -124,14 +124,14 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
 	@Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
     }
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(IEventType evt, ICause cause) throws ContradictionException {
         notifyPropagators(evt, this);
     }
 
@@ -151,7 +151,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }

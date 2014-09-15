@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,13 +27,13 @@
 package solver.constraints.nary.count;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -101,7 +101,7 @@ public class PropCount_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {// initialization
+        if (PropagatorEventType.isFullPropagation(evtmask)) {// initialization
             mandatories.clear();
             possibles.clear();
             for (int i = 0; i < n; i++) {
@@ -170,9 +170,9 @@ public class PropCount_AC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx >= n) {// cardinality variables
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
         }
-        return EventType.INT_ALL_MASK();
+        return IntEventType.INT_ALL_MASK();
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,10 +36,10 @@ import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.iterators.DisposableRangeIterator;
 import util.procedure.UnaryIntProcedure;
@@ -78,9 +78,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (vars[idx].hasEnumeratedDomain()) {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask + EventType.REMOVE.mask;
+            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask() + IntEventType.REMOVE.getMask();
         } else {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
         }
     }
 
@@ -129,18 +129,18 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         int idx2 = varIdx == 0 ? 1 : 0;
         switch (operator) {
             case EQ:
-                if (EventType.isInstantiate(mask)) {
+                if (IntEventType.isInstantiate(mask)) {
                     filterOnInst(vars[idx2], vars[varIdx].getValue());
                 } else {
-                    if (EventType.isRemove(mask) && vars[varIdx].hasEnumeratedDomain()) {
+                    if (IntEventType.isRemove(mask) && vars[varIdx].hasEnumeratedDomain()) {
                         idms[varIdx].freeze();
-                        idms[varIdx].forEach(remproc.set(varIdx), EventType.REMOVE);
+                        idms[varIdx].forEach(remproc.set(varIdx), IntEventType.REMOVE);
                         idms[varIdx].unfreeze();
                     }
-                    if (EventType.isInclow(mask)) {
+                    if (IntEventType.isInclow(mask)) {
                         filterOnInf(vars[varIdx], vars[idx2]);
                     }
-                    if (EventType.isDecupp(mask)) {
+                    if (IntEventType.isDecupp(mask)) {
                         filterOnSup(vars[varIdx], vars[idx2]);
                     }
                 }
@@ -149,16 +149,16 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 filterNeq();
                 break;
             case GT:
-                if (EventType.isInstantiate(mask)) {
+                if (IntEventType.isInstantiate(mask)) {
                     filterGTonVar(vars[varIdx], vars[idx2]);
-                } else if (EventType.isBound(mask)) {
+                } else if (IntEventType.isBound(mask)) {
                     filterGTonVar(vars[varIdx], vars[idx2]);
                 }
                 break;
             case LT:
-                if (EventType.isInstantiate(mask)) {
+                if (IntEventType.isInstantiate(mask)) {
                     filterLTonVar(vars[varIdx], vars[idx2]);
-                } else if (EventType.isBound(mask)) {
+                } else if (IntEventType.isBound(mask)) {
                     filterLTonVar(vars[varIdx], vars[idx2]);
                 }
                 break;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,16 +28,16 @@
 package solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.events.IEventType;
+import solver.variables.events.SetEventType;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
@@ -160,7 +160,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         if (reactOnModification) {
             delta.add(element, SetDelta.KERNEL, cause);
         }
-        EventType e = EventType.ADD_TO_KER;
+        SetEventType e = SetEventType.ADD_TO_KER;
         notifyPropagators(e, cause);
         return true;
     }
@@ -170,7 +170,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         assert cause != null;
         if (element < min || element > max) return false;
         if (kernel.contain(element - min)) {
-            contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
+            contradiction(cause, SetEventType.REMOVE_FROM_ENVELOPE, "");
             return true;
         }
         if (!envelope.remove(element - min)) {
@@ -179,7 +179,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         if (reactOnModification) {
             delta.add(element, SetDelta.ENVELOP, cause);
         }
-        EventType e = EventType.REMOVE_FROM_ENVELOPE;
+		SetEventType e = SetEventType.REMOVE_FROM_ENVELOPE;
         notifyPropagators(e, cause);
         return true;
     }
@@ -361,14 +361,14 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }
