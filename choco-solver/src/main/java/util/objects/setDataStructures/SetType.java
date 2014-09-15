@@ -28,14 +28,14 @@
 package util.objects.setDataStructures;
 
 public enum SetType {
-    SWAP_ARRAY,
+	BIPARTITESET,
     SWAP_HASH,
     LINKED_LIST,
     DOUBLE_LINKED_LIST,
     BITSET,
     BOOL_ARRAY;
 
-    public final static SetType ENVELOPE_BEST = SWAP_ARRAY;
+    public final static SetType ENVELOPE_BEST = BIPARTITESET;
     public final static SetType KERNEL_BEST = LINKED_LIST;
 }
 

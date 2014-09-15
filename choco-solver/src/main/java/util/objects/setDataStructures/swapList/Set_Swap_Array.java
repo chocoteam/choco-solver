@@ -105,6 +105,6 @@ public class Set_Swap_Array extends Set_Swap {
 
 	@Override
 	public SetType getSetType(){
-		return SetType.SWAP_ARRAY;
+		return SetType.BIPARTITESET;
 	}
 }

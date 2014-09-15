@@ -27,7 +27,6 @@
 
 package solver.constraints.nary.nValue.amnv.graph;
 
-import memory.IEnvironment;
 import solver.Solver;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.SetType;
@@ -50,7 +49,7 @@ public abstract class G extends UndirectedGraph{
 	 * @param nbNodes	size of the graph (number of nodes)
 	 */
 	public G(Solver solver, int nbNodes) {
-		super(solver, nbNodes, SetType.SWAP_ARRAY, true);
+		super(solver, nbNodes, SetType.BIPARTITESET, true);
 	}
 
 	//***********************************************************************************

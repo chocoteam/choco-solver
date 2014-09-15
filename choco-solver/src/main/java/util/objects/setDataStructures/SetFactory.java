@@ -75,7 +75,7 @@ public class SetFactory {
 		IEnvironment environment = solver.getEnvironment();
         if (HARD_CODED)
             switch (type) {
-                case SWAP_ARRAY:
+                case BIPARTITESET:
                     return new Set_Std_Swap_Array(environment, maximumSize);
                 case SWAP_HASH:
                     return new Set_Std_Swap_Hash(environment, maximumSize);
@@ -114,7 +114,7 @@ public class SetFactory {
      */
     public static ISet makeSet(SetType type, int maximumSize) {
         switch (type) {
-            case SWAP_ARRAY:
+            case BIPARTITESET:
                 return makeSwap(maximumSize, false);
             case SWAP_HASH:
                 return makeSwap(maximumSize, true);
