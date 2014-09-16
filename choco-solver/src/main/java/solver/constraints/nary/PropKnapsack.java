@@ -104,7 +104,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask() + IntEventType.INCLOW.getMask();
+        return IntEventType.boundAndInst();
     }
 
     @Override

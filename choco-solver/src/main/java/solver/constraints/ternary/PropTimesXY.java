@@ -56,7 +56,7 @@ public class PropTimesXY extends Propagator<IntVar> {
     @Override
     public final int getPropagationConditions(int vIdx) {
         if (vIdx == 2) return 0;
-        return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+        return IntEventType.boundAndInst();
     }
 
     @Override

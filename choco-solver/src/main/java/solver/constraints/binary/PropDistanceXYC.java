@@ -78,9 +78,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (vars[idx].hasEnumeratedDomain()) {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask() + IntEventType.REMOVE.getMask();
+            return IntEventType.all();
         } else {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+            return IntEventType.boundAndInst();
         }
     }
 

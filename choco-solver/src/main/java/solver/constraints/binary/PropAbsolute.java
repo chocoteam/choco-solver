@@ -74,9 +74,9 @@ public class PropAbsolute extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (bothEnumerated) {
-            return IntEventType.INT_ALL_MASK();
+            return IntEventType.all();
         } else {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+            return IntEventType.boundAndInst();
         }
     }
 

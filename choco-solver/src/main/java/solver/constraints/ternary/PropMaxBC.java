@@ -57,7 +57,7 @@ public class PropMaxBC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+        return IntEventType.boundAndInst();
     }
 
     @Override

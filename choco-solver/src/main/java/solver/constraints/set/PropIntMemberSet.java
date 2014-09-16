@@ -100,7 +100,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return SetEventType.REMOVE_FROM_ENVELOPE.getMask() + IntEventType.INT_ALL_MASK();
+        return SetEventType.REMOVE_FROM_ENVELOPE.getMask() + IntEventType.all();
     }
 
     @Override

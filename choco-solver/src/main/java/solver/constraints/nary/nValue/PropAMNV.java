@@ -77,7 +77,7 @@ public class PropAMNV extends Propagator<IntVar> {
 
 	@Override
 	protected int getPropagationConditions(int i) {
-		return IntEventType.INT_ALL_MASK();
+		return IntEventType.all();
 	}
 
 	@Override

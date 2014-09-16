@@ -107,7 +107,7 @@ public class PropNbEmpty extends Propagator<Variable> {
         if (vIdx < n) {
             return SetEventType.REMOVE_FROM_ENVELOPE.getMask() + SetEventType.ADD_TO_KER.getMask();
         } else {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+            return IntEventType.boundAndInst();
         }
     }
 

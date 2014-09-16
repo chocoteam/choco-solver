@@ -101,9 +101,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (idx == nb_vars) {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+            return IntEventType.boundAndInst();
         }
-        return IntEventType.INSTANTIATE.getMask() + +IntEventType.BOUND.getMask() + IntEventType.REMOVE.getMask();
+        return IntEventType.all();
     }
 
     @Override

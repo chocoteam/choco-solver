@@ -141,7 +141,7 @@ public class Grocery extends AbstractProblem {
          * Propagation condition : if a variable is instantiated or a domain bound is modified
          */
         public int getPropagationConditions(int vIdx) {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+            return IntEventType.boundAndInst();
         }
 
         @Override

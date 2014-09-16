@@ -108,7 +108,7 @@ public class PropMinElement extends Propagator<Variable> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0) return SetEventType.ADD_TO_KER.getMask() + SetEventType.REMOVE_FROM_ENVELOPE.getMask();
-        else return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask() + IntEventType.INCLOW.getMask();
+        else return IntEventType.boundAndInst();
     }
 
     @Override

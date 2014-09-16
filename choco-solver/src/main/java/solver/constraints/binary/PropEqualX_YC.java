@@ -80,9 +80,9 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (bothEnumerated)
-            return IntEventType.INT_ALL_MASK();
+            return IntEventType.all();
         else
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask() + IntEventType.INCLOW.getMask();
+            return IntEventType.boundAndInst();
     }
 
     @Override

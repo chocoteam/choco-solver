@@ -78,7 +78,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         if (vars[vIdx].hasEnumeratedDomain()) {
             return IntEventType.INSTANTIATE.getMask();
         }
-        return IntEventType.INSTANTIATE.getMask() + IntEventType.BOUND.getMask();
+        return IntEventType.boundAndInst();
     }
 
     @Override

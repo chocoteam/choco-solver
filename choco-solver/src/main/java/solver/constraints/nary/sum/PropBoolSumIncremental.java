@@ -139,7 +139,7 @@ public class PropBoolSumIncremental extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == n)
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask() + IntEventType.INCLOW.getMask();
+            return IntEventType.boundAndInst();
         return IntEventType.INSTANTIATE.getMask();
     }
 

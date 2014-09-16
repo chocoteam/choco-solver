@@ -78,7 +78,7 @@ public class PropDiffN extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (fast) return IntEventType.INSTANTIATE.getMask();
-        return IntEventType.INSTANTIATE.getMask() + +IntEventType.BOUND.getMask();
+        return IntEventType.boundAndInst();
     }
 
 	@Override

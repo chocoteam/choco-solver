@@ -97,6 +97,9 @@ public abstract class AbstractBinaryTest {
         Random rand = new Random(0);
         for (int k = 0; k < 20000; k++) {
             long seed = System.currentTimeMillis();
+			if(k==0){
+				seed = 1410851231099l;
+			}
             rand.setSeed(seed);
             bounded = rand.nextBoolean();
             int size = 5; // domain size

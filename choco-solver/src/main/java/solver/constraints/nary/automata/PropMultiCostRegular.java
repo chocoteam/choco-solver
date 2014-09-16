@@ -247,8 +247,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return (vIdx < vs.length ?
-                IntEventType.INT_ALL_MASK() :
-                IntEventType.BOUND.getMask() + IntEventType.INSTANTIATE.getMask());
+                IntEventType.all() :
+                IntEventType.boundAndInst());
     }
 
     /**

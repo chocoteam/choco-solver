@@ -285,7 +285,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.INCLOW.getMask() + IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask();
+        return IntEventType.boundAndInst();
     }
 
     @Override
