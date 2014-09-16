@@ -107,3 +107,5 @@ NEXT MILESTONE
 - Issue #215: Fix generation of relation based on tuples
 - Fix #214: Fix problems related to propagators dynamic addition and deletion
 - Add a GenerateAndTest search strategy which can be combined with others
+- Refactor IEventType (use interface and a concrete implementation for each variable type)
+- EXTRACT GRAPH VAR MODULE to choco-graph project (https://github.com/chocoteam/choco-graph)
