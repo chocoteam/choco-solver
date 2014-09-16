@@ -27,7 +27,6 @@
 package solver.variables.delta;
 
 import solver.exception.ContradictionException;
-import solver.variables.events.IntEventType;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -39,9 +38,9 @@ import util.procedure.SafeIntProcedure;
  */
 public interface IIntDeltaMonitor extends IDeltaMonitor {
 
-    void forEach(SafeIntProcedure proc, IntEventType eventType);
+    void forEachRemVal(SafeIntProcedure proc);
 
-    void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException;
+    void forEachRemVal(IntProcedure proc) throws ContradictionException;
 
     public static enum Default implements IIntDeltaMonitor {
         NONE() {
@@ -52,10 +51,10 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
             public void unfreeze() {}
 
             @Override
-            public void forEach(SafeIntProcedure proc, IntEventType eventType) {}
+            public void forEachRemVal(SafeIntProcedure proc) {}
 
             @Override
-            public void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException {}
+            public void forEachRemVal(IntProcedure proc) throws ContradictionException {}
         }
     }
 }

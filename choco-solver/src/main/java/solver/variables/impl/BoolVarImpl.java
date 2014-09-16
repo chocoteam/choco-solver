@@ -170,7 +170,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+//        records.forEachRemVal(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
         if (this.isInstantiated()) {
             int cvalue = this.getValue();
@@ -438,7 +438,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

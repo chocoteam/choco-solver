@@ -34,7 +34,6 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
 import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.graphOperations.connectivity.StrongConnectivityFinder;
@@ -312,7 +311,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx < n) {
             idms[varIdx].freeze();
-            idms[varIdx].forEach(remProc.set(varIdx), IntEventType.REMOVE);
+            idms[varIdx].forEachRemVal(remProc.set(varIdx));
             idms[varIdx].unfreeze();
         }
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);

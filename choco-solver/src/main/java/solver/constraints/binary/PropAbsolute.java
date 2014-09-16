@@ -126,7 +126,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (bothEnumerated) {
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+            idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
             idms[varIdx].unfreeze();
         } else {
             setBounds();

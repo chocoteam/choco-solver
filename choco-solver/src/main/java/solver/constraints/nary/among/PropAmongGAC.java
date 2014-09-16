@@ -129,7 +129,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     }
                 } else {
                     idms[varIdx].freeze();
-                    idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+                    idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
                     idms[varIdx].unfreeze();
                 }
                 return needFilter;

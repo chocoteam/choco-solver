@@ -40,7 +40,7 @@ import java.io.Serializable;
 public interface IntProcedure extends Serializable {
 
     /**
-     * Action to execute in a <code>Delta</code> object, within the <code>forEach</code> method.
+     * Action to execute in a <code>Delta</code> object, within the <code>forEachRemVal</code> method.
      *
      * @param i index
      * @throws solver.exception.ContradictionException
