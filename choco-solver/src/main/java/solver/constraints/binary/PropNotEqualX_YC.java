@@ -76,7 +76,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
         //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
         //Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
         if (vars[vIdx].hasEnumeratedDomain()) {
-            return IntEventType.INSTANTIATE.getMask();
+            return IntEventType.instantiation();
         }
         return IntEventType.boundAndInst();
     }

@@ -74,7 +74,7 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vars[vIdx].hasEnumeratedDomain()) {
-            return IntEventType.INSTANTIATE.getMask();
+            return IntEventType.instantiation();
         }
         return IntEventType.boundAndInst();
     }

@@ -88,7 +88,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 			this.filters[f] = filters[f].make(n,this);
 		}
 		// awakes on instantiations only when FAST mode is set to true
-		awakeningMask = fast? IntEventType.INSTANTIATE.getMask():IntEventType.boundAndInst();
+		awakeningMask = fast? IntEventType.instantiation():IntEventType.boundAndInst();
 		lastCapaMax = solver.getEnvironment().makeInt(capa.getUB()+1);
 		allTasks = SetFactory.makeFullSet(n);
 	}

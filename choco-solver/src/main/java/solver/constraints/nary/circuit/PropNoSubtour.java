@@ -160,7 +160,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.INSTANTIATE.getMask();
+        return IntEventType.instantiation();
     }
 
     @Override

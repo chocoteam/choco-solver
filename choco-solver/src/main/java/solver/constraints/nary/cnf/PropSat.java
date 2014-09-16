@@ -36,7 +36,6 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
 import util.ESat;
 
 /**
@@ -67,7 +66,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.INSTANTIATE.getMask();
+        return IntEventType.instantiation();
     }
 
     @Override

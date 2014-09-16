@@ -77,6 +77,13 @@ public enum IntEventType implements IEventType {
 		return INSTANTIATE.getStrengthenedMask()-REMOVE.getStrengthenedMask();
 	}
 
+	public static int instantiation() {
+		return INSTANTIATE.getMask();
+	}
+
+	//******************************************************************************************************************
+	//******************************************************************************************************************
+
 	public static boolean isInstantiate(int mask) {
 		return (mask & INSTANTIATE.mask) != 0;
 	}
