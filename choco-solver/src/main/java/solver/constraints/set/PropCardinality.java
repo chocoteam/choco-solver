@@ -82,7 +82,7 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) return SetEventType.ADD_TO_KER.getMask() + SetEventType.REMOVE_FROM_ENVELOPE.getMask();
+        if (vIdx == 0) return SetEventType.all();
         else return IntEventType.boundAndInst();
     }
 
