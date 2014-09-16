@@ -118,7 +118,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
         } else if (bothEnumerated) {
             indexToFilter = 1 - varIdx;
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc, IntEventType.REMOVE);
+            idms[varIdx].forEachRemVal(rem_proc);
             idms[varIdx].unfreeze();
         }
     }

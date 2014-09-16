@@ -44,7 +44,6 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.events.IntEventType;
 import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
@@ -172,7 +171,7 @@ public class PropIntChannel extends Propagator<Variable> {
             }
             idx += offSet2;
             idm[idxVarInProp - nSets].freeze();
-            idm[idxVarInProp - nSets].forEach(valRem, IntEventType.REMOVE);
+            idm[idxVarInProp - nSets].forEachRemVal(valRem);
             idm[idxVarInProp - nSets].unfreeze();
         }
     }

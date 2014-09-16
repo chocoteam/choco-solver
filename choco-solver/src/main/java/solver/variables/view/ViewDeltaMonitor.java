@@ -30,7 +30,6 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -74,18 +73,18 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-    public void forEach(SafeIntProcedure proc, IntEventType eventType) {
+    public void forEachRemVal(SafeIntProcedure proc) {
         values.clear();
-        deltamonitor.forEach(filler, eventType);
+        deltamonitor.forEachRemVal(filler);
         for (int v = 0; v < values.size(); v++) {
             proc.execute(transform(values.toArray()[v]));
         }
     }
 
     @Override
-    public void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException {
+    public void forEachRemVal(IntProcedure proc) throws ContradictionException {
         values.clear();
-        deltamonitor.forEach(filler, eventType);
+        deltamonitor.forEachRemVal(filler);
         for (int v = 0; v < values.size(); v++) {
             proc.execute(transform(values.toArray()[v]));
         }

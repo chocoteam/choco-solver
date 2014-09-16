@@ -119,7 +119,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             boundChange.set(true);
         } else { // other variables only deals with removal events
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+            idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
             idms[varIdx].unfreeze();
         }
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);

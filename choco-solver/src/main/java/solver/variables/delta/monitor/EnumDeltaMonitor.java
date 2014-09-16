@@ -32,7 +32,6 @@ import solver.exception.ContradictionException;
 import solver.search.loop.TimeStampedObject;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
 
@@ -77,29 +76,21 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     }
 
     @Override
-    public void forEach(SafeIntProcedure proc, IntEventType eventType) {
-        if (IntEventType.isRemove(eventType.getMask())) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    public void forEachRemVal(SafeIntProcedure proc) {
+		for (int i = frozenFirst; i < frozenLast; i++) {
+			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+				proc.execute(delta.get(i));
+			}
+		}
     }
 
     @Override
-    public void forEach(IntProcedure proc, IntEventType eventType) throws ContradictionException {
-        if (IntEventType.isRemove(eventType.getMask())) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    public void forEachRemVal(IntProcedure proc) throws ContradictionException {
+		for (int i = frozenFirst; i < frozenLast; i++) {
+			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+				proc.execute(delta.get(i));
+			}
+		}
     }
 
     @Override

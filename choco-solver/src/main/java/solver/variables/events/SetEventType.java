@@ -64,7 +64,7 @@ public enum SetEventType implements IEventType {
 	//******************************************************************************************************************
 	//******************************************************************************************************************
 
-	public static int SET_ALL_MASK() {
+	public static int all() {
 		return ADD_TO_KER.mask+REMOVE_FROM_ENVELOPE.mask;
 	}
 

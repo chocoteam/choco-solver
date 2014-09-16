@@ -34,7 +34,6 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
 import util.ESat;
 import util.procedure.UnaryIntProcedure;
 import util.tools.ArrayUtils;
@@ -96,7 +95,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         idms[varIdx].freeze();
-        idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+        idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
         idms[varIdx].unfreeze();
     }
 

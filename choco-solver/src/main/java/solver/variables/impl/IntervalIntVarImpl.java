@@ -104,7 +104,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -483,7 +483,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

@@ -134,7 +134,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 } else {
                     if (IntEventType.isRemove(mask) && vars[varIdx].hasEnumeratedDomain()) {
                         idms[varIdx].freeze();
-                        idms[varIdx].forEach(remproc.set(varIdx), IntEventType.REMOVE);
+                        idms[varIdx].forEachRemVal(remproc.set(varIdx));
                         idms[varIdx].unfreeze();
                     }
                     if (IntEventType.isInclow(mask)) {

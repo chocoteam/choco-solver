@@ -88,7 +88,7 @@ public class PropSquare extends Propagator<IntVar> {
                 updateHolesinY();
             } else {
                 idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+                idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
                 idms[varIdx].unfreeze();
 //                updateHolesinY();
             }
@@ -103,7 +103,7 @@ public class PropSquare extends Propagator<IntVar> {
                 updateHolesinX();
             } else {
                 idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+                idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
                 idms[varIdx].unfreeze();
 //                updateHolesinX();
             }

@@ -296,7 +296,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (varIdx < offset) {
             checkWorld();
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+            idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
             idms[varIdx].unfreeze();
         } else {// if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(varIdx - offset);

@@ -38,7 +38,7 @@ import java.io.Serializable;
  */
 public interface Procedure<E> extends Serializable {
     /**
-     * Action to execute in a <code>Delta</code> object, within the <code>forEach</code> method.
+     * Action to execute in a <code>Delta</code> object, within the <code>forEachRemVal</code> method.
      *
      * @param e object to deal with in the execution
      * @throws solver.exception.ContradictionException

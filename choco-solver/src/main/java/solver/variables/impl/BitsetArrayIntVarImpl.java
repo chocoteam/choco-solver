@@ -117,7 +117,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         assert cause != null;
         ICause antipromo = cause;
         if (value < values[LB.get()] || value > values[UB.get()]) {
@@ -135,7 +135,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().removeValue(this, value, antipromo);
                 }
-                //            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
+                //            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
             }
 			IntEventType e = IntEventType.REMOVE;
@@ -559,7 +559,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

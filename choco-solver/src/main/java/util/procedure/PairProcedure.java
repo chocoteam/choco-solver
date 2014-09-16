@@ -40,7 +40,7 @@ import java.io.Serializable;
 public interface PairProcedure extends Serializable {
 
     /**
-     * Action to execute in a <code>GraphDelta</code> object, within the <code>forEach</code> method.
+     * Action to execute in a <code>GraphDelta</code> object, within the <code>forEachRemVal</code> method.
      * Used to iterate on a set if arcs
      *
      * @param i tail of the arc

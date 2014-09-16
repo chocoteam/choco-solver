@@ -40,7 +40,6 @@ import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
 import util.ESat;
 import util.procedure.UnaryIntProcedure;
 
@@ -80,7 +79,7 @@ public class PropRegular extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < idms.length; i++) {
             idms[i].freeze();
-            idms[i].forEach(rem_proc.set(i), IntEventType.REMOVE);
+            idms[i].forEachRemVal(rem_proc.set(i));
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
                 if (!graph.hasSupport(i, j)) {
                     vars[i].removeValue(j, aCause);
@@ -93,7 +92,7 @@ public class PropRegular extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         idms[varIdx].freeze();
-        idms[varIdx].forEach(rem_proc.set(varIdx), IntEventType.REMOVE);
+        idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
         idms[varIdx].unfreeze();
     }
 

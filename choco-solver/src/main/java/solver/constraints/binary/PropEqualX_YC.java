@@ -126,7 +126,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                 offSet = cste;
             }
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc, IntEventType.REMOVE);
+            idms[varIdx].forEachRemVal(rem_proc);
             idms[varIdx].unfreeze();
         }
     }
