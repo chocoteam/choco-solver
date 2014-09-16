@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,6 @@ import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBool;
 import solver.explanations.antidom.AntiDomain;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IEnumDelta;
@@ -46,6 +45,8 @@ import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
 import solver.variables.delta.monitor.OneValueDeltaMonitor;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
@@ -169,7 +170,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+//        records.forEachRemVal(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
         if (this.isInstantiated()) {
             int cvalue = this.getValue();
@@ -177,12 +178,12 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else {
             if (value == 0 || value == 1) {
-                EventType e = EventType.INSTANTIATE;
+				IntEventType e = IntEventType.INSTANTIATE;
                 assert notInstanciated.contains(offset);
                 notInstanciated.swap(offset);
                 if (reactOnRemoval) {
@@ -198,7 +199,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
                 }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
             }
         }
@@ -397,7 +398,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
@@ -435,9 +436,9 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

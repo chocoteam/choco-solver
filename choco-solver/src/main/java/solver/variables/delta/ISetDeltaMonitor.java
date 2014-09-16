@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,16 +27,15 @@
 package solver.variables.delta;
 
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
+import solver.variables.events.SetEventType;
 import util.procedure.IntProcedure;
 
 /**
- * @author Jean-Guillaume Fages
- * @since Oct 2012
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
 public interface ISetDeltaMonitor extends IDeltaMonitor {
 
-	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException;
+	public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException;
 
 	public static enum Default implements ISetDeltaMonitor {
 		NONE() {
@@ -45,7 +44,7 @@ public interface ISetDeltaMonitor extends IDeltaMonitor {
 			@Override
 			public void unfreeze() {}
 			@Override
-			public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {}
+			public void forEach(IntProcedure proc, SetEventType eventType) throws ContradictionException {}
 		}
 	}
 }

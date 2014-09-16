@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,6 +40,8 @@ import solver.explanations.antidom.AntiDomain;
 import solver.variables.*;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 import solver.variables.view.IView;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
@@ -74,7 +76,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value == constante) {
             assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, EventType.REMOVE, "unique value removal");
+            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
         }
         return false;
     }
@@ -84,7 +86,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (from <= constante && constante <= to) {
             assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, EventType.REMOVE, "unique value removal");
+            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
         }
         return false;
     }
@@ -94,7 +96,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value != constante) {
             assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");
+            this.contradiction(cause, IntEventType.INSTANTIATE, "outside domain instantitation");
         }
         return false;
     }
@@ -104,7 +106,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value > constante) {
             assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, EventType.INCLOW, "outside domain update bound");
+            this.contradiction(cause, IntEventType.INCLOW, "outside domain update bound");
         }
         return false;
     }
@@ -114,7 +116,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value < constante) {
             assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, EventType.DECUPP, "outside domain update bound");
+            this.contradiction(cause, IntEventType.DECUPP, "outside domain update bound");
         }
         return false;
     }
@@ -233,15 +235,15 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+    public void notifyViews(IEventType event, ICause cause) throws ContradictionException {
     }
 
     @Override
@@ -250,7 +252,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         this.empty.set(true);
         solver.getEngine().fails(cause, this, message);
     }

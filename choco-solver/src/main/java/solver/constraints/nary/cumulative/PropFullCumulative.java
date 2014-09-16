@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,8 +30,9 @@ import memory.IStateInt;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -87,7 +88,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 			this.filters[f] = filters[f].make(n,this);
 		}
 		// awakes on instantiations only when FAST mode is set to true
-		awakeningMask = fast?EventType.INSTANTIATE.mask:EventType.BOUND.mask + EventType.INSTANTIATE.mask;
+		awakeningMask = fast? IntEventType.instantiation():IntEventType.boundAndInst();
 		lastCapaMax = solver.getEnvironment().makeInt(capa.getUB()+1);
 		allTasks = SetFactory.makeFullSet(n);
 	}
@@ -116,14 +117,14 @@ public class PropFullCumulative extends Propagator<IntVar> {
 	@Override
 	public int getPropagationConditions(int idx) {
 		if(idx>=4*n){
-			return EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
+			return IntEventType.DECUPP.getMask() + IntEventType.INSTANTIATE.getMask();
 		}
 		return awakeningMask;
 	}
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			propIni();
 		}
 		updateMaxCapa();
@@ -132,7 +133,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
 	}
 
 	protected void propIni() throws ContradictionException {

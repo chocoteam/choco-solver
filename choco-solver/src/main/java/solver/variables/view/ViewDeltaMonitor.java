@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -29,12 +29,9 @@ package solver.variables.view;
 import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.delta.IIntDeltaMonitor;
 import util.procedure.IntProcedure;
 import util.procedure.SafeIntProcedure;
-
-import java.util.ArrayList;
 
 /**
  * A delta monitor dedicated to views
@@ -76,18 +73,18 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType) {
+    public void forEachRemVal(SafeIntProcedure proc) {
         values.clear();
-        deltamonitor.forEach(filler, eventType);
+        deltamonitor.forEachRemVal(filler);
         for (int v = 0; v < values.size(); v++) {
             proc.execute(transform(values.toArray()[v]));
         }
     }
 
     @Override
-    public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+    public void forEachRemVal(IntProcedure proc) throws ContradictionException {
         values.clear();
-        deltamonitor.forEach(filler, eventType);
+        deltamonitor.forEachRemVal(filler);
         for (int v = 0; v < values.size(); v++) {
             proc.execute(transform(values.toArray()[v]));
         }

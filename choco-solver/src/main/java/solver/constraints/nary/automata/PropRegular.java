@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,7 +37,6 @@ import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.regular.Arc;
 import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGraph;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -80,7 +79,7 @@ public class PropRegular extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < idms.length; i++) {
             idms[i].freeze();
-            idms[i].forEach(rem_proc.set(i), EventType.REMOVE);
+            idms[i].forEachRemVal(rem_proc.set(i));
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
                 if (!graph.hasSupport(i, j)) {
                     vars[i].removeValue(j, aCause);
@@ -93,7 +92,7 @@ public class PropRegular extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         idms[varIdx].freeze();
-        idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
         idms[varIdx].unfreeze();
     }
 

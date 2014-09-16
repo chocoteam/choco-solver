@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -65,22 +65,22 @@ public class PropKLoops extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Incremental propagator which restricts the number of loops:
-     * |{succs[i]=i+offSet}| = nbLoops
-     *
-     * @param succs
-     * @param offSet
-     * @param nbLoops
-     */
-    public PropKLoops(IntVar[] succs, int offSet, IntVar nbLoops) {
-        super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY, true);
-        this.n = succs.length;
-        this.offSet = offSet;
-        IEnvironment environment = solver.getEnvironment();
-        this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
-        this.nbMinLoops = environment.makeInt();
-    }
+	/**
+	 * Incremental propagator which restricts the number of loops:
+	 * |{succs[i]=i+offSet}| = nbLoops
+	 *
+	 * @param succs
+	 * @param offSet
+	 * @param nbLoops
+	 */
+	public PropKLoops(IntVar[] succs, int offSet, IntVar nbLoops) {
+		super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY, true);
+		this.n = succs.length;
+		this.offSet = offSet;
+		IEnvironment environment = solver.getEnvironment();
+		this.possibleLoops = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
+		this.nbMinLoops = environment.makeInt();
+	}
 
     //***********************************************************************************
     // METHODS

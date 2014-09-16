@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -110,8 +110,8 @@ public class AlgoAllDiffAC {
 
     protected void findMaximumMatching() throws ContradictionException {
         for (int i = 0; i < n2; i++) {
-            digraph.getSuccessorsOf(i).clear();
-            digraph.getPredecessorsOf(i).clear();
+            digraph.getSuccOf(i).clear();
+            digraph.getPredOf(i).clear();
         }
         free.set(0, n2);
         int k, ub;
@@ -137,7 +137,7 @@ public class AlgoAllDiffAC {
         }
         int p;
         for (int i = 0; i < n; i++) {
-            p = digraph.getPredecessorsOf(i).getFirstElement();
+            p = digraph.getPredOf(i).getFirstElement();
             matching[i] = p;
         }
     }
@@ -166,7 +166,7 @@ public class AlgoAllDiffAC {
         ISet succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
-            succs = digraph.getSuccessorsOf(x);
+            succs = digraph.getSuccOf(x);
             for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
                 if (!in.get(y)) {
                     father[y] = x;
@@ -187,8 +187,8 @@ public class AlgoAllDiffAC {
 
     private void buildSCC() {
         if (n2 > n * 2) {
-            digraph.desactivateNode(n2);
-            digraph.activateNode(n2);
+            digraph.removeNode(n2);
+            digraph.addNode(n2);
             for (int i = n; i < n2; i++) {
                 if (free.get(i)) {
                     digraph.addArc(i, n2);
@@ -199,7 +199,7 @@ public class AlgoAllDiffAC {
         }
         SCCfinder.findAllSCC();
         nodeSCC = SCCfinder.getNodesSCC();
-        digraph.desactivateNode(n2);
+        digraph.removeNode(n2);
     }
 
     protected void filter() throws ContradictionException {

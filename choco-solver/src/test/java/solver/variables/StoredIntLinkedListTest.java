@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package solver.variables;
 
 import memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
@@ -85,10 +85,11 @@ public class StoredIntLinkedListTest {
         Assert.assertTrue(llist.contain(2));
         Assert.assertFalse(llist.contain(3));
 
-        environment.worldPop();
-        Assert.assertFalse(llist.contain(1));
-        Assert.assertFalse(llist.contain(2));
-        Assert.assertFalse(llist.contain(3));
+//		// backtracking above root node makes no sense
+//        environment.worldPop();
+//        Assert.assertFalse(llist.contain(1));
+//        Assert.assertFalse(llist.contain(2));
+//        Assert.assertFalse(llist.contain(3));
 
     }
 

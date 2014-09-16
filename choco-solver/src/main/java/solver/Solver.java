@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -56,7 +56,6 @@ import solver.search.solution.*;
 import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
-import solver.variables.graph.GraphVar;
 import sun.reflect.Reflection;
 import util.ESat;
 
@@ -318,23 +317,6 @@ public class Solver implements Serializable {
         for (int i = 0; i < vIdx; i++) {
             if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
                 bvars[k++] = (RealVar) vars[i];
-            }
-        }
-        return Arrays.copyOf(bvars, k);
-    }
-
-    /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the GraphVar only.
-     * It also contains FIXED variables and VIEWS, if any.
-     *
-     * @return array of SetVars of <code>this</code>
-     */
-    public GraphVar[] retrieveGraphVars() {
-        GraphVar[] bvars = new GraphVar[vIdx];
-        int k = 0;
-        for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.GRAPH) {
-                bvars[k++] = (GraphVar) vars[i];
             }
         }
         return Arrays.copyOf(bvars, k);

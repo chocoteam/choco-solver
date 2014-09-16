@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,9 +32,9 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
 import solver.variables.view.IView;
 
 import java.util.Arrays;
@@ -173,17 +173,17 @@ public abstract class AbstractVariable implements Variable {
     ////////////////////////////////////////////////////////////////
 
 	@Override
-    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
-        if ((modificationEvents & event.mask) != 0) {
+        if ((modificationEvents & event.getMask()) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
     }
 
     @Override
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+    public void notifyViews(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {

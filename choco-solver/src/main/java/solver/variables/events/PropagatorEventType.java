@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,26 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package solver.variables.events;
+
 /**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 13/02/13
- * Time: 22:08
+ * An enum defining the propagator event types:
+ * <ul>
+ * <li><code>FULL_PROPAGATION</code>: Propagation from scratch (as in initial propagation),</li>
+ * <li><code>CUSTOM_PROPAGATION</code>: custom propagation triggered by the developer (partially incremental propagation)</li>
+ * </ul>
+ * <p/>
+ *
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
+public enum PropagatorEventType implements IEventType {
 
-package solver.constraints.gary.degree;
+	VOID(0,0),
+	CUSTOM_PROPAGATION(1, 1),
+	FULL_PROPAGATION(2, 3);
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.variables.graph.GraphVar;
-import util.objects.graphs.IGraph;
-import util.objects.setDataStructures.ISet;
+	private final int mask;
+	private final int strengthened_mask;
 
-interface IncidentSet {
+	private PropagatorEventType(int mask, int fullmask) {
+		this.mask = mask;
+		this.strengthened_mask = fullmask;
+	}
 
-    ISet getSet(IGraph graph, int i);
+	@Override
+	public int getMask() {
+		return mask;
+	}
 
-    void enforce(GraphVar g, int from, int to, ICause cause) throws ContradictionException;
+	@Override
+	public int getStrengthenedMask() {
+		return strengthened_mask;
+	}
 
-    void remove(GraphVar g, int from, int to, ICause cause) throws ContradictionException;
+	//******************************************************************************************************************
+	//******************************************************************************************************************
+
+	public static boolean isFullPropagation(int mask) {
+		return (mask & FULL_PROPAGATION.mask) != 0;
+	}
+
+	public static boolean isCustomPropagation(int mask) {
+		return (mask & CUSTOM_PROPAGATION.mask) != 0;
+	}
 }

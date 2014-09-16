@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -32,9 +32,9 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 
@@ -117,8 +117,8 @@ public class PropOffSet extends Propagator<SetVar> {
             tmp = -offSet;
             tmpSet = vars[0];
         }
-        sdm[v].forEach(forced, EventType.ADD_TO_KER);
-        sdm[v].forEach(removed, EventType.REMOVE_FROM_ENVELOPE);
+        sdm[v].forEach(forced, SetEventType.ADD_TO_KER);
+        sdm[v].forEach(removed, SetEventType.REMOVE_FROM_ENVELOPE);
         sdm[v].unfreeze();
     }
 

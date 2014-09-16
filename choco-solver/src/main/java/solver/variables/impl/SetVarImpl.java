@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,16 +28,16 @@
 package solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.events.IEventType;
+import solver.variables.events.SetEventType;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
 import util.objects.setDataStructures.SetType;
@@ -68,79 +68,76 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Creates a Set variable
-     *
-     * @param name    name of the variable
-     * @param env     initial envelope domain
-     * @param envType data structure of the envelope
-     * @param ker     initial kernel domain
-     * @param kerType data structure of the kernel
-     * @param solver  solver of the variable.
-     */
-    public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
-        super(name, solver);
-        int min = Integer.MAX_VALUE;
-        int max = Integer.MIN_VALUE;
-        for (int i : env) {
-            if (i == Integer.MIN_VALUE || i == Integer.MAX_VALUE) {
-                throw new UnsupportedOperationException("too large (infinite) integers within the set variable. " +
-                        "Integer.MIN_VALUE and i==Integer.MAX_VALUE are not handled.");
-            }
-            min = Math.min(min, i);
-            max = Math.max(max, i);
-        }
-        check(env, ker, max, min);
-        IEnvironment environment = solver.getEnvironment();
-        envelope = SetFactory.makeStoredSet(envType, max - min + 1, environment);
-        kernel = SetFactory.makeStoredSet(kerType, max - min + 1, environment);
-        for (int i : env) {
-            envelope.add(i - min);
-        }
-        for (int i : ker) {
-            kernel.add(i - min);
-        }
-        this.min = min;
-        this.max = max;
-    }
+	/**
+	 * Creates a Set variable
+	 *
+	 * @param name		name of the variable
+	 * @param env		initial envelope domain
+	 * @param envType	data structure of the envelope
+	 * @param ker		initial kernel domain
+	 * @param kerType	data structure of the kernel
+	 * @param solver	solver of the variable.
+	 */
+	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
+		super(name, solver);
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
+		for(int i:env){
+			if(i==Integer.MIN_VALUE || i==Integer.MAX_VALUE){
+				throw new UnsupportedOperationException("too large (infinite) integers within the set variable. " +
+						"Integer.MIN_VALUE and i==Integer.MAX_VALUE are not handled.");
+			}
+			min = Math.min(min,i);
+			max = Math.max(max,i);
+		}
+		check(env,ker,max,min);
+		envelope = SetFactory.makeStoredSet(envType, max-min+1, solver);
+		kernel = SetFactory.makeStoredSet(kerType, max-min+1, solver);
+		for(int i:env){
+			envelope.add(i-min);
+		}
+		for(int i:ker){
+			kernel.add(i-min);
+		}
+		this.min = min;
+		this.max = max;
+	}
 
-    /**
-     * Creates a Set variable
-     *
-     * @param name   name of the variable
-     * @param min    first envelope value
-     * @param max    last envelope value
-     * @param solver solver of the variable.
-     */
-    public SetVarImpl(String name, int min, int max, Solver solver) {
-        super(name, solver);
-        IEnvironment environment = solver.getEnvironment();
-        envelope = SetFactory.makeStoredSet(SetType.BITSET, max - min + 1, environment);
-        kernel = SetFactory.makeStoredSet(SetType.BITSET, max - min + 1, environment);
-        for (int i = min; i <= max; i++) {
-            envelope.add(i - min);
-        }
-        this.min = min;
-        this.max = max;
-    }
+	/**
+	 * Creates a Set variable
+	 *
+	 * @param name		name of the variable
+	 * @param min		first envelope value
+	 * @param max		last envelope value
+	 * @param solver	solver of the variable.
+	 */
+	public SetVarImpl(String name, int min, int max, Solver solver) {
+		super(name, solver);
+		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
+		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
+		for(int i=min; i<=max; i++){
+			envelope.add(i-min);
+		}
+		this.min = min;
+		this.max = max;
+	}
 
-    private static void check(int[] env, int[] ker, int max, int min) {
-        BitSet b = new BitSet(max - min);
-        for (int i : env) {
-            if (b.get(i - min)) {
-                throw new UnsupportedOperationException("Invalid envelope definition. " + i + " is added twice.");
-            }
-            b.set(i - min);
-        }
-        for (int i : ker) {
-            if (!b.get(i - min)) {
-                throw new UnsupportedOperationException("Invalid envelope/kernel definition. "
-                        + i + " is in the kernel but not in the envelope.");
-            }
-        }
-    }
+	private static void check(int[] env, int[] ker, int max, int min) {
+		BitSet b = new BitSet(max-min);
+		for(int i:env){
+			if(b.get(i-min)){
+				throw new UnsupportedOperationException("Invalid envelope definition. "+i+" is added twice.");
+			}b.set(i-min);
+		}
+		for(int i:ker){
+			if(!b.get(i-min)){
+				throw new UnsupportedOperationException("Invalid envelope/kernel definition. "
+						+i+" is in the kernel but not in the envelope.");
+			}
+		}
+	}
 
-    //***********************************************************************************
+	//***********************************************************************************
     // METHODS
     //***********************************************************************************
 
@@ -163,7 +160,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         if (reactOnModification) {
             delta.add(element, SetDelta.KERNEL, cause);
         }
-        EventType e = EventType.ADD_TO_KER;
+        SetEventType e = SetEventType.ADD_TO_KER;
         notifyPropagators(e, cause);
         return true;
     }
@@ -173,7 +170,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         assert cause != null;
         if (element < min || element > max) return false;
         if (kernel.contain(element - min)) {
-            contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
+            contradiction(cause, SetEventType.REMOVE_FROM_ENVELOPE, "");
             return true;
         }
         if (!envelope.remove(element - min)) {
@@ -182,7 +179,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         if (reactOnModification) {
             delta.add(element, SetDelta.ENVELOP, cause);
         }
-        EventType e = EventType.REMOVE_FROM_ENVELOPE;
+		SetEventType e = SetEventType.REMOVE_FROM_ENVELOPE;
         notifyPropagators(e, cause);
         return true;
     }
@@ -364,14 +361,14 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }

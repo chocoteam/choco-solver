@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,13 +27,13 @@
 package solver.constraints.nary;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
@@ -67,9 +67,8 @@ public class PropDiffN extends Propagator<IntVar> {
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
         }
-        IEnvironment environment = solver.getEnvironment();
-        overlappingBoxes = new UndirectedGraph(environment, n, SetType.LINKED_LIST, true);
-        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
+        overlappingBoxes = new UndirectedGraph(solver, n, SetType.LINKED_LIST, true);
+        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, solver);
     }
 
     //***********************************************************************************
@@ -78,30 +77,30 @@ public class PropDiffN extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int idx) {
-        if (fast) return EventType.INSTANTIATE.mask;
-        return EventType.INSTANTIATE.mask + +EventType.BOUND.mask;
+        if (fast) return IntEventType.instantiation();
+        return IntEventType.boundAndInst();
     }
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        int v = varIdx % n;
-        ISet s = overlappingBoxes.getNeighborsOf(v);
-        for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
-            if (!mayOverlap(v, i)) {
-                overlappingBoxes.removeEdge(v, i);
-            }
-        }
-        if (!boxesToCompute.contain(v)) {
-            boxesToCompute.add(v);
-        }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
+	@Override
+	public void propagate(int varIdx, int mask) throws ContradictionException {
+		int v = varIdx % n;
+		ISet s = overlappingBoxes.getNeighOf(v);
+		for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
+			if (!mayOverlap(v, i)) {
+				overlappingBoxes.removeEdge(v, i);
+			}
+		}
+		if (!boxesToCompute.contain(v)) {
+			boxesToCompute.add(v);
+		}
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
+	}
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
-                overlappingBoxes.getNeighborsOf(i).clear();
+                overlappingBoxes.getNeighOf(i).clear();
             }
             for (int i = 0; i < n; i++) {
                 for (int j = i + 1; j < n; j++) {
@@ -138,7 +137,7 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     protected void filterFromBox(int i) throws ContradictionException {
-        ISet s = overlappingBoxes.getNeighborsOf(i);
+        ISet s = overlappingBoxes.getNeighOf(i);
         // check energy
         int xm = vars[i].getLB();
         int xM = vars[i].getUB() + vars[i + 2 * n].getUB();

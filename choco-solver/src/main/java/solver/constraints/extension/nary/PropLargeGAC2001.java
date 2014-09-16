@@ -33,9 +33,9 @@ import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.events.PropagatorEventType;
 
 /**
  * <br/>
@@ -110,7 +110,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < vars.length; i++) {
                 reviseVar(i, true);
             }

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,49 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.gary.channeling.relations;
 
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.ESat;
+package solver.variables.events;
 
-public class IndexOf extends GraphRelation<IntVar> {
+/**
+ * An enum defining the real variable event types:
+ * <ul>
+ * <li><code>INCLOW</code>: lower bound increase event,</li>
+ * <li><code>DECUPP</code>: upper bound decrease event,</li>
+ * <li><code>BOUND</code>: lower bound increase and/or upper bound decrease event,</li>
+ * </ul>
+ * <p/>
+ * @author Charles Prud'homme, Jean-Guillaume Fages
+ */
+public enum RealEventType implements IEventType {
 
-    protected IndexOf(IntVar[] vars) {
-        super(vars);
+    VOID(0),
+    INCLOW(1),
+    DECUPP(2),
+    BOUND(3);
+
+    private final int mask;
+
+	private RealEventType(int mask) {
+        this.mask = mask;
     }
 
     @Override
-    public ESat isEntail(int var1, int var2) {
-        IntVar x = vars[var1];
-        if (!x.contains(var2)) {
-            return ESat.FALSE;
-        }
-        if (x.isInstantiated()) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+    public int getMask() {
+        return mask;
     }
 
     @Override
-    public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-        vars[var1].instantiateTo(var2, cause);
+    public int getStrengthenedMask() {
+        return mask;
     }
 
-    @Override
-    public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-        vars[var1].removeValue(var2, cause);
+    //******************************************************************************************************************
+    //******************************************************************************************************************
+
+    public static boolean isBound(int mask) {
+        return (mask & BOUND.mask) != 0;
     }
 
-    @Override
-    public boolean isDirected() {
-        return true;
+    public static boolean isInclow(int mask) {
+        return (mask & INCLOW.mask) != 0;
     }
 
-//	@Override
-//	public GraphProperty[] getGraphProperties() {
-//		return new GraphProperty[]{GraphProperty.ONE_SUCCESSORS_PER_NODE};
-//	}
+    public static boolean isDecupp(int mask) {
+        return (mask & DECUPP.mask) != 0;
+    }
 }

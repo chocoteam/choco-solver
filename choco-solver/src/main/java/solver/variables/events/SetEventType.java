@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,30 +24,55 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+
+package solver.variables.events;
 
 /**
- * An interface to define event to categorize the filtering algorithm to apply.
- * <br/>Event can promoted or strengthened (cf. "CHOCO : implementing a CP kernel" -- F. Laburthe, 2000).
- * <br/>
+ * An enum defining the set variable event types:
+ * <ul>
+ * <li><code>ADD_TO_KER</code>: value enforcing event,</li>
+ * <li><code>REMOVE_FROM_ENVELOPE</code>: value removal event,</li>
+ * </ul>
+ * <p/>
  *
- * @author Charles Prud'homme
- * @since 01/12/11
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public interface IEventType {
+public enum SetEventType implements IEventType {
 
-    /**
-     * Return the value of the mask associated with the event.
-     *
-     * @return the mask of the event.
-     */
-    int getMask();
+	VOID(0),
+	ADD_TO_KER(1),
+	REMOVE_FROM_ENVELOPE(2);
 
-    /**
-     * Return the strengthened mask associated to the event.
-     * This can be equal to the mask.
-     *
-     * @return the mask of the strenghtened event.
-     */
-    int getStrengthenedMask();
+	private final int mask;
+	private final int strengthened_mask;
+
+	private SetEventType(int mask) {
+		this.mask = mask;
+		this.strengthened_mask = mask;
+	}
+
+	@Override
+	public int getMask() {
+		return mask;
+	}
+
+	@Override
+	public int getStrengthenedMask() {
+		return strengthened_mask;
+	}
+
+	//******************************************************************************************************************
+	//******************************************************************************************************************
+
+	public static int all() {
+		return ADD_TO_KER.mask+REMOVE_FROM_ENVELOPE.mask;
+	}
+
+	public static boolean isKerAddition(int mask) {
+		return (mask & ADD_TO_KER.mask) != 0;
+	}
+
+	public static boolean isEnvRemoval(int mask) {
+		return (mask & REMOVE_FROM_ENVELOPE.mask) != 0;
+	}
 }

@@ -34,8 +34,9 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -84,8 +85,8 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
         this.setValues = new TIntHashSet(values);
         this.values = setValues.toArray();
         Arrays.sort(this.values);
-        poss = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, nb_vars, environment);
-        nbSure = environment.makeInt(0);
+		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET,nb_vars,solver);
+		nbSure = environment.makeInt(0);
     }
 
     //***********************************************************************************
@@ -95,14 +96,14 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (idx == nb_vars) {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.boundAndInst();
         }
-        return EventType.INT_ALL_MASK();
+        return IntEventType.all();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             poss.clear();
             int nbMandForSure = 0;
             for (int i = 0; i < nb_vars; i++) {
@@ -127,7 +128,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     @Override
     public void propagate(int vidx, int evtmask) throws ContradictionException {
         if (vidx == nb_vars) {
-            forcePropagate(EventType.CUSTOM_PROPAGATION);
+            forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
         } else {
             if (poss.contain(vidx)) {
                 IntVar var = vars[vidx];
@@ -146,7 +147,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                     vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), aCause);
                 }
             }
-            forcePropagate(EventType.CUSTOM_PROPAGATION);
+            forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
         }
     }
 

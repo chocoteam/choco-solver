@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -40,8 +40,8 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.events.SetEventType;
 import util.ESat;
 
 /**
@@ -73,7 +73,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE_FROM_ENVELOPE.mask;
+        return SetEventType.REMOVE_FROM_ENVELOPE.getMask();
     }
 
     @Override

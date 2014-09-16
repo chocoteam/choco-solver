@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -50,7 +50,7 @@ public class StrongConnectivityFinder implements Serializable {
 
     public StrongConnectivityFinder(DirectedGraph graph) {
         this.graph = graph;
-        this.n = graph.getNbNodes();
+        this.n = graph.getNbMaxNodes();
         //
         stack = new int[n];
         p = new int[n];
@@ -67,7 +67,7 @@ public class StrongConnectivityFinder implements Serializable {
     }
 
     public void findAllSCC() {
-        ISet nodes = graph.getActiveNodes();
+        ISet nodes = graph.getNodes();
         for (int i = 0; i < n; i++) {
             restriction.set(i, nodes.contain(i));
         }
@@ -94,9 +94,9 @@ public class StrongConnectivityFinder implements Serializable {
     }
 
     private void findSingletons(BitSet restriction) {
-        ISet nodes = graph.getActiveNodes();
+        ISet nodes = graph.getNodes();
         for (int i = restriction.nextSetBit(0); i >= 0; i = restriction.nextSetBit(i + 1)) {
-            if (nodes.contain(i) && graph.getPredecessorsOf(i).getSize() * graph.getSuccessorsOf(i).getSize() == 0) {
+            if (nodes.contain(i) && graph.getPredOf(i).getSize() * graph.getSuccOf(i).getSize() == 0) {
                 nodeSCC[i] = nbSCC;
                 sccFirstNode[nbSCC++] = i;
                 restriction.clear(i);
@@ -122,7 +122,7 @@ public class StrongConnectivityFinder implements Serializable {
         stack[stackIdx++] = i;
         inStack.set(i);
         p[k] = k;
-        successors[k] = graph.getSuccessorsOf(start);
+        successors[k] = graph.getSuccOf(start);
         int j;
         // algo
         boolean notFinished = true;
@@ -143,7 +143,7 @@ public class StrongConnectivityFinder implements Serializable {
                         p[k] = i;
                         i = k;
                         first = true;
-                        successors[i] = graph.getSuccessorsOf(j);
+                        successors[i] = graph.getSuccOf(j);
                         stack[stackIdx++] = i;
                         inStack.set(i);
                         inf[i] = i;

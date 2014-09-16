@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,11 +33,11 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -83,17 +83,17 @@ public final class OffsetView extends IntView {
         int inf = getLB();
         int sup = getUB();
         if (inf <= value && value <= sup) {
-            EventType e = EventType.REMOVE;
+			IntEventType e = IntEventType.REMOVE;
 
             boolean done = var.removeValue(value - cste, this);
             if (done) {
                 if (value == inf) {
-                    e = EventType.INCLOW;
+                    e = IntEventType.INCLOW;
                 } else if (value == sup) {
-                    e = EventType.DECUPP;
+                    e = IntEventType.DECUPP;
                 }
                 if (this.isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
                 return true;
@@ -112,7 +112,7 @@ public final class OffsetView extends IntView {
         } else {
             boolean done = var.removeInterval(from - cste, to - cste, this);
             if (done) {
-                notifyPropagators(EventType.REMOVE, cause);
+                notifyPropagators(IntEventType.REMOVE, cause);
             }
             return done;
         }
@@ -123,7 +123,7 @@ public final class OffsetView extends IntView {
         assert cause != null;
         boolean done = var.instantiateTo(value - cste, this);
         if (done) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
 
@@ -135,10 +135,10 @@ public final class OffsetView extends IntView {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            EventType e = EventType.INCLOW;
+			IntEventType e = IntEventType.INCLOW;
             boolean done = var.updateLowerBound(value - cste, this);
             if (isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             if (done) {
                 this.notifyPropagators(e, cause);
@@ -154,10 +154,10 @@ public final class OffsetView extends IntView {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            EventType e = EventType.DECUPP;
+			IntEventType e = IntEventType.DECUPP;
             boolean done = var.updateUpperBound(value - cste, this);
             if (isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             if (done) {
                 this.notifyPropagators(e, cause);

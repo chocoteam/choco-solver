@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -51,14 +51,14 @@ public class GraphTools {
      * @return num an array to represent node numbers in the dfs tree
      */
     public static int[] performDFS(int root, DirectedGraph graph) {
-        int nb = graph.getNbNodes();
+        int nb = graph.getNbMaxNodes();
         ISet[] neighbors = new ISet[nb];
         int[] father = new int[nb];
         int[] num = new int[nb];
         BitSet notFirstTime = new BitSet(nb);
         for (int i = 0; i < nb; i++) {
             father[i] = -1;
-            neighbors[i] = graph.getSuccessorsOf(i);
+            neighbors[i] = graph.getSuccOf(i);
         }
         int i = root;
         int k = 0;

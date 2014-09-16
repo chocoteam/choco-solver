@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -30,7 +30,6 @@ import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.TimeStampedObject;
-import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import util.procedure.IntProcedure;
@@ -77,29 +76,21 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     }
 
     @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType) {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    public void forEachRemVal(SafeIntProcedure proc) {
+		for (int i = frozenFirst; i < frozenLast; i++) {
+			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+				proc.execute(delta.get(i));
+			}
+		}
     }
 
     @Override
-    public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    public void forEachRemVal(IntProcedure proc) throws ContradictionException {
+		for (int i = frozenFirst; i < frozenLast; i++) {
+			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+				proc.execute(delta.get(i));
+			}
+		}
     }
 
     @Override

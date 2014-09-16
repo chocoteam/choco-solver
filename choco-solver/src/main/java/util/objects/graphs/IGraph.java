@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,37 +41,39 @@ public interface IGraph extends Serializable {
 
 
     /**
-     * @return the collection of active nodes
+     * @return the collection of nodes present in the graph
      */
-    ISet getActiveNodes();
+    ISet getNodes();
 
     /**
-     * Activate node x
+     * Adds node x to the node set of the graph
      *
      * @param x a node index
-     * @return true iff x was not already activated
+     * @return true iff x was not already present in the graph
      */
-    boolean activateNode(int x);
+    boolean addNode(int x);
 
     /**
-     * Desactivate node x
+     * Remove node x from the graph
      *
      * @param x a node index
-     * @return true iff x was activated
+     * @return true iff x was present in the graph
      */
-    boolean desactivateNode(int x);
+    boolean removeNode(int x);
 
     /**
-     * The number of nodes of the graph
+     * The maximum number of nodes in the graph
+	 * Vertices of the graph belong to [0,getNbMaxNodes()-1]
+	 * This quantity is fixed at the creation of the graph
      *
-     * @return the number of nodes of the graph
+     * @return the maximum number of nodes of the graph
      */
-    int getNbNodes();
+    int getNbMaxNodes();
 
     /**
-     * Get the type of the graph
-     *
-     * @return the type of the graph SPARSE or DENSE
+     * Get the type of data structures used in the graph
+	 *
+     * @return the type of data structures used in the graph
      */
     SetType getType();
 
@@ -85,7 +87,7 @@ public interface IGraph extends Serializable {
      * @return x's successors if <code>this</code> is directed
      *         x's neighbors otherwise
      */
-    ISet getSuccsOrNeigh(int x);
+    ISet getSuccOrNeighOf(int x);
 
     /**
      * Get either x's predecessors or neighbors.
@@ -96,7 +98,7 @@ public interface IGraph extends Serializable {
      * @return x's predecessors if <code>this</code> is directed
      *         x's neighbors otherwise
      */
-    ISet getPredsOrNeigh(int x);
+    ISet getPredOrNeighOf(int x);
 
     /**
      * If <code>this </code> is directed

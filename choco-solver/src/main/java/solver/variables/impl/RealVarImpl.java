@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,9 +34,10 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.RealVar;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IEventType;
+import solver.variables.events.RealEventType;
 import util.tools.StringUtils;
 
 /**
@@ -83,10 +84,10 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (old < value) {
             if (this.getUB() < value) {
 //                TODO solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, RealEventType.INCLOW, MSG_LOW);
             } else {
                 LB.set(value);
-                this.notifyPropagators(EventType.INCLOW, cause);
+                this.notifyPropagators(RealEventType.INCLOW, cause);
 
 //                TODO solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return true;
@@ -103,10 +104,10 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (old > value) {
             if (this.getLB() > value) {
 //                TODO solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, RealEventType.DECUPP, MSG_UPP);
             } else {
                 UB.set(value);
-                this.notifyPropagators(EventType.DECUPP, cause);
+                this.notifyPropagators(RealEventType.DECUPP, cause);
 //                TODO solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return true;
             }
@@ -123,16 +124,16 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (oldlb < lowerbound || oldub > upperbound) {
             if (oldub < lowerbound || oldlb > upperbound) {
 //                TODO solver.getExplainer()...
-                this.contradiction(cause, EventType.BOUND, MSG_BOUND);
+                this.contradiction(cause, RealEventType.BOUND, MSG_BOUND);
             } else {
-                EventType e = EventType.VOID;
+				RealEventType e = RealEventType.VOID;
                 if (oldlb < lowerbound) {
                     LB.set(lowerbound);
-                    e = EventType.INCLOW;
+                    e = RealEventType.INCLOW;
                 }
                 if (oldub > upperbound) {
                     UB.set(upperbound);
-                    e = (e == EventType.INCLOW) ? EventType.BOUND : EventType.DECUPP;
+                    e = (e == RealEventType.INCLOW) ? RealEventType.BOUND : RealEventType.DECUPP;
                 }
                 this.notifyPropagators(e, cause);
 //                TODO solver.getExplainer()...
@@ -181,14 +182,14 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }

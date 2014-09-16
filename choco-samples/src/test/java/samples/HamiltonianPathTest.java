@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,21 +33,16 @@ import org.testng.annotations.Test;
 import samples.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.constraints.gary.GraphConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VF;
-import solver.variables.graph.DirectedGraphVar;
 import util.PoolManager;
 import util.objects.setDataStructures.SetType;
 
@@ -67,7 +62,6 @@ public class HamiltonianPathTest {
 		long s;
 		int[] nbVoisins = new int[]{3, 5, 10};
 		boolean[][] matrix;
-		long time = System.currentTimeMillis();
 		for (int n : sizes) {
 			for (int nb : nbVoisins) {
 				for (int ks = 0; ks < 50; ks++) {
@@ -75,10 +69,6 @@ public class HamiltonianPathTest {
 //					System.out.println("n:" + n + " nbVoisins:" + nb + " s:" + s);
 					GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = transformMatrix(gg.neighborBasedGenerator(nb));
-					testProblem(matrix, s, true, false);
-					testProblem(matrix, s, false, false);
-					testProblem(matrix, s, true, true);
-					testProblem(matrix, s, false, true);
 					testInt(matrix, s, true, false);
 					testInt(matrix, s, false, false);
 					testInt(matrix, s, true, true);
@@ -86,41 +76,6 @@ public class HamiltonianPathTest {
 				}
 			}
 		}
-//		System.out.println("it took "+(System.currentTimeMillis()-time)+" ms");
-	}
-
-	private static void testProblem(boolean[][] matrix, long s, boolean rd, boolean strongFilter) {
-		Solver solver = new Solver();
-		int n = matrix.length;
-		// build model
-		DirectedGraphVar graph = new DirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, false);
-		try {
-			graph.getKernelGraph().activateNode(n - 1);
-			for (int i = 0; i < n - 1; i++) {
-				graph.getKernelGraph().activateNode(i);
-				for (int j = 1; j < n; j++) {
-					if (matrix[i][j]) {
-						graph.getEnvelopGraph().addArc(i, j);
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		solver.post(GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1, strongFilter));
-
-		// configure solver
-		if (rd) {
-			solver.set(GraphStrategyFactory.graphRandom(graph, s));
-		} else {
-			solver.set(GraphStrategyFactory.graphStrategy(graph, null, new ConstructorHeur(graph, 0), GraphStrategy.NodeArcPriority.ARCS));
-		}
-		SearchMonitorFactory.limitTime(solver, TIME_LIMIT);
-		solver.findSolution();
-		IMeasures mes = solver.getMeasures();
-
-		// the problem has at least one solution
-		Assert.assertFalse(mes.getSolutionCount() == 0 && mes.getTimeCount() < TIME_LIMIT/1000);
 	}
 
 	private static void testInt(boolean[][] matrix, long seed, boolean rd, boolean enumerated) {
@@ -174,46 +129,6 @@ public class HamiltonianPathTest {
 			matrix[i][n - 1] = m[i][0];
 		}
 		return matrix;
-	}
-
-	// constructive heuristic, can be useful to debug
-	private static class ConstructorHeur extends ArcStrategy<DirectedGraphVar> {
-		int source, n;
-
-		public ConstructorHeur(DirectedGraphVar graphVar, int s) {
-			super(graphVar);
-			source = s;
-			n = graphVar.getEnvelopGraph().getNbNodes();
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			int x = source;
-			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
-			int nb = 1;
-			while (y != -1) {
-				x = y;
-				y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
-				nb++;
-			}
-			y = g.getEnvelopGraph().getSuccessorsOf(x).getFirstElement();
-			if (y == -1) {
-				if (x != n - 1 || nb != n) {
-					for (int i = 0; i < n; i++) {
-						if (g.getEnvelopGraph().getSuccessorsOf(i).getSize() > 1) {
-							this.from = i;
-							this.to = g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
-							return true;
-						}
-					}
-					throw new UnsupportedOperationException();
-				}
-				return false;
-			}
-			this.from = x;
-			this.to = y;
-			return true;
-		}
 	}
 
 	private static class ConstructorIntHeur extends AbstractStrategy<IntVar> {

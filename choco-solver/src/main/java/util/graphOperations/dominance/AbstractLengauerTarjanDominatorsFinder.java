@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -60,7 +60,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
      */
     public AbstractLengauerTarjanDominatorsFinder(int s, DirectedGraph g) {
         root = s;
-        n = g.getNbNodes();
+        n = g.getNbMaxNodes();
         this.g = g;
         parent = new int[n];
         semi = new int[n];
@@ -116,14 +116,14 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
     protected void initParams(boolean inverseGraph) {
         for (int i = 0; i < n; i++) {
-            T.getSuccessorsOf(i).clear();
-            T.getPredecessorsOf(i).clear();
+            T.getSuccOf(i).clear();
+            T.getPredOf(i).clear();
             if (inverseGraph) {
-                succs[i] = g.getPredecessorsOf(i);
-                preds[i] = g.getSuccessorsOf(i);
+                succs[i] = g.getPredOf(i);
+                preds[i] = g.getSuccOf(i);
             } else {
-                succs[i] = g.getSuccessorsOf(i);
-                preds[i] = g.getPredecessorsOf(i);
+                succs[i] = g.getSuccOf(i);
+                preds[i] = g.getPredOf(i);
             }
             semi[i] = -1;
             ancestor[i] = -1;
@@ -274,7 +274,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
         // semi     = out = closing time = postorder
         for (int i = 0; i < n; i++) {
             parent[i] = -1;
-            succs[i] = T.getSuccessorsOf(i);
+            succs[i] = T.getSuccOf(i);
         }
         //PREPROCESSING
         int time = 0;

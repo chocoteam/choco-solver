@@ -30,8 +30,8 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableValueIterator;
 
 /**
@@ -53,7 +53,7 @@ public class PropBinFC extends PropBinCSP {
 
     @Override
     protected int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+        return IntEventType.instantiation();
     }
 
     @Override

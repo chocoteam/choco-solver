@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,40 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.constraints.gary.tsp.specificHeaps;
+package solver.variables.events;
 
 /**
- * Simple heap interface with only a few services
+ * An interface to define event to categorize the filtering algorithm to apply.
+ * <br/>Event can promoted or strengthened (cf. "CHOCO : implementing a CP kernel" -- F. Laburthe, 2000).
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @since 01/12/11
  */
-public interface ISimpleHeap {
+public interface IEventType {
 
+	public static final int ALL_EVENTS = 255;
 
     /**
-     * Get and remove the lowest element of the heap
+     * Return the value of the mask associated with the event.
      *
-     * @return the first (lowest) element of the heap
+     * @return the mask of the event.
      */
-    public int removeFirstElement();
+    int getMask();
 
     /**
-     * Add element in the heap or update its value in case it is already in
+     * Return the strengthened mask associated to the event.
+     * This can be equal to the mask.
      *
-     * @param element
-     * @param value
-     * @return true iff element was not already in the heap or if the new value is strictly lower than the previous one
+     * @return the mask of the strenghtened event.
      */
-    public boolean addOrUpdateElement(int element, double value);
-
-    /**
-     * @return true iff the heap is empty
-     */
-    public boolean isEmpty();
-
-    /**
-     * Clear the heap (remove any remaining element)
-     */
-    public void clear();
+    int getStrengthenedMask();
 }

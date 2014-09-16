@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.ISchedulable;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class Arc<V extends Variable> implements Serializable, ISchedulable<Propa
         this.idxVinP = idxVinP;
     }
 
-    public void update(EventType evt) {
+    public void update(IEventType evt) {
         if (evtmask == 0) {
             if (Configuration.PRINT_SCHEDULE) {
                 IPropagationEngine.Trace.printSchedule(prop);
@@ -82,7 +82,7 @@ public class Arc<V extends Variable> implements Serializable, ISchedulable<Propa
                 scheduler.update(this);
             }
         }
-        evtmask |= evt.strengthened_mask;
+        evtmask |= evt.getStrengthenedMask();
     }
 
     @Override
