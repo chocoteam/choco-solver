@@ -128,8 +128,10 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                     vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
                 }
             }
-            if (allEnum) setPassive();
         }
+		if(count>=vars[n].getUB()){
+			setPassive();
+		}
     }
 
     //***********************************************************************************
