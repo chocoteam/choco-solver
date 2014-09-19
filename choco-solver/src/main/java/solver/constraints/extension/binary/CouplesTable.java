@@ -64,7 +64,7 @@ class CouplesTable extends BinRelation {
         for (int i = 0; i < nt; i++) {
             int[] tuple = tuples.get(i);
             if (var1.contains(tuple[0]) && var2.contains(tuple[1]))
-                table.set((tuple[0] - offset1) * range1 + tuple[1] - offset2);
+                table.set((tuple[0] - offset1) * range2 + tuple[1] - offset2);
         }
     }
 
@@ -79,11 +79,11 @@ class CouplesTable extends BinRelation {
     }
 
     public boolean isConsistent(int x, int y) {
-        return table.get((x - offset1) * range1 + y - offset2) == feasible;
+        return table.get((x - offset1) * range2 + y - offset2) == feasible;
     }
 
     public boolean checkCouple(int x, int y) {
-        return table.get((x - offset1) * range1 + y - offset2);
+        return table.get((x - offset1) * range2 + y - offset2);
     }
 
     @Override

@@ -35,14 +35,17 @@ package solver.constraints.nary;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import solver.variables.VariableFactory;
 
 public class TableTest {
 
@@ -137,6 +140,55 @@ public class TableTest {
     public static void main(String[] args) {
         TableTest tt = new TableTest();
         tt.testAllDifferent();
+    }
+
+    public static void test(String type) {
+        Solver solver;
+        IntVar[] vars;
+        IntVar sum;
+        IntVar[] reified;
+        solver = new Solver();
+        vars = VariableFactory.enumeratedArray("vars", 6, new int[]{1, 2, 3, 4, 5, 6, 10, 45, 57}, solver);
+        reified = VariableFactory.enumeratedArray("rei", vars.length, new int[]{0, 1}, solver);
+        sum = VariableFactory.bounded("sum", 0, reified.length, solver);
+        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        Tuples tuples = new Tuples(true);
+        tuples.add(1, 0);
+        tuples.add(2 , 1);
+        tuples.add(3 , 1);
+        tuples.add(4 , 1);
+        tuples.add(5 , 1);
+        tuples.add(6 , 1);
+        tuples.add(10, 1);
+        tuples.add(45, 1);
+        tuples.add(57, 1);
+
+        for (int i = 0; i < vars.length; i++) {
+            Constraint c = IntConstraintFactory.table(vars[i], reified[i], tuples, type);
+            solver.post(c);
+        }
+        solver.post(IntConstraintFactory.sum(reified, sum));
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
+        if (solver.getMeasures().getSolutionCount() > 0) {
+            for (int i = 0; i < vars.length; i++) {
+                System.out.print(vars[i].getValue() + "\t");
+            }
+            System.out.println("");
+            for (int i = 0; i < reified.length; i++) {
+                System.out.print(reified[i].getValue() + "\t");
+            }
+            System.out.println("\n" + "obj = " + sum.getValue() + ", backtracks = " + solver.getMeasures().getBackTrackCount());
+        }
+        Assert.assertEquals(sum.getValue(), 5);
+    }
+
+    @Test(groups = "1s")
+    public void testtpetit() {
+        test("AC3");
+        test("AC3rm");
+        test("AC3bit+rm");
+        test("AC2001");
+        test("FC");
     }
 
 }

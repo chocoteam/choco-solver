@@ -277,7 +277,7 @@ public class IntConstraintFactory {
      *               <p/> "none" if TABLE is not sorted
      *               <p/> "asc" if TABLE is sorted in the increasing order
      *               <p/> "desc" if TABLE is sorted in the decreasing order
-     *               <p/> "detect" Let the constraint detect the ordering of TABLE, if any
+     *               <p/> "detect" Let the constraint detects the ordering of TABLE, if any
      */
     public static Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
         return new Constraint("Element", new PropElement(VALUE, TABLE, INDEX, OFFSET, PropElement.Sort.valueOf(SORT)));
@@ -858,8 +858,8 @@ public class IntConstraintFactory {
             int miny = Integer.MAX_VALUE / 2;
             int maxy = Integer.MIN_VALUE / 2;
             for (int i = 0; i < X.length; i++) {
-                EX[i] = VF.bounded("", X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), solver);
-                EY[i] = VF.bounded("", Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), solver);
+                EX[i] = VF.bounded(StringUtils.randomName("diffn"), X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), solver);
+                EY[i] = VF.bounded(StringUtils.randomName("diffn"), Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), solver);
                 TX[i] = VF.task(X[i], WIDTH[i], EX[i]);
                 TY[i] = VF.task(Y[i], HEIGHT[i], EY[i]);
                 minx = Math.min(minx, X[i].getLB());
@@ -867,12 +867,12 @@ public class IntConstraintFactory {
                 maxx = Math.max(maxx, X[i].getUB() + WIDTH[i].getUB());
                 maxy = Math.max(maxy, Y[i].getUB() + HEIGHT[i].getUB());
             }
-            IntVar maxX = VF.bounded("", minx, maxx, solver);
-            IntVar minX = VF.bounded("", minx, maxx, solver);
-            IntVar diffX = VF.bounded("", 0, maxx - minx, solver);
-            IntVar maxY = VF.bounded("", miny, maxy, solver);
-            IntVar minY = VF.bounded("", miny, maxy, solver);
-            IntVar diffY = VF.bounded("", 0, maxy - miny, solver);
+            IntVar maxX = VF.bounded(StringUtils.randomName("diffn"), minx, maxx, solver);
+            IntVar minX = VF.bounded(StringUtils.randomName("diffn"), minx, maxx, solver);
+            IntVar diffX = VF.bounded(StringUtils.randomName("diffn"), 0, maxx - minx, solver);
+            IntVar maxY = VF.bounded(StringUtils.randomName("diffn"), miny, maxy, solver);
+            IntVar minY = VF.bounded(StringUtils.randomName("diffn"), miny, maxy, solver);
+            IntVar diffY = VF.bounded(StringUtils.randomName("diffn"), 0, maxy - miny, solver);
             return new Constraint[]{
                     diffNCons,
                     minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, diffX),
@@ -985,7 +985,7 @@ public class IntConstraintFactory {
      * Ensures that :
      * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; TOTAL_WEIGHT
      * <br/>- OCCURRENCES[i] * ENERGY[i] = TOTAL_ENERGY
-     * <br/>and maximizing the value of POWER.
+     * <br/>and maximizing the value of TOTAL_ENERGY.
      * <p/>
      * <p/>
      * A knapsack constraint

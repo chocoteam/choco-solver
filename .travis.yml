@@ -6,7 +6,7 @@ env:
   - GROUP=1m,10m
   - GROUP=30m
 
-script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
+script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
     - master

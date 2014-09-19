@@ -109,3 +109,4 @@ NEXT MILESTONE
 - Add a GenerateAndTest search strategy which can be combined with others
 - Fix #218: return null when all variables are instantiated
 - Fix #219: fix range iterator of enumerated integer variable
+- Fix bug in CoupleTable due to wrong range use

@@ -396,13 +396,12 @@ public class CostRegularTest {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
 
-        int[][] c1 = new int[n][3];
+//        int[][] c1 = new int[n][3];
         int[][][] c2 = new int[n][3][auto.getNbStates()];
         for (int i = 0; i < n; i++) {
             for (int k = 0; k < auto.getNbStates(); k++) {
-                c1[i][0] = 1;
-                c1[i][1] = 2;
-
+//                c1[i][0] = 1;
+//                c1[i][1] = 2;
                 c2[i][0][k] = 1;
                 c2[i][1][k] = 2;
             }

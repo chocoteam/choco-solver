@@ -454,7 +454,7 @@ public class SatFactory {
      * @param BOOLVARS a list of boolean variables
      * @return true if the clause has been added to the clause store
      */
-    boolean AddAtMostNMinusOne(BoolVar[] BOOLVARS) {
+    boolean addAtMostNMinusOne(BoolVar[] BOOLVARS) {
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length);
@@ -465,23 +465,7 @@ public class SatFactory {
         return true;
     }
 
-    boolean AddBoolAndArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
-        Solver solver = BOOLVARS[0].getSolver();
-        PropSat sat = solver.getMinisat().getPropSat();
-        TIntList lits = new TIntArrayList(BOOLVARS.length + 1);
-        for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.add(SatSolver.negated(sat.Literal(BOOLVARS[i])));
-        }
-        lits.add(sat.Literal(TARGET));
-        sat.addClause(lits);
-        for (int i = 0; i < BOOLVARS.length; ++i) {
-            sat.addClause(SatSolver.negated(sat.Literal(TARGET)), sat.Literal(BOOLVARS[i]));
-        }
-        return true;
-    }
-
-
-    boolean AddSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    boolean addSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);
@@ -493,7 +477,7 @@ public class SatFactory {
         return true;
     }
 
-    boolean AddMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    boolean addMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         int tlit = sat.Literal(TARGET);
@@ -503,7 +487,7 @@ public class SatFactory {
         return true;
     }
 
-    boolean AddSumBoolArrayLessEqKVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    boolean addSumBoolArrayLessEqKVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
 
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
