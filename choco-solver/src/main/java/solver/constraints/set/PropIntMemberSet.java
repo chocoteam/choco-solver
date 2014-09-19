@@ -80,8 +80,8 @@ public class PropIntMemberSet extends Propagator<Variable> {
      */
     public PropIntMemberSet(SetVar setVar, IntVar intVar) {
         super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY, true);
+		this.set = (SetVar) vars[0];
         this.iv = (IntVar) vars[1];
-        this.set = (SetVar) vars[0];
         this.sdm = set.monitorDelta(this);
         IEnvironment environment = solver.getEnvironment();
         watchLit1 = environment.makeInt(iv.getLB() - 1);
@@ -100,7 +100,11 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return SetEventType.REMOVE_FROM_ENVELOPE.getMask() + IntEventType.all();
+		if(vIdx == 0){
+			return SetEventType.REMOVE_FROM_ENVELOPE.getMask();
+		}else{
+			return IntEventType.all();
+		}
     }
 
     @Override

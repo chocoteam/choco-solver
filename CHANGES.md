@@ -107,6 +107,11 @@ NEXT MILESTONE
 - Issue #215: Fix generation of relation based on tuples
 - Fix #214: Fix problems related to propagators dynamic addition and deletion
 - Add a GenerateAndTest search strategy which can be combined with others
+<<<<<<< HEAD
 - Fix #218: return null when all variables are instantiated
 - Fix #219: fix range iterator of enumerated integer variable
 - Fix bug in CoupleTable due to wrong range use
+=======
+- Refactor IEventType (use interface and a concrete implementation for each variable type)
+- EXTRACT GRAPH VAR MODULE to choco-graph project (https://github.com/chocoteam/choco-graph)
+>>>>>>> 3eefa7e5188f95eeab904a0efffac041574f39b6
