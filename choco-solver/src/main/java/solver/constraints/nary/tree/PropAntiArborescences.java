@@ -95,12 +95,12 @@ public class PropAntiArborescences extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (PropagatorEventType.isFullPropagation(evtmask)) {
-            for (int i = 0; i < n; i++) {
-                vars[i].updateLowerBound(offSet, aCause);
-                vars[i].updateUpperBound(n + offSet, aCause);
-            }
-        }
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
+			for (int i = 0; i < n; i++) {
+				vars[i].updateLowerBound(offSet, aCause);
+				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+			}
+		}
         structuralPruning();
     }
 

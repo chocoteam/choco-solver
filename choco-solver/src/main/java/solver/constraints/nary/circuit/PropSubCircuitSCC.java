@@ -79,7 +79,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropSubCircuitSCC(IntVar[] succs, int offSet) {
-        super(succs, PropagatorPriority.LINEAR, true);
+        super(succs, PropagatorPriority.LINEAR, false);
         this.offSet = offSet;
         n = vars.length;
         n2 = n + 1;
@@ -104,12 +104,14 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
         return ESat.TRUE;// redundant propagator
     }
 
-    public void propagate(int vIdx, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-    }
-
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
+			for (int i = 0; i < n; i++) {
+				vars[i].updateLowerBound(offSet, aCause);
+				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+			}
+		}
         int size = 0;
         for (int i = 0; i < n; i++) {
             if (!vars[i].contains(i + offSet)) {
