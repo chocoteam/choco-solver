@@ -33,6 +33,7 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.graphOperations.connectivity.StrongConnectivityFinder;
 import util.objects.graphs.DirectedGraph;
@@ -97,6 +98,12 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
+			for (int i = 0; i < n; i++) {
+				vars[i].updateLowerBound(offSet, aCause);
+				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+			}
+		}
 		switch (conf){
 			case FIRST:
 				filterFromSource(0);break;
