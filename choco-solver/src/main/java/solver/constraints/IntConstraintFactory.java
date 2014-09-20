@@ -72,6 +72,7 @@ import solver.constraints.nary.nValue.PropAtMostNValues;
 import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
 import solver.constraints.nary.nValue.amnv.graph.Gci;
 import solver.constraints.nary.nValue.amnv.mis.MD;
+import solver.constraints.nary.nValue.amnv.mis.MDRk;
 import solver.constraints.nary.nValue.amnv.rules.R;
 import solver.constraints.nary.nValue.amnv.rules.R1;
 import solver.constraints.nary.nValue.amnv.rules.R3;
@@ -606,7 +607,7 @@ public class IntConstraintFactory {
             Gci gci = new Gci(VARS, new AutoDiffDetection(VARS));
             R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver())};
             return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES),
-                    new PropAMNV(VARS, NVALUES, gci, new MD(gci), rules));
+                    new PropAMNV(VARS, NVALUES, gci, new MDRk(gci), rules));
         } else {
             return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES));
         }

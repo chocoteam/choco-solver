@@ -45,6 +45,8 @@ public class Rk implements F{
 	// VARIABLES
 	//***********************************************************************************
 
+	public static int DEFAULT_K = 30;
+
 	protected UndirectedGraph graph;
 	protected int n, k, iter;
 	protected BitSet out, inMIS;
@@ -70,11 +72,11 @@ public class Rk implements F{
 
 	/**
 	 * Creates an instance of the Random heuristic to compute independent sets on graph
-	 * uses the default setting k=30
+	 * uses the default setting DEFAULT_K=30
 	 * @param graph	on which IS have to be computed
 	 */
 	public Rk(UndirectedGraph graph){
-		this(graph,30);
+		this(graph,DEFAULT_K);
 	}
 
 	//***********************************************************************************
