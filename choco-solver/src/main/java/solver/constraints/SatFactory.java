@@ -139,7 +139,7 @@ public class SatFactory {
     public static boolean addFalse(BoolVar BOOLVAR) {
         Solver solver = BOOLVAR.getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
-        int lit = sat.Literal(BOOLVAR);
+        int lit = SatSolver.negated(sat.Literal(BOOLVAR));
         sat.addClause(lit);
         return true;
     }
@@ -306,7 +306,7 @@ public class SatFactory {
      * @return true if the clause has been added to the clause store
      */
     public static boolean addBoolXorEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        return addBoolIsNEqVar(LEFT, RIGHT, TARGET);
+        return addBoolIsNeqVar(LEFT, RIGHT, TARGET);
     }
 
     /**
@@ -338,7 +338,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolIsNEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    public static boolean addBoolIsNeqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Solver solver = TARGET.getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -417,14 +417,7 @@ public class SatFactory {
      * @return true if the clause has been added to the clause store
      */
     public static boolean addBoolAndArrayEqualFalse(BoolVar[] BOOLVARS) {
-        Solver solver = BOOLVARS[0].getSolver();
-        PropSat sat = solver.getMinisat().getPropSat();
-        TIntList lits = new TIntArrayList(BOOLVARS.length);
-        for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.add(SatSolver.negated(sat.Literal(BOOLVARS[i])));
-        }
-        sat.addClause(lits);
-        return true;
+        return addAtMostNMinusOne(BOOLVARS);
     }
 
     /**
@@ -454,7 +447,7 @@ public class SatFactory {
      * @param BOOLVARS a list of boolean variables
      * @return true if the clause has been added to the clause store
      */
-    boolean addAtMostNMinusOne(BoolVar[] BOOLVARS) {
+    public static boolean addAtMostNMinusOne(BoolVar[] BOOLVARS) {
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length);
@@ -465,7 +458,13 @@ public class SatFactory {
         return true;
     }
 
-    boolean addSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    /**
+     * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &ge; TARGET
+     *
+     * @param BOOLVARS a list of boolean variables
+     * @return true if the clause has been added to the clause store
+     */
+    public static boolean addSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);
@@ -477,7 +476,13 @@ public class SatFactory {
         return true;
     }
 
-    boolean addMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    /**
+     * Add a clause stating that: max(BOOLVARS<sub>i</sub>) &le; TARGET
+     *
+     * @param BOOLVARS a list of boolean variables
+     * @return true if the clause has been added to the clause store
+     */
+    public static boolean addMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         int tlit = sat.Literal(TARGET);
@@ -487,7 +492,13 @@ public class SatFactory {
         return true;
     }
 
-    boolean addSumBoolArrayLessEqKVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    /**
+     * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &le; TARGET
+     *
+     * @param BOOLVARS a list of boolean variables
+     * @return true if the clause has been added to the clause store
+     */
+    public static boolean addSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
 
         Solver solver = BOOLVARS[0].getSolver();
         PropSat sat = solver.getMinisat().getPropSat();

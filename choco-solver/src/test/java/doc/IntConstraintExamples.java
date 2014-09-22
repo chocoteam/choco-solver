@@ -47,7 +47,7 @@ import solver.variables.VF;
  * @version choco
  * @since 16/09/2014
  */
-public class ConstraintExamples {
+public class IntConstraintExamples {
 
     @Test
     public void arithm1() {
@@ -443,6 +443,171 @@ public class ConstraintExamples {
         IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
         IntVar[] Z = VF.enumeratedArray("Z", 3, 0, 2, solver);
         solver.post(ICF.lex_chain_less(X, Y, Z));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testlex_chain_less_eq() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
+        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
+        IntVar[] Z = VF.enumeratedArray("Z", 3, 0, 2, solver);
+        solver.post(ICF.lex_chain_less_eq(X, Y, Z));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testlex_less() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
+        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
+        solver.post(ICF.lex_less(X, Y));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testlex_less_eq() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
+        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
+        solver.post(ICF.lex_less_eq(X, Y));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testmulticost_regular() {
+        Solver solver = new Solver();
+        IntVar[] VARS = VF.enumeratedArray("VARS", 5, 0, 2, solver);
+        IntVar[] CVARS = VF.enumeratedArray("CVARS", 5, 0, 10, solver);
+        FiniteAutomaton fauto = new FiniteAutomaton();
+        int start = fauto.addState();
+        int end = fauto.addState();
+        fauto.setInitialState(start);
+        fauto.setFinal(start, end);
+
+        fauto.addTransition(start, start, 0, 1);
+        fauto.addTransition(start, end, 2);
+
+        fauto.addTransition(end, end, 1);
+        fauto.addTransition(end, start, 0, 2);
+
+        int[][][] costs = new int[5][3][];
+//        costs[0] = new int[]{1, 2, 3};
+//        costs[1] = new int[]{2, 3, 1};
+//        costs[2] = new int[]{3, 1, 2};
+//        costs[3] = new int[]{3, 2, 1};
+//        costs[4] = new int[]{2, 1, 3};
+
+        solver.post(ICF.multicost_regular(VARS, CVARS, CostAutomaton.makeMultiResources(fauto, costs, CVARS)));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testnvalues() {
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 2, solver);
+        IntVar N = VF.enumerated("N", 0, 3, solver);
+        solver.post(ICF.nvalues(VS, N));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testpath() {
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
+        IntVar S = VF.enumerated("S", 0, 3, solver);
+        IntVar E = VF.enumerated("E", 0, 3, solver);
+        solver.post(ICF.path(VS, S, E, 0));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testregular() {
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 4, 1, 5, solver);
+        solver.post(ICF.regular(CS,
+                new FiniteAutomaton("(1|2)(3*)(4|5)")));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testscalar() {
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 4, 1, 4, solver);
+        int[] coeffs = new int[]{1, 2, 3, 4};
+        IntVar R = VF.bounded("R", 0, 20, solver);
+        solver.post(ICF.scalar(CS, coeffs, R));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testsort() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 3, 0, 2, solver);
+        IntVar[] Y = VF.enumeratedArray("Y", 3, 0, 2, solver);
+        solver.post(ICF.sort(X, Y));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testsubcircuit() {
+        Solver solver = new Solver();
+        IntVar[] NODES = VF.enumeratedArray("NS", 5, 0, 4, solver);
+        IntVar SI = VF.enumerated("SI", 2, 3, solver);
+        solver.post(ICF.subcircuit(NODES, 0, SI));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testsubpath() {
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
+        IntVar S = VF.enumerated("S", 0, 3, solver);
+        IntVar E = VF.enumerated("E", 0, 3, solver);
+        IntVar SI = VF.enumerated("SI", 2, 3, solver);
+        solver.post(ICF.subpath(VS, S, E, 0, SI));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testsum() {
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
+        IntVar SU = VF.enumerated("SU", 2, 3, solver);
+        solver.post(ICF.sum(VS, "<=", SU));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testtree() {
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
+        IntVar NT = VF.enumerated("NT", 2, 3, solver);
+        solver.post(ICF.tree(VS, NT, 0));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testtsp() {
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
+        IntVar CO = VF.enumerated("CO", 0, 15, solver);
+        int[][] costs = new int[][]{{0,1,3,7},{1,0,1,3},{3,1,0,1},{7,3,1,0}};
+        solver.post(ICF.tsp(VS, CO, costs));
         SMF.log(solver, true, false);
         solver.findAllSolutions();
     }

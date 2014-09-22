@@ -1106,7 +1106,7 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * Ensures that the assignment of a sequence of VARS is recognized by CAUTOMATON, a deterministic finite automaton,
      * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
      * This version allows to specify different costs according to the automaton state at which the assignment occurs
      * (i.e. the transition starts)
@@ -1611,7 +1611,7 @@ public class IntConstraintFactory {
      * @param COST_MATRIX symmetric cost matrix
      * @return a CP model for the TSP
      */
-    public static Constraint[] tsp(IntVar[] SUCCS, IntVar COST, int[][] COST_MATRIX, boolean STRONG) {
+    public static Constraint[] tsp(IntVar[] SUCCS, IntVar COST, int[][] COST_MATRIX) {
         int n = SUCCS.length;
         assert n > 1;
         assert n == COST_MATRIX.length && n == COST_MATRIX[0].length;

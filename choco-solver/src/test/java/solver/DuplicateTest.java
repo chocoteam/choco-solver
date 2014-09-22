@@ -1147,22 +1147,20 @@ public class DuplicateTest {
 
     @Test(groups = "1s")
     public void test60() {
-        for (boolean strong : new boolean[]{true, false}) {
-            Solver solver = new Solver("Choco");
-            IntVar[] X = VF.boundedArray("vs", 5, 1, 5, solver);
-            IntVar S = VF.bounded("S", 0, 3, solver);
-            solver.post(ICF.tsp(X, S, new int[][]{{0, 1, 2, 3, 4}, {1, 0, 1, 2, 3}, {2, 1, 0, 1, 2}, {3, 2, 1, 0, 1}, {4, 3, 2, 1, 0}}, strong));
+        Solver solver = new Solver("Choco");
+        IntVar[] X = VF.boundedArray("vs", 5, 1, 5, solver);
+        IntVar S = VF.bounded("S", 0, 3, solver);
+        solver.post(ICF.tsp(X, S, new int[][]{{0, 1, 2, 3, 4}, {1, 0, 1, 2, 3}, {2, 1, 0, 1, 2}, {3, 2, 1, 0, 1}, {4, 3, 2, 1, 0}}));
 
-            Solver copy = solver.duplicateModel();
+        Solver copy = solver.duplicateModel();
 
-            solver.findAllSolutions();
-            copy.findAllSolutions();
+        solver.findAllSolutions();
+        copy.findAllSolutions();
 
-            Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
-            Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
-            Assert.assertEquals(copy.toString(), solver.toString());
-            Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
-        }
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups = "1s")

@@ -112,12 +112,12 @@ public class SetConstraintsFactory {
 
     /**
      * links SET_1 and SET_2 with OFFSET
-     * x in SET_1 <=> x+offSet in SET_2
+     * x in SET_1 <=> x+OFFSET in SET_2
      *
      * @param SET_1  a set variable
      * @param SET_2  a set variable
      * @param OFFSET offset index
-     * @return a constraint ensuring that x in SET_1 <=> x+offSet in SET_2
+     * @return a constraint ensuring that x in SET_1 <=> x+OFFSET in SET_2
      */
     public static Constraint offSet(SetVar SET_1, SetVar SET_2, int OFFSET) {
 		return new Constraint("SetOffset",new PropOffSet(SET_1, SET_2, OFFSET));
@@ -301,7 +301,7 @@ public class SetConstraintsFactory {
     }
 
     /**
-     * Sets in SETS are all disjoints
+     * Sets in SETS are all disjoint
      * Note that there can be multiple empty sets
      *
      * @param SETS disjoint set variables

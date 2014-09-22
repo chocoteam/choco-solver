@@ -21,4 +21,4 @@
    glossary
    faq
 
-
+.. bibliography:: refs.bib
