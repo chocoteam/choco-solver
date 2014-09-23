@@ -391,8 +391,120 @@ The advantage of this framework is the economy of code (less constraints need to
     To ease modelling, it is not required to manipulate propagators, but only constraints. However, one can define specific constraints by defining combinations of propagators and/or its own propagators. More detailed are given in :ref:`Defining its own constraint <46_define_constraint_label>`.
 
 
-Choco |version| provides various types of constraints: :ref:`unary constraints <61_constraints_unaries_label>`, :ref:`binary constraints <61_constraints_binaries_label>`, :ref:`ternary constraints <61_constraints_ternaries_label>` and :ref:`global constraints <61_constraints_global_label>`.
-A constraint should either be posted or be reified.
+Choco |version| provides various types of constraints.
+
+
+Available constraints
+^^^^^^^^^^^^^^^^^^^^^
+
+    :ref:`51_icstr_fal`, :ref:`51_icstr_tru`
+
+    On one integer variable
+:ref:`51_icstr_ari`,
+:ref:`51_icstr_mem`,
+:ref:`51_icstr_nmem`.
+
+
+    On two integer variables
+:ref:`51_icstr_abs`,
+:ref:`51_icstr_ari`,
+:ref:`51_icstr_dist`,
+:ref:`51_icstr_squa`,
+:ref:`51_icstr_tab`,
+:ref:`51_icstr_tim`.
+
+    On three integer variables
+:ref:`51_icstr_ari`,
+:ref:`51_icstr_dist`,
+:ref:`51_icstr_div`,
+:ref:`51_icstr_max`,
+:ref:`51_icstr_min`,
+:ref:`51_icstr_mod`,
+:ref:`51_icstr_tim`.
+
+    On an undefined number of integer variables
+:ref:`51_icstr_elm`,
+:ref:`51_icstr_sor`,
+:ref:`51_icstr_tab`.
+
+
+:ref:`51_icstr_alld`,
+:ref:`51_icstr_alldc`,
+:ref:`51_icstr_alld_e0`,
+:ref:`51_icstr_gcc`,
+
+:ref:`51_icstr_amo`,
+:ref:`51_icstr_atl`,
+:ref:`51_icstr_atm`,
+:ref:`51_icstr_cou`,
+:ref:`51_icstr_nva`,
+
+:ref:`51_icstr_booc`,
+:ref:`51_icstr_ich`.
+
+:ref:`51_icstr_cum`,
+:ref:`51_icstr_diffn`.
+
+:ref:`51_icstr_lexcl`,
+:ref:`51_icstr_lexce`,
+:ref:`51_icstr_lexl`,
+:ref:`51_icstr_lexe`.
+
+:ref:`51_icstr_max`,
+:ref:`51_icstr_min`,
+
+
+:ref:`51_icstr_sca`,
+:ref:`51_icstr_sum`.
+
+:ref:`51_icstr_creg`,
+:ref:`51_icstr_mcreg`,
+:ref:`51_icstr_reg`.
+
+:ref:`51_icstr_cir`,
+:ref:`51_icstr_pat`,
+:ref:`51_icstr_scir`,
+:ref:`51_icstr_spat`,
+:ref:`51_icstr_tree`.
+
+:ref:`51_icstr_bin`,
+:ref:`51_icstr_kna`,
+:ref:`51_icstr_tsp`.
+
+
+    On one set variable
+:ref:`51_scstr_note`.    
+
+    On two set variables
+:ref:`51_scstr_dis`,
+:ref:`51_scstr_off`.
+
+    On an undefined number of set variables
+:ref:`51_scstr_alldif`,
+:ref:`51_scstr_alldis`,
+:ref:`51_scstr_alleq`,
+:ref:`51_scstr_bcha`,
+:ref:`51_scstr_int`,
+:ref:`51_scstr_inv`,
+:ref:`51_scstr_mem`,
+:ref:`51_scstr_nbe`,
+:ref:`51_scstr_part`,
+:ref:`51_scstr_sse`,
+:ref:`51_scstr_sym`,
+:ref:`51_scstr_uni`.
+    
+
+    On integer and set variables
+:ref:`51_scstr_card`,
+:ref:`51_scstr_elm`,
+:ref:`51_scstr_icha`,
+:ref:`51_scstr_max`,
+:ref:`51_scstr_mem`,
+:ref:`51_scstr_min`,
+:ref:`51_scstr_sum`.
+
+    On real variables
+:ref:`51_rcstr_main`.
 
 
 Posting constraints
@@ -456,4 +568,52 @@ This will actually reify both constraints ``a`` and ``b`` and say that at least 
 Note that only the constraint ``c`` is posted.
 
 
+SAT constraints
+---------------
+
+A SAT solver is embedded in Choco. It is not  designed to be accessed directly.
+The SAT solver is internally managed as a constraint (and a propagator), that's why it is referred as SAT constraint in the following.
+
+.. important::
+
+    The SAT solver is directly inspired by `MiniSat <http://minisat.se/>`_:cite:`EenS03`.
+    However, it only propagates clauses, no learning or search is implemented.
+
+On a call to any methods of ``solver.constraints.SatFactory``, the SAT constraint (and propagator) is created and automatically posted to the solver.
+
+How to add clauses
+^^^^^^^^^^^^^^^^^^
+Clauses can be added with calls to the ``solver.constraints.SatFactory``.
+
+
+    On one boolean variable
+:ref:`51_lcstr_true`,
+:ref:`51_lcstr_false`.
+
+    On two boolean variables
+:ref:`51_lcstr_booleq`,
+:ref:`51_lcstr_boolle`,
+:ref:`51_lcstr_boollt`,
+:ref:`51_lcstr_boolnot`.
+
+    Reification on two boolean variables
+:ref:`51_lcstr_booliseqvar`,
+:ref:`51_lcstr_boolislevar`,
+:ref:`51_lcstr_boolisltvar`,
+:ref:`51_lcstr_boolisneqvar`,
+:ref:`51_lcstr_oreqvar`,
+:ref:`51_lcstr_xoreqvar`,
+:ref:`51_lcstr_andeqvar`.
+
+    On undefined number of boolean variables
+:ref:`51_lcstr_orarrayqualtrue`,
+:ref:`51_lcstr_atmostnminusone`,
+:ref:`51_lcstr_atmostone`,
+:ref:`51_lcstr_andarrayequalfalse`,
+:ref:`51_lcstr_andarrayeqvar`,
+:ref:`51_lcstr_orarrayeqvar`,
+:ref:`51_lcstr_clauses`,
+:ref:`51_lcstr_maxboolarraylesseqvar`,
+:ref:`51_lcstr_sumboolarraygreatereqvar`,
+:ref:`51_lcstr_sumboolarraylesseqvar`.
 

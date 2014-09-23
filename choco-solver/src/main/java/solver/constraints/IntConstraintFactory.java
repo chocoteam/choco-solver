@@ -50,6 +50,7 @@ import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.PropMultiCostRegular;
 import solver.constraints.nary.automata.PropRegular;
+import solver.constraints.nary.channeling.PropBitChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.channeling.PropInverseChannelAC;
 import solver.constraints.nary.channeling.PropInverseChannelBC;
@@ -666,6 +667,21 @@ public class IntConstraintFactory {
                     new PropEqualX_Y(VAR, enumV)
             );
         }
+    }
+
+    /**
+     * Ensures that VAR = 2<sup>0</sup>*BIT_1 + 2<sup>1</sup>*BIT_2 + ... 2<sup>n-1</sup>*BIT_n.
+     * <br/>
+     * BIT_1 is related to the first bit of OCTET (2^0),
+     * BIT_2 is related to the first bit of OCTET (2^1), etc.
+     * <br/>
+     * The upper bound of VAR is given by 2<sup>n</sup>, where n is the size of the array BITS.
+     *
+     * @param BITS the array of bits
+     * @param VAR the numeric value
+     */
+    public static Constraint bit_channeling(BoolVar[] BITS, IntVar VAR) {
+        return new Constraint("bit_channeling", new PropBitChanneling(VAR, BITS));
     }
 
     /**

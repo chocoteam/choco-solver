@@ -4,7 +4,7 @@ Elements of Choco
 
 .. |gccat| replace::
 
-.. _61_icstr_main:
+.. _51_icstr_main:
 
 **********************************
 Constraints over integer variables
@@ -12,7 +12,7 @@ Constraints over integer variables
 
 
 
-.. _61_icstr_abs:
+.. _51_icstr_abs:
 
 absolute
 ========
@@ -26,10 +26,10 @@ It ensures that `VAR1` = \| `VAR2` \| .
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 98-101,103
-          :emphasize-lines: 101
+          :lines: 100-103,105
+          :emphasize-lines: 103
           :linenos:
 
     The solutions of the problem are :
@@ -39,7 +39,7 @@ It ensures that `VAR1` = \| `VAR2` \| .
      - `X = 1, Y = 1`
      - `X = 2, Y = -2`
 
-.. _61_icstr_alld:
+.. _51_icstr_alld:
 
 alldifferent
 ============
@@ -62,10 +62,10 @@ A signature offers the possibility to specify the filtering algorithm to use:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 228-232,234
-          :emphasize-lines: 232
+          :lines: 231-235,237
+          :emphasize-lines: 235
           :linenos:
 
     Some solutions of the problem are :
@@ -75,7 +75,7 @@ A signature offers the possibility to specify the filtering algorithm to use:
      - `X = 2, Y = 3, Z = 5, W = 0`
      - `X = 2, Y = 4, Z = 7, W = 1`
 
-.. _61_icstr_alldc:
+.. _51_icstr_alldc:
 
 alldifferent_conditionnal
 =========================
@@ -95,10 +95,10 @@ One can force the `AC` algorithm to be used by calling the second signature.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 240-248,250
-          :emphasize-lines: 248
+          :lines: 243-251,253
+          :emphasize-lines: 251
           :linenos:
 
     The condition in the example states that the values `1` and `3` can appear more than once, unlike other values.
@@ -110,7 +110,7 @@ One can force the `AC` algorithm to be used by calling the second signature.
      - `XS[0] = 1, XS[1] = 2, XS[2] = 1, XS[3] = 1, XS[4] = 1`
      - `XS[0] = 0, XS[1] = 1, XS[2] = 2, XS[3] = 3, XS[4] = 3`
 
-.. _61_icstr_alld_e0:
+.. _51_icstr_alld_e0:
 
 alldifferent_except_0
 =====================
@@ -127,10 +127,10 @@ It ensures that all variables from `VAR` take a distinct value or 0, that is, al
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 255-257,259
-          :emphasize-lines: 257
+          :lines: 258-260,262
+          :emphasize-lines: 260
           :linenos:
 
     Some solutions of the problem are :
@@ -140,7 +140,7 @@ It ensures that all variables from `VAR` take a distinct value or 0, that is, al
      - `XS[0] = 0, XS[1] = 2, XS[2] = 0, XS[3] = 0`
      - `XS[0] = 2, XS[1] = 1, XS[2] = 0, XS[3] = 0`
 
-.. _61_icstr_amo:
+.. _51_icstr_amo:
 
 among
 =====
@@ -163,10 +163,10 @@ It holds that `NVAR` is the number of variables of the collection `VARIABLES` th
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 264-267,269
-          :emphasize-lines: 267
+          :lines: 267-270,272
+          :emphasize-lines: 270
           :linenos:
 
     Some solutions of the problem are :
@@ -176,7 +176,7 @@ It holds that `NVAR` is the number of variables of the collection `VARIABLES` th
      - `N = 3, XS[0] = 1, XS[1] = 1, XS[2] = 2, XS[3] = 4`
      - `N = 3, XS[0] = 3, XS[1] = 2, XS[2] = 1, XS[3] = 0`
 
-.. _61_icstr_ari:
+.. _51_icstr_ari:
 
 arithm
 ======
@@ -196,10 +196,10 @@ The constraint `arithm` involves either:
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 51-53,55
-          :emphasize-lines: 53
+          :lines: 54-56,58
+          :emphasize-lines: 56
           :linenos:
 
     The solutions of the problem are :
@@ -209,10 +209,10 @@ The constraint `arithm` involves either:
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 106-109,111
-          :emphasize-lines: 109
+          :lines: 110-113,115
+          :emphasize-lines: 113
           :linenos:
 
  The solutions of the problem are :
@@ -225,7 +225,7 @@ The constraint `arithm` involves either:
      - `X = 2, Y = 1`
 
 
-.. _61_icstr_atl:
+.. _51_icstr_atl:
 
 atleast_nvalues
 ===============
@@ -250,10 +250,10 @@ The boolean `AC` set to true enforces arc-consistency.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 275-278,280
-          :emphasize-lines: 278
+          :lines: 278-281,283
+          :emphasize-lines: 281
           :linenos:
 
  Some solutions of the problem are :
@@ -264,7 +264,7 @@ The boolean `AC` set to true enforces arc-consistency.
      - `XS[0] = 2 XS[1] = 0 XS[2] = 2 XS[3] = 1 N = 3`
      - `XS[0] = 2 XS[1] = 2 XS[2] = 1 XS[3] = 0 N = 3`
 
-.. _61_icstr_atm:
+.. _51_icstr_atm:
 
 atmost_nvalues
 ==============
@@ -291,10 +291,10 @@ It automatically detects disequalities and `alldifferent` constraints. Presumabl
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 285-288,290
-          :emphasize-lines: 288
+          :lines: 288-291,293
+          :emphasize-lines: 291
           :linenos:
 
  Some solutions of the problem are :
@@ -306,7 +306,7 @@ It automatically detects disequalities and `alldifferent` constraints. Presumabl
      - `XS[0] = 0, XS[1] = 1, XS[2] = 1, XS[3] = 0, N = 2`
      - `XS[0] = 2, XS[1] = 2, XS[2] = 1, XS[3] = 0, N = 3`
 
-.. _61_icstr_bin:
+.. _51_icstr_bin:
 
 bin_packing
 ===========
@@ -334,10 +334,10 @@ This constraint is not a built-in constraint and is based on various propagators
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 295-299,301
-          :emphasize-lines: 299
+          :lines: 298-302,304
+          :emphasize-lines: 302
           :linenos:
 
  Some solutions of the problem are :
@@ -346,8 +346,42 @@ This constraint is not a built-in constraint and is based on various propagators
      - `IBIN[0] = 1, IBIN[1] = 3, IBIN[2] = 1, IBIN[3] = 2, IBIN[4] = 1, BLOADS[0] = 5, BLOADS[1] = 4, BLOADS[2] = 3`
      - `IBIN[0] = 2, IBIN[1] = 3, IBIN[2] = 1, IBIN[3] = 1, IBIN[4] = 3, BLOADS[0] = 5, BLOADS[1] = 2, BLOADS[2] = 5`
 
+.. _51_icstr_bitc:
 
-.. _61_icstr_booc:
+bit_channeling
+==============
+
+The `bit_channeling` constraint involves:
+
+ - an array of boolean variables `BVARS` and
+ - an integer variable `VAR`.
+
+It ensures that: `VAR` = :math:`2^0 \times` `BITS[0]` :math:`2^1 \times` `BITS[1]` + ... +:math:`2^{n} \times` `BITS[n]`.
+`BIT[0] is related to the first bit of `VAR` (:math:`2^0`),
+`BIT[1] is related to the second bit of `VAR` (:math:`2^1`), etc.
+The upper bound of `VAR` is given by :math:`2^{|BITS|+1}`.
+
+**API**:  ::
+
+    Constraint bit_channeling(BoolVar[] BITS, IntVar VAR)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+          :language: java
+          :lines: 617-620,622
+          :emphasize-lines: 620
+          :linenos:
+
+ The solutions of the problem are :
+
+     - `VAR = 0, BVARS[0] = 0, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 0`
+     - `VAR = 1, BVARS[0] = 1, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 0`
+     - `VAR = 2, BVARS[0] = 0, BVARS[1] = 1, BVARS[2] = 0, BVARS[3] = 0`
+     - `VAR = 11, BVARS[0] = 1, BVARS[1] = 1, BVARS[2] = 0, BVARS[3] = 1`
+     - `VAR = 15, BVARS[0] = 1, BVARS[1] = 1, BVARS[2] = 1, BVARS[3] = 1`
+
+.. _51_icstr_booc:
 
 boolean_channeling
 ==================
@@ -367,10 +401,10 @@ The `OFFSET` is typically set to 0.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 306-309,311
-          :emphasize-lines: 309
+          :lines: 309-312,314
+          :emphasize-lines: 312
           :linenos:
 
  The solutions of the problem are :
@@ -382,7 +416,7 @@ The `OFFSET` is typically set to 0.
      - `VAR = 5, BVARS[0] = 0, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 0, BVARS[4] = 1`
 
 
-.. _61_icstr_cir:
+.. _51_icstr_cir:
 
 circuit
 =======
@@ -393,7 +427,7 @@ The `circuit` constraint involves:
  - an integer `OFFSET` and
  - a configuration `CONF`.
 
-It ensures that the elements of `VARS` define a covering circuit where `VARS` [i] = `OFFSET` + `j`means that `j` is the successor of `i`.
+It ensures that the elements of `VARS` define a covering circuit where `VARS` [i] = `OFFSET` + `j` means that `j` is the successor of `i`.
 The filtering algorithms are:
 
 - subtour elimination,
@@ -419,20 +453,20 @@ The `CONF` is a defined by an ``enum``:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 316-318,320
-          :emphasize-lines: 318
+          :lines: 319-321,323
+          :emphasize-lines: 321
           :linenos:
 
  Some solutions of the problem are :
 
-     - `NODES[0] = 1 NODES[1] = 2 NODES[2] = 3 NODES[3] = 4 NODES[4] = 0`
-     - `NODES[0] = 3 NODES[1] = 4 NODES[2] = 0 NODES[3] = 1 NODES[4] = 2`
-     - `NODES[0] = 4 NODES[1] = 2 NODES[2] = 3 NODES[3] = 0 NODES[4] = 1`
-     - `NODES[0] = 4 NODES[1] = 3 NODES[2] = 1 NODES[3] = 0 NODES[4] = 2`
+     - `NODES[0] = 1, NODES[1] = 2, NODES[2] = 3, NODES[3] = 4, NODES[4] = 0`
+     - `NODES[0] = 3, NODES[1] = 4, NODES[2] = 0, NODES[3] = 1, NODES[4] = 2`
+     - `NODES[0] = 4, NODES[1] = 2, NODES[2] = 3, NODES[3] = 0, NODES[4] = 1`
+     - `NODES[0] = 4, NODES[1] = 3, NODES[2] = 1, NODES[3] = 0, NODES[4] = 2`
 
-.. _61_icstr_creg:
+.. _51_icstr_creg:
 
 cost_regular
 ============
@@ -465,10 +499,10 @@ The `CAUOTMATON` can be defined using the ``solver.constraints.nary.automata.FA.
 
 .. admonition:: Example
 
-     .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
            :language: java
-           :lines: 325-347,349
-           :emphasize-lines: 347
+           :lines: 328-350,352
+           :emphasize-lines: 350
            :linenos:
 
   Some solutions of the problem are :
@@ -479,7 +513,7 @@ The `CAUOTMATON` can be defined using the ``solver.constraints.nary.automata.FA.
       - `VARS[0] = 1, VARS[1] = 2, VARS[2] = 1, VARS[3] = 0, VARS[4] = 1, COST = 8`
 
 
-.. _61_icstr_cou:
+.. _51_icstr_cou:
 
 
 count
@@ -505,20 +539,20 @@ An alternate signature enables `VALUE` to be an integer variable.
 
 .. admonition:: Example
 
-     .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
            :language: java
-           :lines: 354-358,360
-           :emphasize-lines: 358
+           :lines: 357-361,363
+           :emphasize-lines: 361
            :linenos:
 
   Some solutions of the problem are :
 
-      - `VS[0] = 0 VS[1] = 0 VS[2] = 0 VS[3] = 0 VA = 1 CO = 0`
-      - `VS[0] = 0 VS[1] = 1 VS[2] = 1 VS[3] = 0 VA = 1 CO = 2`
-      - `VS[0] = 0 VS[1] = 2 VS[2] = 2 VS[3] = 1 VA = 3 CO = 0`
-      - `VS[0] = 3 VS[1] = 3 VS[2] = 3 VS[3] = 3 VA = 3 CO = 4`
+      - `VS[0] = 0, VS[1] = 0, VS[2] = 0, VS[3] = 0, VA = 1, CO = 0`
+      - `VS[0] = 0, VS[1] = 1, VS[2] = 1, VS[3] = 0, VA = 1, CO = 2`
+      - `VS[0] = 0, VS[1] = 2, VS[2] = 2, VS[3] = 1, VA = 3, CO = 0`
+      - `VS[0] = 3, VS[1] = 3, VS[2] = 3, VS[3] = 3, VA = 3, CO = 4`
 
-.. _61_icstr_cum:
+.. _51_icstr_cum:
 
 cumulative
 ==========
@@ -546,10 +580,10 @@ The first API relies on the second, and set `INCREMENTAL` to ``TASKS.length > 50
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 365-378,380
-          :emphasize-lines: 378
+          :lines: 368-381,383
+          :emphasize-lines: 381
           :linenos:
 
  Some solutions of the problem are :
@@ -558,7 +592,7 @@ The first API relies on the second, and set `INCREMENTAL` to ``TASKS.length > 50
      - `S_0 = 4, HE_0 = 0, S_1 = 4, HE_1 = 0, S_2 = 1, HE_2 = 1, S_3 = 0, HE_3 = 2 S_4 = 4, HE_4 = 3, CA = 3`
      - `S_0 = 0, HE_0 = 1, S_1 = 0, HE_1 = 0, S_2 = 1, HE_2 = 1, S_3 = 0, HE_3 = 2 S_4 = 4, HE_4 = 3, CA = 3`
 
-.. _61_icstr_diffn:
+.. _51_icstr_diffn:
 
 diffn
 =====
@@ -582,10 +616,10 @@ The option `USE_CUMUL`, recommended, indicates whether or not redundant `cumulat
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 385-394,396
-          :emphasize-lines: 394
+          :lines: 388-397,399
+          :emphasize-lines: 397
           :linenos:
 
  Some solutions of the problem are :
@@ -595,7 +629,7 @@ The option `USE_CUMUL`, recommended, indicates whether or not redundant `cumulat
      - `X[0] = 0 X[1] = 1, X[2] = 0, X[3] = 1, Y[0] = 1, Y[1] = 0, Y[2] = 2, Y[3]`
 
 
-.. _61_icstr_dist:
+.. _51_icstr_dist:
 
 distance
 ========
@@ -615,10 +649,10 @@ The ``distance`` constraint involves either:
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 116-119,121
-          :emphasize-lines: 119
+          :lines: 120-123,125
+          :emphasize-lines: 123
           :linenos:
 
  The solutions of the problem are :
@@ -630,10 +664,10 @@ The ``distance`` constraint involves either:
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 161-165,166
-          :emphasize-lines: 165
+          :lines: 165-169,171
+          :emphasize-lines: 169
           :linenos:
 
  The solutions of the problem are :
@@ -649,7 +683,7 @@ The ``distance`` constraint involves either:
      - `X = 3, Y = 1, Z = 3`
 
 
-.. _61_icstr_elm:
+.. _51_icstr_elm:
 
 element
 =======
@@ -682,10 +716,10 @@ The `element` constraint ensures that `VALUE` = `TABLE` [`INDEX` - `OFFSET`]. `O
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 126-129,131
-          :emphasize-lines: 129
+          :lines: 130-133,135
+          :emphasize-lines: 133
           :linenos:
 
  The solutions of the problem are :
@@ -696,7 +730,7 @@ The `element` constraint ensures that `VALUE` = `TABLE` [`INDEX` - `OFFSET`]. `O
      - `V = 1, I = 2`
      - `V = 2, I = 0`
 
-.. _61_icstr_div:
+.. _51_icstr_div:
 
 eucl_div
 ========
@@ -710,10 +744,10 @@ The API is : ::
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 172-176,178
-          :emphasize-lines: 176
+          :lines: 176-180,182
+          :emphasize-lines: 180
           :linenos:
 
  The solutions of the problem are :
@@ -722,14 +756,14 @@ The API is : ::
      - `X = 3, Y = 1, Z = 3`
 
 
-.. _61_icstr_fal:
+.. _51_icstr_fal:
 
 FALSE
 =====
 
 The `FALSE` constraint is always unsatisfied. It should only be used with ``LogicalFactory``.
 
-.. _61_icstr_gcc:
+.. _51_icstr_gcc:
 
 global_cardinality
 ==================
@@ -757,10 +791,10 @@ The boolean `CLOSED` set to `true` restricts the domain of `VARS` to the values 
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 402-406,408
-          :emphasize-lines: 406
+          :lines: 404-408,410
+          :emphasize-lines: 408
           :linenos:
 
  The solutions of the problem are :
@@ -772,7 +806,7 @@ The boolean `CLOSED` set to `true` restricts the domain of `VARS` to the values 
      - `VS[0] = 2, VS[1] = 1, VS[2] = 2, VS[3] = 1, OCC[0] = 0, OCC[1] = 2, OCC[2] = 2`
      - `VS[0] = 2, VS[1] = 2, VS[2] = 1, VS[3] = 1, OCC[0] = 0, OCC[1] = 2, OCC[2] = 2`
 
-.. _61_icstr_ich:
+.. _51_icstr_ich:
 
 inverse_channeling
 ==================
@@ -792,10 +826,10 @@ It also automatically imposes one `alldifferent` constraints on each array of va
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 412-415,417
-          :emphasize-lines: 415
+          :lines: 415-418,420
+          :emphasize-lines: 418
           :linenos:
 
    The solutions of the problems are:
@@ -808,7 +842,7 @@ It also automatically imposes one `alldifferent` constraints on each array of va
    - `X[0] = 2, X[1] = 1, X[2] = 0, Y[0] = 3, Y[1] = 2, Y[2] = 1`
 
 
-.. _61_icstr_kna:
+.. _51_icstr_kna:
 
 knapsack
 ========
@@ -833,10 +867,10 @@ It formulates the Knapsack Problem: to determine the count of each item to inclu
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 422-431,433
-          :emphasize-lines: 431
+          :lines: 425-434,436
+          :emphasize-lines: 434
           :linenos:
 
    Some solutions of the problems are:
@@ -846,7 +880,7 @@ It formulates the Knapsack Problem: to determine the count of each item to inclu
    - `IT_0 = 1, IT_1 = 1, IT_2 = 0, WE = 4, EN = 5`
    - `IT_0 = 2, IT_1 = 1, IT_2 = 0, WE = 5, EN = 6`
 
-.. _61_icstr_lexcl:
+.. _51_icstr_lexcl:
 
 lex_chain_less
 ==============
@@ -865,10 +899,10 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 438-442,444
-          :emphasize-lines: 442
+          :lines: 441-445,447
+          :emphasize-lines: 445
           :linenos:
 
    Some solutions of the problems are:
@@ -878,7 +912,7 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
    - `X[0] = 1, X[1] = 0, X[2] = 1, Y[0] = 1, Y[1] = 1, Y[2] = 1, Z[0] = 1, Z[1] = 2, Z[2] = 0`
    - `X[0] = -1, X[1] = 1, X[2] = 1, Y[0] = 1, Y[1] = 1, Y[2] = 1, Z[0] = 2, Z[1] = 2, Z[2] = 1`
 
-.. _61_icstr_lexce:
+.. _51_icstr_lexce:
 
 lex_chain_less_eq
 =================
@@ -897,10 +931,10 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 449-453,455
-          :emphasize-lines: 453
+          :lines: 452-456,458
+          :emphasize-lines: 456
           :linenos:
 
    Some solutions of the problems are:
@@ -910,7 +944,7 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
    - `X[0] = 0, X[1] = 1, X[2] = -1, Y[0] = 1, Y[1] = 1, Y[2] = 1, Z[0] = 2, Z[1] = 1, Z[2] = 2`
    - `X[0] = -1, X[1] = -1, X[2] = 0, Y[0] = 1, Y[1] = 1, Y[2] = 2, Z[0] = 2, Z[1] = 2, Z[2] = 2`
 
-.. _61_icstr_lexl:
+.. _51_icstr_lexl:
 
 lex_less
 ========
@@ -928,10 +962,10 @@ It ensures that `VARS1` is lexicographically strictly less than `VARS2`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 460-463,465
-          :emphasize-lines: 463
+          :lines: 463-466,468
+          :emphasize-lines: 466
           :linenos:
 
    Some solutions of the problems are:
@@ -941,7 +975,7 @@ It ensures that `VARS1` is lexicographically strictly less than `VARS2`.
    - `X[0] = -1, X[1] = 0, X[2] = -1, Y[0] = 2, Y[1] = 1, Y[2] = 1`
    - `X[0] = -1, X[1] = -1, X[2] = 0, Y[0] = 2, Y[1] = 2, Y[2] = 2`
 
-.. _61_icstr_lexe:
+.. _51_icstr_lexe:
 
 lex_less_eq
 ===========
@@ -959,10 +993,10 @@ It ensures that `VARS1` is lexicographically strictly less or equal than `VARS2`
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 470-473,474
-          :emphasize-lines: 473
+          :lines: 473-476,478
+          :emphasize-lines: 476
           :linenos:
 
    Some solutions of the problems are:
@@ -972,7 +1006,7 @@ It ensures that `VARS1` is lexicographically strictly less or equal than `VARS2`
    - `X[0] = 0, X[1] = 0, X[2] = 0, Y[0] = 2, Y[1] = 1, Y[2] = 2`
    - `X[0] = 1, X[1] = 1, X[2] = 1, Y[0] = 2, Y[1] = 2, Y[2] = 2`
 
-.. _61_icstr_max:
+.. _51_icstr_max:
 
 maximum
 =======
@@ -992,10 +1026,10 @@ The `maximum` constraints involves a set of integer variables and a third party 
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 182-187,189
-          :emphasize-lines: 187
+          :lines: 187-191,193
+          :emphasize-lines: 191
           :linenos:
 
     The solutions of the problem are :
@@ -1008,7 +1042,7 @@ The `maximum` constraints involves a set of integer variables and a third party 
         - `MAX = 3, Y = 1, Z = 3`
 
 
-.. _61_icstr_mem:
+.. _51_icstr_mem:
 
 member
 ======
@@ -1025,10 +1059,10 @@ A constraint which restricts the values a variable can be assigned to with respe
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 59-61,63
-          :emphasize-lines: 61
+          :lines: 63-65,67
+          :emphasize-lines: 65
           :linenos:
 
     The solutions of the problem are :
@@ -1038,10 +1072,10 @@ A constraint which restricts the values a variable can be assigned to with respe
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 68-70,72
-          :emphasize-lines: 70
+          :lines: 72-74,76
+          :emphasize-lines: 74
           :linenos:
 
  The solutions of the problem are :
@@ -1050,7 +1084,7 @@ A constraint which restricts the values a variable can be assigned to with respe
      - `X = 3`
      - `X = 4`
 
-.. _61_icstr_min:
+.. _51_icstr_min:
 
 minimum
 =======
@@ -1070,10 +1104,10 @@ The `minimum` constraints involves a set of integer variables and a third party 
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 194-198,200
-          :emphasize-lines: 198
+          :lines: 198-202,204
+          :emphasize-lines: 202
           :linenos:
 
     The solutions of the problem are :
@@ -1085,7 +1119,7 @@ The `minimum` constraints involves a set of integer variables and a third party 
         - `MIN = 3, Y = 0, Z = 3`
         - `MIN = 3, Y = 1, Z = 3`
 
-.. _61_icstr_mod:
+.. _51_icstr_mod:
 
 mod
 ===
@@ -1100,10 +1134,10 @@ The API is : ::
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 205-209,211
-          :emphasize-lines: 209
+          :lines: 209-213,215
+          :emphasize-lines: 213
           :linenos:
 
  The solutions of the problem are :
@@ -1114,7 +1148,7 @@ The API is : ::
      - `X = 3, Y = 4, Z = 3`
      - `X = 4, Y = 3, Z = 1`
 
-.. _61_icstr_mcreg:
+.. _51_icstr_mcreg:
 
 multicost_regular
 =================
@@ -1151,7 +1185,7 @@ The `CAUOTMATON` can be defined using the ``solver.constraints.nary.automata.FA.
 
      *TBD*
 
-.. _61_icstr_nmem:
+.. _51_icstr_nmem:
 
 not_member
 ==========
@@ -1170,10 +1204,10 @@ The constraint
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 77-79,81
-          :emphasize-lines: 79
+          :lines: 81-83,85
+          :emphasize-lines: 83
           :linenos:
 
     The solutions of the problem are :
@@ -1183,17 +1217,17 @@ The constraint
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 87-89,91
-          :emphasize-lines: 89
+          :lines: 91-93,95
+          :emphasize-lines: 93
           :linenos:
 
     The solution of the problem is :
 
      - `X = 1`
 
-.. _61_icstr_nva:
+.. _51_icstr_nva:
 
 nvalues
 =======
@@ -1218,10 +1252,10 @@ This constraint is not a built-in constraint and is based on various propagators
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 510-513,515
-          :emphasize-lines: 513
+          :lines: 512-515,517
+          :emphasize-lines: 515
           :linenos:
 
     Some solutions of the problem are :
@@ -1230,7 +1264,7 @@ This constraint is not a built-in constraint and is based on various propagators
      - `VS[0] = 0 VS[1] = 0 VS[2] = 0 VS[3] = 1 N = 2`
      - `VS[0] = 0 VS[1] = 1 VS[2] = 2 VS[3] = 2 N = 3`
 
-.. _61_icstr_pat:
+.. _51_icstr_pat:
 
 path
 ====
@@ -1257,10 +1291,10 @@ The constraint relies on the `circuit` propagators.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 520-524,526
-          :emphasize-lines: 524
+          :lines: 522-526,528
+          :emphasize-lines: 526
           :linenos:
 
     Some solutions of the problem are :
@@ -1270,7 +1304,7 @@ The constraint relies on the `circuit` propagators.
      - `VS[0] = 3, VS[1] = 4, VS[2] = 0, VS[3] = 1, S = 2, E = 1`
      - `VS[0] = 4, VS[1] = 3, VS[2] = 1, VS[3] = 0, S = 2, E = 0`
 
-.. _61_icstr_reg:
+.. _51_icstr_reg:
 
 regular
 =======
@@ -1295,10 +1329,10 @@ There are various ways to declare the automaton:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 531-534,536
-          :emphasize-lines: 533-534
+          :lines: 533-536,538
+          :emphasize-lines: 535-536
           :linenos:
 
     The solutions of the problem are :
@@ -1309,7 +1343,7 @@ There are various ways to declare the automaton:
      - `CS[0] = 2, CS[1] = 3, CS[2] = 3, CS[3] = 5`
 
 
-.. _61_icstr_sca:
+.. _51_icstr_sca:
 
 scalar
 ======
@@ -1326,7 +1360,7 @@ The `scalar` constraint filters on bounds only.
 The constraint suppress variables with coefficients set to 0, recognizes `sum` (when all coefficients are equal to `-1`, or all equal to `-1`),
 and enables, under certain conditions, to reformulate the constraint with a `table` constraint providint AC filtering algorithm.
 
-**See also**: `scalar <http://sofdem.github.io/gccat/gccat/Cscalar_product.html>`_ in the Global Constraint Catalog.
+**See also**: `scalar_product <http://sofdem.github.io/gccat/gccat/Cscalar_product.html>`_ in the Global Constraint Catalog.
 
 **Implementation based on**: :cite:`HarveyS02`.
 
@@ -1338,10 +1372,10 @@ and enables, under certain conditions, to reformulate the constraint with a `tab
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 541-544,546
-          :emphasize-lines: 544
+          :lines: 543-547,549
+          :emphasize-lines: 547
           :linenos:
 
     Some solutions of the problem are :
@@ -1351,7 +1385,7 @@ and enables, under certain conditions, to reformulate the constraint with a `tab
      - `CS[0] = 1, CS[1] = 4, CS[2] = 2, CS[3] = 1, R = 19`
      - `CS[0] = 1, CS[1] = 2, CS[2] = 1, CS[3] = 3, R = 20`
 
-.. _61_icstr_sor:
+.. _51_icstr_sor:
 
 sort
 ====
@@ -1370,10 +1404,10 @@ Moreover, the variable of `SORTEDVARS` are sorted in increasing order.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 553-556,558
-          :emphasize-lines: 556
+          :lines: 554-557,559
+          :emphasize-lines: 557
           :linenos:
 
     Some solutions of the problem are :
@@ -1383,7 +1417,7 @@ Moreover, the variable of `SORTEDVARS` are sorted in increasing order.
      - `X[0] = 2, X[1] = 1, X[2] = 0, Y[0] = 0, Y[1] = 1, Y[2] = 2`
      - `X[0] = 2, X[1] = 1, X[2] = 2, Y[0] = 1, Y[1] = 2, Y[2] = 2`
 
-.. _61_icstr_squa:
+.. _51_icstr_squa:
 
 square
 ======
@@ -1397,10 +1431,10 @@ It ensures that `VAR1` = `VAR2`:math:`^2`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 136-139,141
-          :emphasize-lines: 139
+          :lines: 140-143,145
+          :emphasize-lines: 143
           :linenos:
 
  The solutions of the problem are :
@@ -1410,7 +1444,7 @@ It ensures that `VAR1` = `VAR2`:math:`^2`.
      - `X = 1, Y = 1`
      - `X = 4, Y = 2`
 
-.. _61_icstr_scir:
+.. _51_icstr_scir:
 
 subcircuit
 ==========
@@ -1434,10 +1468,10 @@ It also ensures that \| `{VARS[i]` :math:`\neq` `OFFSET+i}` \| = `SUBCIRCUIT_SIZ
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 562-565,567
-          :emphasize-lines: 565
+          :lines: 564-567,569
+          :emphasize-lines: 567
           :linenos:
 
  Some solutions of the problem are :
@@ -1447,7 +1481,7 @@ It also ensures that \| `{VARS[i]` :math:`\neq` `OFFSET+i}` \| = `SUBCIRCUIT_SIZ
      - `NS[0] = 1, NS[1] = 2, NS[2] = 0, NS[3] = 3, NS[4] = 4, SI = 3`
      - `NS[0] = 3, NS[1] = 1, NS[2] = 2, NS[3] = 4, NS[4] = 0, SI = 3`
 
-.. _61_icstr_spat:
+.. _51_icstr_spat:
 
 subpath
 =======
@@ -1476,9 +1510,9 @@ Moreover, `VARS[END-OFFSET]` = \| `VARS` \| +`OFFSET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 572-577,579
+          :lines: 574-579,581
           :emphasize-lines: 579
           :linenos:
 
@@ -1490,7 +1524,7 @@ Moreover, `VARS[END-OFFSET]` = \| `VARS` \| +`OFFSET`.
      - `VS[0] = 0, VS[1] = 2, VS[2] = 4, VS[3] = 1, S = 3, E = 2, SI = 3`
 
 
-.. _61_icstr_sum:
+.. _51_icstr_sum:
 
 sum
 ===
@@ -1506,9 +1540,9 @@ If no operator is defined, ``"="`` is set by default.
 Note that when the operator differs from ``"="``, an intermediate variable is declared and an `arithm` constraint is returned.
 For performance reasons, a specialization for boolean variables is provided.
 
-**See also**: `scalar <http://sofdem.github.io/gccat/gccat/Cscalar_product.html>`_ in the Global Constraint Catalog.
+**See also**: `scalar_product <http://sofdem.github.io/gccat/gccat/Cscalar_product.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: *Bounds Consistency Techniques for Long Linear Constraints*. [#cscalar]_
+**Implementation based on**:  :cite:`HarveyS02`.
 
 **API**:  ::
 
@@ -1519,10 +1553,10 @@ For performance reasons, a specialization for boolean variables is provided.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 583-587,589
-          :emphasize-lines: 587
+          :lines: 586-589,591
+          :emphasize-lines: 589
           :linenos:
 
  Some solutions of the problem are :
@@ -1532,7 +1566,7 @@ For performance reasons, a specialization for boolean variables is provided.
      - `VS[0] = 0 VS[1] = 0 VS[2] = 0 VS[3] = 3 SU = 3`
      - `VS[0] = 1 VS[1] = 1 VS[2] = 0 VS[3] = 0 SU = 3`
 
-.. _61_icstr_tab:
+.. _51_icstr_tab:
 
 table
 =====
@@ -1563,9 +1597,7 @@ When more than two variables are involved, the available algorithms are:
 - ``"FC"``: applies the forward checking algorithm.
 
 
-**Implementation based on**: TBD. [#table]_
-
-.. [#table] TBD.
+**Implementation based on**: :cite:`tbd`.
 
 **API**:  ::
 
@@ -1574,10 +1606,10 @@ When more than two variables are involved, the available algorithms are:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 146-154,156
-          :emphasize-lines: 154
+          :lines: 150-158,160
+          :emphasize-lines: 158
           :linenos:
 
  The solutions of the problem are :
@@ -1585,7 +1617,7 @@ When more than two variables are involved, the available algorithms are:
      - `X = 1, Y = 1`
      - `X = 4, Y = 2`
 
-.. _61_icstr_tim:
+.. _51_icstr_tim:
 
 times
 =====
@@ -1598,23 +1630,24 @@ The `times` constraints involves either:
 The propagator of the `times` constraint filters on bounds only.
 If the option is enabled and under certain condition, the `times` constraint may be redefined with a `table` constraint, providing a better filtering algorithm.
 
-The API is : ::
+The API are : ::
 
     Constraint times(IntVar X, IntVar Y, IntVar Z)
+    Constraint times(IntVar X, int Y, IntVar Z)
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 216-220,222
-          :emphasize-lines: 220
+          :lines: 220-224,226
+          :emphasize-lines: 224
           :linenos:
 
  The solution of the problem is :
 
      - `X = 2 Y = 3 Z = 6`
 
-.. _61_icstr_tree:
+.. _51_icstr_tree:
 
 tree
 ====
@@ -1641,10 +1674,10 @@ It partitions the `SUCCS` variables into `NBTREES` (anti) arborescences:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 594-597,599
-          :emphasize-lines: 597
+          :lines: 596-599,601
+          :emphasize-lines: 599
           :linenos:
 
  Some solutions of the problem are :
@@ -1656,7 +1689,7 @@ It partitions the `SUCCS` variables into `NBTREES` (anti) arborescences:
      - `VS[0] = 3, VS[1] = 1, VS[2] = 2, VS[3] = 3, NT = 3`
 
 
-.. _61_icstr_tru:
+.. _51_icstr_tru:
 
 TRUE
 ====
@@ -1664,7 +1697,7 @@ TRUE
 The `TRUE` constraint is always satisfied. It should only be used with ``LogicalFactory``.
 
 
-.. _61_icstr_tsp:
+.. _51_icstr_tsp:
 
 tsp
 ===
@@ -1688,10 +1721,10 @@ This constraint is not a built-in constraint and is based on various propagators
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 603-607,609
-          :emphasize-lines: 607
+          :lines: 606-610,612
+          :emphasize-lines: 610
           :linenos:
 
  The solutions of the problem are :
@@ -1704,13 +1737,13 @@ This constraint is not a built-in constraint and is based on various propagators
      - `VS[0] = 2, VS[1] = 3, VS[2] = 1, VS[3] = 0, CO = 14`
 
 
-.. _61_scstr_main:
+.. _51_scstr_main:
 
 ******************************
 Constraints over set variables
 ******************************
 
-.. _61_scstr_alldif:
+.. _51_scstr_alldif:
 
 all_different
 =============
@@ -1723,7 +1756,7 @@ Note that there cannot be more than two empty sets.
 
     Constraint all_different(SetVar[] SETS)
 
-.. _61_scstr_alldis:
+.. _51_scstr_alldis:
 
 all_disjoint
 ============
@@ -1737,7 +1770,7 @@ Note that there can be multiple empty sets.
     Constraint all_disjoint(SetVar[] SETS)
 
 
-.. _61_scstr_alleq:
+.. _51_scstr_alleq:
 
 all_equal
 =========
@@ -1749,7 +1782,7 @@ It ensures that sets in `SETS` are all equal.
 
     Constraint all_equal(SetVar[] SETS)
 
-.. _61_scstr_bcha:
+.. _51_scstr_bcha:
 
 bool_channel
 ============
@@ -1766,7 +1799,7 @@ It channels `BOOLEANS` and `SET` such that : `i` :math:`\in` SET :math:`\Leftrig
 
     Constraint bool_channel(BoolVar[] BOOLEANS, SetVar SET, int OFFSET)
 
-.. _61_scstr_card:
+.. _51_scstr_card:
 
 cardinality
 ===========
@@ -1782,7 +1815,7 @@ The API is : ::
 
     Constraint cardinality(SetVar SET, IntVar CARD)
 
-.. _61_scstr_dis:
+.. _51_scstr_dis:
 
 disjoint
 ========
@@ -1795,7 +1828,7 @@ Note that they can be both empty.
 
     Constraint disjoint(SetVar SET_1, SetVar SET_2)
 
-.. _61_scstr_elm:
+.. _51_scstr_elm:
 
 element
 =======
@@ -1813,7 +1846,7 @@ It ensures that `SETS[INDEX-OFFSET] = SET`.
 
     Constraint element(IntVar INDEX, SetVar[] SETS, int OFFSET, SetVar SET)
 
-.. _61_scstr_icha:
+.. _51_scstr_icha:
 
 int_channel
 ===========
@@ -1831,7 +1864,7 @@ The API is : ::
     Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2)
 
 
-.. _61_scstr_int:
+.. _51_scstr_int:
 
 intersection
 ============
@@ -1847,7 +1880,7 @@ The API is : ::
 
     Constraint intersection(SetVar[] SETS, SetVar INTERSECTION)
 
-.. _61_scstr_inv:
+.. _51_scstr_inv:
 
 inverse_set
 ===========
@@ -1864,7 +1897,7 @@ It ensures that `x :math:`\in` `SETS[y-OFFSET_1]` :math:`\Leftrightarrow` y :mat
 
     Constraint inverse_set(SetVar[] SETS, SetVar[] INVERSE_SETS, int OFFSET_1, int OFFSET_2)
 
-.. _61_scstr_max:
+.. _51_scstr_max:
 
 max
 ===
@@ -1896,7 +1929,7 @@ The boolean `NOT_EMPTY` set to `true` states that `INDEXES` cannot be empty.
     Constraint max(SetVar SET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY)
     Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY)
 
-.. _61_scstr_mem:
+.. _51_scstr_mem:
 
 member
 ======
@@ -1922,7 +1955,7 @@ The `member` constraint involves:
         Constraint member(SetVar[] SETS, SetVar SET)
         Constraint member(IntVar INTEGER, SetVar SET)
 
-.. _61_scstr_min:
+.. _51_scstr_min:
 
 min
 ===
@@ -1955,7 +1988,7 @@ The boolean `NOT_EMPTY` set to `true` states that `INDEXES` cannot be empty.
     Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY)
 
 
-.. _61_scstr_nbe:
+.. _51_scstr_nbe:
 
 nbEmpty
 =======
@@ -1971,7 +2004,7 @@ It restricts the number of empty sets in `SETS` to be equal `NB_EMPTY_SET`.
 
     Constraint nbEmpty(SetVar[] SETS, IntVar NB_EMPTY_SETS)
 
-.. _61_scstr_note:
+.. _51_scstr_note:
 
 notEmpty
 ========
@@ -1985,7 +2018,7 @@ It prevents `SET` to be empty.
     Constraint notEmpty(SetVar SET)
 
 
-.. _61_scstr_off:
+.. _51_scstr_off:
 
 offSet
 ======
@@ -2002,7 +2035,7 @@ It ensures that to any value `x` in `SET_1`, the value `x+OFFSET` is in `SET_2` 
     Constraint offSet(SetVar SET_1, SetVar SET_2, int OFFSET)
 
 
-.. _61_scstr_part:
+.. _51_scstr_part:
 
 partition
 =========
@@ -2018,7 +2051,7 @@ It ensures that `UNVIVERSE` is partitioned in disjoint sets `SETS`.
 
     Constraint partition(SetVar[] SETS, SetVar UNIVERSE)
 
-.. _61_scstr_sse:
+.. _51_scstr_sse:
 
 subsetEq
 ========
@@ -2030,7 +2063,7 @@ The API is : ::
 
     Constraint subsetEq(SetVar[] SETS)
 
-.. _61_scstr_sum:
+.. _51_scstr_sum:
 
 sum
 ===
@@ -2050,7 +2083,7 @@ The boolean `NOT_EMPTY` set to `true` states that `INDEXES` cannot be empty.
 
     Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM, boolean NOT_EMPTY)
 
-.. _61_scstr_sym:
+.. _51_scstr_sym:
 
 symmetric
 =========
@@ -2066,7 +2099,7 @@ It ensures that: `x` :math:`\in`  `SETS[y-OFFSET]` :math:`\Leftrightarrow` `y` :
 
     Constraint symmetric(SetVar[] SETS, int OFFSET)
 
-.. _61_scstr_uni:
+.. _51_scstr_uni:
 
 union
 =====
@@ -2083,59 +2116,85 @@ The API is : ::
     Constraint union(SetVar[] SETS, SetVar UNION)
 
 
-.. _61_rcstr_main:
+.. _51_rcstr_main:
 
 *******************************
 Constraints over real variables
 *******************************
 
+Real constraints are managed externally with :ref:`47_ibex`.
+Due to the limited number of declaration possibilities, there is no factory for real constraints.
+Indeed, posting a ``RealConstraint`` is enough.
 
-.. _61_lcstr_main:
+The available constructors are: ::
+
+    RealConstraint(String name, String functions, int option, RealVar... rvars)
+    RealConstraint(String name, String functions, RealVar... rvars)
+    RealConstraint(String functions, RealVar... rvars)
+
+- ``name`` enables to set a name to the constraint.
+- ``functions`` is a ``String`` which defines the list of functions to hold, separated with semi-colon ";".
+A function is a declared using the following format:
+	 + the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables ``rvars``,
+	 + one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+A complete list is available in the documentation of IBEX.
+- ``rvars`` is the list of involved real variables.
+- ``option`` is enable to state the propagation option (default is ``Ibex.COMPO``).
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/RealConstraintExamples.java
+          :language: java
+          :lines: 48-57,59
+          :emphasize-lines: 57
+          :linenos:
+
+
+
+.. _51_lcstr_main:
 
 *******************
 Logical constraints
 *******************
 
-.. _61_lcstr_and:
+.. _51_lcstr_and:
 
 and
 ===
 
-.. _61_lcstr_it:
+.. _51_lcstr_it:
 
 ifThen
 ======
 
-.. _61_lcstr_ite:
+.. _51_lcstr_ite:
 
 ifThenElse
 ==========
 
-.. _61_lcstr_not:
+.. _51_lcstr_not:
 
 not
 ===
 
-.. _61_lcstr_or:
+.. _51_lcstr_or:
 
 or
 ==
 
-.. _61_lcstr_rei:
+.. _51_lcstr_rei:
 
 reification
 ===========
 
 
-.. _61_satsolver:
+.. _51_satsolver:
 
 **********
 Sat solver
 **********
 
-
-A SAT solver is embedded in Choco. It should not be acessed directly but clauses can be added using the ``solver.constraints.SatFactory``.
-The SAT solver is considered as a constraint which receives and generates events on boolean variables, that's why it is referred as SAT constraint in the following.
+.. _51_lcstr_atmostnminusone:
 
 addAtMostNMinusOne
 ==================
@@ -2150,7 +2209,7 @@ Add a clause to the SAT constraint whic states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 48-50,52
           :emphasize-lines: 50
@@ -2164,7 +2223,7 @@ Add a clause to the SAT constraint whic states that:
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 1`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 0`
 
-
+.. _51_lcstr_atmostone:
 
 addAtMostOne
 ============
@@ -2179,7 +2238,7 @@ Add a clause to the SAT constraint whic states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 57-59,61
           :emphasize-lines: 59
@@ -2193,6 +2252,7 @@ Add a clause to the SAT constraint whic states that:
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 1`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 0`
 
+.. _51_lcstr_andarrayequalfalse:
 
 addBoolAndArrayEqualFalse
 =========================
@@ -2206,7 +2266,7 @@ Add a clause to the SAT constraint whic states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 66-68,70
           :emphasize-lines: 68
@@ -2220,6 +2280,8 @@ Add a clause to the SAT constraint whic states that:
         - `BS[0] = 0, BS[1] = 1, BS[2] = 0, BS[3] = 1`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 0`
 
+.. _51_lcstr_andarrayeqvar:
+
 addBoolAndArrayEqVar
 ====================
 
@@ -2232,7 +2294,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 179-182,184
           :emphasize-lines: 182
@@ -2244,6 +2306,8 @@ Add a clause to the SAT constraint which states that:
         - `BS[0] = 1, BS[1] = 1, BS[2] = 0, BS[3] = 1, T = 0`
         - `BS[0] = 0, BS[1] = 1, BS[2] = 0, BS[3] = 0, T = 0`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 0, T = 0`
+
+.. _51_lcstr_andeqvar:
 
 addBoolAndEqVar
 ===============
@@ -2257,7 +2321,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 84-88,90
           :emphasize-lines: 88
@@ -2270,6 +2334,8 @@ Add a clause to the SAT constraint which states that:
         - `L = 0, R = 1, T = 0`
         - `L = 0, R = 0, T = 0`
 
+.. _51_lcstr_booleq:
+
 addBoolEq
 =========
 
@@ -2281,7 +2347,7 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 95-98,100
           :emphasize-lines: 98
@@ -2291,6 +2357,8 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
         - `L = 1, R = 1`
         - `L = 0, R = 0`
+
+.. _51_lcstr_booliseqvar:
 
 addBoolIsEqVar
 ==============
@@ -2304,7 +2372,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 105-109,111
           :emphasize-lines: 109
@@ -2316,6 +2384,9 @@ Add a clause to the SAT constraint which states that:
         - `L = 1, R = 0, T = 0`
         - `L = 0, R = 1, T = 0`
         - `L = 0, R = 0, T = 1`
+
+
+.. _51_lcstr_boolislevar:
 
 addBoolIsLeVar
 ==============
@@ -2330,7 +2401,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 116-120,122
           :emphasize-lines: 120
@@ -2342,6 +2413,8 @@ Add a clause to the SAT constraint which states that:
         - `L = 1, R = 0, T = 0`
         - `L = 0, R = 1, T = 1`
         - `L = 0, R = 0, T = 1`
+
+.. _51_lcstr_boolisltvar:
 
 addBoolIsLtVar
 ==============
@@ -2355,7 +2428,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 127-131,133
           :emphasize-lines: 131
@@ -2367,6 +2440,8 @@ Add a clause to the SAT constraint which states that:
         - `L = 1, R = 0, T = 0`
         - `L = 0, R = 1, T = 1`
         - `L = 0, R = 0, T = 0`
+
+.. _51_lcstr_boolisneqvar:
 
 addBoolIsNeqVar
 ===============
@@ -2380,7 +2455,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 138-142,144
           :emphasize-lines: 142
@@ -2393,6 +2468,9 @@ Add a clause to the SAT constraint which states that:
         - `L = 0, R = 1, T = 1`
         - `L = 0, R = 0, T = 0`
 
+
+.. _51_lcstr_boolle:
+
 addBoolLe
 =========
 
@@ -2404,7 +2482,7 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 149-152,154
           :emphasize-lines: 152
@@ -2415,6 +2493,8 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
         - `L = 1, R = 1`
         - `L = 0, R = 1`
         - `L = 0, R = 0`
+
+.. _51_lcstr_boollt:
 
 addBoolLt
 =========
@@ -2427,7 +2507,7 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 159-162,164
           :emphasize-lines: 162
@@ -2436,6 +2516,8 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
     The solutions of the problem are :
 
         - `L = 0, R = 1`
+
+.. _51_lcstr_boolnot:
 
 addBoolNot
 ==========
@@ -2448,7 +2530,7 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 149-152,154
           :emphasize-lines: 152
@@ -2458,6 +2540,8 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
         - `L = 1, R = 0`
         - `L = 0, R = 1`
+
+.. _51_lcstr_orarrayqualtrue:
 
 addBoolOrArrayEqualTrue
 =======================
@@ -2471,7 +2555,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 75-77,79
           :emphasize-lines: 77
@@ -2485,6 +2569,8 @@ Add a clause to the SAT constraint which states that:
         - `BS[0] = 0, BS[1] = 1, BS[2] = 0, BS[3] = 0`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 1`
 
+.. _51_lcstr_orarrayeqvar:
+
 addBoolOrArrayEqVar
 ===================
 
@@ -2497,7 +2583,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 189-192,194
           :emphasize-lines: 192
@@ -2509,6 +2595,8 @@ Add a clause to the SAT constraint which states that:
         - `BS[0] = 1, BS[1] = 1, BS[2] = 0, BS[3] = 1, T = 1`
         - `BS[0] = 0, BS[1] = 1, BS[2] = 0, BS[3] = 0, T = 1`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, BS[3] = 0, T = 0`
+
+.. _51_lcstr_oreqvar:
 
 addBoolOrEqVar
 ==============
@@ -2523,7 +2611,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 199-203,205
           :emphasize-lines: 203
@@ -2535,6 +2623,8 @@ Add a clause to the SAT constraint which states that:
         - `L = 1, R = 0, T = 1`
         - `L = 0, R = 1, T = 1`
         - `L = 0, R = 0, T = 0`
+
+.. _51_lcstr_xoreqvar:
 
 addBoolXorEqVar
 ===============
@@ -2548,7 +2638,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 210-214,216
           :emphasize-lines: 214
@@ -2560,6 +2650,8 @@ Add a clause to the SAT constraint which states that:
         - `L = 1, R = 0, T = 1`
         - `L = 0, R = 1, T = 1`
         - `L = 0, R = 0, T = 0`
+
+.. _51_lcstr_clauses:
 
 addClauses
 ==========
@@ -2588,7 +2680,7 @@ the second array declares negative boolean variables, those who should not be sa
 
 .. admonition:: Example 1
 
-            .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+            .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
                   :language: java
                   :lines: 221-228,230
                   :emphasize-lines: 226-228
@@ -2603,7 +2695,7 @@ the second array declares negative boolean variables, those who should not be sa
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 235-240,242
           :emphasize-lines: 240
@@ -2616,6 +2708,8 @@ the second array declares negative boolean variables, those who should not be sa
         - `P1 = 1, P2 = 0, P3 = 1, N = 0`
         - `P1 = 0, P2 = 0, P3 = 1, N = 1`
 
+.. _51_lcstr_false:
+
 addFalse
 ========
 
@@ -2627,7 +2721,7 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 247-249,251
           :emphasize-lines: 249
@@ -2636,6 +2730,8 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
     The solution of the problem is :
 
         - `B = 0`
+
+.. _51_lcstr_maxboolarraylesseqvar:
 
 addMaxBoolArrayLessEqVar
 ========================
@@ -2650,7 +2746,7 @@ maximum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 256-259,261
           :emphasize-lines: 259
@@ -2663,6 +2759,8 @@ maximum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
         - `BS[0] = 0, BS[1] = 1, BS[2] = 1, T = 1`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, T = 0`
 
+
+.. _51_lcstr_sumboolarraygreatereqvar:
 
 addSumBoolArrayGreaterEqVar
 ===========================
@@ -2677,7 +2775,7 @@ sum(`BOOLVARS`:math:`_i`) :math:`\geq` `TARGET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 266-269,271
           :emphasize-lines: 269
@@ -2690,9 +2788,10 @@ sum(`BOOLVARS`:math:`_i`) :math:`\geq` `TARGET`.
         - `BS[0] = 0, BS[1] = 1, BS[2] = 1, T = 1`
         - `BS[0] = 0, BS[1] = 0, BS[2] = 0, T = 0`
 
+.. _51_lcstr_sumboolarraylesseqvar:
 
-addSumBoolArrayLessEqKVar
-=========================
+addSumBoolArrayLessEqVar
+========================
 
 Add a clause to the SAT constraint which states that:
 sum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
@@ -2700,11 +2799,11 @@ sum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
 
 **API**: ::
 
-    boolean addSumBoolArrayLessEqKVar(BoolVar[] BOOLVARS, BoolVar TARGET)
+    boolean addSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET)
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 276-279,281
           :emphasize-lines: 279
@@ -2717,6 +2816,8 @@ sum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
         - `BS[0] = 0 BS[1] = 1 BS[2] = 1 T = 1`
         - `BS[0] = 0 BS[1] = 0 BS[2] = 0 T = 1`
 
+.. _51_lcstr_true:
+
 addTrue
 =======
 
@@ -2728,7 +2829,7 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-solver/src/test/java/doc/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
           :language: java
           :lines: 286-288,290
           :emphasize-lines: 288
@@ -2738,7 +2839,7 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
         - `B = 1`
 
-.. _61_searches:
+.. _51_searches:
 
 ********
 Searches

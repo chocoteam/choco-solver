@@ -615,8 +615,8 @@ public class IntConstraintExamples {
     @Test(groups = "1s")
     public void testbit_channeling() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VF.boolArray("BVARS", 8, solver);
-        IntVar VAR = VF.enumerated("VAR", 0, 255, solver);
+        BoolVar[] BVARS = VF.boolArray("BVARS", 4, solver);
+        IntVar VAR = VF.enumerated("VAR", 0, 15, solver);
         solver.post(ICF.bit_channeling(BVARS, VAR));
         SMF.log(solver, true, false);
         solver.findAllSolutions();
