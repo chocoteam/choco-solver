@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package doc;
+package docs;
 
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -41,7 +41,7 @@ import solver.variables.Task;
 import solver.variables.VF;
 
 /**
- * <br/>
+ * BEWARE: 5_elements.rst SHOULD BE UPDATED ANYTIME THIS CLASS IS CHANGED
  *
  * @author Charles Prud'homme
  * @version choco
@@ -199,7 +199,7 @@ public class IntConstraintExamples {
         IntVar MIN = VF.enumerated("MIN", 1, 3, solver);
         IntVar Y = VF.enumerated("Y", -1, 1, solver);
         IntVar Z = VF.enumerated("Z", 2, 3, solver);
-        solver.post(ICF.maximum(MIN, Y, Z));
+        solver.post(ICF.minimum(MIN, Y, Z));
         SMF.log(solver, true, false);
         solver.findAllSolutions();
     }
@@ -606,8 +606,18 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
         IntVar CO = VF.enumerated("CO", 0, 15, solver);
-        int[][] costs = new int[][]{{0,1,3,7},{1,0,1,3},{3,1,0,1},{7,3,1,0}};
+        int[][] costs = new int[][]{{0, 1, 3, 7}, {1, 0, 1, 3}, {3, 1, 0, 1}, {7, 3, 1, 0}};
         solver.post(ICF.tsp(VS, CO, costs));
+        SMF.log(solver, true, false);
+        solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testbit_channeling() {
+        Solver solver = new Solver();
+        BoolVar[] BVARS = VF.boolArray("BVARS", 8, solver);
+        IntVar VAR = VF.enumerated("VAR", 0, 255, solver);
+        solver.post(ICF.bit_channeling(BVARS, VAR));
         SMF.log(solver, true, false);
         solver.findAllSolutions();
     }
