@@ -113,3 +113,4 @@ NEXT MILESTONE
 - EXTRACT GRAPH VAR MODULE to choco-graph project (https://github.com/chocoteam/choco-graph)
 - Fix bug in CoupleTable due to wrong range use
 - Issue #191: disable buildFakeHistory by default (add a condition to build fake history)
+- Space are not filtered anymore from Operator

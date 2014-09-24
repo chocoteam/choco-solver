@@ -59,7 +59,7 @@ public enum Operator {
     }
 
 	public static Operator get(String name) {
-		return operators.get(name.replaceAll("\\s+",""));
+        return operators.get(name);
 	}
 
 	@Override
