@@ -115,3 +115,4 @@ NEXT MILESTONE
 - Issue #191: disable buildFakeHistory by default (add a condition to build fake history)
 - Space are not filtered anymore from Operator
 - Remove vars.clone() in Propagator constructor.
+- Remove DSLEngine and dependencies

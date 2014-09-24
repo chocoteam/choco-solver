@@ -63,16 +63,6 @@ public enum PropagationEngineFactory {
         }
     },
 
-    /**
-     * Create a DSL driven propagation engine.
-     */
-    DSLDRIVEN() {
-        @Override
-        public IPropagationEngine make(Solver solver) {
-            return new DSLEngine(solver);
-        }
-    },
-
     DEFAULT() {
         @Override
         public IPropagationEngine make(Solver solver) {

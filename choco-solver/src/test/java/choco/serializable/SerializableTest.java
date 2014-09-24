@@ -32,8 +32,9 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.propagation.DSLEngine;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -96,8 +97,29 @@ public class SerializableTest {
     }
 
     @Test(groups = {"1s"})
-    public void testEngine() {
-        IPropagationEngine eng = new DSLEngine(new Solver());
+    public void testEngine1() {
+        IPropagationEngine eng = new TwoBucketPropagationEngine(new Solver());
+        File file = null;
+        try {
+            file = write(eng);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        eng = null;
+        Assert.assertNull(eng);
+        try {
+            eng = (IPropagationEngine) read(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(eng);
+    }
+
+    @Test(groups = {"1s"})
+    public void testEngine2() {
+        IPropagationEngine eng = new SevenQueuesPropagatorEngine(new Solver());
         File file = null;
         try {
             file = write(eng);
