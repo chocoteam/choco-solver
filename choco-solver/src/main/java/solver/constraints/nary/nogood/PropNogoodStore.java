@@ -36,10 +36,10 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.propagation.queues.CircularQueue;
 import solver.variables.IntVar;
 import solver.variables.events.IntEventType;
 import util.ESat;
+import util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
 import java.util.List;

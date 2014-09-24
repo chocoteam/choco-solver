@@ -35,12 +35,12 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
-import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.strategy.decision.Decision;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.objects.queues.CircularQueue;
 
 /**
  * Created by IntelliJ IDEA.

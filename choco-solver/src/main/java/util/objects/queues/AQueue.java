@@ -24,27 +24,36 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.queues;
+
+package util.objects.queues;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/04/12
+ * @since 10/03/11
  */
-public interface IHeap {
-
-    void insert(int key, int elem);
-
-    void update(int new_value, int elem);
-
-    int removemin();
-
-    int remove(int elem);
+public interface AQueue<E> {
 
     boolean isEmpty();
 
     int size();
 
+    E get(int index);
 
+    boolean addFirst(E e);
+
+    boolean addLast(E e);
+
+    E pollFirst();
+
+    E pollLast();
+
+    E remove(int index);
+
+    boolean remove(E e);
+
+    int indexOf(E e);
+
+    void clear();
 }

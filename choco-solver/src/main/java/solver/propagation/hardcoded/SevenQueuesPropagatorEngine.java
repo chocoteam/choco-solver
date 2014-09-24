@@ -37,11 +37,11 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.hardcoded.util.MId2AbId;
-import solver.propagation.queues.CircularQueue;
 import solver.variables.Variable;
 import solver.variables.events.IEventType;
 import solver.variables.events.PropagatorEventType;
 import util.objects.IntCircularQueue;
+import util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
 import java.util.List;
