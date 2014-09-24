@@ -47,6 +47,10 @@ public abstract class AbstractEnvironment implements IEnvironment {
 
     private static final int SIZE = 128;
 
+    private ICondition condition = ICondition.FALSE;
+
+    private boolean buildFakeHistory = false;
+
     /**
      * Shared BitSet
      */
@@ -103,5 +107,15 @@ public abstract class AbstractEnvironment implements IEnvironment {
             createSharedBipartiteSet(SIZE);
         }
         return booleanSet;
+    }
+
+    @Override
+    public boolean fakeHistoryNeeded() {
+        return condition.satisfied();
+    }
+
+    @Override
+    public void buildFakeHistoryOn(ICondition condition) {
+        this.condition = condition;
     }
 }

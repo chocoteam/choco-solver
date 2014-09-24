@@ -45,7 +45,7 @@ public class RcDouble extends IStateDouble {
     public RcDouble(EnvironmentCopying env, double i) {
         super(env, i);
         env.getDoubleCopy().add(this);
-        if (timeStamp > 0) {
+        if (env.fakeHistoryNeeded()) {
             env.getDoubleCopy().buildFakeHistory(this, i, timeStamp);
         }
     }

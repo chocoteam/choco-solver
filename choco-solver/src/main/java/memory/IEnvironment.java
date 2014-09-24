@@ -68,6 +68,16 @@ public interface IEnvironment extends Serializable {
      */
     void worldCommit();
 
+    /**
+     * Force to build fake history when a stored object on a particular condition.
+     * The default condition is {@link ICondition#FALSE}.
+     */
+    void buildFakeHistoryOn(ICondition condition);
+
+    /**
+     * @return true if building fake history is needed (the condition is satisfied).
+     */
+    boolean fakeHistoryNeeded();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
