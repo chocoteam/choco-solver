@@ -64,7 +64,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropEqualX_YC(IntVar[] vars, int c) {
-        super(vars.clone(), PropagatorPriority.BINARY, true);
+        super(vars, PropagatorPriority.BINARY, true);
         this.x = vars[0];
         this.y = vars[1];
         this.cste = c;

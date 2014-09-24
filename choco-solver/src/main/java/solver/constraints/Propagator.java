@@ -126,6 +126,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Creates a new propagator to filter the domains of vars.
+     * <p/>
+     * <br/>
+     * To limit memory consumption, the array of variables is <b>referenced directly</b> (no clone).
+     * This is the responsibility of the propagator's developer to take care of that point.
      *
      * @param vars           variables of the propagator. Their modification will trigger filtering
      * @param priority       priority of this propagator (lowest priority propagators are called first)
@@ -139,7 +143,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.state = NEW;
         this.priority = priority;
         this.aCause = this;
-        this.vars = vars.clone();
+        // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
+        // This is the responsibility of the propagator's developer to take care of that point.
+        this.vars = vars;
         this.vindices = new int[vars.length];
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
@@ -587,7 +593,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param solver      the target solver
      * @param identitymap a map to ensure uniqueness of objects
      */
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap){
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
     }
 }
