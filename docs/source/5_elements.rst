@@ -2839,8 +2839,471 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
         - `B = 1`
 
-.. _51_searches:
+.. _51_svarsel:
 
-********
-Searches
-********
+******************
+Variable selectors
+******************
+
+lexico_var_selector
+===================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    VariableSelector<IntVar> lexico_var_selector()
+
+random_var_selector
+===================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    VariableSelector<IntVar> random_var_selector(long SEED)
+
+minDomainSize_var_selector
+==========================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    VariableSelector<IntVar> minDomainSize_var_selector()
+
+maxDomainSize_var_selector
+==========================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    VariableSelector<IntVar> maxDomainSize_var_selector()
+
+maxRegret_var_selector
+======================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    VariableSelector<IntVar> maxRegret_var_selector()
+
+.. _51_svalsel:
+
+***************
+Value selectors
+***************
+
+min_value_selector
+==================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntValueSelector min_value_selector()
+
+mid_value_selector
+==================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntValueSelector mid_value_selector()
+
+max_value_selector
+==================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntValueSelector max_value_selector()
+
+randomBound_value_selector
+==========================
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntValueSelector randomBound_value_selector(long SEED)
+
+random_value_selector
+=====================
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntValueSelector random_value_selector(long SEED)
+
+
+.. _51_sdecop:
+
+******************
+Decision operators
+******************
+
+assign
+======
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    DecisionOperator<IntVar> assign()
+
+remove
+======
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    DecisionOperator<IntVar> remove()
+
+split
+=====
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    DecisionOperator<IntVar> split()
+
+reverse_split
+=============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    DecisionOperator<IntVar> reverse_split()
+
+
+
+.. _51_sstrat:
+
+*******************
+Built-in strategies
+*******************
+
+custom
+======
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
+                                                   IntValueSelector VAL_SELECTOR,
+                                                   DecisionOperator<IntVar> DEC_OPERATOR,
+                                                   IntVar... VARS)
+
+    IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
+                                                  IntValueSelector VAL_SELECTOR,
+                                                  IntVar... VARS)
+
+    SetStrategy custom(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst,
+                       SetVar... sets)
+
+
+force_first
+===========
+
+**Scope**: ``SetVar``
+
+**Factory**: ``solver.search.strategy.SetStrategyFactory``
+
+**API**: ::
+
+    SetStrategy force_first(SetVar... sets)
+
+
+force_maxDelta_first
+====================
+
+**Scope**: ``SetVar``
+
+**Factory**: ``solver.search.strategy.SetStrategyFactory``
+
+**API**: ::
+
+    SetStrategy force_maxDelta_first(SetVar... sets)
+
+force_minDelta_first
+====================
+
+**Scope**: ``SetVar``
+
+**Factory**: ``solver.search.strategy.SetStrategyFactory``
+
+**API**: ::
+
+    SetStrategy force_minDelta_first(SetVar... sets)
+
+lexico_LB
+=========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy lexico_LB(IntVar... VARS)
+
+lexico_Neq_LB
+=============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy lexico_Neq_LB(IntVar... VARS)
+
+lexico_Split
+============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy lexico_Split(IntVar... VARS)
+
+lexico_UB
+=========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy lexico_UB(IntVar... VARS)
+
+minDom_LB
+=========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy minDom_LB(IntVar... VARS)
+
+minDom_MidValue
+===============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy minDom_MidValue(IntVar... VARS)
+
+maxDom_Split
+============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy maxDom_Split(IntVar... VARS)
+
+minDom_UB
+=========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy minDom_UB(IntVar... VARS)
+
+maxReg_LB
+=========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy maxReg_LB(IntVar... VARS)
+
+random_bound
+============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy random_bound(IntVar[] VARS, long SEED)
+
+random_bound
+============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy random_bound(IntVar[] VARS)
+
+random_value
+============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy random_value(IntVar[] VARS, long SEED)
+
+random_value
+============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy random_value(IntVar[] VARS)
+
+remove_first
+============
+
+**Scope**: ``SetVar``
+
+**Factory**: ``solver.search.strategy.SetStrategyFactory``
+
+**API**: ::
+
+    SetStrategy remove_first(SetVar... sets)
+
+
+sequencer
+=========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    AbstractStrategy sequencer(AbstractStrategy... strategies)
+
+domOverWDeg
+===========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED, IntValueSelector VAL_SELECTOR)
+    AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED)
+
+activity
+========
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
+                                                    double RESTART, int FORCE_SAMPLING, long SEED)
+    AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED)
+
+
+impact
+======
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    AbstractStrategy<IntVar> impact(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT,
+                                    long SEED, boolean INITONLY)
+    AbstractStrategy<IntVar> impact(IntVar[] VARS, long SEED)
+
+
+lastConflict
+============
+
+**Scope**: ``Variable``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    AbstractStrategy lastConflict(Solver SOLVER)
+    AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT)
+    AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT)
+
+generateAndTest
+===============
+
+**Scope**: ``IntVar``
+
+**Factory**: ``solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy,
+                                             int searchSpaceLimit)
+    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER)
+

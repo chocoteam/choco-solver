@@ -284,48 +284,41 @@ Decisions are computed and applied until all the variables are instantiated, tha
 
 .. note::
 
-    There are many ways to explore the search space and this steps should not be overlooked. Search strategies or heuristics have a strong impact on resolution performances.
+    There are many ways to explore the search space and this steps should not be overlooked.
+    Search strategies or heuristics have a strong impact on resolution performances.
+    Thus, it is strongly recommended to adapt the search space exploration to the problem treated.
 
 
-Default search strategies
--------------------------
+Zoom on IntStrategy
+-------------------
 
-If no search strategy is specified in the model, Choco |version| will generate a default one. In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
-The default search strategy distincts variables per types and defines a specific search strategy per each type:
+A search strategy ``IntStrategy`` is dedicated to ``IntVar`` only.
+It is based on a list of variables ``scope``, a selector of variable ``varSelector``, a value selector ``valSelector`` and an optional ``decOperator``.
 
-#. integer variables (but boolean variables: ``IntStrategyFactory.minDom_LB(ivars)``
-#. boolean variables: :code:`IntStrategyFactory.lexico_UB(bvars)`
-#. set variables: :code:`SetStrategyFactory.force_minDelta_first(svars)`
-#. real variables :code:`new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle())`
-
-Constants are excluded from search strategies' variable scope.
-
-``IntStrategyFactory``, ``SetStrategyFactory`` and ``GraphStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
-
-A search strategy
------------------
-
-It is strongly recommended to adapt the search space exploration to the problem treated.
-To do so, one can use built-in search strategies provided in ``IntSearchStrategy``, ``SetStrategyFactory`` and ``GraphStrategyFactory``.
-
-It is also possible to create an assignment strategy (over integer variables) by using : ::
-
-    IntSearchStrategy.custom(VAR_SELECTOR, VAL_SELECTOR, VARS)
-
-or: ::
-
-    IntSearchStrategy.custom(VAR_SELECTOR, VAL_SELECTOR, DEC_OPERATOR, VARS)
-
-In the first case, the ``DEC_OPERATOR`` is set to ``IntSearchStrategy.assign()``.
-Such methods required the declaraion of a :
-
-#. ``VAR_SELECTOR``:  a variable selector, defines how to select the next variable to branch on,
-#. ``VAL_SELECTOR``: a value selector, defines how to select a value in the domain of the selected variable,
-#. ``DEC_OPERATOR``: a decision operator, defines how to modify the domain of the selected variable with the selected value,
-#. ``VARS``: sets of variables to branch on.
+#. ``scope``: array of variables to branch on.
+#. ``varSelector``:  a variable selector, defines how to select the next variable to branch on.
+#. ``valSelector``: a value selector, defines how to select a value in the domain of the selected variable.
+#. ``decOperator``: a decision operator, defines how to modify the domain of the selected variable with the selected value.
 
 
-Some ``VariableSelector``, ``IntValueSelector`` and ``DecisionOperator`` are provided in ``IntSearchStrategy``.
+On a call to ``IntStrategy.getDecision()``, ``varSelector`` try to find, among ``scope``, a variable not yet instantiated.
+If such a variable does not exist, the method returns ``null``, saying that it can not compute decision anymore.
+Otherwise, ``valSelector`` selects a value, within the domain of the selected variable.
+A decision can then be computed with the selected variable and the selected value, and is returned to the caller.
+
+By default, the decision built is an assignment: its application leads to an instantiation, its refutation, to a value removal.
+It is possible create other types of decision by defining a decision operator ``DecisionOperator``.
+
+**API**
+
+    IntStrategyFactory.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
+                              DecisionOperator<IntVar> DEC_OPERATOR, IntVar... VARS)
+    IntStrategyFactory.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
+                              IntVar... VARS)
+
+    new IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector)
+    new IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector,
+    					   DecisionOperator<IntVar> decOperator)
 
 Sometimes, on a call to the variable selector, several variables could be selected.
 In that case, the order induced by ``VARS`` is used to break tie: the variable with the smallest index is selected.
@@ -343,16 +336,84 @@ domain size is the smallest, ties are randomly broken.
     Only variable selectors which implement ``VariableEvaluator`` can be used to break ties.
 
 
+Very similar operations are achieved in ``SetStrategy`` and ``RealStrategy``.
+
+Available variable selectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    For integer variables
+
+    For set variables
+
+    For real variables
+
+Available value selectors
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    For integer variables
+
+    For set variables
+
+    For real variables
+
+Available strategies
+^^^^^^^^^^^^^^^^^^^^
+
+    ``IntStrategyFactory``
+
+    ``SetStrategyFactory``
+
+
+.. important:: Black-box search strategies
+
+    There are many ways of choosing a variable and computing a decision on it.
+    Designing specific search strategies can be a very tough task to do.
+    The concept of `Black-box search heuristic` (or adaptive search strategy) has naturally emerged from this statement.
+    Most common black-box search strategies observe aspects of the CSP resolution in order to drive the variable selection, and eventually the decision computation (presumably, a value assignment).
+    Three main families of heuristic, stemming from the concepts of variable impact, conflict and variable activity, can be found in Choco|release|.
+
+
+
+Default search strategies
+-------------------------
+
+If no search strategy is specified in the model, Choco |version| will generate a default one. In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
+The default search strategy distincts variables per types and defines a specific search strategy per each type:
+
+#. integer variables (but boolean variables: ``IntStrategyFactory.minDom_LB(ivars)``
+#. boolean variables: :code:`IntStrategyFactory.lexico_UB(bvars)`
+#. set variables: :code:`SetStrategyFactory.force_minDelta_first(svars)`
+#. real variables :code:`new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle())`
+
+Constants are excluded from search strategies' variable scope.
+
+``IntStrategyFactory``, ``SetStrategyFactory`` and ``GraphStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
+
+Composition of strategies
+-------------------------
+
+Most of the time, it is necessary to combine various strategies.
+A ``StrategiesSequencer`` enables to compose various ``AbstractStrategy``.
+It is created on the basis of a list of ``AbstractStrategy``.
+The current active strategy is called to compute a decision through its ``getDecision()`` method.
+When no more decision can be computed for the current strategy, the following one becomes active.
+The intersection of variables from each strategy does not have to be empty.
+When a variable appears in various strategy, it is ignored as soon as it is instantiated.
+
+When no environment is given in parameter,
+the last active strategy is not stored, and strategies are evaluated in lexicographical order to find the first active one, based on its capacity to return a decision.
+
+When an environment is given in parameter, the last active strategy is stored.
+
+**API**
+
+    IntStrategyFactory.sequencer(AbstractStrategy... strategies)
+
+    new StrategiesSequencer(AbstractStrategy... strategies)
+    new StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies)
+
+
 Finally, one can create its own strategy, see :ref:`Defining its own search <45_define_search_label>` for more details.
-
-Black-box search strategies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-There are many ways of choosing a variable and computing a decision on it.
-Designing specific search strategies can be a very tough task to do.
-The concept of black-box search heuristic (or adaptive search strategy) has naturally emerged from this statement.
-Most common black-box search strategies observe aspects of the CSP resolution in order to drive the variable selection, and eventually the decision computation (presumably, a value assignment).
-Three main families of heuristic, stemming from the concepts of variable impact, conflict and variable activity, can be found in Choco|release|.
 
 
 Restarts

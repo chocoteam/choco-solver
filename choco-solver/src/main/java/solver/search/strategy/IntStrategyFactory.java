@@ -219,7 +219,7 @@ public class IntStrategyFactory {
      * @param VARS         variables to branch on
      * @return a custom search strategy
      */
-    public static AbstractStrategy<IntVar> custom(VariableSelector<IntVar> VAR_SELECTOR,
+    public static IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
                                                   IntValueSelector VAL_SELECTOR,
                                                   DecisionOperator<IntVar> DEC_OPERATOR,
                                                   IntVar... VARS) {
@@ -237,7 +237,7 @@ public class IntStrategyFactory {
      * @param VARS         variables to branch on
      * @return a custom search strategy
      */
-    public static AbstractStrategy<IntVar> custom(VariableSelector<IntVar> VAR_SELECTOR,
+    public static IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
                                                   IntValueSelector VAL_SELECTOR,
                                                   IntVar... VARS) {
         return custom(VAR_SELECTOR, VAL_SELECTOR, assign(), VARS);
@@ -253,7 +253,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return int strategy based on value assignments
      */
-    public static AbstractStrategy<IntVar> lexico_LB(IntVar... VARS) {
+    public static IntStrategy lexico_LB(IntVar... VARS) {
         return custom(lexico_var_selector(), min_value_selector(), VARS);
     }
 
@@ -263,7 +263,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return int strategy based on value removals
      */
-    public static AbstractStrategy<IntVar> lexico_Neq_LB(IntVar... VARS) {
+    public static IntStrategy lexico_Neq_LB(IntVar... VARS) {
         return custom(lexico_var_selector(), min_value_selector(), remove(), VARS);
     }
 
@@ -273,7 +273,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return int strategy based on domain splits
      */
-    public static AbstractStrategy<IntVar> lexico_Split(IntVar... VARS) {
+    public static IntStrategy lexico_Split(IntVar... VARS) {
         return custom(lexico_var_selector(), mid_value_selector(), split(), VARS);
     }
 
@@ -283,7 +283,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> lexico_UB(IntVar... VARS) {
+    public static IntStrategy lexico_UB(IntVar... VARS) {
         return custom(lexico_var_selector(), max_value_selector(), VARS);
     }
 
@@ -293,7 +293,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDom_LB(IntVar... VARS) {
+    public static IntStrategy minDom_LB(IntVar... VARS) {
         return custom(minDomainSize_var_selector(), min_value_selector(), VARS);
     }
 
@@ -303,7 +303,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDom_MidValue(IntVar... VARS) {
+    public static IntStrategy minDom_MidValue(IntVar... VARS) {
         return custom(minDomainSize_var_selector(), mid_value_selector(), VARS);
     }
 
@@ -313,7 +313,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return an int strategy based on domain splits
      */
-    public static AbstractStrategy<IntVar> maxDom_Split(IntVar... VARS) {
+    public static IntStrategy maxDom_Split(IntVar... VARS) {
         return custom(maxDomainSize_var_selector(), mid_value_selector(), split(), VARS);
     }
 
@@ -323,7 +323,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDom_UB(IntVar... VARS) {
+    public static IntStrategy minDom_UB(IntVar... VARS) {
         return custom(minDomainSize_var_selector(), max_value_selector(), VARS);
     }
 
@@ -333,7 +333,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> maxReg_LB(IntVar... VARS) {
+    public static IntStrategy maxReg_LB(IntVar... VARS) {
         return custom(maxRegret_var_selector(), min_value_selector(), VARS);
     }
 
@@ -345,7 +345,7 @@ public class IntStrategyFactory {
      * @param SEED a seed for random
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> random_bound(IntVar[] VARS, long SEED) {
+    public static IntStrategy random_bound(IntVar[] VARS, long SEED) {
         return custom(random_var_selector(SEED), randomBound_value_selector(SEED), VARS);
     }
 
@@ -357,7 +357,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> random_bound(IntVar[] VARS) {
+    public static IntStrategy random_bound(IntVar[] VARS) {
         return random_bound(VARS, 0);
     }
 
@@ -368,7 +368,7 @@ public class IntStrategyFactory {
      * @param SEED a seed for random
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> random_value(IntVar[] VARS, long SEED) {
+    public static IntStrategy random_value(IntVar[] VARS, long SEED) {
         return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
     }
 
@@ -379,7 +379,7 @@ public class IntStrategyFactory {
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> random_value(IntVar[] VARS) {
+    public static IntStrategy random_value(IntVar[] VARS) {
         return random_value(VARS, 0);
     }
 

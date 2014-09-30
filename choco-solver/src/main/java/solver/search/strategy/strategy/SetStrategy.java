@@ -42,7 +42,7 @@ import util.PoolManager;
  * @author Jean-Guillaume Fages
  * @since 6/10/13
  */
-public class SetSearchStrategy extends AbstractStrategy<SetVar> {
+public class SetStrategy extends AbstractStrategy<SetVar> {
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -65,7 +65,7 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
      * @param valS         integer  selection strategy
      * @param enforceFirst branching order true = enforce first; false = remove first
      */
-    public SetSearchStrategy(SetVar[] scope, VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst) {
+    public SetStrategy(SetVar[] scope, VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst) {
         super(scope);
         varSelector = varS;
         valSelector = valS;
