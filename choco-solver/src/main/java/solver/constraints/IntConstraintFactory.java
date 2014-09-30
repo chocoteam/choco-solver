@@ -72,7 +72,6 @@ import solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import solver.constraints.nary.nValue.PropAtMostNValues;
 import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
 import solver.constraints.nary.nValue.amnv.graph.Gci;
-import solver.constraints.nary.nValue.amnv.mis.MD;
 import solver.constraints.nary.nValue.amnv.mis.MDRk;
 import solver.constraints.nary.nValue.amnv.rules.R;
 import solver.constraints.nary.nValue.amnv.rules.R1;

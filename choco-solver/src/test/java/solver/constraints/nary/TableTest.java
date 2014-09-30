@@ -142,7 +142,6 @@ public class TableTest {
         tt.testAllDifferent();
     }
 
-<<<<<<< HEAD
     public static void test(String type) {
         Solver solver;
         IntVar[] vars;
@@ -191,7 +190,6 @@ public class TableTest {
         test("AC2001");
         test("FC");
     }
-=======
 	@Test(groups = "1s")
 	public static void testThierry() {
 		Solver solver = new Solver();
@@ -201,6 +199,5 @@ public class TableTest {
 		solver.post(ICF.table(vars, t, "GAC3rm"));
 		solver.findSolution();
 	}
->>>>>>> 3000a1803b785b561762b885bb22544491bdecb0
 
 }
