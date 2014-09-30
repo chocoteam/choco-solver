@@ -54,11 +54,20 @@ public class MDRk extends MD{
 	/**
 	 * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
 	 * @param graph
+	 * @param k number of random iterations
 	 */
 	public MDRk(UndirectedGraph graph, int k){
 		super(graph);
 		this.k=k;
 		this.rd = new Random(0);
+	}
+
+	/**
+	 * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
+	 * @param graph
+	 */
+	public MDRk(UndirectedGraph graph){
+		this(graph,Rk.DEFAULT_K);
 	}
 
 	//***********************************************************************************
