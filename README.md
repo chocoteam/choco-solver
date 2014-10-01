@@ -21,7 +21,7 @@ There are two ways to parse and solve a fzn file with Choco3:
   ```fzn_choco.sh [<options>] [<file>]```  
 
 Common options are:
-* ```-a``` : This causes the solver to search for, and output all solutions.When this option is not given the solver should search for, and output the first solution or the best known one.
+* ```-a``` : This causes the solver to search for, and output all solutions in case of satisfaction problems. For optimization problems, the solver search for an optimal solution and outputs all intermediate solutions. When this option is not given the solver should search for and output only the first solution (for satisfaction problems) or the best known one (for optimization problems).
 * ```-f```: When invoked with this option the solver ignores any specified search strategy.
 * ```-p <n>```: When invoked with this option the solver is free to use multiple threads and/or cores during search.  The argument <n> specifies the number of cores that are available. 
 * ```-tl <n>```: Limit the resolution time of each problem instance to <n> ms.
