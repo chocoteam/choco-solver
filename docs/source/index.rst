@@ -3,11 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. _index:
-
 .. warning::
   This is a work-in-progress documentation. If you have any questions, suggestions or requests, please send an email to choco@mines-nantes.fr.
 
+.. _index:
 
 .. toctree::
    :maxdepth: 4
@@ -18,7 +17,7 @@
    4_advanced
    5_elements
    6_extensions
-   glossary
-   faq
+..  glossary
+..  faq
 
 .. bibliography:: refs.bib

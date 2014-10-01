@@ -3,13 +3,31 @@ IGNORED
 #######
 
 #############
-Documentation
+Preliminaries
 #############
 
 
 *************
-Preliminaries
+Main concepts
 *************
+
+
+What is Constraint Programming?
+===============================
+
+
+Such a paradigm takes its features from various domains (Operational Research, Artificial Intelligence, etc).
+Constraint programming is now part of the portfolio of global solutions for processing real combinatorial problems.
+Actually, this technique provides tools to deal with a wide range of combinatorial problems.
+These tools are designed to allow non-specialists to address strategic as well as operational problems,
+which include problems in planning, scheduling, logistics, financial analysis or bio-informatics.
+Constraint programming differs from other methods of Operational Research by how it is implemented.
+Usually, the algorithms must be adapted to the specifications of the problem addressed.
+This is not the case in Constraint Programming where the problem addressed is described using the tools available in the library.
+The exercise consists in choosing carefully what constraints combine to properly express the problem,
+while taking advantage of the benefits they offer in terms of efficiency.
+
+`[wikipedia] <http://en.wikipedia.org/wiki/Constraint_programming>`_
 
 What is Choco ?
 ===============
@@ -17,11 +35,11 @@ What is Choco ?
 Choco is a Free and Open-Source Software [#f1]_ dedicated to Constraint Programming.
 It aims at describing real combinatorial problems in the form of Constraint Satisfaction Problems and to solve them with Constraint Programming techniques.
 
-Choco can be used for:
+Choco is used for:
 
 - teaching (a user-oriented constraint solver with open-source code)
 - research (state-of-the-art algorithms and techniques, user-defined constraints, domains and variables)
-- real-life applications (many application now embed CHOCO)
+- real-life applications (an efficient, reliable and free software with a support team)
 
 Choco is easy to manipulate, that’s why it is widely used for teaching. And Choco is also efficient, and we are proud to count industrial users too.
 
@@ -55,23 +73,15 @@ A support mailing list is also available: choco3-support@mines-nantes.fr.
 .. [#f2] A complete list of contributors can be found on the website of Choco, team page.
 
 
-By the way, what is Constraint Programming?
-===========================================
+How to cite Choco ?
+===================
+
+*TBD*
 
 
-Such a paradigm takes its features from various domains (Operational Research, Artificial Intelligence, etc).
-Constraint programming is now part of the portfolio of global solutions for processing real combinatorial problems.
-Actually, this technique provides tools to deal with a wide range of combinatorial problems.
-These tools are designed to allow non-specialists to address strategic as well as operational problems,
-which include problems in planning, scheduling, logistics, financial analysis or bio-informatics.
-Constraint programming differs from other methods of Operational Research by how it is implemented.
-Usually, the algorithms must be adapted to the specifications of the problem addressed.
-This is not the case in Constraint Programming where the problem addressed is described using the tools available in the library.
-The exercise consists in choosing carefully what constraints combine to properly express the problem,
-while taking advantage of the benefits they offer in terms of efficiency.
-
-`[wikipedia] <http://en.wikipedia.org/wiki/Constraint_programming>`_
-
+***************
+Getting started
+***************
 
 Installing Choco |version|
 ==========================
@@ -119,7 +129,7 @@ Then you can simply add the ``choco-solver`` jar file (and extension libraries) 
 Update the classpath
 --------------------
 
-Simply add the jar file to the classpath of your project (in cli or in your favorite IDE).
+Simply add the jar file to the classpath of your project (in a terminal or in your favorite IDE).
 
 .. parsed-literal::
 
@@ -208,8 +218,6 @@ To facilitate the modeling, Choco |version| provides factories for almost every 
 | ``IntStrategyFactory``       | ISF          | Custom or black-box search strategies     |
 +------------------------------+--------------+-------------------------------------------+
 | ``SetStrategyFactory``       | SSF          |                                           |
-+------------------------------+--------------+-------------------------------------------+
-| ``GraphStrategyFactory``     | GSF          |                                           |
 +------------------------------+--------------+-------------------------------------------+
 +------------------------------+--------------+-------------------------------------------+
 | ``SearchMonitorFactory``     | SMF          | log, resolution limits, restarts etc.     |

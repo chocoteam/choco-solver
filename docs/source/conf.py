@@ -210,7 +210,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'Choco3.tex', u'Choco3 Documentation',
-   u'Jean-Guillaume Fages, Xavier Lorca, Charles Prud\'homme', 'manual'),
+   u'Charles Prud\'homme, Jean-Guillaume Fages, Xavier Lorca', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -219,7 +219,7 @@ latex_logo = 'CHOCO_cmjn.jpg'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-latex_use_parts = True;
+latex_use_parts = True
 
 # If true, show page references after internal links.
 #latex_show_pagerefs = False
@@ -239,7 +239,7 @@ latex_use_parts = True;
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'choco3userguide', u'Choco3 Documentation',
-     [u'Jean-Guillaume Fages, Xavier Lorca, Charles Prud\'homme'], 1)
+     [u'Charles Prud\'homme, Jean-Guillaume Fages, Xavier Lorca'], 1)
 ]
 
 # If true, show URL addresses after external links.
