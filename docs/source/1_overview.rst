@@ -55,7 +55,8 @@ especially by Charles Prud'homme and Jean-Guillaume Fages [#f2]_.
 The latest version is Choco |version|.
 
 Choco |version| is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
-The current release, choco-solver-|release|, is hosted on `GitHub <https://github.com/chocoteam/choco3>`_.
+The source code of choco-solver-|release| is hosted on **GitHub** (`<https://github.com/chocoteam/choco3>`_).
+Complementary information can be found on the webiste of Choco: `<http://www.choco-solver.org>`_.
 Choco |version| comes with:
 
 - various type of variables (integer, boolean, set and real),
@@ -89,6 +90,22 @@ A reference to this manual, or more globally to Choco |version|, is made like th
       url           = {http://www.choco-solver.org },
     }
 
+Who contribute to Choco ?
+=========================
+
++------------------------------------+-----------------------------------------------------------------------------+
+|**Core developers**                 |  Charles Prud'homme and Jean-Guillaume Fages.                               |
++------------------------------------+-----------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------+
+|**Main contributors**               |  Xavier Lorca, Narendra Jussien, Fabien Hermenier, Jimmy Liang.             |
++------------------------------------+-----------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------+
+|**Previous versions contributors**  |  François Laburthe, Hadrien Cambazard, Guillaume Rochart, Arnaud Malapert,  |
+|                                    |  Sophie Demassey, Nicolas Beldiceanu, Julien Menana, Guillaume Richaud,     |
+|                                    |  Thierry Petit, Julien Vion, Stéphane Zampelli.                             |
++------------------------------------+-----------------------------------------------------------------------------+
+
+If you want to contribute, let us know.
 
 ***************
 Getting started
@@ -106,29 +123,23 @@ Which jar to select ?
 
 We provide a zip file which contains the following files:
 
-apidocs-|release|.zip
- Javadoc of Choco-|release|
-choco-solver-|release|.jar
- An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
-choco-solver-|release|-sources.jar
- The source of the core library.
-choco-samples-|release|-sources.jar
- The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
+- choco-solver-|release|.jar
+An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
+
+- choco-solver-|release|-sources.jar
+The source of the core library.
+
+- choco-samples-|release|-sources.jar
+The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
+
+- apidocs-|release|.zip
+Javadoc of Choco-|release|
+
+Extensions
+^^^^^^^^^^
 
 There are also official extensions, thus maintained by the Choco team. They are provided apart from the zip file.
-Each of the following extensions include dependencies but choco-solver classes, which ease their usage.
-The available extensions are:
-
-choco-parsers-|release|.jar
- This extension provides tools to parse modelling languages to Choco; it should be selected to work with MiniZinc and FlatZinc files.
-choco-gui-|release|.jar
- This extension provides a Graphical User Interface to interact and visualize the search process.
-choco-cpviz-|release|.jar
- This extension produces files required for the cpviz software.
-choco-geost-|release|.jar
- This extension provides support for the well-known Geost constraint, which is almost a solver by itself.
-choco-exppar-|release|.jar
- This extension provides an expression parser to ease modelling.
+The available extensions are: :ref:`61_ext_pars`, :ref:`61_ext_gui`, :ref:`61_ext_cpviz`, :ref:`61_ext_graph`, :ref:`61_ext_geost`, :ref:`61_ext_exppar`, :ref:`61_ext_eps`.
 
 .. note::
     Each of those extensions include all dependencies but choco-solver classes, which ease their usage.
@@ -145,8 +156,6 @@ Simply add the jar file to the classpath of your project (in a terminal or in yo
 .. parsed-literal::
 
    java -cp .:choco-solver-|release|.jar my.project.Main
-   java -cp .:choco-solver-|release|.jar:choco-parsers-|release|.jar my.other.project.Main
-
 
 
 As a Maven Dependency

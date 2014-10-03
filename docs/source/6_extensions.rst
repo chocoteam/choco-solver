@@ -8,6 +8,8 @@ Extensions of Choco
 IO extensions
 *************
 
+.. _61_ext_pars:
+
 choco-parsers
 =============
 
@@ -15,12 +17,16 @@ choco-parsers is an extension of Choco |version|. It provides a parser for the F
 This module follows the flatzinc standards that are used for the annual MiniZinc challenge. It only supports integer variables.
 You will find it at https://github.com/chocoteam/choco-parsers
 
+.. _61_ext_gui:
+
 choco-gui
 =========
 
 choco-gui is an extension of Choco |version|.
 It provides a Graphical User Interface with various views which can be simply plugged on any Choco Solver object.
 You will find it at https://github.com/chocoteam/choco-gui
+
+.. _61_ext_cpviz:
 
 choco-cpviz
 ===========
@@ -31,6 +37,8 @@ You will find it at https://github.com/chocoteam/choco-cpviz
 *******************
 Modeling extensions
 *******************
+
+.. _61_ext_graph:
 
 choco-graph
 ===========
@@ -46,6 +54,8 @@ These operations stem from both constraint propagation and search. The benefits 
 
 This extension has documentation. You will find it at https://github.com/chocoteam/choco-graph
 
+.. _61_ext_geost:
+
 choco-geost
 ===========
 
@@ -53,12 +63,15 @@ choco-geost is a Choco |version| module which provides the GEOST global constrai
 This constraint is designed for geometrical and packing applications (see http://www.emn.fr/z-info/sdemasse/gccat/Cgeost.html).
 You will find it at https://github.com/chocoteam/choco-geost
 
+.. _61_ext_exppar:
 
 choco-exppar
 ============
 
 choco-exppar is a Choco |version| module which provides an expression parser. This enables to simplify the modeling step.
 You will find it at https://github.com/chocoteam/choco-exppar
+
+.. _61_ext_eps:
 
 choco-eps
 =========

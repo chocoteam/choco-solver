@@ -558,7 +558,7 @@ will return false if the second option is used.
 
 .. admonition:: Going further
 
-    :ref:`Large Neighborhood Search <41_LNS_label>`, :ref:`Multi-threading <42_mutlithreads_label>`, :ref:`Explanations <43_explanations_label>`.
+    :ref:`Large Neighborhood Search <41_LNS_label>`, :ref:`Explanations <43_explanations_label>`.
 
 Logging
 =======
