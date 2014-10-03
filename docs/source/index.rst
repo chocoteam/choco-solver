@@ -20,4 +20,8 @@
 ..  glossary
 ..  faq
 
+##########
+References
+##########
+
 .. bibliography:: refs.bib
