@@ -2845,8 +2845,17 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 Variable selectors
 ******************
 
+.. important::
+
+    By default, in case of equalities, the variable with the smallest index in the input array is returned.
+    Otherwise, consider using a ``VariableSelectorWithTies`` (See :ref:`31_zoom`).
+
+.. _51_svarsel_lex:
+
 lexico_var_selector
 ===================
+
+A built-in variable selector which chooses the first non-instantiated integer variable to branch on, regarding the lexicographic order.
 
 **Scope**: ``IntVar``
 
@@ -2856,8 +2865,12 @@ lexico_var_selector
 
     VariableSelector<IntVar> lexico_var_selector()
 
+.. _51_svarsel_rnd:
+
 random_var_selector
 ===================
+
+A built-in variable selector which randomly chooses an integer variable, among non-instantiated ones, to branch on.
 
 **Scope**: ``IntVar``
 
@@ -2867,8 +2880,12 @@ random_var_selector
 
     VariableSelector<IntVar> random_var_selector(long SEED)
 
+.. _51_svarsel_mind:
+
 minDomainSize_var_selector
 ==========================
+
+A built-in variable selector which chooses the non-instantiated integer variable with the smallest domain to branch on.
 
 **Scope**: ``IntVar``
 
@@ -2878,8 +2895,12 @@ minDomainSize_var_selector
 
     VariableSelector<IntVar> minDomainSize_var_selector()
 
+.. _51_svarsel_maxd:
+
 maxDomainSize_var_selector
 ==========================
+
+A built-in variable selector which chooses the non-instantiated integer variable with the largest domain to branch on.
 
 **Scope**: ``IntVar``
 
@@ -2889,8 +2910,13 @@ maxDomainSize_var_selector
 
     VariableSelector<IntVar> maxDomainSize_var_selector()
 
+.. _51_svarsel_maxr:
+
 maxRegret_var_selector
 ======================
+
+
+A built-in variable selector which chooses the non-instantiated integer variable with the largest difference between the two smallest values in its domain to branch on .
 
 **Scope**: ``IntVar``
 
@@ -2906,8 +2932,12 @@ maxRegret_var_selector
 Value selectors
 ***************
 
+.. _51_svalsel_minv:
+
 min_value_selector
 ==================
+
+A built-in value selector which selects the variable lower bound.
 
 **Scope**: ``IntVar``
 
@@ -2917,8 +2947,20 @@ min_value_selector
 
     IntValueSelector min_value_selector()
 
+.. _51_svalsel_midv:
+
 mid_value_selector
 ==================
+
+A built-in value selector which selects the value in the variable domain closest to the mean of its current bounds.
+It computes the middle value of the domain. Then checks if the mean is contained in the domain.
+If not, the closest value to the middle is chosen.
+Rounding policy is floor. It could be override by creating a new instance of ``IntDomainMiddle`` with ``false`` as parameter.
+
+.. imoprtant::
+
+    `mid_value_selector` should not be used with assignment decisions over bounded variables (because the decision negation would result in no inference).
+
 
 **Scope**: ``IntVar``
 
@@ -2928,8 +2970,12 @@ mid_value_selector
 
     IntValueSelector mid_value_selector()
 
+.. _51_svalsel_maxv:
+
 max_value_selector
 ==================
+
+A built-in value selector which selects the variable upper bound.
 
 **Scope**: ``IntVar``
 
@@ -2939,8 +2985,13 @@ max_value_selector
 
     IntValueSelector max_value_selector()
 
+.. _51_svalsel_rndb:
+
 randomBound_value_selector
 ==========================
+
+A built-in value selector which randomly selects either the lower bound or the upper bound of the variable.
+
 **Scope**: ``IntVar``
 
 **Factory**: ``solver.search.strategy.IntStrategyFactory``
@@ -2949,8 +3000,17 @@ randomBound_value_selector
 
     IntValueSelector randomBound_value_selector(long SEED)
 
+.. _51_svalsel_rndv:
+
 random_value_selector
 =====================
+
+Selects randomly a value in the variable domain.
+
+.. imoprtant::
+
+    `random_value_selector` should not be used with assignment decisions over bounded variables (because the decision negation could result in no inference).
+
 
 **Scope**: ``IntVar``
 
@@ -2967,8 +3027,13 @@ random_value_selector
 Decision operators
 ******************
 
+.. _51_sdecop_ass:
+
 assign
 ======
+
+A built-in decision operator which assigns the selected variable to the selected value.
+Its negation is `remove`.
 
 **Scope**: ``IntVar``
 
@@ -2978,8 +3043,14 @@ assign
 
     DecisionOperator<IntVar> assign()
 
+.. _51_sdecop_rem:
+
 remove
 ======
+
+A built-in decision operator which removes the selected value from the selected variable domain.
+Its negation is `assign`.
+
 
 **Scope**: ``IntVar``
 
@@ -2989,8 +3060,14 @@ remove
 
     DecisionOperator<IntVar> remove()
 
+.. _51_sdecop_spl:
+
 split
 =====
+
+A built-in decision operator which splits the selected variable domain at the selected value, that is, it updates the upper bound of the variable to the selected value.
+Its negation is `reverse_split` on `value + 1`.
+
 
 **Scope**: ``IntVar``
 
@@ -3000,8 +3077,14 @@ split
 
     DecisionOperator<IntVar> split()
 
+.. _51_sdecop_rspl:
+
 reverse_split
 =============
+
+A built-in decision operator which splits the selected variable domain at the selected value, that is, it updates the lower bound of the variable to the selected value.
+Its negation is `split` on `value - 1`.
+
 
 **Scope**: ``IntVar``
 
@@ -3019,8 +3102,13 @@ reverse_split
 Built-in strategies
 *******************
 
+.. _51_sstrat_cus:
+
 custom
 ======
+
+To build a specific strategy based on ``IntVar`` or ``SetVar``.
+A strategy is based on a variable selector, a value selector and an optional decision operator.
 
 **Scope**: ``IntVar``
 
@@ -3040,9 +3128,12 @@ custom
     SetStrategy custom(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst,
                        SetVar... sets)
 
+.. _51_sstrat_lexfi:
 
 force_first
 ===========
+
+A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and forces its first smallest unfixed value to be part of the kernel.
 
 **Scope**: ``SetVar``
 
@@ -3052,9 +3143,12 @@ force_first
 
     SetStrategy force_first(SetVar... sets)
 
+.. _51_sstrat_maxdfi:
 
 force_maxDelta_first
 ====================
+
+A built-in strategy which chooses the first non-instantiated variable of maximum delta (envelope's cardinality minus kernel's cardinality) and forces its smallest unfixed value to be part of the kernel.
 
 **Scope**: ``SetVar``
 
@@ -3064,8 +3158,12 @@ force_maxDelta_first
 
     SetStrategy force_maxDelta_first(SetVar... sets)
 
+.. _51_sstrat_mindfi:
+
 force_minDelta_first
 ====================
+
+A built-in strategy which chooses the first non-instantiated variable of minimum delta (envelope's cardinality minus kernel's cardinality) and forces its smallest first unfixed value to be part of the kernel.
 
 **Scope**: ``SetVar``
 
@@ -3075,8 +3173,12 @@ force_minDelta_first
 
     SetStrategy force_minDelta_first(SetVar... sets)
 
+.. _51_sstrat_lexlb:
+
 lexico_LB
 =========
+
+A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and assigns it to its lower bound.
 
 **Scope**: ``IntVar``
 
@@ -3086,8 +3188,12 @@ lexico_LB
 
     IntStrategy lexico_LB(IntVar... VARS)
 
+.. _51_sstrat_lexnlb:
+
 lexico_Neq_LB
 =============
+
+A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and removes its lower bound from its domain.
 
 **Scope**: ``IntVar``
 
@@ -3097,8 +3203,12 @@ lexico_Neq_LB
 
     IntStrategy lexico_Neq_LB(IntVar... VARS)
 
+.. _51_sstrat_lexspl:
+
 lexico_Split
 ============
+
+A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and removes the second half of its domain.
 
 **Scope**: ``IntVar``
 
@@ -3108,8 +3218,12 @@ lexico_Split
 
     IntStrategy lexico_Split(IntVar... VARS)
 
+.. _51_sstrat_lexub:
+
 lexico_UB
 =========
+
+A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and assigns it to its upper bound.
 
 **Scope**: ``IntVar``
 
@@ -3119,8 +3233,12 @@ lexico_UB
 
     IntStrategy lexico_UB(IntVar... VARS)
 
+.. _51_sstrat_minlb:
+
 minDom_LB
 =========
+
+A built-in strategy which chooses the first non-instantiated variable with the smallest domain size, and assigns it to its lower bound.
 
 **Scope**: ``IntVar``
 
@@ -3130,8 +3248,12 @@ minDom_LB
 
     IntStrategy minDom_LB(IntVar... VARS)
 
+.. _51_sstrat_midlb:
+
 minDom_MidValue
 ===============
+
+A built-in strategy which chooses the first non-instantiated variable with the smallest domain size, and assigns it to the value closest to its middle of its domain.
 
 **Scope**: ``IntVar``
 
@@ -3141,8 +3263,12 @@ minDom_MidValue
 
     IntStrategy minDom_MidValue(IntVar... VARS)
 
+.. _51_sstrat_maxspl:
+
 maxDom_Split
 ============
+
+A built-in strategy which chooses the first non-instantiated variable with largest domain size, and removes the second half of its domain.
 
 **Scope**: ``IntVar``
 
@@ -3152,8 +3278,12 @@ maxDom_Split
 
     IntStrategy maxDom_Split(IntVar... VARS)
 
+.. _51_sstrat_minub:
+
 minDom_UB
 =========
+
+A built-in strategy which chooses the first non-instantiated variable with the smallest domain size, and assigns it to its upper bound.
 
 **Scope**: ``IntVar``
 
@@ -3163,8 +3293,12 @@ minDom_UB
 
     IntStrategy minDom_UB(IntVar... VARS)
 
+.. _51_sstrat_maxrlb:
+
 maxReg_LB
 =========
+
+A built-in strategy which chooses the first non-instantiated variable with the largest difference between the two smallest values of its domain, and assigns it to its lower bound.
 
 **Scope**: ``IntVar``
 
@@ -3174,19 +3308,12 @@ maxReg_LB
 
     IntStrategy maxReg_LB(IntVar... VARS)
 
-random_bound
-============
-
-**Scope**: ``IntVar``
-
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
-
-**API**: ::
-
-    IntStrategy random_bound(IntVar[] VARS, long SEED)
+.. _51_sstrat_rndb:
 
 random_bound
 ============
+
+A built-in strategy which randomly chooses a non-instantiated variable, and assigns it to one of its bounds, randomly selected.
 
 **Scope**: ``IntVar``
 
@@ -3195,20 +3322,14 @@ random_bound
 **API**: ::
 
     IntStrategy random_bound(IntVar[] VARS)
+    IntStrategy random_bound(IntVar[] VARS, long SEED)
+
+.. _51_sstrat_rndv:
 
 random_value
 ============
 
-**Scope**: ``IntVar``
-
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
-
-**API**: ::
-
-    IntStrategy random_value(IntVar[] VARS, long SEED)
-
-random_value
-============
+A built-in strategy which randomly chooses a non-instantiated variable, and assigns it to a randomly selected value from its domain.
 
 **Scope**: ``IntVar``
 
@@ -3217,9 +3338,14 @@ random_value
 **API**: ::
 
     IntStrategy random_value(IntVar[] VARS)
+    IntStrategy random_value(IntVar[] VARS, long SEED)
+
+.. _51_sstrat_remfi:
 
 remove_first
 ============
+
+A built-in strategy which chooses the first unfixed variable and removes its smallest unfixed value from the envelope.
 
 **Scope**: ``SetVar``
 
@@ -3229,9 +3355,12 @@ remove_first
 
     SetStrategy remove_first(SetVar... sets)
 
+.. _51_sstrat_seq:
 
 sequencer
 =========
+
+A meta strategy which applies sequentially the strategies in its scope.
 
 **Scope**: ``IntVar``
 
@@ -3241,8 +3370,17 @@ sequencer
 
     AbstractStrategy sequencer(AbstractStrategy... strategies)
 
+.. _51_sstrat_dwdeg:
+
 domOverWDeg
 ===========
+
+A black-box strategy for ``IntVar`` which selects the non-instantiated variable with the smallest ratio :math:`\frac{|d(x)|}{w(x)}`,
+where :math:`|d(x)|` denotes the domain size of a variable `x` and
+:math:`w(x)` its weighted degree. The weighted degree of a variable sums the weight of each of the constraint it is involved in where at least 2 variables remains uninstantiated.
+The weight of a constraint is initialized to `1` and increased by one each time a constraint propagation fails during the search.
+
+**Implementation based on**: :cite:`BoussemartHLS04`.
 
 **Scope**: ``IntVar``
 
@@ -3251,10 +3389,20 @@ domOverWDeg
 **API**: ::
 
     AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED, IntValueSelector VAL_SELECTOR)
-    AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED)
+    AbstractStrategy<IntVar> domOverWDeg(IntVar[] VARS, long SEED) // default: min_value_selector
+
+.. _51_sstrat_act:
 
 activity
 ========
+
+A black-box strategy for ``IntVar`` which selects the non-instantiated variable with the largest ratio :math:`\frac{a(x)}{|d(x)|}`,
+where :math:`|d(x)|` denotes the domain size of a variable `x` and
+:math:`a(x)` its activity.
+The activity of a variable measures how often the domain of the variable is reducing during the search.
+Then, the value with the least activity is selected from the domain of the variable.
+
+**Implementation based on**: :cite:`MichelH12`.
 
 **Scope**: ``IntVar``
 
@@ -3264,11 +3412,21 @@ activity
 
     AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
                                                     double RESTART, int FORCE_SAMPLING, long SEED)
-    AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED)
+    AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED) // default: 0.999d, 0.2d, 8, 1.1d, 1
 
+.. _51_sstrat_imp:
 
 impact
 ======
+
+A black-box strategy for ``IntVar`` which selects the non-instantiated variable with the largest impact :math:`\sum_{a in d(x)}{1 - I(x = a)}`,
+:math:`I(x = a)` denotes the impact of assigning the variable `x` to a value `a` from its domain :math:`d(x)`.
+The impact of an assignment measures the search space reduction induced by a decision, by evaluating the size of the search before and after the application of a decision.
+The higher the impact, the greater the search space reduction.
+Then, the value with the least impact is selected from the domain of the variable.
+An approximation of the impacts is preprocessed.
+
+**Implementation based on**: :cite:`Refalo04`.
 
 **Scope**: ``IntVar``
 
@@ -3278,11 +3436,18 @@ impact
 
     AbstractStrategy<IntVar> impact(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT,
                                     long SEED, boolean INITONLY)
-    AbstractStrategy<IntVar> impact(IntVar[] VARS, long SEED)
+    AbstractStrategy<IntVar> impact(IntVar[] VARS, long SEED) // default: 2, 3, 10, true
 
+
+.. _51_sstrat_lf:
 
 lastConflict
 ============
+
+A composite heuristic which override the defined strategy by forcing some decisions to branch on variables involved in recent conflicts.
+After each conflict, the last assigned variable is selected in priority, so long as a failure occurs.
+
+**Implementation based on**: :cite:`LecoutreSTV09`.
 
 **Scope**: ``Variable``
 
@@ -3294,8 +3459,17 @@ lastConflict
     AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT)
     AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT)
 
+.. _51_sstrat_gat:
+
 generateAndTest
 ===============
+
+A strategy that simulate a `Generate and Test` behavior through a specific internal decision.
+The main idea is, from all the variables of a problem,  to generate and test the satisfiability of a complete instantiation.
+The process does not rely on propagation anymore, but on satisfaction only.
+
+Such strategy can be triggered when the search space reached a given limit.
+
 
 **Scope**: ``IntVar``
 
@@ -3303,7 +3477,7 @@ generateAndTest
 
 **API**: ::
 
+    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER)
     AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy,
                                              int searchSpaceLimit)
-    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER)
 

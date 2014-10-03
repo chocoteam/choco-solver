@@ -289,6 +289,8 @@ Decisions are computed and applied until all the variables are instantiated, tha
     Thus, it is strongly recommended to adapt the search space exploration to the problem treated.
 
 
+.. _31_zoom:
+
 Zoom on IntStrategy
 -------------------
 
@@ -338,30 +340,91 @@ domain size is the smallest, ties are randomly broken.
 
 Very similar operations are achieved in ``SetStrategy`` and ``RealStrategy``.
 
+See ``solver.search.strategy.IntStrategyFactory`` and ``solver.search.strategy.SetStrategyFactory`` for built-in strategies and selectors.
+
 Available variable selectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     For integer variables
+:ref:`51_svarsel_lex`,
+:ref:`51_svarsel_rnd`,
+:ref:`51_svarsel_mind`,
+:ref:`51_svarsel_maxd`,
+:ref:`51_svarsel_maxr`.
 
     For set variables
 
+See ``solver.search.strategy.selectors.variables.MaxDelta``, ``solver.search.strategy.selectors.variables.MinDelta``.
+
     For real variables
+
+See ``solver.search.strategy.selectors.variables.Cyclic``.
+
 
 Available value selectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
     For integer variables
 
+:ref:`51_svalsel_minv`,
+:ref:`51_svalsel_midv`,
+:ref:`51_svalsel_maxv`,
+:ref:`51_svalsel_rndb`,
+:ref:`51_svalsel_rndv`.
+
     For set variables
 
+See ``solver.search.strategy.selectors.values.SetDomainMin``.
+
     For real variables
+
+See ``solver.search.strategy.selectors.values.RealDomainMiddle``.
+
+Available decision operators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:ref:`51_sdecop_ass`,
+:ref:`51_sdecop_rem`,
+:ref:`51_sdecop_spl`,
+:ref:`51_sdecop_rspl`.
 
 Available strategies
 ^^^^^^^^^^^^^^^^^^^^
 
-    ``IntStrategyFactory``
+    For integer variables
 
-    ``SetStrategyFactory``
+:ref:`51_sstrat_cus`, :ref:`51_sstrat_seq`.
+
+:ref:`51_sstrat_lexlb`,
+:ref:`51_sstrat_lexnlb`,
+:ref:`51_sstrat_lexspl`,
+:ref:`51_sstrat_lexub`,
+:ref:`51_sstrat_minlb`,
+:ref:`51_sstrat_midlb`,
+:ref:`51_sstrat_maxspl`,
+:ref:`51_sstrat_minub`,
+:ref:`51_sstrat_maxrlb`,
+:ref:`51_sstrat_rndb`,
+:ref:`51_sstrat_rndv`.
+
+:ref:`51_sstrat_dwdeg`,
+:ref:`51_sstrat_act`,
+:ref:`51_sstrat_imp`.
+
+:ref:`51_sstrat_lf`.
+
+:ref:`51_sstrat_gat`.
+
+    For set variables
+
+:ref:`51_sstrat_cus`, :ref:`51_sstrat_seq`.
+
+:ref:`51_sstrat_lexfi`,
+:ref:`51_sstrat_maxdfi`,
+:ref:`51_sstrat_mindfi`,
+:ref:`51_sstrat_remfi`.
+
+:ref:`51_sstrat_lf`.
 
 
 .. important:: Black-box search strategies
@@ -371,6 +434,7 @@ Available strategies
     The concept of `Black-box search heuristic` (or adaptive search strategy) has naturally emerged from this statement.
     Most common black-box search strategies observe aspects of the CSP resolution in order to drive the variable selection, and eventually the decision computation (presumably, a value assignment).
     Three main families of heuristic, stemming from the concepts of variable impact, conflict and variable activity, can be found in Choco|release|.
+    Black-box strategies can be augmented with restarts.
 
 
 

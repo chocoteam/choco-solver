@@ -76,7 +76,18 @@ A support mailing list is also available: choco3-support@mines-nantes.fr.
 How to cite Choco ?
 ===================
 
-*TBD*
+A reference to this manual, or more globally to Choco |version|, is made like this:
+
+.. code-block:: none
+
+    @manual{
+      author        = {Charles Prud'homme, Jean-Guillaume Fages, Xavier Lorca},
+      title         = {Choco3 Documentation},
+      year          = {2014},
+      organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241},
+      timestamp     = {Thu, 02 Oct 2014},
+      url           = {http://www.choco-solver.org },
+    }
 
 
 ***************

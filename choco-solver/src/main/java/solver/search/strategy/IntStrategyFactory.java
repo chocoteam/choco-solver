@@ -93,7 +93,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Selects the non-instantiated variable of largest domain, to branch on it.
+     * Selects the non-instantiated variable with the largest difference between the two smallest values in its domain, to branch on it.
      *
      * @return a variable selector
      */

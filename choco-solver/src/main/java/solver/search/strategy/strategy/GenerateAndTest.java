@@ -43,7 +43,7 @@ import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
- * A strategy, dedicated to IntVars, that simulate a Generate and Test behavior through a specific internal decision.
+ * A strategy, dedicated to IntVars, that simulates a Generate and Test behavior through a specific internal decision.
  * <br/>
  * The main idea is, from all the variables of a problem,  to generate and test the satisfiability of a complete instantiation.
  * The process does not rely on propagation anymore, but on satisfaction.
