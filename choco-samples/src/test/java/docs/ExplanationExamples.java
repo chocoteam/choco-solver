@@ -24,39 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.strategies.jumper;
+package docs;
 
-import solver.explanations.BranchingDecision;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.strategies.IDecisionJumper;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.ICF;
+import solver.explanations.ExplanationFactory;
+import solver.explanations.strategies.DynamicBacktracking;
+import solver.explanations.strategies.jumper.MaximumDomainSizeJumper;
+import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VF;
 
 /**
- * A decision jumper which select the world to jump to by considering the size of decision variable domain.
- * It selects the decision involving the maximum variable domain size.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 12/02/13
+ * @version choco
+ * @since 03/10/2014
  */
-public class MaximumDomainSizeJumper implements IDecisionJumper {
-    @Override
-    public int compute(Explanation explanation, int currentWorldIndex) {
-        int dworld = 0, maxDomSize = 0, curDomSize;
-        if (explanation.nbDeductions() > 0) {
-            for (int d = 0; d < explanation.nbDeductions(); d++) {
-                Deduction dec = explanation.getDeduction(d);
-                if (dec.getmType() == Deduction.Type.DecLeft) {
-                    IntVar ivar = (IntVar) dec.getVar();
-                    curDomSize = ivar.getDomainSize();
-                    if (maxDomSize < curDomSize) {
-                        dworld = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
-                        maxDomSize = curDomSize;
-                    }
-                }
+public class ExplanationExamples {
+
+    @Test
+    public void dummy() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VF.boolArray("B", 4, solver);
+        solver.post(ICF.arithm(bvars[2], "=", bvars[3]));
+        solver.post(ICF.arithm(bvars[2], "!=", bvars[3]));
+        solver.set(ISF.lexico_LB(bvars));
+        ExplanationFactory.SILENT.plugin(solver, true);
+        new DynamicBacktracking(solver.getExplainer(), new MaximumDomainSizeJumper());
+        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+    }
+
+    @Test
+    public void pigeon() {
+        Solver solver = new Solver();
+        IntVar[] pigeon = VF.enumeratedArray("p", 5, 1, 4, solver);
+        for (int i = 0; i < 4; i++) {
+            for (int j = i + 1; j < 5; j++) {
+                solver.post(ICF.arithm(pigeon[i], "!=", pigeon[j]));
             }
         }
-        return 1 + (currentWorldIndex - dworld);
+        solver.set(ISF.lexico_LB(pigeon));
+        ExplanationFactory.CBJ.plugin(solver, true);
+        SMF.log(solver, true, true);
+        solver.findAllSolutions();
     }
 }

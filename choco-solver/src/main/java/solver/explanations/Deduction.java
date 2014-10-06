@@ -46,8 +46,6 @@ public abstract class Deduction implements Identity, Comparable<Deduction> {
 
     final int id;
 
-    int wi;
-
     public enum Type {
         Exp, ValRem, DecLeft, DecRight, PropAct
     }
@@ -85,14 +83,5 @@ public abstract class Deduction implements Identity, Comparable<Deduction> {
 
     public Type getmType() {
         return mType;
-    }
-
-    public final void setWI(int wi){
-        this.wi = wi;
-    }
-
-    public final int getWI(){
-        return this.wi;
-
     }
 }
