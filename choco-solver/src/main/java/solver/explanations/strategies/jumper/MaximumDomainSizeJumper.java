@@ -47,11 +47,13 @@ public class MaximumDomainSizeJumper implements IDecisionJumper {
         if (explanation.nbDeductions() > 0) {
             for (int d = 0; d < explanation.nbDeductions(); d++) {
                 Deduction dec = explanation.getDeduction(d);
-                IntVar ivar = (IntVar) dec.getVar();
-                curDomSize = ivar.getDomainSize();
-                if (dec.getmType() == Deduction.Type.DecLeft && maxDomSize < curDomSize) {
-                    dworld = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
-                    maxDomSize = curDomSize;
+                if (dec.getmType() == Deduction.Type.DecLeft) {
+                    IntVar ivar = (IntVar) dec.getVar();
+                    curDomSize = ivar.getDomainSize();
+                    if (maxDomSize < curDomSize) {
+                        dworld = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
+                        maxDomSize = curDomSize;
+                    }
                 }
             }
         }

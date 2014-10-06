@@ -24,16 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.strategies;
+package docs;
 
-import java.io.Serializable;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.ICF;
+import solver.explanations.ExplanationFactory;
+import solver.search.loop.monitors.SMF;
+import solver.search.strategy.ISF;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.VF;
 
 /**
- * An interface to define operations of dynamic backtracking, in opposition with "standard backtracking".
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 12/02/13
+ * @version choco
+ * @since 03/10/2014
  */
-public interface IDynamicBacktrackingAlgorithm extends Serializable {
+public class ExplanationExamples {
+
+    @Test
+    public void dummy() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VF.boolArray("B", 4, solver);
+        solver.post(ICF.arithm(bvars[2], "=", bvars[3]));
+        solver.post(ICF.arithm(bvars[2], "!=", bvars[3]));
+        solver.set(ISF.lexico_LB(bvars));
+        ExplanationFactory.CBJ.plugin(solver, true);
+        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+    }
+
+    @Test
+    public void pigeon() {
+        Solver solver = new Solver();
+        IntVar[] pigeon = VF.enumeratedArray("p", 5, 1, 4, solver);
+        for (int i = 0; i < 4; i++) {
+            for (int j = i + 1; j < 5; j++) {
+                solver.post(ICF.arithm(pigeon[i], "!=", pigeon[j]));
+            }
+        }
+        solver.set(ISF.lexico_LB(pigeon));
+        ExplanationFactory.CBJ.plugin(solver, true);
+        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+    }
 }

@@ -48,7 +48,7 @@ import solver.search.strategy.decision.RootDecision;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm, IMonitorContradiction, IMonitorSolution {
+public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitorSolution {
 
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
     protected ExplanationEngine mExplanationEngine;

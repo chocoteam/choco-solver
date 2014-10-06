@@ -28,6 +28,7 @@ package solver.search.strategy.decision;
 
 
 import solver.exception.ContradictionException;
+import solver.explanations.BranchingDecision;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.Variable;
@@ -40,6 +41,9 @@ import solver.variables.Variable;
  */
 public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
+
+    // Required for explanation store
+    private static BranchingDecision BROOT = new BranchingDecision(ROOT, true);
 
     // FOR SERIALIZATION
     private Object readResolve() {
@@ -99,12 +103,12 @@ public class RootDecision extends Decision {
 
     @Override
     public Deduction getNegativeDeduction() {
-        return null;
+        return BROOT;
     }
 
     @Override
     public Deduction getPositiveDeduction() {
-        return null;
+        return BROOT;
     }
 
     @Override
