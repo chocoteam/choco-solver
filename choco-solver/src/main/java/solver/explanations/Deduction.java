@@ -31,7 +31,7 @@ import solver.Identity;
 import solver.variables.Variable;
 
 /**
- * An abstract class to explain event occuring on variables during the search.
+ * An abstract class to explain event occurring on variables during the search.
  * There are for of them: value removal, variable assignment, variable refutation and explanation.
  * An explanations is a combination of deductions and propagators.
  * <p/>

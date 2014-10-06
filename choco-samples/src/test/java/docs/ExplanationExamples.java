@@ -30,8 +30,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.explanations.ExplanationFactory;
-import solver.explanations.strategies.DynamicBacktracking;
-import solver.explanations.strategies.jumper.MaximumDomainSizeJumper;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
 import solver.variables.BoolVar;
@@ -54,8 +52,7 @@ public class ExplanationExamples {
         solver.post(ICF.arithm(bvars[2], "=", bvars[3]));
         solver.post(ICF.arithm(bvars[2], "!=", bvars[3]));
         solver.set(ISF.lexico_LB(bvars));
-        ExplanationFactory.SILENT.plugin(solver, true);
-        new DynamicBacktracking(solver.getExplainer(), new MaximumDomainSizeJumper());
+        ExplanationFactory.CBJ.plugin(solver, true);
         SMF.log(solver, true, true);
         solver.findAllSolutions();
     }
