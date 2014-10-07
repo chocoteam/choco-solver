@@ -84,8 +84,8 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
     public ExplainingCut(Solver aSolver, int level, long seed) {
         super(aSolver);
-        if (!(aSolver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(aSolver, true);
+        if (!(aSolver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            aSolver.set(new LazyExplanationEngineFromRestart(aSolver));
         }
         this.mExplanationEngine = aSolver.getExplainer();
         this.level = level;

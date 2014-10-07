@@ -45,12 +45,13 @@ import solver.variables.events.PropagatorEventType;
 /**
  * A explanation engine that works in a lazy way.
  * It stores events on the fly, but do not compute anything until an explicit call is made.
- * <br/>
+ * However, it needs to be used AFTER RESTART only. Otherwise, it can be not synchronized anymore.
+ *
  *
  * @author Charles Prud'homme
  * @since 25/03/13
  */
-public class LazyExplanationEngine extends RecorderExplanationEngine {
+public class LazyExplanationEngineFromRestart extends RecorderExplanationEngine {
 
 	private static final int CHUNK_SIZE = 128;
 
@@ -74,7 +75,7 @@ public class LazyExplanationEngine extends RecorderExplanationEngine {
 	 *
 	 * @param slv associated solver's environment
 	 */
-	public LazyExplanationEngine(Solver slv) {
+	public LazyExplanationEngineFromRestart(Solver slv) {
 		super(slv);
 		IEnvironment env = slv.getEnvironment();
 		curChunk = env.makeInt(0);
@@ -257,8 +258,8 @@ public class LazyExplanationEngine extends RecorderExplanationEngine {
 		up2date = true;
 		int currentC = curChunk.get();
 		int currentI = nextTop.get();
-//        long time = -System.nanoTime();
-//        long count = 0;
+
+        boolean bug;
 		for (int chunk = 0; chunk <= currentC; chunk++) {
 			int to = (chunk == currentC ? currentI : CHUNK_SIZE);
 			for (int cell = 0; cell < to; cell++) {
@@ -268,9 +269,8 @@ public class LazyExplanationEngine extends RecorderExplanationEngine {
 				int one = val1Chunks[chunk][cell];
 				int two = val2Chunks[chunk][cell];
 				int three = val3Chunks[chunk][cell];
-//                System.out.printf("%s %s %d %d %d - %s\n", var, etype, one, two, three, cause);
-//                count++;
-				boolean bug = true;
+
+ 				bug = true;
 				if(etype == IntEventType.REMOVE) {
 					super.removeValue(var, one, cause);
 					bug = false;
@@ -298,9 +298,6 @@ public class LazyExplanationEngine extends RecorderExplanationEngine {
 				}
 			}
 		}
-//        time += System.nanoTime();
-//        System.out.printf("depth %d, lazy %.3f ", count, time / (1000 * 1000f));
-
 
 	}
 
