@@ -1,6 +1,7 @@
 */target/*
 *.iml
 *.ipr
+*.ids
 *.iws
 choco.iws~
 parser/src/fzn/choco.jar
