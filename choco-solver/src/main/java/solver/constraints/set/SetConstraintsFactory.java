@@ -293,8 +293,8 @@ public class SetConstraintsFactory {
 	 */
 	public static Constraint int_values_union(IntVar[] VARS, SetVar VALUES){
 		return new Constraint("SetIntValuesUnion"
-				,new PropSetIntValuesUnionA(VARS,VALUES)
-				,new PropSetIntValuesUnionB(VARS,VALUES)
+				,new PropSetIntValuesUnion(VARS,VALUES)
+				,new PropSetIntValuesUnion(VARS,VALUES)
 		);
 	}
 

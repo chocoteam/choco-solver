@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -31,17 +31,19 @@ import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
+import solver.variables.Variable;
 import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Maintain a link between a set variable and the union of values taken by an array of
  * integer variables
  *
- * Filters from ints to set
+ * Not idempotent (use two of them)
  *
  * @author Jean-Guillaume Fages
  */
-public class PropSetIntValuesUnionA extends Propagator<IntVar> {
+public class PropSetIntValuesUnion extends Propagator<Variable> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -54,8 +56,8 @@ public class PropSetIntValuesUnionA extends Propagator<IntVar> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropSetIntValuesUnionA(IntVar[] X, SetVar values){
-		super(X);
+	public PropSetIntValuesUnion(IntVar[] X, SetVar values){
+		super(ArrayUtils.append(X,new Variable[]{values}));
 		this.X = X;
 		this.values = values;
 	}
@@ -67,19 +69,31 @@ public class PropSetIntValuesUnionA extends Propagator<IntVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int v=values.getEnvelopeFirst();v!=SetVar.END;v=values.getEnvelopeNext()){
-			boolean support = false;
-			for(int i=0;i<X.length && !support;i++){
+			int support = -1;
+			for(int i=0;i<X.length;i++){
 				if(X[i].contains(v)){
-					support = true;
+					if(support==-1){
+						support = i;
+					}else{
+						support = -2;
+						break;
+					}
 				}
 			}
-			if(!support){
+			if(support == -1){
 				values.removeFromEnvelope(v,aCause);
+			}else if(support!=-2 && values.kernelContains(v)){
+				X[support].instantiateTo(v,aCause);
 			}
 		}
-		for(IntVar x:X){
-			if(x.isInstantiated()){
-				values.addToKernel(x.getValue(),aCause);
+		for(int i=0;i<X.length;i++){
+			for(int v=X[i].getLB();v<=X[i].getUB();v=X[i].nextValue(v)){
+				if(!values.envelopeContains(v)){
+					X[i].removeValue(v,aCause);
+				}
+				if(X[i].isInstantiated()){
+					values.addToKernel(v,aCause);
+				}
 			}
 		}
 	}
@@ -108,7 +122,7 @@ public class PropSetIntValuesUnionA extends Propagator<IntVar> {
 			}
 		}
 		if(isCompletelyInstantiated()){
-			return ESat.UNDEFINED;
-		}return ESat.TRUE;
+			return ESat.TRUE;
+		}return ESat.UNDEFINED;
 	}
 }
