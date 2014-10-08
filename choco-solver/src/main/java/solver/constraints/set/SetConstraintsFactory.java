@@ -284,6 +284,20 @@ public class SetConstraintsFactory {
 		);
     }
 
+	/**
+	 * Channeling constraint ensuring that
+	 * VALUES is exactly the set of values taken by VARS,
+	 * @param VARS		integer variables
+	 * @param VALUES	a set variable
+	 * @return	a channeling constraint ensuring that VALUES = {value(x) | x in VARS}
+	 */
+	public static Constraint int_values_union(IntVar[] VARS, SetVar VALUES){
+		return new Constraint("SetIntValuesUnion"
+				,new PropSetIntValuesUnionA(VARS,VALUES)
+				,new PropSetIntValuesUnionB(VARS,VALUES)
+		);
+	}
+
     //***********************************************************************************
     // MINIZINC API
     //***********************************************************************************
