@@ -61,7 +61,7 @@ import java.util.Properties;
 
 @members{
 // The flatzinc logger -- 'System.out/err' is fobidden!
-protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
+protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
 public Datas datas;
 
@@ -80,7 +80,7 @@ flatzinc_model [Solver aSolver, Datas datas]
     }
        (pred_decl)* (param_decl)* (var_decl)* (constraint)* solve_goal
     {
-    if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
+    if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
         datas.plugLayout(mSolver);
     }
     }

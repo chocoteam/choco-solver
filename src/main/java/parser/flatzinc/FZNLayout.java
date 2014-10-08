@@ -56,7 +56,7 @@ import java.util.List;
  */
 public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
+    protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
     List<String> output_names;
     List<Declaration.DType> output_types;
@@ -166,7 +166,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     @Override
     public void beforeClose() {
         finalOutPut();
-        Runtime.getRuntime().removeShutdownHook(statOnKill);
+        if (statOnKill != null) Runtime.getRuntime().removeShutdownHook(statOnKill);
     }
 
     public void finalOutPut() {
@@ -191,6 +191,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             }
             if (!LOGGER.isDebugEnabled()) {
                 LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
+                LOGGER.info("% {}", solver.getMeasures().toString());
             }
         }
         if (LOGGER.isDebugEnabled()) {

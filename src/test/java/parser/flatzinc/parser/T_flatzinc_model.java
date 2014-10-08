@@ -26,15 +26,11 @@
  */
 package parser.flatzinc.parser;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
 import solver.Solver;
 
@@ -61,28 +57,13 @@ public class T_flatzinc_model extends GrammarTest {
 
     @AfterMethod
     public void after() {
-        FlatzincParser fp = null;
+        Flatzinc4Parser fp = null;
         try {
-            fp = parser(st.toString());
+            fp = parser(st.toString(), mSolver, datas);
         } catch (IOException e) {
             Assert.fail();
         }
-        FlatzincParser.flatzinc_model_return r = null;
-        try {
-            r = fp.flatzinc_model();
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.mSolver = mSolver;
-        walker.datas = datas;
-        try {
-            walker.flatzinc_model(mSolver, datas);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.flatzinc_model(mSolver, datas);
         mSolver.findSolution();
     }
 

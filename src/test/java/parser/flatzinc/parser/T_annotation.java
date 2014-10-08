@@ -27,13 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
-import parser.flatzinc.ast.Datas;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.expression.EAnnotation;
 
 import java.io.IOException;
@@ -45,35 +41,27 @@ import java.io.IOException;
  * @since 18/10/12
  */
 public class T_annotation extends GrammarTest {
-    public EAnnotation annotation(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.annotation_return r = parser.annotation();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.datas = new Datas();
-        return walker.annotation();
-    }
 
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("anAnnotation");
-        EAnnotation d = annotation(fp);
+        Flatzinc4Parser fp = parser("anAnnotation");
+        EAnnotation d = fp.annotation().ann;
         Assert.assertEquals("anAnnotation", d.id.value);
         Assert.assertEquals(0, d.exps.size());
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("anAnnotation(true)");
-        EAnnotation d = annotation(fp);
+        Flatzinc4Parser fp = parser("anAnnotation(true)");
+        EAnnotation d = fp.annotation().ann;
         Assert.assertEquals("anAnnotation", d.id.value);
         Assert.assertEquals(1, d.exps.size());
     }
 
     @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("anAnnotation(true, false)");
-        EAnnotation d = annotation(fp);
+        Flatzinc4Parser fp = parser("anAnnotation(true, false)");
+        EAnnotation d = fp.annotation().ann;
         Assert.assertEquals("anAnnotation", d.id.value);
         Assert.assertEquals(2, d.exps.size());
     }

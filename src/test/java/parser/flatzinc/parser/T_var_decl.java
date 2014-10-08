@@ -26,15 +26,13 @@
  */
 package parser.flatzinc.parser;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.FZNLayout;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
+import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -60,25 +58,10 @@ public class T_var_decl extends GrammarTest {
     }
 
 
-    public void var_decl(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.var_decl_return r = parser.var_decl();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.mSolver = mSolver;
-        walker.datas = datas;
-        walker.var_decl();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException {
-        FlatzincParser fp = parser("var 0..9: digit;");
-
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("var 0..9: digit;", mSolver, datas);
+        fp.var_decl();
         Object o = datas.get("digit");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
@@ -90,13 +73,9 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test2() throws IOException {
-        FlatzincParser fp = parser("var bool: b::var_is_introduced::is_defined_var;");
+        Flatzinc4Parser fp = parser("var bool: b::var_is_introduced::is_defined_var;", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
         Object o = datas.get("b");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof BoolVar);
@@ -108,35 +87,23 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
     public void test3() throws IOException {
-        FlatzincParser fp = parser("var set of 1..3: s;");
+        Flatzinc4Parser fp = parser("var set of 1..3: s;", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
     }
 
-    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "1s", expectedExceptions = NullPointerException.class)
     public void test4() throws IOException {
-        FlatzincParser fp = parser("var 0.1..1.0: f;");
+        Flatzinc4Parser fp = parser("var 0.1..1.0: f;", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
     }
 
     @Test(groups = "1s")
     public void test5() throws IOException {
-        FlatzincParser fp = parser("var int : y :: mip; % 'mip' annotation\n");
+        Flatzinc4Parser fp = parser("var int : y :: mip; % 'mip' annotation\n", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
         Object o = datas.get("y");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
@@ -146,13 +113,9 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test6() throws IOException {
-        FlatzincParser fp = parser("array [1..3] of var 1..10:a;");
+        Flatzinc4Parser fp = parser("array [1..3] of var 1..10:a;", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
         Object o = datas.get("a");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar[]);
@@ -160,12 +123,8 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(3, a.length);
         Assert.assertEquals(10, a[0].getDomainSize());
 
-        fp = parser("array [1..3] of var 1..10:b = [a[3],a[2],a[1]];");
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp = parser("array [1..3] of var 1..10:b = [a[3],a[2],a[1]];", mSolver, datas);
+        fp.var_decl();
         o = datas.get("b");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar[]);
@@ -177,13 +136,9 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test7() throws IOException {
-        FlatzincParser fp = parser("var {0,3,18}: B::var_is_introduced;");
+        Flatzinc4Parser fp = parser("var {0,3,18}: B::var_is_introduced;", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
         Object o = datas.get("B");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
@@ -196,13 +151,13 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test8() throws IOException {
-        FlatzincParser fp = parser("var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;");
+        FZNLayout fl = new FZNLayout("test", new GoalConf());
+        datas.setmLayout(fl);
+        fl.makeup();
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;", mSolver, datas);
+
+        fp.var_decl();
         Object o = datas.get("INT____00001");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
@@ -211,12 +166,8 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(123456789, var.getLB());
         Assert.assertEquals(987654321, var.getUB());
 
-        fp = parser("var 123456789..987654321: num :: output_var = INT____00001;");
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp = parser("var 123456789..987654321: num :: output_var = INT____00001;", mSolver, datas);
+        fp.var_decl();
 
         o = datas.get("num");
         Assert.assertNotNull(o);
@@ -225,13 +176,13 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test9() throws IOException {
-        FlatzincParser fp = parser("array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);");
+        FZNLayout fl = new FZNLayout("test", new GoalConf());
+        datas.setmLayout(fl);
+        fl.makeup();
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);", mSolver, datas);
+
+        fp.var_decl();
         Object o = datas.get("C");
         Assert.assertTrue(o.getClass().isArray());
         IntVar[] oi = (IntVar[]) o;
@@ -242,33 +193,20 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test10() throws IOException {
-        FlatzincParser fp = parser("var 1 .. 5: a ::output_var;");
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
-        fp = parser("var 1 .. 5: b::output_var;");
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        FZNLayout fl = new FZNLayout("test", new GoalConf());
+        datas.setmLayout(fl);
+        fl.makeup();
+        Flatzinc4Parser fp = parser("var 1 .. 5: a ::output_var;", mSolver, datas);
+        fp.var_decl();
+        fp = parser("var 1 .. 5: b::output_var;", mSolver, datas);
+        fp.var_decl();
 
 
-        fp = parser("var 1 .. 5: c::output_var;");
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp = parser("var 1 .. 5: c::output_var;", mSolver, datas);
+        fp.var_decl();
 
-        fp = parser("array[1 .. 3] of var 1 .. 5: alpha = [ a, b, c];");
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp = parser("array[1 .. 3] of var 1 .. 5: alpha = [ a, b, c];", mSolver, datas);
+        fp.var_decl();
         Object o = datas.get("alpha");
         Assert.assertTrue(o.getClass().isArray());
         IntVar[] oi = (IntVar[]) o;
@@ -279,15 +217,14 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test11() throws IOException {
-        FlatzincParser fp = parser("array [1..8] of var 1..8: queens " +
+        FZNLayout fl = new FZNLayout("test", new GoalConf());
+        datas.setmLayout(fl);
+        fl.makeup();
+        Flatzinc4Parser fp = parser("array [1..8] of var 1..8: queens " +
                 ":: output_array([1..8]) " +
-                ":: viz([viztype(\"vector\"), vizpos(0, 2), vizdisplay(\"expanded\"), vizwidth(8), vizheight(8), vizrange(1, 8)]);");
+                ":: viz([viztype(\"vector\"), vizpos(0, 2), vizdisplay(\"expanded\"), vizwidth(8), vizheight(8), vizrange(1, 8)]);", mSolver, datas);
 
-        try {
-            var_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.var_decl();
     }
 
 }

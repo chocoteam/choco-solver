@@ -35,6 +35,7 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
+import solver.variables.IntVar;
 
 import java.util.List;
 
@@ -50,12 +51,12 @@ public class Bool2IntBuilder implements IBuilder {
     @Override
     public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar bVar = exps.get(0).boolVarValue(solver);
-        BoolVar iVar = exps.get(1).boolVarValue(solver);
-        if (ParserConfiguration.ENABLE_CLAUSE) {
-            SatFactory.addBoolEq(bVar, iVar);
-        } else {
-            solver.post(IntConstraintFactory.arithm(bVar, "=", iVar));
+        IntVar iVar = exps.get(1).intVarValue(solver);
+        if (iVar.isBool() && ParserConfiguration.ENABLE_CLAUSE) {
+            SatFactory.addBoolEq(bVar, (BoolVar) iVar);
+            return;
         }
+        solver.post(IntConstraintFactory.arithm(bVar, "=", iVar));
     }
 
 }

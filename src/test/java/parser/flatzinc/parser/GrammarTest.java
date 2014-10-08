@@ -26,10 +26,13 @@
  */
 package parser.flatzinc.parser;
 
-import org.antlr.runtime.ANTLRInputStream;
-import org.antlr.runtime.CommonTokenStream;
-import parser.flatzinc.FlatzincLexer;
-import parser.flatzinc.FlatzincParser;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import parser.flatzinc.FZNLayout;
+import parser.flatzinc.Flatzinc4Lexer;
+import parser.flatzinc.Flatzinc4Parser;
+import parser.flatzinc.ast.Datas;
+import solver.Solver;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,16 +46,29 @@ import java.io.InputStream;
  */
 public class GrammarTest {
 
-    public FlatzincParser parser(String st) throws IOException {
+    public Flatzinc4Parser parser(String st, Solver aSolver, Datas aDatas) throws IOException {
         InputStream in = new ByteArrayInputStream(st.getBytes());
-        // Create an input character stream from standard in
-        ANTLRInputStream input = new ANTLRInputStream(in);
+        CharStream input = new UnbufferedCharStream(in);
         // Create an ExprLexer that feeds from that stream
-        FlatzincLexer lexer = new FlatzincLexer(input);
+        Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
+        lexer.setTokenFactory(new CommonTokenFactory(true));
         // Create a stream of tokens fed by the lexer
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TokenStream tokens = new UnbufferedTokenStream<CommonToken>(lexer);
         // Create a parser that feeds off the token stream
-        return new FlatzincParser(tokens);
+        Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
+        parser.datas = aDatas;
+        parser.mSolver = aSolver;
+        FZNLayout fl = new FZNLayout("", parser.datas.goals());
+        parser.datas.setmLayout(fl);
+//        fl.makeup();
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
+        parser.setBuildParseTree(false);
+        parser.setTrimParseTree(false);
+        return parser;
+    }
+
+    public Flatzinc4Parser parser(String st) throws IOException {
+        return parser(st, new Solver(), new Datas());
     }
 
 

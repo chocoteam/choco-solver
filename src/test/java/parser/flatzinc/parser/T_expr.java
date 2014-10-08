@@ -27,14 +27,12 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.*;
+import solver.Solver;
 
 import java.io.IOException;
 
@@ -46,95 +44,88 @@ import java.io.IOException;
  */
 public class T_expr extends GrammarTest {
 
-    public Expression expr(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.expr_return r = parser.expr();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.datas = new Datas();
-        walker.datas.register("a", new int[]{1, 2});
-        return walker.expr();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("true");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("true");
+        Expression d =fp.expr().exp;
         Assert.assertTrue(d instanceof EBool);
         Assert.assertEquals(true, ((EBool) d).value);
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("false");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("false");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EBool);
         Assert.assertEquals(false, ((EBool) d).value);
     }
 
     @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("12");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("12");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EInt);
         Assert.assertEquals(12, ((EInt) d).value);
     }
 
     @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("-12");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("-12");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EInt);
         Assert.assertEquals(-12, ((EInt) d).value);
     }
 
     @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("1..3");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("1..3");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof ESetBounds);
     }
 
     @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("{1,2,3}");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("{1,2,3}");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof ESetList);
     }
 
     @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("a");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("a");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EIdentifier);
     }
 
     @Test(groups = "1s")
     public void test8() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("a[1]");
-        Expression d = expr(fp);
+        String[] _a = {"a","b"};
+        Datas da = new Datas();
+        da.register("a", _a);
+        Flatzinc4Parser fp = parser("a[1]", new Solver(), da);
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EIdArray);
     }
 
     @Test(groups = "1s")
     public void test9() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("[]");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("[]");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EArray);
     }
 
 
     @Test(groups = "1s")
     public void test10() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("[a,b]");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("[a,b]");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EArray);
     }
 
     @Test(groups = "1s")
     public void test11() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("\"toto\"");
-        Expression d = expr(fp);
+        Flatzinc4Parser fp = parser("\"toto\"");
+        Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EString);
     }
 

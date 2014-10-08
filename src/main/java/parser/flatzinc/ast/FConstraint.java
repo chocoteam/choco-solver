@@ -53,7 +53,7 @@ import java.util.Properties;
 */
 public final class FConstraint {
 
-    static Logger LOGGER = LoggerFactory.getLogger("fzn");
+    static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     private static final String ERROR_MSG = "Cant load manager by reflection: ";
 

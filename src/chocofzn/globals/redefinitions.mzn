@@ -33,6 +33,7 @@ predicate minimumChoco(var int: m, array[int] of var int: x);
 predicate nvalueChoco(var int: n, array[int] of var int: x);
 predicate regularChoco(array[int] of var int: x, int: Q, int: S,
                     array[int,int] of int: d, int: q0, set of int: F);
+predicate sortChoco(array[int] of var int: x, array[int] of var int: y);
 predicate subcircuitChoco(array[int] of var int: x);
 predicate tableChoco(array[int] of var bool: x, array[int, int] of bool: t);
 predicate tableChoco(array[int] of var int: x, array[int, int] of int: t);

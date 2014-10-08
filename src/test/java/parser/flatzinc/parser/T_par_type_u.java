@@ -27,12 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.declaration.*;
 
 import java.io.IOException;
@@ -45,42 +42,34 @@ import java.io.IOException;
  */
 public class T_par_type_u extends GrammarTest {
 
-    public Declaration par_type_u(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.par_type_u_return r = parser.par_type_u();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        return walker.par_type_u();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("bool");
-        Declaration d = par_type_u(fp);
+        Flatzinc4Parser fp = parser("bool");
+        Declaration d = fp.par_type_u().decl;
         Assert.assertTrue(d instanceof DBool);
         Assert.assertEquals(DBool.me, d);
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("float");
-        Declaration d = par_type_u(fp);
+        Flatzinc4Parser fp = parser("float");
+        Declaration d = fp.par_type_u().decl;
         Assert.assertTrue(d instanceof DFloat);
         Assert.assertEquals(DFloat.me, d);
     }
 
     @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("int");
-        Declaration d = par_type_u(fp);
+        Flatzinc4Parser fp = parser("int");
+        Declaration d = fp.par_type_u().decl;
         Assert.assertTrue(d instanceof DInt);
         Assert.assertEquals(DInt.me, d);
     }
 
     @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("set of int");
-        Declaration d = par_type_u(fp);
+        Flatzinc4Parser fp = parser("set of int");
+        Declaration d = fp.par_type_u().decl;
         Assert.assertTrue(d instanceof DSetOfInt);
         Assert.assertEquals(DSetOfInt.me, d);
     }

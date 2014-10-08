@@ -26,14 +26,9 @@
  */
 package parser.flatzinc.parser;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.variables.VariableFactory;
@@ -57,57 +52,31 @@ public class T_solve_goal extends GrammarTest {
         datas = new Datas();
     }
 
-    public void solve_goal(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.solve_goal_return r = parser.solve_goal();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.mSolver = mSolver;
-        walker.datas = datas;
-        walker.solve_goal();
-    }
-
     @Test(groups = "1s")
     public void testSatisfy() throws IOException {
-        FlatzincParser fp = parser("solve satisfy;");
-        try {
-            solve_goal(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("solve satisfy;", mSolver, datas);
+        fp.solve_goal();
     }
 
     @Test(groups = "1s")
     public void testMaximize() throws IOException {
         datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
-        FlatzincParser fp = parser("solve maximize a;");
-        try {
-            solve_goal(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("solve maximize a;", mSolver, datas);
+        fp.solve_goal();
     }
 
     @Test(groups = "1s")
     public void testMinimize() throws IOException {
         datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
-        FlatzincParser fp = parser("solve minimize a;");
-        try {
-            solve_goal(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("solve minimize a;", mSolver, datas);
+        fp.solve_goal();
     }
 
     @Test(groups = "1s")
     public void testSatisfy2() throws IOException {
         datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
-        FlatzincParser fp = parser("solve ::int_search([a],input_order,indomain_min, complete) satisfy;");
-        try {
-            solve_goal(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("solve ::int_search([a],input_order,indomain_min, complete) satisfy;", mSolver, datas);
+        fp.solve_goal();
     }
 
 
@@ -116,18 +85,14 @@ public class T_solve_goal extends GrammarTest {
         datas.register("r", VariableFactory.boundedArray("r", 5, 0, 10, mSolver));
         datas.register("s", VariableFactory.boundedArray("s", 5, 0, 10, mSolver));
         datas.register("o", VariableFactory.bounded("o", 0, 10, mSolver));
-        FlatzincParser fp = parser(
+        Flatzinc4Parser fp = parser(
                 "solve\n" +
                         "  ::seq_search(\n" +
                         "    [ int_search(r, input_order, indomain_min, complete),\n" +
                         "      int_search(s, input_order, indomain_min, complete) ])\n" +
-                        "  minimize o;"
+                        "  minimize o;", mSolver, datas
         );
-        try {
-            solve_goal(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        fp.solve_goal();
     }
 
 }

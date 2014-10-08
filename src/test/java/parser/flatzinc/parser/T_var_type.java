@@ -27,12 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.declaration.*;
 
 import java.io.IOException;
@@ -45,73 +42,64 @@ import java.io.IOException;
  */
 public class T_var_type extends GrammarTest {
 
-    public Declaration var_type(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.var_type_return r = parser.var_type();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        return walker.var_type();
-    }
-
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var bool");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var bool");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DBool);
         Assert.assertEquals(DBool.me, d);
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var float");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var float");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DFloat);
         Assert.assertEquals(DFloat.me, d);
     }
 
     @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var int");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var int");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DInt);
         Assert.assertEquals(DInt.me, d);
     }
 
     @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var 1 .. 4");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var 1 .. 4");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DInt2);
     }
 
     @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var {1,2,3}");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var {1,2,3}");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DManyInt);
     }
 
     @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var set of 1 .. 4");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var set of 1 .. 4");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DSet);
         Assert.assertTrue(((DSet) d).getWhat() instanceof DInt2);
     }
 
     @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("var set of {1,2,3}");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("var set of {1,2,3}");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DSet);
         Assert.assertTrue(((DSet) d).getWhat() instanceof DManyInt);
     }
 
     @Test(groups = "1s")
     public void test8() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of var bool");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of var bool");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -120,8 +108,8 @@ public class T_var_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test10() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of var int");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of var int");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -130,8 +118,8 @@ public class T_var_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test11() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of var 1..3");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of var 1..3");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -140,8 +128,8 @@ public class T_var_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test12() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of var {1,2,3}");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of var {1,2,3}");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -151,8 +139,8 @@ public class T_var_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test13() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of var set of 1..3");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of var set of 1..3");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -161,8 +149,8 @@ public class T_var_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test14() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of var set of {1,2,3}");
-        Declaration d = var_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of var set of {1,2,3}");
+        Declaration d = fp.var_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);

@@ -31,6 +31,7 @@ import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -51,6 +52,28 @@ public class IntLinLeBuilder implements IBuilder {
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         IntVar c = exps.get(2).intVarValue(solver);
         if (bs.length > 0) {
+            if (c.isInstantiated()) {
+                if (bs.length == 1) {
+                    if (as[0] == -1) {
+                        solver.post(ICF.arithm(bs[0], ">=", -c.getValue()));
+                        return;
+                    }
+                    if (as[0] == 1) {
+                        solver.post(ICF.arithm(bs[0], "<=", c.getValue()));
+                        return;
+                    }
+                }
+                if (bs.length == 2) {
+                    if (as[0] == -1 && as[1] == 1) {
+                        solver.post(ICF.arithm(bs[1], "<=", bs[0], "+", c.getValue()));
+                        return;
+                    }
+                    if (as[0] == 1 && as[1] == -1) {
+                        solver.post(ICF.arithm(bs[0], "<=", bs[1], "+", c.getValue()));
+                        return;
+                    }
+                }
+            }
             solver.post(IntConstraintFactory.scalar(bs, as, "<=", c));
         }
 

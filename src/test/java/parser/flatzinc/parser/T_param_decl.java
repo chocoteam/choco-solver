@@ -26,13 +26,9 @@
  */
 package parser.flatzinc.parser;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
 
 import java.io.IOException;
@@ -45,27 +41,11 @@ import java.io.IOException;
  */
 public class T_param_decl extends GrammarTest {
 
-
-    public Datas param_decl(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.param_decl_return r = parser.param_decl();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.datas = new Datas();
-        walker.param_decl();
-        return walker.datas;
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException {
-        FlatzincParser fp = parser("bool: beer_is_good = true;");
-        Datas map = null;
-        try {
-            map = param_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
-        Object o = map.get("beer_is_good");
+        Flatzinc4Parser fp = parser("bool: beer_is_good = true;", null, new Datas());
+        fp.param_decl();
+        Object o = fp.datas.get("beer_is_good");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Boolean);
         Assert.assertEquals(true, ((Boolean) o).booleanValue());
@@ -73,14 +53,10 @@ public class T_param_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test2() throws IOException {
-        FlatzincParser fp = parser("int: n = 4;");
-        Datas map = null;
-        try {
-            map = param_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
-        Object o = map.get("n");
+        Flatzinc4Parser fp = parser("int: n = 4;", null, new Datas());
+        fp.datas = new Datas();
+        fp.param_decl();
+        Object o = fp.datas.get("n");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Integer);
         Assert.assertEquals(4, ((Integer) o).intValue());
@@ -89,14 +65,10 @@ public class T_param_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test3() throws IOException {
-        FlatzincParser fp = parser("array [1..7] of int: fib = [1,1,2,3,5,8,13];");
-        Datas map = null;
-        try {
-            map = param_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
-        Object o = map.get("fib");
+        Flatzinc4Parser fp = parser("array [1..7] of int: fib = [1,1,2,3,5,8,13];", null, new Datas());
+        fp.datas = new Datas();
+        fp.param_decl();
+        Object o = fp.datas.get("fib");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof int[]);
         Assert.assertEquals(new int[]{1, 1, 2, 3, 5, 8, 13}, o);
@@ -104,11 +76,8 @@ public class T_param_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test4() throws IOException {
-        FlatzincParser fp = parser("array [1..3] of set of int: suc = [{5, 10, 14}, {}, {}];");
-        try {
-            param_decl(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        Flatzinc4Parser fp = parser("array [1..3] of set of int: suc = [{5, 10, 14}, {}, {}];", null, new Datas());
+        fp.datas = new Datas();
+        fp.param_decl();
     }
 }

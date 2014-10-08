@@ -27,12 +27,8 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
 
 import java.io.IOException;
 
@@ -45,21 +41,13 @@ import java.io.IOException;
 public class T_bool_const extends GrammarTest {
 
 
-    public boolean bool_const(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.bool_const_return r = parser.bool_const();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        return walker.bool_const();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        Assert.assertTrue(bool_const(parser("true")));
+        Assert.assertTrue(parser("true").bool_const().value);
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        Assert.assertFalse(bool_const(parser("false")));
+        Assert.assertFalse(parser("false").bool_const().value);
     }
 }

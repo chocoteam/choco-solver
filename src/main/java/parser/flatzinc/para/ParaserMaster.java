@@ -37,7 +37,7 @@ import util.tools.ArrayUtils;
 
 public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
+    protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
     //***********************************************************************************
     // VARIABLES

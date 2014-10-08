@@ -57,7 +57,8 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         Datas datas = new Datas();
-        datas.setmLayout(new FZNLayout());
+        pas.gc = datas.goals();
+        pas.buildLayout(datas);
         pas.buildParser(in, solver, datas);
 
         solver.findSolution();
@@ -75,7 +76,8 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         Datas datas = new Datas();
-        datas.setmLayout(new FZNLayout());
+        pas.gc = datas.goals();
+        pas.buildLayout(datas);
         pas.buildParser(in, solver, datas);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -94,7 +96,8 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         Datas datas = new Datas();
-        datas.setmLayout(new FZNLayout());
+        pas.gc = datas.goals();
+        pas.buildLayout(datas);
         pas.buildParser(in, solver, datas);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -165,7 +168,8 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         Datas datas = new Datas();
-        datas.setmLayout(new FZNLayout());
+        pas.gc = datas.goals();
+        pas.buildLayout(datas);
         pas.buildParser(in, solver, datas);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);

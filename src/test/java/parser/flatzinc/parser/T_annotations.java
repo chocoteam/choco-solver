@@ -27,13 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
-import parser.flatzinc.ast.Datas;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.expression.EAnnotation;
 
 import java.io.IOException;
@@ -47,48 +43,34 @@ import java.util.List;
  */
 public class T_annotations extends GrammarTest {
 
-
-    public List<EAnnotation> annotations(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.annotations_return r = parser.annotations();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.datas = new Datas();
-        return walker.annotations();
-    }
-
     @Test(groups = "1s")
     public void test0() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("");
-        List<EAnnotation> as = annotations(fp);
+        Flatzinc4Parser fp = parser("");
+        List<EAnnotation> as = fp.annotations().anns;
         Assert.assertEquals(0, as.size());
     }
 
     @Test(groups = "1s")
     public void testa1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("::ann1");
-        List<EAnnotation> as = annotations(fp);
+        Flatzinc4Parser fp = parser("::ann1");
+        List<EAnnotation> as = fp.annotations().anns;
         Assert.assertEquals(1, as.size());
         Assert.assertEquals("ann1", as.get(0).id.value);
     }
 
     @Test(groups = "1s")
     public void testa2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("::ann1::ann2");
-        List<EAnnotation> as = annotations(fp);
+        Flatzinc4Parser fp = parser("::ann1::ann2");
+        List<EAnnotation> as = fp.annotations().anns;
         Assert.assertEquals(2, as.size());
         Assert.assertEquals("ann1", as.get(0).id.value);
         Assert.assertEquals("ann2", as.get(1).id.value);
     }
 
     private void fastcheck(String toParse) throws IOException {
-        FlatzincParser fp = parser(toParse);
+        Flatzinc4Parser fp = parser(toParse);
         List<EAnnotation> as = null;
-        try {
-            as = annotations(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        as = fp.annotations().anns;
         Assert.assertTrue(as.size() > 0);
     }
 

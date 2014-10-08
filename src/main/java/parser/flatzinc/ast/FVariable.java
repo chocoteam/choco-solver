@@ -63,7 +63,7 @@ public final class FVariable {
 
 
 
-    static Logger LOGGER = LoggerFactory.getLogger("fzn");
+    static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     public static void make_variable(Datas datas, Declaration type, String identifier, List<EAnnotation> annotations,
                                      Expression expression, Solver aSolver) {

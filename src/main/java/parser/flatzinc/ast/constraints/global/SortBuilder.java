@@ -24,47 +24,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc.ast.ext;
+package parser.flatzinc.ast.constraints.global;
+
+import parser.flatzinc.ast.Datas;
+import parser.flatzinc.ast.constraints.IBuilder;
+import parser.flatzinc.ast.expression.EAnnotation;
+import parser.flatzinc.ast.expression.Expression;
+import solver.Solver;
+import solver.constraints.IntConstraintFactory;
+import solver.variables.IntVar;
+
+import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 22/10/12
+ * @since 26/07/12
  */
-public enum Operator {
-
-    EQ {
-        @Override
-        public boolean apply(int i, int j) {
-            return i == j;
-        }
-    }, NQ {
-        @Override
-        public boolean apply(int i, int j) {
-            return i != j;
-        }
-    }, LT {
-        @Override
-        public boolean apply(int i, int j) {
-            return i < j;
-        }
-    }, GT {
-        @Override
-        public boolean apply(int i, int j) {
-            return i > j;
-        }
-    }, LQ {
-        @Override
-        public boolean apply(int i, int j) {
-            return i <= j;
-        }
-    }, GQ {
-        @Override
-        public boolean apply(int i, int j) {
-            return i >= j;
-        }
-    };
-
-    public abstract boolean apply(int i, int j);
+public class SortBuilder implements IBuilder {
+    @Override
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] xs = exps.get(0).toIntVarArray(solver);
+        IntVar[] ys = exps.get(1).toIntVarArray(solver);
+        solver.post(IntConstraintFactory.sort(xs, ys));
+    }
 }

@@ -27,12 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.declaration.*;
 
 import java.io.IOException;
@@ -45,50 +42,42 @@ import java.io.IOException;
  */
 public class T_par_type extends GrammarTest {
 
-    public Declaration par_type(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.par_type_return r = parser.par_type();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        return walker.par_type();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("bool");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("bool");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DBool);
         Assert.assertEquals(DBool.me, d);
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("float");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("float");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DFloat);
         Assert.assertEquals(DFloat.me, d);
     }
 
     @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("int");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("int");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DInt);
         Assert.assertEquals(DInt.me, d);
     }
 
     @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("set of int");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("set of int");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DSetOfInt);
         Assert.assertEquals(DSetOfInt.me, d);
     }
 
     @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of bool");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of bool");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -97,8 +86,8 @@ public class T_par_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of float");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of float");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -107,8 +96,8 @@ public class T_par_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of int");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of int");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
@@ -117,8 +106,8 @@ public class T_par_type extends GrammarTest {
 
     @Test(groups = "1s")
     public void test8() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("array [1..2] of set of int");
-        Declaration d = par_type(fp);
+        Flatzinc4Parser fp = parser("array [1..2] of set of int");
+        Declaration d = fp.par_type().decl;
         Assert.assertTrue(d instanceof DArray);
         Assert.assertEquals(1, ((DArray) d).getDimension());
         Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);

@@ -79,6 +79,27 @@ public class IntLinLeReifBuilder implements IBuilder {
                     solver.post(new Constraint("BoolSumLeq0Reif", new PropBoolSumLeq0Reif(bbs)));
                     return;
                 }
+            } else if (c.isInstantiated()) {
+                if (bs.length == 1) {
+                    if (as[0] == -1) {
+                        ICF.arithm(bs[0], ">=", -c.getValue()).reifyWith(r);
+                        return;
+                    }
+                    if (as[0] == 1) {
+                        ICF.arithm(bs[0], "<=", c.getValue()).reifyWith(r);
+                        return;
+                    }
+                }
+                if (bs.length == 2) {
+                    if (as[0] == -1 && as[1] == 1) {
+                        ICF.arithm(bs[1], "<=", bs[0], "+", c.getValue()).reifyWith(r);
+                        return;
+                    }
+                    if (as[0] == 1 && as[1] == -1) {
+                        ICF.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
+                        return;
+                    }
+                }
             }
             int[] tmp = Scalar.getScalarBounds(bs, as);
             IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);

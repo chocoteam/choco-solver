@@ -58,7 +58,7 @@ public class IntNeReifBuilder implements IBuilder {
         // this constraint is not poster, hence not returned, because it is reified
         if (ParserConfiguration.ENABLE_CLAUSE
                 && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
-            SatFactory.addBoolIsNEqVar((BoolVar) a, (BoolVar) b, r);
+            SatFactory.addBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
         } else {
             if (ParserConfiguration.HACK_REIFICATION) {
                 if (a.isInstantiated() || b.isInstantiated()) {

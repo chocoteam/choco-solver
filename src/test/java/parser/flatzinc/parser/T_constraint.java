@@ -26,15 +26,10 @@
  */
 package parser.flatzinc.parser;
 
-import gnu.trove.map.hash.THashMap;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.constraints.Arithmetic;
@@ -52,33 +47,19 @@ import java.io.IOException;
 public class T_constraint extends GrammarTest {
 
     Solver mSolver;
-    THashMap<String, Object> map;
+    Datas map;
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
-        map = new THashMap<String, Object>();
-    }
-
-    public void constraint(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.constraint_return r = parser.constraint();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.mSolver = mSolver;
-        walker.datas = new Datas();
-        walker.constraint();
+        map = new Datas();
     }
 
     @Test(groups = "1s")
     public void test1() throws IOException {
-        map.put("x", VariableFactory.bounded("x", 0, 2, mSolver));
-        FlatzincParser fp = parser("constraint int_le(0,x); % 0<= x\n");
-        try {
-            constraint(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        map.register("x", VariableFactory.bounded("x", 0, 2, mSolver));
+        Flatzinc4Parser fp = parser("constraint int_le(0,x); % 0<= x\n", mSolver, map);
+        fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
         Constraint c = mSolver.getCstrs()[0];
         Assert.assertTrue(c instanceof Arithmetic);
@@ -86,14 +67,10 @@ public class T_constraint extends GrammarTest {
 
     @Test(groups = "1s")
     public void test2() throws IOException {
-        map.put("x", VariableFactory.bounded("x", 0, 2, mSolver));
-        map.put("y", VariableFactory.bounded("y", 0, 2, mSolver));
-        FlatzincParser fp = parser("constraint int_lt(x,y); % x <= y\n");
-        try {
-            constraint(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        map.register("x", VariableFactory.bounded("x", 0, 2, mSolver));
+        map.register("y", VariableFactory.bounded("y", 0, 2, mSolver));
+        Flatzinc4Parser fp = parser("constraint int_lt(x,y); % x <= y\n", mSolver, map);
+        fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
         Constraint c = mSolver.getCstrs()[0];
         Assert.assertTrue(c instanceof Arithmetic);
@@ -102,14 +79,10 @@ public class T_constraint extends GrammarTest {
 
     @Test(groups = "1s")
     public void test3() throws IOException {
-        map.put("x", VariableFactory.bounded("x", 0, 2, mSolver));
-        map.put("y", VariableFactory.bounded("y", 0, 2, mSolver));
-        FlatzincParser fp = parser("constraint int_lin_eq([2,3],[x,y],10); % 0<= x\n");
-        try {
-            constraint(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        map.register("x", VariableFactory.bounded("x", 0, 2, mSolver));
+        map.register("y", VariableFactory.bounded("y", 0, 2, mSolver));
+        Flatzinc4Parser fp = parser("constraint int_lin_eq([2,3],[x,y],10); % 0<= x\n", mSolver, map);
+        fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
         Constraint c = mSolver.getCstrs()[0];
 //		// not even true (can be Arithmetic or Scalar)
@@ -118,13 +91,9 @@ public class T_constraint extends GrammarTest {
 
     @Test(groups = "1s")
     public void test4() throws IOException {
-        map.put("q", VariableFactory.boundedArray("q", 2, 0, 2, mSolver));
-        FlatzincParser fp = parser("constraint int_lin_eq([ 1, -1 ], [ q[1], q[2] ], -1);");
-        try {
-            constraint(fp);
-        } catch (RecognitionException e) {
-            Assert.fail();
-        }
+        map.register("q", VariableFactory.boundedArray("q", 2, 0, 2, mSolver));
+        Flatzinc4Parser fp = parser("constraint int_lin_eq([ 1, -1 ], [ q[1], q[2] ], -1);", mSolver, map);
+        fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
         Constraint c = mSolver.getCstrs()[0];
 //		// not even true (can be Arithmetic or Scalar)

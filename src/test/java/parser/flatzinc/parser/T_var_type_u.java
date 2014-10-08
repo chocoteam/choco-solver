@@ -27,12 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.declaration.*;
 
 import java.io.IOException;
@@ -45,65 +42,57 @@ import java.io.IOException;
  */
 public class T_var_type_u extends GrammarTest {
 
-    public Declaration var_type_u(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.var_type_u_return r = parser.var_type_u();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        return walker.var_type_u();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("bool");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("bool");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DBool);
         Assert.assertEquals(DBool.me, d);
     }
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("float");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("float");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DFloat);
         Assert.assertEquals(DFloat.me, d);
     }
 
     @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("int");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("int");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DInt);
         Assert.assertEquals(DInt.me, d);
     }
 
     @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("1..4");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("1..4");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DInt2);
     }
 
     @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("{1,2,3}");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("{1,2,3}");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DManyInt);
     }
 
 
     @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("set of 1..4");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("set of 1..4");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DSet);
         Assert.assertTrue(((DSet) d).getWhat() instanceof DInt2);
     }
 
     @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("set of {1,2,3}");
-        Declaration d = var_type_u(fp);
+        Flatzinc4Parser fp = parser("set of {1,2,3}");
+        Declaration d = fp.var_type_u().decl;
         Assert.assertTrue(d instanceof DSet);
         Assert.assertTrue(((DSet) d).getWhat() instanceof DManyInt);
     }

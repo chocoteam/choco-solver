@@ -58,7 +58,7 @@ import java.util.ArrayList;
  */
 public class ParseAndSolve {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
+    protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////  MINIZINC OPTIONS   ////////////////////////////////////////////////////////////////////
@@ -73,9 +73,6 @@ public class ParseAndSolve {
 
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy.", required = false)
     protected boolean free = false;
-
-    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
-    protected int nb_cores = 1;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected long tl = -1;
@@ -129,8 +126,8 @@ public class ParseAndSolve {
                     l.add(c.getName());
                     LOGGER.info("% {}", c.getName());
                 }
-                    }
-                }
+            }
+        }
         solve();
     }
 
@@ -163,8 +160,6 @@ public class ParseAndSolve {
         if (!solver.getExplainer().isActive()) {
             if (expeng != ExplanationFactory.NONE) {
                 expeng.plugin(solver, fexp);
-            } else if (fexp) {
-                ExplanationFactory.SILENT.plugin(solver, fexp);
             }
         }
         datas.clear();
@@ -173,7 +168,7 @@ public class ParseAndSolve {
 
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
-        if (ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
+        if (ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, false);
         solver.getSearchLoop().launch((!solver.getObjectiveManager().isOptimization()) && !gc.all);
     }
 
@@ -196,8 +191,8 @@ public class ParseAndSolve {
     protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
             case 2:
-            solver.set(new SevenQueuesPropagatorEngine(solver));
-            break;
+                solver.set(new SevenQueuesPropagatorEngine(solver));
+                break;
             default:
             case 1:
                 solver.set(new TwoBucketPropagationEngine(solver));

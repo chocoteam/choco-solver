@@ -27,12 +27,9 @@
 package parser.flatzinc.parser;
 
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import parser.flatzinc.FlatzincParser;
-import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.declaration.DInt;
 import parser.flatzinc.ast.declaration.DInt2;
 import parser.flatzinc.ast.declaration.Declaration;
@@ -47,18 +44,10 @@ import java.io.IOException;
  */
 public class T_index_set extends GrammarTest {
 
-    public Declaration index_set(FlatzincParser parser) throws RecognitionException {
-        FlatzincParser.index_set_return r = parser.index_set();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincWalker walker = new FlatzincWalker(nodes);
-        return walker.index_set();
-    }
-
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("1..3");
-        Declaration d = index_set(fp);
+        Flatzinc4Parser fp = parser("1..3");
+        Declaration d = fp.index_set().decl;
         Assert.assertTrue(d instanceof DInt2);
         Assert.assertEquals(1, ((DInt2) d).getLow());
         Assert.assertEquals(3, ((DInt2) d).getUpp());
@@ -66,8 +55,8 @@ public class T_index_set extends GrammarTest {
 
     @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
-        FlatzincParser fp = parser("int");
-        Declaration d = index_set(fp);
+        Flatzinc4Parser fp = parser("int");
+        Declaration d = fp.index_set().decl;
         Assert.assertEquals(DInt.me, d);
     }
 

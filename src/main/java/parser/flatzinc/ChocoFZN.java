@@ -44,7 +44,7 @@ public class ChocoFZN {
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         int nbCores = 1;
-		for (int i = 0; i < args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-p")) {
                 // -p option defines the number of slaves
                 nbCores = Integer.parseInt(args[i + 1]);

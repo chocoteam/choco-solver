@@ -49,6 +49,6 @@ public class BoolXorBuilder implements IBuilder {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-        SatFactory.addBoolIsNEqVar(a, b, r);
+        SatFactory.addBoolIsNeqVar(a, b, r);
     }
 }

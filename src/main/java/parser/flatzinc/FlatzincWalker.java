@@ -122,7 +122,7 @@ public class FlatzincWalker extends TreeParser {
 
 
     // The flatzinc logger -- 'System.out/err' is fobidden!
-    protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
+    protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
     public Datas datas;
 

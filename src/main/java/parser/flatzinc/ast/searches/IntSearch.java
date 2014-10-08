@@ -80,7 +80,7 @@ public class IntSearch {
             case max_regret:
                 return new MaxRegret();
             default:
-                LoggerFactory.getLogger("fzn").error("% No implementation for " + varChoice.name() + ". Set default.");
+                LoggerFactory.getLogger("solver").error("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;
         }
     }
@@ -116,7 +116,7 @@ public class IntSearch {
                 assgnt = DecisionOperator.int_reverse_split;
                 break;
             default:
-                LoggerFactory.getLogger("fzn").error("% No implementation for " + assignmennt.name() + ". Set default.");
+                LoggerFactory.getLogger("solver").error("% No implementation for " + assignmennt.name() + ". Set default.");
                 valSelector = new IntDomainMin();
         }
         return new IntStrategy(scope, variableSelector, valSelector, assgnt);
