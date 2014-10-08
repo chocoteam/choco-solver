@@ -26,6 +26,7 @@
  */
 package solver.search.loop.monitors;
 
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.search.limits.*;
@@ -47,7 +48,7 @@ public class SearchMonitorFactory {
     SearchMonitorFactory() {
     }
 
-	private static class DefaultSolutionMessage implements IMessage {
+    private static class DefaultSolutionMessage implements IMessage {
 
         private Solver solver;
 
@@ -174,6 +175,25 @@ public class SearchMonitorFactory {
     }
 
     /**
+     * Print statistics in one line
+     * @param solver the solver to observe
+     */
+    public static void shortlog(final Solver solver) {
+        solver.plugMonitor(new IMonitorClose() {
+            @Override
+            public void beforeClose() {
+                if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
+                    LoggerFactory.getLogger("solver").info(solver.getMeasures().toOneLineString());
+                }
+            }
+
+            @Override
+            public void afterClose() {
+            }
+        });
+    }
+
+    /**
      * Log execution during choices #s and #e
      *
      * @param solver a solver
@@ -292,8 +312,8 @@ public class SearchMonitorFactory {
      * <br/>
      * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
      *
-	 * @param solver	the solver subject to the time limit
-     * @param limit		maximal resolution time in millisecond
+     * @param solver the solver subject to the time limit
+     * @param limit  maximal resolution time in millisecond
      * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
@@ -317,7 +337,7 @@ public class SearchMonitorFactory {
      */
     public static void limitTime(Solver solver, String duration) {
         limitTime(solver, convertInMilliseconds(duration));
-	}
+    }
 
     /**
      * Defines a limit over the run time, set in a thread.
@@ -388,7 +408,7 @@ public class SearchMonitorFactory {
         }
         if (milliseconds == 0) throw new SolverException("Duration cannot be parsed or must be positive" + duration);
         return milliseconds;
-	}
+    }
 
     /**
      * Defines a limit over the number of fails allowed during the resolution.
@@ -427,12 +447,12 @@ public class SearchMonitorFactory {
         solver.plugMonitor(new OutputCSV(solver, prefix, filename));
     }
 
-	public static void restartAfterEachSolution(final Solver solver) {
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				solver.getSearchLoop().restart();
-			}
-		});
-	}
+    public static void restartAfterEachSolution(final Solver solver) {
+        solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.getSearchLoop().restart();
+            }
+        });
+    }
 }
