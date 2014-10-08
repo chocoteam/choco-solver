@@ -32,8 +32,11 @@ import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.explanations.*;
-import solver.explanations.strategies.jumper.MostRecentWorldJumper;
+import solver.exception.SolverException;
+import solver.explanations.BranchingDecision;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ExplanationEngine;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
@@ -53,17 +56,12 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
     protected ExplanationEngine mExplanationEngine;
     protected Solver mSolver;
-
-    protected IDecisionJumper decisionJumper;
+    boolean userE; // set to true, store the last explanation
+    protected Explanation lastOne;
 
     public ConflictBasedBackjumping(ExplanationEngine mExplanationEngine) {
-        this(mExplanationEngine, new MostRecentWorldJumper());
-    }
-
-    protected ConflictBasedBackjumping(ExplanationEngine mExplanationEngine, IDecisionJumper ws) {
         this.mExplanationEngine = mExplanationEngine;
         this.mSolver = mExplanationEngine.getSolver();
-        this.decisionJumper = ws;
         mSolver.getSearchLoop().plugSearchMonitor(this);
     }
 
@@ -71,25 +69,42 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         return mSolver;
     }
 
+    /**
+     * By activating the user explanation, the algorithm will only store the explanation
+     * related to the last conflict. It has a meaning only when the search is complete and has no solution.
+     * In that case, the explanation is not composed of any decisions, and the propagators involved explained
+     * why there is no solution to the problem.
+     *
+     * @param active true or false
+     */
+    public void activeUserExplanation(boolean active) {
+        if (!Configuration.PROP_IN_EXP) {
+            throw new SolverException("Configuration.properties should be modified to allow storing propagators in explanations. (PROP_IN_EXP property).");
+        }
+        userE = active;
+    }
+
+    public Explanation getUserExplanation() {
+        if (userE) {
+            return lastOne;
+        } else {
+            throw new SolverException("User explanation is not activated (see #activeUserExplanation).");
+        }
+    }
+
     @Override
     public void onContradiction(ContradictionException cex) {
-        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = new Explanation();
-            if (cex.v != null) {
-                cex.v.explain(VariableState.DOM, expl);
-            } else {
-                cex.c.explain(null, expl);
-            }
-            Explanation complete = mExplanationEngine.flatten(expl);
-            if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-                mExplanationEngine.onContradiction(cex, complete);
-            }
-            int upto = decisionJumper.compute(complete, mSolver.getEnvironment().getWorldIndex());
-            mSolver.getSearchLoop().overridePreviousWorld(upto);
-            updateVRExplainUponbacktracking(upto, complete, cex.c);
-        } else {
-            throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
+        assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
+        Explanation complete = mExplanationEngine.flatten(cex.explain());
+        if (userE) {
+            lastOne = complete;
         }
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+            mExplanationEngine.onContradiction(cex, complete);
+        }
+        int upto = compute(complete, mSolver.getEnvironment().getWorldIndex());
+        mSolver.getSearchLoop().overridePreviousWorld(upto);
+        updateVRExplainUponbacktracking(upto, complete, cex.c);
     }
 
     @Override
@@ -141,5 +156,28 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
+    }
+
+    /**
+     * Compute the world to backtrack to
+     *
+     * @param explanation current explanation
+     * @param currentWorldIndex current world index
+     * @return the number of world to backtrack to.
+     */
+    int compute(Explanation explanation, int currentWorldIndex) {
+        int dworld = 0;
+        if (explanation.nbDeductions() > 0) {
+            for (int d = 0; d < explanation.nbDeductions(); d++) {
+                Deduction dec = explanation.getDeduction(d);
+                if (dec.getmType() == Deduction.Type.DecLeft) {
+                    int world = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
+                    if (world > dworld) {
+                        dworld = world;
+                    }
+                }
+            }
+        }
+        return 1 + (currentWorldIndex - dworld);
     }
 }

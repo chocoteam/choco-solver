@@ -27,8 +27,7 @@
 package solver.search.loop.lns;
 
 import solver.Solver;
-import solver.explanations.ExplanationFactory;
-import solver.explanations.LazyExplanationEngine;
+import solver.explanations.LazyExplanationEngineFromRestart;
 import solver.explanations.strategies.*;
 import solver.search.limits.ACounter;
 import solver.search.loop.lns.neighbors.*;
@@ -152,8 +151,8 @@ public class LNSFactory {
      */
     public static LargeNeighborhoodSearch elns(Solver solver, IntVar[] vars, int level, long seed,
                                                ACounter fr4exp, ACounter fr4rnd) {
-        if (!(solver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(solver, true);
+        if (!(solver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            solver.set(new LazyExplanationEngineFromRestart(solver));
         }
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
         neighbor1.fastRestart(fr4exp);
@@ -184,8 +183,8 @@ public class LNSFactory {
     public static LargeNeighborhoodSearch pgelns(Solver solver, IntVar[] vars, int level, long seed,
                                                  int fgmtSize, int listSize,
                                                  ACounter fr4exp, ACounter fr4rnd) {
-        if (!(solver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(solver, true);
+        if (!(solver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            solver.set(new LazyExplanationEngineFromRestart(solver));
         }
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
         neighbor1.fastRestart(fr4exp);
@@ -220,8 +219,8 @@ public class LNSFactory {
     public static LargeNeighborhoodSearch apgelns(Solver solver, IntVar[] vars, int level, long seed,
                                                   int fgmtSize, int listSize,
                                                   ACounter fr4exp, ACounter fr4rnd) {
-        if (!(solver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(solver, true);
+        if (!(solver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            solver.set(new LazyExplanationEngineFromRestart(solver));
         }
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
         neighbor1.fastRestart(fr4exp);

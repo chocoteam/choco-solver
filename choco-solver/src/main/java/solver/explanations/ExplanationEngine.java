@@ -229,6 +229,10 @@ public class ExplanationEngine implements Serializable {
         LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
     }
 
+    public void onActivatePropagator(Propagator propagator, Explanation explanation) {
+        LOGGER.info("::EXPL:: ACTIV. " + propagator + " BECAUSE OF " + flatten(explanation));
+    }
+
     public void onContradiction(ContradictionException cex, Explanation explanation) {
         if (cex.v != null) {
             LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);

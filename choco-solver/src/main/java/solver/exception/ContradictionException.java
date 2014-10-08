@@ -29,6 +29,8 @@ package solver.exception;
 
 import solver.Cause;
 import solver.ICause;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.Variable;
 
 /**
@@ -86,5 +88,15 @@ public final class ContradictionException extends Exception {
      */
     public synchronized Throwable fillInStackTrace() {
         return this;
+    }
+
+    public Explanation explain() {
+        Explanation expl = new Explanation();
+        if (v != null) {
+            v.explain(VariableState.DOM, expl);
+        } else {
+            c.explain(null, expl);
+        }
+        return expl;
     }
 }

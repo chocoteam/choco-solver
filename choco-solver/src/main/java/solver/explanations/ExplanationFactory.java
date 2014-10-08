@@ -30,7 +30,6 @@ package solver.explanations;
 import solver.Solver;
 import solver.explanations.strategies.ConflictBasedBackjumping;
 import solver.explanations.strategies.DynamicBacktracking;
-import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -48,22 +47,25 @@ public enum ExplanationFactory {
             solver.set(new ExplanationEngine(solver));
         }
     },
-    /**
+    /*
      * Active explanations, but do not interact with search.
      */
+    /*
     SILENT {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
         }
-    },
+    },*/
+/*
+    BEWARE: not accessible anymore since it needs to be called just after a restart, otherwise, explanations are wrong.
 
     LAZY {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             solver.set(new LazyExplanationEngine(solver));
         }
-    },
+    },*/
     /**
      * add a Conflict-based jumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
@@ -83,7 +85,7 @@ public enum ExplanationFactory {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
-            new DynamicBacktracking(solver.getExplainer(), new MostRecentWorldJumper( ));
+            new DynamicBacktracking(solver.getExplainer());
         }
     };
 

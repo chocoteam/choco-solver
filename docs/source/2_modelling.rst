@@ -275,23 +275,23 @@ Their domains are implicitly defined by a function and implied variables.
 
 ``x`` is a constant : ::
 
- IntVar x = Views.fixed(1, solver);
+ IntVar x = VariableFactory.fixed(1, solver);
 
 ``x = y + 2`` : ::
 
- IntVar x = Views.offset(y, 2);
+ IntVar x = VariableFactory.offset(y, 2);
 
 ``x = -y`` : ::
 
- IntVar x = Views.minus(y);
+ IntVar x = VariableFactory.minus(y);
 
 ``x = 3*y`` : ::
 
- IntVar x = Views.scale(y, 3);
+ IntVar x = VariableFactory.scale(y, 3);
 
 Views can be combined together: ::
 
- IntVar x = Views.offset(Views.scale(y,2),5);
+ IntVar x = VariableFactory.offset(VariableFactory.scale(y,2),5);
 
 Set variable
 ------------

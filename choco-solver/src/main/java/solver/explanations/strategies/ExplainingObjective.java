@@ -103,8 +103,8 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         this.random = new Random(seed);
         this.level = level;
 
-        if (!(aSolver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(aSolver, true);
+        if (!(aSolver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            aSolver.set(new LazyExplanationEngineFromRestart(aSolver));
         }
         this.mExplanationEngine = aSolver.getExplainer();
 
