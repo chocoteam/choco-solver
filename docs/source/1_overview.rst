@@ -210,6 +210,81 @@ Eclipse
    mvn eclipse:eclipse
 
 
+Note about logging
+------------------
+
+Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
+In order to avoid imposing a logging framework on end-user, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
+
+    "SLF4J is a simple facade for logging systems allowing the end-user to plug-in the desired logging system at deployment time."
+    -- http://www.slf4j.org/faq.html
+
+SLF4J is only a facade, meaning that it does not provide a complete logging solution, and a logging framework must be bound.
+Otherwise, you'll get the following error:
+
+.. parsed-literal::
+
+    SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+    SLF4J: Defaulting to no-operation (NOP) logger implementation
+    SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+
+
+Choco is developed using `Logback <http://logback.qos.ch/>`_,
+but other framework are available such as `log4j <http://logging.apache.org/log4j/1.2/index.html>`_
+(a exhaustive list is given on `SL4J <http://www.slf4j.org/manual.html>`_).
+Declaring a logging framework is as simple as adding jar files to the classpath of your application:
+
+
+Command-line
+^^^^^^^^^^^^
+
+For logback:
+
+    .. parsed-literal::
+
+        java \\
+        -cp .:choco-solver-|release|.jar:logback-core-1.0.13.jar:logback-classic-1.0.13.jar \\
+        my.project.Main
+
+.. note::
+
+    Logback relies on property file, namely `logback.xml`, provided in the zip file.
+    `Where should the configuration files such as logback.groovy, logback-test.xml or logback.xml be located on the classpath? <http://logback.qos.ch/faq.html#configFileLocation>`_
+
+
+For log4j:
+
+    .. parsed-literal::
+
+        java -cp .:choco-solver-|release|.jar:slf4j-log4j12-1.7.7.jar my.project.Main
+
+
+Maven
+^^^^^
+
+For logback:
+
+    .. code-block:: xml
+
+        <dependency>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+          <version>1.0.13</version>
+        </dependency>
+
+For log4j:
+
+    .. code-block:: xml
+
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <version>1.7.7</version>
+        </dependency>
+
+More details can be found on http://www.slf4j.org/manual.html.
+
+
 .. _12_overview_label:
 
 Overview of Choco |version|
