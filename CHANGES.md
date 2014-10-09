@@ -3,34 +3,39 @@ Choco 3 ChangeLog
 
 This file is dedicated to sum up the new features added and bugs fixed in Choco 3 since the first stable version, 3.1.0.
 
-3.1.0 - 02 Sep 2013
+NEXT MILESTONE
 -------------------
 
-This the first stable version of Choco 3.
-The CHANGES.md file starts at this version.
-
-3.1.1 - 10 Jan 2014
--------------------
-
-* Explain PropSumEq
-* Fix #118: activate DBT
-* Feat #120: new framework to build set strategies, more built-in set strategies
-* Fix #122: update Database schema
-* Fix #123: Monotonic decreasing for real objective
-* Fix #124: mzn script now handles free search
-* Fix #125: remove shut down hooks when the resolution ends normally
-* Cumulative energy-based greedy filter improvement
-* Fix #130: fix delta for view
-* Fix #142: synchronize nb pending events
-* Fix #143: Dow/WDeg is now supporting propagator hot addition
-* Fix #144: setObjectiveOptimal(...) in searchLoop.close() is correct
+* Fix #206: fix lack of robustness in eucl_div
+- Better circuit constraint
+- incremental and coarse propagation of graph variable degrees
+- better samples for Hamiltonian cycle problems
+- NValue now split into atleast and atmost
+- fix LOGGER usage in parser (allows different levels of logging)
+- integer signature for the Lagrangian 1-tree relaxation constraint (good for solving the TSP)
+- Table constraint refactoring (STR2+) (seems to be not idempotent however)
+- Table reformulation of small scalar products
+- Minimum and Maximum over boolean arrays
+- Issue #215: Fix generation of relation based on tuples
+- Fix #214: Fix problems related to propagators dynamic addition and deletion
+- Add a GenerateAndTest search strategy which can be combined with others
+- Fix #218: return null when all variables are instantiated
+- Fix #219: fix range iterator of enumerated integer variable
+- Refactor IEventType (use interface and a concrete implementation for each variable type)
+- EXTRACT GRAPH VAR MODULE to choco-graph project (https://github.com/chocoteam/choco-graph)
+- Fix bug in CoupleTable due to wrong range use
+- Issue #191: disable buildFakeHistory by default (add a condition to build fake history)
+- Space are not filtered anymore from Operator
+- Remove vars.clone() in Propagator constructor.
+- Remove DSLEngine and dependencies
+- Add a set constraint to get the set of values of an array of integer variables (SCF.int_values_union)
 
 3.2.0 - 28 May 2014
 -------------------
 * Fix #148: update release script
 * Refactoring  #149
 * Less Java Genericity:
-- Remove Delta type from Variable 
+- Remove Delta type from Variable
 - Remove Propagator type from Constraints
 - Remove Variable type from views
 * StrategySequencer now created automatically
@@ -75,7 +80,7 @@ The CHANGES.md file starts at this version.
 * Fix #192: NogoodFromSolution now available (only for integer variables)
 * Fix #193: VF.enumerated() now copies the input array of values
 * Strong refactoring of IntStrategyFactory (access to variable and value selectors, decision operators, and more simple to understand search names).
-* Stronger AtMostNValue constraint with automatic detection of disequalities 
+* Stronger AtMostNValue constraint with automatic detection of disequalities
 * Fix #114: Enable to specify a time unit in time limits (ms, s, m or h)
 * Fix #195: fix bug while using IntViews over BoolVar
 * Fix #17: propagator annotations (PropAnn) have been removed
@@ -91,29 +96,25 @@ The CHANGES.md file starts at this version.
 - Changes measure, times are now in second
 * Fix#199: some deltamonitors were desynchronized with delta
 
-NEXT MILESTONE
+3.1.1 - 10 Jan 2014
 -------------------
 
-* Fix #206: fix lack of robustness in eucl_div
-- Better circuit constraint
-- incremental and coarse propagation of graph variable degrees
-- better samples for Hamiltonian cycle problems
-- NValue now split into atleast and atmost
-- fix LOGGER usage in parser (allows different levels of logging)
-- integer signature for the Lagrangian 1-tree relaxation constraint (good for solving the TSP)
-- Table constraint refactoring (STR2+) (seems to be not idempotent however)
-- Table reformulation of small scalar products
-- Minimum and Maximum over boolean arrays
-- Issue #215: Fix generation of relation based on tuples
-- Fix #214: Fix problems related to propagators dynamic addition and deletion
-- Add a GenerateAndTest search strategy which can be combined with others
-- Fix #218: return null when all variables are instantiated
-- Fix #219: fix range iterator of enumerated integer variable
-- Refactor IEventType (use interface and a concrete implementation for each variable type)
-- EXTRACT GRAPH VAR MODULE to choco-graph project (https://github.com/chocoteam/choco-graph)
-- Fix bug in CoupleTable due to wrong range use
-- Issue #191: disable buildFakeHistory by default (add a condition to build fake history)
-- Space are not filtered anymore from Operator
-- Remove vars.clone() in Propagator constructor.
-- Remove DSLEngine and dependencies
-- Add a set constraint to get the set of values of an array of integer variables (SCF.int_values_union)
+* Explain PropSumEq
+* Fix #118: activate DBT
+* Feat #120: new framework to build set strategies, more built-in set strategies
+* Fix #122: update Database schema
+* Fix #123: Monotonic decreasing for real objective
+* Fix #124: mzn script now handles free search
+* Fix #125: remove shut down hooks when the resolution ends normally
+* Cumulative energy-based greedy filter improvement
+* Fix #130: fix delta for view
+* Fix #142: synchronize nb pending events
+* Fix #143: Dow/WDeg is now supporting propagator hot addition
+* Fix #144: setObjectiveOptimal(...) in searchLoop.close() is correct
+
+
+3.1.0 - 02 Sep 2013
+-------------------
+
+This the first stable version of Choco 3.
+The CHANGES.md file starts at this version.
