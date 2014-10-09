@@ -116,3 +116,4 @@ NEXT MILESTONE
 - Space are not filtered anymore from Operator
 - Remove vars.clone() in Propagator constructor.
 - Remove DSLEngine and dependencies
+- Add a set constraint to get the set of values of an array of integer variables (SCF.int_values_union)
