@@ -36,7 +36,6 @@ import solver.explanations.Explanation;
 import solver.explanations.ExplanationFactory;
 import solver.explanations.RecorderExplanationEngine;
 import solver.explanations.strategies.ConflictBasedBackjumping;
-import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -66,7 +65,7 @@ public class ExplanationTest {
                 solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
                 solver.set(ISF.lexico_LB(vars));
                 engines[e].plugin(solver, false);
-                SMF.shortlog(solver);
+//                SMF.shortlog(solver);
                 Assert.assertFalse(solver.findSolution());
                 // get the last contradiction, which is
                 if (e == 0) {
@@ -91,7 +90,7 @@ public class ExplanationTest {
             solver.set(new RecorderExplanationEngine(solver));
             ConflictBasedBackjumping cbj = new ConflictBasedBackjumping(solver.getExplainer());
             cbj.activeUserExplanation(true);
-            SMF.shortlog(solver);
+//            SMF.shortlog(solver);
             Assert.assertFalse(solver.findSolution());
             Explanation exp = cbj.getUserExplanation();
             Assert.assertEquals(2, exp.nbPropagators());
@@ -108,7 +107,7 @@ public class ExplanationTest {
                     solver.post(ICF.alldifferent(pigeons, "NEQS"));
                     solver.set(ISF.random_value(pigeons, seed));
                     engines[e].plugin(solver, false);
-                    SMF.shortlog(solver);
+//                    SMF.shortlog(solver);
                     Assert.assertFalse(solver.findSolution());
                 }
             }
@@ -162,7 +161,7 @@ public class ExplanationTest {
                     solver.set(ISF.random_value(vars, seed));
 
                     engines[e].plugin(solver, false);
-                    SMF.shortlog(solver);
+//                    SMF.shortlog(solver);
                     Assert.assertEquals(n > 2, solver.findSolution());
                 }
             }
