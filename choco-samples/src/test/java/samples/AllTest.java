@@ -31,12 +31,11 @@ import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.AbsoluteEvaluation;
+import samples.integer.AllIntervalSeries;
 import solver.Configuration;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
-import solver.search.loop.SearchLoops;
 
 import java.util.Arrays;
 
@@ -53,25 +52,21 @@ public class AllTest {
     long nbSol;
     IEnvironment environment;
     PropagationEngineFactory strat;
-    SearchLoops sloop;
     ExplanationFactory efact;
 
 
     public AllTest() {
-//        this(new AllIntervalSeries(), new String[]{"-o", "5"},
-        this(new AbsoluteEvaluation(), null,
+        this(new AllIntervalSeries(), new String[]{"-o", "5"},
                 Environments.TRAIL.make(),
                 PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE,
                 ExplanationFactory.NONE,
-                SearchLoops.BINARY,
-                6);
+                2);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
                    PropagationEngineFactory strat,
                    ExplanationFactory e,
-                   SearchLoops sloop,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
@@ -82,7 +77,6 @@ public class AllTest {
         this.strat = strat;
         this.nbSol = nbSol;
         this.efact = e;
-        this.sloop = sloop;
     }
 
     @Test(groups = "1m")
@@ -91,7 +85,6 @@ public class AllTest {
             LoggerFactory.getLogger("test").info(this.toString());
             prob.readArgs(args);
             prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
-            sloop.make(prob.solver);
             prob.buildModel();
             prob.configureSearch();
             efact.plugin(prob.solver, true);

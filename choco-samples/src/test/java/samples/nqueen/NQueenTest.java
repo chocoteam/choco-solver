@@ -115,7 +115,7 @@ public class NQueenTest {
         assertIt(s);
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void testGlobal() throws ContradictionException {
         log.info("modelGlobal {}", parameters());
         Solver s = modeler(new NQueenGlobal(), size);
@@ -123,7 +123,7 @@ public class NQueenTest {
         assertIt(s);
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void testDualBinary() {
         log.info("modelDualBinary {}", parameters());
         Solver s = modeler(new NQueenDualBinary(), size);

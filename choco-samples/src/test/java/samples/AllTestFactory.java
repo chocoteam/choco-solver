@@ -31,7 +31,6 @@ import org.testng.annotations.Factory;
 import samples.integer.AbsoluteEvaluation;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
-import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,10 +72,6 @@ public class AllTestFactory {
             ExplanationFactory.DBT,
     };
 
-    SearchLoops[] slFact = new SearchLoops[]{
-            SearchLoops.BINARY
-    };
-
 
     @Factory
     public Object[] createInstances() {
@@ -86,11 +81,10 @@ public class AllTestFactory {
 
         for (int p = 0; p < problems.length; p++)
             for (ExplanationFactory x : expFact)
-                for (SearchLoops sl : slFact) {
-                    for (Environments e : envFact)
-                        for (PropagationEngineFactory st : pol)
-                            lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, x, sl, nbSol[p]));
-                }
+                for (Environments e : envFact)
+                    for (PropagationEngineFactory st : pol)
+                        lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, x, nbSol[p]));
+
         return lresult.toArray();
     }
 }

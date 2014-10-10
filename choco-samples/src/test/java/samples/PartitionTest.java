@@ -64,7 +64,7 @@ public class PartitionTest {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void test16to32() {
         int[] size = {32, 36, 40, 44, 48, 52, 56, 60, 64};
         int[] sols = {1, 1, 1, 1, 1, 1, 1, 1, 1};
