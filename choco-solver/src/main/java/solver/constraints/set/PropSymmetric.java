@@ -80,13 +80,13 @@ public class PropSymmetric extends Propagator<SetVar> {
         elementForced = new IntProcedure() {
             @Override
             public void execute(int element) throws ContradictionException {
-                vars[element - offSet].addToKernel(currentSet, aCause);
+                vars[element - offSet].addToKernel(currentSet + offSet, aCause);
             }
         };
         elementRemoved = new IntProcedure() {
             @Override
             public void execute(int element) throws ContradictionException {
-                vars[element - offSet].removeFromEnvelope(currentSet, aCause);
+                vars[element - offSet].removeFromEnvelope(currentSet + offSet, aCause);
             }
         };
     }
@@ -114,7 +114,7 @@ public class PropSymmetric extends Propagator<SetVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        currentSet = idxVarInProp + offSet;
+        currentSet = idxVarInProp;
         sdm[currentSet].freeze();
         sdm[currentSet].forEach(elementForced, SetEventType.ADD_TO_KER);
         sdm[currentSet].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
