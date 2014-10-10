@@ -15,6 +15,6 @@ branches:
 notifications:
   recipients:
     - choco@emn.fr
-    on_success: always
-    on_failure: always
+  on_success: always
+  on_failure: always
 
