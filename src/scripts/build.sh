@@ -56,7 +56,6 @@ if [ ${BRANCH} = "release" ]; then
     #Clean
     git push origin --delete release
 else
-    mvn clean install -DtestFailureIgnore=true -Dgroups="1s,10s" || exit 1
-    mvn clean install -DtestFailureIgnore=true -Dgroups="1m,10m" || exit 1
+    mvn clean install -DtestFailureIgnore=true -Dgroups="1s,10s,1m,10m" || exit 1
     mvn clean install -DtestFailureIgnore=true -Dgroups="30ms" || exit 1
 fi

@@ -195,7 +195,7 @@ public class TableTest {
 		Solver solver = new Solver();
 		IntVar[] vars = VF.enumeratedArray("vars", 10, 0,100, solver);
 		Tuples t = new Tuples(false);
-		t.add(new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+		t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 		solver.post(ICF.table(vars, t, "GAC3rm"));
 		solver.findSolution();
 	}

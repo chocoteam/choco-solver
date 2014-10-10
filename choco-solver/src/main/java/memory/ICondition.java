@@ -26,6 +26,8 @@
  */
 package memory;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
@@ -33,7 +35,7 @@ package memory;
  * @version choco
  * @since 24/09/2014
  */
-public interface ICondition {
+public interface ICondition extends Serializable{
 
     boolean satisfied();
 
