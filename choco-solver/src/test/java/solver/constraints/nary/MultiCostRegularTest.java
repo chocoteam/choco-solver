@@ -126,6 +126,7 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test1() {
         long seed = System.currentTimeMillis();
+        System.out.printf("SEED1:%d\n", seed);
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(5, i + seed);
             solver.findAllSolutions();
@@ -136,6 +137,7 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test2() {
         long seed = System.currentTimeMillis();
+        System.out.printf("SEED:%d\n", seed);
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(7, i);
             solver.findAllSolutions();

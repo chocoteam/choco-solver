@@ -51,8 +51,8 @@ import java.util.*;
 public class FiniteAutomaton implements IAutomaton {
 
 
-    protected static TIntIntHashMap charFromIntMap = new TIntIntHashMap();
-    protected static TIntIntHashMap intFromCharMap = new TIntIntHashMap();
+    protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap();
+    protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap();
 
     public static org.slf4j.Logger LOGGER = LoggerFactory.getLogger("solver");
 
