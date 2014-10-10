@@ -1537,7 +1537,7 @@ public class DuplicateTest {
         Solver solver = new Solver("Choco");
         SetVar[] S = new SetVar[4];
         for (int i = 0; i < S.length; i++) {
-            S[i] = VF.set("S_" + i, new int[]{1, 2, 3, 4}, solver);
+            S[i] = VF.set("S_" + i, new int[]{-5, 0, 1, 2, 4}, solver);
         }
         solver.post(SCF.symmetric(S, -1));
 

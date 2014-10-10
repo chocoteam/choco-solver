@@ -6,6 +6,8 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+- Graph vars externalized into choco-graph module (https://github.com/chocoteam/choco-graph)
+- Fix PropSymmetric (set vars)
 * Fix #206: fix lack of robustness in eucl_div
 - Better circuit constraint
 - incremental and coarse propagation of graph variable degrees
