@@ -1863,6 +1863,21 @@ The API is : ::
 
     Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2)
 
+.. _51_scstr_intvu:
+
+int_values_union
+================
+
+The `int_values_union` constraint involves:
+
+- an array of integer variables `VARS` and
+- a set variable `VALUES`
+
+It ensures that: :math:`\text{VALUES} = \text{VARS}_1 \cup \text{VARS}_2 \cup \ldots \cup \text{VARS}_n`.
+
+The API is : ::
+
+    Constraint int_values_union(IntVar[] VARS, SetVar VALUES)
 
 .. _51_scstr_int:
 
