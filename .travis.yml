@@ -3,10 +3,6 @@ jdk:
 - oraclejdk8
 before_script:
   - "export MAVEN_OPTS='-Xmx4096m -Xms1024 -Xss64m -server'"
-env:
-  - GROUP=1s,10s
-  - GROUP=1m,10m
-  - GROUP=30m
 script: travis_wait ./src/scripts/build.sh
 branches:
   only:
