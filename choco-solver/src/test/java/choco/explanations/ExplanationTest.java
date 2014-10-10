@@ -36,7 +36,9 @@ import solver.explanations.Explanation;
 import solver.explanations.ExplanationFactory;
 import solver.explanations.RecorderExplanationEngine;
 import solver.explanations.strategies.ConflictBasedBackjumping;
+import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
@@ -164,6 +166,24 @@ public class ExplanationTest {
 //                    SMF.shortlog(solver);
                     Assert.assertEquals(n > 2, solver.findSolution());
                 }
+            }
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testReif() {
+        for (long seed = 0; seed < 1; seed++) {
+            for (int e = 0; e < engines.length; e++) {
+                final Solver solver = new Solver();
+                IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
+                BoolVar[] bs = VF.boolArray("b", 2, solver);
+                ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+                ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+                solver.post(ICF.arithm(bs[0], "=", bs[1]));
+                solver.set(ISF.random_value(p, seed));
+                engines[e].plugin(solver, false);
+                SMF.shortlog(solver);
+                Assert.assertFalse(solver.findSolution());
             }
         }
     }
