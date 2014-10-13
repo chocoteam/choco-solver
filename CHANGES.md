@@ -6,6 +6,10 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+
+3.2.1 - 13 Oct 2014
+-------------------
+
 - Graph vars externalized into choco-graph module (https://github.com/chocoteam/choco-graph)
 - Fix PropSymmetric (set vars)
 * Fix #206: fix lack of robustness in eucl_div
