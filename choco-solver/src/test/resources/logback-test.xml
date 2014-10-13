@@ -18,7 +18,7 @@
 
     <logger name="solver" level="info"/>
 
-    <logger name="explainer" level="error"/>
+    <logger name="explainer" level="info"/>
 
     <root level="warn">
         <appender-ref ref="STDOUT"/>

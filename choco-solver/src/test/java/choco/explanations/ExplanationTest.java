@@ -173,18 +173,63 @@ public class ExplanationTest {
     @Test(groups = "1s")
     public void testReif() {
         for (long seed = 0; seed < 1; seed++) {
-            for (int e = 0; e < engines.length; e++) {
+            for (int e = 1; e < engines.length - 1; e++) {
                 final Solver solver = new Solver();
                 IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
                 BoolVar[] bs = VF.boolArray("b", 2, solver);
                 ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
                 ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                 solver.post(ICF.arithm(bs[0], "=", bs[1]));
+
+                solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), VF.fixed(5, solver)));
+                solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
                 solver.set(ISF.random_value(p, seed));
                 engines[e].plugin(solver, false);
                 SMF.shortlog(solver);
                 Assert.assertFalse(solver.findSolution());
             }
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testReif2() { // to test PropagatorActivation, from bs to p
+        for (int e = 0; e < engines.length; e++) {
+            final Solver solver = new Solver();
+            IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
+            BoolVar[] bs = VF.boolArray("b", 2, solver);
+            ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+            ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+            solver.post(ICF.arithm(bs[0], "=", bs[1]));
+
+            solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), VF.fixed(5, solver)));
+            solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
+            // p[0], p[1] are just for fun
+            solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
+            engines[e].plugin(solver, false);
+            SMF.log(solver,true, true);
+            SMF.shortlog(solver);
+            Assert.assertFalse(solver.findSolution());
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testReif3() { // to test PropagatorActivation, from bs to p
+        for (int e = 0; e < engines.length; e++) {
+            final Solver solver = new Solver();
+            IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
+            BoolVar[] bs = VF.boolArray("b", 2, solver);
+            ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+            ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+            solver.post(ICF.arithm(bs[0], "=", bs[1]));
+
+            solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), VF.fixed(5, solver)));
+            solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
+            // p[0], p[1] are just for fun
+            solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
+            engines[e].plugin(solver, false);
+            SMF.log(solver,true, true);
+            SMF.shortlog(solver);
+            Assert.assertFalse(solver.findSolution());
         }
     }
 }
