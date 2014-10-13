@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -245,5 +245,19 @@ public class DynamicPostTest {
                     ICF.arithm(b, ">", bestB)));
         }
         Assert.assertEquals(9, nbSolution);
+    }
+
+    @Test(groups = "1s")
+    public void testIssue214() {
+        Solver solver = new Solver();
+        IntVar x = VariableFactory.enumerated("x", 1, 2, solver);
+        IntVar y = VariableFactory.enumerated("y", 1, 2, solver);
+        IntVar z = VariableFactory.enumerated("z", 1, 2, solver);
+        Constraint c = LCF.or(
+                ICF.arithm(x, "<", y),
+                ICF.arithm(x, "<", z));
+        solver.post(c);
+        solver.findSolution();
+        solver.unpost(c);
     }
 }

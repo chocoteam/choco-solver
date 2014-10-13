@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -109,7 +109,7 @@ public class SatSolver {
         assert 0 == trailMarker();
         if (!ok_) return false;
 
-        // Check if clause is satisfied and remove false/duplicate literals:
+        // Check if clause is satisfied and remove false/duplicated literals:
         ps.sort();
         int lit = kUndefinedLiteral;
         int j = 0;

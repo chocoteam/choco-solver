@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,9 @@ package solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.constraints.Constraint;
+import solver.constraints.Propagator;
 import solver.variables.IntVar;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>
@@ -41,79 +43,75 @@ import solver.variables.IntVar;
  */
 public class Scalar extends Constraint {
 
-    final int[] coeffs;
-    final int b;
+	/**
+	 * Scalar product A.X Op B
+	 * e.g. a1.x1 + a2.x2 = b
+	 *
+	 * @param X		Array of integer variables
+	 * @param A		Array of integer coefficients
+	 * @param B		Integer result of the scalar product
+	 */
+	public Scalar(IntVar[] X, int[] A, int B) {
+		super("Scalar",makeProp(X, A, B));
+	}
 
+	/**
+	 * Scalar product A.X Op B.Y
+	 * e.g. a1.x1 + a2.x2 = b.y
+	 *
+	 * @param X		Array of integer variables
+	 * @param A		Array of integer coefficients
+	 * @param Y		Integer variable
+	 * @param B		Integer coefficient
+	 */
+	public Scalar(IntVar[] X, int[] A, IntVar Y, int B) {
+		this(ArrayUtils.append(X,new IntVar[]{Y}),ArrayUtils.append(A,new int[]{-B}),0);
+	}
 
-    protected Scalar(IntVar[] vars, int[] coeffs, int pos, int b) {
-        super("Scalar",new PropScalarEq(vars, coeffs, pos, b));
-        this.coeffs = coeffs.clone();
-        this.b = b;
-    }
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private static Propagator<IntVar> makeProp(IntVar[] vars, int[] coeffs, int result) {
+		// aggregate multiple variable occurrences
+		TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
+		for (int i = 0; i < vars.length; i++) {
+			map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
+			if (map.get(vars[i]) == 0) {
+				map.remove(vars[i]);
+			}
+		}
+		// to fix determinism in the construction, we iterate over the original array of variables
+		int b = 0, e = map.size();
+		IntVar[] tmpV = new IntVar[e];
+		int[] tmpC = new int[e];
+		for (int i = 0; i < vars.length; i++) {
+			IntVar key = vars[i];
+			int coeff = map.get(key);
+			if (coeff > 0) {
+				tmpV[b] = key;
+				tmpC[b++] = coeff;
+			} else if (coeff < 0) {
+				tmpV[--e] = key;
+				tmpC[e] = coeff;
+			}
+			map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
+		}
+		return new PropScalarEq(tmpV, tmpC, b, result);
+	}
 
-    private static Scalar build(IntVar[] vars, int[] coeffs) {
-        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        for (int i = 0; i < vars.length; i++) {
-            map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
-            if (map.get(vars[i]) == 0) {
-                map.remove(vars[i]);
-            }
-        }
-        int b = 0, e = map.size();
-        IntVar[] tmpV = new IntVar[e];
-        int[] tmpC = new int[e];
-        // to fix determinism in the construction, we iterate over the original array of variables
-        for (int i = 0; i < vars.length; i++) {
-            IntVar key = vars[i];
-            int coeff = map.get(key);
-            if (coeff > 0) {
-                tmpV[b] = key;
-                tmpC[b++] = coeff;
-            } else if (coeff < 0) {
-                tmpV[--e] = key;
-                tmpC[e] = coeff;
-            }
-            map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
-        }
-        return new Scalar(tmpV, tmpC, b, 0);
-    }
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Ensures that sum{vars[i]*coreffs[i]} = b*c
-     *
-     * @param vars
-     * @param coeffs
-     * @param b
-     * @param c
-     * @return a scalar product constraint
-     */
-    public static Scalar buildScalar(IntVar[] vars, int[] coeffs, IntVar b, int c) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static int[] getScalarBounds(IntVar[] vars, int[] coefs) {
-        int[] ext = new int[2];
-        for (int i = 0; i < vars.length; i++) {
-            int min = Math.min(0, vars[i].getLB() * coefs[i]);
-            min = Math.min(min, vars[i].getUB() * coefs[i]);
-            int max = Math.max(0, vars[i].getLB() * coefs[i]);
-            max = Math.max(max, vars[i].getUB() * coefs[i]);
-            ext[0] += min;
-            ext[1] += max;
-        }
-        return ext;
-    }
-    ;
+	public static int[] getScalarBounds(IntVar[] vars, int[] coefs) {
+		int[] ext = new int[2];
+		for (int i = 0; i < vars.length; i++) {
+			int min = Math.min(0, vars[i].getLB() * coefs[i]);
+			min = Math.min(min, vars[i].getUB() * coefs[i]);
+			int max = Math.max(0, vars[i].getLB() * coefs[i]);
+			max = Math.max(max, vars[i].getUB() * coefs[i]);
+			ext[0] += min;
+			ext[1] += max;
+		}
+		return ext;
+	}
 }

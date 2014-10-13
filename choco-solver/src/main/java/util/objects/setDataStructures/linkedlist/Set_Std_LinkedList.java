@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,6 @@
 package util.objects.setDataStructures.linkedlist;
 
 import memory.IEnvironment;
-import memory.structure.Operation;
 
 /**
  * Backtrable LinkedList of m elements
@@ -37,104 +36,39 @@ import memory.structure.Operation;
  * remove: O(m)
  * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
+ * User: Jean-Guillaume Fages, chameau
  * Date: 10 fevr. 2011
  */
-public class Set_Std_LinkedList extends Set_LinkedList {
+public class Set_Std_LinkedList extends Set_Std_LinkedList_NoRecycling {
 
-	final IEnvironment environment;
 	private ListOP[] operationPoolGC;
 	private int poolCurrentSize;
-	private final static boolean ADD = true;
-	private final static boolean REMOVE = false;
 
 	public Set_Std_LinkedList(IEnvironment environment) {
-		super();
-		this.environment = environment;
+		super(environment);
 		operationPoolGC = new ListOP[16];
 		poolCurrentSize = 0;
 	}
 
 	@Override
-	public boolean add(int element) {
-		this._add(element);
-		if (poolCurrentSize<=0) {
-			new ListOP(element, REMOVE);
-		} else {
-			ListOP op = operationPoolGC[--poolCurrentSize];
-			op.set(element, REMOVE);
+	protected void makeOperation(int element, boolean addOrRem){
+		if(environment.getWorldIndex()>0) {
+			if (poolCurrentSize<=0) {
+				new ListOP(element, addOrRem);
+			}else{
+				ListOP op = operationPoolGC[--poolCurrentSize];
+				op.set(element, addOrRem);
+			}
 		}
-		return true;
-	}
-
-	protected void _add(int element) {
-		super.add(element);
 	}
 
 	@Override
-	public boolean remove(int element) {
-		boolean done = this._remove(element);
-		if (done) {
-			if (poolCurrentSize<=0) {
-				new ListOP(element, ADD);
-			} else {
-				ListOP op = operationPoolGC[--poolCurrentSize];
-				op.set(element, ADD);
-			}
+	protected void free(ListOP op){
+		if(poolCurrentSize==operationPoolGC.length){
+			ListOP[] tmp = new ListOP[poolCurrentSize*4/3+10];
+			System.arraycopy(operationPoolGC,0,tmp,0,poolCurrentSize);
+			operationPoolGC = tmp;
 		}
-		return done;
-	}
-
-	protected boolean _remove(int element) {
-		return super.remove(element);
-	}
-
-	@Override
-	public void clear() {
-		for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
-			if (poolCurrentSize<=0) {
-				new ListOP(i, ADD);
-			} else {
-				ListOP op = operationPoolGC[--poolCurrentSize];
-				op.set(i, ADD);
-			}
-		}
-		super.clear();
-	}
-
-	//***********************************************************************************
-	// TRAILING OPERATIONS
-	//***********************************************************************************
-
-	private class ListOP extends Operation {
-		int element;
-		boolean addOrRemove;
-
-		public ListOP(int i, boolean add) {
-			super();
-			set(i, add);
-		}
-
-		@Override
-		public void undo() {
-			if (addOrRemove) {
-				_add(element);
-			} else {
-				_remove(element);
-			}
-			// ensures capacity
-			if(poolCurrentSize==operationPoolGC.length){
-				ListOP[] tmp = new ListOP[poolCurrentSize*4/3+10];
-				System.arraycopy(operationPoolGC,0,tmp,0,poolCurrentSize);
-				operationPoolGC = tmp;
-			}
-			operationPoolGC[poolCurrentSize++] = this;
-		}
-
-		public void set(int i, boolean add) {
-			element = i;
-			addOrRemove = add;
-			environment.save(this);
-		}
+		operationPoolGC[poolCurrentSize++] = op;
 	}
 }

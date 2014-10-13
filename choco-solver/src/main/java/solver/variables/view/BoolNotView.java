@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,17 +26,18 @@
  */
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -48,11 +49,11 @@ import util.ESat;
  */
 public final class BoolNotView extends IntView implements BoolVar {
 
-	protected final BoolVar var;
+    protected final BoolVar var;
 
     public BoolNotView(BoolVar var, Solver solver) {
         super("not(" + var.getName() + ")", var, solver);
-		this.var = var;
+        this.var = var;
     }
 
     @Override
@@ -63,7 +64,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
         if (var.setToFalse(this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -72,7 +73,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
         if (var.setToTrue(this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -81,7 +82,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (var.removeValue(1 - value, this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -107,7 +108,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (var.instantiateTo(1 - value, this)) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -117,7 +118,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > 0) {
             if (var.instantiateTo(1 - value, this)) {
-                notifyPropagators(EventType.INSTANTIATE, cause);
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             }
         }
@@ -128,7 +129,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < 1) {
             if (var.instantiateTo(1 - value, this)) {
-                notifyPropagators(EventType.INSTANTIATE, cause);
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             }
         }
@@ -145,10 +146,10 @@ public final class BoolNotView extends IntView implements BoolVar {
         return var.isInstantiatedTo(1 - value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -172,7 +173,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int nextValue(int v) {
-        if(v < 0 && contains(0)) {
+        if (v < 0 && contains(0)) {
             return 0;
         }
         return v <= 0 && contains(1) ? 1 : Integer.MAX_VALUE;
@@ -180,7 +181,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int previousValue(int v) {
-        if(v > 1 && contains(1)) {
+        if (v > 1 && contains(1)) {
             return 1;
         }
         return v >= 1 && contains(0) ? 0 : Integer.MIN_VALUE;
@@ -216,6 +217,15 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            BoolNotView clone = new BoolNotView((BoolVar) identitymap.get(this.var), solver);
+            identitymap.put(this, clone);
+        }
+    }
+
+    @Override
     public BoolVar not() {
         return var;
     }
@@ -225,10 +235,10 @@ public final class BoolNotView extends IntView implements BoolVar {
         assert not == var;
     }
 
-	@Override
-	public boolean hasNot() {
-		return true;
-	}
+    @Override
+    public boolean hasNot() {
+        return true;
+    }
 
     @Override
     public boolean isLit() {
@@ -240,13 +250,13 @@ public final class BoolNotView extends IntView implements BoolVar {
         return !var.isNot();
     }
 
-	@Override
-	public void setNot(boolean isNot){
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void setNot(boolean isNot) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public int getTypeAndKind() {
-		return Variable.VIEW | Variable.BOOL;
-	}
+    @Override
+    public int getTypeAndKind() {
+        return Variable.VIEW | Variable.BOOL;
+    }
 }

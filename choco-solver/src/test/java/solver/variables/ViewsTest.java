@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -30,8 +30,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.sum.Scalar;
 import solver.constraints.set.SCF;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
@@ -75,18 +77,18 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, 1}, z, 1));
                 ref.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -102,17 +104,17 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1a() {
         // Z = X + Y (bounded)
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, ref);
                 IntVar y = VariableFactory.bounded("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, 1}, z, 1));
                 ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
 
             }
@@ -128,10 +130,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testa() {
         // Z = max(X + Y)
-        for (int seed = 0; seed < 99999; seed += 1) {
+        for (int seed = 0; seed < 9999; seed += 1) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -153,10 +155,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1b() {
         // Z = |X|
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -176,10 +178,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1bb() {
         // Z = X + c
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -199,10 +201,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1bbb() {
         // Z = X * c
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -222,10 +224,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1c() {
         // Z = -X
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -274,7 +276,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "30s")
+    @Test(groups = "1s")
     public void test1f() {
         // Z = MAX(X,Y)
         Solver ref = new Solver();
@@ -300,14 +302,16 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test2() {
         // Z = X - Y
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                Constraint cstr = new Scalar(new IntVar[]{x, y}, new int[]{1, -1}, z, 1);
+//				System.out.println(cstr);
+                ref.post(cstr);
                 ref.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -315,7 +319,9 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, x));
+                Constraint cstr = IntConstraintFactory.sum(new IntVar[]{z, y}, x);
+                solver.post(cstr);
+//				System.out.println(cstr);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -323,10 +329,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test3() {
         // Z = |X - Y|
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -334,7 +340,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, -1}, z, 1));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
             }
@@ -350,10 +356,10 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test4() {
         // Z = |X - Y| + AllDiff
-        for (int seed = 0; seed < 99999; seed++) {
+        for (int seed = 0; seed < 9999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -361,7 +367,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.post(new Scalar(new IntVar[]{x, y}, new int[]{1, -1}, z, 1));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
                 ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
@@ -391,7 +397,7 @@ public class ViewsTest {
                 IntVar[] y = VariableFactory.enumeratedArray("y", k - 1, -(k - 1), k - 1, ref);
                 IntVar[] t = VariableFactory.enumeratedArray("t", k - 1, 0, k - 1, ref);
                 for (int i = 0; i < k - 1; i++) {
-                    ref.post(IntConstraintFactory.scalar(new IntVar[]{x[i + 1], x[i]}, new int[]{1, -1}, y[i]));
+                    ref.post(new Scalar(new IntVar[]{x[i + 1], x[i]}, new int[]{1, -1}, y[i], 1));
                     ref.post(IntConstraintFactory.absolute(t[i], y[i]));
                 }
                 ref.post(IntConstraintFactory.alldifferent(x, "BC"));
@@ -419,7 +425,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 0, 10, solver);
@@ -427,22 +433,22 @@ public class ViewsTest {
         IntVar z = VariableFactory.abs(VariableFactory.abs(x));
 
         for (int j = 0; j < 200; j++) {
-            long t = -System.nanoTime();
+//            long t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (y.getLB() == x.getUB()) {
                     y.updateLowerBound(0, Cause.Null);
                 }
             }
-            t += System.nanoTime();
-            System.out.printf("%.2fms vs. ", t / 1000 / 1000f);
-            t = -System.nanoTime();
+//            t += System.nanoTime();
+//            System.out.printf("%.2fms vs. ", t / 1000 / 1000f);
+//            t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (z.getLB() == x.getUB()) {
                     z.updateLowerBound(0, Cause.Null);
                 }
             }
-            t += System.nanoTime();
-            System.out.printf("%.2fms\n", t / 1000 / 1000f);
+//            t += System.nanoTime();
+//            System.out.printf("%.2fms\n", t / 1000 / 1000f);
         }
     }
 
@@ -468,86 +474,107 @@ public class ViewsTest {
         solver.set(SetStrategyFactory.force_first(new SetVar[]{v1, v2}));
         if (solver.findSolution()) {
             do {
-                System.out.println(v1 + " subseteq " + v2);
+//                System.out.println(v1 + " subseteq " + v2);
             } while (solver.nextSolution());
         }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-	@Test(groups = "1s")
-	public void testJL3(){
-		Solver solver = new Solver();
-		solver.post(ICF.arithm(
-				VF.enumerated("int", -3,3, solver),
-				"=",
-				VF.minus(VF.bool("bool", solver))));
-		if(solver.findSolution()) {
-			do{
-				System.out.println(solver);
-			}while(solver.nextSolution());
-		}
-	}
+    @Test(groups = "1s")
+    public void testJL3() {
+        Solver solver = new Solver();
+        solver.post(ICF.arithm(
+                VF.enumerated("int", -3, 3, solver),
+                "=",
+                VF.minus(VF.bool("bool", solver))));
+        if (solver.findSolution()) {
+            do {
+//				System.out.println(solver);
+            } while (solver.nextSolution());
+        }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+    }
 
-	@Test(groups = "1s")
-	public void testJL4() throws ContradictionException {
-	    Solver s = new Solver();
-	    BoolVar bool = VF.bool("bool", s);
-		BoolVar view = VF.eq(bool);
-	    SetVar set = VF.set("set", 0, 1, s);
-		s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
-	    s.post(SCF.member(VF.one(s), set));
-	    s.set(ISF.minDom_UB(bool));
-	    if (s.findSolution()) {
-	        do {
-	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
-	        } while (s.nextSolution());
-	    }
-	}
+    @Test(groups = "1s")
+    public void testJL4() throws ContradictionException {
+        Solver s = new Solver();
+        BoolVar bool = VF.bool("bool", s);
+        BoolVar view = VF.eq(bool);
+        SetVar set = VF.set("set", 0, 1, s);
+        s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
+        s.post(SCF.member(VF.one(s), set));
+        s.set(ISF.minDom_UB(bool));
+        if (s.findSolution()) {
+            do {
+//	            System.out.println(bool + " : " + set + " : " + s.isSatisfied());
+            } while (s.nextSolution());
+        }
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
+    }
 
-	@Test(groups = "1s")
-	public void testJG() throws ContradictionException {
-	    Solver s = new Solver();
-	    BoolVar bool = VF.bool("bool", s);
-		BoolVar view = VF.eq(bool);
-		IntVar sum = VF.bounded("sum",0,6,s);
-		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
-	    s.post(ICF.arithm(sum, ">", 2));
-		s.propagate();
-		Assert.assertEquals(sum.isInstantiated(), true);
-	}
+    @Test(groups = "1s")
+    public void testJG() throws ContradictionException {
+        Solver s = new Solver();
+        BoolVar bool = VF.bool("bool", s);
+        BoolVar view = VF.eq(bool);
+        IntVar sum = VF.bounded("sum", 0, 6, s);
+        s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, sum));
+        s.post(ICF.arithm(sum, ">", 2));
+        s.propagate();
+        Assert.assertEquals(sum.isInstantiated(), true);
+    }
 
-	@Test(groups = "1s")
-	public void testJG2() throws ContradictionException {
-	    Solver s = new Solver();
-	    BoolVar bool = VF.bool("bool", s);
-		BoolVar view = VF.not(bool);
-		IntVar sum = VF.bounded("sum",0,6,s);
-		s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1,5}, sum));
-	    s.post(ICF.arithm(sum, ">", 2));
-		s.propagate();
-		Assert.assertEquals(sum.isInstantiated(), true);
-	}
+    @Test(groups = "1s")
+    public void testJG2() throws ContradictionException {
+        Solver s = new Solver();
+        BoolVar bool = VF.bool("bool", s);
+        BoolVar view = VF.not(bool);
+        IntVar sum = VF.bounded("sum", 0, 6, s);
+        s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, sum));
+        s.post(ICF.arithm(sum, ">", 2));
+        s.propagate();
+        Assert.assertEquals(sum.isInstantiated(), true);
+    }
 
-	@Test(groups = "1s")
-	public void testJG3() throws ContradictionException {
-	    Solver s = new Solver();
-	    IntVar var = VF.bounded("int", 0, 2,s);
-		IntVar view = VF.eq(var);
-		IntVar sum = VF.bounded("sum",0,6,s);
-		s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1,5}, sum));
-	    s.post(ICF.arithm(sum, ">", 2));
-		s.propagate();
-		Assert.assertEquals(sum.isInstantiated(), true);
-	}
+    @Test(groups = "1s")
+    public void testJG3() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar var = VF.bounded("int", 0, 2, s);
+        IntVar view = VF.eq(var);
+        IntVar sum = VF.bounded("sum", 0, 6, s);
+        s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, sum));
+        s.post(ICF.arithm(sum, ">", 2));
+        s.propagate();
+        Assert.assertEquals(sum.isInstantiated(), true);
+    }
 
-	@Test(groups = "1s")
-	public void testJG4() throws ContradictionException {
-	    Solver s = new Solver();
-	    IntVar var = VF.bounded("int", 0, 2,s);
-		IntVar view = VF.minus(var);
-		IntVar sum = VF.bounded("sum",0,6,s);
-		s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1,5}, sum));
-	    s.post(ICF.arithm(sum, ">", 2));
-		s.propagate();
-		Assert.assertEquals(sum.isInstantiated(), true);
-	}
+    @Test(groups = "1s")
+    public void testJG4() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar var = VF.bounded("int", 0, 2, s);
+        IntVar view = VF.minus(var);
+        IntVar sum = VF.bounded("sum", 0, 6, s);
+        s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, sum));
+        s.post(ICF.arithm(sum, ">", 2));
+        s.propagate();
+        Assert.assertEquals(sum.isInstantiated(), true);
+    }
+
+    @Test(groups = "1s")
+    public void testvanH() {
+        Solver solver = new Solver();
+        BoolVar x1 = VariableFactory.bool("x1", solver);
+        BoolVar x2 = VariableFactory.not(x1);
+        BoolVar x3 = VariableFactory.bool("x3", solver);
+        IntVar[] av = new IntVar[]{x1, x2, x3};
+        int[] coef = new int[]{5, 3, 2};
+        IntVar rhs = VariableFactory.fixed(7, solver);
+        solver.post(IntConstraintFactory.scalar(av, coef, ">=", rhs));
+        try {
+            solver.propagate();
+        } catch (Exception e) {
+        }
+        Assert.assertTrue(x3.isInstantiated());
+        Assert.assertEquals(x3.getValue(), 1);
+    }
 }

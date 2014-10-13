@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,12 +34,14 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
+import solver.variables.events.SetEventType;
 import util.ESat;
 
 /**
@@ -71,7 +73,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE_FROM_ENVELOPE.mask;
+        return SetEventType.REMOVE_FROM_ENVELOPE.getMask();
     }
 
     @Override
@@ -123,5 +125,18 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            SetVar[] aVars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropAtMost1Empty(aVars));
+        }
     }
 }

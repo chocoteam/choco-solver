@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,14 @@
 package solver.constraints.nary.nValue;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -273,7 +276,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
+        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
     }
 
     //***********************************************************************************
@@ -282,7 +285,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INCLOW.mask + EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -314,5 +317,20 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropAtMostNValues_BC(aVars, aVar));
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -103,8 +103,8 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         this.random = new Random(seed);
         this.level = level;
 
-        if (!(aSolver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(aSolver, true);
+        if (!(aSolver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            aSolver.set(new LazyExplanationEngineFromRestart(aSolver));
         }
         this.mExplanationEngine = aSolver.getExplainer();
 

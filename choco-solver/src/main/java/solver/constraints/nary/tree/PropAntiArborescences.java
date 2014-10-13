@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,13 @@
 
 package solver.constraints.nary.tree;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import util.graphOperations.dominance.AlphaDominatorsFinder;
@@ -93,19 +95,19 @@ public class PropAntiArborescences extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            for (int i = 0; i < n; i++) {
-                vars[i].updateLowerBound(offSet, aCause);
-                vars[i].updateUpperBound(n + offSet, aCause);
-            }
-        }
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
+			for (int i = 0; i < n; i++) {
+				vars[i].updateLowerBound(offSet, aCause);
+				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+			}
+		}
         structuralPruning();
     }
 
     private void structuralPruning() throws ContradictionException {
         for (int i = 0; i < n + 1; i++) {
-            connectedGraph.getSuccessorsOf(i).clear();
-            connectedGraph.getPredecessorsOf(i).clear();
+            connectedGraph.getSuccOf(i).clear();
+            connectedGraph.getPredOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             int ub = vars[i].getUB();
@@ -161,5 +163,18 @@ public class PropAntiArborescences extends Propagator<IntVar> {
             y = vars[x].getValue();
         }
         return false;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropAntiArborescences(aVars, this.offSet, (this.domFinder instanceof AlphaDominatorsFinder)));
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -39,14 +39,7 @@ import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
  */
 public class TestConsistency {
 
-    private SearchLoops slType; // search loop type default value
-
-    public TestConsistency() {
-        this.slType = SearchLoops.BINARY;
-    }
-
     public TestConsistency(SearchLoops peType) {
-        this.slType = peType;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +97,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, null, seed + i, "ac");
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "30m")
     public void testALLDIFFERENT4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -163,14 +156,14 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffBC, 5, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testALLDIFFERENTBC4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testALLDIFFERENTGRAPHBC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -200,14 +193,14 @@ public class TestConsistency {
 //            checkConsistency(Modeler.modelTimes, 3, -50, -3, null, seed + i, "bc");
 //    }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testABSOLUTEBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAbsolute, 2, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testABSOLUTEBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -258,7 +251,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelCountAC, 2, 2, 50, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testCOUNTBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 999; i++)
@@ -272,14 +265,14 @@ public class TestConsistency {
             checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testLEX1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, true, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testLEX2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
@@ -293,7 +286,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelLexChainAC, 9, -10, 10, true, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testLEXC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
@@ -343,7 +336,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelSortBC, 6, 0, 10, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testSORT2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
@@ -359,7 +352,7 @@ public class TestConsistency {
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] propagators = constraints[c].getPropagators();
             for (int p = 0; p < propagators.length; p++) {
-                propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
+                propagators[p].forcePropagate(PropagatorEventType.FULL_PROPAGATION);
             }
         }
         s.propagate();

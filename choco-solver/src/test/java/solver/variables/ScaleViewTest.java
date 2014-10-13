@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,6 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
-import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
@@ -135,7 +134,7 @@ public class ScaleViewTest {
         return s;
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
@@ -163,7 +162,7 @@ public class ScaleViewTest {
         //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -197,7 +196,7 @@ public class ScaleViewTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,8 +38,6 @@ import solver.search.strategy.decision.RootDecision;
 
 /**
  * A dynamic backtracking algorithm.
- * It selects the decision to undo w.r.t. a {@link IDecisionJumper}.
- * Note that by giving {@link solver.explanations.strategies.jumper.MostRecentWorldJumper}, it acts like <code>dbt</code>.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -49,8 +47,8 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
     DecisionsSet cobdec;
 
-    public DynamicBacktracking(ExplanationEngine mExplanationEngine, IDecisionJumper decisionJumper) {
-        super(mExplanationEngine, decisionJumper);
+    public DynamicBacktracking(ExplanationEngine mExplanationEngine) {
+        super(mExplanationEngine);
         cobdec = new DecisionsSet(this);
     }
 
@@ -87,10 +85,9 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
                     // add it to the decisions to force
                     cobdec.push(dec);
 
-                } else {
-                    // we need to forget everything and start from scratch on this decision
-                    // so nothing to be done
                 }
+                // else  we need to forget everything and start from scratch on this decision
+                // so nothing to be done
             } else {
                 // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a willful decision
                 dec.rewind();

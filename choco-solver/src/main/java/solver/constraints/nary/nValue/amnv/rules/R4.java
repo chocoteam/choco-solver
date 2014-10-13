@@ -28,11 +28,11 @@
 package solver.constraints.nary.nValue.amnv.rules;
 
 import solver.constraints.Propagator;
-import solver.constraints.nary.alldifferent.conditions.AlgoAllDiffBC;
-import solver.constraints.nary.nValue.amnv.graph.G;
+import solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import solver.constraints.nary.nValue.amnv.mis.F;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.objects.graphs.UndirectedGraph;
 
 import java.util.BitSet;
 
@@ -46,7 +46,7 @@ public class R4 implements R {
 
 	private AlgoAllDiffBC filter;
 
-	public void filter(IntVar[] vars, G graph, F heur, Propagator aCause) throws ContradictionException{
+	public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException{
 		int n = vars.length-1;
 		BitSet mis = heur.getMIS();
 		if(mis.cardinality()==vars[n].getUB()){

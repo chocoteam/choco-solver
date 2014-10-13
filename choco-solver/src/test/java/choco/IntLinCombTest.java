@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -195,7 +195,7 @@ public class IntLinCombTest {
             Assert.assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
             Assert.assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
             LoggerFactory.getLogger("test").info("({}) {}ms vs {}ms",
-                    new Object[]{op, sum.getMeasures().getTimeCount(), intlincomb.getMeasures().getTimeCount()});
+                    op, sum.getMeasures().getTimeCount(), intlincomb.getMeasures().getTimeCount());
         }
     }
 

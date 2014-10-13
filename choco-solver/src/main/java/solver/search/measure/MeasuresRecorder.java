@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -429,7 +429,16 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
-        st.append("- Search statistics\n");
+//        st.append("- Search statistics\n");
+        if(solver.hasReachedLimit()){
+            st.append("- Incomplete search - Limit reached.\n");
+        }else{
+            st.append("- Complete search - ");
+            if(solutionCount == 0){
+                st.append("No solution.");
+            }
+            st.append('\n');
+        }
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
             st.append("\t").append(solver.getObjectiveManager()).append(",\n");

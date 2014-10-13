@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.*;
-import solver.variables.graph.GraphVar;
 
 import java.text.MessageFormat;
 
@@ -92,7 +91,7 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testRight() {
         boolean alive = true;
         int cas = 0;
@@ -133,7 +132,7 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testWrong() {
         boolean alive = true;
         int cas = 0;
@@ -185,15 +184,13 @@ public class SolverTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testFH1() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
         IntVar i = VF.bounded("i", VF.MIN_INT_BOUND, VF.MAX_INT_BOUND, solver);
         SetVar s = VF.set("s", 2, 3, solver);
         RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
-        GraphVar g = VF.directedGraph("g", 2, solver);
-
 
         BoolVar[] bvars = solver.retrieveBoolVars();
         Assert.assertEquals(bvars, new BoolVar[]{solver.ZERO, solver.ONE, b});
@@ -207,8 +204,6 @@ public class SolverTest {
         RealVar[] rvars = solver.retrieveRealVars();
         Assert.assertEquals(rvars, new RealVar[]{r});
 
-        GraphVar[] gvars = solver.retrieveGraphVars();
-        Assert.assertEquals(gvars, new GraphVar[]{g});
     }
 
 }

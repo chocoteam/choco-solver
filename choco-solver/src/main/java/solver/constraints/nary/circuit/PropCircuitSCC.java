@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 16/11/11
- * Time: 10:42
- */
-
 package solver.constraints.nary.circuit;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.graphOperations.connectivity.StrongConnectivityFinder;
 import util.objects.graphs.DirectedGraph;
@@ -68,25 +63,28 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
-	private final int NB_MAX_ITER = 10;
+	private CircuitConf conf;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropCircuitSCC(IntVar[] succs, int offSet) {
-		super(succs, PropagatorPriority.LINEAR, true);
+	public PropCircuitSCC(IntVar[] succs, int offSet, CircuitConf conf) {
+		super(succs, PropagatorPriority.LINEAR, false);
 		this.offSet = offSet;
 		n = vars.length;
 		n2 = n+1;
-		support = new DirectedGraph(n2,SetType.LINKED_LIST,true);
+		support = new DirectedGraph(n2,SetType.BITSET,true);
 		G_R = new DirectedGraph(n2,SetType.LINKED_LIST,false);
 		SCCfinder = new StrongConnectivityFinder(support);
 		mates = new ISet[n2];
 		for(int i=0;i<n2;i++){
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
-		rd = new Random(0);
+		this.conf = conf;
+		if(conf==CircuitConf.RD){ 
+			rd = new Random(0);
+		}
 	}
 
 	//***********************************************************************************
@@ -98,24 +96,23 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		return ESat.TRUE;// redundant propagator
 	}
 
-	public void propagate(int vIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
-
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if(rd.nextBoolean()){
-			filterFromSource(rd.nextInt(n));
-		}else{
-			if(n<NB_MAX_ITER){
-				for(int i=0;i<n;i++){
-					filterFromSource(i);
-				}
-			}else{
-				for(int i=0;i<NB_MAX_ITER;i++){
-					filterFromSource(rd.nextInt(n));
-				}
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
+			for (int i = 0; i < n; i++) {
+				vars[i].updateLowerBound(offSet, aCause);
+				vars[i].updateUpperBound(n - 1 + offSet, aCause);
 			}
+		}
+		switch (conf){
+			case FIRST:
+				filterFromSource(0);break;
+			case RD:
+				filterFromSource(rd.nextInt(n));break;
+			case ALL:
+				for (int i = 0; i < n; i++) {
+					filterFromSource(i);
+				}break;
 		}
 	}
 
@@ -127,13 +124,13 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int last = -1;
 		int n_R = SCCfinder.getNbSCC();
 		for (int i = 0; i < n_R; i++) {
-			if (G_R.getPredecessorsOf(i).isEmpty()) {
+			if (G_R.getPredOf(i).isEmpty()) {
 				if(first!=-1){
 					contradiction(vars[0],"");
 				}
 				first = i;
 			}
-			if (G_R.getSuccessorsOf(i).isEmpty()) {
+			if (G_R.getSuccOf(i).isEmpty()) {
 				if(last!=-1){
 					contradiction(vars[0],"");
 				}
@@ -158,12 +155,12 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	public void rebuild(int source) {
 		for(int i=0;i<n2;i++){
 			mates[i].clear();
-			support.getSuccessorsOf(i).clear();
-			support.getPredecessorsOf(i).clear();
-			G_R.getPredecessorsOf(i).clear();
-			G_R.getSuccessorsOf(i).clear();
+			support.getSuccOf(i).clear();
+			support.getPredOf(i).clear();
+			G_R.getPredOf(i).clear();
+			G_R.getSuccOf(i).clear();
 		}
-		G_R.getActiveNodes().clear();
+		G_R.getNodes().clear();
 		for(int i=0;i<n;i++){
 			IntVar v = vars[i];
 			int lb = v.getLB();
@@ -179,14 +176,14 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		SCCfinder.findAllSCC();
 		int n_R = SCCfinder.getNbSCC();
 		for (int i = 0; i < n_R; i++) {
-			G_R.getActiveNodes().add(i);
+			G_R.getNodes().add(i);
 		}
 		sccOf = SCCfinder.getNodesSCC();
 		ISet succs;
 		int x;
 		for (int i = 0; i < n; i++) {
 			x = sccOf[i];
-			succs = support.getSuccessorsOf(i);
+			succs = support.getSuccOf(i);
 			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 				if (x != sccOf[j]) {
 					G_R.addArc(x, sccOf[j]);
@@ -204,9 +201,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			return 1;
 		}
 		int next = -1;
-		ISet succs = G_R.getSuccessorsOf(node);
+		ISet succs = G_R.getSuccOf(node);
 		for (int x = succs.getFirstElement(); x >= 0; x = succs.getNextElement()) {
-			if (G_R.getPredecessorsOf(x).getSize() == 1) {
+			if (G_R.getPredOf(x).getSize() == 1) {
 				if (next != -1) {
 					return 0;
 				}
@@ -280,7 +277,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			forceOutDoor(outDoor);
 			// If 1 in and 1 out and |scc| > 2 then forbid in->out
 			// Is only 1 in ?
-			int p = G_R.getPredecessorsOf(sccFrom).getFirstElement();
+			int p = G_R.getPredOf(sccFrom).getFirstElement();
 			if (p != -1) {
 				int in = -1;
 				for (int i = mates[p].getFirstElement(); i >= 0; i = mates[p].getNextElement()) {
@@ -324,6 +321,19 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			if(sccOf[v-offSet]==sx){
 				vars[x].removeValue(v,aCause);
 			}
+		}
+	}
+
+	@Override
+	public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+		if (!identitymap.containsKey(this)) {
+			int size = this.vars.length;
+			IntVar[] aVars = new IntVar[size];
+			for (int i = 0; i < size; i++) {
+				this.vars[i].duplicate(solver, identitymap);
+				aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+			}
+			identitymap.put(this, new PropCircuitSCC(aVars, this.offSet, this.conf));
 		}
 	}
 }

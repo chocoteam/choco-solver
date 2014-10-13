@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -92,9 +92,9 @@ public class LCAGraphManager {
     //***********************************************************************************
 
     private void initParams() {
-        nbActives = graph.getActiveNodes().getSize();
+        nbActives = graph.getNodes().getSize();
         for (int i = 0; i < nbNodes; i++) {
-            successors[i] = graph.getSuccessorsOf(i);
+            successors[i] = graph.getSuccOf(i);
             dfsNumberOfNode[i] = -1;
             father[i] = -1;
             A[i] = -1;
@@ -175,7 +175,7 @@ public class LCAGraphManager {
             I[i] = i;
             L[i] = i;
             int sucInRun = -1;
-            nei = graph.getSuccessorsOf(nodeOfDfsNumber[i]);
+            nei = graph.getSuccOf(nodeOfDfsNumber[i]);
             int s;
             for (int k = nei.getFirstElement(); k >= 0; k = nei.getNextElement()) {
                 s = dfsNumberOfNode[k];

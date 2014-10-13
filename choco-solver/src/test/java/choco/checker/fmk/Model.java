@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -228,7 +228,7 @@ public interface Model {
                     if (rvars[i] == null) rvars[i] = vars[i];
                 }
             } catch (ArrayIndexOutOfBoundsException ce) {
-                System.out.printf("");
+//                System.out.printf("");
             }
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
@@ -263,12 +263,12 @@ public interface Model {
         }
     };
 
-    Model modelNValues_AtMostBC = new Model() {
+    Model modelNValues = new Model() {
         public void fillTypes(int[] types) {
         }
 
         public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("modelNValues_AtMostBC_" + n);
+            Solver s = new Solver("modelNValues" + n);
             IntVar[] vars = new IntVar[n];
             IntVar[] decvars = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
@@ -278,10 +278,8 @@ public interface Model {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_BC");
-            Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-            s.post(ctrs);
+            s.post(IntConstraintFactory.nvalues(decvars, vars[n - 1]));
             s.set(strategy);
             return s;
         }

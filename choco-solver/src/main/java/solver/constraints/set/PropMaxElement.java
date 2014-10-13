@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,13 +34,16 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
+import solver.variables.events.IntEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 
 /**
@@ -59,7 +62,7 @@ public class PropMaxElement extends Propagator<Variable> {
     private SetVar set;
     private int offSet;
     private int[] weights;
-	private final boolean notEmpty;
+    private final boolean notEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -71,8 +74,8 @@ public class PropMaxElement extends Propagator<Variable> {
      *
      * @param setVar
      * @param max
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if so, the MAX constraint is not applied)
+     * @param notEmpty true : the set variable cannot be empty
+     *                 false : the set may be empty (if so, the MAX constraint is not applied)
      */
     public PropMaxElement(SetVar setVar, IntVar max, boolean notEmpty) {
         this(setVar, null, 0, max, notEmpty);
@@ -86,8 +89,8 @@ public class PropMaxElement extends Propagator<Variable> {
      * @param weights
      * @param offset
      * @param max
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if so, the MAX constraint is not applied)
+     * @param notEmpty true : the set variable cannot be empty
+     *                 false : the set may be empty (if so, the MAX constraint is not applied)
      */
     public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, boolean notEmpty) {
         super(new Variable[]{setVar, max}, PropagatorPriority.BINARY, false);
@@ -95,7 +98,7 @@ public class PropMaxElement extends Propagator<Variable> {
         this.set = (SetVar) vars[0];
         this.weights = weights;
         this.offSet = offset;
-		this.notEmpty = notEmpty;
+        this.notEmpty = notEmpty;
     }
 
     //***********************************************************************************
@@ -104,18 +107,18 @@ public class PropMaxElement extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
-        else return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+        if (vIdx == 0) return SetEventType.all();
+        else return IntEventType.boundAndInst();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             max.updateLowerBound(get(j), aCause);
         }
         int maxVal = Integer.MIN_VALUE;
         int ub = max.getUB();
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             int k = get(j);
             if (k > ub) {
                 set.removeFromEnvelope(j, aCause);
@@ -125,34 +128,34 @@ public class PropMaxElement extends Propagator<Variable> {
                 }
             }
         }
-		if(notEmpty || set.getKernelSize()>0){
-			max.updateUpperBound(maxVal, aCause);
-		}
+        if (notEmpty || set.getKernelSize() > 0) {
+            max.updateUpperBound(maxVal, aCause);
+        }
     }
 
     @Override
     public ESat isEntailed() {
-		if(set.getEnvelopeSize()==0){
-			if(notEmpty){
-				return ESat.FALSE;
-			}else{
-				return ESat.TRUE;
-			}
-		}
+        if (set.getEnvelopeSize() == 0) {
+            if (notEmpty) {
+                return ESat.FALSE;
+            } else {
+                return ESat.TRUE;
+            }
+        }
         int lb = max.getLB();
         int ub = max.getUB();
-        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
+        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
             if (get(j) > ub) {
                 return ESat.FALSE;
             }
         }
         int maxVal = Integer.MIN_VALUE;
-        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             if (maxVal < get(j)) {
                 maxVal = get(j);
             }
         }
-        if (maxVal < lb && (notEmpty || set.getKernelSize()>0)) {
+        if (maxVal < lb && (notEmpty || set.getKernelSize() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {
@@ -163,5 +166,18 @@ public class PropMaxElement extends Propagator<Variable> {
 
     private int get(int j) {
         return (weights == null) ? j : weights[j - offSet];
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            set.duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(set);
+
+            max.duplicate(solver, identitymap);
+            IntVar M = (IntVar) identitymap.get(max);
+
+            identitymap.put(this, new PropMaxElement(S, M, notEmpty));
+        }
     }
 }

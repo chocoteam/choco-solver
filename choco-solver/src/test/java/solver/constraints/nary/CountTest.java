@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -84,7 +84,7 @@ public class CountTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;

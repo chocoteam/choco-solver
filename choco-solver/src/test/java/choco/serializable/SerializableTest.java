@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,8 +32,9 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.propagation.DSLEngine;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -96,8 +97,29 @@ public class SerializableTest {
     }
 
     @Test(groups = {"1s"})
-    public void testEngine() {
-        IPropagationEngine eng = new DSLEngine(new Solver());
+    public void testEngine1() {
+        IPropagationEngine eng = new TwoBucketPropagationEngine(new Solver());
+        File file = null;
+        try {
+            file = write(eng);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        eng = null;
+        Assert.assertNull(eng);
+        try {
+            eng = (IPropagationEngine) read(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(eng);
+    }
+
+    @Test(groups = {"1s"})
+    public void testEngine2() {
+        IPropagationEngine eng = new SevenQueuesPropagatorEngine(new Solver());
         File file = null;
         try {
             file = write(eng);
@@ -189,9 +211,7 @@ public class SerializableTest {
         s = null;
         try {
             s = (Solver) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(s);
@@ -199,4 +219,27 @@ public class SerializableTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 92, "nb sol incorrect");
     }
 
+
+    @Test(groups = {"1s"})
+    public void testBigNQueen() {
+        Solver s = new Solver();
+        int n = 9;
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, s);
+        }
+
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                s.post(neq);
+                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        Solver clone = s.duplicateModel();
+        Assert.assertNotNull(s);
+    }
 }

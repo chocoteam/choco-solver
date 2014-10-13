@@ -1,5 +1,5 @@
 package samples.integer; /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.cpviz.Visualization;
-import solver.search.loop.monitors.cpviz.visualizers.Vector;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -86,16 +84,6 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void solve() {
-        //-------> Visualization declaration starts here <-------//
-        // create a new instance of Visualization
-        Visualization visu = new Visualization("SendMoreMoney", solver, System.getProperty("user.dir"));
-        visu.createTree(); // declare tree search visualization
-        visu.createViz(); // declare visualizers container
-        // create a new Vector visualizer
-        Vector visualizer = new Vector(new IntVar[]{S, E, N, D, M, O, R, Y},
-                "expanded", 0, 0, 8, 10, "SENDMORY", 0, 9);
-        // add the vector to the visualizers container
-        visu.addVisualizer(visualizer);
         solver.findSolution();
     }
 

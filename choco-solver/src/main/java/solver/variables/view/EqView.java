@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,15 +26,16 @@
  */
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -62,17 +63,17 @@ public class EqView extends IntView {
         int inf = getLB();
         int sup = getUB();
         if (inf <= value && value <= sup) {
-            EventType e = EventType.REMOVE;
+			IntEventType e = IntEventType.REMOVE;
 
             boolean done = var.removeValue(value, this);
             if (done) {
                 if (value == inf) {
-                    e = EventType.INCLOW;
+                    e = IntEventType.INCLOW;
                 } else if (value == sup) {
-                    e = EventType.DECUPP;
+                    e = IntEventType.DECUPP;
                 }
                 if (this.isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
                 return true;
@@ -91,7 +92,7 @@ public class EqView extends IntView {
         } else {
             boolean done = var.removeInterval(from, to, this);
             if (done) {
-                notifyPropagators(EventType.REMOVE, cause);
+                notifyPropagators(IntEventType.REMOVE, cause);
             }
             return done;
         }
@@ -102,7 +103,7 @@ public class EqView extends IntView {
         assert cause != null;
         boolean done = var.instantiateTo(value, this);
         if (done) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
 
@@ -114,10 +115,10 @@ public class EqView extends IntView {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            EventType e = EventType.INCLOW;
+			IntEventType e = IntEventType.INCLOW;
             boolean done = var.updateLowerBound(value, this);
             if (isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             if (done) {
                 this.notifyPropagators(e, cause);
@@ -133,10 +134,10 @@ public class EqView extends IntView {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            EventType e = EventType.DECUPP;
+			IntEventType e = IntEventType.DECUPP;
             boolean done = var.updateUpperBound(value, this);
             if (isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             if (done) {
                 this.notifyPropagators(e, cause);
@@ -156,10 +157,10 @@ public class EqView extends IntView {
         return var.isInstantiatedTo(value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -194,6 +195,15 @@ public class EqView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.eq(this.var);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            EqView clone = new EqView((IntVar) identitymap.get(this.var), solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

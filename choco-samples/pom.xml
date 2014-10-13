@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 1999-2013, Ecole des Mines de Nantes
+  ~ Copyright (c) 1999-2014, Ecole des Mines de Nantes
   ~ All rights reserved.
   ~ Redistribution and use in source and binary forms, with or without
   ~ modification, are permitted provided that the following conditions are met:
@@ -30,7 +30,7 @@
     <parent>
         <artifactId>choco</artifactId>
         <groupId>choco</groupId>
-        <version>3.2.0</version>
+        <version>3.2.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>choco-samples</artifactId>

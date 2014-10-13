@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -104,5 +104,24 @@ public class Set_Full implements ISet {
 	@Override
 	public SetType getSetType(){
 		return SetType.BITSET;
+	}
+
+	@Override
+	public String toString(){
+		return "["+0+","+(n-1)+"]";
+	}
+
+	@Override
+	public int[] toArray(){
+		int[] a = new int[n];
+		for(int i=0;i<n;i++){
+			a[i] = i;
+		}
+		return a;
+	}
+
+	@Override
+	public int getMaxSize(){
+		return n;
 	}
 }

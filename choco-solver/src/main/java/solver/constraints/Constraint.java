@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 
 package solver.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.reification.PropOpposite;
 import solver.variables.BoolVar;
@@ -59,8 +60,8 @@ public class Constraint implements Serializable {
     final protected Propagator[] propagators;
 
     // for reification
-    private BoolVar boolReif;
-    private Constraint opposite;
+    BoolVar boolReif;
+    Constraint opposite;
 
     // name
     protected String name;
@@ -220,5 +221,36 @@ public class Constraint implements Serializable {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return the maximum priority of a propagator of this constraint
+     */
+    public PropagatorPriority computeMaxPriority() {
+        int priority = 1;
+        for (Propagator p : propagators) {
+            priority = Math.max(priority, p.getPriority().priority);
+        }
+        return PropagatorPriority.get(priority);
+    }
+
+    /**
+     * Duplicate the current constraint.
+     * The constraint is NOT posted into the solver.
+     *
+     * @param solver      the target solver
+     * @param identitymap a map to ensure uniqueness of objects
+     */
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            Propagator[] pclone = new Propagator[this.propagators.length];
+            // then duplicate propagators
+            for (int i = 0; i < propagators.length; i++) {
+                propagators[i].duplicate(solver, identitymap);
+                pclone[i] = (Propagator) identitymap.get(propagators[i]);
+            }
+            Constraint clone = new Constraint(this.name, pclone);
+            identitymap.put(this, clone);
+        }
     }
 }

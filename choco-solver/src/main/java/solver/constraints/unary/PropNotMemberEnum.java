@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,9 @@
 package solver.constraints.unary;
 
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,13 +67,13 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
             if (val == right + 1) {
                 right = val;
             } else {
-                if(left  > Integer.MIN_VALUE){
+                if (left > Integer.MIN_VALUE) {
                     rall &= vars[0].removeInterval(left, right, aCause);
                 }
                 left = right = val;
             }
         }
-        if(left  > Integer.MIN_VALUE){
+        if (left > Integer.MIN_VALUE) {
             rall &= vars[0].removeInterval(left, right, aCause);
         }
         if (rall) {
@@ -109,4 +111,10 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
         e.add(aCause);
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropNotMemberEnum((IntVar) identitymap.get(vars[0]), values.toArray()));
+        }
+    }
 }

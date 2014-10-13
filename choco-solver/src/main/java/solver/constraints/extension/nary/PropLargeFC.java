@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,10 +26,13 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
+import solver.exception.SolverException;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 
 /**
@@ -42,20 +45,27 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     protected final int[] currentTuple;
 
-    public PropLargeFC(IntVar[] vars, Tuples tuples) {
-        super(vars, tuples);
+    private PropLargeFC(IntVar[] vars, LargeRelation relation) {
+        super(vars, relation);
         this.currentTuple = new int[vars.length];
     }
 
-    protected LargeRelation makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        int totalSize = 1;
-        for (int i = 0; i < offsets.length; i++) {
-            totalSize *= dsizes[i];
+    public PropLargeFC(IntVar[] vars, Tuples tuples) {
+        this(vars, makeRelation(tuples, vars));
+    }
+
+    private static LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
+        long totalSize = 1;
+        for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
+            totalSize *= vars[i].getDomainSize();
         }
-        if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
-            return new TuplesLargeTable(tuples, offsets, dsizes);
+        if (totalSize < 0) {
+            throw new SolverException("Tuples required too much memory ...");
         }
-        return new TuplesTable(tuples, offsets, dsizes);
+        if (totalSize / 8 > 50 * 1024 * 1024) {
+            return new TuplesLargeTable(tuples, vars);
+        }
+        return new TuplesTable(tuples, vars);
     }
 
 
@@ -66,7 +76,7 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
+        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
     }
 
     @Override
@@ -137,6 +147,19 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
                     this.contradiction(null, "not consistent");
                 }
             }
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeFC(aVars, relation.duplicate()));
         }
     }
 }

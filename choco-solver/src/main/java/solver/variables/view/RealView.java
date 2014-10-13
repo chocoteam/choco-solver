@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,16 +27,20 @@
 package solver.variables.view;
 
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
+import solver.variables.events.RealEventType;
 import solver.variables.impl.AbstractVariable;
 
 /**
@@ -64,13 +68,19 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        if (evt == EventType.INSTANTIATE) {
-            evt = EventType.BOUND;
-        } else if (evt == EventType.REMOVE) {
-            return;
-        }
-        notifyPropagators(evt, this);
+    public void transformEvent(IEventType evt, ICause cause) throws ContradictionException {
+		RealEventType realevt;
+		IntEventType intevt = (IntEventType) evt;
+		switch (intevt){
+			case INSTANTIATE:
+			case BOUND:
+				realevt = RealEventType.BOUND;break;
+			case INCLOW:realevt = RealEventType.INCLOW;break;
+			case DECUPP:realevt = RealEventType.DECUPP;break;
+			case REMOVE:return;
+			default:throw new UnsupportedOperationException("unexpected event transformation in RealView");
+		}
+        notifyPropagators(realevt, this);
     }
 
     @Override
@@ -99,7 +109,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
         if (var.updateLowerBound((int) Math.ceil(value - precision), this)) {
-            notifyPropagators(EventType.INCLOW, cause);
+            notifyPropagators(RealEventType.INCLOW, cause);
             return true;
         }
         return false;
@@ -108,7 +118,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
         if (var.updateUpperBound((int) Math.floor(value + precision), this)) {
-            notifyPropagators(EventType.INCLOW, cause);
+            notifyPropagators(RealEventType.INCLOW, cause);
             return true;
         }
         return false;
@@ -121,13 +131,13 @@ public class RealView extends AbstractVariable implements IView, RealVar {
         c += (var.updateUpperBound((int) Math.floor(upperbound + precision), this) ? 2 : 0);
         switch (c) {
             case 3:
-                notifyPropagators(EventType.BOUND, cause);
+                notifyPropagators(RealEventType.BOUND, cause);
                 return true;
             case 2:
-                notifyPropagators(EventType.DECUPP, cause);
+                notifyPropagators(RealEventType.DECUPP, cause);
                 return true;
             case 1:
-                notifyPropagators(EventType.INCLOW, cause);
+                notifyPropagators(RealEventType.INCLOW, cause);
                 return true;
             default: //cas 0;
                 return false;
@@ -153,15 +163,15 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     public void createDelta() {
     }
 
-	@Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    @Override
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         solver.getEngine().fails(cause, this, message);
     }
 
@@ -173,6 +183,15 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public RealVar duplicate() {
         return VariableFactory.real(this.var, this.precision);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            RealView clone = new RealView((IntVar) identitymap.get(this.var), this.precision);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override

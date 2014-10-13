@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 
 package solver;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.Environments;
 import memory.IEnvironment;
@@ -47,6 +48,7 @@ import solver.propagation.NoPropagationEngine;
 import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import solver.search.loop.ISearchLoop;
+import solver.search.loop.SearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -54,9 +56,6 @@ import solver.search.solution.*;
 import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
-import solver.variables.graph.GraphVar;
-import solver.variables.impl.FixedBoolVarImpl;
-import solver.variables.impl.FixedIntVarImpl;
 import sun.reflect.Reflection;
 import util.ESat;
 
@@ -67,7 +66,6 @@ import java.util.Arrays;
  * The <code>Solver</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
  * and a <code>IPropagationEngine</code> to pilot the propagation.<br/>
- * It reads default properties in {@link SolverProperties} (it can be overriden).<br/>
  * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: apply decisions and propagate,
  * run backups and rollbacks and store solutions.
  *
@@ -80,7 +78,7 @@ import java.util.Arrays;
  */
 public class Solver implements Serializable {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 1L;
 
     private ExplanationEngine explainer;
 
@@ -96,7 +94,7 @@ public class Solver implements Serializable {
     Constraint[] cstrs;
     int cIdx;
 
-    public TIntObjectHashMap<FixedIntVarImpl> cachedConstants;
+    public TIntObjectHashMap<IntVar> cachedConstants;
 
     /**
      * Environment, based of the search tree (trailing or copying)
@@ -115,7 +113,7 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
-	protected ISolutionRecorder solutionRecorder;
+    protected ISolutionRecorder solutionRecorder;
 
     /**
      * Solver name
@@ -142,7 +140,7 @@ public class Solver implements Serializable {
     /**
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
-    public final FixedBoolVarImpl ZERO, ONE;
+    public final BoolVar ZERO, ONE;
 
 
     protected SatConstraint minisat;
@@ -152,48 +150,45 @@ public class Solver implements Serializable {
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
-     * @param environment      a backtracking environment
-     * @param name             a name
-     * @param solverProperties default properties to load
+     * @param environment a backtracking environment
+     * @param name        a name
      */
-    public Solver(IEnvironment environment, String name, ISolverProperties solverProperties) {
+    public Solver(IEnvironment environment, String name) {
         this.name = name;
         this.vars = new Variable[32];
         vIdx = 0;
         this.cstrs = new Constraint[32];
         cIdx = 0;
         this.environment = environment;
-        this.measures = new MeasuresRecorder(this);
-        solverProperties.loadPropertiesIn(this);
+        this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
+        this.search = new SearchLoop(this);
+        this.explainer = new ExplanationEngine(this);
         this.creationTime -= System.nanoTime();
-        this.cachedConstants = new TIntObjectHashMap<FixedIntVarImpl>(16, 1.5f, Integer.MAX_VALUE);
+        this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = new FixedBoolVarImpl("0", 0, this);
-        ONE = new FixedBoolVarImpl("1", 1, this);
+        ZERO = (BoolVar) VF.fixed(0, this);
+        ONE = (BoolVar) VF.fixed(1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
         TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
         FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
-		solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
+        solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
         set(ObjectiveManager.SAT());
     }
 
     /**
      * Create a solver object with default parameters.
-     * Default settings are declared in {@link SolverProperties}.
      */
     public Solver() {
         this(Environments.DEFAULT.make(),
-                Reflection.getCallerClass(2).getSimpleName(),
-                SolverProperties.DEFAULT);
+                Reflection.getCallerClass(2).getSimpleName());
     }
 
     /**
      * Create a solver object with default parameters, named <code>name</code>.
-     * Default settings are declared in {@link SolverProperties}.
      */
     public Solver(String name) {
-        this(Environments.DEFAULT.make(), name, SolverProperties.DEFAULT);
+        this(Environments.DEFAULT.make(), name);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +197,7 @@ public class Solver implements Serializable {
 
 
     /**
-     * Returns the unique and internal seach loop.
+     * Returns the unique and internal search loop.
      *
      * @return the unique and internal <code>AbstractSearchLoop</code> object.
      */
@@ -328,23 +323,6 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the GraphVar only.
-     * It also contains FIXED variables and VIEWS, if any.
-     *
-     * @return array of SetVars of <code>this</code>
-     */
-    public GraphVar[] retrieveGraphVars() {
-        GraphVar[] bvars = new GraphVar[vIdx];
-        int k = 0;
-        for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.GRAPH) {
-                bvars[k++] = (GraphVar) vars[i];
-            }
-        }
-        return Arrays.copyOf(bvars, k);
-    }
-
-    /**
      * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
      *
      * @return array of constraints
@@ -391,10 +369,12 @@ public class Solver implements Serializable {
         return explainer;
     }
 
-	/**
-	 * Return the solution recorder
-	 */
-	public ISolutionRecorder getSolutionRecorder(){return solutionRecorder;}
+    /**
+     * Return the solution recorder
+     */
+    public ISolutionRecorder getSolutionRecorder() {
+        return solutionRecorder;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
@@ -416,8 +396,6 @@ public class Solver implements Serializable {
      * If it cannot provide a new decision, the second strategy is called ...
      * and so on, until the last strategy.
      * <p/>
-     * <p/>
-     * <b>BEWARE:</b> the default strategy requires variables to be integer.
      *
      * @param strategies the search strategies to use.
      */
@@ -457,13 +435,13 @@ public class Solver implements Serializable {
         this.search.setObjectiveManager(om);
     }
 
-	/**
-	 * Override the solution recorder.
-	 * Beware : multiple recorders which restore a solution might create a conflict.
-	 */
-	public void set(ISolutionRecorder sr){
-		this.solutionRecorder = sr;
-	}
+    /**
+     * Override the solution recorder.
+     * Beware : multiple recorders which restore a solution might create a conflict.
+     */
+    public void set(ISolutionRecorder sr) {
+        this.solutionRecorder = sr;
+    }
 
     /**
      * Put a search monitor to react on search events (solutions, decisions, fails, ...)
@@ -486,9 +464,6 @@ public class Solver implements Serializable {
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
-//        if (getEngine() != null && getEngine().isInitialized()) {
-//            throw new SolverException("Solver does not support dynamic variable addition");
-//        }
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
             vars = new Variable[tmp.length * 2];
@@ -503,12 +478,15 @@ public class Solver implements Serializable {
      * @param variable
      */
     public void unassociates(Variable variable) {
+        if (variable.getNbProps() > 0) {
+            throw new SolverException("Try to remove a variable (" + variable.getName() + ")which is still involved in at least one constraint");
+        }
         int idx = 0;
         for (; idx < vIdx; idx++) {
             if (variable == vars[idx]) break;
         }
-        if (idx == vIdx) return;
-        vars[idx] = vars[--vIdx];
+        System.arraycopy(vars, idx + 1, vars, idx + 1 - 1, vIdx - (idx + 1));
+        vars[--vIdx] = null;
     }
 
     /**
@@ -594,7 +572,7 @@ public class Solver implements Serializable {
     /**
      * Remove permanently the constraint <code>c</code> from the constraint network.
      *
-     * @param c
+     * @param c the constraint to remove
      */
     public void unpost(Constraint c) {
         // 1. look for the constraint c
@@ -737,78 +715,78 @@ public class Solver implements Serializable {
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
         }
-		set(new LastSolutionRecorder(new Solution(), true, this));
+        set(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 
-	/**
-	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-	 * Finds and stores all optimal solution
-	 * Restores the best solution found so far (if any)
-	 *
-	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-	 * @param objective the variable to optimize
-	 * @param twoSteps	When set to true it calls two resolution:
-	 *                  	1) It finds and prove the optimum
-	 *                  	2) It reset search and enumerates all solutions of optimal cost
-	 *                  When set to false, it performs only one resolution but which does impose to find strictly
-	 *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
-	 *                  the best cost found so far (but not necessarily optimal).
-	 */
-	public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
-		if(twoSteps){
-			findOptimalSolution(policy,objective);
-			if(getMeasures().getSolutionCount()>0){
-				int opt = getObjectiveManager().getBestSolutionValue().intValue();
-				getEngine().flush();
-				search.reset();
-				post(ICF.arithm(objective, "=", opt));
-				set(new AllSolutionsRecorder(this));
-				findAllSolutions();
-			}
-		}else{
-			if (policy == ResolutionPolicy.SATISFACTION) {
-				throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-			}
-			if (objective == null) {
-				throw new SolverException("No objective variable has been defined");
-			}
-			if (!getObjectiveManager().isOptimization()) {
-				set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
-			}
-			set(new BestSolutionsRecorder(objective));
-			solve(false);
-		}
-	}
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Finds and stores all optimal solution
+     * Restores the best solution found so far (if any)
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objective the variable to optimize
+     * @param twoSteps  When set to true it calls two resolution:
+     *                  1) It finds and prove the optimum
+     *                  2) It reset search and enumerates all solutions of optimal cost
+     *                  When set to false, it performs only one resolution but which does impose to find strictly
+     *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
+     *                  the best cost found so far (but not necessarily optimal).
+     */
+    public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
+        if (twoSteps) {
+            findOptimalSolution(policy, objective);
+            if (getMeasures().getSolutionCount() > 0) {
+                int opt = getObjectiveManager().getBestSolutionValue().intValue();
+                getEngine().flush();
+                search.reset();
+                post(ICF.arithm(objective, "=", opt));
+                set(new AllSolutionsRecorder(this));
+                findAllSolutions();
+            }
+        } else {
+            if (policy == ResolutionPolicy.SATISFACTION) {
+                throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+            }
+            if (objective == null) {
+                throw new SolverException("No objective variable has been defined");
+            }
+            if (!getObjectiveManager().isOptimization()) {
+                set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
+            }
+            set(new BestSolutionsRecorder(objective));
+            solve(false);
+        }
+    }
 
-	/**
-	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-	 * Finds and stores all optimal solution
-	 * Restores the best solution found so far (if any)
-	 *
-	 * @param policy    	optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-	 * @param objectives	the variables to optimize. BEWARE they should all respect the SAME optimization policy
-	 */
-	public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-		if (policy == ResolutionPolicy.SATISFACTION) {
-			throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-		}
-		if (objectives==null || objectives.length==0) {
-			throw new SolverException("No objective variable has been defined");
-		}
-		if (objectives.length==1) {
-			throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
-		}
-		// BEWARE the usual optimization manager is only defined for mono-objective optimization
-		// so we use a satisfaction manager by default (it does nothing)
-		if (getObjectiveManager().isOptimization()) {
-			set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
-		}
-		set(new ParetoSolutionsRecorder(policy,objectives));
-		solve(false);
-	}
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Finds and stores all optimal solution
+     * Restores the best solution found so far (if any)
+     *
+     * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
+     */
+    public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+        }
+        if (objectives == null || objectives.length == 0) {
+            throw new SolverException("No objective variable has been defined");
+        }
+        if (objectives.length == 1) {
+            throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
+        }
+        // BEWARE the usual optimization manager is only defined for mono-objective optimization
+        // so we use a satisfaction manager by default (it does nothing)
+        if (getObjectiveManager().isOptimization()) {
+            set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
+        }
+        set(new ParetoSolutionsRecorder(policy, objectives));
+        solve(false);
+    }
 
-	/**
+    /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
      * Restores the last solution found so far (if any)
      *
@@ -965,45 +943,62 @@ public class Solver implements Serializable {
         return model;
     }
 
-    /**
-     * Cloning process based on serialization.
-     * <p/>
-     * Return a clone of <code>solver</code>.
-     *
-     * @param solver solver to clone.
-     */
-    public static Solver serializeClone(Solver solver) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream out;
-        try {
-            out = new ObjectOutputStream(baos);
-            out.writeObject(solver);
-            out.close();
-            byte[] buf = baos.toByteArray();
 
-            ByteArrayInputStream bin = new ByteArrayInputStream(buf);
-            ObjectInputStream in = new ObjectInputStream(bin);
-            return (Solver) in.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+    /**
+     * Duplicate the model declares within <code>this</code>, ie only variables and constraints.
+     * Some parameters are reset to default value: search loop (set to binary), explanation engine (set to NONE),
+     * propagation engine (set to NONE), objective manager (set to SAT), solution recorder (set to LastSolutionRecorder) and
+     * feasibility (set to UNDEFINED).
+     * The search strategies and search monitors are simply not reported in the copy.
+     * <p/>
+     * Note that a new instance of the environment is made, preserving the initial choice.
+     * <p/>
+     * Duplicating a solver is only possible before any resolution process began.
+     * This is a strong restriction which may be removed in the future.
+     * Indeed, duplicating a solver should only be considered while dealing with multi-threading.
+     *
+     * @return a copy of <code>this</code>
+     * @throws solver.exception.SolverException if the search has already begun.
+     */
+    public Solver duplicateModel() {
+        if (environment.getWorldIndex() > 0) {
+            throw new SolverException("Duplicating a solver cannot be achieved once the resolution has begun.");
         }
-        return null;
+        // Create a fresh solver
+        Solver clone;
+        try {
+            clone = new Solver(this.environment.getClass().newInstance(), this.name);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new SolverException("The current solver cannot be duplicated:\n" + e.getMessage());
+        }
+
+        THashMap<Object, Object> identitymap = new THashMap<>();
+        // duplicate variables
+        for (int i = 0; i < this.vIdx; i++) {
+            this.vars[i].duplicate(clone, identitymap);
+        }
+        // duplicate constraints
+        for (int i = 0; i < this.cIdx; i++) {
+            this.cstrs[i].duplicate(clone, identitymap);
+            //TODO How to deal with temporary constraints ?
+            clone.post((Constraint) identitymap.get(this.cstrs[i]));
+        }
+
+        return clone;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * <b>This methods should be called by the user.</b>
+     * <b>This methods should not be called by the user.</b>
      */
     public int getNbIdElt() {
         return id;
     }
 
     /**
-     * <b>This methods should be called by the user.</b>
+     * <b>This methods should not be called by the user.</b>
      */
     public int nextId() {
         return id++;

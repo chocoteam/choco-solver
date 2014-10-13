@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,12 +26,13 @@
  */
 package solver.constraints.unary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -50,25 +51,13 @@ public class PropEqualXC extends Propagator<IntVar> {
     private final int constant;
 
     public PropEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;// TODO shouldn't it react to everythink (in case of views...)
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[0].instantiateTo(constant, aCause) || vars[0].isInstantiated()) {// view precaution
-            setPassive();
-        }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
+        vars[0].instantiateTo(constant, aCause);
     }
 
     @Override
@@ -90,5 +79,12 @@ public class PropEqualXC extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(aCause);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropEqualXC((IntVar) identitymap.get(vars[0]), constant));
+        }
     }
 }

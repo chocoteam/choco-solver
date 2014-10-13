@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,13 @@
 
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -54,7 +56,7 @@ public class PropTimesZ extends Propagator<IntVar> {
     @Override
     public final int getPropagationConditions(int vIdx) {
         if (vIdx != 2) return 0;
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -223,5 +225,18 @@ public class PropTimesZ extends Propagator<IntVar> {
         }
         v2.updateUpperBound(ub, aCause);
 
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = vars.length;
+            IntVar[] ivars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                vars[i].duplicate(solver, identitymap);
+                ivars[i] = (IntVar) identitymap.get(vars[i]);
+            }
+            identitymap.put(this, new PropTimesZ(ivars[0], ivars[1], ivars[2]));
+        }
     }
 }

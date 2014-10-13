@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,6 @@ package solver.variables.delta.monitor;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import util.procedure.IntProcedure;
@@ -65,19 +64,14 @@ public class OneValueDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType) {
-        if (EventType.isRemove(eventType.mask)) {
-            if (used && propagator != delta.getCause(0))
-                proc.execute(delta.get(0));
-        }
+    public void forEachRemVal(SafeIntProcedure proc) {
+		if (used && propagator != delta.getCause(0))
+			proc.execute(delta.get(0));
     }
 
     @Override
-    public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
-            if (used && propagator != delta.getCause(0))
-                proc.execute(delta.get(0));
-        }
+    public void forEachRemVal(IntProcedure proc) throws ContradictionException {
+		if (used && propagator != delta.getCause(0))
+			proc.execute(delta.get(0));
     }
-
 }

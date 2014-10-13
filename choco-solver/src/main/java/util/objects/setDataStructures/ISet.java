@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -103,4 +103,16 @@ public interface ISet extends Serializable {
 	 * @return the implementation type of this set
 	 */
 	SetType getSetType();
+
+	/**
+	 * Copies the set in an array if integers
+	 * @return an array containing every integer of the set
+	 */
+	int[] toArray();
+
+	/**
+	 * Gets the maximum size of the set, or -1 if it is unbounded.
+	 * @return the maximum size of the set, or -1 if it is unbounded
+	 */
+	int getMaxSize();
 }

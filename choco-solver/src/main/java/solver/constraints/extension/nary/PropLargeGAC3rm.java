@@ -26,10 +26,13 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
+import solver.exception.SolverException;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -56,8 +59,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
     protected DisposableValueIterator[] seekIter;
 
 
-    public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {
-        super(vs, tuples);
+    private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
+        super(vs, relation);
         this.size = vs.length;
         this.blocks = new int[size];
         this.offsets = new int[size];
@@ -78,23 +81,29 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             seekIter[i] = vars[i].getValueIterator(true);
         }
         Arrays.fill(supports, Integer.MIN_VALUE);
-
     }
 
-    protected LargeRelation makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        int totalSize = 1;
-        for (int i = 0; i < offsets.length; i++) {
-            totalSize *= dsizes[i];
+    public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {
+        this(vs, makeRelation(tuples, vs));
+    }
+
+    private static LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
+        long totalSize = 1;
+        for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
+            totalSize *= vars[i].getDomainSize();
         }
-        if (totalSize < 0 || (totalSize / 8 > 50 * 1024 * 1024)) {
-            return new TuplesLargeTable(tuples, offsets, dsizes);
+        if (totalSize < 0) {
+            throw new SolverException("Tuples required too much memory ...");
         }
-        return new TuplesTable(tuples, offsets, dsizes);
+        if (totalSize / 8 > 50 * 1024 * 1024) {
+            return new TuplesLargeTable(tuples, vars);
+        }
+        return new TuplesTable(tuples, vars);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if ((evtmask & PropagatorEventType.FULL_PROPAGATION.getMask()) != 0) {
             for (int i = 0; i < vars.length; i++) {
                 initializeSupports(i);
             }
@@ -320,4 +329,16 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         return null;
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeGAC3rm(aVars, relation.duplicate()));
+        }
+    }
 }

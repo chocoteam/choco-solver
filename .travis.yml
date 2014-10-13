@@ -1,12 +1,16 @@
 language: java
+jdk:
+- oraclejdk8
 before_script:
   - "export MAVEN_OPTS='-Xmx4096m -Xms1024 -Xss64m -server'"
-script: mvn clean install -DtestFailureIgnore=true
+script: travis_wait ./src/scripts/build.sh
 branches:
   only:
-    - master
     - develop
-    - /^release-.*$/
+    - release
 notifications:
-  email:
-  - choco@emn.fr
+  recipients:
+    - choco@emn.fr
+  on_success: always
+  on_failure: always
+

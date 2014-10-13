@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -68,7 +68,7 @@ public class CNFTest {
             solver.post(LogicalConstraintFactory.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
-            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());
+//            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());
         }
     }
 }

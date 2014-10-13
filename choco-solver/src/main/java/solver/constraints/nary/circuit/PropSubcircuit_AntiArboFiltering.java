@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,13 @@
 
 package solver.constraints.nary.circuit;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import util.graphOperations.dominance.SimpleDominatorsFinder;
@@ -68,7 +70,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
         domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-		rootCandidates = new int[n];
+        rootCandidates = new int[n];
     }
 
     //***********************************************************************************
@@ -77,7 +79,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
                 vars[i].updateLowerBound(offSet, aCause);
                 vars[i].updateUpperBound(n - 1 + offSet, aCause);
@@ -90,19 +92,19 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
             }
         }
         if (size > 0) {
-			filterFromPostDom(rootCandidates[rd.nextInt(size)]);
+            filterFromPostDom(rootCandidates[rd.nextInt(size)]);
         }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
+        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
     }
 
     private void filterFromPostDom(int duplicatedNode) throws ContradictionException {
         for (int i = 0; i < n + 1; i++) {
-            connectedGraph.getSuccessorsOf(i).clear();
-            connectedGraph.getPredecessorsOf(i).clear();
+            connectedGraph.getSuccOf(i).clear();
+            connectedGraph.getPredOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             if (i == duplicatedNode || vars[i].contains(i + offSet)) {
@@ -140,5 +142,18 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropSubcircuit_AntiArboFiltering(aVars, this.offSet));
+        }
     }
 }

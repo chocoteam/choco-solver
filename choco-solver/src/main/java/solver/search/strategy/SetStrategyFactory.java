@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,7 @@ import solver.search.strategy.selectors.values.SetDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.selectors.variables.MaxDelta;
 import solver.search.strategy.selectors.variables.MinDelta;
-import solver.search.strategy.strategy.SetSearchStrategy;
+import solver.search.strategy.strategy.SetStrategy;
 import solver.variables.SetVar;
 
 /**
@@ -58,8 +58,8 @@ public final class SetStrategyFactory {
 	 * @param sets         SetVar array to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy generic(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
-        return new SetSearchStrategy(sets, varS, valS, enforceFirst);
+    public static SetStrategy custom(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
+        return new SetStrategy(sets, varS, valS, enforceFirst);
     }
 
     /**
@@ -68,8 +68,8 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy force_first(SetVar... sets) {
-        return generic(new InputOrder<SetVar>(), new SetDomainMin(), true, sets);
+    public static SetStrategy force_first(SetVar... sets) {
+        return custom(new InputOrder<SetVar>(), new SetDomainMin(), true, sets);
     }
 
     /**
@@ -78,8 +78,8 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy remove_first(SetVar... sets) {
-        return generic(new InputOrder<SetVar>(), new SetDomainMin(), false, sets);
+    public static SetStrategy remove_first(SetVar... sets) {
+        return custom(new InputOrder<SetVar>(), new SetDomainMin(), false, sets);
     }
 
     /**
@@ -90,8 +90,8 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy force_minDelta_first(SetVar... sets) {
-        return generic(new MinDelta(), new SetDomainMin(), true, sets);
+    public static SetStrategy force_minDelta_first(SetVar... sets) {
+        return custom(new MinDelta(), new SetDomainMin(), true, sets);
     }
 
     /**
@@ -102,7 +102,7 @@ public final class SetStrategyFactory {
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetSearchStrategy force_maxDelta_first(SetVar... sets) {
-        return generic(new MaxDelta(), new SetDomainMin(), true, sets);
+    public static SetStrategy force_maxDelta_first(SetVar... sets) {
+        return custom(new MaxDelta(), new SetDomainMin(), true, sets);
     }
 }

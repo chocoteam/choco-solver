@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,13 +34,15 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.monitor.SetDeltaMonitor;
+import solver.variables.events.PropagatorEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -76,21 +78,21 @@ public class PropUnion extends Propagator<SetVar> {
         unionForced = new IntProcedure() {
             @Override
             public void execute(int element) throws ContradictionException {
-				int mate = -1;
-				for(int i=0;i<k && mate!=-2;i++){
-					if(vars[i].envelopeContains(element)){
-						if(mate == -1){
-							mate = i;
-						}else{
-							mate = -2;
-						}
-					}
-				}
-				if(mate == -1){
-					contradiction(vars[k],"");
-				}else if(mate != -2){
-					vars[mate].addToKernel(element,aCause);
-				}
+                int mate = -1;
+                for (int i = 0; i < k && mate != -2; i++) {
+                    if (vars[i].envelopeContains(element)) {
+                        if (mate == -1) {
+                            mate = i;
+                        } else {
+                            mate = -2;
+                        }
+                    }
+                }
+                if (mate == -1) {
+                    contradiction(vars[k], "");
+                } else if (mate != -2) {
+                    vars[mate].addToKernel(element, aCause);
+                }
             }
         };
         unionRemoved = new IntProcedure() {
@@ -110,23 +112,23 @@ public class PropUnion extends Propagator<SetVar> {
         setRemoved = new IntProcedure() {
             @Override
             public void execute(int element) throws ContradictionException {
-				if(vars[k].envelopeContains(element)){
-					int mate = -1;
-					for(int i=0;i<k && mate!=-2;i++){
-						if(vars[i].envelopeContains(element)){
-							if(mate == -1){
-								mate = i;
-							}else{
-								mate = -2;
-							}
-						}
-					}
-					if(mate == -1){
-						vars[k].removeFromEnvelope(element,aCause);
-					}else if(mate != -2 && vars[k].kernelContains(element)){
-						vars[mate].addToKernel(element,aCause);
-					}
-				}
+                if (vars[k].envelopeContains(element)) {
+                    int mate = -1;
+                    for (int i = 0; i < k && mate != -2; i++) {
+                        if (vars[i].envelopeContains(element)) {
+                            if (mate == -1) {
+                                mate = i;
+                            } else {
+                                mate = -2;
+                            }
+                        }
+                    }
+                    if (mate == -1) {
+                        vars[k].removeFromEnvelope(element, aCause);
+                    } else if (mate != -2 && vars[k].kernelContains(element)) {
+                        vars[mate].addToKernel(element, aCause);
+                    }
+                }
             }
         };
     }
@@ -137,32 +139,32 @@ public class PropUnion extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-			SetVar union = vars[k];
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
+            SetVar union = vars[k];
             for (int i = 0; i < k; i++) {
-                for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext())
+                for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext())
                     union.addToKernel(j, aCause);
-                for (int j=vars[i].getEnvelopeFirst(); j!=SetVar.END; j=vars[i].getEnvelopeNext())
+                for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
                     if (!union.envelopeContains(j))
                         vars[i].removeFromEnvelope(j, aCause);
             }
-            for (int j=union.getEnvelopeFirst(); j!=SetVar.END; j=union.getEnvelopeNext()) {
+            for (int j = union.getEnvelopeFirst(); j != SetVar.END; j = union.getEnvelopeNext()) {
                 if (union.kernelContains(j)) {
-					int mate = -1;
-					for(int i=0;i<k && mate!=-2;i++){
-						if(vars[i].envelopeContains(j)){
-							if(mate == -1){
-								mate = i;
-							}else{
-								mate = -2;
-							}
-						}
-					}
-					if(mate == -1){
-						contradiction(vars[k],"");
-					}else if(mate != -2){
-						vars[mate].addToKernel(j,aCause);
-					}
+                    int mate = -1;
+                    for (int i = 0; i < k && mate != -2; i++) {
+                        if (vars[i].envelopeContains(j)) {
+                            if (mate == -1) {
+                                mate = i;
+                            } else {
+                                mate = -2;
+                            }
+                        }
+                    }
+                    if (mate == -1) {
+                        contradiction(vars[k], "");
+                    } else if (mate != -2) {
+                        vars[mate].addToKernel(j, aCause);
+                    }
                 } else {
                     int mate = -1;
                     for (int i = 0; i < k; i++) {
@@ -174,22 +176,21 @@ public class PropUnion extends Propagator<SetVar> {
                     if (mate == -1) union.removeFromEnvelope(j, aCause);
                 }
             }
-			// ------------------
-			if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0)
-				for (int i = 0; i <= k; i++)
-					sdm[i].unfreeze();
-		}
+            // ------------------
+			for (int i = 0; i <= k; i++)
+				sdm[i].unfreeze();
+        }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         sdm[idxVarInProp].freeze();
         if (idxVarInProp < k) {
-            sdm[idxVarInProp].forEach(setForced, EventType.ADD_TO_KER);
-            sdm[idxVarInProp].forEach(setRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm[idxVarInProp].forEach(setForced, SetEventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(setRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         } else {
-            sdm[idxVarInProp].forEach(unionForced, EventType.ADD_TO_KER);
-            sdm[idxVarInProp].forEach(unionRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm[idxVarInProp].forEach(unionForced, SetEventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(unionRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         }
         sdm[idxVarInProp].unfreeze();
     }
@@ -197,11 +198,11 @@ public class PropUnion extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < k; i++) {
-            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext())
+            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext())
                 if (!vars[k].envelopeContains(j))
                     return ESat.FALSE;
         }
-        for (int j=vars[k].getKernelFirst(); j!=SetVar.END; j=vars[k].getKernelNext()) {
+        for (int j = vars[k].getKernelFirst(); j != SetVar.END; j = vars[k].getKernelNext()) {
             int mate = -1;
             for (int i = 0; i < k; i++)
                 if (vars[i].envelopeContains(j)) {
@@ -212,5 +213,21 @@ public class PropUnion extends Propagator<SetVar> {
         }
         if (isCompletelyInstantiated()) return ESat.TRUE;
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = vars.length - 1;
+            SetVar[] svars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                vars[i].duplicate(solver, identitymap);
+                svars[i] = (SetVar) identitymap.get(vars[i]);
+            }
+            vars[size].duplicate(solver, identitymap);
+            SetVar svar = (SetVar) identitymap.get(vars[size]);
+
+            identitymap.put(this, new PropUnion(svars, svar));
+        }
     }
 }

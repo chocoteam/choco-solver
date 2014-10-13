@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -35,18 +35,21 @@ package solver.constraints.nary;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import solver.variables.VariableFactory;
 
 public class TableTest {
 
-    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm"};
+    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
 
     @Test(groups = "1s")
     public void test1() {
@@ -76,7 +79,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testAllEquals() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {10, 2, 4}, {5, 0, 20}};
         for (int p = 0; p < params.length; p++) {
@@ -108,7 +111,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testAllDifferent() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {7, 0, 7}};
 
@@ -138,5 +141,63 @@ public class TableTest {
         TableTest tt = new TableTest();
         tt.testAllDifferent();
     }
+
+    public static void test(String type) {
+        Solver solver;
+        IntVar[] vars;
+        IntVar sum;
+        IntVar[] reified;
+        solver = new Solver();
+        vars = VariableFactory.enumeratedArray("vars", 6, new int[]{1, 2, 3, 4, 5, 6, 10, 45, 57}, solver);
+        reified = VariableFactory.enumeratedArray("rei", vars.length, new int[]{0, 1}, solver);
+        sum = VariableFactory.bounded("sum", 0, reified.length, solver);
+        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        Tuples tuples = new Tuples(true);
+        tuples.add(1, 0);
+        tuples.add(2 , 1);
+        tuples.add(3 , 1);
+        tuples.add(4 , 1);
+        tuples.add(5 , 1);
+        tuples.add(6 , 1);
+        tuples.add(10, 1);
+        tuples.add(45, 1);
+        tuples.add(57, 1);
+
+        for (int i = 0; i < vars.length; i++) {
+            Constraint c = IntConstraintFactory.table(vars[i], reified[i], tuples, type);
+            solver.post(c);
+        }
+        solver.post(IntConstraintFactory.sum(reified, sum));
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
+        if (solver.getMeasures().getSolutionCount() > 0) {
+            for (int i = 0; i < vars.length; i++) {
+                System.out.print(vars[i].getValue() + "\t");
+            }
+            System.out.println("");
+            for (int i = 0; i < reified.length; i++) {
+                System.out.print(reified[i].getValue() + "\t");
+            }
+            System.out.println("\n" + "obj = " + sum.getValue() + ", backtracks = " + solver.getMeasures().getBackTrackCount());
+        }
+        Assert.assertEquals(sum.getValue(), 5);
+    }
+
+    @Test(groups = "1s")
+    public void testtpetit() {
+        test("AC3");
+        test("AC3rm");
+        test("AC3bit+rm");
+        test("AC2001");
+        test("FC");
+    }
+	@Test(groups = "1s")
+	public static void testThierry() {
+		Solver solver = new Solver();
+		IntVar[] vars = VF.enumeratedArray("vars", 10, 0,100, solver);
+		Tuples t = new Tuples(false);
+		t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+		solver.post(ICF.table(vars, t, "GAC3rm"));
+		solver.findSolution();
+	}
 
 }

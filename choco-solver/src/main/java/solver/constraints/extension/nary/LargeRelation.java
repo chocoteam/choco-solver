@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,11 @@
 
 package solver.constraints.extension.nary;
 
-public abstract class LargeRelation {
+import solver.variables.IntVar;
+
+import java.io.Serializable;
+
+public abstract class LargeRelation implements Serializable {
 
     /**
      * return true if tuple is feasible according
@@ -45,16 +49,13 @@ public abstract class LargeRelation {
      */
     public abstract boolean isConsistent(int[] tuple);
 
-    protected boolean valid(int[] tuple, int[] offsets, int[] domSizes) {
+    protected boolean valid(int[] tuple, IntVar[] vars) {
         for (int i = 0; i < tuple.length; i++) {
-                if (!between(tuple[i], offsets[i], offsets[i] + domSizes[i] - 1)) return false;
-            }
-            return true;
+            if (!vars[i].contains(tuple[i]))
+                return false;
         }
+        return true;
+    }
 
-    private static boolean between(int v, int low, int upp) {
-            return (low <= v) && (v <= upp);
-        }
-
-
+    public abstract LargeRelation duplicate();
 }

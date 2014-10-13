@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,11 +26,14 @@
  */
 package solver.constraints.nary.lex;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -80,12 +83,12 @@ public class PropLexChain extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < N; i++) {
                 UB[M - 1][i] = x[M - 1][i].getUB();
             }
@@ -110,7 +113,7 @@ public class PropLexChain extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         int vec_idx = idxVarInProp % M;
-        if (EventType.isDecupp(mask)) {
+        if (IntEventType.isDecupp(mask)) {
             for (int i = 0; i < N; i++) {
                 UB[vec_idx][i] = x[vec_idx][i].getUB();
             }
@@ -118,7 +121,7 @@ public class PropLexChain extends Propagator<IntVar> {
                 computeUB(x[i], UB[i + 1], UB[i]);
             }
         }
-        if (EventType.isInclow(mask)) {
+        if (IntEventType.isInclow(mask)) {
             for (int i = 0; i < N; i++) {
                 LB[vec_idx][i] = x[vec_idx][i].getLB();
             }
@@ -127,7 +130,7 @@ public class PropLexChain extends Propagator<IntVar> {
                 computeLB(x[i], LB[i - 1], LB[i]);
             }
         }
-        forcePropagate(EventType.FULL_PROPAGATION);
+        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
     }
 
     @Override
@@ -136,6 +139,23 @@ public class PropLexChain extends Propagator<IntVar> {
             return ESat.eval(checkTuple(0));
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int d1 = this.x.length;
+            IntVar[][] aVars = new IntVar[d1][];
+            for (int i = 0; i < d1; i++) {
+                int d2 = this.x[i].length;
+                aVars[i] = new IntVar[d2];
+                for (int j = 0; j < d2; j++) {
+                    this.x[i][j].duplicate(solver, identitymap);
+                    aVars[i][j] = (IntVar) identitymap.get(this.x[i][j]);
+                }
+            }
+            identitymap.put(this, new PropLexChain(aVars, this.strict));
+        }
     }
 
     /**

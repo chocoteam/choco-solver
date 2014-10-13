@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -227,6 +227,10 @@ public class ExplanationEngine implements Serializable {
 
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
         LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
+    }
+
+    public void onActivatePropagator(Propagator propagator, Explanation explanation) {
+        LOGGER.info("::EXPL:: ACTIV. " + propagator + " BECAUSE OF " + flatten(explanation));
     }
 
     public void onContradiction(ContradictionException cex, Explanation explanation) {

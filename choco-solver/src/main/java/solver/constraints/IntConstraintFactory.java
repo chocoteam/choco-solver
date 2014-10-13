@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -29,9 +29,11 @@ package solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.binary.*;
 import solver.constraints.extension.Tuples;
+import solver.constraints.extension.TuplesFactory;
 import solver.constraints.extension.binary.*;
 import solver.constraints.extension.nary.*;
 import solver.constraints.nary.PropDiffN;
@@ -48,20 +50,34 @@ import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.PropMultiCostRegular;
 import solver.constraints.nary.automata.PropRegular;
+import solver.constraints.nary.channeling.PropBitChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.channeling.PropInverseChannelAC;
 import solver.constraints.nary.channeling.PropInverseChannelBC;
 import solver.constraints.nary.circuit.*;
+import solver.constraints.nary.count.PropCountVar;
 import solver.constraints.nary.count.PropCount_AC;
 import solver.constraints.nary.cumulative.Cumulative;
 import solver.constraints.nary.element.PropElementV_fast;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.PropLex;
 import solver.constraints.nary.lex.PropLexChain;
+import solver.constraints.nary.min_max.PropBoolMax;
+import solver.constraints.nary.min_max.PropBoolMin;
 import solver.constraints.nary.min_max.PropMax;
 import solver.constraints.nary.min_max.PropMin;
-import solver.constraints.nary.nValue.NValues;
-import solver.constraints.nary.sum.PropBoolSum;
+import solver.constraints.nary.nValue.PropAMNV;
+import solver.constraints.nary.nValue.PropAtLeastNValues;
+import solver.constraints.nary.nValue.PropAtLeastNValues_AC;
+import solver.constraints.nary.nValue.PropAtMostNValues;
+import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
+import solver.constraints.nary.nValue.amnv.graph.Gci;
+import solver.constraints.nary.nValue.amnv.mis.MDRk;
+import solver.constraints.nary.nValue.amnv.rules.R;
+import solver.constraints.nary.nValue.amnv.rules.R1;
+import solver.constraints.nary.nValue.amnv.rules.R3;
+import solver.constraints.nary.sum.PropBoolSumCoarse;
+import solver.constraints.nary.sum.PropBoolSumIncremental;
 import solver.constraints.nary.sum.PropSumEq;
 import solver.constraints.nary.sum.Scalar;
 import solver.constraints.nary.tree.PropAntiArborescences;
@@ -202,11 +218,17 @@ public class IntConstraintFactory {
      * @param VAR2 second variable
      */
     public static Constraint arithm(IntVar VAR1, String OP, IntVar VAR2) {
+        if (VAR2.isInstantiated()) {
+            return arithm(VAR1, OP, VAR2.getValue());
+        }
+        if (VAR1.isInstantiated()) {
+            return arithm(VAR2, Operator.getFlip(OP), VAR1.getValue());
+        }
         return new Arithmetic(VAR1, Operator.get(OP), VAR2);
     }
 
     /**
-     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="} or {"+", "-"}
      *
      * @param VAR1 first variable
      * @param OP1  an operator
@@ -215,6 +237,20 @@ public class IntConstraintFactory {
      * @param CSTE an operator
      */
     public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
+        if (VAR2.isInstantiated()) {
+            if (OP1.equals("+")) {
+                return arithm(VAR1, OP2, CSTE - VAR2.getValue());
+            } else if (OP1.equals("-")) {
+                return arithm(VAR1, OP2, CSTE + VAR2.getValue());
+            }
+        }
+        if (VAR1.isInstantiated()) {
+            if (OP1.equals("+")) {
+                return arithm(VAR2, OP2, CSTE - VAR1.getValue());
+            } else if (OP1.equals("-")) {
+                return arithm(VAR2, Operator.getFlip(OP2), VAR1.getValue() - CSTE);
+            }
+        }
         Operator op1 = Operator.get(OP1);
         Operator op2 = Operator.get(OP2);
         return new Arithmetic(VAR1, op1, VAR2, op2, CSTE);
@@ -242,7 +278,7 @@ public class IntConstraintFactory {
      *               <p/> "none" if TABLE is not sorted
      *               <p/> "asc" if TABLE is sorted in the increasing order
      *               <p/> "desc" if TABLE is sorted in the decreasing order
-     *               <p/> "detect" Let the constraint detect the ordering of TABLE, if any
+     *               <p/> "detect" Let the constraint detects the ordering of TABLE, if any
      */
     public static Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
         return new Constraint("Element", new PropElement(VALUE, TABLE, INDEX, OFFSET, PropElement.Sort.valueOf(SORT)));
@@ -299,7 +335,6 @@ public class IntConstraintFactory {
                 p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
                 break;
         }
-
         return new Constraint("TableBin(" + ALGORITHM + ")", p);
     }
 
@@ -324,7 +359,7 @@ public class IntConstraintFactory {
 
     /**
      * Ensures DIVIDEND / DIVISOR = RESULT, rounding towards 0 -- Euclidean division
-	 * Also ensures DIVISOR != 0
+     * Also ensures DIVISOR != 0
      *
      * @param DIVIDEND dividend
      * @param DIVISOR  divisor
@@ -378,11 +413,11 @@ public class IntConstraintFactory {
         Solver solver = X.getSolver();
         IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
         IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
+        Constraint div = IntConstraintFactory.eucl_div(X, Y, t1);
+        Constraint tim = IntConstraintFactory.times(t1, Y, t2);
+        Constraint sum = IntConstraintFactory.sum(new IntVar[]{Z, t2}, X);
         return new Constraint("Mod",
-                new PropDivXYZ(X, Y, t1),
-                new PropTimesXY(t1, Y, t2),
-                new PropTimesZ(t1, Y, t2),
-                new PropSumEq(new IntVar[]{Z, t2}, X)
+                ArrayUtils.append(div.getPropagators(), tim.getPropagators(), sum.getPropagators())
         );
     }
 
@@ -398,6 +433,8 @@ public class IntConstraintFactory {
             return times(X, Y.getValue(), Z);
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
+        } else if (tupleIt(X, Y, Z)) {
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "");
         } else {
             return new Times(X, Y, Z);
         }
@@ -531,6 +568,52 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Let N be the number of distinct values assigned to the variables of the VARS collection.
+     * Enforce condition N >= NVALUES to hold.
+     * <p/>
+     * This embeds a light propagator by default.
+     * Additional filtering algorithms can be added.
+     *
+     * @param VARS    collection of variables
+     * @param NVALUES limit variable
+     * @param AC      additional filtering algorithm, domain filtering algorithm derivated from (Soft)AllDifferent
+     */
+    public static Constraint atleast_nvalues(IntVar[] VARS, IntVar NVALUES, boolean AC) {
+        TIntArrayList vals = getDomainUnion(VARS);
+        if (AC) {
+            return new Constraint("AtLeastNValues", new PropAtLeastNValues(VARS, vals, NVALUES), new PropAtLeastNValues_AC(VARS, NVALUES));
+        } else {
+            return new Constraint("AtLeastNValues", new PropAtLeastNValues(VARS, vals, NVALUES));
+        }
+    }
+
+    /**
+     * Let N be the number of distinct values assigned to the variables of the VARS collection.
+     * Enforce condition N <= NVALUES to hold.
+     * <p/>
+     * This embeds a light propagator by default.
+     * Additional filtering algorithms can be added.
+     *
+     * @param VARS    collection of variables
+     * @param NVALUES limit variable
+     * @param GREEDY  "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
+     *                (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
+     *                automatically detects disequalities and alldifferent constraints.
+     *                Presumably useful when NVALUES must be minimized.
+     */
+    public static Constraint atmost_nvalues(IntVar[] VARS, IntVar NVALUES, boolean GREEDY) {
+        TIntArrayList vals = getDomainUnion(VARS);
+        if (GREEDY) {
+            Gci gci = new Gci(VARS, new AutoDiffDetection(VARS));
+            R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver())};
+            return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES),
+                    new PropAMNV(VARS, NVALUES, gci, new MDRk(gci), rules));
+        } else {
+            return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES));
+        }
+    }
+
+    /**
      * Bin Packing formulation:
      * forall b in [0,BIN_LOAD.length-1],
      * BIN_LOAD[b]=sum(ITEM_SIZE[i] | i in [0,ITEM_SIZE.length-1], ITEM_BIN[i] = b+OFFSET
@@ -587,6 +670,53 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Ensures that VAR = 2<sup>0</sup>*BIT_1 + 2<sup>1</sup>*BIT_2 + ... 2<sup>n-1</sup>*BIT_n.
+     * <br/>
+     * BIT_1 is related to the first bit of OCTET (2^0),
+     * BIT_2 is related to the first bit of OCTET (2^1), etc.
+     * <br/>
+     * The upper bound of VAR is given by 2<sup>n</sup>, where n is the size of the array BITS.
+     *
+     * @param BITS the array of bits
+     * @param VAR the numeric value
+     */
+    public static Constraint bit_channeling(BoolVar[] BITS, IntVar VAR) {
+        return new Constraint("bit_channeling", new PropBitChanneling(VAR, BITS));
+    }
+
+    /**
+     * Creates a circuit constraint which ensures that
+     * <p/> the elements of vars define a covering circuit
+     * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
+     * <p/>
+     * Filtering algorithms:
+     * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
+     * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
+     * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+     * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+     *
+     * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
+     * @param OFFSET 0 by default but typically 1 if used within MiniZinc
+     *               (which counts from 1 to n instead of from 0 to n-1)
+     * @param CONF   filtering options
+     * @return a circuit constraint
+     */
+    public static Constraint circuit(IntVar[] VARS, int OFFSET, CircuitConf CONF) {
+        Propagator[] props;
+        if (CONF == CircuitConf.LIGHT) {
+            props = new Propagator[]{new PropNoSubtour(VARS, OFFSET)};
+        } else {
+            props = new Propagator[]{
+                    new PropNoSubtour(VARS, OFFSET),
+                    new PropCircuit_ArboFiltering(VARS, OFFSET, CONF),
+                    new PropCircuit_AntiArboFiltering(VARS, OFFSET, CONF),
+                    new PropCircuitSCC(VARS, OFFSET, CONF)
+            };
+        }
+        return new Constraint("Circuit", ArrayUtils.append(alldifferent(VARS, "AC").propagators, props));
+    }
+
+    /**
      * Creates a circuit constraint which ensures that
      * <p/> the elements of vars define a covering circuit
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
@@ -603,14 +733,7 @@ public class IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        return new Constraint("Circuit", ArrayUtils.append(
-                alldifferent(VARS).propagators,
-                new Propagator[]{
-                        new PropNoSubtour(VARS, OFFSET),
-                        new PropCircuit_AntiArboFiltering(VARS, OFFSET),
-                        new PropCircuitSCC(VARS, OFFSET)
-                }
-        ));
+        return circuit(VARS, OFFSET, CircuitConf.RD);
     }
 
     /**
@@ -632,7 +755,6 @@ public class IntConstraintFactory {
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
      * <p/>
-     * Based on GlobalCardinality constraint, ensures GAC.
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
@@ -640,6 +762,28 @@ public class IntConstraintFactory {
      */
     public static Constraint count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
         return new Constraint("Count", new PropCount_AC(VARS, VALUE, LIMIT));
+    }
+
+    /**
+     * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
+     * Enforce condition N = LIMIT to hold.
+     * <p/>
+     *
+     * @param VALUE a variable
+     * @param VARS  a vector of variables
+     * @param LIMIT a variable
+     */
+    public static Constraint count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
+        if (VALUE.isInstantiated()) {
+            return count(VALUE.getValue(), VARS, LIMIT);
+        } else if (VALUE.hasEnumeratedDomain()) {
+            return new Constraint("Count", new PropCountVar(VARS, VALUE, LIMIT));
+        } else {
+            IntVar EVALUE = VF.enumerated(StringUtils.randomName(), VALUE.getLB(), VALUE.getUB(), VALUE.getSolver());
+            return new Constraint("Count",
+                    new PropEqualX_Y(EVALUE, VALUE),
+                    new PropCountVar(VARS, EVALUE, LIMIT));
+        }
     }
 
     /**
@@ -670,31 +814,31 @@ public class IntConstraintFactory {
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY, boolean INCREMENTAL) {
         // Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
         boolean addHeights = false;
-		int nbUseFull = 0;
+        int nbUseFull = 0;
         for (int h = 0; h < HEIGHTS.length; h++) {
             if (!HEIGHTS[h].isInstantiated()) {
                 addHeights = true;
             }
-			if(!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))){
-				nbUseFull++;
-			}
+            if (!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))) {
+                nbUseFull++;
+            }
         }
-		// remove tasks which have no impact on resource
-		if(nbUseFull<TASKS.length){
-			if(nbUseFull==0)return arithm(CAPACITY,">=",0);
-			Task[] T2 = new Task[nbUseFull];
-			IntVar[] H2 = new IntVar[nbUseFull];
-			int idx = 0;
-			for (int h = 0; h < HEIGHTS.length; h++) {
-				if(!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))){
-					T2[idx] = TASKS[h];
-					H2[idx] = HEIGHTS[h];
-					idx++;
-				}
-			}
-			TASKS = T2;
-			HEIGHTS = H2;
-		}
+        // remove tasks which have no impact on resource
+        if (nbUseFull < TASKS.length) {
+            if (nbUseFull == 0) return arithm(CAPACITY, ">=", 0);
+            Task[] T2 = new Task[nbUseFull];
+            IntVar[] H2 = new IntVar[nbUseFull];
+            int idx = 0;
+            for (int h = 0; h < HEIGHTS.length; h++) {
+                if (!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))) {
+                    T2[idx] = TASKS[h];
+                    H2[idx] = HEIGHTS[h];
+                    idx++;
+                }
+            }
+            TASKS = T2;
+            HEIGHTS = H2;
+        }
         Cumulative.Filter[] filters = new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
         if (addHeights) {
             filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
@@ -730,8 +874,8 @@ public class IntConstraintFactory {
             int miny = Integer.MAX_VALUE / 2;
             int maxy = Integer.MIN_VALUE / 2;
             for (int i = 0; i < X.length; i++) {
-                EX[i] = VF.bounded("", X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), solver);
-                EY[i] = VF.bounded("", Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), solver);
+                EX[i] = VF.bounded(StringUtils.randomName("diffn"), X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), solver);
+                EY[i] = VF.bounded(StringUtils.randomName("diffn"), Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), solver);
                 TX[i] = VF.task(X[i], WIDTH[i], EX[i]);
                 TY[i] = VF.task(Y[i], HEIGHT[i], EY[i]);
                 minx = Math.min(minx, X[i].getLB());
@@ -739,12 +883,12 @@ public class IntConstraintFactory {
                 maxx = Math.max(maxx, X[i].getUB() + WIDTH[i].getUB());
                 maxy = Math.max(maxy, Y[i].getUB() + HEIGHT[i].getUB());
             }
-            IntVar maxX = VF.bounded("", minx, maxx, solver);
-            IntVar minX = VF.bounded("", minx, maxx, solver);
-            IntVar diffX = VF.bounded("", 0, maxx - minx, solver);
-            IntVar maxY = VF.bounded("", miny, maxy, solver);
-            IntVar minY = VF.bounded("", miny, maxy, solver);
-            IntVar diffY = VF.bounded("", 0, maxy - miny, solver);
+            IntVar maxX = VF.bounded(StringUtils.randomName("diffn"), minx, maxx, solver);
+            IntVar minX = VF.bounded(StringUtils.randomName("diffn"), minx, maxx, solver);
+            IntVar diffX = VF.bounded(StringUtils.randomName("diffn"), 0, maxx - minx, solver);
+            IntVar maxY = VF.bounded(StringUtils.randomName("diffn"), miny, maxy, solver);
+            IntVar minY = VF.bounded(StringUtils.randomName("diffn"), miny, maxy, solver);
+            IntVar diffY = VF.bounded(StringUtils.randomName("diffn"), 0, maxy - miny, solver);
             return new Constraint[]{
                     diffNCons,
                     minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, diffX),
@@ -857,7 +1001,7 @@ public class IntConstraintFactory {
      * Ensures that :
      * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; TOTAL_WEIGHT
      * <br/>- OCCURRENCES[i] * ENERGY[i] = TOTAL_ENERGY
-     * <br/>and maximizing the value of POWER.
+     * <br/>and maximizing the value of TOTAL_ENERGY.
      * <p/>
      * <p/>
      * A knapsack constraint
@@ -941,6 +1085,16 @@ public class IntConstraintFactory {
     }
 
     /**
+     * MAX is the maximum value of the collection of boolean variables VARS
+     *
+     * @param MAX  a boolean variable
+     * @param VARS a vector of boolean variables
+     */
+    public static Constraint maximum(BoolVar MAX, BoolVar[] VARS) {
+        return new Constraint("MinOverBools", new PropBoolMax(VARS, MAX));
+    }
+
+    /**
      * MIN is the minimum value of the collection of domain variables VARS
      *
      * @param MIN  a variable
@@ -958,7 +1112,17 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * MIN is the minimum value of the collection of boolean variables VARS
+     *
+     * @param MIN  a boolean variable
+     * @param VARS a vector of boolean variables
+     */
+    public static Constraint minimum(BoolVar MIN, BoolVar[] VARS) {
+        return new Constraint("MinOverBools", new PropBoolMin(VARS, MIN));
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by CAUTOMATON, a deterministic finite automaton,
      * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
      * This version allows to specify different costs according to the automaton state at which the assignment occurs
      * (i.e. the transition starts)
@@ -978,21 +1142,15 @@ public class IntConstraintFactory {
      * <p/>
      * This embeds a light propagator by default.
      * Additional filtering algorithms can be added.
+     * <p/>
+     * see atleast_nvalue and atmost_nvalue
      *
      * @param VARS    collection of variables
      * @param NVALUES limit variable
-     * @param ALGOS   additional filtering algorithms, among :
-     *                "at_most_BC", bound filtering alogorithm from Beldiceanu's for AtMostNValue
-     *                <p/>
-     *                "at_least_AC", domain filtering algorithm derivated from (Soft)AllDifferent for AtLeastNValue
-     *                <p/>
-     *                "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
-     *                (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
-     *                automatically detects disequalities and alldifferent constraints.
-     *                Presumably useful when NVALUES must be minimized.
+     * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
-    public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES, String... ALGOS) {
-        return new NValues(VARS, NVALUES, ALGOS);
+    public static Constraint[] nvalues(IntVar[] VARS, IntVar NVALUES) {
+        return new Constraint[]{atleast_nvalues(VARS, NVALUES, false), atmost_nvalues(VARS, NVALUES, true)};
     }
 
     /**
@@ -1069,6 +1227,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
+        // detect unaries and binaries
         if (VARS.length == 0) {
             return arithm(VF.fixed(0, SCALAR.getSolver()), OPERATOR, SCALAR);
         }
@@ -1142,17 +1301,51 @@ public class IntConstraintFactory {
                     }
                     return sum(v2, Operator.getFlip(OPERATOR), VF.offset(s2, -SCALAR.getValue()));
                 }
+            } else if (n == 2) {
+                if (COEFFS[0] == 1) {
+                    assert COEFFS[1] == -1;
+                    return sum(new IntVar[]{VARS[1], SCALAR}, Operator.getFlip(OPERATOR), VARS[0]);
+                } else {
+                    assert COEFFS[0] == -1;
+                    assert COEFFS[1] == 1;
+                    return sum(new IntVar[]{VARS[0], SCALAR}, Operator.getFlip(OPERATOR), VARS[1]);
+                }
             }
         }
-        //
+        // scalar
         if (OPERATOR.equals("=")) {
-            return Scalar.buildScalar(VARS, COEFFS, SCALAR, 1);
+            return makeScalar(VARS, COEFFS, SCALAR, 1);
         }
         int[] b = Scalar.getScalarBounds(VARS, COEFFS);
         Solver s = VARS[0].getSolver();
         IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], s);
-        s.post(Scalar.buildScalar(VARS, COEFFS, p, 1));
+        s.post(makeScalar(VARS, COEFFS, p, 1));
         return arithm(p, OPERATOR, SCALAR);
+    }
+
+    private static Constraint makeScalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR, int SCALAR_COEF) {
+        int maxDomSize = SCALAR.getDomainSize();
+        int idx = -1;
+        int n = VARS.length;
+        for (int i = 0; i < n; i++) {
+            if (maxDomSize < VARS[i].getDomainSize()) {
+                maxDomSize = VARS[i].getDomainSize();
+                idx = i;
+            }
+        }
+        if (idx != -1) {
+            IntVar[] VARS2 = VARS.clone();
+            int[] COEFFS2 = COEFFS.clone();
+            VARS2[idx] = SCALAR;
+            COEFFS2[idx] = -SCALAR_COEF;
+            return makeScalar(VARS2, COEFFS2, VARS[idx], -COEFFS[idx]);
+        } else {
+            if (tupleIt(VARS) && SCALAR.hasEnumeratedDomain()) {
+                return table(ArrayUtils.append(VARS, new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS, COEFFS, SCALAR, SCALAR_COEF), "");
+            } else {
+                return new Scalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
+            }
+        }
     }
 
     /**
@@ -1186,7 +1379,7 @@ public class IntConstraintFactory {
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      * <p/> SCC-based filtering
      *
-     * @param VARS a vector of variables
+     * @param VARS            a vector of variables
      * @param OFFSET          0 by default but 1 if used within MiniZinc
      *                        (which counts from 1 to n instead of from 0 to n-1)
      * @param SUBCIRCUIT_SIZE expected number of nodes in the circuit
@@ -1275,6 +1468,19 @@ public class IntConstraintFactory {
         } else if (VARS.length == 2 && SUM.isInstantiated()) {
             return arithm(VARS[0], "+", VARS[1], OPERATOR, SUM.getValue());
         } else {
+            int nbBools = 0;
+            for (IntVar left : VARS) {
+                if ((left.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
+                    nbBools++;
+                }
+            }
+            if (nbBools == VARS.length) {
+                BoolVar[] bvars = new BoolVar[nbBools];
+                for (int i = 0; i < nbBools; i++) {
+                    bvars[i] = (BoolVar) VARS[i];
+                }
+                return sum(bvars, OPERATOR, SUM);
+            }
             if (OPERATOR.equals("=")) {
                 return new Constraint("Sum", new PropSumEq(VARS, SUM));
             }
@@ -1298,7 +1504,33 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-        return new Constraint("SumOfBool", new PropBoolSum(VARS, SUM));
+        if (VARS.length > 10) {
+            return new Constraint("SumOfBool", new PropBoolSumIncremental(VARS, SUM));
+        } else {
+            return new Constraint("SumOfBool", new PropBoolSumCoarse(VARS, SUM));
+        }
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+     * This constraint is much faster than the one over integer variables
+     *
+     * @param VARS a vector of boolean variables
+     * @param SUM  a variable
+     */
+    public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
+        if (OPERATOR.equals("=")) {
+            return sum(VARS, SUM);
+        }
+        int lb = 0;
+        int ub = 0;
+        for (BoolVar v : VARS) {
+            lb += v.getLB();
+            ub += v.getUB();
+        }
+        IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
+        SUM.getSolver().post(sum(VARS, p));
+        return arithm(p, OPERATOR, SUM);
     }
 
     /**
@@ -1314,15 +1546,18 @@ public class IntConstraintFactory {
      * <br/>
      * - <b>GACSTR+</b>: Arc Consistency version STR for allowed tuples,
      * <br/>
+     * - <b>STR2+</b>: Arc Consistency version STR2 for allowed tuples,
+     * <br/>
      * - <b>FC</b>: Forward Checking.
      *
      * @param VARS      first variable
      * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
-     * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC"}
+     * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
-        //TODO: vars.length == 2
-
+        if (VARS.length == 2) {
+            table(VARS[0], VARS[1], TUPLES, "");
+        }
         Propagator p;
         switch (ALGORITHM) {
             case "FC":
@@ -1352,6 +1587,12 @@ public class IntConstraintFactory {
                     throw new SolverException("GAC3rm+ cannot be used with forbidden tuples.");
                 }
                 p = new PropLargeGAC3rmPositive(VARS, TUPLES);
+                break;
+            case "STR2+":
+                if (!TUPLES.isFeasible()) {
+                    throw new SolverException("STR2+ cannot be used with forbidden tuples.");
+                }
+                p = new PropTableStr2(VARS, TUPLES.toMatrix());
         }
         return new Constraint("Table(" + ALGORITHM + ")", p);
     }
@@ -1375,5 +1616,66 @@ public class IntConstraintFactory {
                 new PropAntiArborescences(SUCCS, OFFSET, false),
                 new PropKLoops(SUCCS, OFFSET, NBTREES)
         );
+    }
+
+    /**
+     * A constraint for the Traveling Salesman Problem :
+     * Enforces SUCCS to form a hamiltonian circuit of value COST
+     *
+     * @param SUCCS       successors variables
+     * @param COST        cost of the cycle
+     * @param COST_MATRIX symmetric cost matrix
+     * @return a CP model for the TSP
+     */
+    public static Constraint[] tsp(IntVar[] SUCCS, IntVar COST, int[][] COST_MATRIX) {
+        int n = SUCCS.length;
+        assert n > 1;
+        assert n == COST_MATRIX.length && n == COST_MATRIX[0].length;
+        IntVar[] costOf = new IntVar[n];
+        for (int i = 0; i < n; i++) {
+            costOf[i] = VF.enumerated("costOf(" + i + ")", COST_MATRIX[i], COST.getSolver());
+        }
+        Constraint[] model = new Constraint[n + 2];
+        for (int i = 0; i < n; i++) {
+            model[i] = element(costOf[i], COST_MATRIX[i], SUCCS[i]);
+        }
+        model[n] = sum(costOf, COST);
+        model[n + 1] = circuit(SUCCS, 0);
+        return model;
+    }
+
+    public static TIntArrayList getDomainUnion(IntVar[] vars) {
+        TIntArrayList values = new TIntArrayList();
+        for (IntVar v : vars) {
+            int ub = v.getUB();
+            for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
+                if (!values.contains(i)) {
+                    values.add(i);
+                }
+            }
+        }
+        return values;
+    }
+
+    // ###################
+
+    /**
+     * Check whether the intension constraint to extension constraint substitution is enabled and can be achieved
+     *
+     * @param VARS list of variables involved
+     * @return a boolean
+     */
+    private static boolean tupleIt(IntVar... VARS) {
+        if (!Configuration.ENABLE_TABLE_SUBS) {
+            return false;
+        }
+        long doms = 1;
+        for (int i = 0; i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
+            if (!VARS[i].hasEnumeratedDomain()) {
+                return false;
+            }
+            doms *= VARS[i].getDomainSize();
+        }
+        return (doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS);
     }
 }

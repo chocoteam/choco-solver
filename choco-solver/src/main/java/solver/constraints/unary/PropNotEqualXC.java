@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
  */
 package solver.constraints.unary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -47,7 +49,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
     private final int constant;
 
     public PropNotEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }
 
@@ -56,11 +58,6 @@ public class PropNotEqualXC extends Propagator<IntVar> {
         if (vars[0].removeValue(constant, aCause) || !vars[0].contains(constant)) {
             this.setPassive();
         }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override
@@ -84,4 +81,10 @@ public class PropNotEqualXC extends Propagator<IntVar> {
         e.add(aCause);
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropNotEqualXC((IntVar) identitymap.get(vars[0]), constant));
+        }
+    }
 }

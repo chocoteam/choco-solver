@@ -1,6 +1,7 @@
 */target/*
 *.iml
 *.ipr
+*.ids
 *.iws
 choco.iws~
 parser/src/fzn/choco.jar
@@ -8,6 +9,7 @@ parser/src/fzn/fzn_choco
 *.jar
 parser/src/lib/*
 *.DS_Store
+*/dependency-reduced-pom.xml
 
 choco-parser/src/main/resources/mysql.properties
 choco-solver/src/test/resources/logback-test

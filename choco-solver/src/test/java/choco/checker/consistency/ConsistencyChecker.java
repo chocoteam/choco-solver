@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ public class ConsistencyChecker {
 
     public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
-        System.out.printf("Running %s\n", modeler.name());
+//        System.out.printf("Running %s\n", modeler.name());
         Consistency _consistency = Consistency.valueOf(consistency);
 
         THashMap<int[], IntVar> map = new THashMap<>();
@@ -113,7 +113,7 @@ public class ConsistencyChecker {
                 }
             }
         }
-        System.out.printf("loop: %d\n", loop);
+//        System.out.printf("loop: %d\n", loop);
     }
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {

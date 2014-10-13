@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ public class MaxViewTest {
         solver.post(IntConstraintFactory.maximum(z, x, y));
     }
 
-    @Test
+    @Test(groups = "10s")
     public void testMax1() {
         Random random = new Random();
         for (int seed = 1; seed < 9999; seed++) {
@@ -92,7 +92,7 @@ public class MaxViewTest {
         }
     }
 
-    @Test
+    @Test(groups = "1m")
     public void testMax2() {
         Random random = new Random();
         for (int seed = 169; seed < 9999; seed++) {

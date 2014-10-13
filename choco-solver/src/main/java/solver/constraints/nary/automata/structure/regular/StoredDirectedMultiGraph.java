@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -37,7 +37,6 @@ import solver.constraints.nary.automata.structure.Node;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.iterators.DisposableIntIterator;
-import util.iterators.DisposableRangeIterator;
 import util.objects.StoredIndexedBipartiteSet;
 import util.objects.StoredIndexedBipartiteSetWithOffset;
 
@@ -52,246 +51,214 @@ import java.util.Set;
  */
 public class StoredDirectedMultiGraph {
 
-    int[] starts;
-    int[] offsets;
-    TIntStack stack = new TIntArrayStack();
+	int[] starts;
+	int[] offsets;
+	TIntStack stack = new TIntArrayStack();
+	StoredIndexedBipartiteSetWithOffset[] supports;
 
-    StoredIndexedBipartiteSetWithOffset[] supports;
+	class Nodes {
+		int[] states;
+		int[] layers;
+		StoredIndexedBipartiteSetWithOffset[] outArcs;
+		StoredIndexedBipartiteSetWithOffset[] inArcs;
+	}
 
+	public class Arcs {
+		int[] values;
+		int[] dests;
+		int[] origs;
+	}
 
-    class Nodes {
-        int[] states;
-        int[] layers;
-        StoredIndexedBipartiteSetWithOffset[] outArcs;
-        StoredIndexedBipartiteSetWithOffset[] inArcs;
-    }
+	public Nodes GNodes;
+	public Arcs GArcs;
 
+	public StoredDirectedMultiGraph(IEnvironment environment, DirectedMultigraph<Node, Arc> graph,
+									int[] starts, int[] offsets, int supportLength) {
+		this.starts = starts;
+		this.offsets = offsets;
 
-    public class Arcs {
-        int[] values;
-        int[] dests;
-        int[] origs;
-    }
+		this.GNodes = new Nodes();
+		this.GArcs = new Arcs();
 
-
-    public Nodes GNodes;
-    public Arcs GArcs;
-
-
-    public StoredDirectedMultiGraph(IEnvironment environment, DirectedMultigraph<Node, Arc> graph,
-                                    int[] starts, int[] offsets, int supportLength) {
-        this.starts = starts;
-        this.offsets = offsets;
-
-        this.GNodes = new Nodes();
-        this.GArcs = new Arcs();
-
-        TIntHashSet[] sups = new TIntHashSet[supportLength];
-        this.supports = new StoredIndexedBipartiteSetWithOffset[supportLength];
+		TIntHashSet[] sups = new TIntHashSet[supportLength];
+		this.supports = new StoredIndexedBipartiteSetWithOffset[supportLength];
 
 
-        Set<Arc> arcs = graph.edgeSet();
+		Set<Arc> arcs = graph.edgeSet();
 
-        GArcs.values = new int[arcs.size()];
-        GArcs.dests = new int[arcs.size()];
-        GArcs.origs = new int[arcs.size()];
+		GArcs.values = new int[arcs.size()];
+		GArcs.dests = new int[arcs.size()];
+		GArcs.origs = new int[arcs.size()];
 
-        for (Arc a : arcs) {
-            GArcs.values[a.id] = a.value;
-            GArcs.dests[a.id] = a.dest.id;
-            GArcs.origs[a.id] = a.orig.id;
+		for (Arc a : arcs) {
+			GArcs.values[a.id] = a.value;
+			GArcs.dests[a.id] = a.dest.id;
+			GArcs.origs[a.id] = a.orig.id;
 
-            int idx = starts[a.orig.layer] + a.value - offsets[a.orig.layer];
-            if (sups[idx] == null)
-                sups[idx] = new TIntHashSet();
-            sups[idx].add(a.id);
+			int idx = starts[a.orig.layer] + a.value - offsets[a.orig.layer];
+			if (sups[idx] == null)
+				sups[idx] = new TIntHashSet();
+			sups[idx].add(a.id);
 
+		}
 
-        }
+		for (int i = 0; i < sups.length; i++) {
+			if (sups[i] != null)
+				supports[i] = new StoredIndexedBipartiteSetWithOffset(environment, sups[i].toArray());
+		}
 
-        for (int i = 0; i < sups.length; i++) {
-            if (sups[i] != null)
-                supports[i] = new StoredIndexedBipartiteSetWithOffset(environment, sups[i].toArray());
-        }
-
-        Set<Node> nodes = graph.vertexSet();
-        GNodes.outArcs = new StoredIndexedBipartiteSetWithOffset[nodes.size()];
-        GNodes.inArcs = new StoredIndexedBipartiteSetWithOffset[nodes.size()];
-        GNodes.layers = new int[nodes.size()];
-        GNodes.states = new int[nodes.size()];
-
-
-        for (Node n : nodes) {
-            GNodes.layers[n.id] = n.layer;
-            GNodes.states[n.id] = n.state;
-            int i;
-            Set<Arc> outarc = graph.outgoingEdgesOf(n);
-            if (!outarc.isEmpty()) {
-                int[] out = new int[outarc.size()];
-                i = 0;
-                for (Arc a : outarc) {
-                    out[i++] = a.id;
-                }
-                GNodes.outArcs[n.id] = new StoredIndexedBipartiteSetWithOffset(environment, out);
-            }
-
-            Set<Arc> inarc = graph.incomingEdgesOf(n);
-            if (!inarc.isEmpty()) {
-                int[] in = new int[inarc.size()];
-                i = 0;
-                for (Arc a : inarc) {
-                    in[i++] = a.id;
-                }
-                GNodes.inArcs[n.id] = new StoredIndexedBipartiteSetWithOffset(environment, in);
-            }
-        }
+		Set<Node> nodes = graph.vertexSet();
+		GNodes.outArcs = new StoredIndexedBipartiteSetWithOffset[nodes.size()];
+		GNodes.inArcs = new StoredIndexedBipartiteSetWithOffset[nodes.size()];
+		GNodes.layers = new int[nodes.size()];
+		GNodes.states = new int[nodes.size()];
 
 
-    }
+		for (Node n : nodes) {
+			GNodes.layers[n.id] = n.layer;
+			GNodes.states[n.id] = n.state;
+			int i;
+			Set<Arc> outarc = graph.outgoingEdgesOf(n);
+			if (!outarc.isEmpty()) {
+				int[] out = new int[outarc.size()];
+				i = 0;
+				for (Arc a : outarc) {
+					out[i++] = a.id;
+				}
+				GNodes.outArcs[n.id] = new StoredIndexedBipartiteSetWithOffset(environment, out);
+			}
 
-    private final int getIdx(int i, int j) {
-        return starts[i] + j - offsets[i];
-    }
+			Set<Arc> inarc = graph.incomingEdgesOf(n);
+			if (!inarc.isEmpty()) {
+				int[] in = new int[inarc.size()];
+				i = 0;
+				for (Arc a : inarc) {
+					in[i++] = a.id;
+				}
+				GNodes.inArcs[n.id] = new StoredIndexedBipartiteSetWithOffset(environment, in);
+			}
+		}
+	}
 
-    public final StoredIndexedBipartiteSetWithOffset getSupport(int i, int j) {
-        return supports[getIdx(i, j)];
-    }
+	//***********************************************************************************
+	// EXTERNAL METHODS
+	//***********************************************************************************
 
+	public boolean hasSupport(int i, int j) {
+		StoredIndexedBipartiteSetWithOffset sup = getSupport(i,j);
+		return sup != null && !sup.isEmpty();
+	}
 
-    private void removeArc(Propagator<IntVar> propagator) throws ContradictionException {
-        while (stack.size() > 0) {
-            int arcId = stack.pop();
+	public void clearSupports(int idxVar, int val, Propagator p) throws ContradictionException {
+		clearSupports(getSupport(idxVar, val), p);
+	}
 
-            int orig = GArcs.origs[arcId];
-            int dest = GArcs.dests[arcId];
+	//***********************************************************************************
+	// INTERNAL METHODS
+	//***********************************************************************************
 
-            int layer = GNodes.layers[orig];
-            int value = GArcs.values[arcId];
+	private final int getIdx(int i, int j) {
+		return starts[i] + j - offsets[i];
+	}
 
-            StoredIndexedBipartiteSetWithOffset support = getSupport(layer, value);
-            support.remove(arcId);
+	protected final StoredIndexedBipartiteSetWithOffset getSupport(int i, int j) {
+		return supports[getIdx(i, j)];
+	}
 
-            if (support.isEmpty()) {
-                IntVar var = propagator.getVar(layer);
-                try {
-                    var.removeValue(value, propagator);
-                } catch (ContradictionException ex) {
-                    stack.clear();
-                    throw ex;
-                }
-            }
+	protected void removeArc(Propagator<IntVar> propagator) throws ContradictionException {
+		while (stack.size() > 0) {
+			int arcId = stack.pop();
 
-            DisposableIntIterator it;
-            StoredIndexedBipartiteSetWithOffset out = GNodes.outArcs[orig];
-            StoredIndexedBipartiteSetWithOffset in;
+			int orig = GArcs.origs[arcId];
+			int dest = GArcs.dests[arcId];
 
-            out.remove(arcId);
+			int layer = GNodes.layers[orig];
+			int value = GArcs.values[arcId];
 
+			StoredIndexedBipartiteSetWithOffset support = getSupport(layer, value);
+			support.remove(arcId);
 
-            if (GNodes.layers[orig] > 0 && out.isEmpty()) {
-                in = GNodes.inArcs[orig];
-                if (in != null) {
-                    it = in.getIterator();
-                    while (it.hasNext()) {
-                        int id = it.next();
-                        stack.push(id);
-                    }
-                    it.dispose();
-                }
-            }
+			if (support.isEmpty()) {
+				IntVar var = propagator.getVar(layer);
+				try {
+					var.removeValue(value, propagator);
+				} catch (ContradictionException ex) {
+					stack.clear();
+					throw ex;
+				}
+			}
 
-            in = GNodes.inArcs[dest];
-            in.remove(arcId);
+			DisposableIntIterator it;
+			StoredIndexedBipartiteSetWithOffset out = GNodes.outArcs[orig];
+			StoredIndexedBipartiteSetWithOffset in;
 
-            if (GNodes.layers[dest] < propagator.getNbVars() && in.isEmpty()) {
-                out = GNodes.outArcs[dest];
-                if (out != null) {
-                    it = out.getIterator();
-                    while (it.hasNext()) {
-                        int id = it.next();
-                        stack.push(id);
-                    }
-                    it.dispose();
-                }
+			out.remove(arcId);
 
-            }
+			if (GNodes.layers[orig] > 0 && out.isEmpty()) {
+				in = GNodes.inArcs[orig];
+				if (in != null) {
+					it = in.getIterator();
+					while (it.hasNext()) {
+						int id = it.next();
+						stack.push(id);
+					}
+					it.dispose();
+				}
+			}
 
-//        while (!(stack.size() == 0)) {
-//            int v = stack.pop();
-//            removeArc(v, propagator);
-//        }
-        }
-    }
+			in = GNodes.inArcs[dest];
+			in.remove(arcId);
 
+			if (GNodes.layers[dest] < propagator.getNbVars() && in.isEmpty()) {
+				out = GNodes.outArcs[dest];
+				if (out != null) {
+					it = out.getIterator();
+					while (it.hasNext()) {
+						int id = it.next();
+						stack.push(id);
+					}
+					it.dispose();
+				}
 
-    public void updateSupports(int idxVar, IntVar var, Propagator p) throws ContradictionException {
-        //1. from 'from' to var.lb
-        int from = offsets[idxVar];
-        int to = var.getLB();
-        for (int value = from; value < to; value++) {
-            clearSupports(getSupport(idxVar, value), p);
-        }
-        //2. holes between var.lb and var.ub
-        DisposableRangeIterator rit = var.getRangeIterator(true);
-        rit.hasNext();
-        from = rit.max();
-        rit.next();
-        while (rit.hasNext()) {
-            to = rit.min();
-            for (int value = from; value < to; value++) {
-                clearSupports(getSupport(idxVar, value), p);
-            }
-            from = rit.max();
-            rit.next();
-        }
-        rit.dispose();
-        if (idxVar == starts.length - 1) {
-            to = supports.length - getIdx(idxVar, offsets[idxVar]) + offsets[idxVar];
-        } else {
-            to = getIdx(idxVar + 1, offsets[idxVar + 1]) - getIdx(idxVar, offsets[idxVar]) + offsets[idxVar];
-        }
-        //3. from var.ub  to 'to'
-        from = var.getUB() + 1;
-        for (int value = from; value < to; value++) {
-            clearSupports(getSupport(idxVar, value), p);
-        }
-    }
+			}
+		}
+	}
 
-    public void clearSupports(StoredIndexedBipartiteSet supports, Propagator p) throws ContradictionException {
-        if (supports != null) {
-            DisposableIntIterator it = supports.getIterator();
-            while (it.hasNext()) {
-                int arcId = it.next();
-                stack.push(arcId);
-            }
-            it.dispose();
-            removeArc(p);
-        }
-    }
+	protected void clearSupports(StoredIndexedBipartiteSet supports, Propagator p) throws ContradictionException {
+		if (supports != null) {
+			DisposableIntIterator it = supports.getIterator();
+			while (it.hasNext()) {
+				int arcId = it.next();
+				stack.push(arcId);
+			}
+			it.dispose();
+			removeArc(p);
+		}
+	}
 
-    @Override
-    public String toString() {
+	@Override
+	public String toString() {
 
-        StringBuilder st = new StringBuilder();
-        int nb = 0;
-        for (int i = 0; i < supports.length; i++) {
-            if (supports[i] != null && !supports[i].isEmpty()) {
-                nb++;
-            }
-        }
-        st.append("nb: ").append(nb).append("\n");
+		StringBuilder st = new StringBuilder();
+		int nb = 0;
+		for (int i = 0; i < supports.length; i++) {
+			if (supports[i] != null && !supports[i].isEmpty()) {
+				nb++;
+			}
+		}
+		st.append("nb: ").append(nb).append("\n");
 
-        for (int i = 0; i < supports.length; i++) {
-            if (supports[i] != null && !supports[i].isEmpty()) {
-                DisposableIntIterator it = supports[i].getIterator();
-                while (it.hasNext()) {
-                    int arcId = it.next();
-                    st.append(arcId).append(",");
-                }
-                it.dispose();
-                st.append("\n");
-            }
-        }
-        return st.toString();
-    }
+		for (int i = 0; i < supports.length; i++) {
+			if (supports[i] != null && !supports[i].isEmpty()) {
+				DisposableIntIterator it = supports[i].getIterator();
+				while (it.hasNext()) {
+					int arcId = it.next();
+					st.append(arcId).append(",");
+				}
+				it.dispose();
+				st.append("\n");
+			}
+		}
+		return st.toString();
+	}
 }

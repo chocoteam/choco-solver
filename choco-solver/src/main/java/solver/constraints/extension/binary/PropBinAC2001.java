@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,12 +26,14 @@
  */
 package solver.constraints.extension.binary;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 
 /**
  * AC2001 algorithm for binary table constraint
@@ -49,7 +51,11 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset1;
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {
-        super(x, y, new CouplesTable(tuples, x.getLB(), x.getUB(), y.getLB(), y.getUB()));
+        this(x, y, new CouplesTable(tuples, x, y));
+    }
+
+    private PropBinAC2001(IntVar x, IntVar y, CouplesTable table) {
+        super(x, y, table);
         offset0 = x.getLB();
         offset1 = y.getLB();
         currentSupport0 = new IStateInt[x.getUB() - offset0 + 1];
@@ -63,6 +69,7 @@ public class PropBinAC2001 extends PropBinCSP {
             currentSupport1[i] = environment.makeInt();
             currentSupport1[i].set(-1);
         }
+
     }
 
     @Override
@@ -125,7 +132,7 @@ public class PropBinAC2001 extends PropBinCSP {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
+        if (IntEventType.isInstantiate(mask)) {
             onInstantiationOf(idxVarInProp);
         } else {
             if (idxVarInProp == 0) {
@@ -139,6 +146,18 @@ public class PropBinAC2001 extends PropBinCSP {
     @Override
     public String toString() {
         return "Bin_AC2001(" + vars[0].getName() + ", " + vars[1].getName() + ", " + this.relation.getClass().getSimpleName() + ")";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropBinAC2001(X, Y, (CouplesTable) relation.duplicate()));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

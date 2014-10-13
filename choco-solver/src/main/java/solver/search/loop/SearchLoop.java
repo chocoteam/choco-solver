@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,6 @@ import solver.propagation.NoPropagationEngine;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.decision.Decision;
@@ -47,9 +46,7 @@ import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.RealStrategy;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.*;
-import solver.variables.graph.GraphVar;
 import util.ESat;
 
 import java.util.Arrays;
@@ -96,7 +93,7 @@ public class SearchLoop implements ISearchLoop {
 	protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
 
 	// keep an int, that's faster than a long, and the domain of definition is large enough
-	public int timeStamp;
+	int timeStamp;
 
 	/* Reference to the solver */
 	final Solver solver;
@@ -574,16 +571,6 @@ public class SearchLoop implements ISearchLoop {
 			strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
 		}
 
-		// GRAPH VARIABLES DEFAULT SEARCH STRATEGY
-		GraphVar[] gvars = excludeConstants(solver.retrieveGraphVars());
-		if (gvars.length > 0) {
-			AbstractStrategy<GraphVar>[] gstrats = new AbstractStrategy[gvars.length];
-			for (int g = 0; g < gvars.length; g++) {
-				gstrats[g] = GraphStrategyFactory.graphLexico(gvars[g]);
-			}
-			strats[nb++] = new StrategiesSequencer(gstrats);
-		}
-
 		// REAL VARIABLES DEFAULT SEARCH STRATEGY
 		RealVar[] rvars = excludeConstants(solver.retrieveRealVars());
 		if (rvars.length > 0) {
@@ -611,7 +598,6 @@ public class SearchLoop implements ISearchLoop {
 			case Variable.BOOL:	noCsts = (V[]) new BoolVar[nb];	break;
 			case Variable.INT:	noCsts = (V[]) new IntVar[nb];	break;
 			case Variable.SET:	noCsts = (V[]) new SetVar[nb];	break;
-			case Variable.GRAPH:noCsts = (V[]) new GraphVar[nb];break;
 			case Variable.REAL:	noCsts = (V[]) new RealVar[nb];	break;
 			default:
 				throw new UnsupportedOperationException();

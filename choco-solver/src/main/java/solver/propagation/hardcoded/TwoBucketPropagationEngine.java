@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,8 +40,9 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.hardcoded.util.MId2AbId;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 import util.objects.IntCircularQueue;
 
 import java.util.ArrayDeque;
@@ -109,7 +110,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     protected final ArrayDeque<Propagator>[] pro_queue_c;
     protected boolean[] schedule_c;
-    protected EventType[] event_c;
+    protected PropagatorEventType[] event_c;
 
     private boolean init; // is ready to propagate?
 
@@ -121,7 +122,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
-        List<Propagator> _propagators = new ArrayList<Propagator>();
+        List<Propagator> _propagators = new ArrayList<>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = 0;
@@ -160,12 +161,14 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         event_f = new IntCircularQueue[nbProp];
         eventmasks = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
-            int nbv = propagators[i].getNbVars();
-            event_f[i] = new IntCircularQueue(nbv);
-            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+            if (propagators[i].reactToFineEvent()) {
+                int nbv = propagators[i].getNbVars();
+                event_f[i] = new IntCircularQueue(nbv);
+                eventmasks[i] = new int[nbv];
+            }
         }
-        event_c = new EventType[nbProp];
-        Arrays.fill(event_c, EventType.VOID);
+        event_c = new PropagatorEventType[nbProp];
+        Arrays.fill(event_c, PropagatorEventType.VOID);
         init = true;
     }
 
@@ -224,21 +227,29 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         lastProp = pro_queue_f.pollFirst();
         // revision of the variable
         int aid = p2i.get(lastProp.getId());
+        //assert schedule_f[aid] : "try to propagate an unscheduled propagator";
         schedule_f[aid] = false;
-        IntCircularQueue evtset = event_f[aid];
-        while (!evtset.isEmpty()) {
-            int v = evtset.pollFirst();
-            assert lastProp.isActive() : "propagator is not active";
-            if (Configuration.PRINT_PROPAGATION) {
-                Trace.printPropagation(lastProp.getVar(v), lastProp);
+        if (lastProp.reactToFineEvent()) {
+            IntCircularQueue evtset = event_f[aid];
+            while (!evtset.isEmpty()) {
+                int v = evtset.pollFirst();
+                assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                if (Configuration.PRINT_PROPAGATION) {
+                    Trace.printPropagation(lastProp.getVar(v), lastProp);
+                }
+                // clear event
+                int mask = eventmasks[aid][v];
+                eventmasks[aid][v] = 0;
+                // run propagation on the specific event
+                lastProp.fineERcalls++;
+                lastProp.propagate(v, mask);
             }
-            // clear event
-            int vid = lastProp.reactToFineEvent() ? v : 0;
-            int mask = eventmasks[aid][vid];
-            eventmasks[aid][vid] = 0;
-            // run propagation on the specific event
-            lastProp.fineERcalls++;
-            lastProp.propagate(v, mask);
+        } else if(lastProp.isActive()){ // need to be checked due to views
+            //assert lastProp.isActive() : "propagator is not active:" + lastProp;
+            if (Configuration.PRINT_PROPAGATION) {
+                Trace.printPropagation(null, lastProp);
+            }
+            lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
         // This part is for debugging only!!
         if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
@@ -250,10 +261,11 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         lastProp = pro_queue_c.pollFirst();
         // revision of the variable
         int aid = p2i.get(lastProp.getId());
+        assert schedule_c[aid] : "try to propagate an unscheduled propagator";
         schedule_c[aid] = false;
-        EventType evt = event_c[aid];
-        event_c[aid] = EventType.VOID;
-        assert lastProp.isActive() : "propagator is not active";
+		PropagatorEventType evt = event_c[aid];
+        event_c[aid] = PropagatorEventType.VOID;
+        assert lastProp.isActive() : "propagator is not active:" + lastProp;
         if (Configuration.PRINT_PROPAGATION) {
             Trace.printPropagation(null, lastProp);
         }
@@ -286,25 +298,24 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     private void flushFine() {
         int aid = p2i.get(lastProp.getId());
-        IntCircularQueue evtset = event_f[aid];
-        //for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-        while (!evtset.isEmpty()) {
-            int v = evtset.pollLast();
-            int vid = lastProp.reactToFineEvent() ? v : 0;
-            eventmasks[aid][vid] = 0;
+        if (lastProp.reactToFineEvent()) {
+            IntCircularQueue evtset = event_f[aid];
+            while (!evtset.isEmpty()) {
+                eventmasks[aid][evtset.pollLast()] = 0;
+            }
+            evtset.clear();
         }
-        evtset.clear();
         schedule_f[aid] = false;
     }
 
     private void flushCoarse() {
         int aid = p2i.get(lastProp.getId());
         schedule_c[aid] = false;
-        event_c[aid] = EventType.VOID;
+        event_c[aid] = PropagatorEventType.VOID;
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
             Trace.printModification(variable, type, cause);
         }
@@ -312,19 +323,20 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         for (int p = 0; p < nbp; p++) {
             Propagator prop = variable.getPropagator(p);
             int pindice = variable.getIndexInPropagator(p);
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
                 int aid = p2i.get(prop.getId());
-                int vid = prop.reactToFineEvent() ? pindice : 0;
-                boolean needSched = (eventmasks[aid][vid] == 0);
-                eventmasks[aid][vid] |= type.strengthened_mask;
-                if (needSched) {
-                    //assert !event_f[aid].get(pindice);
-                    if (Configuration.PRINT_SCHEDULE) {
-                        Trace.printSchedule(prop);
+                if (prop.reactToFineEvent()) {
+                    boolean needSched = (eventmasks[aid][pindice] == 0);
+                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
+                    if (needSched) {
+                        //assert !event_f[aid].get(pindice);
+                        if (Configuration.PRINT_SCHEDULE) {
+                            Trace.printSchedule(prop);
+                        }
+                        event_f[aid].addLast(pindice);
+                    } else if (Configuration.PRINT_SCHEDULE) {
+                        Trace.printAlreadySchedule(prop);
                     }
-                    event_f[aid].addLast(pindice);
-                } else if (Configuration.PRINT_SCHEDULE) {
-                    Trace.printAlreadySchedule(prop);
                 }
                 if (!schedule_f[aid]) {
                     PropagatorPriority prio = prop.getPriority();
@@ -339,7 +351,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException {
+    public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         int aid = p2i.get(propagator.getId());
         if (!schedule_c[aid]) {
             PropagatorPriority prio = /*dynamic ? prop.dynPriority() :*/ propagator.getPriority();
@@ -398,20 +410,22 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         event_f = new IntCircularQueue[nsize];
         System.arraycopy(_event_f, 0, event_f, 0, osize);
         for (int i = osize; i < nsize; i++) {
-            int nbv = propagators[i].getNbVars();
-            event_f[i] = new IntCircularQueue(nbv);
+            if (propagators[i].reactToFineEvent()) {
+                event_f[i] = new IntCircularQueue(propagators[i].getNbVars());
+            }
         }
-        EventType[] _event_c = event_c;
-        event_c = new EventType[nsize];
+		PropagatorEventType[] _event_c = event_c;
+        event_c = new PropagatorEventType[nsize];
         System.arraycopy(_event_c, 0, event_c, 0, osize);
-        Arrays.fill(event_c, osize, nsize, EventType.VOID);
+        Arrays.fill(event_c, osize, nsize, PropagatorEventType.VOID);
 
         int[][] _eventmasks = eventmasks;
         eventmasks = new int[nsize][];
         System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
         for (int i = osize; i < nsize; i++) {
-            int nbv = propagators[i].getNbVars();
-            eventmasks[i] = new int[propagators[i].reactToFineEvent() ? nbv : 1];
+            if (propagators[i].reactToFineEvent()) {
+                eventmasks[i] = new int[propagators[i].getNbVars()];
+            }
         }
     }
 
@@ -447,17 +461,17 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
             // 4. remove event_f
             IntCircularQueue icqtm = event_f[idtm];
-            assert event_f[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
+            assert !toDelete.reactToFineEvent() || event_f[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
             IntCircularQueue[] _event_f = event_f;
             event_f = new IntCircularQueue[nsize];
             System.arraycopy(_event_f, 0, event_f, 0, nsize);
 
 
             // 5. remove event_f
-            EventType ettm = event_c[idtm];
-            assert event_c[idtd] == EventType.VOID : "try to delete a propagator which has events to propagate (coarse)";
-            EventType[] _event_c = event_c;
-            event_c = new EventType[nsize];
+			PropagatorEventType ettm = event_c[idtm];
+            assert event_c[idtd] == PropagatorEventType.VOID : "try to delete a propagator which has events to propagate (coarse)";
+			PropagatorEventType[] _event_c = event_c;
+            event_c = new PropagatorEventType[nsize];
             System.arraycopy(_event_c, 0, event_c, 0, nsize);
 
             // 6. remove eventmasks

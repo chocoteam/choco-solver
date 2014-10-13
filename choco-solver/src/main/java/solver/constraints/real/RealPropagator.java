@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,11 +26,13 @@
  */
 package solver.constraints.real;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.RealVar;
+import solver.variables.events.RealEventType;
 import util.ESat;
 
 /**
@@ -88,7 +90,7 @@ public class RealPropagator extends Propagator<RealVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.BOUND.mask;
+        return RealEventType.BOUND.getMask();
     }
 
     @Override
@@ -119,11 +121,6 @@ public class RealPropagator extends Propagator<RealVar> {
 	}
 
     @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public ESat isEntailed() {
 		double domains[] = new double[2 * vars.length];
 		for (int i = 0; i < vars.length; i++) {
@@ -143,5 +140,18 @@ public class RealPropagator extends Propagator<RealVar> {
 			return ESat.TRUE;
 		}
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = vars.length;
+            RealVar[] rvars = new RealVar[size];
+            for (int i = 0; i < size; i++) {
+                vars[i].duplicate(solver, identitymap);
+                rvars[i] = (RealVar) identitymap.get(vars[i]);
+            }
+            identitymap.put(this, new RealPropagator(functions, rvars, option));
+        }
     }
 }

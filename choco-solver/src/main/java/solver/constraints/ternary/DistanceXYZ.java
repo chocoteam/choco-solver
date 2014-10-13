@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
  */
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.exception.SolverException;
@@ -42,23 +44,39 @@ import util.tools.ArrayUtils;
 public class DistanceXYZ extends Constraint {
 
 
-	final IntVar X,Y,Z;
-	final Operator OP;
+    final IntVar X, Y, Z;
+    final Operator OP;
 
 
-	public DistanceXYZ(IntVar x, IntVar y, Operator op, IntVar z) {
-		super("DistanceXYZ "+op.name(),new PropDistanceXYZ(ArrayUtils.toArray(x,y,z), op));
-		if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
-			throw new SolverException("Unexpected operator for distance");
-		}
-		this.X=x;
-		this.Y=y;
-		this.Z=z;
-		this.OP = op;
-	}
+    public DistanceXYZ(IntVar x, IntVar y, Operator op, IntVar z) {
+        super("DistanceXYZ " + op.name(), new PropDistanceXYZ(ArrayUtils.toArray(x, y, z), op));
+        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
+            throw new SolverException("Unexpected operator for distance");
+        }
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
+        this.OP = op;
+    }
 
 //  will be ok once every operator is be supported
 //	public Constraint makeOpposite(){
 //		return new DistanceXYZ(X,Y,Operator.getOpposite(OP),Z);
 //	}
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.X.duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.X);
+            this.Y.duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.Y);
+            this.Z.duplicate(solver, identitymap);
+            IntVar Z = (IntVar) identitymap.get(this.Z);
+
+            Constraint clone = new DistanceXYZ(X, Y, this.OP, Z);
+            identitymap.put(this.propagators[0], clone.getPropagator(0));
+            identitymap.put(this, clone);
+        }
+    }
 }

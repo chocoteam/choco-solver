@@ -28,7 +28,9 @@ package solver.constraints.extension.nary;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.hash.THashMap;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -80,8 +82,8 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     int[] listuples;
 
 
-    public PropLargeGACSTRPos(IntVar[] vs, Tuples tuples) {
-        super(vs, tuples);
+    private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
+        super(vs, relation);
         this.arity = vs.length;
         this.futureVars = new TIntLinkedList();
         this.gacValues = new BitSet[arity];
@@ -126,9 +128,12 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         } else valcheck = new ValidityChecker(arity, vars);
     }
 
-    @Override
-    protected TuplesList makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        return new TuplesList(tuples, offsets, dsizes);
+    public PropLargeGACSTRPos(IntVar[] vs, Tuples tuples) {
+        this(vs, makeRelation(tuples, vs));
+    }
+
+    private static TuplesList makeRelation(Tuples tuples, IntVar[] vars) {
+        return new TuplesList(tuples, vars);
     }
 
     @Override
@@ -185,53 +190,20 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     }
 
     /**
-     * maintain the list by checking only the variable that has changed when
-     * checking if a tuple is valid.
-     *
-     * @param idx : the variable changed
-     */
-    public void maintainList(int idx) {
-        int cidx = 0;
-        int nLast = last.get();
-        while (cidx <= nLast) {
-            int idxt = listuples[cidx++];
-            int[] tuple = relation.getTuple(idxt);
-            if (valcheck.isValid(tuple, idx)) {
-                //extract the supports
-                for (int i = 0; i < futureVars.size(); i++) {
-                    int vIdx = futureVars.get(i);
-                    if (!gacValues[vIdx].get(tuple[vIdx] - offsets[vIdx])) {
-                        gacValues[vIdx].set(tuple[vIdx] - offsets[vIdx]);
-                        nbGacValues[vIdx]++;
-                        if (nbGacValues[vIdx] == vars[vIdx].getDomainSize()) {
-                            futureVars.removeAt(i);
-                            i--;
-                        }
-                    }
-                }
-            } else {
-                //remove the tuple from the current list
-                cidx--;
-                final int temp = listuples[nLast];
-                listuples[nLast] = listuples[cidx];
-                listuples[cidx] = temp;
-                last.add(-1);
-                nLast--;
-            }
-        }
-    }
-
-    /**
      * maintain the list by checking all variable within isValid
      */
-    public void maintainList() {
+    //maintain the list by checking only the variable that has changed when
+    //* checking if a tuple is valid.
+    //*
+    //* @param idx : the variable changed
+    public void maintainList(/*int idx*/) {
         int cidx = 0;
         int nLast = last.get();
         while (cidx <= nLast) {
             int idxt = listuples[cidx++];
             int[] tuple = relation.getTuple(idxt);
 
-            if (valcheck.isValid(tuple)) {
+            if (valcheck.isValid(tuple/*,idx*/)) {
                 //extract the supports
                 for (int i = 0; i < futureVars.size(); i++) {
                     int vIdx = futureVars.get(i);
@@ -286,5 +258,18 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         valcheck.sortvars();
         gacstr();
         //constAwake(false);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeGACSTRPos(aVars, (TuplesList) relation.duplicate()));
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,10 +27,11 @@
 
 package solver.constraints.nary.channeling;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import util.ESat;
@@ -94,7 +95,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         idms[varIdx].freeze();
-        idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
         idms[varIdx].unfreeze();
     }
 
@@ -160,5 +161,23 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return "Inverse_AC({" + X[0] + "...}{" + Y[0] + "...})";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.n;
+            IntVar[] X = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            IntVar[] Y = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i + n].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
+            }
+            identitymap.put(this, new PropInverseChannelAC(X, Y, this.minX, this.minY));
+        }
     }
 }

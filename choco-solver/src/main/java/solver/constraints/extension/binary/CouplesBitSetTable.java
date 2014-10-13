@@ -43,64 +43,60 @@ class CouplesBitSetTable extends BinRelation {
      * table[0][i] gives the supports of value i of variable 0
      * table[1][i] gives the supports of value i of variable 1
      */
-    protected BitSet[][] table;
+    protected final BitSet[][] table;
 
     /**
-     * first value of x
+     * first value of x, and y
      */
-    protected int[] offsets;
-
-    protected int[] ns;
+    protected final int[] offsets;
 
 
-    protected boolean feasible;
+    protected final boolean feasible;
 
     /**
      * Create a tuple list for AC3bit+rm
      *
      * @param tuples list of tuples
-     * @param min1   v1.getLB()
-     * @param max1   v1.getUB()
-     * @param min2   v2.getLB()
-     * @param max2   v2.getUB()
      */
-    public CouplesBitSetTable(Tuples tuples, int min1, int max1, int min2, int max2) {
-        this.offsets = new int[]{min1, min2};
-        int n1 = max1 - min1 + 1;
-        int n2 = max2 - min2 + 1;
+    public CouplesBitSetTable(Tuples tuples, IntVar var1, IntVar var2) {
+        offsets = new int[]{var1.getLB(), var2.getLB()};
+        int range1 = var1.getUB() - offsets[0] + 1;
+        int range2 = var2.getUB() - offsets[1] + 1;
         this.table = new BitSet[2][];
-        this.table[0] = new BitSet[n1];
-        this.ns = new int[]{n1, n2};
+        this.table[0] = new BitSet[range1];
         this.feasible = tuples.isFeasible();
-        for (int i = 0; i < n1; i++) {
-            table[0][i] = new BitSet(n2);
-            if (!feasible) table[0][i].set(0, n2);
+        for (int i = 0; i < range1; i++) {
+            table[0][i] = new BitSet(range2);
+            if (!feasible) table[0][i].set(0, range2);
         }
-        this.table[1] = new BitSet[n2];
-        for (int i = 0; i < n2; i++) {
-            table[1][i] = new BitSet(n1);
-            if (!feasible) table[1][i].set(0, n1);
+        this.table[1] = new BitSet[range2];
+        for (int i = 0; i < range2; i++) {
+            table[1][i] = new BitSet(range1);
+            if (!feasible) table[1][i].set(0, range1);
         }
 
         int nt = tuples.nbTuples();
         for (int i = 0; i < nt; i++) {
             int[] tuple = tuples.get(i);
-            setCouple(tuple[0], tuple[1]);
+//            setCouple(tuple[0], tuple[1]);
+            if (var1.contains(tuple[0]) && var2.contains(tuple[1])) {
+                if (feasible) {
+                    table[0][tuple[0] - offsets[0]].set(tuple[1] - offsets[1]);
+                    table[1][tuple[1] - offsets[1]].set(tuple[0] - offsets[0]);
+                } else {
+                    table[0][tuple[0] - offsets[0]].clear(tuple[1] - offsets[1]);
+                    table[1][tuple[1] - offsets[1]].clear(tuple[0] - offsets[0]);
+                }
+            }
         }
     }
 
+    // required for duplicate method, should not be called by default
+    private CouplesBitSetTable(BitSet[][] table, int[] offsets, boolean feasible) {
+        this.table = table;
+        this.offsets = offsets;
+        this.feasible = feasible;
 
-    private void setCouple(int x, int y) {
-        // stored only couples which are between ranges
-        if (between(x - offsets[0], 0, ns[0]) && between(y - offsets[1], 0, ns[1])) {
-            if (feasible) {
-                table[0][x - offsets[0]].set(y - offsets[1]);
-                table[1][y - offsets[1]].set(x - offsets[0]);
-            } else {
-                table[0][x - offsets[0]].clear(y - offsets[1]);
-                table[1][y - offsets[1]].clear(x - offsets[0]);
-            }
-        }
     }
 
     public boolean isConsistent(int x, int y) {
@@ -125,5 +121,17 @@ class CouplesBitSetTable extends BinRelation {
             }
         }
         return false;
+    }
+
+    @Override
+    public BinRelation duplicate() {
+        BitSet[][] nTables = new BitSet[table.length][];
+        for (int i = 0; i < table.length; i++) {
+            nTables[i] = new BitSet[table[i].length];
+            for (int j = 0; j < table[i].length; j++) {
+                nTables[i][j] = (BitSet) table[i][j].clone();
+            }
+        }
+        return new CouplesBitSetTable(nTables, offsets.clone(), feasible);
     }
 }

@@ -43,7 +43,7 @@ import solver.variables.VF;
  */
 public class SortTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         Solver solver = new Solver();
         IntVar[] X, Y;
@@ -79,7 +79,7 @@ public class SortTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         Solver solver = new Solver();
         IntVar[] X, Y;
@@ -102,7 +102,7 @@ public class SortTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() {
         Solver solver = new Solver();
         IntVar[] X, Y;
@@ -125,7 +125,7 @@ public class SortTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() {
         Solver solver = new Solver();
         IntVar[] X, Y;

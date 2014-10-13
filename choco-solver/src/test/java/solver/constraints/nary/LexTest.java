@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -133,7 +132,7 @@ public class LexTest {
         } catch (ContradictionException e) {
             Assert.fail();
         }
-        SearchMonitorFactory.log(solver, true, true);
+//        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(6, solver.getMeasures().getSolutionCount());
     }
@@ -158,7 +157,7 @@ public class LexTest {
             Assert.fail();
         }
         Assert.assertEquals(5, a[0].getUB());
-        SearchMonitorFactory.log(solver, true, true);
+//        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -259,7 +258,7 @@ public class LexTest {
             Assert.fail();
         }
         Assert.assertEquals(-1, b[0].getLB());
-        SearchMonitorFactory.log(solver, true, false);
+//        SearchMonitorFactory.log(solver, true, false);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 30);
     }

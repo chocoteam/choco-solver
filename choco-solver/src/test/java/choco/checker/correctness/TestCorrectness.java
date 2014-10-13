@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -54,12 +54,14 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testTIMES() {
+		for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+			CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, 1407157364513l, null);
+		}
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 8) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, seed, null);
             }
-
         }
     }
 
@@ -310,7 +312,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "5m")
+    @Test(groups = "10m")
     public void testNVALUES() {
         String[][] filters = new String[][]{
                 {"at_most_BC"},
@@ -390,8 +392,8 @@ public class TestCorrectness {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 30; i++) {
                 long seed = System.currentTimeMillis();
-                System.out.println("n = " + n);
-                System.out.println("seed = " + seed);
+//                System.out.println("n = " + n);
+//                System.out.println("seed = " + seed);
                 CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
             }
         }

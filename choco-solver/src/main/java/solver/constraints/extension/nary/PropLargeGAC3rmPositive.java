@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -64,8 +66,8 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    public PropLargeGAC3rmPositive(IntVar[] vars, Tuples tuples) {
-        super(vars, tuples);
+    private PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
+        super(vars, relation);
         this.arity = vars.length;
         this.offsets = new int[arity];
         this.supports = new int[arity][];
@@ -102,9 +104,12 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
         } else valcheck = new ValidityChecker(arity, vars);
     }
 
-    @Override
-    protected IterTuplesTable makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        return new IterTuplesTable(tuples, offsets, dsizes);
+    public PropLargeGAC3rmPositive(IntVar[] vars, Tuples tuples) {
+        this(vars, makeRelation(tuples, vars));
+    }
+
+    private static IterTuplesTable makeRelation(Tuples tuples, IntVar[] vars) {
+        return new IterTuplesTable(tuples, vars);
     }
 
     @Override
@@ -151,7 +156,6 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
 
     /**
      * set the support using multidirectionality
-     *
      */
     protected void setSupport(final int idxSupport) {
         int[] tuple = relation.getTuple(idxSupport);
@@ -161,7 +165,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     }
 
     /**
-     * @param value    with offset removed
+     * @param value with offset removed
      * @return the residual support
      */
     protected int getSupport(final int indexVar, final int value) {
@@ -225,6 +229,19 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
             if (idx != valcheck.getPosition(i)) {
                 reviseVar(valcheck.getPosition(i));
             }
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeGAC3rmPositive(aVars, (IterTuplesTable) relation.duplicate()));
         }
     }
 }

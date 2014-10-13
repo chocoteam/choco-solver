@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,13 +27,15 @@
 
 package solver.constraints.unary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -47,9 +49,8 @@ public class PropMemberBound extends Propagator<IntVar> {
     final int lb, ub;
 
 
-    public PropMemberBound(IntVar var, int lb, int ub,
-                           boolean reactOnPromotion) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+    public PropMemberBound(IntVar var, int lb, int ub) {
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.lb = lb;
         this.ub = ub;
     }
@@ -65,13 +66,8 @@ public class PropMemberBound extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
 
@@ -94,5 +90,12 @@ public class PropMemberBound extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(aCause);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            identitymap.put(this, new PropMemberBound((IntVar) identitymap.get(vars[0]), lb, ub));
+        }
     }
 }

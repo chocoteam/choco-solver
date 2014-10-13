@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.Configuration;
@@ -37,13 +38,14 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomInterval;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IIntervalDelta;
 import solver.variables.delta.IntervalDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntervalDeltaMonitor;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueBoundIterator;
@@ -97,47 +99,46 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws solver.exception.ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
             if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().removeValue(this, value, cause);
             }
-            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+            this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
-            EventType e;
+			IntEventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
                 }
                 SIZE.add(-1);
                 LB.set(value + 1);
-                e = EventType.INCLOW;
+                e = IntEventType.INCLOW;
             } else {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
                 }
                 SIZE.add(-1);
                 UB.set(value - 1);
-                e = EventType.DECUPP;
+                e = IntEventType.DECUPP;
             }
             if (SIZE.get() > 0) {
                 if (this.isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().removeValue(this, value, cause);
                 }
-                this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
+                this.contradiction(cause, IntEventType.REMOVE, MSG_EMPTY);
             }
             if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().removeValue(this, value, cause);
@@ -176,7 +177,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (this.isInstantiated()) {
@@ -185,11 +186,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
-            EventType e = EventType.INSTANTIATE;
+			IntEventType e = IntEventType.INSTANTIATE;
 
             int lb = 0;
             int ub = 0;
@@ -215,7 +216,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -237,19 +238,19 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
             if (oub < value) {
-                if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateLowerBound(this, old, oub+1, cause);
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
                 }
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-                EventType e = EventType.INCLOW;
+				IntEventType e = IntEventType.INCLOW;
 
                 if (reactOnRemoval) {
                     if (old <= value - 1) delta.add(old, value - 1, cause);
@@ -257,11 +258,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(old - value);
                 LB.set(value);
                 if (isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
 
-                if (Configuration.PLUG_EXPLANATION){
+                if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                 }
                 return true;
@@ -288,19 +289,19 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
             int olb = this.getLB();
             if (olb > value) {
-                if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateUpperBound(this, old, olb-1, cause);
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
                 }
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-                EventType e = EventType.DECUPP;
+				IntEventType e = IntEventType.DECUPP;
 
                 if (reactOnRemoval) {
                     if (value + 1 <= old) delta.add(value + 1, old, cause);
@@ -309,10 +310,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 UB.set(value);
 
                 if (isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (Configuration.PLUG_EXPLANATION){
+                if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().updateUpperBound(this, old, value, cause);
                 }
                 return true;
@@ -328,7 +329,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         removeInterval(this.getLB(), this.getUB(), cause);
     }
 
-	@Override
+    @Override
     public boolean isInstantiated() {
         return SIZE.get() == 1;
     }
@@ -338,12 +339,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return isInstantiated() && contains(value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
-	@Override
+    @Override
     public boolean contains(int aValue) {
         return ((aValue >= LB.get()) && (aValue <= UB.get()));
     }
@@ -353,7 +354,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      *
      * @return the current value (or lower bound if not yet instantiated).
      */
-	@Override
+    @Override
     public int getValue() {
         assert isInstantiated() : name + " not instantiated";
         return getLB();
@@ -364,7 +365,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      *
      * @return the lower bound
      */
-	@Override
+    @Override
     public int getLB() {
         return this.LB.get();
     }
@@ -374,17 +375,17 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      *
      * @return the upper bound
      */
-	@Override
+    @Override
     public int getUB() {
         return this.UB.get();
     }
 
-	@Override
+    @Override
     public int getDomainSize() {
         return SIZE.get();
     }
 
-	@Override
+    @Override
     public int nextValue(int aValue) {
         int lb = LB.get();
         if (aValue < lb) {
@@ -418,7 +419,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return delta;
     }
 
-	@Override
+    @Override
     public String toString() {
         if (SIZE.get() == 1) {
             return String.format("%s = %d", name, getLB());
@@ -445,8 +446,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return new IntervalDeltaMonitor(delta, propagator);
     }
 
-	@Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    @Override
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
@@ -458,7 +459,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return new AntiDomInterval(this);
     }
 
-	@Override
+    @Override
     public void explain(VariableState what, Explanation to) {
         AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
@@ -480,9 +481,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
@@ -496,6 +497,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.getSolver());
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntervalIntVarImpl clone = new IntervalIntVarImpl(this.name, this.LB.get(), this.UB.get(), solver);
+            identitymap.put(this, clone);
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -512,7 +520,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return _viterator;
     }
 
-	@Override
+    @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);

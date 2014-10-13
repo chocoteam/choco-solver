@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -75,7 +75,7 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testOneAllDiff() {
         int nbSol = 1;
         for (int k = 2; k <= 9; k++) {
@@ -96,10 +96,7 @@ public class TestSolveur {
 
             s.post(cstrs);
             s.set(IntStrategyFactory.lexico_LB(vars));
-            long t = System.currentTimeMillis();
-            System.out.println("nb solutions : " + s.findAllSolutions());
-            t = System.currentTimeMillis() - t;
-            System.out.println("time : " + t);
+            s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
     }
@@ -245,7 +242,7 @@ public class TestSolveur {
     }
 
 
-    @Test(groups = {"1s"})
+    @Test(groups = {"10s"})
     public void testDO3to6() {
         int[] nbSol = {0, 0, 0, 0, 1, 768, 354294};
         int[] nbNod = {0, 0, 0, 0, 1, 1535, 708587};

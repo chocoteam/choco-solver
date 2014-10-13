@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 1999-2012, Ecole des Mines de Nantes
+  ~ Copyright (c) 1999-2014, Ecole des Mines de Nantes
   ~ All rights reserved.
   ~ Redistribution and use in source and binary forms, with or without
   ~ modification, are permitted provided that the following conditions are met:
@@ -26,11 +26,12 @@
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>choco</artifactId>
         <groupId>choco</groupId>
-        <version>3.2.0</version>
+        <version>3.2.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>choco-solver</artifactId>
@@ -38,12 +39,6 @@
     <name>Choco-${project.version} core solver</name>
 
     <dependencies>
-        <dependency>
-            <groupId>choco</groupId>
-            <artifactId>choco-environment</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>dk.brics</groupId>
             <artifactId>automaton</artifactId>
@@ -61,31 +56,36 @@
             <version>3.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.0.28</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.1</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>samples.FrontEndBenchmarking</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <!-- this is used for inheritance merges -->
                         <phase>package</phase>
-                        <!-- bind to the packaging phase -->
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <minimizeJar>true</minimizeJar>
+                            <filters>
+                                <filter>
+                                    <!-- remove logback.xml to avoid conflict on end-user application -->
+                                    <artifact>*:*:*:*</artifact>
+                                    <excludes>
+                                        <exclude>logback.xml</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -102,16 +102,42 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.17</version>
                 <configuration>
-                    <excludedGroups>>30min,1h</excludedGroups>
-                    <parallel>methods</parallel>
-                    <threadCount>10</threadCount>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>
+                                util.CustomListener
+                            </value>
+                        </property>
+                    </properties>
                 </configuration>
+            </plugin>
+            <!-- UNCOMMENT TO GENERATE CLASSES FOR MEMORY PACKAGE
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>memory.generator.CodeGenerator</mainClass>
+                            <arguments>
+                                &lt;!&ndash;<argument>-c</argument>&ndash;&gt;
+                                <argument>${basedir}/src/main/resources/</argument>
+                                <argument>${basedir}/src/main/java/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             -->
         </plugins>

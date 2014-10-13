@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -67,7 +67,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private OptimizationPolicy optPolicy;
-	private boolean log;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -79,10 +78,9 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      *
      * @param objective variable
      * @param policy    BOTTOM_UP, TOP_TOWN or DICHOTOMIC
-	 * @param logOpt	log the objective bounds if set to true
      */
-    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy, boolean logOpt) {
-        this(objective, getCoefs(policy), policy, logOpt);
+    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy) {
+        this(objective, getCoefs(policy), policy);
     }
 
     /**
@@ -94,11 +92,9 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      *                  [1,1] will halve its domain
      *                  [1,2] will take a value closer to the upper bound than the lower bound
      * @param policy    should be DICHOTOMIC
-	 * @param logOpt	log the objective bounds if set to true
      */
-    public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy, boolean logOpt) {
+    public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
         super(new IntVar[]{objective});
-		this.log = logOpt;
         this.pool = new PoolManager<FastDecision>();
         this.obj = objective;
         this.solver = obj.getSolver();
@@ -179,13 +175,15 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (globalLB > globalUB) {
             return null;
         }
-		if(log)
+		if(LOGGER.isInfoEnabled())
 			LOGGER.info("% objective in [" + globalLB + ", " + globalUB + "]");
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         FastDecision dec = pool.getE();
         if (dec == null) dec = new FastDecision(pool);
         dec.set(obj, target, decOperator);
+		if(LOGGER.isInfoEnabled())
+			LOGGER.info("% trying " + obj+" "+(decOperator==decUB?"<=":">=")+" "+target);
         return dec;
     }
 

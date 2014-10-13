@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,8 +34,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.GraphVar;
 import util.tools.ArrayUtils;
 
 /**
@@ -114,12 +112,12 @@ public class SetConstraintsFactory {
 
     /**
      * links SET_1 and SET_2 with OFFSET
-     * x in SET_1 <=> x+offSet in SET_2
+     * x in SET_1 <=> x+OFFSET in SET_2
      *
      * @param SET_1  a set variable
      * @param SET_2  a set variable
      * @param OFFSET offset index
-     * @return a constraint ensuring that x in SET_1 <=> x+offSet in SET_2
+     * @return a constraint ensuring that x in SET_1 <=> x+OFFSET in SET_2
      */
     public static Constraint offSet(SetVar SET_1, SetVar SET_2, int OFFSET) {
 		return new Constraint("SetOffset",new PropOffSet(SET_1, SET_2, OFFSET));
@@ -286,39 +284,19 @@ public class SetConstraintsFactory {
 		);
     }
 
-    /**
-     * Channeling between a graph variable GRAPH and set variables SETS
-     * representing either node neighbors or node successors
-     * <p/> arc (i,j) in GRAPH <=> j in SETS[i]
-     *
-     * @param SETS  set variables representing nodes neighbors (or successors if directed) in GRAPH
-     * @param GRAPH a graph variable
-     * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SETS[i]
-     */
-    public static Constraint graph_channel(SetVar[] SETS, GraphVar GRAPH) {
-        if (GRAPH.isDirected()) {
-			return new Constraint("SetUndirectedGraphChannel",new PropSymmetric(SETS, 0),new PropGraphChannel(SETS, GRAPH));
-        }else{
-			return new Constraint("SetDirectedGraphChannel",new PropGraphChannel(SETS, GRAPH));
-		}
-    }
-
-    /**
-     * Channeling between a directed graph variable GRAPH and set variables SUCCESSORS and PREDECESSORS
-     * representing node successors and predecessors:
-     * <p/> arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
-     *
-     * @param SUCCESSORS   set variables representing nodes' successors in GRAPH
-     * @param PREDECESSORS set variables representing nodes' predecessors in GRAPH
-     * @param GRAPH        a graph variable
-     * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
-     */
-    public static Constraint graph_channel(SetVar[] SUCCESSORS, SetVar[] PREDECESSORS, DirectedGraphVar GRAPH) {
-		return new Constraint("SetPartition",ArrayUtils.append(
-				graph_channel(SUCCESSORS, GRAPH).getPropagators(),
-				new Propagator[]{new PropInverse(SUCCESSORS, PREDECESSORS, 0, 0)})
+	/**
+	 * Channeling constraint ensuring that
+	 * VALUES is exactly the set of values taken by VARS,
+	 * @param VARS		integer variables
+	 * @param VALUES	a set variable
+	 * @return	a channeling constraint ensuring that VALUES = {value(x) | x in VARS}
+	 */
+	public static Constraint int_values_union(IntVar[] VARS, SetVar VALUES){
+		return new Constraint("SetIntValuesUnion"
+				,new PropSetIntValuesUnion(VARS,VALUES)
+				,new PropSetIntValuesUnion(VARS,VALUES)
 		);
-    }
+	}
 
     //***********************************************************************************
     // MINIZINC API
@@ -337,7 +315,7 @@ public class SetConstraintsFactory {
     }
 
     /**
-     * Sets in SETS are all disjoints
+     * Sets in SETS are all disjoint
      * Note that there can be multiple empty sets
      *
      * @param SETS disjoint set variables

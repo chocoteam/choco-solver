@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -30,7 +30,6 @@ package solver.explanations;
 import solver.Solver;
 import solver.explanations.strategies.ConflictBasedBackjumping;
 import solver.explanations.strategies.DynamicBacktracking;
-import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -48,22 +47,25 @@ public enum ExplanationFactory {
             solver.set(new ExplanationEngine(solver));
         }
     },
-    /**
+    /*
      * Active explanations, but do not interact with search.
      */
+    /*
     SILENT {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
         }
-    },
+    },*/
+/*
+    BEWARE: not accessible anymore since it needs to be called just after a restart, otherwise, explanations are wrong.
 
     LAZY {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             solver.set(new LazyExplanationEngine(solver));
         }
-    },
+    },*/
     /**
      * add a Conflict-based jumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
@@ -83,7 +85,7 @@ public enum ExplanationFactory {
         @Override
         public void plugin(Solver solver, boolean flattened) {
             plugExpl(solver, flattened);
-            new DynamicBacktracking(solver.getExplainer(), new MostRecentWorldJumper( ));
+            new DynamicBacktracking(solver.getExplainer());
         }
     };
 
@@ -97,7 +99,7 @@ public enum ExplanationFactory {
 
 
     private static void plugExpl(Solver solver, boolean flattened) {
-        assert !solver.getExplainer().isActive() : "Explanations are already turn on!";
+        assert solver.getExplainer()==null || !solver.getExplainer().isActive() : "Explanations are already turn on!";
         solver.set(flattened ? new FlattenedRecorderExplanationEngine(solver)
                 : new RecorderExplanationEngine(solver));
     }

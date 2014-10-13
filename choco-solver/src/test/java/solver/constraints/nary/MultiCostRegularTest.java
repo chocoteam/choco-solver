@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -126,6 +126,7 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test1() {
         long seed = System.currentTimeMillis();
+        System.out.printf("SEED1:%d\n", seed);
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(5, i + seed);
             solver.findAllSolutions();
@@ -136,6 +137,7 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test2() {
         long seed = System.currentTimeMillis();
+        System.out.printf("SEED:%d\n", seed);
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(7, i);
             solver.findAllSolutions();
@@ -143,7 +145,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void test3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
@@ -153,7 +155,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {

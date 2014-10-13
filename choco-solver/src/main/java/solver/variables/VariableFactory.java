@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,12 +33,9 @@ import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.real.IntEqRealConstraint;
 import solver.exception.SolverException;
-import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.impl.*;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
-import util.tools.StringUtils;
 
 import java.util.Arrays;
 
@@ -119,6 +116,78 @@ public class VariableFactory {
         }
         return vars;
     }
+
+    /**
+     * Build an integer variable whose domain representation is abstracted by two integers:
+     * a lower bound and an upper bound.
+     * <p/> Its initial domain is [MIN,MAX]
+     * <p/>
+     * This API automatically selects the way the domain is represented by checking its size and by comparing
+     * it to {@code Configuration.MAX_DOM_SIZE_FOR_ENUM}:
+     * a domain size below this value calls {@code VariableFactory.enumerated}, {@code VariableFactory.bounded} otherwise.
+     *
+     * @param NAME   name of the variable
+     * @param MIN    initial lower bound
+     * @param MAX    initial upper bound
+     * @param SOLVER solver involving the variable
+     * @return an integer variable with a bounded domain
+     * @see solver.variables.VariableFactory#bounded(String, int, int, solver.Solver)
+     * @see solver.variables.VariableFactory#enumerated(String, int, int, solver.Solver)
+     */
+    public static IntVar integer(String NAME, int MIN, int MAX, Solver SOLVER) {
+        int size = MAX - MIN + 1;
+        if (size < Configuration.MAX_DOM_SIZE_FOR_ENUM) {
+            return enumerated(NAME, MIN, MAX, SOLVER);
+        } else {
+            return bounded(NAME, MIN, MAX, SOLVER);
+        }
+    }
+
+    /**
+     * Build and array of bounded variables
+     * (each variable domain is represented by two integers)
+     *
+     * @param NAME   name of the variables
+     * @param SIZE   number of variables
+     * @param MIN    initial lower bound
+     * @param MAX    initial upper bound
+     * @param SOLVER solver involving the variable
+     * @return an array of integer variables with bounded domains
+     * @see solver.variables.VariableFactory#integer(String, int, int, solver.Solver)
+     * @see solver.variables.VariableFactory#bounded(String, int, int, solver.Solver)
+     * @see solver.variables.VariableFactory#enumerated(String, int, int, solver.Solver)
+     */
+    public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
+        IntVar[] vars = new IntVar[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            vars[i] = integer(NAME + "[" + i + "]", MIN, MAX, SOLVER);
+        }
+        return vars;
+    }
+
+    /**
+     * Build a DIM1*DIM2-sized matrix of bounded variables
+     * (each variable domain is represented by two integers)
+     *
+     * @param NAME   name of the variables
+     * @param DIM1   number of rows
+     * @param DIM2   number of columns
+     * @param MIN    initial lower bound
+     * @param MAX    initial upper bound
+     * @param SOLVER solver involving the variable
+     * @return an array of integer variables with bounded domains
+     * @see solver.variables.VariableFactory#integer(String, int, int, solver.Solver)
+     * @see solver.variables.VariableFactory#bounded(String, int, int, solver.Solver)
+     * @see solver.variables.VariableFactory#enumerated(String, int, int, solver.Solver)
+     */
+    public static IntVar[][] integerMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
+        IntVar[][] vars = new IntVar[DIM1][];
+        for (int i = 0; i < DIM1; i++) {
+            vars[i] = integerArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
+        }
+        return vars;
+    }
+
 
     /**
      * Build an integer variable whose domain representation is abstracted by two integers:
@@ -254,8 +323,8 @@ public class VariableFactory {
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else {
-			int gap = VALUES[VALUES.length - 1] - VALUES[0];
-            if (gap > 30 && gap/VALUES.length > 5) {
+            int gap = VALUES[VALUES.length - 1] - VALUES[0];
+            if (gap > 30 && gap / VALUES.length > 5) {
                 return new BitsetArrayIntVarImpl(NAME, VALUES, SOLVER);
             } else {
                 return new BitsetIntVarImpl(NAME, VALUES, SOLVER);
@@ -417,44 +486,6 @@ public class VariableFactory {
      */
     public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
         return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
-    }
-
-    //*************************************************************************************
-    // GRAPH VARIABLES
-    //*************************************************************************************
-
-    /**
-     * Builds a non-directed graph variable with an empty domain
-     * but allocates memory to deal with at most NB_NODES nodes.
-     * <p/>
-     * The domain of a graph variable is defined by two graphs:
-     * <p/> The envelope graph denotes nodes and edges that may belong to a solution
-     * <p/> The kernel graph denotes nodes and edges that must belong to any solution
-     *
-     * @param NAME     name of the variable
-     * @param NB_NODES maximal number of nodes
-     * @param SOLVER   solver involving the variable
-     * @return a graph variable with an empty domain
-     */
-    public static UndirectedGraphVar undirectedGraph(String NAME, int NB_NODES, Solver SOLVER) {
-        return new UndirectedGraphVar(NAME, SOLVER, NB_NODES, false);
-    }
-
-    /**
-     * Builds a directed graph variable with an empty domain
-     * but allocates memory to deal with at most NB_NODES nodes.
-     * <p/>
-     * The domain of a graph variable is defined by two graphs:
-     * <p/> The envelope graph denotes nodes and arcs that may belong to a solution
-     * <p/> The kernel graph denotes nodes and arcs that must belong to any solution
-     *
-     * @param NAME     name of the variable
-     * @param NB_NODES maximal number of nodes
-     * @param SOLVER   solver involving the variable
-     * @return a graph variable with an empty domain
-     */
-    public static DirectedGraphVar directedGraph(String NAME, int NB_NODES, Solver SOLVER) {
-        return new DirectedGraphVar(NAME, SOLVER, NB_NODES, false);
     }
 
     //*************************************************************************************
@@ -642,7 +673,12 @@ public class VariableFactory {
         if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
-        FixedIntVarImpl cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+		IntVar cste;
+		if(VALUE == 0 || VALUE == 1){
+			cste = new FixedBoolVarImpl(NAME, VALUE, SOLVER);
+		}else {
+			cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+		}
         if (NAME.equals(CSTE_NAME + VALUE)) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
@@ -692,76 +728,76 @@ public class VariableFactory {
         if (CSTE == 0) {
             return VAR;
         }
-		if(Configuration.ENABLE_VIEWS) {
-			return new OffsetView(VAR, CSTE, VAR.getSolver());
-		}else{
-			Solver s = VAR.getSolver();
-			int lb = VAR.getLB()+CSTE;
-			int ub = VAR.getUB()+CSTE;
-			String name = "("+VAR.getName()+"+"+CSTE+")";
-			IntVar ov;
-			if(VAR.hasEnumeratedDomain()){
-				ov = enumerated(name,lb,ub,s);
-			}else{
-				ov = bounded(name,lb,ub,s);
-			}
-			s.post(ICF.arithm(ov,"-",VAR,"=",CSTE));
-			return ov;
-		}
+        if (Configuration.ENABLE_VIEWS) {
+            return new OffsetView(VAR, CSTE, VAR.getSolver());
+        } else {
+            Solver s = VAR.getSolver();
+            int lb = VAR.getLB() + CSTE;
+            int ub = VAR.getUB() + CSTE;
+            String name = "(" + VAR.getName() + "+" + CSTE + ")";
+            IntVar ov;
+            if (VAR.hasEnumeratedDomain()) {
+                ov = enumerated(name, lb, ub, s);
+            } else {
+                ov = bounded(name, lb, ub, s);
+            }
+            s.post(ICF.arithm(ov, "-", VAR, "=", CSTE));
+            return ov;
+        }
     }
 
-	/**
-	 * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
-	 * <p/>
-	 * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-	 * Any operations on this will transformed to operations on VAR following the offset rules.
-	 *
-	 * @param VAR an integer variable
-	 */
-	public static IntVar eq(IntVar VAR) {
-		// this part should remain (at least for Propagator.checkVariable())
-		if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
-			return eqbool((BoolVar) VAR);
-		} else {
-			return eqint(VAR);
-		}
-	}
+    /**
+     * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
+     * <p/>
+     * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
+     * Any operations on this will transformed to operations on VAR following the offset rules.
+     *
+     * @param VAR an integer variable
+     */
+    public static IntVar eq(IntVar VAR) {
+        // this part should remain (at least for Propagator.checkVariable())
+        if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
+            return eqbool((BoolVar) VAR);
+        } else {
+            return eqint(VAR);
+        }
+    }
 
-	/**
-	 * Create a kind of clone of VAR such that, the resulting view is defined on VAR.
-	 * <p/>
-	 * The resulting BoolVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-	 * Any operations on this will transformed to operations on VAR.
-	 *
-	 * @param VAR an integer variable
-	 */
-	public static BoolVar eq(BoolVar VAR) {
-		return eqbool(VAR);
-	}
+    /**
+     * Create a kind of clone of VAR such that, the resulting view is defined on VAR.
+     * <p/>
+     * The resulting BoolVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
+     * Any operations on this will transformed to operations on VAR.
+     *
+     * @param VAR an integer variable
+     */
+    public static BoolVar eq(BoolVar VAR) {
+        return eqbool(VAR);
+    }
 
     private static IntVar eqint(IntVar ivar) {
-		if(Configuration.ENABLE_VIEWS) {
-			return new EqView(ivar, ivar.getSolver());
-		}else{
-			IntVar ov = ivar.duplicate();
-			ivar.getSolver().post(ICF.arithm(ov,"=",ivar));
-			return ov;
-		}
+        if (Configuration.ENABLE_VIEWS) {
+            return new EqView(ivar, ivar.getSolver());
+        } else {
+            IntVar ov = ivar.duplicate();
+            ivar.getSolver().post(ICF.arithm(ov, "=", ivar));
+            return ov;
+        }
     }
 
     private static BoolVar eqbool(BoolVar BOOL) {
-		if(Configuration.ENABLE_VIEWS){
-			return new BoolEqView(BOOL, BOOL.getSolver());
+        if (Configuration.ENABLE_VIEWS) {
+            return new BoolEqView(BOOL, BOOL.getSolver());
 
-		}else{
-			BoolVar ov = BOOL.duplicate();
-			BOOL.getSolver().post(ICF.arithm(ov, "=", BOOL));
-			if(BOOL.hasNot()){
-				ov._setNot(BOOL.not());
-			}
-			ov.setNot(BOOL.isNot());
-			return ov;
-		}
+        } else {
+            BoolVar ov = BOOL.duplicate();
+            BOOL.getSolver().post(ICF.arithm(ov, "=", BOOL));
+            if (BOOL.hasNot()) {
+                ov._setNot(BOOL.not());
+            }
+            ov.setNot(BOOL.isNot());
+            return ov;
+        }
     }
 
     /**
@@ -773,21 +809,21 @@ public class VariableFactory {
      * @param BOOL a boolean variable.
      */
     public static BoolVar not(BoolVar BOOL) {
-		if(Configuration.ENABLE_VIEWS) {
-			return new BoolNotView(BOOL, BOOL.getSolver());
-		}else{
-			if(BOOL.hasNot()){
-				return BOOL.not();
-			}else {
-				Solver s = BOOL.getSolver();
-				BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
-				s.post(ICF.arithm(ov, "!=", BOOL));
-				BOOL._setNot(ov);
-				ov._setNot(BOOL);
-				ov.setNot(true);
-				return ov;
-			}
-		}
+        if (Configuration.ENABLE_VIEWS) {
+            return new BoolNotView(BOOL, BOOL.getSolver());
+        } else {
+            if (BOOL.hasNot()) {
+                return BOOL.not();
+            } else {
+                Solver s = BOOL.getSolver();
+                BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
+                s.post(ICF.arithm(ov, "!=", BOOL));
+                BOOL._setNot(ov);
+                ov._setNot(BOOL);
+                ov.setNot(true);
+                return ov;
+            }
+        }
     }
 
     /**
@@ -800,22 +836,22 @@ public class VariableFactory {
      * @param VAR an integer variable
      */
     public static IntVar minus(IntVar VAR) {
-		if(Configuration.ENABLE_VIEWS) {
-			return new MinusView(VAR, VAR.getSolver());
-		}else{
-			Solver s = VAR.getSolver();
-			int ub = -VAR.getLB();
-			int lb = -VAR.getUB();
-			String name = "-("+VAR.getName()+")";
-			IntVar ov;
-			if(VAR.hasEnumeratedDomain()){
-				ov = enumerated(name,lb,ub,s);
-			}else{
-				ov = bounded(name,lb,ub,s);
-			}
-			s.post(ICF.arithm(ov,"+",VAR,"=",0));
-			return ov;
-		}
+        if (Configuration.ENABLE_VIEWS) {
+            return new MinusView(VAR, VAR.getSolver());
+        } else {
+            Solver s = VAR.getSolver();
+            int ub = -VAR.getLB();
+            int lb = -VAR.getUB();
+            String name = "-(" + VAR.getName() + ")";
+            IntVar ov;
+            if (VAR.hasEnumeratedDomain()) {
+                ov = enumerated(name, lb, ub, s);
+            } else {
+                ov = bounded(name, lb, ub, s);
+            }
+            s.post(ICF.arithm(ov, "+", VAR, "=", 0));
+            return ov;
+        }
     }
 
     /**
@@ -846,22 +882,22 @@ public class VariableFactory {
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
-				if(Configuration.ENABLE_VIEWS) {
-					var = new ScaleView(VAR, CSTE, VAR.getSolver());
-				}else{
-					Solver s = VAR.getSolver();
-					int lb = VAR.getLB()*CSTE;
-					int ub = VAR.getUB()*CSTE;
-					String name = "("+VAR.getName()+"*"+CSTE+")";
-					IntVar ov;
-					if(VAR.hasEnumeratedDomain()){
-						ov = enumerated(name,lb,ub,s);
-					}else{
-						ov = bounded(name,lb,ub,s);
-					}
-					s.post(ICF.times(VAR, CSTE, ov));
-					return ov;
-				}
+                if (Configuration.ENABLE_VIEWS) {
+                    var = new ScaleView(VAR, CSTE, VAR.getSolver());
+                } else {
+                    Solver s = VAR.getSolver();
+                    int lb = VAR.getLB() * CSTE;
+                    int ub = VAR.getUB() * CSTE;
+                    String name = "(" + VAR.getName() + "*" + CSTE + ")";
+                    IntVar ov;
+                    if (VAR.hasEnumeratedDomain()) {
+                        ov = enumerated(name, lb, ub, s);
+                    } else {
+                        ov = bounded(name, lb, ub, s);
+                    }
+                    s.post(ICF.times(VAR, CSTE, ov));
+                    return ov;
+                }
             }
             return var;
         }
@@ -889,8 +925,8 @@ public class VariableFactory {
             return minus(VAR);
         } else {
             Solver s = VAR.getSolver();
-			int ub = Math.max(-VAR.getLB(), VAR.getUB());
-			String name = "|"+VAR.getName()+"|";
+            int ub = Math.max(-VAR.getLB(), VAR.getUB());
+            String name = "|" + VAR.getName() + "|";
             IntVar abs;
             if (VAR.hasEnumeratedDomain()) {
                 abs = enumerated(name, 0, ub, s);
@@ -911,16 +947,16 @@ public class VariableFactory {
      * @param PRECISION used to evaluate the instantiation of the view.
      */
     public static RealVar real(IntVar VAR, double PRECISION) {
-		if(Configuration.ENABLE_VIEWS) {
-			return new RealView(VAR, PRECISION);
-		}else{
-			Solver s = VAR.getSolver();
-			double lb = VAR.getLB();
-			double ub = VAR.getUB();
-			RealVar rv = real("(real)" + VAR.getName(), lb, ub, PRECISION, s);
-			s.post(new IntEqRealConstraint(VAR,rv,PRECISION));
-			return rv;
-		}
+        if (Configuration.ENABLE_VIEWS) {
+            return new RealView(VAR, PRECISION);
+        } else {
+            Solver s = VAR.getSolver();
+            double lb = VAR.getLB();
+            double ub = VAR.getUB();
+            RealVar rv = real("(real)" + VAR.getName(), lb, ub, PRECISION, s);
+            s.post(new IntEqRealConstraint(VAR, rv, PRECISION));
+            return rv;
+        }
     }
 
     /**
@@ -933,20 +969,20 @@ public class VariableFactory {
      * @return
      */
     public static RealVar[] real(IntVar[] VARS, double PRECISION) {
-		RealVar[] reals = new RealVar[VARS.length];
-		if(Configuration.ENABLE_VIEWS) {
-			for (int i = 0; i < VARS.length; i++) {
-				reals[i] = real(VARS[i], PRECISION);
-			}
-		}else{
-			Solver s = VARS[0].getSolver();
-			for (int i = 0; i < VARS.length; i++) {
-				double lb = VARS[i].getLB();
-				double ub = VARS[i].getUB();
-				reals[i] = real("(real)" + VARS[i].getName(), lb, ub, PRECISION, s);
-			}
-			s.post(new IntEqRealConstraint(VARS,reals,PRECISION));
-		}
-		return reals;
+        RealVar[] reals = new RealVar[VARS.length];
+        if (Configuration.ENABLE_VIEWS) {
+            for (int i = 0; i < VARS.length; i++) {
+                reals[i] = real(VARS[i], PRECISION);
+            }
+        } else {
+            Solver s = VARS[0].getSolver();
+            for (int i = 0; i < VARS.length; i++) {
+                double lb = VARS[i].getLB();
+                double ub = VARS[i].getUB();
+                reals[i] = real("(real)" + VARS[i].getName(), lb, ub, PRECISION, s);
+            }
+            s.post(new IntEqRealConstraint(VARS, reals, PRECISION));
+        }
+        return reals;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,15 +27,17 @@
 
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -64,7 +66,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y) {
-        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
         this.x = vars[0];
         this.y = vars[1];
     }
@@ -74,9 +76,9 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
         //Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
         if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INSTANTIATE.mask;
+            return IntEventType.instantiation();
         }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -90,36 +92,23 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        // typical case: A=[1,4], B=[1,4] (bounded domains)
-        // A instantiated to 3 => nothing can be done on B
-        // then B dec supp to 3 => 3 can also be removed du to A = 3.
-        propagate(0);
-    }
-
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue(), aCause)
-                || !x.contains(y.getValue())) {
+        if (x.removeValue(y.getValue(), aCause) || !x.contains(y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue(), aCause)
-                || !y.contains(x.getValue())) {
+        if (y.removeValue(x.getValue(), aCause) || !y.contains(x.getValue())) {
             this.setPassive();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if ((x.getUB() < y.getLB()) ||
-                (y.getUB() < x.getLB()))
+        if ((x.getUB() < y.getLB()) || (y.getUB() < x.getLB()))
             return ESat.TRUE;
-        else if (x.isInstantiated()
-                && y.isInstantiated()
-                && x.getValue() == y.getValue())
+        else if (x.isInstantiated() && y.isInstantiated())
             return ESat.FALSE;
         else
             return ESat.UNDEFINED;
@@ -145,5 +134,17 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         }
         // and the application of the current propagator
         e.add(aCause);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropNotEqualX_Y(X, Y));
+        }
     }
 }

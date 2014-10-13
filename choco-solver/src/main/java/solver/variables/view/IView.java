@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,8 +28,8 @@ package solver.variables.view;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
 
 /**
  * An interface to define views.
@@ -58,5 +58,5 @@ public interface IView extends ICause, Variable {
      * @param cause cause of the modification
      * @throws ContradictionException can encounter a contradiction
      */
-    void transformEvent(EventType evt, ICause cause) throws ContradictionException;
+    void transformEvent(IEventType evt, ICause cause) throws ContradictionException;
 }

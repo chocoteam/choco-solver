@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -43,11 +44,11 @@ import util.ESat;
  */
 public final class BoolEqView extends EqView implements BoolVar {
 
-	protected final BoolVar var;
+    protected final BoolVar var;
 
     public BoolEqView(BoolVar var, Solver solver) {
         super(var, solver);
-		this.var = var;
+        this.var = var;
     }
 
     @Override
@@ -71,14 +72,23 @@ public final class BoolEqView extends EqView implements BoolVar {
     }
 
     @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            BoolEqView clone = new BoolEqView((BoolVar) identitymap.get(this.var), solver);
+            identitymap.put(this, clone);
+        }
+    }
+
+    @Override
     public BoolVar not() {
         return var.not();
     }
 
-	@Override
-	public boolean hasNot() {
-		return var.hasNot();
-	}
+    @Override
+    public boolean hasNot() {
+        return var.hasNot();
+    }
 
     @Override
     public void _setNot(BoolVar not) {
@@ -95,13 +105,13 @@ public final class BoolEqView extends EqView implements BoolVar {
         return var.isNot();
     }
 
-	@Override
-	public void setNot(boolean isNot){
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void setNot(boolean isNot) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public int getTypeAndKind() {
-		return Variable.VIEW | Variable.BOOL;
-	}
+    @Override
+    public int getTypeAndKind() {
+        return Variable.VIEW | Variable.BOOL;
+    }
 }

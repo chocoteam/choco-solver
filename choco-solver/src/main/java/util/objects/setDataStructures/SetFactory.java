@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -37,10 +37,8 @@ package util.objects.setDataStructures;
 import memory.IEnvironment;
 import memory.copy.EnvironmentCopying;
 import memory.trailing.EnvironmentTrailing;
-import util.objects.setDataStructures.linkedlist.Set_2LinkedList;
-import util.objects.setDataStructures.linkedlist.Set_LinkedList;
-import util.objects.setDataStructures.linkedlist.Set_Std_2LinkedList;
-import util.objects.setDataStructures.linkedlist.Set_Std_LinkedList;
+import solver.Solver;
+import util.objects.setDataStructures.linkedlist.*;
 import util.objects.setDataStructures.matrix.Set_Array;
 import util.objects.setDataStructures.matrix.Set_BitSet;
 import util.objects.setDataStructures.matrix.Set_Std_Array;
@@ -61,7 +59,8 @@ public class SetFactory {
     // FACTORY - STORED SET
     //***********************************************************************************
 
-    public static boolean HARD_CODED = true;
+	public static boolean HARD_CODED = true;
+	public static boolean RECYCLE = true;
 
     /**
      * Make a stored set of integers in the range [0,maximumSize-1]
@@ -69,18 +68,22 @@ public class SetFactory {
      *
      * @param type        of set data structure
      * @param maximumSize of the set (maximum value -1)
-     * @param environment solver environment
+     * @param solver	  solver providing the backtracking environment
      * @return a new set which can be restored during search, after some backtracks
      */
-    public static ISet makeStoredSet(SetType type, int maximumSize, IEnvironment environment) {
+    public static ISet makeStoredSet(SetType type, int maximumSize, Solver solver) {
+		IEnvironment environment = solver.getEnvironment();
         if (HARD_CODED)
             switch (type) {
-                case SWAP_ARRAY:
+                case BIPARTITESET:
                     return new Set_Std_Swap_Array(environment, maximumSize);
                 case SWAP_HASH:
                     return new Set_Std_Swap_Hash(environment, maximumSize);
                 case LINKED_LIST:
-                    return new Set_Std_LinkedList(environment);
+					if(RECYCLE)
+						return new Set_Std_LinkedList(environment);
+					else
+						return new Set_Std_LinkedList_NoRecycling(environment);
                 case DOUBLE_LINKED_LIST:
                     return new Set_Std_2LinkedList(environment);
                 case BITSET:
@@ -111,7 +114,7 @@ public class SetFactory {
      */
     public static ISet makeSet(SetType type, int maximumSize) {
         switch (type) {
-            case SWAP_ARRAY:
+            case BIPARTITESET:
                 return makeSwap(maximumSize, false);
             case SWAP_HASH:
                 return makeSwap(maximumSize, true);

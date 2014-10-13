@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  */
 package samples.integer;
 
+import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -35,9 +36,9 @@ import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -140,7 +141,7 @@ public class Grocery extends AbstractProblem {
          * Propagation condition : if a variable is instantiated or a domain bound is modified
          */
         public int getPropagationConditions(int vIdx) {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.boundAndInst();
         }
 
         @Override
@@ -181,6 +182,19 @@ public class Grocery extends AbstractProblem {
                 return ESat.TRUE;
             } else {
                 return ESat.UNDEFINED;
+            }
+        }
+
+        @Override
+        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+            if (!identitymap.containsKey(this)) {
+                int size = vars.length;
+                IntVar[] ivars = new IntVar[size];
+                for (int i = 0; i < size; i++) {
+                    vars[i].duplicate(solver, identitymap);
+                    ivars[i] = (IntVar) identitymap.get(vars[i]);
+                }
+                identitymap.put(this, new PropLargeProduct(ivars, target));
             }
         }
     }

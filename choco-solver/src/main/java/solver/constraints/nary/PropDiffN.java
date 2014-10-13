@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,12 +26,14 @@
  */
 package solver.constraints.nary;
 
-import memory.IEnvironment;
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
@@ -45,33 +47,44 @@ import util.tools.ArrayUtils;
  */
 public class PropDiffN extends Propagator<IntVar> {
 
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
     private int n;
     private UndirectedGraph overlappingBoxes;
     private ISet boxesToCompute;
-	private boolean fast;
+    private boolean fast;
+
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean fast) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, true);
-		this.fast = fast;
+        this.fast = fast;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
         }
-		IEnvironment environment = solver.getEnvironment();
-        overlappingBoxes = new UndirectedGraph(environment, n, SetType.LINKED_LIST, true);
-        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
+        overlappingBoxes = new UndirectedGraph(solver, n, SetType.LINKED_LIST, true);
+        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, solver);
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int idx) {
-		if(fast) return EventType.INSTANTIATE.mask;
-        return EventType.INSTANTIATE.mask + +EventType.BOUND.mask;
+        if (fast) return IntEventType.instantiation();
+        return IntEventType.boundAndInst();
     }
 
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
 		int v = varIdx % n;
-		ISet s = overlappingBoxes.getNeighborsOf(v);
+		ISet s = overlappingBoxes.getNeighOf(v);
 		for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
 			if (!mayOverlap(v, i)) {
 				overlappingBoxes.removeEdge(v, i);
@@ -80,14 +93,14 @@ public class PropDiffN extends Propagator<IntVar> {
 		if (!boxesToCompute.contain(v)) {
 			boxesToCompute.add(v);
 		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
 	}
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
-                overlappingBoxes.getNeighborsOf(i).clear();
+                overlappingBoxes.getNeighOf(i).clear();
             }
             for (int i = 0; i < n; i++) {
                 for (int j = i + 1; j < n; j++) {
@@ -124,7 +137,7 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     protected void filterFromBox(int i) throws ContradictionException {
-        ISet s = overlappingBoxes.getNeighborsOf(i);
+        ISet s = overlappingBoxes.getNeighOf(i);
         // check energy
         int xm = vars[i].getLB();
         int xM = vars[i].getUB() + vars[i + 2 * n].getUB();
@@ -141,49 +154,49 @@ public class PropDiffN extends Propagator<IntVar> {
                 contradiction(vars[i], "");
             }
         }
-		// mandatory part based filtering
-		boolean horizontal = true;
-		boolean vertical   = false;
-		for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-			if(doOverlap(i,j,horizontal)){
-				filter(i, j, vertical);
-			}
-			if(doOverlap(i,j,vertical)){
-				filter(i,j,horizontal);
-			}
-			assert !(doOverlap(i,j,horizontal) && doOverlap(i,j,vertical));
-		}
+        // mandatory part based filtering
+        boolean horizontal = true;
+        boolean vertical = false;
+        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+            if (doOverlap(i, j, horizontal)) {
+                filter(i, j, vertical);
+            }
+            if (doOverlap(i, j, vertical)) {
+                filter(i, j, horizontal);
+            }
+            assert !(doOverlap(i, j, horizontal) && doOverlap(i, j, vertical));
+        }
     }
 
-	private boolean doOverlap(int i, int j, boolean hori){
-		int offSet = hori?0:n;
-		int S_i = vars[i+offSet].getUB();
-		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
-		int S_j = vars[j+offSet].getUB();
-		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
-		return (S_i<e_i && e_j>S_i && S_j<e_i)
-				|| (S_j<e_j && e_i>S_j && S_i<e_j);
-	}
+    private boolean doOverlap(int i, int j, boolean hori) {
+        int offSet = hori ? 0 : n;
+        int S_i = vars[i + offSet].getUB();
+        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB();
+        int S_j = vars[j + offSet].getUB();
+        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
+        return (S_i < e_i && e_j > S_i && S_j < e_i)
+                || (S_j < e_j && e_i > S_j && S_i < e_j);
+    }
 
-	private void filter(int i, int j, boolean hori) throws ContradictionException {
-		int offSet = hori?0:n;
-		int S_i = vars[i+offSet].getUB();
-		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
-		int S_j = vars[j+offSet].getUB();
-		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
-		if(S_i<e_i || S_j<e_j){
-			if(e_j>S_i){
-				vars[j+offSet].updateLowerBound(e_i,aCause);
-				vars[i+offSet].updateUpperBound(S_j-vars[i+2*n+offSet].getLB(),aCause);
-				vars[i+offSet+2*n].updateUpperBound(S_j-vars[i+offSet].getLB(),aCause);
-			}
-			if(S_j<e_i){
-				vars[i+offSet].updateLowerBound(e_j,aCause);
-				vars[j+offSet].updateUpperBound(S_i-vars[j+2*n+offSet].getLB(),aCause);
-				vars[j+offSet+2*n].updateUpperBound(S_i-vars[j+offSet].getLB(),aCause);
-			}
-		}
-	}
+    private void filter(int i, int j, boolean hori) throws ContradictionException {
+        int offSet = hori ? 0 : n;
+        int S_i = vars[i + offSet].getUB();
+        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB();
+        int S_j = vars[j + offSet].getUB();
+        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
+        if (S_i < e_i || S_j < e_j) {
+            if (e_j > S_i) {
+                vars[j + offSet].updateLowerBound(e_i, aCause);
+                vars[i + offSet].updateUpperBound(S_j - vars[i + 2 * n + offSet].getLB(), aCause);
+                vars[i + offSet + 2 * n].updateUpperBound(S_j - vars[i + offSet].getLB(), aCause);
+            }
+            if (S_j < e_i) {
+                vars[i + offSet].updateLowerBound(e_j, aCause);
+                vars[j + offSet].updateUpperBound(S_i - vars[j + 2 * n + offSet].getLB(), aCause);
+                vars[j + offSet + 2 * n].updateUpperBound(S_i - vars[j + offSet].getLB(), aCause);
+            }
+        }
+    }
 
     @Override
     public ESat isEntailed() {
@@ -221,5 +234,27 @@ public class PropDiffN extends Propagator<IntVar> {
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.n;
+            IntVar[] X = new IntVar[size];
+            IntVar[] Y = new IntVar[size];
+            IntVar[] dX = new IntVar[size];
+            IntVar[] dY = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.vars[i]);
+                this.vars[i + n].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
+                this.vars[i + 2 * n].duplicate(solver, identitymap);
+                dX[i] = (IntVar) identitymap.get(this.vars[i + 2 * n]);
+                this.vars[i + 3 * n].duplicate(solver, identitymap);
+                dY[i] = (IntVar) identitymap.get(this.vars[i + 3 * n]);
+            }
+            identitymap.put(this, new PropDiffN(X, Y, dX, dY, this.fast));
+        }
     }
 }

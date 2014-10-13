@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,14 @@
 
 package solver.constraints.reification;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.constraints.ReificationConstraint;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -59,7 +62,7 @@ public class PropReif extends Propagator<Variable> {
     private final Constraint trueCons;
     // constraint to apply if bVar = false
     private final Constraint falseCons;
-	// constraint in charge of the reification process (constraint of this propagator)
+    // constraint in charge of the reification process (constraint of this propagator)
     private ReificationConstraint reifCons;
 
     //***********************************************************************************
@@ -67,16 +70,21 @@ public class PropReif extends Propagator<Variable> {
     //***********************************************************************************
 
     public PropReif(Variable[] allVars, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(allVars, PropagatorPriority.LINEAR, false);
+        super(allVars, computePrority(consIfBoolTrue, consIfBoolFalse), false);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;
     }
 
-	public void setReifCons(ReificationConstraint reifCons){
-		assert this.reifCons==null:"cannot change the ReificationConstraint of a PropReif";
-		this.reifCons = reifCons;
-	}
+    public void setReifCons(ReificationConstraint reifCons) {
+        assert this.reifCons == null : "cannot change the ReificationConstraint of a PropReif";
+        this.reifCons = reifCons;
+    }
+
+    private static PropagatorPriority computePrority(Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+        int p = Math.min(consIfBoolTrue.computeMaxPriority().priority, consIfBoolFalse.computeMaxPriority().priority);
+        return PropagatorPriority.get(Math.min(p, PropagatorPriority.TERNARY.priority));
+    }
 
     //***********************************************************************************
     // METHODS
@@ -85,31 +93,36 @@ public class PropReif extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (bVar.isInstantiated()) {
+            setPassive();
             if (bVar.getBooleanValue() == ESat.TRUE) {
                 reifCons.activate(0);
             } else {
                 reifCons.activate(1);
             }
-            setPassive();
         } else {
             ESat sat = trueCons.isSatisfied();
-            if (sat == ESat.FALSE) {
-                bVar.setToFalse(aCause);
-                reifCons.activate(1);
+            if (sat == ESat.TRUE) {
                 setPassive();
-            }
-            sat = falseCons.isSatisfied();
-            if (sat == ESat.FALSE) {
                 bVar.setToTrue(aCause);
                 reifCons.activate(0);
+            } else if (sat == ESat.FALSE) {
                 setPassive();
+                bVar.setToFalse(aCause);
+                reifCons.activate(1);
             }
+//			else {// in case the entailment has not the same implementation
+//				sat = falseCons.isSatisfied();
+//				if (sat == ESat.FALSE) {
+//					bVar.setToTrue(aCause);
+//					reifCons.activate(0);
+//					setPassive();
+//				}else if(sat == ESat.TRUE){
+//					bVar.setToFalse(aCause);
+//					reifCons.activate(1);
+//					setPassive();
+//				}
+//			}
         }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override
@@ -120,16 +133,16 @@ public class PropReif extends Propagator<Variable> {
             } else {
                 return falseCons.isSatisfied();
             }
-        }else{
-			// a constraint an its opposite can neither be both true nor both false
-			ESat tie = trueCons.isSatisfied();
-			if(tie!=ESat.UNDEFINED){
-				ESat fie = falseCons.isSatisfied();
-				if(tie==fie){
-					return ESat.FALSE;
-				}
-			}
-		}
+        } else {
+            // a constraint an its opposite can neither be both true nor both false
+            ESat tie = trueCons.isSatisfied();
+            if (tie != ESat.UNDEFINED) {
+                ESat fie = falseCons.isSatisfied();
+                if (tie == fie) {
+                    return ESat.FALSE;
+                }
+            }
+        }
         return ESat.UNDEFINED;
     }
 
@@ -150,6 +163,11 @@ public class PropReif extends Propagator<Variable> {
 
     @Override
     public String toString() {
-        return bVar.toString() + "=>" + trueCons.toString()+", !"+bVar.toString() + "=>" + falseCons.toString();
+        return bVar.toString() + "=>" + trueCons.toString() + ", !" + bVar.toString() + "=>" + falseCons.toString();
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new SolverException("PropReif cannot be duplicated!");
     }
 }

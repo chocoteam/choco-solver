@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,6 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
-import solver.constraints.extension.Tuples;
 import solver.variables.IntVar;
 import util.ESat;
 
@@ -42,21 +41,12 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
 
     protected final R relation;
 
-    protected PropLargeCSP(IntVar[] vars, Tuples tuples) {
+    protected PropLargeCSP(IntVar[] vars, R relation) {
         super(vars, PropagatorPriority.QUADRATIC, true);
-        int[] offsets = new int[vars.length];
-        int[] dsizes = new int[vars.length];
-        for (int i = 0; i < vars.length; i++) {
-            offsets[i] = vars[i].getLB();
-            dsizes[i] = vars[i].getDomainSize();
-        }
-        this.relation = makeRelation(tuples, offsets, dsizes);
+        this.relation = relation;
     }
 
-    protected abstract R makeRelation(Tuples tuples, int[] offsets, int[] dsizes);
-
-
-    public final LargeRelation getRelation() {
+    public final R getRelation() {
         return relation;
     }
 

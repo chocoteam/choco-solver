@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
  */
 
 package samples.graph.input;
+
+import gnu.trove.list.array.TIntArrayList;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -102,6 +104,61 @@ public class HCP_Utils {
         }
         return matrix;
     }
+
+	public static TIntArrayList[] generateKingTourInstance_LightMemory(int size) {
+		int n = size * size;
+		int node, next, a, b;
+		TIntArrayList[] matrix = new TIntArrayList[n];
+		for (int i = 0; i < n; i++) {
+			matrix[i] = new TIntArrayList(8);
+		}
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				node = i * size + j;
+				// move
+				a = i + 1;
+				b = j + 2;
+				next = a * size + (b);
+				if (next >= 0 && next < n) {
+					if(inChessboard(a, b, size)){
+						matrix[node].add(next);
+						matrix[next].add(node);
+					}
+				}
+				// move
+				a = i + 1;
+				b = j - 2;
+				next = a * size + (b);
+				if (next >= 0 && next < n) {
+					if(inChessboard(a, b, size)){
+						matrix[node].add(next);
+						matrix[next].add(node);
+					}
+				}
+				// move
+				a = i + 2;
+				b = j + 1;
+				next = a * size + (b);
+				if (next >= 0 && next < n) {
+					if(inChessboard(a, b, size)){
+						matrix[node].add(next);
+						matrix[next].add(node);
+					}
+				}
+				// move
+				a = i + 2;
+				b = j - 1;
+				next = a * size + (b);
+				if (next >= 0 && next < n) {
+					if(inChessboard(a, b, size)){
+						matrix[node].add(next);
+						matrix[next].add(node);
+					}
+				}
+			}
+		}
+		return matrix;
+	}
 
     private static boolean inChessboard(int a, int b, int n) {
         if (a < 0 || a >= n || b < 0 || b >= n) {

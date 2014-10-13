@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -210,7 +210,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "0");
+        Assert.assertEquals(l.toString(), "cste -- 0");
     }
 
     @Test(groups = "1s")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,8 +26,10 @@
  */
 package solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.extension.Tuples;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -62,8 +64,8 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    public PropLargeGAC2001Positive(IntVar[] vs, Tuples tuples) {
-        super(vs, tuples);
+    private PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
+        super(vs, relation);
         this.arity = vs.length;
         this.blocks = new int[arity];
         this.offsets = new int[arity];
@@ -109,9 +111,12 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         } else valcheck = new ValidityChecker(arity, vars);
     }
 
-    @Override
-    protected IterTuplesTable makeRelation(Tuples tuples, int[] offsets, int[] dsizes) {
-        return new IterTuplesTable(tuples, offsets, dsizes);
+    public PropLargeGAC2001Positive(IntVar[] vs, Tuples tuples) {
+        this(vs, makeRelation(tuples, vs));
+    }
+
+    private static IterTuplesTable makeRelation(Tuples tuples, IntVar[] vars) {
+        return new IterTuplesTable(tuples, vars);
     }
 
     @Override
@@ -246,5 +251,18 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
             if (isValid) return true;
         }
         return false;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropLargeGAC2001Positive(aVars, (IterTuplesTable) relation.duplicate()));
+        }
     }
 }

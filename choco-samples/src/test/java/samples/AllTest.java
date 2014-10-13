@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,14 +31,11 @@ import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.AbsoluteEvaluation;
+import samples.integer.AllIntervalSeries;
 import solver.Configuration;
-import solver.ISolverProperties;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
-import solver.search.loop.SearchLoops;
-import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.util.Arrays;
 
@@ -54,36 +51,32 @@ public class AllTest {
     String[] args;
     long nbSol;
     IEnvironment environment;
-    ISolverProperties properties;
     PropagationEngineFactory strat;
+    ExplanationFactory efact;
 
 
     public AllTest() {
-//        this(new AllIntervalSeries(), new String[]{"-o", "5"},
-        this(new AbsoluteEvaluation(), null,
+        this(new AllIntervalSeries(), new String[]{"-o", "5"},
                 Environments.TRAIL.make(),
-                new AllSolverProp(
-                        SearchLoops.BINARY,
-                        ExplanationFactory.CBJ, false),
-                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE, 6);
+                PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE,
+                ExplanationFactory.NONE,
+                2);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
-                   ISolverProperties properties,
                    PropagationEngineFactory strat,
+                   ExplanationFactory e,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
-		if(args==null){
-			args=new String[0];
-		}
-//        args = ArrayUtils.append(args, new String[]{"-engine", strat.name()});
+        if (args == null) {
+            args = new String[0];
+        }
         this.environment = env;
-        this.properties = properties;
         this.strat = strat;
         this.nbSol = nbSol;
-        //prob.solver.
+        this.efact = e;
     }
 
     @Test(groups = "1m")
@@ -91,11 +84,10 @@ public class AllTest {
         if (Configuration.PLUG_EXPLANATION) {
             LoggerFactory.getLogger("test").info(this.toString());
             prob.readArgs(args);
-            prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
+            prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
             prob.buildModel();
             prob.configureSearch();
-            //  prob.overrideExplanation();
-            SearchMonitorFactory.log(prob.solver, true, true);
+            efact.plugin(prob.solver, true);
             prob.solver.findAllSolutions();
 
             Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
@@ -104,11 +96,6 @@ public class AllTest {
 
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append(prob.getClass().getSimpleName()).append(" ");
-        st.append(Arrays.toString(args)).append(" ");
-        st.append(environment.getClass().getSimpleName()).append(" ");
-        st.append(properties).append(" ");
-        return st.toString();
+        return prob.getClass().getSimpleName() + " " + Arrays.toString(args) + " " + environment.getClass().getSimpleName() + " ";
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,12 +35,12 @@ import solver.Solver;
 import solver.constraints.Propagator;
 import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
-import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.strategy.decision.Decision;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.objects.queues.CircularQueue;
 
 /**
  * Created by IntelliJ IDEA.
@@ -65,7 +65,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     protected TIntHashSet expanded = new TIntHashSet();
     protected TIntHashSet toexpand = new TIntHashSet();
-    protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
+    protected CircularQueue<Deduction> pending = new CircularQueue<>(16);
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
@@ -76,13 +76,13 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                     "# Enabling explanations:\n" +
                     "PLUG_EXPLANATION=true\n");
         }
-        removedvalues = new TIntObjectHashMap<AntiDomain>();
-        valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
-        propactivs = new TIntObjectHashMap<PropagatorActivation>();
-        database = new TIntObjectHashMap<Explanation>();
-        leftbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
-        rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
-		solver.plugMonitor(this);
+        removedvalues = new TIntObjectHashMap<>();
+        valueremovals = new TIntObjectHashMap<>();
+        propactivs = new TIntObjectHashMap<>();
+        database = new TIntObjectHashMap<>();
+        leftbranchdecisions = new TIntObjectHashMap<>();
+        rightbranchdecisions = new TIntObjectHashMap<>();
+        solver.plugMonitor(this);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             removedvalues.put(vid, toreturn);
             TIntObjectHashMap<ValueRemoval> hm = valueremovals.get(vid);
             if (hm == null) {
-                hm = new TIntObjectHashMap<ValueRemoval>();
+                hm = new TIntObjectHashMap<>();
                 valueremovals.put(vid, hm);
             }
         }
@@ -130,7 +130,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         ValueRemoval vr;
         TIntObjectHashMap<ValueRemoval> hm = valueremovals.get(vid);
         if (hm == null) {
-            hm = new TIntObjectHashMap<ValueRemoval>();
+            hm = new TIntObjectHashMap<>();
             valueremovals.put(vid, hm);
         }
         vr = hm.get(val);
@@ -160,7 +160,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         TIntObjectHashMap<BranchingDecision> mapvar = isLeft ? leftbranchdecisions.get(vid) : rightbranchdecisions.get(vid);
         BranchingDecision vr;
         if (mapvar == null) {
-            mapvar = new TIntObjectHashMap<BranchingDecision>();
+            mapvar = new TIntObjectHashMap<>();
             if (isLeft) {
                 if (!decision.hasNext()) {
                     System.out.println(decision);
@@ -204,6 +204,9 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             expl.reset();
         }
         var.explain(VariableState.DOM, expl);
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+            onActivatePropagator(propagator, expl);
+        }
         store(pa, expl);
     }
 
@@ -395,5 +398,4 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     public Deduction explain(Deduction deduction) {
         return deduction;
     }
-
 }

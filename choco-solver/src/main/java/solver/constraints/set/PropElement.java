@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -35,10 +35,11 @@
 package solver.constraints.set;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
@@ -58,7 +59,7 @@ public class PropElement extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-	private TIntArrayList constructiveDisjunction;
+    private TIntArrayList constructiveDisjunction;
     private IntVar index;
     private SetVar set;
     private SetVar[] array;
@@ -117,29 +118,29 @@ public class PropElement extends Propagator<Variable> {
             ub = index.getUB();
             // filter set (constructive disjunction)
             if (noEmptyKer) {// from ker
-				constructiveDisjunction.clear();
-				SetVar v = array[index.getLB() - offSet];
-                for (int j=v.getKernelFirst(); j!=SetVar.END; j=v.getKernelNext()) {
-					if(!set.kernelContains(j)){
-						constructiveDisjunction.add(j);
-					}
+                constructiveDisjunction.clear();
+                SetVar v = array[index.getLB() - offSet];
+                for (int j = v.getKernelFirst(); j != SetVar.END; j = v.getKernelNext()) {
+                    if (!set.kernelContains(j)) {
+                        constructiveDisjunction.add(j);
+                    }
                 }
-                for (int cd=constructiveDisjunction.size()-1;cd>=0;cd--) {
-					int j = constructiveDisjunction.get(cd);
+                for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
+                    int j = constructiveDisjunction.get(cd);
                     for (int i = index.nextValue(index.getLB()); i <= ub; i = index.nextValue(i)) {
                         if (!array[i - offSet].kernelContains(j)) {
-							constructiveDisjunction.remove(j);
+                            constructiveDisjunction.remove(j);
                             break;
                         }
                     }
                 }
-				for (int cd=constructiveDisjunction.size()-1;cd>=0;cd--) {
-					int j = constructiveDisjunction.get(cd);
+                for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
+                    int j = constructiveDisjunction.get(cd);
                     set.addToKernel(j, aCause);
                 }
             }
             if (!set.isInstantiated()) {// from env
-                for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+                for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
                         if (array[i - offSet].envelopeContains(j)) {
@@ -156,10 +157,10 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
-        for (int j=s2.getKernelFirst(); j!=SetVar.END; j=s2.getKernelNext()) {
+        for (int j = s2.getKernelFirst(); j != SetVar.END; j = s2.getKernelNext()) {
             s1.addToKernel(j, aCause);
         }
-        for (int j=s1.getEnvelopeFirst(); j!=SetVar.END; j=s1.getEnvelopeNext()) {
+        for (int j = s1.getEnvelopeFirst(); j != SetVar.END; j = s1.getEnvelopeNext()) {
             if (!s2.envelopeContains(j)) {
                 s1.removeFromEnvelope(j, aCause);
             }
@@ -167,7 +168,7 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private boolean disjoint(SetVar s1, SetVar s2) {
-        for (int j=s2.getKernelFirst(); j!=SetVar.END; j=s2.getKernelNext()) {
+        for (int j = s2.getKernelFirst(); j != SetVar.END; j = s2.getKernelNext()) {
             if (!s1.envelopeContains(j)) {
                 return true;
             }
@@ -189,5 +190,24 @@ public class PropElement extends Propagator<Variable> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 2;
+            SetVar[] aVars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
+            }
+            set.duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(set);
+
+            index.duplicate(solver, identitymap);
+            IntVar I = (IntVar) identitymap.get(index);
+
+            identitymap.put(this, new PropElement(I, aVars, offSet, S));
+        }
     }
 }

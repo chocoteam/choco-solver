@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,14 +28,14 @@
 package util.objects.setDataStructures;
 
 public enum SetType {
-    SWAP_ARRAY,
+	BIPARTITESET,
     SWAP_HASH,
     LINKED_LIST,
     DOUBLE_LINKED_LIST,
     BITSET,
     BOOL_ARRAY;
 
-    public final static SetType ENVELOPE_BEST = SWAP_ARRAY;
+    public final static SetType ENVELOPE_BEST = BIPARTITESET;
     public final static SetType KERNEL_BEST = LINKED_LIST;
 }
 

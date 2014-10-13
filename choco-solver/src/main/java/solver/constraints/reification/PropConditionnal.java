@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -69,15 +69,15 @@ public abstract class PropConditionnal extends Propagator<Variable> {
     public void propagate(int evtmask) throws ContradictionException {
         ESat condition = checkCondition();
         if (condition == ESat.TRUE) {
+            setPassive();
             for (Constraint cstr : condTrue) {
                 postTemp(cstr);
             }
-            setPassive();
         } else if (condition == ESat.FALSE) {
+            setPassive();
             for (Constraint cstr : condFalse) {
                 postTemp(cstr);
             }
-            setPassive();
         }
     }
 

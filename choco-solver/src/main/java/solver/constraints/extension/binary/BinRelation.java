@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -49,8 +49,5 @@ public abstract class BinRelation {
      */
     public abstract boolean isConsistent(int x, int y);
 
-    protected static boolean between(int v, int low, int upp) {
-        return (low <= v) && (v <= upp);
-    }
-
+    public abstract BinRelation duplicate();
 }

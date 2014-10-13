@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,10 +29,8 @@ package samples;
 import memory.Environments;
 import org.testng.annotations.Factory;
 import samples.integer.AbsoluteEvaluation;
-import solver.ISolverProperties;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
-import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +51,8 @@ public class AllTestFactory {
 
     String[][] arguments = new String[][]{
 
-            {"-s", "1234"},
-            {"-s", "1236"},
+            {"-seed", "1234"},
+            {"-seed", "1236"},
 
 
     };
@@ -65,9 +63,7 @@ public class AllTestFactory {
 
     Environments[] envFact = new Environments[]{
             Environments.TRAIL,
-//            Environments.COPY,
-//            Environments.BUFFER,
-//            Environments.BUFFER_UNSAFE
+            Environments.COPY
     };
 
     ExplanationFactory[] expFact = new ExplanationFactory[]{
@@ -76,27 +72,19 @@ public class AllTestFactory {
             ExplanationFactory.DBT,
     };
 
-    SearchLoops[] slFact = new SearchLoops[]{
-            SearchLoops.BINARY,
-            //SearchLoops.ADVANCED_BINARY,
-            //SearchLoops.BINARY_WITH_RECOMPUTATION
-    };
-
 
     @Factory
     public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+        List<Object> lresult = new ArrayList<>(12);
 
         PropagationEngineFactory[] pol = PropagationEngineFactory.values();
 
         for (int p = 0; p < problems.length; p++)
             for (ExplanationFactory x : expFact)
-                for (SearchLoops sl : slFact) {
-                    ISolverProperties pr = new AllSolverProp(sl, x, false);
-                    for (Environments e : envFact)
-                        for (PropagationEngineFactory st : pol)
-                            lresult.add(new AllTest(problems[p], arguments[p], e.make(), pr, st, nbSol[p]));
-                }
+                for (Environments e : envFact)
+                    for (PropagationEngineFactory st : pol)
+                        lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, x, nbSol[p]));
+
         return lresult.toArray();
     }
 }

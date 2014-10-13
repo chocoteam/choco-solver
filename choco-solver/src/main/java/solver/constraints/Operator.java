@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ public enum Operator {
     }
 
 	public static Operator get(String name) {
-		return operators.get(name.replaceAll("\\s+",""));
+        return operators.get(name);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,6 +34,8 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -91,17 +93,17 @@ public class PropAllDiff extends Propagator<SetVar> {
                     if (ski >= s - 1 && sei <= s + 1) {
                         int nbSameInKer = 0;
                         int diff = -1;
-                        for (int j=vars[idx].getKernelFirst(); j!=SetVar.END; j=vars[idx].getKernelNext())
-                            if (vars[i].kernelContains(j)){
+                        for (int j = vars[idx].getKernelFirst(); j != SetVar.END; j = vars[idx].getKernelNext())
+                            if (vars[i].kernelContains(j)) {
                                 nbSameInKer++;
-							}else{
+                            } else {
                                 diff = j;
-							}
+                            }
                         if (nbSameInKer == s) {
                             if (sei == s) { // check diff
                                 contradiction(vars[i], "");
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
-                                for (int j=vars[i].getEnvelopeFirst(); j!=SetVar.END; j=vars[i].getEnvelopeNext())
+                                for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
                                     vars[i].addToKernel(j, aCause);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
@@ -134,7 +136,7 @@ public class PropAllDiff extends Propagator<SetVar> {
         if (vars[i].getEnvelopeSize() < vars[i2].getKernelSize()) return false;
         if (vars[i2].getEnvelopeSize() < vars[i].getKernelSize()) return false;
         if (vars[i].isInstantiated() && vars[i2].isInstantiated()) {
-            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
+            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                 if (!vars[i2].envelopeContains(j)) {
                     return false;
                 }
@@ -142,5 +144,18 @@ public class PropAllDiff extends Propagator<SetVar> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            SetVar[] aVars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropAllDiff(aVars));
+        }
     }
 }

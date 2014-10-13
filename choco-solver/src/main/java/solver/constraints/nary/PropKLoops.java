@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,8 +27,10 @@
 
 package solver.constraints.nary;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -47,21 +49,21 @@ import util.tools.ArrayUtils;
  */
 public class PropKLoops extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	// number of nodes
-	private int n;
-	// offset (usually 0 but 1 with MiniZinc)
-	private int offSet;
-	// uninstantiated variables that can be loops
-	private ISet possibleLoops;
-	private IStateInt nbMinLoops;
+    // number of nodes
+    private int n;
+    // offset (usually 0 but 1 with MiniZinc)
+    private int offSet;
+    // uninstantiated variables that can be loops
+    private ISet possibleLoops;
+    private IStateInt nbMinLoops;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
 	/**
 	 * Incremental propagator which restricts the number of loops:
@@ -76,92 +78,107 @@ public class PropKLoops extends Propagator<IntVar> {
 		this.n = succs.length;
 		this.offSet = offSet;
 		IEnvironment environment = solver.getEnvironment();
-		this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+		this.possibleLoops = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
 		this.nbMinLoops = environment.makeInt();
 	}
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		possibleLoops.clear();
-		nbMinLoops.set(0);
-		for (int i = 0; i < n; i++) {
-			if (vars[i].contains(i + offSet)) {
-				if (vars[i].isInstantiated()) {
-					nbMinLoops.add(1);
-				} else {
-					possibleLoops.add(i);
-				}
-			}
-		}
-		filter();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        possibleLoops.clear();
+        nbMinLoops.set(0);
+        for (int i = 0; i < n; i++) {
+            if (vars[i].contains(i + offSet)) {
+                if (vars[i].isInstantiated()) {
+                    nbMinLoops.add(1);
+                } else {
+                    possibleLoops.add(i);
+                }
+            }
+        }
+        filter();
+    }
 
-	private void filter() throws ContradictionException {
-		int nbMin = nbMinLoops.get();
-		int nbMax = nbMin + possibleLoops.getSize();
-		vars[n].updateLowerBound(nbMin, aCause);
-		vars[n].updateUpperBound(nbMax, aCause);
-		if (vars[n].isInstantiated() && nbMin != nbMax) {
-			if (vars[n].getValue() == nbMax) {
-				for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
-					vars[i].instantiateTo(i + offSet, aCause);
-					assert vars[i].isInstantiatedTo(i+offSet);
-					nbMinLoops.add(1);
-				}
-				possibleLoops.clear();
-				setPassive();
-			} else if (vars[n].getValue() == nbMin) {
-				for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
-					if(vars[i].removeValue(i + offSet, aCause)){
-						possibleLoops.remove(i);
-					}
-				}
-				if(possibleLoops.isEmpty()) {
-					setPassive();
-				}
-			}
-		}
-	}
+    private void filter() throws ContradictionException {
+        int nbMin = nbMinLoops.get();
+        int nbMax = nbMin + possibleLoops.getSize();
+        vars[n].updateLowerBound(nbMin, aCause);
+        vars[n].updateUpperBound(nbMax, aCause);
+        if (vars[n].isInstantiated() && nbMin != nbMax) {
+            if (vars[n].getValue() == nbMax) {
+                for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
+                    vars[i].instantiateTo(i + offSet, aCause);
+                    assert vars[i].isInstantiatedTo(i + offSet);
+                    nbMinLoops.add(1);
+                }
+                possibleLoops.clear();
+                setPassive();
+            } else if (vars[n].getValue() == nbMin) {
+                for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
+                    if (vars[i].removeValue(i + offSet, aCause)) {
+                        possibleLoops.remove(i);
+                    }
+                }
+                if (possibleLoops.isEmpty()) {
+                    setPassive();
+                }
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idV, int mask) throws ContradictionException {
-		if (idV < n) {
-			if (possibleLoops.contain(idV)) {
-				if (vars[idV].contains(idV + offSet)) {
-					if (vars[idV].isInstantiated()) {
-						nbMinLoops.add(1);
-						possibleLoops.remove(idV);
-					}
-				} else {
-					possibleLoops.remove(idV);
-				}
-			}
-		}
-		filter();
-	}
+    @Override
+    public void propagate(int idV, int mask) throws ContradictionException {
+        if (idV < n) {
+            if (possibleLoops.contain(idV)) {
+                if (vars[idV].contains(idV + offSet)) {
+                    if (vars[idV].isInstantiated()) {
+                        nbMinLoops.add(1);
+                        possibleLoops.remove(idV);
+                    }
+                } else {
+                    possibleLoops.remove(idV);
+                }
+            }
+        }
+        filter();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int nbMax = 0;
-		int nbMin = 0;
-		for (int i = 0; i < n; i++) {
-			if (vars[i].contains(i + offSet)) {
-				nbMax++;
-				if (vars[i].isInstantiated()) {
-					nbMin++;
-				}
-			}
-		}
-		if (vars[n].getLB() > nbMax || vars[n].getUB() < nbMin) {
-			return ESat.FALSE;
-		}
-		if (nbMin == nbMax && vars[n].isInstantiated()) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int nbMax = 0;
+        int nbMin = 0;
+        for (int i = 0; i < n; i++) {
+            if (vars[i].contains(i + offSet)) {
+                nbMax++;
+                if (vars[i].isInstantiated()) {
+                    nbMin++;
+                }
+            }
+        }
+        if (vars[n].getLB() > nbMax || vars[n].getUB() < nbMin) {
+            return ESat.FALSE;
+        }
+        if (nbMin == nbMax && vars[n].isInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropKLoops(aVars, this.offSet, aVar));
+        }
+    }
 }

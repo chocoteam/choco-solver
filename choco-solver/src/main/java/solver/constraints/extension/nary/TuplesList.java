@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -29,6 +29,7 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
+import solver.variables.IntVar;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -43,7 +44,7 @@ import java.util.Comparator;
 public class TuplesList extends LargeRelation {
 
     // each tuple (a int[]) has its own index
-    protected int[][] tuplesIndexes;
+    protected final int[][] tuplesIndexes;
 
     protected static final Comparator<int[]> TCOMP = new Comparator<int[]>() {
         @Override
@@ -57,14 +58,19 @@ public class TuplesList extends LargeRelation {
         }
     };
 
+    // required for duplicate method, should not be called by default
+    TuplesList(int[][] tuplesIndexes) {
+        this.tuplesIndexes = tuplesIndexes;
+        Arrays.sort(tuplesIndexes, TCOMP);
+    }
 
-    public TuplesList(Tuples tuples, int[] offsets, int[] domSizes) {
+    public TuplesList(Tuples tuples, IntVar[] vars) {
         int nb = tuples.nbTuples();
         int[][] _tuplesIndexes = new int[nb][];
         int k = 0;
         for (int i = 0; i < nb; i++) {
             int[] tuple = tuples.get(i);
-            if (valid(tuple, offsets, domSizes)) {
+            if (valid(tuple, vars)) {
                 _tuplesIndexes[k++] = tuple;
             }
         }
@@ -90,4 +96,8 @@ public class TuplesList extends LargeRelation {
         return Arrays.binarySearch(tuplesIndexes, tuple, TCOMP) >= 0;
     }
 
+    @Override
+    public LargeRelation duplicate() {
+        return new TuplesList(this.tuplesIndexes.clone());
+    }
 }

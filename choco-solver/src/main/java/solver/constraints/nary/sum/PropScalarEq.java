@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -34,8 +36,8 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -203,18 +205,12 @@ public class PropScalarEq extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        filter(true, 2);
-//        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
-    public final ESat isEntailed() {
+    public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
         for (; i < pos; i++) { // first the positive coefficients
             sumLB += vars[i].getLB() * c[i];
@@ -253,7 +249,7 @@ public class PropScalarEq extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(this);
-        if (d!=null && d.getmType() == Deduction.Type.ValRem) {
+        if (d != null && d.getmType() == Deduction.Type.ValRem) {
             ValueRemoval vr = (ValueRemoval) d;
             IntVar var = (IntVar) vr.getVar();
             int val = vr.getVal();
@@ -301,6 +297,19 @@ public class PropScalarEq extends Propagator<IntVar> {
 
         } else {
             super.explain(d, e);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropScalarEq(aVars, this.c, this.pos, this.b));
         }
     }
 

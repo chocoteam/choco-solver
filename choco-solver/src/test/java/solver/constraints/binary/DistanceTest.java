@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.selectors.values.IntDomainRandom;
 import solver.variables.IntVar;
@@ -158,9 +157,9 @@ public class DistanceTest {
         IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
         solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
         solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{Z, X, Y, Z}));
-        SearchMonitorFactory.log(solver, true, true);
+//        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
-        System.out.printf("end\n");
+//        System.out.printf("end\n");
     }
 
 }

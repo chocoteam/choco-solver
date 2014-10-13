@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -37,7 +37,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -54,7 +53,7 @@ public class ClauseTest {
 
     Logger log = LoggerFactory.getLogger("test");
 
-    @Test(groups = "30s")
+    @Test(groups = "1m")
     public void test1() {
         int nSol = 1;
         for (int n = 1; n < 20; n++) {
@@ -117,7 +116,7 @@ public class ClauseTest {
 
         BoolVar[] bs = new BoolVar[]{b};
         s.set(IntStrategyFactory.lexico_LB(bs));
-        SMF.log(s, true, true);
+//        SMF.log(s, true, true);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);

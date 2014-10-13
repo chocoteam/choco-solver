@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,7 +37,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -230,11 +229,11 @@ public class ReifiedTest {
      * C. Bessiere, G. Katsirelos, N. Narodytska, C.G. Quimper, T. Walsh.
      * Proceedings IJCAI'09, Pasadena CA, pages 419-424.
      */
-    @Test(groups = {"10s"})
+    @Test(groups = {"1m"})
     public void testAllDifferentDecomp() {
 
         for (int i = 1; i < 12; i++) {
-            System.out.printf("i : %d\n", i);
+//            System.out.printf("i : %d\n", i);
             Random r = new Random(i);
             for (double d = 1.0; d <= 1.0; d += 0.125) {
 
@@ -413,7 +412,7 @@ public class ReifiedTest {
         int max_abs = 1;
         s.post(IntConstraintFactory.sum(ab, VariableFactory.fixed(ab.length - max_abs, s)));
 
-        SearchMonitorFactory.log(s, true, false);
+//        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
 
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
@@ -450,7 +449,7 @@ public class ReifiedTest {
         int max_abs = 1;
         s.post(IntConstraintFactory.sum(ab, VariableFactory.fixed(ab.length - max_abs, s)));
 
-        SearchMonitorFactory.log(s, true, false);
+//        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
 
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 5);
@@ -474,10 +473,10 @@ public class ReifiedTest {
             int index = 0;
             do {
                 index++;
-                System.out.println(index + " : a=" + a.getValue() + ", b=" + b.getValue() + ",c= " + c.getValue());
+//                System.out.println(index + " : a=" + a.getValue() + ", b=" + b.getValue() + ",c= " + c.getValue());
             }
             while (solver.nextSolution());
-            System.out.println("nombre total de solutions = " + index);
+//            System.out.println("nombre total de solutions = " + index);
         }
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }

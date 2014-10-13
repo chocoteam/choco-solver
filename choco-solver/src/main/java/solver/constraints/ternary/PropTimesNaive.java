@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,13 @@
 
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -56,7 +58,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
 
     @Override
     public final int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -67,11 +69,9 @@ public class PropTimesNaive extends Propagator<IntVar> {
             hasChanged |= div(v1, v2.getLB(), v2.getUB(), v0.getLB(), v0.getUB());
             hasChanged |= mul(v2, v0.getLB(), v0.getUB(), v1.getLB(), v1.getUB());
         }
-    }
-
-    @Override
-    public final void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
+        if (v2.isInstantiatedTo(0) && (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(1))) {
+            setPassive();
+        }
     }
 
     @Override
@@ -82,19 +82,33 @@ public class PropTimesNaive extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+            this.vars[2].duplicate(solver, identitymap);
+            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
+
+            identitymap.put(this, new PropTimesNaive(X, Y, Z));
+        }
+    }
+
     private boolean div(IntVar var, int a, int b, int c, int d) throws ContradictionException {
         int min = 0, max = 0;
 
         if (a <= 0 && b >= 0 && c <= 0 && d >= 0) { // case 1
             min = MIN;
             max = MAX;
-            return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         } else if (c == 0 && d == 0 && (a > 0 || b < 0)) // case 2
             this.contradiction(var, "");
         else if (c < 0 && d > 0 && (a > 0 || b < 0)) { // case 3
             max = Math.max(Math.abs(a), Math.abs(b));
             min = -max;
-            return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         } else if (c == 0 && d != 0 && (a > 0 || b < 0)) // case 4 a
             return div(var, a, b, 1, d);
         else if (c != 0 && d == 0 && (a > 0 || b < 0)) // case 4 b
@@ -107,7 +121,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             min = (int) Math.round(Math.ceil(low));
             max = (int) Math.round(Math.floor(high));
             if (min > max) this.contradiction(var, "");
-            return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         }
         return false;
     }
@@ -115,7 +129,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
     private boolean mul(IntVar var, int a, int b, int c, int d) throws ContradictionException {
         int min = Math.min(Math.min(multiply(a, c), multiply(a, d)), Math.min(multiply(b, c), multiply(b, d)));
         int max = Math.max(Math.max(multiply(a, c), multiply(a, d)), Math.max(multiply(b, c), multiply(b, d)));
-        return var.updateLowerBound(min, this) & var.updateUpperBound(max, this);
+        return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
     }
 
     public final static int multiply(int a, int b) {

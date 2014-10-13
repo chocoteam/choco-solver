@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -53,7 +53,7 @@ import java.util.Random;
  */
 public class AmongTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -68,7 +68,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1m")
     public void testRandomProblems2() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -78,7 +78,7 @@ public class AmongTest {
             nbsol = randomOcc2(realNbSol, bigseed, true, 3, false);
             //b solutions of occurrences + bound
             nbsol2 = randomOcc2(realNbSol, bigseed, false, 3, false);
-//            Assert.assertEquals(nbsol, nbsol2);
+            Assert.assertEquals(nbsol, nbsol2);
             Assert.assertEquals(nbsol2, realNbSol);
         }
     }

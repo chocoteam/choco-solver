@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -74,13 +74,7 @@ public class NQueenTest {
     }
 
     private String parameters() {
-        StringBuilder st = new StringBuilder();
-        st.append("(s:").append(size);
-        st.append(" pe:").append(peType);
-        st.append(" pi:").append(piType);
-        st.append(" sl:").append(slType);
-        st.append(")");
-        return st.toString();
+        return "(s:" + size + " pe:" + peType + " pi:" + piType + " sl:" + slType + ")";
     }
 
     private void assertIt(Solver s) {
@@ -121,7 +115,7 @@ public class NQueenTest {
         assertIt(s);
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void testGlobal() throws ContradictionException {
         log.info("modelGlobal {}", parameters());
         Solver s = modeler(new NQueenGlobal(), size);
@@ -129,7 +123,7 @@ public class NQueenTest {
         assertIt(s);
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void testDualBinary() {
         log.info("modelDualBinary {}", parameters());
         Solver s = modeler(new NQueenDualBinary(), size);
@@ -146,7 +140,7 @@ public class NQueenTest {
         assertIt(s);
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll1() {
         Solver sol;
         for (int j = 4; j < 23; j++) {
@@ -165,7 +159,7 @@ public class NQueenTest {
         }
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll2() {
         Solver sol;
         for (int j = 4; j < 23; j++) {
@@ -202,13 +196,13 @@ public class NQueenTest {
         ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
         solver.propagate();
         LoggerFactory.getLogger("test").error("*******************************************");
-        System.out.printf("%s\n", solver.toString());
+//        System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {
             solver.propagate();
             Assert.fail();
         } catch (ContradictionException ex) {
-            System.out.printf("%s\n", ex.getMessage());
+//            System.out.printf("%s\n", ex.getMessage());
         }
     }
 }

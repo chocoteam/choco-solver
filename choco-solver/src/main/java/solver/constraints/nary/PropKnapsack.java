@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,11 +34,14 @@
 
 package solver.constraints.nary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -101,7 +104,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -145,7 +148,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     @Override
@@ -165,5 +168,22 @@ public class PropKnapsack extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 2;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar C = (IntVar) identitymap.get(this.vars[size]);
+            this.vars[size + 1].duplicate(solver, identitymap);
+            IntVar E = (IntVar) identitymap.get(this.vars[size + 1]);
+            identitymap.put(this, new PropKnapsack(aVars, C, E, this.weigth, this.energy));
+        }
     }
 }

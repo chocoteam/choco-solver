@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -73,12 +73,12 @@ public class BoundGlobalCardinlityTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void testRandom() {
         Random random = new Random();
 //        int seed= 108;{
         for (int seed = 0; seed < 200; seed++) {
-            System.out.println(seed);
+//            System.out.println(seed);
             random.setSeed(seed);
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);
@@ -111,11 +111,11 @@ public class BoundGlobalCardinlityTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void testRandom2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
-            System.out.println(seed);
+//            System.out.println(seed);
             random.setSeed(seed);
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);

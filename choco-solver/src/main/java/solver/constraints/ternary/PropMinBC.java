@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,11 +27,13 @@
 
 package solver.constraints.ternary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 
 /**
@@ -55,7 +57,7 @@ public class PropMinBC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -143,7 +145,7 @@ public class PropMinBC extends Propagator<IntVar> {
                     vars[1].instantiateTo(min, aCause);
                     setPassive();
                 } else {
-                    if(vars[1].updateLowerBound(min, aCause)|vars[2].updateLowerBound(min, aCause)){
+                    if (vars[1].updateLowerBound(min, aCause) | vars[2].updateLowerBound(min, aCause)) {
                         filter(); // to ensure idempotency for "free"
                     }
                 }
@@ -187,5 +189,19 @@ public class PropMinBC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return MIN.toString() + ".MIN(" + v1.toString() + "," + v2.toString() + ")";
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+            this.vars[2].duplicate(solver, identitymap);
+            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
+
+            identitymap.put(this, new PropMinBC(X, Y, Z));
+        }
     }
 }

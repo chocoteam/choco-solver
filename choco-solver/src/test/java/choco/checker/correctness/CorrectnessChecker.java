@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -52,7 +52,7 @@ public class CorrectnessChecker {
 
     public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
-        System.out.printf("Running %s\n", modeler.name());
+//        System.out.printf("Running %s\n", modeler.name());
         THashMap<int[], IntVar> map = new THashMap<int[], IntVar>();
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};
@@ -84,7 +84,7 @@ public class CorrectnessChecker {
                             try {
                                 if (test.findSolution()) {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                            new Object[]{ds, ide, h, rvars[d], val, loop, seed});
+                                            ds, ide, h, rvars[d], val, loop, seed);
                                     LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
                                     ref.getEnvironment().worldPop();
                                     LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
@@ -100,7 +100,7 @@ public class CorrectnessChecker {
                             } catch (Exception e) {
                                 LoggerFactory.getLogger("test").error(e.getMessage());
                                 LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                        new Object[]{ds, ide, h, rvars[d], val, loop, seed});
+                                        ds, ide, h, rvars[d], val, loop, seed);
                                 LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
                                 File f = new File("SOLVER_ERROR.ser");
                                 try {
@@ -116,7 +116,7 @@ public class CorrectnessChecker {
                 }
             }
         }
-        System.out.printf("loop: %d\n", loop);
+//        System.out.printf("loop: %d\n", loop);
     }
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {

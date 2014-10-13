@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ import java.util.Random;
  */
 public class BoolNotViewTest {
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test1() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -73,7 +73,7 @@ public class BoolNotViewTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void testIt() {
         Solver ref = new Solver();
         BoolVar o = VariableFactory.bool("b", ref);

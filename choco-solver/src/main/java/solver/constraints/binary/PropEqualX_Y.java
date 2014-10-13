@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,8 @@
 
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -34,9 +36,9 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
@@ -75,9 +77,9 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (bothEnumerated)
-            return EventType.INT_ALL_MASK();
+            return IntEventType.all();
         else
-            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+            return IntEventType.boundAndInst();
     }
 
     private void updateBounds() throws ContradictionException {
@@ -123,7 +125,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
         } else if (bothEnumerated) {
             indexToFilter = 1 - varIdx;
             idms[varIdx].freeze();
-            idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+            idms[varIdx].forEachRemVal(rem_proc);
             idms[varIdx].unfreeze();
         }
     }
@@ -186,6 +188,18 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             }
         } else {
             super.explain(d, e);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropEqualX_Y(X, Y));
         }
     }
 }

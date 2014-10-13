@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -40,7 +40,7 @@ import java.io.Serializable;
 public interface IntProcedure extends Serializable {
 
     /**
-     * Action to execute in a <code>Delta</code> object, within the <code>forEach</code> method.
+     * Action to execute in a <code>Delta</code> object, within the <code>forEachRemVal</code> method.
      *
      * @param i index
      * @throws solver.exception.ContradictionException

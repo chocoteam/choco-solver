@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -38,6 +38,8 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 
 /**
  * Container representing a task:
@@ -74,7 +76,7 @@ public class Task {
         if (s.hasEnumeratedDomain() || d.hasEnumeratedDomain() || e.hasEnumeratedDomain()) {
             update = new IVariableMonitor() {
                 @Override
-                public void onUpdate(Variable var, EventType evt) throws ContradictionException {
+                public void onUpdate(Variable var, IEventType evt) throws ContradictionException {
                     boolean fixpoint = true;
                     while (fixpoint) {
                         // start
@@ -98,7 +100,7 @@ public class Task {
         } else {
             update = new IVariableMonitor() {
                 @Override
-                public void onUpdate(Variable var, EventType evt) throws ContradictionException {
+                public void onUpdate(Variable var, IEventType evt) throws ContradictionException {
                     // start
                     start.updateLowerBound(end.getLB() - duration.getUB(), this);
                     start.updateUpperBound(end.getUB() - duration.getLB(), this);
@@ -132,7 +134,7 @@ public class Task {
      * @throws ContradictionException
      */
     public void ensureBoundConsistency() throws ContradictionException {
-        update.onUpdate(start, EventType.REMOVE);
+        update.onUpdate(start, IntEventType.REMOVE);
     }
 
     //***********************************************************************************

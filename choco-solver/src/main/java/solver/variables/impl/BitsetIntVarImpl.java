@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 
 package solver.variables.impl;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateBitSet;
 import memory.IStateInt;
@@ -38,16 +39,19 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.EnumDeltaMonitor;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 import util.tools.StringUtils;
+
+import java.util.BitSet;
 
 /**
  * <br/>
@@ -94,14 +98,17 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         LENGTH = capacity;
     }
 
-    public BitsetIntVarImpl(String name, int offset, IStateBitSet values, Solver solver) {
+    public BitsetIntVarImpl(String name, int offset, BitSet values, Solver solver) {
         super(name, solver);
         IEnvironment env = solver.getEnvironment();
         OFFSET = offset;
         int cardinality = values.cardinality();
-        this.VALUES = values.copy();
+        this.VALUES = env.makeBitSet(cardinality);
+        for (int i = 0; i > -1; i = values.nextSetBit(i+1)) {
+            this.VALUES.set(i);
+        }
         this.LB = env.makeInt(0);
-        this.UB = env.makeInt(values.prevSetBit(values.size()));
+        this.UB = env.makeInt(VALUES.prevSetBit(VALUES.size()));
         this.SIZE = env.makeInt(cardinality);
         LENGTH = this.UB.get();
     }
@@ -138,25 +145,24 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws solver.exception.ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         assert cause != null;
         int aValue = value - OFFSET;
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
             if (SIZE.get() == 1) {
-                if (Configuration.PLUG_EXPLANATION){
+                if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().removeValue(this, value, cause);
                 }
-//            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
-                this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+//            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
+                this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
             }
-            EventType e = EventType.REMOVE;
+			IntEventType e = IntEventType.REMOVE;
             this.VALUES.clear(aValue);
             this.SIZE.add(-1);
             if (reactOnRemoval) {
@@ -165,17 +171,17 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
             if (value == getLB()) {
                 LB.set(VALUES.nextSetBit(aValue));
-                e = EventType.INCLOW;
+                e = IntEventType.INCLOW;
             } else if (value == getUB()) {
                 UB.set(VALUES.prevSetBit(aValue));
-                e = EventType.DECUPP;
+                e = IntEventType.DECUPP;
             }
             assert !VALUES.isEmpty();
             if (this.isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             this.notifyPropagators(e, cause);
-            if (Configuration.PLUG_EXPLANATION){
+            if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().removeValue(this, value, cause);
             }
         }
@@ -215,20 +221,19 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param value instantiation value (int)
      * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws solver.exception.ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (this.isInstantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
-                if (Configuration.PLUG_EXPLANATION){
+                if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -257,18 +262,18 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_EMPTY);
             }
-            if (Configuration.PLUG_EXPLANATION){
+            if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().instantiateTo(this, value, cause, oldLB, oldUB);
             }
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         } else {
-            if (Configuration.PLUG_EXPLANATION){
+            if (Configuration.PLUG_EXPLANATION) {
                 solver.getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             }
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -288,22 +293,21 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param value new lower bound (included)
      * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws solver.exception.ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
             if (oub < value) {
-                if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateLowerBound(this, old, oub+1, cause);
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
                 }
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-                EventType e = EventType.INCLOW;
+				IntEventType e = IntEventType.INCLOW;
 
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
@@ -314,13 +318,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 VALUES.clear(old - OFFSET, aValue);
                 LB.set(VALUES.nextSetBit(aValue));
-				assert SIZE.get()>VALUES.cardinality();
+                assert SIZE.get() > VALUES.cardinality();
                 SIZE.set(VALUES.cardinality());
                 if (isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (Configuration.PLUG_EXPLANATION){
+                if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                 }
                 return true;
@@ -345,22 +349,21 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param value new upper bound (included)
      * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
-     * @throws solver.exception.ContradictionException
-     *          if the domain become empty due to this action
+     * @throws solver.exception.ContradictionException if the domain become empty due to this action
      */
-	@Override
+    @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
             int olb = this.getLB();
             if (olb > value) {
-                if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateUpperBound(this, old, olb-1, cause);
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
                 }
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-                EventType e = EventType.DECUPP;
+				IntEventType e = IntEventType.DECUPP;
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
@@ -370,13 +373,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 VALUES.clear(aValue + 1, old - OFFSET + 1);
                 UB.set(VALUES.prevSetBit(aValue));
-				assert SIZE.get()>VALUES.cardinality();
+                assert SIZE.get() > VALUES.cardinality();
                 SIZE.set(VALUES.cardinality());
                 if (isInstantiated()) {
-                    e = EventType.INSTANTIATE;
+                    e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (Configuration.PLUG_EXPLANATION){
+                if (Configuration.PLUG_EXPLANATION) {
                     solver.getExplainer().updateUpperBound(this, old, value, cause);
                 }
                 return true;
@@ -391,7 +394,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         removeInterval(this.getLB(), this.getUB(), cause);
     }
 
-	@Override
+    @Override
     public boolean isInstantiated() {
         return SIZE.get() == 1;
     }
@@ -401,12 +404,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return isInstantiated() && contains(value);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
-	@Override
+    @Override
     public boolean contains(int aValue) {
         aValue -= OFFSET;
         return aValue >= 0 && this.VALUES.get(aValue);
@@ -417,7 +420,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      *
      * @return the current value (or lower bound if not yet instantiated).
      */
-	@Override
+    @Override
     public int getValue() {
         assert isInstantiated() : name + " not instantiated";
         return getLB();
@@ -428,7 +431,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      *
      * @return the lower bound
      */
-	@Override
+    @Override
     public int getLB() {
         return this.LB.get() + OFFSET;
     }
@@ -438,17 +441,17 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      *
      * @return the upper bound
      */
-	@Override
+    @Override
     public int getUB() {
         return this.UB.get() + OFFSET;
     }
 
-	@Override
+    @Override
     public int getDomainSize() {
         return SIZE.get();
     }
 
-	@Override
+    @Override
     public int nextValue(int aValue) {
         aValue -= OFFSET;
         int lb = LB.get();
@@ -478,7 +481,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return delta;
     }
 
-	@Override
+    @Override
     public String toString() {
         StringBuilder s = new StringBuilder(20);
         s.append(name).append(" = ");
@@ -512,14 +515,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         }
     }
 
-	@Override
+    @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
     }
 
-	@Override
-    public void notifyMonitors(EventType event) throws ContradictionException {
+    @Override
+    public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
@@ -533,7 +536,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return new AntiDomBitset(this);
     }
 
-	@Override
+    @Override
     public void explain(VariableState what, Explanation to) {
         AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
@@ -556,9 +559,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
@@ -569,7 +572,15 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copy(), this.getSolver());
+        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), this.getSolver());
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            BitsetIntVarImpl clone = new BitsetIntVarImpl(this.name, this.OFFSET, this.VALUES.copyToBitSet(), solver);
+            identitymap.put(this, clone);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

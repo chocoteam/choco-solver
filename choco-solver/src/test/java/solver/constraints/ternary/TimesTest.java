@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,10 +27,17 @@
 
 package solver.constraints.ternary;
 
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.Propagator;
+import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import solver.variables.VF;
+import solver.variables.events.PropagatorEventType;
 
 /**
  * <br/>
@@ -50,4 +57,25 @@ public class TimesTest extends AbstractTernaryTest {
         return IntConstraintFactory.times(vars[0], vars[1], vars[2]);
     }
 
+	@Test(groups = "1s")
+	public void testJL() {
+	    Solver s = new Solver();
+	    IntVar a = VF.enumerated("a", 0, 3, s);
+	    IntVar b = VF.enumerated("b", -3, 3, s);
+
+	    IntVar z = VF.enumerated("z", 3, 4, s);
+	    s.post(ICF.arithm(z, "=", 3));
+	    Constraint c = ICF.times(a, b, z);
+	    s.post(c);
+		try {
+			s.propagate();
+			Assert.assertFalse(a.contains(0));
+			for (Propagator p : c.getPropagators()) {
+				p.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+			}
+			Assert.assertFalse(a.contains(0));
+		}catch (ContradictionException e){
+			Assert.assertFalse(true);
+		}
+	}
 }

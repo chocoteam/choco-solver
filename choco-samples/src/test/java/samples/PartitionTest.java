@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -64,7 +64,7 @@ public class PartitionTest {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void test16to32() {
         int[] size = {32, 36, 40, 44, 48, 52, 56, 60, 64};
         int[] sols = {1, 1, 1, 1, 1, 1, 1, 1, 1};

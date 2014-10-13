@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -66,7 +66,7 @@ public enum Configuration {
         }
         {
             String values = properties.getProperty("FINE_EVENT_QUEUES");
-            values = values.substring(1,values.length()-1);
+            values = values.substring(1, values.length() - 1);
             String[] values_ = values.split(",");
             short[] shorts = new short[values_.length];
             for (int i = 0; i < values_.length; i++) {
@@ -76,7 +76,7 @@ public enum Configuration {
         }
         {
             String values = properties.getProperty("COARSE_EVENT_QUEUES");
-            values = values.substring(1,values.length()-1);
+            values = values.substring(1, values.length() - 1);
             String[] values_ = values.split(",");
             short[] shorts = new short[values_.length];
             for (int i = 0; i < values_.length; i++) {
@@ -108,8 +108,8 @@ public enum Configuration {
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = Boolean.parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
 
-	// Set to true to allow the creation of views in the VariableFactory.
-	// Creates new variables with channeling constraints otherwise.
+    // Set to true to allow the creation of views in the VariableFactory.
+    // Creates new variables with channeling constraints otherwise.
     public static final boolean ENABLE_VIEWS = Boolean.parseBoolean(properties.getProperty("ENABLE_VIEWS"));
 
     public enum MOVP {
@@ -119,14 +119,6 @@ public enum Configuration {
         view, // detect each occurrence, replace additional occurrences with an EQ view
         duplicate // detect each occurrence, duplicate the variable and post and EQ constraint
     }
-
-    // Define what answer should be given when a variable occurs more than once in a propagator
-    // disabled : throws an error when a variable occurs more than once
-    // silent : do not do anything
-    // warn : print a warning message when a variable occurs more than once
-    // view: detect each occurrence, replace additional occurrences with an EQ view
-    // duplicate: detect each occurrence, duplicate the variable and post and EQ constraint
-    public static final MOVP MUL_OCC_VAR_PROP = MOVP.valueOf(properties.getProperty("MUL_OCC_VAR_PROP"));
 
     public enum Idem {
         disabled, // does not anything
@@ -153,4 +145,17 @@ public enum Configuration {
     public static final short[] FINE_EVENT_QUEUES;
     // 2. For coarse events
     public static final short[] COARSE_EVENT_QUEUES;
+
+    // Define the maximum domain size to force integer variable to be enumerated
+    // instead of bounded while calling VariableFactory.integer
+    public static final int MAX_DOM_SIZE_FOR_ENUM = Integer.parseInt(properties.getProperty("MAX_DOM_SIZE_FOR_ENUM"));
+
+    // Set to true to allow intension constraint to extension constraint substitution
+    public static final boolean ENABLE_TABLE_SUBS = Boolean.parseBoolean(properties.getProperty("ENABLE_TABLE_SUBS"));
+
+    // Define the maximum domain size to enable intension constraint to extension constraint substitution
+    // Only checked when ENABLE_TABLE_SUBS is set to true
+    public static final int MAX_TUPLES_FOR_TABLE_SUBS = Integer.parseInt(properties.getProperty("MAX_TUPLES_FOR_TABLE_SUBS"));
+
+
 }

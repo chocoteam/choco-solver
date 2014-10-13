@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -56,7 +56,7 @@ public class MagicSquareTest {
         return pb.getSolver();
     }
 
-    @Test(groups = ">30m")
+    @Test(groups = "verylong")
     public void testAll() {
         Solver sol;
         for (int j = 3; j < 7; j++) {
@@ -101,7 +101,7 @@ public class MagicSquareTest {
             solver.propagate();
             LoggerFactory.getLogger("test").error("************************");
             Assert.fail("should fail");
-        } catch (ContradictionException e) {
+        } catch (ContradictionException ignored) {
         }
         LoggerFactory.getLogger("test").error("************************");
     }

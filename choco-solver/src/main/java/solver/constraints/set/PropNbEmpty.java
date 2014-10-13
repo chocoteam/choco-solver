@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,15 +27,19 @@
 
 package solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
+import solver.variables.events.SetEventType;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -76,8 +80,8 @@ public class PropNbEmpty extends Propagator<Variable> {
         }
         this.nbEmpty = (IntVar) vars[n];
 		IEnvironment environment = solver.getEnvironment();
-        this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
-        this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+        this.canBeEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
+        this.isEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
         this.nbAlreadyEmpty = environment.makeInt();
         this.nbMaybeEmpty = environment.makeInt();
     }
@@ -101,15 +105,15 @@ public class PropNbEmpty extends Propagator<Variable> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx < n) {
-            return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
+            return SetEventType.all();
         } else {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.boundAndInst();
         }
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
             int nbMin = 0;
             int nbMax = 0;
             canBeEmpty.clear();
@@ -203,5 +207,21 @@ public class PropNbEmpty extends Propagator<Variable> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = sets.length;
+            SetVar[] svars = new SetVar[size];
+            for (int i = 0; i < size; i++) {
+                sets[i].duplicate(solver, identitymap);
+                svars[i] = (SetVar) identitymap.get(sets[i]);
+            }
+            nbEmpty.duplicate(solver, identitymap);
+            IntVar C = (IntVar) identitymap.get(nbEmpty);
+
+            identitymap.put(this, new PropNbEmpty(svars, C));
+        }
     }
 }

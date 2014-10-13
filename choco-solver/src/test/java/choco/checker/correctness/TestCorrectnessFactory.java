@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ public class TestCorrectnessFactory {
         List<Object> lresult = new ArrayList<Object>(12);
 
         for (SearchLoops sl : SearchLoops.values()) {
-            System.out.println("CORRECTNESS : " + sl.name());
+//            System.out.println("CORRECTNESS : " + sl.name());
             lresult.add(new TestCorrectness(sl));
         }
         return lresult.toArray();

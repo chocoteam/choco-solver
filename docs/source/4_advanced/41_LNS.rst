@@ -1,4 +1,0 @@
-Overview of Choco |version|
-===========================
-
-

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -128,7 +128,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9280);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void ccostregular2() {
         Solver solver = new Solver();
 
@@ -177,7 +177,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void ccostregular2WithCostAutomaton() {
         Solver solver = new Solver();
 
@@ -229,7 +229,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrect() {
         Solver solver = new Solver();
 
@@ -271,7 +271,7 @@ public class CostRegularTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrectWithCostAutomaton() {
         Solver solver = new Solver();
 
@@ -314,7 +314,7 @@ public class CostRegularTest {
 //        assertEquals(124927, s.getNodeCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrect2() {
         Solver solver = new Solver();
 
@@ -351,7 +351,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void isCorrect2WithCostAutomaton() {
 
         Solver solver = new Solver();
@@ -391,18 +391,17 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void compareVersionSpeedNew() {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
 
-        int[][] c1 = new int[n][3];
+//        int[][] c1 = new int[n][3];
         int[][][] c2 = new int[n][3][auto.getNbStates()];
         for (int i = 0; i < n; i++) {
             for (int k = 0; k < auto.getNbStates(); k++) {
-                c1[i][0] = 1;
-                c1[i][1] = 2;
-
+//                c1[i][0] = 1;
+//                c1[i][1] = 2;
                 c2[i][0][k] = 1;
                 c2[i][1][k] = 2;
             }

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -29,6 +29,8 @@ package solver.exception;
 
 import solver.Cause;
 import solver.ICause;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.Variable;
 
 /**
@@ -86,5 +88,15 @@ public final class ContradictionException extends Exception {
      */
     public synchronized Throwable fillInStackTrace() {
         return this;
+    }
+
+    public Explanation explain() {
+        Explanation expl = new Explanation();
+        if (v != null) {
+            v.explain(VariableState.DOM, expl);
+        } else {
+            c.explain(null, expl);
+        }
+        return expl;
     }
 }

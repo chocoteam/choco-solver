@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -84,8 +84,8 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
     public ExplainingCut(Solver aSolver, int level, long seed) {
         super(aSolver);
-        if (!(aSolver.getExplainer() instanceof LazyExplanationEngine)) {
-            ExplanationFactory.LAZY.plugin(aSolver, true);
+        if (!(aSolver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
+            aSolver.set(new LazyExplanationEngineFromRestart(aSolver));
         }
         this.mExplanationEngine = aSolver.getExplainer();
         this.level = level;
@@ -294,7 +294,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
                     related2cut.set(idx);
                 }
 
-                // 4. need to replace the duplicate decision with the correct one
+                // 4. need to replace the duplicated decision with the correct one
                 for (int i = 0; i < path.size(); i++) {
                     Decision dec = path.get(i);
                     boolean forceNext = !dec.hasNext();

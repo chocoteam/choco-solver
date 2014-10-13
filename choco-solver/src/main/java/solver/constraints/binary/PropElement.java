@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,17 +27,19 @@
 
 package solver.constraints.binary;
 
+import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
 import memory.structure.Operation;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.iterators.DisposableValueIterator;
 import util.tools.ArrayUtils;
@@ -103,7 +105,7 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
+        if (IntEventType.isInstantiate(mask)) {
             if (varIdx == 1) {  // INDEX (should be only that)
                 this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], aCause);
                 this.setPassive();
@@ -167,6 +169,18 @@ public class PropElement extends Propagator<IntVar> {
         reason.explain(VariableState.DOM, e);
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.vars[0].duplicate(solver, identitymap);
+            IntVar X = (IntVar) identitymap.get(this.vars[0]);
+            this.vars[1].duplicate(solver, identitymap);
+            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
+
+            identitymap.put(this, new PropElement(X, this.lval, Y, this.cste, this.s));
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +222,7 @@ public class PropElement extends Propagator<IntVar> {
                     }
                 }
                 if (s == Sort.detect) {
-					IEnvironment environment = solver.getEnvironment();
+                    IEnvironment environment = solver.getEnvironment();
                     if (isDsc) {
                         s = Sort.desc;
                         environment.save(new Operation() {

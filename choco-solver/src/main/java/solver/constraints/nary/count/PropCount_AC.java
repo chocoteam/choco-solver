@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,12 +26,14 @@
  */
 package solver.constraints.nary.count;
 
-import memory.IEnvironment;
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -74,9 +76,8 @@ public class PropCount_AC extends Propagator<IntVar> {
         super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, true);
         this.value = restrictedValue;
         this.n = decvars.length;
-        IEnvironment environment = solver.getEnvironment();
-        this.possibles = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
-        this.mandatories = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
+        this.possibles = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
+        this.mandatories = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class PropCount_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {// initialization
+        if (PropagatorEventType.isFullPropagation(evtmask)) {// initialization
             mandatories.clear();
             possibles.clear();
             for (int i = 0; i < n; i++) {
@@ -169,9 +170,9 @@ public class PropCount_AC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx >= n) {// cardinality variables
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.boundAndInst();
         }
-        return EventType.INT_ALL_MASK();
+        return IntEventType.all();
     }
 
     @Override
@@ -197,5 +198,20 @@ public class PropCount_AC extends Propagator<IntVar> {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropCount_AC(aVars, this.value, aVar));
+        }
     }
 }

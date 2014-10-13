@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,13 +28,13 @@ package solver.constraints.nary.nogood;
 
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.variables.IntVar;
+import util.objects.queues.CircularQueue;
 
 import java.util.Arrays;
 

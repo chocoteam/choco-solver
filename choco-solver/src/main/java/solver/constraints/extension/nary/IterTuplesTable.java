@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -29,46 +29,60 @@ package solver.constraints.extension.nary;
 
 import solver.constraints.extension.Tuples;
 import solver.exception.SolverException;
+import solver.variables.IntVar;
 
 /**
  *
  **/
-class IterTuplesTable extends TuplesList{
+class IterTuplesTable extends TuplesList {
+
+    /**
+     * number of variables
+     */
+    protected final int nbVar;
+    /**
+     * lower bound of each variable
+     */
+    protected final int[] lowerbounds;
+
+    /**
+     * upper bound of each variable
+     */
+    protected final int[] ranges;
 
     /**
      * table[i][j] gives the table of supports as an int[] for value j of variable i
      */
     protected int[][][] table;
 
-    /**
-     * number of variables
-     */
-    protected int nbVar = 0;
+    public IterTuplesTable(Tuples tuples, IntVar[] vars) {
+        super(tuples, vars);
+        nbVar = vars.length;
+        lowerbounds = new int[nbVar];
+        ranges = new int[nbVar];
+        for (int i = 0; i < nbVar; i++) {
+            lowerbounds[i] = vars[i].getLB();
+            ranges[i] = vars[i].getUB() - lowerbounds[i] + 1;
+        }
 
-    /**
-     * The sizes of the domains
-     */
-    protected int[] dsizes;
-
-    /**
-     * The lower bound of each variable
-     */
-    protected int[] offsets;
-
-    public IterTuplesTable(Tuples tuples, int[] offsets, int[] domSizes) {
-        super(tuples, offsets, domSizes);
-        nbVar = domSizes.length;
-        dsizes = domSizes;
-        this.offsets = offsets;
         table = new int[nbVar][][];
-        for (int i = 0; i < domSizes.length; i++) {
-            table[i] = new int[domSizes[i]][];
+        for (int i = 0; i < nbVar; i++) {
+            table[i] = new int[ranges[i]][];
             int[] nbsups = getNbSupportFor(i);
             for (int j = 0; j < nbsups.length; j++) {
                 table[i][j] = new int[nbsups[j]];
             }
         }
         buildInitialListOfSupports();
+    }
+
+    // required for duplicate method, should not be called by default
+    private IterTuplesTable(int[][] tuplesIndexes, int n, int[] lowerbounds, int[] ranges, int[][][] table) {
+        super(tuplesIndexes);
+        this.nbVar = n;
+        this.lowerbounds = lowerbounds;
+        this.ranges = ranges;
+        this.table = table;
     }
 
     /**
@@ -78,11 +92,11 @@ class IterTuplesTable extends TuplesList{
      * @return nb supports
      */
     public int[] getNbSupportFor(int i) {
-        int[] nbsup = new int[dsizes[i]];
+        int[] nbsup = new int[ranges[i]];
         int nt = tuplesIndexes.length;
         for (int j = 0; j < nt; j++) {
             int[] tuple = tuplesIndexes[j];
-            nbsup[tuple[i] - offsets[i]]++;
+            nbsup[tuple[i] - lowerbounds[i]]++;
         }
         return nbsup;
     }
@@ -91,13 +105,13 @@ class IterTuplesTable extends TuplesList{
         int cpt = 0;
         int[][] level = new int[nbVar][];
         for (int i = 0; i < nbVar; i++) {
-            level[i] = new int[dsizes[i]];
+            level[i] = new int[ranges[i]];
         }
         int nt = tuplesIndexes.length;
         for (int j = 0; j < nt; j++) {
             int[] tuple = tuplesIndexes[j];
             for (int i = 0; i < tuple.length; i++) {
-                int value = tuple[i] - offsets[i];
+                int value = tuple[i] - lowerbounds[i];
                 table[i][value][level[i][value]] = cpt;
                 level[i][value]++;
             }
@@ -118,8 +132,8 @@ class IterTuplesTable extends TuplesList{
      * This relation do not take advantage of the knowledge of the
      * previous support ! so start from scratch
      *
-     * @param val    is the value assuming the offset has already been
-     *               removed
+     * @param val is the value assuming the offset has already been
+     *            removed
      */
     public int seekNextTuple(int oldidx, int var, int val) {
         int nidx = oldidx + 1;
@@ -133,17 +147,21 @@ class IterTuplesTable extends TuplesList{
     /**
      * return the number of supports of the pair (var, val) assuming the
      * offset has already been removed
-     *
      */
     public int getNbSupport(int var, int val) {
         return table[var][val].length;
     }
 
     public int getRelationOffset(int var) {
-        return offsets[var];
+        return lowerbounds[var];
     }
 
     public boolean checkTuple(int[] tuple) {
         throw new SolverException("checkTuple should not be used on an IterRelation");
+    }
+
+    @Override
+    public LargeRelation duplicate() {
+        return new IterTuplesTable(this.tuplesIndexes.clone(), this.nbVar, this.lowerbounds.clone(), this.ranges.clone(), this.table.clone());
     }
 }

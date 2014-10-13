@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,8 +31,9 @@ import solver.ICause;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 
 import java.io.Serializable;
 
@@ -52,8 +53,8 @@ public interface IPropagationEngine extends Serializable {
             LoggerFactory.getLogger("solver").info("[P] {}", "(" + v + "::" + p + ")");
         }
 
-        public static void printModification(Variable v, EventType e, ICause c) {
-            LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", new Object[]{v, e, c});
+        public static void printModification(Variable v, IEventType e, ICause c) {
+            LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", v, e, c);
         }
 
 
@@ -100,11 +101,12 @@ public interface IPropagationEngine extends Serializable {
      * Take into account the modification of a variable
      *
      * @param variable modified variable
-     * @throws ContradictionException
+     * @param type
+	 * @throws ContradictionException
      */
-    void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException;
+    void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException;
 
-    void delayedPropagation(Propagator propagator, EventType type) throws ContradictionException;
+    void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException;
 
     void onPropagatorExecution(Propagator propagator);
 

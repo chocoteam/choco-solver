@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>3.2.0</version>
+    <version>3.2.1</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://www.emn.fr/z-info/choco-solver/</url>
 
@@ -16,15 +17,12 @@
         <connection>scm:git:git@github.com:chocoteam/choco3.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco3</url>
         <developerConnection>scm:git:git@github.com:chocoteam/choco3.git</developerConnection>
-    <tag>choco-3.2.0</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <modules>
-        <module>choco-environment</module>
         <module>choco-solver</module>
         <module>choco-samples</module>
-        <module>choco-parser</module>
-        <module>choco-extra</module>
     </modules>
     <dependencies>
         <dependency>
@@ -45,25 +43,10 @@
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.2</version>
+            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>args4j</groupId>
-            <artifactId>args4j</artifactId>
-            <version>2.0.28</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--<dependency>
-            <groupId>uk.com.robust-it</groupId>
-            <artifactId>cloning</artifactId>
-            <version>1.7.5-SNAPSHOT</version>
-        </dependency>-->
     </dependencies>
     <distributionManagement>
         <repository>
@@ -143,7 +126,7 @@
                     <aggregate>true</aggregate>
                     <properties>
                         <owner>Ecole des Mines de Nantes</owner>
-                        <year>2013</year>
+                        <year>2014</year>
                     </properties>
                     <strictCheck>true</strictCheck>
                     <includes>
@@ -176,6 +159,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <!--<groups>1s,10s,1m,10m,30m</groups>-->
+                    <parallel>methods</parallel>
+                    <threadCount>4</threadCount>
+                </configuration>
             </plugin>
         </plugins>
     </build>

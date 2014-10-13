@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,11 +26,14 @@
  */
 package solver.constraints.nary.alldifferent.conditions;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
+import solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 
 /**
@@ -42,76 +45,89 @@ import util.ESat;
  */
 public class PropCondAllDiff_AC extends Propagator<IntVar> {
 
-	private Condition condition;
-	private AllDiffACAlgorithm filter;
+    private Condition condition;
+    private AlgoAllDiffAC filter;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * AllDifferent constraint for integer variables
-	 * Holds only on the subset of variables satisfying the given condition
-	 *
-	 * @param variables
-	 * @param condition defines the subset of variables which is considered by the
-	 *                  alldifferent constraint
-	 */
-	public PropCondAllDiff_AC(IntVar[] variables, Condition condition) {
-		super(variables, PropagatorPriority.QUADRATIC,false);
-		this.condition = condition;
-	}
+    /**
+     * AllDifferent constraint for integer variables
+     * Holds only on the subset of variables satisfying the given condition
+     *
+     * @param variables
+     * @param condition defines the subset of variables which is considered by the
+     *                  alldifferent constraint
+     */
+    public PropCondAllDiff_AC(IntVar[] variables, Condition condition) {
+        super(variables, PropagatorPriority.QUADRATIC, false);
+        this.condition = condition;
+    }
 
-	//***********************************************************************************
-	// PROPAGATION
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int nb = 0;
-		for(IntVar v:vars){
-			if(condition.holdOnVar(v)){
-				nb++;
-			}
-		}
-		IntVar[] vs = new IntVar[nb];
-		for(IntVar v:vars){
-			if(condition.holdOnVar(v)){
-				nb--;
-				vs[nb] = v;
-			}
-		}
-		filter = new AllDiffACAlgorithm(vs,aCause);
-		filter.propagate();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int nb = 0;
+        for (IntVar v : vars) {
+            if (condition.holdOnVar(v)) {
+                nb++;
+            }
+        }
+        IntVar[] vs = new IntVar[nb];
+        for (IntVar v : vars) {
+            if (condition.holdOnVar(v)) {
+                nb--;
+                vs[nb] = v;
+            }
+        }
+        filter = new AlgoAllDiffAC(vs, aCause);
+        filter.propagate();
+    }
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
-	@Override
-	public ESat isEntailed() {
-		int nbInst = 0;
-		for (int i = 0; i < vars.length; i++) {
-			if (vars[i].isInstantiated()) {
-				nbInst++;
-				if(condition.holdOnVar(vars[i])){
-					for (int j = i + 1; j < vars.length; j++) {
-						if(condition.holdOnVar(vars[j]))
-							if (vars[j].isInstantiated() && vars[i].getValue() == vars[j].getValue()) {
-								return ESat.FALSE;
-							}
-					}
-				}
-			}
-		}
-		if (nbInst == vars.length) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        int nbInst = 0;
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i].isInstantiated()) {
+                nbInst++;
+                if (condition.holdOnVar(vars[i])) {
+                    for (int j = i + 1; j < vars.length; j++) {
+                        if (condition.holdOnVar(vars[j]))
+                            if (vars[j].isInstantiated() && vars[i].getValue() == vars[j].getValue()) {
+                                return ESat.FALSE;
+                            }
+                    }
+                }
+            }
+        }
+        if (nbInst == vars.length) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            identitymap.put(this, new PropCondAllDiff_AC(aVars, this.condition));
+        }
+    }
 }

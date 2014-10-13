@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -36,13 +36,9 @@ import solver.explanations.strategies.ExplainingObjective;
 import solver.explanations.strategies.RandomNeighborhood4Explanation;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.lns.neighbors.SequenceNeighborhood;
-import solver.search.loop.monitors.IMessage;
-import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.Arrays;
 
 /**
  * <br/>
@@ -72,12 +68,12 @@ public class ELNSTest {
         solver.set(IntStrategyFactory.random_bound(vars, seed));
 
 
-        SMF.log(solver, true, true, new IMessage() {
-            @Override
-            public String print() {
-                return Arrays.toString(vars) + " o:" + obj;
-            }
-        });
+//        SMF.log(solver, true, true, new IMessage() {
+//            @Override
+//            public String print() {
+//                return Arrays.toString(vars) + " o:" + obj;
+//            }
+//        });
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
     }
 

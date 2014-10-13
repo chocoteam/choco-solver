@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,8 @@
 
 package solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -34,8 +36,8 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -78,25 +80,17 @@ public class PropSumEq extends Propagator<IntVar> {
                 max += vars[i].getUB();
                 ampMax = Math.max(vars[i].getUB() - vars[i].getLB(), ampMax);
             }
-            //if (vars[n].getUB() - min < 0) {
-            //    this.contradiction(null, "b - sumLB < 0");
-            //}
             vars[n].updateLowerBound(min, aCause);
-            //if (vars[n].getLB() - max > 0) {
-            //    this.contradiction(null, "b - sumLB < 0");
-            //}
             vars[n].updateUpperBound(max, aCause);
             int lb = vars[n].getLB();
             int ub = vars[n].getUB();
             again = false;
             if (min + ampMax > ub) {
-//				again = true;
                 for (int i = 0; i < n; i++) {
                     again |= vars[i].updateUpperBound(ub - min + vars[i].getLB(), aCause);
                 }
             }
             if (max - ampMax < lb) {
-//				again = true;
                 for (int i = 0; i < n; i++) {
                     again |= vars[i].updateLowerBound(lb - max + vars[i].getUB(), aCause);
                 }
@@ -105,13 +99,8 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return IntEventType.boundAndInst();
     }
 
     @Override
@@ -154,7 +143,6 @@ public class PropSumEq extends Propagator<IntVar> {
             int val = vr.getVal();
             // 1. find the pos of var in vars
             boolean ispos = vars[n].getId() != var.getId();
-
             if (val < var.getLB()) { // explain LB
                 for (int i = 0; i < n; i++) { // first the positive coefficients
                     if (vars[i] != var) {
@@ -178,9 +166,23 @@ public class PropSumEq extends Propagator<IntVar> {
             } else {
                 super.explain(d, e);
             }
-
         } else {
             super.explain(d, e);
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar S = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropSumEq(aVars, S));
         }
     }
 }

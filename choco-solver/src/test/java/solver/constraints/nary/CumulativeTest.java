@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -92,7 +92,7 @@ public class CumulativeTest {
 		test(32,3,2,4,1,0);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "10s")
 	public void test6(){
 		// this tests raises an exception which is in fact due to the time limit
 		// and unlucky random heuristic (fixed by adding last conflict)
@@ -161,15 +161,15 @@ public class CumulativeTest {
 		SMF.limitTime(solver,5000);
 		switch (mode){
 			case 0:	solver.findSolution();
-				print(solver,last,graph,f);
+//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			case 1:	solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,last);
-				print(solver,last,graph,f);
+//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getBestSolutionValue().longValue();
 			case 2:	solver.findAllSolutions();// too many solutions to be used
-				print(solver,last,graph,f);
+//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			default:throw new UnsupportedOperationException();

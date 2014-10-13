@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -44,9 +44,10 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.selectors.IntValueSelector;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
+import solver.variables.events.IEventType;
+import solver.variables.events.IntEventType;
 import util.PoolManager;
 
 /**
@@ -166,8 +167,8 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
     }
 
     @Override
-    public void onUpdate(IntVar var, EventType evt) {
-        if (evt == EventType.INSTANTIATE) {
+    public void onUpdate(IntVar var, IEventType evt) {
+        if (evt == IntEventType.INSTANTIATE) {
             Propagator[] props = var.getPropagators();
             for (int i = 0; i < props.length; i++) {
                 int pid = props[i].getId();

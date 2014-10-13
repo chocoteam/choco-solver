@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,11 +26,12 @@
  */
 package solver.constraints.nary.channeling;
 
+import gnu.trove.map.hash.THashMap;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import util.ESat;
@@ -47,95 +48,111 @@ import util.tools.ArrayUtils;
  */
 public class PropEnumDomainChanneling extends Propagator<IntVar> {
 
-	protected final int n;
+    protected final int n;
     protected final IntProcedure rem_proc;
     protected final IIntDeltaMonitor idm;
-	protected final int offSet;
+    protected final int offSet;
 
-    public PropEnumDomainChanneling(BoolVar[] bvars, IntVar aVar,final int offSet) {
+    public PropEnumDomainChanneling(BoolVar[] bvars, IntVar aVar, final int offSet) {
         super(ArrayUtils.append(bvars, new IntVar[]{aVar}), PropagatorPriority.UNARY, true);
-		assert aVar.hasEnumeratedDomain();
-		this.n = bvars.length;
-		this.offSet = offSet;
-		this.idm = this.vars[n].monitorDelta(this);
-        this.rem_proc = new IntProcedure(){
-			@Override
-			public void execute(int i) throws ContradictionException {
-				vars[i-offSet].instantiateTo(0,aCause);
-			}
-		};
+        assert aVar.hasEnumeratedDomain();
+        this.n = bvars.length;
+        this.offSet = offSet;
+        this.idm = this.vars[n].monitorDelta(this);
+        this.rem_proc = new IntProcedure() {
+            @Override
+            public void execute(int i) throws ContradictionException {
+                vars[i - offSet].instantiateTo(0, aCause);
+            }
+        };
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		vars[n].updateLowerBound(offSet,aCause);
-		vars[n].updateUpperBound(n-1+offSet,aCause);
-		for(int i=0;i<n;i++){
-			if(vars[i].isInstantiated()){
-				if(vars[i].getValue()==0){
-					vars[n].removeValue(i+offSet,aCause);
-				}else{
-					vars[n].instantiateTo(i+offSet,aCause);
-				}
-			}else if(!vars[n].contains(i+offSet)){
-				vars[i].instantiateTo(0,aCause);
-			}
-		}
-		if(vars[n].isInstantiated()){
-			int v = vars[n].getValue()-offSet;
-			vars[v].instantiateTo(1, aCause);
-			for(int i=0;i<n;i++){
-				if(i!=v){
-					vars[i].instantiateTo(0,aCause);
-				}
-			}
-		}
-		idm.unfreeze();
+        vars[n].updateLowerBound(offSet, aCause);
+        vars[n].updateUpperBound(n - 1 + offSet, aCause);
+        for (int i = 0; i < n; i++) {
+            if (vars[i].isInstantiated()) {
+                if (vars[i].getValue() == 0) {
+                    vars[n].removeValue(i + offSet, aCause);
+                } else {
+                    vars[n].instantiateTo(i + offSet, aCause);
+                }
+            } else if (!vars[n].contains(i + offSet)) {
+                vars[i].instantiateTo(0, aCause);
+            }
+        }
+        if (vars[n].isInstantiated()) {
+            int v = vars[n].getValue() - offSet;
+            vars[v].instantiateTo(1, aCause);
+            for (int i = 0; i < n; i++) {
+                if (i != v) {
+                    vars[i].instantiateTo(0, aCause);
+                }
+            }
+        }
+        idm.unfreeze();
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-		if(varIdx==n){
-			idm.freeze();
-			idm.forEach(rem_proc,EventType.REMOVE);
-			idm.unfreeze();
-		}else{
-			if(vars[varIdx].getValue()==1){
-				vars[n].instantiateTo(varIdx+offSet,aCause);
-				for(int i=0;i<n;i++){
-					if(i!=varIdx){
-						vars[i].instantiateTo(0,aCause);
-					}
-				}
-			}else {
-				vars[n].removeValue(varIdx+offSet,aCause);
-			}
-		}
-		if(vars[n].isInstantiated()){
-			vars[vars[n].getValue()-offSet].instantiateTo(1,aCause);
-		}
+        if (varIdx == n) {
+            idm.freeze();
+            idm.forEachRemVal(rem_proc);
+            idm.unfreeze();
+        } else {
+            if (vars[varIdx].getValue() == 1) {
+                vars[n].instantiateTo(varIdx + offSet, aCause);
+                for (int i = 0; i < n; i++) {
+                    if (i != varIdx) {
+                        vars[i].instantiateTo(0, aCause);
+                    }
+                }
+            } else {
+                vars[n].removeValue(varIdx + offSet, aCause);
+            }
+        }
+        if (vars[n].isInstantiated()) {
+            vars[vars[n].getValue() - offSet].instantiateTo(1, aCause);
+        }
     }
 
     @Override
     public ESat isEntailed() {
-		if(vars[n].getLB()>n-1+offSet || vars[n].getUB()<offSet){
-			return ESat.FALSE;
-		}
-		for(int i=0;i<n;i++){
-			if(vars[i].isInstantiated()){
-				if(vars[i].getValue()==1 && !vars[n].contains(i+offSet)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		if(vars[n].isInstantiated()){
-			int v = vars[n].getValue()-offSet;
-			if(!vars[v].contains(1)){
-				return ESat.FALSE;
-			}
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}return ESat.UNDEFINED;
+        if (vars[n].getLB() > n - 1 + offSet || vars[n].getUB() < offSet) {
+            return ESat.FALSE;
+        }
+        for (int i = 0; i < n; i++) {
+            if (vars[i].isInstantiated()) {
+                if (vars[i].getValue() == 1 && !vars[n].contains(i + offSet)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        if (vars[n].isInstantiated()) {
+            int v = vars[n].getValue() - offSet;
+            if (!vars[v].contains(1)) {
+                return ESat.FALSE;
+            }
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            BoolVar[] bVars = new BoolVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                bVars[i] = (BoolVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+            identitymap.put(this, new PropEnumDomainChanneling(bVars, aVar, this.offSet));
+        }
     }
 }

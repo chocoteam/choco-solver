@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,21 +28,22 @@
 package solver.constraints;
 
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.structure.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
-import solver.constraints.set.SCF;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.*;
+import solver.variables.Variable;
+import solver.variables.events.IEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 
 import java.io.Serializable;
@@ -125,6 +126,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Creates a new propagator to filter the domains of vars.
+     * <p/>
+     * <br/>
+     * To limit memory consumption, the array of variables is <b>referenced directly</b> (no clone).
+     * This is the responsibility of the propagator's developer to take care of that point.
      *
      * @param vars           variables of the propagator. Their modification will trigger filtering
      * @param priority       priority of this propagator (lowest priority propagators are called first)
@@ -134,12 +139,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.solver = vars[0].getSolver();
-        checkVariable(vars);
         this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
         this.aCause = this;
-        this.vars = vars.clone();
+        // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
+        // This is the responsibility of the propagator's developer to take care of that point.
+        this.vars = vars;
         this.vindices = new int[vars.length];
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
@@ -182,56 +188,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     // METHODS
     //***********************************************************************************
 
-    // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
-    private <V extends Variable> void checkVariable(V[] vars) {
-		if(Configuration.MUL_OCC_VAR_PROP == Configuration.MOVP.silent){
-			return;
-		}
-        set.get().clear();
-        for (int i = 0; i < vars.length; i++) {
-            Variable v = vars[i];
-            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                if (set.get().contains(v.getId())) {
-                    switch (Configuration.MUL_OCC_VAR_PROP) {
-                        case disabled:
-                            throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator.\n" +
-                                    "See configurations.property to change this policy.");
-                        case warn:
-                            LOGGER.warn(v.toString() + " occurs more than one time in this propagator.");
-                            break;
-                        case view:
-                            if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                                vars[i] = (V) VariableFactory.eq((IntVar) v);
-                            } else {
-                                throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                        "However, this type of variable cannot be declared in a view.");
-                            }
-                            break;
-                        case duplicate:
-                            if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                                Solver solver = v.getSolver();
-                                vars[i] = (V) v.duplicate();
-                                solver.post(IntConstraintFactory.arithm((IntVar) v, "=", (IntVar) vars[i]));
-                            } else {
-                                if ((v.getTypeAndKind() & Variable.SET) != 0) {
-                                    Solver solver = v.getSolver();
-                                    vars[i] = (V) v.duplicate();
-                                    solver.post(SCF.all_equal(new SetVar[]{(SetVar) v, (SetVar) vars[i]}));
-                                } else {
-                                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                            "However, this type of variable does not allow to post an EQ constraint over it.");
-                                }
-                            }
-                            break;
-                        default: throw new UnsupportedOperationException("This should never occur");
-                    }
-
-                }
-                set.get().add(vars[i].getId());
-            }
-        }
-    }
-
     /**
      * Enlarges the variable scope of this propagator
      * Should not be called by the user.
@@ -239,7 +195,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param nvars variables to be added to this propagator
      */
     protected void addVariable(V... nvars) {
-        checkVariable(vars);
         V[] tmp = vars;
         vars = Arrays.copyOf(vars, vars.length + nvars.length);
         System.arraycopy(tmp, 0, vars, 0, tmp.length);
@@ -273,7 +228,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     protected int getPropagationConditions(int vIdx) {
-        return EventType.ALL_FINE_EVENTS.mask;
+        return IEventType.ALL_EVENTS;
     }
 
     /**
@@ -310,7 +265,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * of index idxVarInProp has changed. This method calls a CUSTOM_PROPAGATION (coarse-grained) by default.
      * <p/>
      * This method should be overridden if the argument <code>reactToFineEvt</code> is set to <code>true</code> in the constructor.
-     * Otherwise, it executes <code>propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
+     * Otherwise, it executes <code>propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
      *
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
@@ -325,7 +280,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
                     "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
         }
-        propagate(EventType.CUSTOM_PROPAGATION.getStrengthenedMask());
+        propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());
     }
 
     /**
@@ -335,7 +290,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param evt event type
      */
-    public final void forcePropagate(EventType evt) throws ContradictionException {
+    public final void forcePropagate(PropagatorEventType evt) throws ContradictionException {
         solver.getEngine().delayedPropagation(this, evt);
     }
 
@@ -379,11 +334,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-        assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
-        state = PASSIVE;
-        solver.getEnvironment().save(operations[ACTIVE]);
-        //TODO: update var mask back
-        solver.getEngine().desactivatePropagator(this);
+        if (!isCompletelyInstantiated()) {// useless call to setPassive if all vars are instantiated
+            assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
+            state = PASSIVE;
+            solver.getEnvironment().save(operations[ACTIVE]);
+            //TODO: update var mask back
+            solver.getEngine().desactivatePropagator(this);
+        }
     }
 
     /**
@@ -611,5 +568,32 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public final boolean reactToFineEvent() {
         return reactToFineEvt;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append(getClass().getSimpleName() + "(");
+        int i = 0;
+        for (; i < Math.min(4, vars.length); i++) {
+            st.append(vars[i].getName()).append(", ");
+        }
+        if (i < vars.length - 2) {
+            st.append("...,");
+        }
+        st.append(vars[vars.length - 1].getName()).append(")");
+        return st.toString();
+    }
+
+    /**
+     * Duplicate the current propagator.
+     * A restriction is that the resolution process should have not begun yet.
+     * That's why state of the propagator may not be duplicated.
+     *
+     * @param solver      the target solver
+     * @param identitymap a map to ensure uniqueness of objects
+     */
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
     }
 }

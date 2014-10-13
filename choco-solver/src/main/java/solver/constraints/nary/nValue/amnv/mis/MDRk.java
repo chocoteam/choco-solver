@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.nValue.amnv.mis;
 
-import solver.constraints.nary.nValue.amnv.graph.G;
+import util.objects.graphs.UndirectedGraph;
 import util.objects.setDataStructures.ISet;
 
 import java.util.Random;
@@ -54,11 +54,20 @@ public class MDRk extends MD{
 	/**
 	 * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
 	 * @param graph
+	 * @param k number of random iterations
 	 */
-	public MDRk(G graph, int k){
+	public MDRk(UndirectedGraph graph, int k){
 		super(graph);
 		this.k=k;
 		this.rd = new Random(0);
+	}
+
+	/**
+	 * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
+	 * @param graph
+	 */
+	public MDRk(UndirectedGraph graph){
+		this(graph,Rk.DEFAULT_K);
 	}
 
 	//***********************************************************************************
@@ -93,7 +102,7 @@ public class MDRk extends MD{
 			}
 			inMIS.set(idx);
 			out.set(idx);
-			ISet nei = graph.getNeighborsOf(idx);
+			ISet nei = graph.getNeighOf(idx);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				out.set(j);
 			}

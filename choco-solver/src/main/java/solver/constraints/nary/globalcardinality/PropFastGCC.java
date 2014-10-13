@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,13 +27,15 @@
 package solver.constraints.nary.globalcardinality;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.events.IntEventType;
+import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetFactory;
@@ -83,12 +85,11 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.possibles = new ISet[n2];
         this.mandatories = new ISet[n2];
         this.map = map;
-        IEnvironment environment = solver.getEnvironment();
         for (int idx = 0; idx < n2; idx++) {
-            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
-            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
+            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
+            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
         }
-        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, n2, environment);
+        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, n2, solver);
         this.boundVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
             if (!vars[i].hasEnumeratedDomain()) {
@@ -119,7 +120,7 @@ public class PropFastGCC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         do {
-            if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {// initialization
+			if (PropagatorEventType.isFullPropagation(evtmask)) {// initialization
                 valueToCompute.clear();
                 for (int i = 0; i < n2; i++) {
                     mandatories[i].clear();
@@ -156,13 +157,13 @@ public class PropFastGCC extends Propagator<IntVar> {
                 }
             }
             // filtering
-            evtmask = EventType.CUSTOM_PROPAGATION.getStrengthenedMask();
+            evtmask = PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask();
         } while (filter());
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     private boolean filter() throws ContradictionException {
@@ -192,7 +193,7 @@ public class PropFastGCC extends Propagator<IntVar> {
             again |= filterBounds();
         }
         //if (again) {// fix point
-        //    propagate(EventType.CUSTOM_PROPAGATION.mask);
+        //    propagate(PropagatorEventType.CUSTOM_PROPAGATION.mask);
         //}
         return again;
     }
@@ -254,9 +255,9 @@ public class PropFastGCC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx >= n) {// cardinality variables
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+            return IntEventType.boundAndInst();
         }
-        return EventType.INT_ALL_MASK();
+        return IntEventType.all();
     }
 
     @Override
@@ -294,5 +295,24 @@ public class PropFastGCC extends Propagator<IntVar> {
             }
         }
         return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.n;
+            IntVar[] X = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                X[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            size = this.n2;
+            IntVar[] Y = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i + n].duplicate(solver, identitymap);
+                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
+            }
+            identitymap.put(this, new PropFastGCC(X, this.values.clone(), new TIntIntHashMap(this.map), Y));
+        }
     }
 }

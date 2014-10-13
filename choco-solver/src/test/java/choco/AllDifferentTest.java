@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,6 @@
 package choco;
 
 import choco.checker.DomainBuilder;
-import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -57,7 +56,6 @@ public class AllDifferentTest {
 
     public static void model(boolean simple, int n, int nbSol) {
         Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -97,7 +95,7 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "1s")
     public void test1() {
         model(true, 8, 92);
         model(false, 8, 92);
@@ -121,9 +119,9 @@ public class AllDifferentTest {
         vars[3] = VariableFactory.enumerated("v_3", new int[]{1, 3, 5, 6}, s);
 
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
-        List<Constraint> lcstrs1 = new ArrayList<Constraint>(1);
-        List<Constraint> lcstrs2 = new ArrayList<Constraint>(10);
+        List<Constraint> lcstrs = new ArrayList<>(10);
+        List<Constraint> lcstrs1 = new ArrayList<>(1);
+        List<Constraint> lcstrs2 = new ArrayList<>(10);
 
         lcstrs1.add(IntConstraintFactory.alldifferent(vars, "BC"));
         for (int i = 0; i < n - 1; i++) {
@@ -162,7 +160,7 @@ public class AllDifferentTest {
         vars[4] = VariableFactory.bounded("v_4", 2, 6, s);
 
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
+        List<Constraint> lcstrs = new ArrayList<>(10);
 
         lcstrs.add(IntConstraintFactory.alldifferent(vars, "BC"));
 
@@ -177,7 +175,7 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "1h")
+    @Test(groups = "verylong")
     public void test6() {
         Random rand;
         for (int seed = 0; seed < 4; seed++) {
@@ -207,9 +205,8 @@ public class AllDifferentTest {
                         Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
                         Assert.assertTrue(ac.getMeasures().getFailCount() == 0 || b == 0, "nb nod incorrect" + seed);
 
-                        LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
-                                neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
-                                bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount()});
+                        LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
+                                bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount());
                     }
                 }
             }
@@ -231,7 +228,7 @@ public class AllDifferentTest {
             }
         }
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
+        List<Constraint> lcstrs = new ArrayList<>(10);
 
         switch (c) {
             case 0:
@@ -279,10 +276,10 @@ public class AllDifferentTest {
             ts[3].removeValue(-3, Cause.Null);
             ts[3].removeValue(3, Cause.Null);
             solver.propagate();
-        } catch (ContradictionException ex) {
+        } catch (ContradictionException ignored) {
 
         }
-        System.out.printf("%s\n", solver.toString());
+//        System.out.printf("%s\n", solver.toString());
 
 
     }

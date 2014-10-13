@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,16 +27,17 @@
 
 package solver.variables.view;
 
+import gnu.trove.map.hash.THashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.events.IntEventType;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 import util.tools.MathUtils;
@@ -71,7 +72,7 @@ public final class ScaleView extends IntView {
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
             protected int transform(int value) {
-                return cste*value;
+                return cste * value;
             }
         };
     }
@@ -83,17 +84,17 @@ public final class ScaleView extends IntView {
             int inf = getLB();
             int sup = getUB();
             if (inf <= value && value <= sup) {
-                EventType e = EventType.REMOVE;
+				IntEventType e = IntEventType.REMOVE;
 
                 boolean done = var.removeValue(value / cste, this);
                 if (done) {
                     if (value == inf) {
-                        e = EventType.INCLOW;
+                        e = IntEventType.INCLOW;
                     } else if (value == sup) {
-                        e = EventType.DECUPP;
+                        e = IntEventType.DECUPP;
                     }
                     if (this.isInstantiated()) {
-                        e = EventType.INSTANTIATE;
+                        e = IntEventType.INSTANTIATE;
                     }
                     this.notifyPropagators(e, cause);
                     return true;
@@ -113,7 +114,7 @@ public final class ScaleView extends IntView {
         } else {
             boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), this);
             if (done) {
-                notifyPropagators(EventType.REMOVE, cause);
+                notifyPropagators(IntEventType.REMOVE, cause);
             }
             return done;
         }
@@ -123,11 +124,11 @@ public final class ScaleView extends IntView {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (value % cste != 0) {
-            contradiction(cause, EventType.INSTANTIATE, "Not a multiple of " + cste);
+            contradiction(cause, IntEventType.INSTANTIATE, "Not a multiple of " + cste);
         }
         boolean done = var.instantiateTo(value / cste, this);
         if (done) {
-            notifyPropagators(EventType.INSTANTIATE, cause);
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -138,10 +139,10 @@ public final class ScaleView extends IntView {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            EventType e = EventType.INCLOW;
+			IntEventType e = IntEventType.INCLOW;
             boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
             if (isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             if (done) {
                 this.notifyPropagators(e, cause);
@@ -156,10 +157,10 @@ public final class ScaleView extends IntView {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            EventType e = EventType.DECUPP;
+			IntEventType e = IntEventType.DECUPP;
             boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
             if (isInstantiated()) {
-                e = EventType.INSTANTIATE;
+                e = IntEventType.INSTANTIATE;
             }
             if (done) {
                 this.notifyPropagators(e, cause);
@@ -179,10 +180,10 @@ public final class ScaleView extends IntView {
         return value % cste == 0 && var.isInstantiatedTo(value / cste);
     }
 
-	@Override
-	public boolean instantiatedTo(int value) {
-		return isInstantiatedTo(value);
-	}
+    @Override
+    public boolean instantiatedTo(int value) {
+        return isInstantiatedTo(value);
+    }
 
     @Override
     public int getValue() {
@@ -201,7 +202,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public int nextValue(int v) {
-        int value = var.nextValue(MathUtils.divFloor(v , cste));
+        int value = var.nextValue(MathUtils.divFloor(v, cste));
         if (value == Integer.MAX_VALUE) {
             return value;
         }
@@ -225,6 +226,15 @@ public final class ScaleView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.scale(this.var, this.cste);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            this.var.duplicate(solver, identitymap);
+            ScaleView clone = new ScaleView((IntVar) identitymap.get(this.var), this.cste, solver);
+            identitymap.put(this, clone);
+        }
     }
 
     @Override
