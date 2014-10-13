@@ -21,8 +21,10 @@ REPO_URL="http://www.emn.fr/z-info/choco-repo/mvn/repository/choco"
 
 if [ $1 == "--next" ]; then
     VERSION=$(guess $2)
+    NEXTMIL="no"
 else
     VERSION=$1
+    NEXTMIL="yes"
 fi
 echo "New version is ${VERSION}"
 #Update the poms
@@ -58,10 +60,21 @@ sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constr
 REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"
 sedInPlace "${REGEX}" CHANGES.md
 # add a new empty line in CHANGES.md
+
+if test "${NEXTMIL}" = "yes"
+then
 sedInPlace '5 i\
 \
 NEXT MILESTONE\
 -------------------\
 \
 ' CHANGES.md
+fi
 
+REGEX="s%release = *%release = ${VERSION}%"
+sedInPlace "${REGEX}" ./docs/source/conf.py
+
+cd ./docs/
+make latexpdf
+make latexpdf
+make latexpdf

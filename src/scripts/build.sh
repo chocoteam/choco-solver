@@ -40,7 +40,7 @@ if [ ${BRANCH} = "release" ]; then
     echo "** Prepare develop for the next version **"
     git checkout develop
     git merge --no-ff ${TAG}
-    ./bin/set_version.sh --next ${VERSION}
+    ./src/scripts/set_version.sh --next ${VERSION}
     git commit -m "Prepare the code for the next version" -a
 
     #Push changes on develop, with the tag
