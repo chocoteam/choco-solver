@@ -70,8 +70,8 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     public PropCostRegular(IntVar[] variables, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph) {
         super(variables, PropagatorPriority.CUBIC, true);
-        this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++) {
+        this.idms = new IIntDeltaMonitor[this.vars.length-1];
+        for (int i = 0; i < this.vars.length-1; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         this.zIdx = vars.length - 1;
@@ -107,7 +107,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             initialize();
         }
         filter();
-        for (int i = 0; i < idms.length; i++) {
+        for (int i = 0; i < idms.length-1; i++) {
             idms[i].unfreeze();
         }
     }
@@ -131,7 +131,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             int first = this.graph.sourceIndex;
             boolean found;
             double cost = 0.0;
-            int[] str = new int[vars.length];
+            int[] str = new int[vars.length-1];
             for (int i = 0; i < vars.length - 1; i++) {
                 found = false;
                 str[i] = vars[i].getValue();

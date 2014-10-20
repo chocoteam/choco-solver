@@ -6,6 +6,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+- Fix #225: fix PropCostRegular, wrt to S.Demassey instructions.
 
 3.2.1 - 13 Oct 2014
 -------------------
