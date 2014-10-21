@@ -27,6 +27,11 @@
 
 package parser.flatzinc.ast.expression;
 
+import solver.Solver;
+import solver.variables.SetVar;
+import solver.variables.VF;
+import util.tools.StringUtils;
+
 /*
 * User : CPRUDHOM
 * Mail : cprudhom(a)emn.fr
@@ -49,17 +54,15 @@ public abstract class ESet extends Expression {
         return enumVal();
     }
 
-//    @Override
-//    public final SetVar setVarValue(Solver solver) {
-//        int[] values = enumVal();
-//        if(values.length==0)return Choco.emptySet();
-//        return Choco.constant(enumVal());
-//    }
+    @Override
+    public final SetVar setVarValue(Solver solver) {
+        int[] values = enumVal();
+        return VF.set(StringUtils.randomName("set_const"), values, values, solver);
+    }
 
-//    @Override
-//    public final SetVar[] toSetVarArray(Solver solver) {
-//        return new SetVariable[]{setVarValue()};
-//        Exit.log();
-//        return null;
-//    }
+    //
+    @Override
+    public final SetVar[] toSetVarArray(Solver solver) {
+        return new SetVar[]{setVarValue(solver)};
+    }
 }

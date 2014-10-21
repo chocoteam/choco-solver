@@ -79,5 +79,9 @@ public class T_param_decl extends GrammarTest {
         Flatzinc4Parser fp = parser("array [1..3] of set of int: suc = [{5, 10, 14}, {}, {}];", null, new Datas());
         fp.datas = new Datas();
         fp.param_decl();
+        Object o = fp.datas.get("suc");
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof int[][]);
+        Assert.assertEquals(new int[][]{{5,10,14},{},{}}, o);
     }
 }

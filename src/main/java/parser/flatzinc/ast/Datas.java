@@ -33,6 +33,7 @@ import parser.flatzinc.ast.declaration.Declaration;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.Variable;
 
 import java.util.Arrays;
@@ -51,13 +52,15 @@ public class Datas {
 
     final THashMap<String, Object> map;
 
-    final THashSet<Variable> searchVariables;
+    final THashSet<IntVar> intsearchVariables;
+    final THashSet<SetVar> setsearchVariables;
     final THashSet<Variable> outputVariables;
 
     public Datas(GoalConf gc) {
         this.gc = gc;
         this.map = new THashMap<String, Object>();
-        searchVariables = new THashSet<Variable>();
+        intsearchVariables = new THashSet<IntVar>();
+        setsearchVariables = new THashSet<SetVar>();
         outputVariables = new THashSet<Variable>();
     }
 
@@ -81,16 +84,27 @@ public class Datas {
         return gc;
     }
 
-    public void addSearchVars(IntVar... vars) {
-        searchVariables.addAll(Arrays.asList(vars));
+    public void addSearchVars(Variable... vars) {
+        for (int i = 0; i < vars.length; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.INT) != 0) {
+
+                intsearchVariables.addAll(Arrays.asList((IntVar) vars[i]));
+            } else {
+                setsearchVariables.addAll(Arrays.asList((SetVar) vars[i]));
+            }
+        }
     }
 
-    public IntVar[] getSearchVars() {
-        return searchVariables.toArray(new IntVar[searchVariables.size()]);
+    public IntVar[] getIntSearchVars() {
+        return intsearchVariables.toArray(new IntVar[intsearchVariables.size()]);
     }
 
-    public IntVar[] getOutputVars() {
-        return outputVariables.toArray(new IntVar[outputVariables.size()]);
+    public SetVar[] getSetSearchVars() {
+        return setsearchVariables.toArray(new SetVar[setsearchVariables.size()]);
+    }
+
+    public Variable[] getOutputVars() {
+        return outputVariables.toArray(new Variable[outputVariables.size()]);
     }
 
     public void declareOutput(String name, Variable variable, Declaration type) {
@@ -103,22 +117,13 @@ public class Datas {
         outputVariables.addAll(Arrays.asList(variables));
     }
 
-    public void declareOutput(String name, IntVar variable, Declaration type) {
-        mLayout.addOutputVar(name, variable, type);
-        outputVariables.add(variable);
-    }
-
-    public void declareOutput(String name, IntVar[] variables, List<Expression> indices, Declaration type) {
-        mLayout.addOutputArrays(name, variables, indices, type);
-        outputVariables.addAll(Arrays.asList(variables));
-    }
-
     public void plugLayout(Solver aSolver) {
         mLayout.set(aSolver);
     }
 
     public void clear() {
         map.clear();
-        searchVariables.clear();
+        intsearchVariables.clear();
+        setsearchVariables.clear();
     }
 }

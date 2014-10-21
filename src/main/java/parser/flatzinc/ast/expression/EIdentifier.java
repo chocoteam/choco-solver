@@ -32,6 +32,7 @@ import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.VariableFactory;
 
 /*
@@ -154,5 +155,19 @@ public final class EIdentifier extends Expression {
             values[i] = bar[i] ? 1 : 0;
         }
         return values;
+    }
+
+    @Override
+    public SetVar setVarValue(Solver solver) {
+        return (SetVar) object;
+    }
+
+    @Override
+    public SetVar[] toSetVarArray(Solver solver) {
+        if (object.getClass().isArray()) {
+            return (SetVar[]) object;
+        }
+        Exit.log();
+        return null;
     }
 }

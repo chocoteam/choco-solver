@@ -32,6 +32,7 @@ import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.VariableFactory;
 
 /*
@@ -153,6 +154,20 @@ public final class EIdArray extends Expression {
                 return vars;
             }
             return (IntVar[]) object;
+        }
+        Exit.log();
+        return null;
+    }
+
+    @Override
+    public SetVar setVarValue(Solver solver) {
+        return (SetVar) object;
+    }
+
+    @Override
+    public SetVar[] toSetVarArray(Solver solver) {
+        if (object.getClass().isArray()) {
+            return (SetVar[]) object;
         }
         Exit.log();
         return null;

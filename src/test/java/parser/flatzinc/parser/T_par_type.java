@@ -114,4 +114,14 @@ public class T_par_type extends GrammarTest {
         Assert.assertEquals(DSetOfInt.me, ((DArray) d).getWhat());
     }
 
+    @Test(groups = "1s")
+    public void test9() throws IOException, RecognitionException {
+        Flatzinc4Parser fp = parser("array [1..4] of set of int: a = [1..2, 2..3, {1, 3}, 2..2];");
+        Declaration d = fp.par_type().decl;
+        Assert.assertTrue(d instanceof DArray);
+        Assert.assertEquals(1, ((DArray) d).getDimension());
+        Assert.assertEquals(Declaration.DType.INT2, ((DArray) d).getIndex(0).typeOf);
+        Assert.assertEquals(DSetOfInt.me, ((DArray) d).getWhat());
+    }
+
 }

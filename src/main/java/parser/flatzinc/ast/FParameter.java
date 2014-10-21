@@ -57,6 +57,7 @@ public final class FParameter {
                 buildInt(identifier, (EInt) expression, datas);
                 break;
             case SET:
+            case SETOFINT:
                 buildSet(identifier, (ESet) expression, datas);
                 break;
             case ARRAY:
@@ -104,29 +105,30 @@ public final class FParameter {
      * Build a {@link Variable} object
      * and add it to the {@code flatzinc.parser.FZNParser.map}.
      *
-     * @param name key name
-     * @param set  {@link parser.flatzinc.ast.expression.ESet} defining the set
+     * @param name  key name
+     * @param set   {@link parser.flatzinc.ast.expression.ESet} defining the set
      * @param datas
      * @return {@link Variable}
      */
-    private static Variable buildSet(String name, ESet set, Datas datas) {
-//        final SetConstantVariable s;
-//        switch (set.getTypeOf()){
-//            case SET_B:
-//                ESetBounds bset = (ESetBounds)set;
-//                s = Choco.constant(bset.enumVal());
-//                map.put(name, s);
-//                return s;
-//            case SET_L:
-//                ESetList lset = (ESetList)set;
-//                s = Choco.constant(lset.enumVal());
-//                map.put(name, s);
-//                return s;
-//            default:
-//                return null;
-//        }
-        Exit.log();
-        return null;
+    private static int[] buildSet(String name, ESet set, Datas datas) {
+        final int[] s;
+        switch (set.getTypeOf()) {
+            case SET_B:
+                ESetBounds bset = (ESetBounds) set;
+                s = bset.enumVal();
+                break;
+            case SET_L:
+                ESetList lset = (ESetList) set;
+                s = lset.enumVal();
+                break;
+            default:
+                s = null;
+                Exit.log("Unknown expression");
+                break;
+
+        }
+        datas.register(name, s);
+        return s;
     }
 
     /**
@@ -158,20 +160,23 @@ public final class FParameter {
                 }
                 datas.register(name, iarr);
                 break;
-            case SET:
+            case SET: {
                 int[][] sarr = new int[size][];
                 for (int i = 0; i < size; i++) {
                     sarr[i] = ((ESet) value.getWhat_i(i)).enumVal();
                 }
                 datas.register(name, sarr);
-//                SetConstantVariable[] sarr = new SetConstantVariable[size];
-//                for(int i = 0; i < size; i++){
-//                    sarr[i] = buildSet(name+ '_' +i, (ESet)value.getWhat_i(i), map);
-//                }
-//                map.put(name, sarr);
-//                Exit.log("% array of set unavailable");
-                break;
-            case ARRAY:
+            }
+            break;
+            case SETOFINT: {
+                int[][] sarr = new int[size][];
+                for (int i = 0; i < size; i++) {
+                    sarr[i] = ((ESet) value.getWhat_i(i)).enumVal();
+                }
+                datas.register(name, sarr);
+            }
+            break;
+            default:
                 LoggerFactory.getLogger("parser").error("Parameter#buildArray ARRAY: unexpected type for " + name);
                 throw new UnsupportedOperationException();
         }

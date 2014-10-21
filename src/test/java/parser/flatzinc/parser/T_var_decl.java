@@ -92,6 +92,13 @@ public class T_var_decl extends GrammarTest {
         fp.var_decl();
     }
 
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void test3bis() throws IOException {
+        Flatzinc4Parser fp = parser("array[1..nb] of var set of 1..3: sets;", mSolver, datas);
+
+        fp.var_decl();
+    }
+
     @Test(groups = "1s", expectedExceptions = NullPointerException.class)
     public void test4() throws IOException {
         Flatzinc4Parser fp = parser("var 0.1..1.0: f;", mSolver, datas);

@@ -33,10 +33,7 @@ import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 
 import java.util.List;
 
@@ -60,7 +57,6 @@ public final class FVariable {
     private static final String output_array = "out";//"output_array";
     private static final String is_defined_var = "is_";//"is_defined_var";
     private static final String var_is_introduced = "var";//"var_is_introduced";
-
 
 
     static Logger LOGGER = LoggerFactory.getLogger("solver");
@@ -91,12 +87,12 @@ public final class FVariable {
             }
             break;
             case SET: {
-                SetVar sv = buildWithSet(identifier, (DSet) type, datas);
-//                readAnnotations(identifier, sv, type, annotations, datas);
+                SetVar sv = buildWithSet(identifier, (DSet) type, expression, datas, aSolver);
+                readAnnotations(identifier, sv, type, annotations, datas);
             }
             break;
             case ARRAY: {
-                IntVar[] vs;
+                Variable[] vs;
                 if (expression == null) {
                     vs = buildWithDArray(identifier, (DArray) type, expression, datas, aSolver);
                 } else {
@@ -109,7 +105,7 @@ public final class FVariable {
 
     }
 
-    private static void readAnnotations(String name, IntVar var, Declaration type, List<EAnnotation> expressions, Datas datas) {
+    private static void readAnnotations(String name, Variable var, Declaration type, List<EAnnotation> expressions, Datas datas) {
         boolean is_introduced = false;
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
@@ -126,13 +122,6 @@ public final class FVariable {
                     varanno = eanno.id.value;//Annotation.valueOf(eanno.id.value);
                     break;
             }
-            /*switch (varanno) {
-                case output_var:
-                    datas.declareOutput(name, var, type);
-                    break;
-                case var_is_introduced:
-                    is_introduced = true;
-            }*/
             if (varanno.startsWith(output_var)) {
                 datas.declareOutput(name, var, type);
             } else if (varanno.startsWith(var_is_introduced)) {
@@ -144,7 +133,7 @@ public final class FVariable {
         }
     }
 
-    private static void readAnnotations(String name, IntVar[] vars, Declaration type, List<EAnnotation> expressions, Datas datas) {
+    private static void readAnnotations(String name, Variable[] vars, Declaration type, List<EAnnotation> expressions, Datas datas) {
         boolean is_introduced = false;
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
@@ -161,14 +150,6 @@ public final class FVariable {
                     varanno = eanno.id.value;//Annotation.valueOf(eanno.id.value);
                     break;
             }
-            /*switch (varanno) {
-                case output_array:
-                    EAnnotation eanno = (EAnnotation) expression;
-                    datas.declareOutput(name, vars, eanno.exps, type);
-                    break;
-                case is_defined_var:
-                    is_introduced = true;
-            }*/
             if (varanno.startsWith(output_array)) {
                 EAnnotation eanno = (EAnnotation) expression;
                 datas.declareOutput(name, vars, eanno.exps, type);
@@ -300,27 +281,36 @@ public final class FVariable {
      * @param datas
      * @return {@link solver.variables.Variable}.
      */
-    private static SetVar buildWithSet(String name, DSet type, Datas datas) {
-//        final Declaration what = type.getWhat();
-//        final SetVariable sv;
-//        switch (what.typeOf) {
-//            case INT:
-//                LOGGER.severe("PVariable#buildWithSet INT: unknown constructor for " + name);
-//                throw new UnsupportedOperationException();
-//            case INT2:
-//                DInt2 bounds = (DInt2) what;
-//                sv = Choco.makeSetVar(name, bounds.getLow(), bounds.getUpp());
-//                datas.register(name, sv);
-//                return sv;
-//            case INTN:
-//                DManyInt values = (DManyInt) what;
-//                sv = Choco.makeSetVar(name, values.getValues());
-//                datas.register(name, sv);
-//                return sv;
-//        }
-//        return null;
-        Exit.log("SET VAR");
-        return null;
+    private static SetVar buildWithSet(String name, DSet type, Expression expression, Datas datas, Solver solver) {
+        final Declaration what = type.getWhat();
+        final SetVar sv;
+        switch (what.typeOf) {
+            case INT2:
+                if (expression == null) {
+                    DInt2 bounds = (DInt2) what;
+                    sv = VariableFactory.set(DEBUG ? name : NO_NAME, bounds.getLow(), bounds.getUpp(), solver);
+                } else {
+                    Exit.log();
+                    sv = null;
+                }
+                break;
+            case INTN:
+                DManyInt mint = (DManyInt) what;
+                if (expression == null) {
+                    sv = VariableFactory.set(DEBUG ? name : NO_NAME, mint.getValues(), solver);
+                } else {
+                    sv = null;
+                    Exit.log("Unknown expression");
+                }
+                break;
+            default:
+                sv = null;
+                Exit.log("Unknown expression");
+                break;
+
+        }
+        datas.register(name, sv);
+        return sv;
     }
 
 
@@ -333,12 +323,12 @@ public final class FVariable {
      * @param datas
      * @param solver
      */
-    private static IntVar[] buildWithDArray(String name, DArray type, Expression expression, Datas datas, Solver solver) {
+    private static Variable[] buildWithDArray(String name, DArray type, Expression expression, Datas datas, Solver solver) {
         final DInt2 index = (DInt2) type.getIndex(0);
-        // no need to get lowB, it is always 1 (see specification of FZN for more informations)
+        // no need to get lowB, it is always 1 (see specification of FZN for more information)
         int size = index.getUpp();
         Declaration what = type.getWhat();
-        IntVar[] vs = null;
+        Variable[] vs = null;
         switch (what.typeOf) {
             case BOOL:
                 BoolVar[] bs = new BoolVar[size];
@@ -390,12 +380,11 @@ public final class FVariable {
                 datas.register(name, vs);
                 break;
             case SET:
-//                final SetVariable[] svs = new SetVariable[size];
-//                for (int i = 1; i <= size; i++) {
-//                    svs[i - 1] = buildWithSet(name + '_' + i, (DSet) what, datas);
-//                }
-//                datas.register(name, svs);
-                Exit.log("SET VAR");
+                vs = new SetVar[size];
+                for (int i = 1; i <= size; i++) {
+                    vs[i - 1] = buildWithSet(name + '_' + i, (DSet) what, expression, datas, solver);
+                }
+                datas.register(name, vs);
                 break;
             default:
                 break;
@@ -404,57 +393,10 @@ public final class FVariable {
 
     }
 
-    private static void buildFromIntArray(IntVar[] vs, EArray array, int size, Solver solver) {
+    private static void buildFromIntArray(Variable[] vs, EArray array, int size, Solver solver) {
         //build the array
         for (int i = 0; i < size; i++) {
             vs[i] = array.getWhat_i(i).intVarValue(solver);
         }
-    }
-
-    /**
-     * Build an array of <? extends {@link solver.variables.Variable}>.
-     * </br>WARNING: array's indice are from 1 to n.
-     *
-     * @param name   name of the array of variables.</br> Each variable is named like {@code name}_i.
-     * @param type   {@link parser.flatzinc.ast.declaration.DArray} object.
-     * @param earr   array of {@link parser.flatzinc.ast.expression.Expression}
-     * @param datas
-     * @param solver
-     */
-    private static IntVar[] buildWithDArray(String name, DArray type, Expression expression, EArray earr, Datas datas, Solver solver) {
-        final DInt2 index = (DInt2) type.getIndex(0);
-        // no need to get lowB, it is always 1 (see specification of FZN for more informations)
-        final int size = index.getUpp();
-        final Declaration what = type.getWhat();
-
-        switch (what.typeOf) {
-            case BOOL:
-                final BoolVar[] bs = new BoolVar[size];
-                for (int i = 0; i < size; i++) {
-                    bs[i] = earr.getWhat_i(i).boolVarValue(solver);
-                }
-                datas.register(name, bs);
-                return bs;
-            case INT:
-            case INT2:
-            case INTN:
-                final IntVar[] vs = new IntVar[size];
-                for (int i = 0; i < size; i++) {
-                    vs[i] = earr.getWhat_i(i).intVarValue(solver);
-                }
-                datas.register(name, vs);
-                return vs;
-            case SET:
-//                final SetVariable[] svs = new SetVariable[size];
-//                for (int i = 0; i < size; i++) {
-//                    svs[i] = earr.getWhat_i(i).setVarValue();
-//                }
-//                datas.register(name, svs);
-                Exit.log("SET VAR");
-                break;
-            default:
-                break;
-        }
-        return null;
     }
 }
