@@ -1,11 +1,12 @@
-*/target/*
+*target/*
 *.iml
 *.ipr
 *.iws
-*/fzn_choco
+*/fzn_choco/*
 *.jar
 /lib/*
 *.DS_Store
+*/dependency-reduced-pom.xml
 
 */mysql.properties
 */logback-test.xml
