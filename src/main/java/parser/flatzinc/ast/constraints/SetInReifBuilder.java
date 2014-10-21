@@ -27,14 +27,15 @@
 package parser.flatzinc.ast.constraints;
 
 import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.ICF;
+import solver.constraints.set.SCF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 
 import java.util.List;
 
@@ -50,16 +51,17 @@ public class SetInReifBuilder implements IBuilder {
     @Override
     public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar a = exps.get(0).intVarValue(solver);
-		BoolVar r = exps.get(2).boolVarValue(solver);
+        BoolVar r = exps.get(2).boolVarValue(solver);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-			ICF.member(a, values).reifyWith(r);
+            ICF.member(a, values).reifyWith(r);
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-			ICF.member(a, low, upp).reifyWith(r);
+            ICF.member(a, low, upp).reifyWith(r);
         } else {
-            Exit.log("SetVar unavailable");
+            SetVar b = exps.get(1).setVarValue(solver);
+            SCF.member(a, b).reifyWith(r);
         }
     }
 }

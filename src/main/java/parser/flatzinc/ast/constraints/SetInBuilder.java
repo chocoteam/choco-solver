@@ -27,13 +27,14 @@
 package parser.flatzinc.ast.constraints;
 
 import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.set.SCF;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 
 import java.util.List;
 
@@ -57,7 +58,8 @@ public class SetInBuilder implements IBuilder {
             int upp = ((ESetBounds) exps.get(1)).getUpp();
             solver.post(IntConstraintFactory.member(var, low, upp));
         } else {
-            Exit.log("SetVar unavailable");
+            SetVar b = exps.get(1).setVarValue(solver);
+            solver.post(SCF.member(var, b));
         }
     }
 }
