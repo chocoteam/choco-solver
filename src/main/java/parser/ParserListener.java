@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,42 +24,65 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc;
-
-
-import org.antlr.v4.runtime.RecognitionException;
-import parser.flatzinc.para.ParserMaster;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
+package parser;
 
 /**
- * The main entry point
+ * A parser listener to ease user interaction.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 16/07/13
+ * @version choco-parsers
+ * @since 21/10/2014
  */
-public class ChocoFZN {
+public interface ParserListener {
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+    /**
+     * Actions to do before starting the parsing the parameters
+     */
+    void beforeParsingParameters();
 
-        int i = Arrays.asList(args).indexOf("-p"); // look for the "-p" option
-        int nbCores = (i == -1 ? 1 : Integer.parseInt(args[i + 1])); // and get its value if declared
+    /**
+     * Actions to do after ending the parsing  the parameters
+     */
+    void afterParsingParameters();
 
-        if (nbCores == 1) {
-            Flatzinc fzn = new Flatzinc();
-            fzn.addListener(new BaseFlatzincListener(fzn));
+    /**
+     * Actions to do before creating the solver
+     */
+    void beforeSolverCreation();
 
-            fzn.parseParameters(args);
-            fzn.createSolver();
-            fzn.parseInputFile();
-            fzn.configureSearch();
-            fzn.solve();
-        } else {
-            // will manage one ParseAndSolve per thread
-            new ParserMaster(nbCores, args);
-        }
-    }
+    /**
+     * Actions to do after the solver is created
+     */
+    void afterSolverCreation();
+
+    /**
+     * Actions to do before starting the parsing the input file
+     */
+    void beforeParsingFile();
+
+    /**
+     * Actions to do after ending the parsing  the input file
+     */
+    void afterParsingFile();
+
+    /**
+     * Actions to do before configuring the search
+     */
+    void beforeConfiguringSearch();
+
+    /**
+     * Actions to do after ending the search configuration
+     */
+    void afterConfiguringSearch();
+
+    /**
+     * Actions to do before starting the resolution
+     */
+    void beforeSolving();
+
+    /**
+     * Actions to do after ending the resolution
+     */
+    void afterSolving();
 }

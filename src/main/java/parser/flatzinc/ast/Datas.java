@@ -28,7 +28,7 @@ package parser.flatzinc.ast;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
-import parser.flatzinc.FZNLayout;
+import parser.flatzinc.layout.FZNLayout;
 import parser.flatzinc.ast.declaration.Declaration;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;

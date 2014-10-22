@@ -30,12 +30,17 @@ package parser.flatzinc.para;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.flatzinc.ParseAndSolve;
+import parser.flatzinc.Flatzinc;
 import solver.ResolutionPolicy;
+import solver.Solver;
+import solver.objective.ObjectiveManager;
+import solver.search.limits.FailCounter;
+import solver.search.loop.lns.LNSFactory;
+import solver.search.strategy.ISF;
 import solver.thread.AbstractParallelMaster;
-import util.tools.ArrayUtils;
+import solver.variables.IntVar;
 
-public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
+public class ParserMaster extends AbstractParallelMaster<ParserSlave> {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
 
@@ -47,31 +52,50 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
     int nbSol;
     boolean closeWithSuccess;
     ResolutionPolicy policy;
-    ParseAndSolve aPas;
-
-    public final static String[][] config = new String[][]{
-            {"-lf"},                    // fix+lf
-            {"-lf", "-lns", "PGLNS"},    // LNS propag + fix + lf
-            {"-lf", "-lns", "RLNS"},    // LNS random + fix + lf
-            {},                            // fix
-//				{"-lf","-i","-bbss","1","-dv"},		// ABS on dec vars + lf
-//				{"-lf","-i","-bbss","2","-dv"},	// IBS on dec vars + lf
-//				{"-lf","-i","-bbss","3","-dv"},	// WDeg on dec vars + lf
-    };
+    Flatzinc aPas;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public ParaserMaster(int nbCores, String[] args) {
-        nbCores = Math.min(nbCores, config.length);
-        slaves = new ParaserSlave[nbCores];
+    public ParserMaster(int nbCores, String[] args) {
+        nbCores = Math.min(nbCores, 4);
+        slaves = new ParserSlave[nbCores];
         for (int i = 0; i < nbCores; i++) {
-            String[] options = ArrayUtils.append(args, config[i]);
-            slaves[i] = new ParaserSlave(this, i, options);
+            slaves[i] = new ParserSlave(this, i, args);
             if (i == 0) {
-                aPas = slaves[i].PAS;
+                aPas = slaves[i].fznp;
             }
+            Solver solver = slaves[i].fznp.getSolver();
+            ObjectiveManager om = solver.getObjectiveManager();
+
+            IntVar[] dvars = slaves[i].fznp.datas.getIntSearchVars();
+            switch (i) {
+                case 0:
+                    solver.set(ISF.lastConflict(solver));
+                    break;
+                case 1:
+                    if (!om.isOptimization()) {
+                        solver.set(ISF.domOverWDeg(dvars, 0));
+                    } else {
+                        LNSFactory.pglns(solver, dvars, 200, 100, 10, slaves[i].fznp.seed, new FailCounter(30));
+                    }
+                    solver.set(ISF.lastConflict(solver));
+                    break;
+                case 2:
+                    if (!om.isOptimization()) {
+                        solver.set(ISF.domOverWDeg(dvars, 0));
+                    } else {
+                        LNSFactory.pglns(solver, dvars, 200, 100, 10, slaves[i].fznp.seed, new FailCounter(30));
+                    }
+                    solver.set(ISF.lastConflict(solver));
+                    break;
+                case 3:
+                    // fix
+                    break;
+            }
+
+
             slaves[i].workInParallel();
         }
 

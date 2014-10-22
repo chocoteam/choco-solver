@@ -34,8 +34,9 @@
 
 package parser.flatzinc.para;
 
-import parser.flatzinc.FZNLayoutPara;
-import parser.flatzinc.ParseAndSolve;
+import parser.flatzinc.BaseFlatzincListener;
+import parser.flatzinc.layout.FZNLayoutPara;
+import parser.flatzinc.Flatzinc;
 import parser.flatzinc.ast.Datas;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -44,7 +45,7 @@ import solver.thread.AbstractParallelSlave;
 
 import java.io.IOException;
 
-public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
+public class ParserSlave extends AbstractParallelSlave<ParserMaster> {
 
     //***********************************************************************************
     // VARIABLES
@@ -52,23 +53,28 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
 
     String[] args;
     Solver solver;
-    ParseAndSolve PAS;
+    Flatzinc fznp;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public ParaserSlave(final ParaserMaster master, int id, String[] args) {
+    public ParserSlave(final ParserMaster master, int id, String[] args) {
         super(master, id);
         this.args = args;
-        PAS = new ParseAndSolve() {
-            @Override
-            public void buildLayout(Datas datas) {
-                datas.setmLayout(new FZNLayoutPara(master, PAS.instance, PAS.gc));
-            }
-        };
+        fznp = new Flatzinc();
         try {// sequential parsing (safer)
-            PAS.parse(args);
+            fznp.addListener(new BaseFlatzincListener(fznp) {
+                @Override
+                public void buildLayout(String instance, Datas datas) {
+                    datas.setmLayout(new FZNLayoutPara(master, fznp.instance, fznp.gc));
+                }
+            });
+
+            fznp.parseParameters(args);
+            fznp.createSolver();
+            fznp.parseInputFile();
+            fznp.configureSearch();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,15 +86,11 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
 
     @Override
     public void work() {
-        try {
-            // plug monitor to communicate bounds (should not be added in the sequential phasis)
-            solver = PAS.getSolver();
-            PAS.solve();
-            if (!solver.hasReachedLimit()) {
-                master.closeWithSuccess();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        // plug monitor to communicate bounds (should not be added in the sequential phasis)
+        solver = fznp.getSolver();
+        fznp.solve();
+        if (!solver.hasReachedLimit()) {
+            master.closeWithSuccess();
         }
     }
 

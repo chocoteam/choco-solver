@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -24,39 +24,64 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc;
+package parser;
 
-import parser.flatzinc.ast.GoalConf;
-import parser.flatzinc.para.ParaserMaster;
-import solver.ResolutionPolicy;
-import solver.objective.ObjectiveManager;
+import solver.Solver;
+
+import java.io.FileNotFoundException;
 
 /**
+ * An interface for all parsers
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 16/07/13
+ * @version choco-parsers
+ * @since 21/10/2014
  */
-public class FZNLayoutPara extends FZNLayout {
+public interface IParser {
 
-    final ParaserMaster master;
+    /**
+     * Add a parser listener
+     * @param listener
+     */
+    void addListener(ParserListener listener);
 
-    public FZNLayoutPara(ParaserMaster master, String instance, GoalConf gc) {
-        super(instance, gc);
-        this.master = master;
-    }
+    /**
+     * Remove a parser listener
+     * @param listener
+     */
+    void removeListener(ParserListener listener);
 
-    @Override
-    public void onSolution() {
-        ObjectiveManager om = solver.getObjectiveManager();
-        int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
-        if (master.newSol(val, om.getPolicy())) {
-            super.onSolution();
-        }
-    }
+    /**
+     * Parse the program arguments
+     * @param args program arguments
+     */
+    void parseParameters(String[] args);
 
-    @Override
-    public void beforeClose() {
-        // nothing to do
-    }
+    /**
+     * Create the solver
+     */
+    void createSolver();
+
+    /**
+     * Parse the file
+     */
+    void parseInputFile() throws FileNotFoundException;
+
+    /**
+     * Configure the search strategy
+     */
+    void configureSearch();
+
+    /**
+     * Run the resolution of the given solver
+     */
+    void solve();
+
+    /**
+     * Get the solver
+     * @return solver
+     */
+    Solver getSolver();
+
 }

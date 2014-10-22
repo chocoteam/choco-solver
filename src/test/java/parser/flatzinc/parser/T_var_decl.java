@@ -29,7 +29,7 @@ package parser.flatzinc.parser;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import parser.flatzinc.FZNLayout;
+import parser.flatzinc.layout.FZNLayout;
 import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.GoalConf;

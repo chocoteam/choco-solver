@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
-import parser.flatzinc.ParserConfiguration;
+import parser.ParserConfiguration;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;

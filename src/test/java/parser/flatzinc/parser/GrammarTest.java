@@ -28,7 +28,7 @@ package parser.flatzinc.parser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
-import parser.flatzinc.FZNLayout;
+import parser.flatzinc.layout.FZNLayout;
 import parser.flatzinc.Flatzinc4Lexer;
 import parser.flatzinc.Flatzinc4Parser;
 import parser.flatzinc.ast.Datas;

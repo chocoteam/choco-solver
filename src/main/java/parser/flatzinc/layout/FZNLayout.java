@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package parser.flatzinc;
+package parser.flatzinc.layout;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,9 @@ import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -60,11 +62,11 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     List<String> output_names;
     List<Declaration.DType> output_types;
-    List<IntVar> output_vars;
+    List<Variable> output_vars;
 
     List<String> output_arrays_names;
     List<Declaration.DType> output_arrays_types;
-    List<IntVar[]> output_arrays_vars;
+    List<Variable[]> output_arrays_vars;
 
     StringBuilder stringBuilder = new StringBuilder();
 
@@ -122,7 +124,7 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         }
         for (int i = 0; i < output_arrays_names.size(); i++) {
             String name = output_arrays_names.get(i);
-            IntVar[] ivars = output_arrays_vars.get(i);
+            Variable[] ivars = output_arrays_vars.get(i);
             if (ivars.length > 0) {
                 Declaration.DType type = output_arrays_types.get(i);
                 stringBuilder.append(value(ivars[0], type));
@@ -149,14 +151,23 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         return true;
     }
 
-    private String value(IntVar var, Declaration.DType type) {
+    private String value(Variable var, Declaration.DType type) {
         switch (type) {
             case BOOL:
-                return var.getValue() == 1 ? "true" : "false";
+                return ((BoolVar) var).getValue() == 1 ? "true" : "false";
             case INT:
             case INT2:
             case INTN:
-                return Integer.toString(var.getValue());
+                return Integer.toString(((IntVar) var).getValue());
+            case SET:
+                StringBuilder st = new StringBuilder();
+                st.append('{');
+                for (int i : ((SetVar) var).getValues()) {
+                    st.append(i).append(',');
+                }
+                if(st.length()>1)st.deleteCharAt(st.length() - 1);
+                st.append('}');
+                return st.toString();
             default:
                 Exit.log();
         }
@@ -191,7 +202,6 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
             }
             if (!LOGGER.isDebugEnabled()) {
                 LOGGER.info("% " + solver.getMeasures().toOneShortLineString());
-                LOGGER.info("% {}", solver.getMeasures().toString());
             }
         }
         if (LOGGER.isDebugEnabled()) {
@@ -226,20 +236,12 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     }
 
     public void addOutputVar(String name, Variable variable, Declaration type) {
-        Exit.log("Cannot output " + name);
-    }
-
-    public void addOutputVar(String name, IntVar variable, Declaration type) {
         output_names.add(name);
         output_vars.add(variable);
         output_types.add(type.typeOf);
     }
 
     public void addOutputArrays(String name, Variable[] variables, List<Expression> indices, Declaration type) {
-        Exit.log("Cannot output " + name);
-    }
-
-    public void addOutputArrays(String name, IntVar[] variables, List<Expression> indices, Declaration type) {
         EArray array = (EArray) indices.get(0);
         // print the size of the type of array
         stringBuilder.append(name).append(" = array").append(array.what.size()).append("d(");

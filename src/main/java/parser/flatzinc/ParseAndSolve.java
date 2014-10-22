@@ -35,8 +35,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import parser.ParserConfiguration;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.GoalConf;
+import parser.flatzinc.layout.FZNLayout;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.explanations.ExplanationFactory;
@@ -56,6 +58,7 @@ import java.util.ArrayList;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
+@Deprecated
 public class ParseAndSolve {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("solver");
@@ -75,7 +78,7 @@ public class ParseAndSolve {
     protected boolean free = false;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
-    protected int nb_cores = 1;
+    protected int nb_cores = 1; // SEEMS USELESS, BUT NEEDED BY CHOCOFZN
 
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected long tl = -1;
@@ -98,9 +101,6 @@ public class ParseAndSolve {
     @Option(name = "-lf", usage = "Last Conflict.", required = false)
     protected boolean lastConflict;
 
-    @Option(name = "-lns", usage = "Plug Large Neighborhood Seach in", required = false)
-    protected GoalConf.LNS lns = GoalConf.LNS.NONE;
-
     @Option(name = "-fr", aliases = "--fast-restart", usage = "Force fast restart (fail 20).", required = false)
     protected boolean fr = false;
 
@@ -119,6 +119,7 @@ public class ParseAndSolve {
     public GoalConf gc;
 
 
+    @Deprecated
     public void doMain(String[] args) throws IOException, RecognitionException {
         parse(args);
         if (ParserConfiguration.PRINT_CONSTRAINT && LOGGER.isInfoEnabled()) {
@@ -134,6 +135,7 @@ public class ParseAndSolve {
         solve();
     }
 
+    @Deprecated
     public void parse(String[] args) throws IOException, RecognitionException {
         CmdLineParser cmdparser = new CmdLineParser(this);
         cmdparser.setUsageWidth(160);
@@ -147,7 +149,7 @@ public class ParseAndSolve {
             System.err.println();
             return;
         }
-        gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl, lns, fr);
+        gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl, fr);
         LOGGER.info("% parse instance...");
         solver = new Solver();
         long creationTime = -System.nanoTime();
@@ -169,12 +171,14 @@ public class ParseAndSolve {
         solver.getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
     }
 
+    @Deprecated
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
         if (ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, false);
         solver.getSearchLoop().launch((!solver.getObjectiveManager().isOptimization()) && !gc.all);
     }
 
+    @Deprecated
     public void buildParser(InputStream is, Solver mSolver, Datas datas) {
         // Create an input character stream from standard in
         CharStream input = new UnbufferedCharStream(is);
@@ -203,10 +207,12 @@ public class ParseAndSolve {
         }
     }
 
+    @Deprecated
     public Solver getSolver() {
         return solver;
     }
 
+    @Deprecated
     public void buildLayout(Datas datas) {
         FZNLayout fl = new FZNLayout(instance, gc);
         datas.setmLayout(fl);

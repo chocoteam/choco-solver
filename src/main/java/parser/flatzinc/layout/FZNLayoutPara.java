@@ -24,42 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc;
+package parser.flatzinc.layout;
 
-
-import org.antlr.v4.runtime.RecognitionException;
+import parser.flatzinc.ast.GoalConf;
 import parser.flatzinc.para.ParserMaster;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
+import solver.ResolutionPolicy;
+import solver.objective.ObjectiveManager;
 
 /**
- * The main entry point
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 16/07/13
  */
-public class ChocoFZN {
+public class FZNLayoutPara extends FZNLayout {
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+    final ParserMaster master;
 
-        int i = Arrays.asList(args).indexOf("-p"); // look for the "-p" option
-        int nbCores = (i == -1 ? 1 : Integer.parseInt(args[i + 1])); // and get its value if declared
+    public FZNLayoutPara(ParserMaster master, String instance, GoalConf gc) {
+        super(instance, gc);
+        this.master = master;
+    }
 
-        if (nbCores == 1) {
-            Flatzinc fzn = new Flatzinc();
-            fzn.addListener(new BaseFlatzincListener(fzn));
-
-            fzn.parseParameters(args);
-            fzn.createSolver();
-            fzn.parseInputFile();
-            fzn.configureSearch();
-            fzn.solve();
-        } else {
-            // will manage one ParseAndSolve per thread
-            new ParserMaster(nbCores, args);
+    @Override
+    public void onSolution() {
+        ObjectiveManager om = solver.getObjectiveManager();
+        int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
+        if (master.newSol(val, om.getPolicy())) {
+            super.onSolution();
         }
+    }
+
+    @Override
+    public void beforeClose() {
+        // nothing to do
     }
 }
