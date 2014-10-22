@@ -1,4 +1,5 @@
-*target/*
+target/*
+out/*
 *.iml
 *.ipr
 *.iws
@@ -10,3 +11,5 @@
 
 */mysql.properties
 */logback-test.xml
+
+dependency-reduced-pom.xml
