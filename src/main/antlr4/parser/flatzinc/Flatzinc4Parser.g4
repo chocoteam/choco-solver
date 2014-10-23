@@ -42,7 +42,7 @@ import gnu.trove.list.array.TIntArrayList;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.FZNException;
-import parser.flatzinc.FZNLayout;
+import parser.flatzinc.layout.FZNLayout;
 import parser.flatzinc.ast.FConstraint;
 import parser.flatzinc.ast.FGoal;
 import parser.flatzinc.ast.FParameter;
