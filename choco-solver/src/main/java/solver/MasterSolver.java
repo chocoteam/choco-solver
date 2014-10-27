@@ -42,8 +42,8 @@ import util.ESat;
  * advises the others.
  * On optimisation problem, the best value found so far is shared among
  * all the solvers.
- *
- *
+ * <p/>
+ * <p/>
  * The expected ways to solve a problem using MasterSolver is:
  * <pre>
  *     Solver solver = new Solver();
@@ -171,7 +171,9 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
      * @return an {@link util.ESat}.
      */
     public ESat isFeasible() {
-        return feasible;
+        if (nbSolution > 0) return ESat.TRUE;
+        else if (limit) return ESat.UNDEFINED;
+        else return ESat.FALSE;
     }
 
     /**

@@ -29,10 +29,13 @@ package solver.para;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.MasterSolver;
+import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 /**
  * <br/>
@@ -53,6 +56,35 @@ public class MasterSolverTests {
         }
         solver.post(IntConstraintFactory.arithm(p[0], "<", p[n * k - 1]));
         solver.post(IntConstraintFactory.alldifferent(p, "AC"));
+        return solver;
+    }
+
+    private Solver golomb(int m) {
+        Solver solver = new Solver();
+        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+
+        solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
+
+        for (int i = 0; i < m - 1; i++) {
+            solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
+        }
+
+        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+        IntVar[][] m_diffs = new IntVar[m][m];
+        for (int k = 0, i = 0; i < m - 1; i++) {
+            for (int j = i + 1; j < m; j++, k++) {
+                solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
+                solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                m_diffs[i][j] = diffs[k];
+            }
+        }
+        solver.post(IntConstraintFactory.alldifferent(diffs, "BC"));
+        // break symetries
+        if (m > 2) {
+            solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+        }
         return solver;
     }
 
@@ -109,4 +141,72 @@ public class MasterSolverTests {
         ms.configureSearches();
         Assert.assertFalse(ms.findSolution());
     }
+
+    //
+    @Test(groups = "1s")
+    public void testOptOneSolver() {
+        Solver s0 = golomb(10);
+        MasterSolver ms = new MasterSolver();
+        ms.populate(s0, 0);
+        ms.configureSearches();
+        ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
+        Assert.assertEquals(ESat.TRUE, ms.isFeasible());
+        Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
+    }
+
+    @Test(groups = "1s")
+    public void testOptTwoSolvers() {
+        Solver s0 = golomb(10);
+        MasterSolver ms = new MasterSolver();
+        ms.populate(s0, 1);
+        ms.configureSearches();
+        ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
+        Assert.assertEquals(ESat.TRUE, ms.isFeasible());
+        Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
+    }
+
+    @Test(groups = "1s")
+    public void testOptFourSolvers() {
+        Solver s0 = golomb(10);
+        MasterSolver ms = new MasterSolver();
+        ms.populate(s0, 3);
+        ms.configureSearches();
+        ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
+        Assert.assertEquals(ESat.TRUE, ms.isFeasible());
+        Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
+    }
+
+    @Test(groups = "1s")
+    public void testOptOneSolverNoSol() {
+        Solver s0 = golomb(10);
+        s0.post(ICF.arithm((IntVar) s0.getVars()[9], "=", (IntVar) s0.getVars()[0]));
+        MasterSolver ms = new MasterSolver();
+        ms.populate(s0, 0);
+        ms.configureSearches();
+        ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
+        Assert.assertEquals(ESat.FALSE, ms.isFeasible());
+    }
+
+    @Test(groups = "1s")
+    public void testOptTwoSolversNoSol() {
+        Solver s0 = golomb(10);
+        s0.post(ICF.arithm((IntVar) s0.getVars()[9], "=", (IntVar) s0.getVars()[0]));
+        MasterSolver ms = new MasterSolver();
+        ms.populate(s0, 1);
+        ms.configureSearches();
+        ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
+        Assert.assertEquals(ESat.FALSE, ms.isFeasible());
+    }
+
+    @Test(groups = "1s")
+    public void testOptFourSolversNoSol() {
+        Solver s0 = golomb(10);
+        s0.post(ICF.arithm((IntVar) s0.getVars()[9], "=", (IntVar) s0.getVars()[0]));
+        MasterSolver ms = new MasterSolver();
+        ms.populate(s0, 3);
+        ms.configureSearches();
+        ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
+        Assert.assertEquals(ESat.FALSE, ms.isFeasible());
+    }
+
 }
