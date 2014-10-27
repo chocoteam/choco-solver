@@ -61,7 +61,7 @@ public class SearchMonitorFactory {
             return String.format("- Solution #%s found. %s \n\t%s.",
                     solver.getMeasures().getSolutionCount(),
                     solver.getMeasures().toOneShortLineString(),
-                    print(solver.getStrategy().vars)
+                    print(solver.getStrategy().getVariables())
             );
         }
 
@@ -87,7 +87,7 @@ public class SearchMonitorFactory {
         @Override
         public String print() {
             int limit = 120;
-            Variable[] vars = solver.getStrategy().vars;
+            Variable[] vars = solver.getStrategy().getVariables();
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');

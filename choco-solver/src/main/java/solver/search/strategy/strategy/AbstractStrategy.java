@@ -51,7 +51,7 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
-    public final V[] vars;
+    protected final V[] vars;
 
     protected AbstractStrategy(V[] variables) {
         this.vars = variables.clone();
@@ -92,5 +92,12 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
      */
     public Decision<V> computeDecision(V var) {
         return null;
+    }
+
+    /**
+     * @return
+     */
+    public V[] getVariables() {
+        return vars;
     }
 }

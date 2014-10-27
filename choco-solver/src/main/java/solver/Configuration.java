@@ -157,5 +157,7 @@ public enum Configuration {
     // Only checked when ENABLE_TABLE_SUBS is set to true
     public static final int MAX_TUPLES_FOR_TABLE_SUBS = Integer.parseInt(properties.getProperty("MAX_TUPLES_FOR_TABLE_SUBS"));
 
+    // Define the search binder path
+    public static final String SEARCH_BINDER_PATH = properties.getProperty("SEARCH_BINDER_PATH");
 
 }
