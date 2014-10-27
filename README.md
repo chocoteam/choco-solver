@@ -4,7 +4,7 @@ Choco3 is an open-source Java library for Constraint Programming.
 
 Choco3 is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
 
-Current stable version is 3.2.2-SNAPSHOT (13 Oct 2014).
+Current stable version is 3.2.1 (13 Oct 2014).
 
 Choco3 comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -40,7 +40,7 @@ Next, just declare the dependency:
 <dependency>
    <groupId>choco</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>3.2.2-SNAPSHOT</version>
+   <version>3.2.1</version>
 </dependency>
 ```
 
@@ -48,14 +48,14 @@ Next, just declare the dependency:
 
 The jar can be downloaded from this URL:
 
-* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/3.2.2-SNAPSHOT/choco-solver-3.2.2-SNAPSHOT-jar-with-dependencies.jar
+* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/3.2.1/choco-solver-3.2.1.jar
 
-The file contains `choco-environment`, `choco-solver`artifacts and their dependencies.
+The file contains `choco-solver` artifacts and its dependencies.
 
 ## Building from sources ##
 
 Requirements:
-* JDK 7+
+* JDK 8+
 * maven 3+
 
 The source of the released versions are directly available in the `Tag` section.
