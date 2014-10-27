@@ -7,13 +7,10 @@ NEXT MILESTONE
 -------------------
 
 - Fix #225: fix PropCostRegular, wrt to S.Demassey instructions.
-<<<<<<< HEAD
-=======
 - Fix #229: create MasterSolver and SlaveSolver classes to deal with multi-thread resolution
             + add external configuration of the search strategy through a binder
 - Fix #227: deal with initial propagation
-
->>>>>>> iss_229
+- fix #230: update release script
 
 3.2.1 - 13 Oct 2014
 -------------------
