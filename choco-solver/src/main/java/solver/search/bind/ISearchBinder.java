@@ -24,55 +24,48 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.bind;
 
-package solver.thread;
+import solver.Solver;
 
 /**
- * Slave born to be mastered and work in parallel
+ * Define a search binder to configure or override the search strategies.
+ * When no search strategies is defined, the set of all variables
+ * (treated by type: IntVar, BoolVar, SetVar, etc) is considered.
+ * When one (or more) search strategies is already defined, the decision
+ * variables are extracted and considered as an input.
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme, Jean-Guillaume Fages
+ * @version choco
+ * @since 23/10/14
  */
-public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
-
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    public P master;
-    public final int id;
-
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+public interface ISearchBinder {
 
     /**
-     * Create a slave born to be mastered and work in parallel
+     * Configure or override the search strategies of the given solver.
      *
-     * @param master
-     * @param id     slave unique name
+     * @param solver a solver
      */
-    public AbstractParallelSlave(P master, int id) {
-        this.master = master;
-        this.id = id;
-    }
-
-    //***********************************************************************************
-    // SUB-PROBLEM SOLVING
-    //***********************************************************************************
+    void configureSearch(Solver solver);
 
     /**
-     * Creates a new thread to work in parallel
+     * Configure (or override) the search strategies of the given solvers.
+     *
+     * @param solvers a list of solver
      */
-    public void workInParallel() {
-        Thread t = new Thread(() -> {
-            work();
-            master.wishGranted();
-        });
-        t.start();
+    default void configureSearches(Solver[] solvers) {
+        for (int i = 0; i < solvers.length; i++) {
+            configureSearch(solvers, i);
+        }
     }
 
+
     /**
-     * do something
+     * Configure (or override) the search strategies of the given solvers.
+     *
+     * @param solvers a list of solver
+     * @param sidx    index of the solver to configure
      */
-    public abstract void work();
+    void configureSearch(Solver[] solvers, int sidx);
 }

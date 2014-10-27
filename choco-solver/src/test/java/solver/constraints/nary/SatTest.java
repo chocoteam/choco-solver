@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 import solver.variables.VF;
+import util.ESat;
 
 /**
  * <br/>
@@ -149,4 +150,28 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
+
+    @Test(groups = "1s")
+    public void test10() {
+        Solver solver = new Solver();
+        BoolVar b1;
+        b1 = VF.bool("b1", solver);
+        SatFactory.addTrue(b1);
+        //        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(b1.getBooleanValue(), ESat.TRUE);
+    }
+
+    @Test(groups = "1s")
+    public void test11() {
+        Solver solver = new Solver();
+        BoolVar b1;
+        b1 = VF.bool("b1", solver);
+        SatFactory.addFalse(b1);
+        //        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(b1.getBooleanValue(), ESat.FALSE);
+    }
 }

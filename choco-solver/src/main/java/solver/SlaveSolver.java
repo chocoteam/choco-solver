@@ -24,75 +24,77 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/09/13
- * Time: 23:06
- */
-
-package samples;
-
-import solver.ResolutionPolicy;
-import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.thread.AbstractParallelSlave;
+import solver.variables.IntVar;
 
-import java.lang.reflect.InvocationTargetException;
-
-public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
-
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @version choco
+ * @since 27/10/14
+ */
+public class SlaveSolver extends AbstractParallelSlave<MasterSolver> {
 
     Solver solver;
-    ParallelizedProblem model;
+    ResolutionPolicy policy;
+    IntVar objective;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
-
-    public SlaveProblem(final String probClassName, final MasterProblem master, final int id) {
-        super(master, id);
-        try {
-            model = (ParallelizedProblem) Class.forName(probClassName).getDeclaredConstructors()[0].newInstance(id);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Create a slave born to be mastered and work in parallel
+     *
+     * @param master
+     * @param id     slave unique name
+     */
+    public SlaveSolver(MasterSolver master, int id, Solver solver) {
+        this(master, id, solver, ResolutionPolicy.SATISFACTION, null);
     }
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+    /**
+     * Create a slave born to be mastered and work in parallel
+     *
+     * @param master    the driver
+     * @param id        slave unique name
+     * @param solver    the driven solver
+     * @param policy    the resolution policy
+     * @param objective the objective variable (can be null)
+     */
+    public SlaveSolver(MasterSolver master, int id, Solver solver, ResolutionPolicy policy, IntVar objective) {
+        super(master, id);
+        this.solver = solver;
+        this.policy = policy;
+        this.objective = objective;
+    }
+
 
     @Override
     public void work() {
-        try {
-            // plug monitor to communicate bounds (should not be added in the sequential phasis)
-            solver = model.getSolver();
-
-            // communication
-            solver.plugMonitor((IMonitorSolution) () -> {
-                ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
-                int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
-                master.newSol(val, om.getPolicy());
-            });
-
-            model.solve();
+        solver.plugMonitor((IMonitorSolution) () -> {
+            ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
+            int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
+            master.onSolution(val);
+        });
+        if (policy.equals(ResolutionPolicy.SATISFACTION)) {
+            solver.findSolution();
             if (!solver.hasReachedLimit()) {
                 master.closeWithSuccess();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            solver.findOptimalSolution(policy, objective);
+            if (!solver.hasReachedLimit()) {
+                master.closeWithSuccess();
+            }
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void findBetterThan(int val, ResolutionPolicy policy) {
         if (solver == null) return;// can happen if a solution is found before this thread is fully ready
-        ObjectiveManager iom = solver.getSearchLoop().getObjectiveManager();
+        ObjectiveManager<IntVar, Integer> iom = solver.getSearchLoop().getObjectiveManager();
         if (iom == null) return;// can happen if a solution is found before this thread is fully ready
         switch (policy) {
             case MAXIMIZE:
@@ -105,5 +107,9 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
                 // nothing to do
                 break;
         }
+    }
+
+    public void stop(){
+        solver.getSearchLoop().forceAlive(false);
     }
 }

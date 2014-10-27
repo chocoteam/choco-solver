@@ -126,7 +126,7 @@ public class SatFactory {
         Solver solver = BOOLVAR.getSolver();
         PropSat sat = solver.getMinisat().getPropSat();
         int lit = sat.Literal(BOOLVAR);
-        sat.addClause(SatSolver.negated(lit));
+        sat.addClause(lit);
         return true;
     }
 

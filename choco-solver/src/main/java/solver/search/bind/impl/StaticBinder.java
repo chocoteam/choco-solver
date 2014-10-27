@@ -24,55 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.bind.impl;
 
-package solver.thread;
+import solver.search.bind.ISearchBinder;
 
 /**
- * Slave born to be mastered and work in parallel
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @version choco
+ * @since 23/10/14
  */
-public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
-
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    public P master;
-    public final int id;
-
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+public class StaticBinder {
 
     /**
-     * Create a slave born to be mastered and work in parallel
+     * The unique instance of this class.
+     */
+    private static final StaticBinder SINGLETON = new StaticBinder();
+
+    /**
+     * Return the singleton of this class.
      *
-     * @param master
-     * @param id     slave unique name
+     * @return the StaticLoggerBinder singleton
      */
-    public AbstractParallelSlave(P master, int id) {
-        this.master = master;
-        this.id = id;
-    }
-
-    //***********************************************************************************
-    // SUB-PROBLEM SOLVING
-    //***********************************************************************************
-
-    /**
-     * Creates a new thread to work in parallel
-     */
-    public void workInParallel() {
-        Thread t = new Thread(() -> {
-            work();
-            master.wishGranted();
-        });
-        t.start();
+    public static StaticBinder getSingleton() {
+        return SINGLETON;
     }
 
     /**
-     * do something
+     * Declare the version of the CHOCO API this implementation is compiled against.
+     * The value of this field is usually modified with each release.
      */
-    public abstract void work();
+    // to avoid constant folding by the compiler, this field must *not* be final
+    public static String REQUESTED_API_VERSION = "3.2.2";  // !final
+
+    private StaticBinder() {
+        throw new UnsupportedOperationException("This code should have never made it into slf4j-api.jar");
+    }
+
+    public ISearchBinder getBinder(){
+        throw new UnsupportedOperationException("This code should have never made it into slf4j-api.jar");
+    }
 }

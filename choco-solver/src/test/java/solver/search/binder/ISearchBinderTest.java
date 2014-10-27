@@ -24,55 +24,23 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.binder;
 
-package solver.thread;
+import org.testng.annotations.Test;
+import solver.search.bind.ISearchBinder;
+import solver.search.bind.SearchBinderFactory;
 
 /**
- * Slave born to be mastered and work in parallel
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @version choco
+ * @since 23/10/14
  */
-public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
+public class ISearchBinderTest {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    public P master;
-    public final int id;
-
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
-
-    /**
-     * Create a slave born to be mastered and work in parallel
-     *
-     * @param master
-     * @param id     slave unique name
-     */
-    public AbstractParallelSlave(P master, int id) {
-        this.master = master;
-        this.id = id;
+    @Test(groups = "1s")
+    public void test1() {
+        ISearchBinder ISearchBinder = SearchBinderFactory.getSearchBinder();
     }
-
-    //***********************************************************************************
-    // SUB-PROBLEM SOLVING
-    //***********************************************************************************
-
-    /**
-     * Creates a new thread to work in parallel
-     */
-    public void workInParallel() {
-        Thread t = new Thread(() -> {
-            work();
-            master.wishGranted();
-        });
-        t.start();
-    }
-
-    /**
-     * do something
-     */
-    public abstract void work();
 }

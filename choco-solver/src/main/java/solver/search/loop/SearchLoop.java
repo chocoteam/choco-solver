@@ -35,21 +35,16 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;
 import solver.propagation.NoPropagationEngine;
+import solver.search.bind.ISearchBinder;
+import solver.search.bind.SearchBinderFactory;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.ISF;
-import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
-import solver.search.strategy.selectors.values.RealDomainMiddle;
-import solver.search.strategy.selectors.variables.Cyclic;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.RealStrategy;
-import solver.variables.*;
+import solver.variables.Variable;
 import util.ESat;
-
-import java.util.Arrays;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object
@@ -90,524 +85,463 @@ public class SearchLoop implements ISearchLoop {
     // VARIABLES
     //***********************************************************************************
 
-	protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
 
-	// keep an int, that's faster than a long, and the domain of definition is large enough
-	int timeStamp;
+    // keep an int, that's faster than a long, and the domain of definition is large enough
+    int timeStamp;
 
-	/* Reference to the solver */
-	final Solver solver;
+    /* Reference to the solver */
+    final Solver solver;
 
-	/* Reference to the environment of the solver */
-	IEnvironment env;
+    /* Reference to the environment of the solver */
+    IEnvironment env;
 
-	/* Node selection, or how to select a couple variable-value to continue branching */
-	AbstractStrategy<Variable> strategy;
+    /* Node selection, or how to select a couple variable-value to continue branching */
+    AbstractStrategy<Variable> strategy;
 
-	boolean stopAtFirstSolution;
+    boolean stopAtFirstSolution;
 
-	/* initila world index, before initial propagation (can be different from 0) */
-	int rootWorldIndex;
+    /* initila world index, before initial propagation (can be different from 0) */
+    int rootWorldIndex;
 
-	/* world index just after initial propagation (commonly rootWorldIndex + 2) */
-	int searchWorldIndex;
+    /* world index just after initial propagation (commonly rootWorldIndex + 2) */
+    int searchWorldIndex;
 
-	/* store the next state of the search loop.
-	 * initial value is <code>INITIAL_PROPAGATION</code> */
-	int nextState;
+    /* store the next state of the search loop.
+     * initial value is <code>INITIAL_PROPAGATION</code> */
+    int nextState;
 
-	// Store the number of wrolds to jump to -- usefull in UpBranch
-	int jumpTo;
+    // Store the number of wrolds to jump to -- usefull in UpBranch
+    int jumpTo;
 
-	/** Stores the search measures */
-	final protected IMeasures measures;
+    /**
+     * Stores the search measures
+     */
+    final protected IMeasures measures;
 
-	boolean hasReachedLimit;
+    boolean hasReachedLimit;
 
-	public SearchMonitorList smList;
+    public SearchMonitorList smList;
 
-	/** Objective manager. Default object is no objective. */
-	ObjectiveManager objectivemanager;
+    /**
+     * Objective manager. Default object is no objective.
+     */
+    ObjectiveManager objectivemanager;
 
-	private boolean alive;
-	
-	public Decision decision = RootDecision.ROOT;
+    private boolean alive;
+
+    public Decision decision = RootDecision.ROOT;
 
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
 
-	@SuppressWarnings({"unchecked"})
-	public SearchLoop(Solver solver) {
-		this.solver = solver;
-		this.env = solver.getEnvironment();
-		this.measures = solver.getMeasures();
-		smList = new SearchMonitorList();
-		smList.add(this.measures);
-		this.nextState = INIT;
-		rootWorldIndex = -1;
-	}
+    @SuppressWarnings({"unchecked"})
+    public SearchLoop(Solver solver) {
+        this.solver = solver;
+        this.env = solver.getEnvironment();
+        this.measures = solver.getMeasures();
+        smList = new SearchMonitorList();
+        smList.add(this.measures);
+        this.nextState = INIT;
+        rootWorldIndex = -1;
+    }
 
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
-	@Override
-	public void reset() {
-		// if a resolution has already been done
-		if (rootWorldIndex > -1) {
-			env.worldPopUntil(rootWorldIndex);
-			timeStamp++;
-			Decision tmp;
-			while (decision != RootDecision.ROOT) {
-				tmp = decision;
-				decision = tmp.getPrevious();
-				tmp.free();
-			}
-			nextState = INIT;
-			rootWorldIndex = -1;
-			searchWorldIndex = -1;
-			measures.reset();
-			objectivemanager = ObjectiveManager.SAT();
-			solver.set(NoPropagationEngine.SINGLETON);
-		}
-	}
+    @Override
+    public void reset() {
+        // if a resolution has already been done
+        if (rootWorldIndex > -1) {
+            env.worldPopUntil(rootWorldIndex);
+            timeStamp++;
+            Decision tmp;
+            while (decision != RootDecision.ROOT) {
+                tmp = decision;
+                decision = tmp.getPrevious();
+                tmp.free();
+            }
+            nextState = INIT;
+            rootWorldIndex = -1;
+            searchWorldIndex = -1;
+            measures.reset();
+            objectivemanager = ObjectiveManager.SAT();
+            solver.set(NoPropagationEngine.SINGLETON);
+        }
+    }
 
-	@Override
-	public void launch(boolean stopatfirst) {
-		if (nextState != INIT) {
-			throw new SolverException("!! The search has not been initialized.\n" +
-					"!! Be sure you are respecting one of these call configurations :\n " +
-					"\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
-		}
-		this.stopAtFirstSolution = stopatfirst;
-		loop();
-	}
+    @Override
+    public void launch(boolean stopatfirst) {
+        if (nextState != INIT) {
+            throw new SolverException("!! The search has not been initialized.\n" +
+                    "!! Be sure you are respecting one of these call configurations :\n " +
+                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+        }
+        this.stopAtFirstSolution = stopatfirst;
+        loop();
+    }
 
-	@Override
-	public void resume() {
-		if (nextState == INIT) {
-			throw new SolverException("the search loop has not been initialized.\n " +
-					"This appears when 'nextSolution' is called before 'findSolution'.");
-		} else if (nextState != RESUME) {
-			throw new SolverException("The search cannot be resumed.");
-		}
-		moveTo(UP_BRANCH);
-		loop();
-	}
+    @Override
+    public void resume() {
+        if (nextState == INIT) {
+            throw new SolverException("the search loop has not been initialized.\n " +
+                    "This appears when 'nextSolution' is called before 'findSolution'.");
+        } else if (nextState != RESUME) {
+            throw new SolverException("The search cannot be resumed.");
+        }
+        moveTo(UP_BRANCH);
+        loop();
+    }
 
-	/**
-	 * Required method to be sure a restart is taken into account.
-	 * Because, restart limit checker are threads, si they can interrupt the search loop at any moment.
-	 * And the interruption must not be forget and replaced by the wrong next state.
-	 * <br/>
-	 * <b>Beware, if this method is called from RESTART case, it leads to an infinite loop!</b>
-	 *
-	 * @param to STEP to reach
-	 */
-	@Override
-	public void moveTo(int to) {
-		if ((nextState & RESTART) == 0) {
-			nextState = to;
-		}
-	}
+    /**
+     * Required method to be sure a restart is taken into account.
+     * Because, restart limit checker are threads, si they can interrupt the search loop at any moment.
+     * And the interruption must not be forget and replaced by the wrong next state.
+     * <br/>
+     * <b>Beware, if this method is called from RESTART case, it leads to an infinite loop!</b>
+     *
+     * @param to STEP to reach
+     */
+    @Override
+    public void moveTo(int to) {
+        if ((nextState & RESTART) == 0) {
+            nextState = to;
+        }
+    }
 
-	@Override
-	public void restoreRootNode() {
-		env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
-		timeStamp++; // to force clear delta, on solution recording
-		Decision tmp;
-		while (decision != RootDecision.ROOT) {
-			tmp = decision;
-			decision = tmp.getPrevious();
-			tmp.free();
-		}
-	}
+    @Override
+    public void restoreRootNode() {
+        env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
+        timeStamp++; // to force clear delta, on solution recording
+        Decision tmp;
+        while (decision != RootDecision.ROOT) {
+            tmp = decision;
+            decision = tmp.getPrevious();
+            tmp.free();
+        }
+    }
 
-	@Override
-	public final void interrupt(String message) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Search interruption: {}", message);
-		}
-		nextState = RESUME;
-		alive = false;
-		smList.afterInterrupt();
-	}
+    @Override
+    public final void interrupt(String message) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search interruption: {}", message);
+        }
+        nextState = RESUME;
+        alive = false;
+        smList.afterInterrupt();
+    }
 
-	@Override
-	public final void forceAlive(boolean bvalue) {
-		alive = bvalue;
-	}
+    @Override
+    public final void forceAlive(boolean bvalue) {
+        alive = bvalue;
+    }
 
-	@Override
-	public final void restart() {
-		nextState = RESTART;
-	}
+    @Override
+    public final void restart() {
+        nextState = RESTART;
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Main loop. Flatten representation of recursive tree search.
-	 */
-	private void loop() {
-		alive = true;
-		while (alive) {
-			switch (nextState) {
-				// INITIALIZE THE SEARCH LOOP
-				case INIT:
-					smList.beforeInitialize();
-					initialize();
-					smList.afterInitialize();
-					break;
-				// INITIAL PROPAGATION -- ROOT NODE FEASABILITY
-				case INITIAL_PROPAGATION:
-					smList.beforeInitialPropagation();
-					initialPropagation();
-					smList.afterInitialPropagation();
-					break;
-				// OPENING A NEW NODE IN THE TREE SEARCH
-				case OPEN_NODE:
-					smList.beforeOpenNode();
-					openNode();
-					smList.afterOpenNode();
-					break;
-				// GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
-				case DOWN_LEFT_BRANCH:
-					timeStamp++;
-					smList.beforeDownLeftBranch();
-					downLeftBranch();
-					smList.afterDownLeftBranch();
-					break;
-				// GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
-				case DOWN_RIGHT_BRANCH:
-					timeStamp++;
-					smList.beforeDownRightBranch();
-					downRightBranch();
-					smList.afterDownRightBranch();
-					break;
-				// GOING UP IN THE TREE SEARCH TO RECONSIDER THE CURRENT DECISION
-				case UP_BRANCH:
-					smList.beforeUpBranch();
-					upBranch();
-					smList.afterUpBranch();
-					break;
-				// RESTARTING THE SEARCH FROM A PREVIOUS NODE -- COMMONLY, THE ROOT NODE
-				case RESTART:
-					smList.beforeRestart();
-					restartSearch();
-					smList.afterRestart();
-					break;
-			}
-		}
-		smList.beforeClose();
-		close();
-		smList.afterClose();
-	}
+    /**
+     * Main loop. Flatten representation of recursive tree search.
+     */
+    private void loop() {
+        alive = true;
+        while (alive) {
+            switch (nextState) {
+                // INITIALIZE THE SEARCH LOOP
+                case INIT:
+                    smList.beforeInitialize();
+                    initialize();
+                    smList.afterInitialize();
+                    break;
+                // INITIAL PROPAGATION -- ROOT NODE FEASABILITY
+                case INITIAL_PROPAGATION:
+                    smList.beforeInitialPropagation();
+                    initialPropagation();
+                    smList.afterInitialPropagation();
+                    break;
+                // OPENING A NEW NODE IN THE TREE SEARCH
+                case OPEN_NODE:
+                    smList.beforeOpenNode();
+                    openNode();
+                    smList.afterOpenNode();
+                    break;
+                // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
+                case DOWN_LEFT_BRANCH:
+                    timeStamp++;
+                    smList.beforeDownLeftBranch();
+                    downLeftBranch();
+                    smList.afterDownLeftBranch();
+                    break;
+                // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
+                case DOWN_RIGHT_BRANCH:
+                    timeStamp++;
+                    smList.beforeDownRightBranch();
+                    downRightBranch();
+                    smList.afterDownRightBranch();
+                    break;
+                // GOING UP IN THE TREE SEARCH TO RECONSIDER THE CURRENT DECISION
+                case UP_BRANCH:
+                    smList.beforeUpBranch();
+                    upBranch();
+                    smList.afterUpBranch();
+                    break;
+                // RESTARTING THE SEARCH FROM A PREVIOUS NODE -- COMMONLY, THE ROOT NODE
+                case RESTART:
+                    smList.beforeRestart();
+                    restartSearch();
+                    smList.afterRestart();
+                    break;
+            }
+        }
+        smList.beforeClose();
+        close();
+        smList.afterClose();
+    }
 
-	/**
-	 * Initializes the measures, just before the beginning of the search
-	 */
-	private void initialize() {
-		this.rootWorldIndex = env.getWorldIndex();
-		this.nextState = INITIAL_PROPAGATION;
-	}
+    /**
+     * Initializes the measures, just before the beginning of the search
+     */
+    private void initialize() {
+        this.rootWorldIndex = env.getWorldIndex();
+        this.nextState = INITIAL_PROPAGATION;
+    }
 
-	/**
-	 * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
-	 */
-	private void initialPropagation(){
-		this.env.worldPush();
-		try {
-			solver.getEngine().propagate();
-		} catch (ContradictionException e) {
-			this.env.worldPop();
-			solver.setFeasible(ESat.FALSE);
-			solver.getEngine().flush();
-			interrupt(MSG_INIT);
-			return;
-		}
-		this.env.worldPush(); // push another wolrd to recover the state after initial propagation
-		this.searchWorldIndex = env.getWorldIndex();
-		// call to HeuristicVal.update(Action.initial_propagation)
-		if (strategy == null) {
-			defaultSearchStrategy(solver);
-		}
-		try {
-			strategy.init(); // the initialisation of the strategy can detect inconsistency
-		} catch (ContradictionException cex) {
-			this.env.worldPop();
-			solver.setFeasible(ESat.FALSE);
-			solver.getEngine().flush();
-			interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage());
-		}
-		moveTo(OPEN_NODE);
-	}
+    /**
+     * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
+     */
+    private void initialPropagation() {
+        this.env.worldPush();
+        try {
+            solver.getEngine().propagate();
+        } catch (ContradictionException e) {
+            this.env.worldPop();
+            solver.setFeasible(ESat.FALSE);
+            solver.getEngine().flush();
+            interrupt(MSG_INIT);
+            return;
+        }
+        this.env.worldPush(); // push another wolrd to recover the state after initial propagation
+        this.searchWorldIndex = env.getWorldIndex();
+        // call to HeuristicVal.update(Action.initial_propagation)
+        if (strategy == null) {
+            ISearchBinder binder = SearchBinderFactory.getSearchBinder();
+            binder.configureSearch(solver);
+        }
+        try {
+            strategy.init(); // the initialisation of the strategy can detect inconsistency
+        } catch (ContradictionException cex) {
+            this.env.worldPop();
+            solver.setFeasible(ESat.FALSE);
+            solver.getEngine().flush();
+            interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage());
+        }
+        moveTo(OPEN_NODE);
+    }
 
-	/**
-	 * Opens a new node in the tree search : compute the next decision or store a solution.
-	 */
-	private void openNode() {
-		Decision tmp = decision;
-		decision = strategy.getDecision();
-		if (decision != null) { // null means there is no more decision
-			decision.setPrevious(tmp);
-			moveTo(DOWN_LEFT_BRANCH);
-		} else {
-			decision = tmp;
-			recordSolution();
-		}
-	}
+    /**
+     * Opens a new node in the tree search : compute the next decision or store a solution.
+     */
+    private void openNode() {
+        Decision tmp = decision;
+        decision = strategy.getDecision();
+        if (decision != null) { // null means there is no more decision
+            decision.setPrevious(tmp);
+            moveTo(DOWN_LEFT_BRANCH);
+        } else {
+            decision = tmp;
+            recordSolution();
+        }
+    }
 
-	private void recordSolution() {
-		//todo: checker d'etat
-		solver.setFeasible(ESat.TRUE);
-		assert (ESat.TRUE.equals(solver.isSatisfied())) : Reporting.fullReport(solver);
-		objectivemanager.update();
-		if (stopAtFirstSolution) {
-			interrupt(MSG_FIRST_SOL);
-		} else {
-			moveTo(UP_BRANCH);
-		}
-		smList.onSolution();
-	}
+    private void recordSolution() {
+        //todo: checker d'etat
+        solver.setFeasible(ESat.TRUE);
+        assert (ESat.TRUE.equals(solver.isSatisfied())) : Reporting.fullReport(solver);
+        objectivemanager.update();
+        if (stopAtFirstSolution) {
+            interrupt(MSG_FIRST_SOL);
+        } else {
+            moveTo(UP_BRANCH);
+        }
+        smList.onSolution();
+    }
 
-	/**
-	 * Goes down in the tree search : apply the current decision.
-	 */
-	private void downLeftBranch() {
-		downBranch();
-	}
+    /**
+     * Goes down in the tree search : apply the current decision.
+     */
+    private void downLeftBranch() {
+        downBranch();
+    }
 
-	private void downRightBranch() {
-		downBranch();
-	}
+    private void downRightBranch() {
+        downBranch();
+    }
 
-	private void downBranch() {
-		env.worldPush();
-		try {
-			decision.buildNext();
-			objectivemanager.apply(decision);
-			objectivemanager.postDynamicCut();
+    private void downBranch() {
+        env.worldPush();
+        try {
+            decision.buildNext();
+            objectivemanager.apply(decision);
+            objectivemanager.postDynamicCut();
 
-			solver.getEngine().propagate();
-			moveTo(OPEN_NODE);
-		} catch (ContradictionException e) {
-			solver.getEngine().flush();
-			moveTo(UP_BRANCH);
-			jumpTo = 1;
-			smList.onContradiction(e);
-		}
-	}
+            solver.getEngine().propagate();
+            moveTo(OPEN_NODE);
+        } catch (ContradictionException e) {
+            solver.getEngine().flush();
+            moveTo(UP_BRANCH);
+            jumpTo = 1;
+            smList.onContradiction(e);
+        }
+    }
 
-	/**
-	 * Goes up in the tree search : reconsider the current decision.
-	 *
-	 * Rolls back the previous state.
-	 * Then, if it goes back to the base world, stop the search.
-	 * Otherwise, gets the opposite decision, applies it and calls the propagation.
-	 */
-	private void upBranch() {
-		env.worldPop();
-		if (decision == RootDecision.ROOT) {// Issue#55
-			// The entire tree search has been explored, the search cannot be followed
-			interrupt(MSG_ROOT);
-		} else {
-			jumpTo--;
-			if (jumpTo <= 0 && decision.hasNext()) {
-				moveTo(DOWN_RIGHT_BRANCH);
-			} else {
-				Decision tmp = decision;
-				decision = decision.getPrevious();
-				tmp.free();
-			}
-		}
-	}
+    /**
+     * Goes up in the tree search : reconsider the current decision.
+     * <p/>
+     * Rolls back the previous state.
+     * Then, if it goes back to the base world, stop the search.
+     * Otherwise, gets the opposite decision, applies it and calls the propagation.
+     */
+    private void upBranch() {
+        env.worldPop();
+        if (decision == RootDecision.ROOT) {// Issue#55
+            // The entire tree search has been explored, the search cannot be followed
+            interrupt(MSG_ROOT);
+        } else {
+            jumpTo--;
+            if (jumpTo <= 0 && decision.hasNext()) {
+                moveTo(DOWN_RIGHT_BRANCH);
+            } else {
+                Decision tmp = decision;
+                decision = decision.getPrevious();
+                tmp.free();
+            }
+        }
+    }
 
-	/**
-	 * Force restarts of the search from a previous node in the tree search.
-	 */
-	private void restartSearch() {
-		restoreRootNode();
-		solver.getEnvironment().worldPush(); //issue#55
-		try {
-			objectivemanager.postDynamicCut();
-			solver.getEngine().propagate();
-			nextState = OPEN_NODE;
-		} catch (ContradictionException e) {
-			interrupt(MSG_CUT);
-		}
-	}
+    /**
+     * Force restarts of the search from a previous node in the tree search.
+     */
+    private void restartSearch() {
+        restoreRootNode();
+        solver.getEnvironment().worldPush(); //issue#55
+        try {
+            objectivemanager.postDynamicCut();
+            solver.getEngine().propagate();
+            nextState = OPEN_NODE;
+        } catch (ContradictionException e) {
+            interrupt(MSG_CUT);
+        }
+    }
 
-	/**
-	 * Close the search, restore the last solution if any,
-	 * and set the feasibility and optimality variables.
-	 */
-	private void close() {
-		ESat sat = ESat.FALSE;
-		if (measures.getSolutionCount() > 0) {
-			sat = ESat.TRUE;
-			if (objectivemanager.isOptimization()) {
-				measures.setObjectiveOptimal(!hasReachedLimit);
-			}
-		} else if (hasReachedLimit) {
-			measures.setObjectiveOptimal(false);
-			sat = ESat.UNDEFINED;
-		}
-		solver.setFeasible(sat);
-	}
+    /**
+     * Close the search, restore the last solution if any,
+     * and set the feasibility and optimality variables.
+     */
+    private void close() {
+        ESat sat = ESat.FALSE;
+        if (measures.getSolutionCount() > 0) {
+            sat = ESat.TRUE;
+            if (objectivemanager.isOptimization()) {
+                measures.setObjectiveOptimal(!hasReachedLimit);
+            }
+        } else if (hasReachedLimit) {
+            measures.setObjectiveOptimal(false);
+            sat = ESat.UNDEFINED;
+        }
+        solver.setFeasible(sat);
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override
-	public void plugSearchMonitor(ISearchMonitor sm) {
-		if (!smList.contains(sm)) {
-			smList.add(sm);
-		} else {
-			LOGGER.warn("The search monitor already exists and is ignored");
-		}
-	}
+    @Override
+    public void plugSearchMonitor(ISearchMonitor sm) {
+        if (!smList.contains(sm)) {
+            smList.add(sm);
+        } else {
+            LOGGER.warn("The search monitor already exists and is ignored");
+        }
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override
-	public void setObjectiveManager(ObjectiveManager objectivemanager) {
-		this.objectivemanager = objectivemanager;
-		if (objectivemanager.isOptimization()) {
-			this.measures.declareObjective();
-		}
-	}
+    @Override
+    public void setObjectiveManager(ObjectiveManager objectivemanager) {
+        this.objectivemanager = objectivemanager;
+        if (objectivemanager.isOptimization()) {
+            this.measures.declareObjective();
+        }
+    }
 
-	@Override
-	public void overridePreviousWorld(int gap) {
-		this.jumpTo = gap;
-	}
+    @Override
+    public void overridePreviousWorld(int gap) {
+        this.jumpTo = gap;
+    }
 
-	@Override
-	public void set(AbstractStrategy strategy) {
-		this.strategy = strategy;
-	}
+    @Override
+    public void set(AbstractStrategy strategy) {
+        this.strategy = strategy;
+    }
 
-	@Override
-	public final void reachLimit() {
-		hasReachedLimit = true;
-		interrupt(MSG_LIMIT);
-	}
+    @Override
+    public final void reachLimit() {
+        hasReachedLimit = true;
+        interrupt(MSG_LIMIT);
+    }
 
-	@Override
-	public void setLastDecision(Decision d){
-		decision = d;
-	}
+    @Override
+    public void setLastDecision(Decision d) {
+        decision = d;
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override
-	public ObjectiveManager getObjectiveManager() {
-		return objectivemanager;
-	}
+    @Override
+    public ObjectiveManager getObjectiveManager() {
+        return objectivemanager;
+    }
 
-	@Override
-	public AbstractStrategy<Variable> getStrategy() {
-		return strategy;
-	}
+    @Override
+    public AbstractStrategy<Variable> getStrategy() {
+        return strategy;
+    }
 
-	@Override
-	public int getCurrentDepth() {
-		int d = 0;
-		Decision tmp = decision;
-		while (tmp != RootDecision.ROOT) {
-			tmp = tmp.getPrevious();
-			d++;
-		}
-		return d;
-	}
+    @Override
+    public int getCurrentDepth() {
+        int d = 0;
+        Decision tmp = decision;
+        while (tmp != RootDecision.ROOT) {
+            tmp = tmp.getPrevious();
+            d++;
+        }
+        return d;
+    }
 
-	@Override
-	public boolean hasReachedLimit() {
-		return hasReachedLimit;
-	}
+    @Override
+    public boolean hasReachedLimit() {
+        return hasReachedLimit;
+    }
 
-	@Override
-	public int getTimeStamp(){
-		return timeStamp;
-	}
+    @Override
+    public int getTimeStamp() {
+        return timeStamp;
+    }
 
-	@Override
-	public Decision getLastDecision(){
-		return decision;
-	}
+    @Override
+    public Decision getLastDecision() {
+        return decision;
+    }
 
-	@Override
-	public SearchMonitorList getSMList(){
-		return smList;
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////// DEFAULT SEARCH /////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private void defaultSearchStrategy(Solver solver) {
-		AbstractStrategy[] strats = new AbstractStrategy[5];
-		int nb = 0;
-
-		// INTEGER VARIABLES DEFAULT SEARCH STRATEGY
-		IntVar[] ivars = excludeConstants(solver.retrieveIntVars());
-		if (ivars.length > 0) {
-			strats[nb++] = ISF.minDom_LB(ivars);
-		}
-
-		// BOOLEAN VARIABLES DEFAULT SEARCH STRATEGY
-		BoolVar[] bvars = excludeConstants(solver.retrieveBoolVars());
-		if (bvars.length > 0) {
-			strats[nb++] = ISF.lexico_UB(bvars);
-		}
-
-		// SET VARIABLES DEFAULT SEARCH STRATEGY
-		SetVar[] svars = excludeConstants(solver.retrieveSetVars());
-		if (svars.length > 0) {
-			strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
-		}
-
-		// REAL VARIABLES DEFAULT SEARCH STRATEGY
-		RealVar[] rvars = excludeConstants(solver.retrieveRealVars());
-		if (rvars.length > 0) {
-			strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());
-		}
-
-		if (nb==0) {
-			// simply to avoid null pointers in case all variables are instantiated
-			solver.set(ISF.minDom_LB(solver.ONE));
-		}else{
-			solver.set(Arrays.copyOf(strats, nb));
-		}
-	}
-
-	private static <V extends Variable> V[] excludeConstants(V[] vars){
-		int nb = 0;
-		for(V v:vars){
-			if((v.getTypeAndKind() & Variable.CSTE) == 0){
-				nb++;
-			}
-		}
-		if(nb==vars.length)return vars;
-		V[] noCsts;
-		switch (vars[0].getTypeAndKind() & Variable.KIND){
-			case Variable.BOOL:	noCsts = (V[]) new BoolVar[nb];	break;
-			case Variable.INT:	noCsts = (V[]) new IntVar[nb];	break;
-			case Variable.SET:	noCsts = (V[]) new SetVar[nb];	break;
-			case Variable.REAL:	noCsts = (V[]) new RealVar[nb];	break;
-			default:
-				throw new UnsupportedOperationException();
-		}
-		nb = 0;
-		for(V v:vars){
-			if((v.getTypeAndKind() & Variable.CSTE) == 0){
-				noCsts[nb++] = v;
-			}
-		}
-		return noCsts;
-	}
+    @Override
+    public SearchMonitorList getSMList() {
+        return smList;
+    }
 }

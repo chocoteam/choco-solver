@@ -65,7 +65,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropSubcircuit_AntiArboFiltering(IntVar[] succs, int offSet) {
-        super(succs, PropagatorPriority.QUADRATIC, true);
+        super(succs, PropagatorPriority.QUADRATIC, false);
         this.n = succs.length;
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
@@ -94,11 +94,6 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
         if (size > 0) {
             filterFromPostDom(rootCandidates[rd.nextInt(size)]);
         }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
     }
 
     private void filterFromPostDom(int duplicatedNode) throws ContradictionException {
