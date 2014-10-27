@@ -573,15 +573,27 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
-        st.append(getClass().getSimpleName() + "(");
+        st.append(getClass().getSimpleName()).append("(");
         int i = 0;
-        for (; i < Math.min(4, vars.length); i++) {
-            st.append(vars[i].getName()).append(", ");
+        switch (vars.length) {
+            case 0:
+                break;
+            default:
+            case 3:
+                st.append(vars[i++].getName()).append(", ");
+            case 2:
+                st.append(vars[i++].getName()).append(", ");
+            case 1:
+                st.append(vars[i++].getName());
         }
-        if (i < vars.length - 2) {
-            st.append("...,");
+        if (i < vars.length) {
+            if (vars.length > 4) {
+                st.append(", ...");
+            }
+            st.append(", ").append(vars[vars.length - 1].getName());
         }
-        st.append(vars[vars.length - 1].getName()).append(")");
+        st.append(')');
+
         return st.toString();
     }
 
