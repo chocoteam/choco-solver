@@ -48,9 +48,9 @@ public class MaxViewTest {
 
     public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
         BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
-        solver.post(LogicalConstraintFactory.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x)));
-        solver.post(LogicalConstraintFactory.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y)));
-        solver.post(LogicalConstraintFactory.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
+        LogicalConstraintFactory.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x));
+        LogicalConstraintFactory.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y));
+        LogicalConstraintFactory.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
         SatFactory.addClauses(LogOp.or(LogOp.and(bs[0], bs[2]),
                 LogOp.and(bs[1], bs[2].not())), solver);
     }

@@ -72,8 +72,7 @@ public class GlobalCardinality extends Constraint {
             IntVar cste = VF.fixed(i, solver);
             BoolVar[] bs = VF.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
-                Constraint cs = LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
-                cstrs.add(cs);
+                LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
             }
             cstrs.add(ICF.sum(bs, card[i]));
         }

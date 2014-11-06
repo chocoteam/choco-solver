@@ -83,10 +83,9 @@ public class Photo extends AbstractProblem {
 			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, positions[pa]));
 			dist[i] = VariableFactory.abs(k);
 
-            solver.post(
-                    ifThenElse(viols[i],
+            ifThenElse(viols[i],
                             arithm(dist[i], ">", 1),
-                            arithm(dist[i], "<=", 1)));
+                            arithm(dist[i], "<=", 1));
         }
         solver.post(sum(viols, violations));
         solver.post(alldifferent(positions, "BC"));

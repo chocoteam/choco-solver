@@ -208,10 +208,10 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v1, rankMen[m], wife[m], 0, "detect"));
 
                 BoolVar b1 = bool("b1", solver);
-                solver.post(LogicalConstraintFactory.ifThenElse(b1,
+                LogicalConstraintFactory.ifThenElse(b1,
                         arithm(v1, ">", rankMen[m][o]),
                         arithm(v1, "<=", rankMen[m][o])
-                ));
+                );
 
 
         /*
@@ -223,10 +223,10 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v2, rankWomen[o], husband[o], 0, "detect"));
 
                 BoolVar b2 = bool("b2", solver);
-                solver.post(LogicalConstraintFactory.ifThenElse(b2,
+                LogicalConstraintFactory.ifThenElse(b2,
                         arithm(v2, "<", rankWomen[o][m]),
                         arithm(v2, ">=", rankWomen[o][m])
-                ));
+                );
 
 
                     
@@ -260,10 +260,10 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v1, rankWomen[w], husband[w], 0, "detect"));
 
                 BoolVar b1 = bool("b1", solver);
-                solver.post(LogicalConstraintFactory.ifThenElse(b1,
+                LogicalConstraintFactory.ifThenElse(b1,
                         arithm(v1, ">", rankWomen[w][o]),
                         arithm(v1, "<=", rankWomen[w][o])
-                ));
+                );
 
 
         /*
@@ -275,10 +275,10 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v2, rankMen[o], wife[o], 0, "detect"));
 
                 BoolVar b2 = bool("b2", solver);
-                solver.post(LogicalConstraintFactory.ifThenElse(b2,
+                LogicalConstraintFactory.ifThenElse(b2,
                         arithm(v2, "<", rankMen[o][w]),
                         arithm(v2, ">=", rankMen[o][w])
-                ));
+                );
 
 
         /*

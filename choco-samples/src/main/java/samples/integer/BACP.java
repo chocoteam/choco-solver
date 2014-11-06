@@ -102,10 +102,9 @@ public class BACP extends AbstractProblem {
         for (int i = 0; i < n_periods; i++) {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
-                solver.post(
-                        LogicalConstraintFactory.ifThenElse(x[i][j],
+                LogicalConstraintFactory.ifThenElse(x[i][j],
 								IntConstraintFactory.arithm(course_period[j], "=", i),
-								IntConstraintFactory.arithm(course_period[j], "!=", i))
+								IntConstraintFactory.arithm(course_period[j], "!=", i)
                 );
             }
             // sum(i in courses) (x[p, i])>=courses_per_period_lb /\
