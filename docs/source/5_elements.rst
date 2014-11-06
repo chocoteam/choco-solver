@@ -2172,36 +2172,57 @@ A complete list is available in the documentation of IBEX.
 Logical constraints
 *******************
 
-.. _51_lcstr_and:
-
-and
-===
-
-.. _51_lcstr_it:
-
-ifThen
-======
-
-.. _51_lcstr_ite:
-
-ifThenElse
-==========
+The ``LogicalConstraintFactory`` (or ``LCF``) provides various interesting constraints to manipulate other constraints.
+These constraints are based on the concept of reification.
+We say a constraint ``C`` is reified with a boolean variable ``b`` when we maintain
+the equivalence betwen ``b`` being equal to true and ``C`` being satisfied.
+This means the ``C`` constraint may be not satisfied, hence it should not be posted to the solver.
 
 .. _51_lcstr_not:
 
 not
 ===
 
-.. _51_lcstr_or:
+Creates the opposite constraint of the input constraint.
 
-or
-==
+While this works for any kind of constraint (including globals), it might be a bit naive and slow.
+
+.. _51_lcstr_it:
+
+ifThen
+======
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThen_reifiable`` (whose implementation differ)
+
+.. _51_lcstr_ite:
+
+ifThenElse
+==========
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well. Otherwise, the ELSE statement must be true.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThenElse_reifiable`` (whose implementation differ)
 
 .. _51_lcstr_rei:
 
 reification
 ===========
 
+Creates and automatically post a constraint maintaining the equivalent between
+a binary variable being equal to 1 and a constraint being satisfied.
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``reification_reifiable`` (whose implementation differ)
 
 .. _51_satsolver:
 
