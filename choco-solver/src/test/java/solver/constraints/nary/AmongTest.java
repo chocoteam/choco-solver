@@ -260,7 +260,7 @@ public class AmongTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
+            LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
         }
         return IntConstraintFactory.sum(bs, occ);
     }
@@ -268,7 +268,7 @@ public class AmongTest {
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values)));
+            LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values));
         }
         return IntConstraintFactory.sum(bs, occ);
     }

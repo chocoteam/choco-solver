@@ -31,6 +31,7 @@ import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 import util.tools.StringUtils;
 
 /**
@@ -41,7 +42,7 @@ import util.tools.StringUtils;
 public class LogicalConstraintFactory {
 
 	//***********************************************************************************
-	// BoolVar-based constraints
+	// simple logical constraints
 	//***********************************************************************************
 
 	/**
@@ -67,10 +68,6 @@ public class LogicalConstraintFactory {
 		s.post(IntConstraintFactory.sum(BOOLS,sum));
 		return IntConstraintFactory.arithm(sum,">=",1);
 	}
-
-	//***********************************************************************************
-	// Constraint-based constraints
-	//***********************************************************************************
 
 	/**
 	 * Make a and constraint
@@ -100,6 +97,7 @@ public class LogicalConstraintFactory {
 
 	/**
 	 * Get the opposite of a constraint
+	 * Works for any constraint, but the associated performances might be weak
 	 * @param CONS a constraint
 	 * @return the opposite constraint of CONS
 	 */
@@ -107,26 +105,22 @@ public class LogicalConstraintFactory {
 		return CONS.getOpposite();
 	}
 
-	/**
-	 * If Then constraint
-	 * @param IF a constraint
-	 * @param THEN a constraint
-	 * @return a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
-	 */
-	public static Constraint ifThen(Constraint IF, Constraint THEN){
-		return ifThen(IF.reif(), THEN);
-	}
+	//***********************************************************************************
+	// Non-reifiable reification constraints
+	//***********************************************************************************
 
 	/**
-	 * If Then Else constraint
+	 * Post a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
+	 * Otherwise, ELSE must be satisfied
+	 *
+	 * BEWARE : it is automatically posted (it cannot be reified)
+	 *
 	 * @param IF a constraint
 	 * @param THEN a constraint
 	 * @param ELSE a constraint
-	 * @return a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
-	 * Otherwise, ELSE must be satisfied
 	 */
-	public static Constraint ifThenElse(Constraint IF, Constraint THEN, Constraint ELSE){
-		return ifThenElse(IF.reif(), THEN, ELSE);
+	public static void ifThenElse(Constraint IF, Constraint THEN, Constraint ELSE){
+		ifThenElse(IF.reif(), THEN, ELSE);
 	}
 
 	/**
@@ -138,18 +132,33 @@ public class LogicalConstraintFactory {
 	 * <p/>- THEN is not satisfied => BVAR = 0 <br/>
 	 * <p/>- ELSE is not satisfied => BVAR = 1 <br/>
 	 * <p/>
-	 * <p/> In order to have BVAR <=> THEN, make sure ELSE is the opposite constraint of THEN
+	 * <p/> In order to have BVAR <=> THEN, use reification
+	 *
+	 * BEWARE : it is automatically posted (it cannot be reified)
 	 *
 	 * @param BVAR     variable of reification
 	 * @param THEN     the constraint to be satisfied when BVAR = 1
-	 * @param ELSE the constraint to be satisfied when BVAR = 0
+	 * @param ELSE     the constraint to be satisfied when BVAR = 0
 	 */
-	public static Constraint ifThenElse(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
-		return and(ifThen(BVAR,THEN),ifThen(BVAR.not(),ELSE));
+	public static void ifThenElse(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
+		ifThen(BVAR,THEN);
+		ifThen(BVAR.not(),ELSE);
 	}
 
 	/**
-	 * Implication constraint: BVAR => CSTR
+	 * Post a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
+	 *
+	 * BEWARE : it is automatically posted (it cannot be reified)
+	 *
+	 * @param IF a constraint
+	 * @param THEN a constraint
+	 */
+	public static void ifThen(Constraint IF, Constraint THEN) {
+		ifThen(IF.reif(), THEN);
+	}
+
+	/**
+	 * Imply a constraint: BVAR => CSTR
 	 * Also called half reification constraint
 	 * Ensures:<br/>
 	 * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
@@ -159,16 +168,131 @@ public class LogicalConstraintFactory {
 	 * - <code>ifThen(b1, arithm(v1, "=", 2));</code>:
 	 * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
 	 * But if b1 is equal to 0, nothing happens
+	 *
+	 * BEWARE : it is automatically posted (it cannot be reified)
+	 *
+	 * Note that its implementation relies on reification
+	 * (it will not be faster)
 	 * <p/>
 	 *
 	 * @param BVAR variable of reification
 	 * @param CSTR the constraint to be satisfied when BVAR = 1
 	 */
-	public static Constraint ifThen(BoolVar BVAR, Constraint CSTR) {
-		return ICF.arithm(BVAR,"<=",CSTR.reif());
+	public static void ifThen(BoolVar BVAR, Constraint CSTR) {
+		Solver s = BVAR.getSolver();
+		// PRESOLVE
+		if(BVAR.contains(1)){
+			if(BVAR.isInstantiated()){
+				s.post(CSTR);
+			}else if(CSTR.isSatisfied() == ESat.FALSE){
+				s.post(ICF.arithm(BVAR,"=",0));
+			}
+			// END OF PRESOLVE
+			else {
+				s.post(ICF.arithm(BVAR, "<=", CSTR.reif()));
+			}
+		}
 	}
 
-	public static Constraint reification(BoolVar BVAR, Constraint CSTR){
-		return ICF.arithm(BVAR,"=",CSTR.reif());
+	/**
+	 * Reify a constraint with a boolean variable: BVAR <=> CSTR
+	 *
+	 * Ensures:<br/>
+	 * <p/>- BVAR = 1 <=>  CSTR is satisfied, <br/>
+	 *
+	 * BEWARE : it is automatically posted (it cannot be reified)
+	 *
+	 * @param BVAR variable of reification
+	 * @param CSTR the constraint to be satisfied when BVAR = 1
+	 */
+	public static void reification(BoolVar BVAR, Constraint CSTR){
+		Solver s = BVAR.getSolver();
+		// PRESOLVE
+		ESat entail = CSTR.isSatisfied();
+		if(BVAR.isInstantiatedTo(1)){
+			s.post(CSTR);
+		}else if(BVAR.isInstantiatedTo(0)) {
+			s.post(not(CSTR));
+		}else if(entail == ESat.TRUE) {
+			s.post(ICF.arithm(BVAR,"=",1));
+		}else if(entail == ESat.FALSE) {
+			s.post(ICF.arithm(BVAR,"=",0));
+		}
+		// END OF PRESOLVE
+		else {
+			CSTR.reifyWith(BVAR);
+		}
+	}
+
+	//***********************************************************************************
+	// Reifiable reification constraints
+	//***********************************************************************************
+
+	/**
+	 * Same as ifThenElse, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThenElse_reifiable(Constraint IF, Constraint THEN, Constraint ELSE){
+		return ifThenElse_reifiable(IF.reif(), THEN, ELSE);
+	}
+
+	/**
+	 * Same as ifThenElse, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThenElse_reifiable(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
+		return and(ifThen_reifiable(BVAR,THEN),ifThen_reifiable(BVAR.not(),ELSE));
+	}
+
+	/**
+	 * Same as ifThen, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThen_reifiable(Constraint IF, Constraint THEN) {
+		return ifThen_reifiable(IF.reif(), THEN);
+	}
+
+	/**
+	 * Same as ifThen, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThen_reifiable(BoolVar BVAR, Constraint CSTR) {
+		Solver s = BVAR.getSolver();
+		// PRESOLVE
+		ESat entail = CSTR.isSatisfied();
+		if (BVAR.isInstantiatedTo(0) || (BVAR.isInstantiatedTo(1) && entail == ESat.TRUE)) {
+			return s.TRUE;
+		}else if (BVAR.isInstantiatedTo(1) && entail == ESat.FALSE) {
+			return s.FALSE;
+		}
+		// END PRESOLVE
+		return ICF.arithm(BVAR, "<=", CSTR.reif());
+	}
+
+	/**
+	 * Same as reification, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint reification_reifiable(BoolVar BVAR, Constraint CSTR) {
+		Solver s = BVAR.getSolver();
+		// PRESOLVE
+		ESat entail = CSTR.isSatisfied();
+		if (BVAR.isInstantiated() && entail != ESat.UNDEFINED) {
+			if ((BVAR.getValue() == 1 && entail == ESat.TRUE)
+					|| (BVAR.getValue() == 0 && entail == ESat.FALSE)) {
+				return s.TRUE;
+			} else {
+				return s.FALSE;
+			}
+		}
+		// END PRESOLVE
+		else {
+			return ICF.arithm(BVAR, "=", CSTR.reif());
+		}
 	}
 }
