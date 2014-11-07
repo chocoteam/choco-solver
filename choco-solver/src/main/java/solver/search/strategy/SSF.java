@@ -24,51 +24,12 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary;
 
-import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
-import solver.constraints.SatFactory;
-import solver.constraints.nary.cnf.LogOp;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+package solver.search.strategy;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 23/04/12
+ * @author Jean-Guillaume Fages
  */
-public class CNFTest {
-
-    @Test(groups = "1s")
-    public void testJGF() {
-        for (int i = 0; i < 2; i++) {
-
-            Solver solver = new Solver();
-            BoolVar a = VariableFactory.bool("a", solver);
-            BoolVar b = VariableFactory.bool("b", solver);
-            IntVar x = VariableFactory.bounded("x", 0, 24, solver);
-            IntVar y = VariableFactory.bounded("y", 0, 24, solver);
-
-            if (i == 0) {
-                SatFactory.addClauses(LogOp.implies(
-                        a,
-                        b
-                ), solver);
-            } else {
-                SatFactory.addClauses(LogOp.implies(
-                        b.not(),
-                        a.not()
-                ), solver);
-            }
-            LogicalConstraintFactory.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
-//            SearchMonitorFactory.log(solver, true, true);
-            solver.findAllSolutions();
-//            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());
-        }
-    }
+public class SSF extends SetStrategyFactory{
+	// SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
 }

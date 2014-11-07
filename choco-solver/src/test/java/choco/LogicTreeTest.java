@@ -219,15 +219,12 @@ public class LogicTreeTest {
         Solver solver = new Solver();
         BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
 
-        solver.post(
-                LogicalConstraintFactory.ifThen(
+        LogicalConstraintFactory.ifThen(
 						rows[0],
-						IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2)));
-        solver.post(
-                LogicalConstraintFactory.ifThen(
+						IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2));
+        LogicalConstraintFactory.ifThen(
 						VariableFactory.not(rows[0]),
-						IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1))
-        );
+						IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         long nbSol = solver.getMeasures().getSolutionCount();

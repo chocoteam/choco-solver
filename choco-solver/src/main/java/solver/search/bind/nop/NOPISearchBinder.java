@@ -93,6 +93,13 @@ public class NOPISearchBinder implements ISearchBinder {
     }
 
     @Override
+    public void configureSearches(Solver[] solvers) {
+        for (int i = 0; i < solvers.length; i++) {
+            configureSearch(solvers, i);
+        }
+    }
+
+    @Override
     public void configureSearch(Solver[] solvers, int sidx) {
         configureSearch(solvers[sidx]);
     }

@@ -151,7 +151,7 @@ public class Constraint implements Serializable {
         if (boolReif == null) {
             boolReif = bool;
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
-        } else {
+        } else if(bool!=boolReif){
             s.post(ICF.arithm(bool, "=", boolReif));
         }
     }

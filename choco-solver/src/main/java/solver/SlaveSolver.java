@@ -47,7 +47,7 @@ public class SlaveSolver extends AbstractParallelSlave<MasterSolver> {
     /**
      * Create a slave born to be mastered and work in parallel
      *
-     * @param master
+     * @param master master solver
      * @param id     slave unique name
      */
     public SlaveSolver(MasterSolver master, int id, Solver solver) {
@@ -73,10 +73,13 @@ public class SlaveSolver extends AbstractParallelSlave<MasterSolver> {
 
     @Override
     public void work() {
-        solver.plugMonitor((IMonitorSolution) () -> {
-            ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
-            int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
-            master.onSolution(val);
+        solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
+                int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
+                master.onSolution(val);
+            }
         });
         if (policy.equals(ResolutionPolicy.SATISFACTION)) {
             solver.findSolution();
@@ -109,7 +112,7 @@ public class SlaveSolver extends AbstractParallelSlave<MasterSolver> {
         }
     }
 
-    public void stop(){
+    public void stop() {
         solver.getSearchLoop().forceAlive(false);
     }
 }

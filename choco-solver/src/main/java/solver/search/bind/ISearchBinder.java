@@ -54,11 +54,11 @@ public interface ISearchBinder {
      *
      * @param solvers a list of solver
      */
-    default void configureSearches(Solver[] solvers) {
+    void configureSearches(Solver[] solvers);/* {
         for (int i = 0; i < solvers.length; i++) {
             configureSearch(solvers, i);
         }
-    }
+    }*/
 
 
     /**

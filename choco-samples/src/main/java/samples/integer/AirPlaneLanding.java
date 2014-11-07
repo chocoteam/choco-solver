@@ -148,8 +148,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                Constraint cr = LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
-                solver.post(cr);
+                LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
             }
         }
 

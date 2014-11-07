@@ -75,7 +75,7 @@ public class ReifiedTest {
             Constraint cons = IntConstraintFactory.arithm(x, "=", y);
             Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
 
-            s.post(LogicalConstraintFactory.ifThenElse(b, cons, oppCons));
+            LogicalConstraintFactory.ifThenElse(b, cons, oppCons);
             s.set(IntStrategyFactory.lexico_LB(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
@@ -95,9 +95,9 @@ public class ReifiedTest {
         IntVar z = VariableFactory.enumerated("z", 1, 2, s);
         z.toString();
 
-        s.post(LogicalConstraintFactory.ifThenElse(a, member(x, new int[]{1, 1}), not_member(x, new int[]{1, 1})));
-        s.post(LogicalConstraintFactory.ifThenElse(b, member(y, new int[]{1, 1}), not_member(y, new int[]{1, 1})));
-        s.post(LogicalConstraintFactory.ifThenElse(c, member(z, new int[]{1, 1}), not_member(z, new int[]{1, 1})));
+        LogicalConstraintFactory.ifThenElse(a, member(x, new int[]{1, 1}), not_member(x, new int[]{1, 1}));
+        LogicalConstraintFactory.ifThenElse(b, member(y, new int[]{1, 1}), not_member(y, new int[]{1, 1}));
+        LogicalConstraintFactory.ifThenElse(c, member(z, new int[]{1, 1}), not_member(z, new int[]{1, 1}));
 
         s.post(IntConstraintFactory.sum(new IntVar[]{a, b, c}, VariableFactory.bool("sum", s)));
 
@@ -123,9 +123,8 @@ public class ReifiedTest {
             Constraint cons = IntConstraintFactory.arithm(x, "!=", y);
             Constraint oppCons = IntConstraintFactory.arithm(x, "=", y);
 
-            Constraint cstr = LogicalConstraintFactory.ifThenElse(b, cons, oppCons);
+            LogicalConstraintFactory.ifThenElse(b, cons, oppCons);
 
-            s.post(cstr);
             s.set(IntStrategyFactory.lexico_LB(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
@@ -191,7 +190,7 @@ public class ReifiedTest {
                     Constraint cA = member(X[j], p, q);
                     Constraint ocA = not_member(X[j], p, q);
 
-                    s2.post(LogicalConstraintFactory.ifThenElse(a, cA, ocA));
+                    LogicalConstraintFactory.ifThenElse(a, cA, ocA);
                 }
             }
         }
@@ -283,9 +282,9 @@ public class ReifiedTest {
         IntVar cp = VariableFactory.enumerated("cp", 1, 10, solver);
         BoolVar[] bv = VariableFactory.boolArray("b1", 10, solver);
         for (int i = 1; i <= 10; i++) {
-            solver.post(LogicalConstraintFactory.ifThenElse(bv[i - 1],
+            LogicalConstraintFactory.ifThenElse(bv[i - 1],
                     IntConstraintFactory.arithm(cp, "=", i),
-                    IntConstraintFactory.arithm(cp, "!=", i)));
+                    IntConstraintFactory.arithm(cp, "!=", i));
         }
 
         IntVar cp2 = VariableFactory.enumerated("cp27", 1, 10, solver);
@@ -293,9 +292,9 @@ public class ReifiedTest {
 
         BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
         for (int i = 1; i <= 10; i++) {
-            solver.post(LogicalConstraintFactory.ifThenElse(bv2[i - 1],
+            LogicalConstraintFactory.ifThenElse(bv2[i - 1],
                     IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), "<", cp),
-                    IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp)));
+                    IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp));
         }
 
         try {
@@ -332,8 +331,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]));
-        s.post(LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]));
+        LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]);
+        LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]);
 
 
         //one row must be wrong
@@ -368,8 +367,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]));
-        s.post(LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]));
+        LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]);
+        LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]);
 
 
         //one row must be wrong
@@ -404,8 +403,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]));
-        s.post(LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]));
+        LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]);
+        LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]);
 
 
         //one row must be wrong
@@ -441,8 +440,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]));
-        s.post(LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]));
+        LogicalConstraintFactory.ifThenElse(ab[0], constraints[0], constraints[1]);
+        LogicalConstraintFactory.ifThenElse(ab[1], constraints[2], constraints[3]);
 
 
         //one row must be wrong
@@ -463,11 +462,9 @@ public class ReifiedTest {
         BoolVar b = VariableFactory.bool("b", solver);
         BoolVar c = VariableFactory.bool("c", solver);
 
-        solver.post(LogicalConstraintFactory.ifThen(
+        LogicalConstraintFactory.ifThen(
                 a,
-                LogicalConstraintFactory.ifThen(
-                        b,
-                        IntConstraintFactory.arithm(c, "=", 1))));
+                LogicalConstraintFactory.ifThen_reifiable(b, IntConstraintFactory.arithm(c, "=", 1)));
         solver.set(IntStrategyFactory.minDom_LB(new BoolVar[]{a, b, c}));
         if (solver.findSolution()) {
             int index = 0;

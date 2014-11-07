@@ -48,7 +48,7 @@ public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
     /**
      * Create a slave born to be mastered and work in parallel
      *
-     * @param master
+     * @param master master solver
      * @param id     slave unique name
      */
     public AbstractParallelSlave(P master, int id) {
@@ -64,10 +64,13 @@ public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
      * Creates a new thread to work in parallel
      */
     public void workInParallel() {
-        Thread t = new Thread(() -> {
-            work();
-            master.wishGranted();
-        });
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                work();
+                master.wishGranted();
+            }
+        };
         t.start();
     }
 

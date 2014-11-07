@@ -44,9 +44,9 @@ import solver.variables.SetVar;
  * @author Jean-Guillaume Fages
  * @since 02/2013
  */
-public final class SetStrategyFactory {
+public class SetStrategyFactory {
 
-    private SetStrategyFactory() {
+    SetStrategyFactory() {
     }
 
     /**
