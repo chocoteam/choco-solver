@@ -65,7 +65,7 @@ public class SparseSet {
      * @param k
      */
     public void add(int k) {
-        ensureCapacity(k);
+        ensureCapacity(k+1);
         int a = sparse[k];
         if (a >= members || dense[a] != k) {
             sparse[k] = members;
