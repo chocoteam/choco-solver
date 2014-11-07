@@ -68,7 +68,7 @@ public class StoredSparseSet {
      * @param k value to add
      */
     public void add(int k) {
-        ensureCapacity(k);
+        ensureCapacity(k+1);
         int a = sparse[k];
         int b = members.get();
         if (a >= b || dense[a] != k) {

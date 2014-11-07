@@ -101,6 +101,7 @@ public class ConsistencyChecker {
                                     Assert.fail("no solution found");
                                 }
                             } catch (Exception e) {
+                                e.printStackTrace();
                                 LOGGER.error(e.getMessage());
                                 LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                         ds, ide, h, rvars[d], val, loop, seed);
