@@ -444,3 +444,18 @@ Explanations
 Choco natively supports explained constraints to reduce the search space and to give feedback to the user.
 Explanations are disabled by default.
 
+
+Choco |version| : changes
+=========================
+
+
+|release|
+---------
+
+- Fix #225: fix PropCostRegular, wrt to S.Demassey instructions.
+- Fix #229: create MasterSolver and SlaveSolver classes to deal with multi-thread resolution
+            + add external configuration of the search strategy through a binder
+- Fix #227: deal with initial propagation
+- fix #230: update release script
+- fix #231: correct addTrue in SatFactory
+- Add a MDD-based propagator (ICF.mddc).

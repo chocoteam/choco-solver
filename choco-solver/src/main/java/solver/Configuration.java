@@ -160,4 +160,6 @@ public enum Configuration {
     // Define the search binder path
     public static final String SEARCH_BINDER_PATH = properties.getProperty("SEARCH_BINDER_PATH");
 
+    // MDD compacting only once at the end (true) or after each addition (false)
+    public static final boolean COMPACT_MDD_ONLY_ONCE = Boolean.parseBoolean(properties.getProperty("COMPACT_MDD_ONLY_ONCE"));
 }

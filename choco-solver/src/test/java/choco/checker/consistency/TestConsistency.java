@@ -343,6 +343,27 @@ public class TestConsistency {
             checkConsistency(Modeler.modelSortBC, 8, -20, 20, null, seed + i, "bc");
     }
 
+    @Test(groups = "1s")
+    public void testMDD1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelmddcAC, 1, 0, 10, null, seed + i, "ac");
+    }
+
+    @Test(groups = "1s")
+    public void testMDD2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelmddcAC, 2, 0, 2, null, seed + i, "ac");
+    }
+
+    @Test(groups = "1m")
+    public void testMDD3() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelmddcAC, 5, -4, 3, null, seed + i, "ac");
+    }
+
     /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/kyzrsoze/Sources/Choco3/SOLVER_ERROR.ser");

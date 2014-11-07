@@ -425,7 +425,8 @@ Available constraints
     On an undefined number of integer variables
 :ref:`51_icstr_elm`,
 :ref:`51_icstr_sor`,
-:ref:`51_icstr_tab`.
+:ref:`51_icstr_tab`,
+:ref:`51_icstr_mdd`.
 
 
 :ref:`51_icstr_alld`,

@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.binary.PropScale;
+import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.constraints.nary.circuit.CircuitConf;
 import solver.constraints.set.SCF;
@@ -39,6 +40,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.VF;
+import util.objects.graphs.MultivaluedDecisionDiagram;
 import util.objects.setDataStructures.SetType;
 
 /**
@@ -1608,6 +1610,27 @@ public class DuplicateTest {
         Solver copy = solver.duplicateModel();
 
         solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test
+    public void test83() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("X", 2, -2, 2, solver);
+        Tuples tuples = new Tuples();
+        tuples.add(0, -1);
+        tuples.add(1, -1);
+        tuples.add(0, 1);
+        solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+
+        Solver copy = solver.duplicateModel();
+        solver.findAllSolutions();
+
         copy.findAllSolutions();
 
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());

@@ -1041,6 +1041,33 @@ The `maximum` constraints involves a set of integer variables and a third party 
         - `MAX = 3, Y = 0, Z = 3`
         - `MAX = 3, Y = 1, Z = 3`
 
+.. _51_icstr_mdd:
+
+mddc
+====
+
+A constraint which restricts the values a variable can be assigned to the solutions encoded with a multi-valued decision diagram.
+
+**Implementation based on**: :cite:`ChengY08`.
+
+**API**:  ::
+
+    Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD)
+
+.. admonition:: Example 1
+
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples2.java
+:language: java
+          :lines: 49-55,57
+              :emphasize-lines: 59
+              :linenos:
+
+        The solutions of the problem are :
+
+            - `X[0] = 0, X[1] = -1`
+            - `X[0] = 0, X[1] = 1`,
+            - `X[0] = 1, X[1] = -1`
+
 
 .. _51_icstr_mem:
 

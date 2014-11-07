@@ -12,6 +12,7 @@ NEXT MILESTONE
 - Fix #227: deal with initial propagation
 - fix #230: update release script
 - fix #231: correct addTrue in SatFactory
+- Add a MDD-based propagator (ICF.mddc).
 
 3.2.1 - 13 Oct 2014
 -------------------
