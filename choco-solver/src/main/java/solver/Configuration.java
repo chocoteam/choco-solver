@@ -26,8 +26,9 @@
  */
 package solver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 import java.util.Properties;
 
@@ -41,7 +42,7 @@ import java.util.Properties;
 public enum Configuration {
     ;
 
-    private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
+    private static final ILogger logger = LoggerFactory.getLogger();
 
     private static final String UDPATH = "/user.properties";
 
@@ -53,7 +54,7 @@ public enum Configuration {
         try {
             properties.load(Configuration.class.getResourceAsStream(PATH));
         } catch (Exception e) {
-            logger.error("Unable to load " + PATH + " file from classpath.", e);
+            logger.errorf("Unable to load %s file from classpath.\n%s\n", PATH, e);
             System.exit(1);
         }
         // then override values, if any
@@ -62,7 +63,7 @@ public enum Configuration {
         } catch (NullPointerException e) {
             //            logger.warn("No user defined properties. Skip loading " + UDPATH + " file.");
         } catch (Exception e) {
-            logger.error("Unable to load " + UDPATH + " file from classpath.", e);
+            logger.errorf("Unable to load %s file from classpath.\n%s\n", UDPATH, e);
         }
         {
             String values = properties.getProperty("FINE_EVENT_QUEUES");
@@ -111,14 +112,6 @@ public enum Configuration {
     // Set to true to allow the creation of views in the VariableFactory.
     // Creates new variables with channeling constraints otherwise.
     public static final boolean ENABLE_VIEWS = Boolean.parseBoolean(properties.getProperty("ENABLE_VIEWS"));
-
-    public enum MOVP {
-        disabled, //throws an error when a variable occurs more than once
-        silent, // do not do anything
-        warn, // print a warning message when a variable occurs more than once
-        view, // detect each occurrence, replace additional occurrences with an EQ view
-        duplicate // detect each occurrence, duplicate the variable and post and EQ constraint
-    }
 
     public enum Idem {
         disabled, // does not anything

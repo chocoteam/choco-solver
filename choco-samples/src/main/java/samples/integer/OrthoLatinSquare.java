@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -35,6 +34,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +140,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Ortho latin square({})", m);
+        LoggerFactory.getLogger().info("Ortho latin square({})", m);
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < m; i++) {
@@ -156,7 +156,7 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
             st.append("\n\t");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

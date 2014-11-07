@@ -33,7 +33,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import org.slf4j.LoggerFactory;
 import util.tools.StringUtils;
 
 import java.io.BufferedWriter;
@@ -53,9 +52,6 @@ public class FiniteAutomaton implements IAutomaton {
 
     protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap();
     protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap();
-
-    public static org.slf4j.Logger LOGGER = LoggerFactory.getLogger("solver");
-
 
     static {
         int delta = 0;
@@ -243,7 +239,7 @@ public class FiniteAutomaton implements IAutomaton {
             try {
                 checkState(source, destination);
             } catch (StateNotInAutomatonException e) {
-                LOGGER.warn("Unable to addTransition : " + e);
+//                LOGGER.warn("Unable to addTransition : " + e);
             }
             alphabet.add(symbol);
             State s = states.get(source);
@@ -256,7 +252,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(source, destination);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to delete transition : " + e);
+//            LOGGER.warn("Unable to delete transition : " + e);
         }
         State s = states.get(source);
         State d = states.get(destination);
@@ -297,7 +293,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(source);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to perform delta lookup, state not in automaton : " + e);
+//            LOGGER.warn("Unable to perform delta lookup, state not in automaton : " + e);
         }
         State s = states.get(source);
         State d = s.step(getCharFromInt(symbol));
@@ -314,7 +310,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(source);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable perform delta lookup, state not in automaton : " + e);
+//            LOGGER.warn("Unable perform delta lookup, state not in automaton : " + e);
         }
         State s = this.states.get(source);
         nexts.clear();
@@ -329,7 +325,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(source);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to get outgoing transition, state not in automaton : " + e);
+//            LOGGER.warn("Unable to get outgoing transition, state not in automaton : " + e);
         }
         TIntHashSet set = new TIntHashSet();
         State s = states.get(source);
@@ -348,7 +344,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(source);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to get outgoing transition, state not in automaton : " + e);
+//            LOGGER.warn("Unable to get outgoing transition, state not in automaton : " + e);
         }
         tmpSet.clear();
         State s = states.get(source);
@@ -381,7 +377,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(state);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to check if this state is final : " + e);
+//            LOGGER.warn("Unable to check if this state is final : " + e);
         }
         return states.get(state).isAccept();
     }
@@ -390,7 +386,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(state);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to set initial state, state is not in automaton : " + e);
+//            LOGGER.warn("Unable to set initial state, state is not in automaton : " + e);
         }
         representedBy.setInitialState(states.get(state));
     }
@@ -399,7 +395,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(state);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to set final state, state is not in automaton : " + e);
+//            LOGGER.warn("Unable to set final state, state is not in automaton : " + e);
         }
         states.get(state).setAccept(true);
     }
@@ -412,7 +408,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(state);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to set non final state, state is not in automaton : " + e);
+//            LOGGER.warn("Unable to set non final state, state is not in automaton : " + e);
         }
         states.get(state).setAccept(false);
     }
@@ -520,7 +516,7 @@ public class FiniteAutomaton implements IAutomaton {
         try {
             checkState(source, destination);
         } catch (StateNotInAutomatonException e) {
-            LOGGER.warn("Unable to add epsilon transition, a state is not in the automaton : " + e);
+//            LOGGER.warn("Unable to add epsilon transition, a state is not in the automaton : " + e);
 
         }
         State s = states.get(source);
@@ -557,7 +553,7 @@ public class FiniteAutomaton implements IAutomaton {
             bw.write(s);
             bw.close();
         } catch (IOException e) {
-            System.err.println("Unable to write dotty file " + f);
+//            System.err.println("Unable to write dotty file " + f);
         }
     }
 

@@ -31,7 +31,6 @@ import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.Environments;
 import memory.IEnvironment;
-import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.Propagator;
@@ -56,8 +55,8 @@ import solver.search.solution.*;
 import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
-import sun.reflect.Reflection;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 import java.io.*;
 import java.util.Arrays;
@@ -180,8 +179,7 @@ public class Solver implements Serializable {
      * Create a solver object with default parameters.
      */
     public Solver() {
-        this(Environments.DEFAULT.make(),
-                Reflection.getCallerClass(2).getSimpleName());
+        this(Environments.DEFAULT.make(),"");
     }
 
     /**
@@ -846,8 +844,8 @@ public class Solver implements Serializable {
         for (int c = 0; c < cIdx; c++) {
             ESat satC = cstrs[c].isSatisfied();
             if (ESat.FALSE == satC) {
-                if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
-                    LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
+                if (LoggerFactory.getLogger().isErrorEnabled()) {
+                    LoggerFactory.getLogger().error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
                 }
                 return ESat.FALSE;
             } else if (ESat.TRUE == satC) {

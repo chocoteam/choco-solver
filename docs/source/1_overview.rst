@@ -214,25 +214,13 @@ Note about logging
 ------------------
 
 Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
-In order to avoid imposing a logging framework on end-user, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
+Choco defines a unique entry point to centralize console output for all classes of the project.
+The principle is to not rely on a specific logging framework, in order to avoid imposing a logging framework on end-user.
+By default it relies on ``System.out`` and ``System.err``, but it allows using a specific logging framework.
+The choice is made to not rely on SLF4J to reduce dependencies and ease usages.
+But, one can bind the static logger to its favorite one by implementing the ``util.logger.ILogger`` interface and setting it as default in the ``util.logger.LoggerFactory``.
 
-    "SLF4J is a simple facade for logging systems allowing the end-user to plug-in the desired logging system at deployment time."
-    -- http://www.slf4j.org/faq.html
-
-SLF4J is only a facade, meaning that it does not provide a complete logging solution, and a logging framework must be bound.
-Otherwise, you'll get the following error:
-
-.. parsed-literal::
-
-    SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-    SLF4J: Defaulting to no-operation (NOP) logger implementation
-    SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-
-
-Choco is developed using `Logback <http://logback.qos.ch/>`_,
-but other framework are available such as `log4j <http://logging.apache.org/log4j/1.2/index.html>`_
-(a exhaustive list is given on `SL4J <http://www.slf4j.org/manual.html>`_).
-Declaring a logging framework is as simple as adding jar files to the classpath of your application:
+If you don't know what is a logging framework, but want to, take a look at `SLF4J <http://www.slf4j.org/>`_.
 
 
 Command-line

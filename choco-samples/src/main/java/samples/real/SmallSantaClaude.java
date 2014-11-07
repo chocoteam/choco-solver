@@ -26,7 +26,6 @@
  */
 package samples.real;
 
-import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -37,6 +36,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 /**
@@ -100,15 +100,15 @@ public class SmallSantaClaude {
         solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
-                if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
-                    LoggerFactory.getLogger("solver").info("*******************");
+                if (LoggerFactory.getLogger().isInfoEnabled()) {
+                    LoggerFactory.getLogger().info("*******************");
                     for (int i = 0; i < n_kids; i++) {
-                        LoggerFactory.getLogger("solver").info("Kids #{} has received the gift #{} at a cost of {} euros",
+                        LoggerFactory.getLogger().info("Kids #{} has received the gift #{} at a cost of {} euros",
                                 new Object[]{i, kid_gift[i].getValue(), kid_price[i].getValue()});
                     }
-                    LoggerFactory.getLogger("solver").info("Total cost: {} euros", total_cost.getValue());
-					LoggerFactory.getLogger("solver").info("Average: {} euros per kid", average.getLB());
-					LoggerFactory.getLogger("solver").info("Average deviation: {} ", average_deviation.getLB());
+                    LoggerFactory.getLogger().info("Total cost: {} euros", total_cost.getValue());
+					LoggerFactory.getLogger().info("Average: {} euros per kid", average.getLB());
+					LoggerFactory.getLogger().info("Average deviation: {} ", average_deviation.getLB());
                 }
             }
         });

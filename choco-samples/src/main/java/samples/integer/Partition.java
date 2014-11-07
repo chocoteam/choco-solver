@@ -28,7 +28,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -38,6 +37,7 @@ import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -175,7 +175,7 @@ public class Partition extends AbstractProblem {
         } else {
             st.append("INFEASIBLE");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

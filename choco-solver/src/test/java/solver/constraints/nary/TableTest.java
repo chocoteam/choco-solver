@@ -47,6 +47,7 @@ import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 import util.objects.graphs.MultivaluedDecisionDiagram;
 
 import java.util.Random;
@@ -249,7 +250,7 @@ public class TableTest {
                 solver.set(ISF.random_value(vars));
                 long nbs = solver.findAllSolutions();
                 long nbn = solver.getMeasures().getNodeCount();
-                System.out.printf("%s\n", solver.getMeasures().toOneLineString());
+                LoggerFactory.getLogger().infof("%s\n", solver.getMeasures().toOneLineString());
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Solver tsolver = new Solver(ALGOS[a]);
@@ -258,7 +259,7 @@ public class TableTest {
                         tsolver.set(ISF.random_value(tvars));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
-                        System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
+                        LoggerFactory.getLogger().infof("%s\n", tsolver.getMeasures().toOneLineString());
                     }
                 }
             }

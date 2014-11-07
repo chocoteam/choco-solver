@@ -27,8 +27,6 @@
 
 package solver.explanations;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Propagator;
@@ -38,6 +36,8 @@ import solver.search.strategy.decision.Decision;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -50,7 +50,7 @@ import java.io.Serializable;
  * A class to manage explanations. The default behavior is to do nothing !
  */
 public class ExplanationEngine implements Serializable {
-    static Logger LOGGER = LoggerFactory.getLogger("explainer");
+    static ILogger LOGGER = LoggerFactory.getLogger();
     Solver solver;
 
     /**

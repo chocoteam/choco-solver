@@ -26,8 +26,6 @@
  */
 package solver.search.bind.nop;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.bind.ISearchBinder;
 import solver.search.strategy.ISF;
@@ -37,6 +35,7 @@ import solver.search.strategy.selectors.variables.Cyclic;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.RealStrategy;
 import solver.variables.*;
+import util.logger.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -51,11 +50,9 @@ import java.util.Arrays;
  */
 public class NOPISearchBinder implements ISearchBinder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("solver");
-
     @Override
     public void configureSearch(Solver solver) {
-        LOGGER.debug("No search strategies defined\nSet to default ones");
+        LoggerFactory.getLogger().info("No search strategies defined\nSet to default ones");
 
         AbstractStrategy[] strats = new AbstractStrategy[5];
         int nb = 0;

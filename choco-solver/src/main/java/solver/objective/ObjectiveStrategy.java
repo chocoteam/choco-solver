@@ -95,7 +95,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      */
     public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
         super(new IntVar[]{objective});
-        this.pool = new PoolManager<FastDecision>();
+        this.pool = new PoolManager<>();
         this.obj = objective;
         this.solver = obj.getSolver();
         this.firstCall = true;

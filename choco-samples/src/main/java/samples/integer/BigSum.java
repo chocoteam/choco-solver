@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -34,6 +33,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 /**
  * Simple example using a sum constraint on a large set of variables
@@ -71,7 +71,7 @@ public class BigSum extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("big sum");
+        LoggerFactory.getLogger().info("big sum");
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
@@ -80,7 +80,7 @@ public class BigSum extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

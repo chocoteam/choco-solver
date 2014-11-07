@@ -27,8 +27,6 @@
 
 package samples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 import solver.Configuration;
 import solver.Solver;
@@ -38,6 +36,7 @@ import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 import static util.tools.StatisticUtils.*;
@@ -75,7 +74,6 @@ public class CycleLtTest {
     @Test(groups = "1s")
     public void testAll() {
         if (Configuration.PLUG_EXPLANATION) {
-            Logger log = LoggerFactory.getLogger("bench");
             StringBuilder st = new StringBuilder("\nCycle LT \n");
 
             int n = 6;
@@ -90,7 +88,7 @@ public class CycleLtTest {
             st.append(StringUtils.pad("(DIFF)", -15, " "));
             float[] times = new float[nbIt];
             for (int j = 0; j < PropagationEngineFactory.values().length; j++) {
-                log.info(st.toString());
+                LoggerFactory.getLogger().info(st.toString());
                 st.setLength(0);
                 st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
                 for (int i = 0; i < nbIt; i++) {
@@ -101,12 +99,12 @@ public class CycleLtTest {
                     times[i] = rand.getMeasures().getInitialPropagationTimeCount();
                     st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
                     st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
-                    log.info(st.toString());
+                    LoggerFactory.getLogger().info(st.toString());
                     st.setLength(0);
                 }
                 st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));
                 st.append(StringUtils.pad(String.format("DEVIATION : %fms ", standarddeviation(prepare(times))), -15, " "));
-                log.info(st.toString());
+                LoggerFactory.getLogger().info(st.toString());
                 st.setLength(0);
             }
         }

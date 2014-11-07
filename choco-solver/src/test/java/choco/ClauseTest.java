@@ -27,8 +27,6 @@
 
 package choco;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -40,6 +38,7 @@ import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 
 import java.util.Random;
 
@@ -50,8 +49,6 @@ import java.util.Random;
  * @since 22 nov. 2010
  */
 public class ClauseTest {
-
-    Logger log = LoggerFactory.getLogger("test");
 
     @Test(groups = "1m")
     public void test1() {
@@ -76,7 +73,7 @@ public class ClauseTest {
 				}
 
                 LogOp or = LogOp.or(bs);
-                log.info(or.toString());
+                LoggerFactory.getLogger().info(or.toString());
                 SatFactory.addClauses(or, s);
                 s.set(IntStrategyFactory.lexico_LB(bs));
 

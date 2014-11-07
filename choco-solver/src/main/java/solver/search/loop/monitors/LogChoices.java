@@ -26,10 +26,10 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.loop.ISearchLoop;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 /**
@@ -42,7 +42,7 @@ import util.tools.StringUtils;
  */
 public class LogChoices implements IMonitorDownBranch {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+    private static ILogger LOGGER = LoggerFactory.getLogger();
 
     final Solver solver;
     final ISearchLoop searchLoop;

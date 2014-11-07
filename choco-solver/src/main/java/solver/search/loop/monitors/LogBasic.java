@@ -26,10 +26,10 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.Solver;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 /**
  * Basic search monitor logger, which prints welcome message at the beginning od the search and
@@ -42,7 +42,7 @@ import solver.Solver;
  */
 public final class LogBasic implements IMonitorInitialize, IMonitorClose {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+    private static ILogger LOGGER = LoggerFactory.getLogger();
 
 
     final Solver solver;

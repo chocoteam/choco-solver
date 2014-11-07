@@ -31,8 +31,6 @@ package solver.constraints;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.structure.Operation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -45,6 +43,8 @@ import solver.variables.Variable;
 import solver.variables.events.IEventType;
 import solver.variables.events.PropagatorEventType;
 import util.ESat;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -95,7 +95,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     //***********************************************************************************
 
     private static final long serialVersionUID = 2L;
-    protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
+    protected final static ILogger LOGGER = LoggerFactory.getLogger();
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
     private static ThreadLocal<TIntHashSet> set = new ThreadLocal<TIntHashSet>() {
         @Override

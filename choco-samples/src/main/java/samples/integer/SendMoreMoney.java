@@ -25,12 +25,12 @@ package samples.integer; /**
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 
 
 /**
@@ -89,13 +89,13 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("SEND + MORE = MONEY ");
+        LoggerFactory.getLogger().info("SEND + MORE = MONEY ");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < ALL.length; i++) {
             st.append(String.format("%s : %d\n\t", ALL[i].getName(), ALL[i].getValue()));
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

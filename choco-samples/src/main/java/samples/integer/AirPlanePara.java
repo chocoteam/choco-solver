@@ -28,7 +28,6 @@
 package samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import org.slf4j.LoggerFactory;
 import samples.MasterProblem;
 import samples.ParallelizedProblem;
 import solver.ResolutionPolicy;
@@ -45,6 +44,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -208,7 +208,7 @@ public class AirPlanePara extends ParallelizedProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Air plane landing({})", mData);
+        LoggerFactory.getLogger().info("Air plane landing({})", mData);
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
@@ -219,7 +219,7 @@ public class AirPlanePara extends ParallelizedProblem {
                         append("]\n");
             }
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

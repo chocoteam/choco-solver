@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -34,6 +33,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -97,7 +97,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("20 equations");
+        LoggerFactory.getLogger().info("20 equations");
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
@@ -106,7 +106,7 @@ public class Eq20 extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

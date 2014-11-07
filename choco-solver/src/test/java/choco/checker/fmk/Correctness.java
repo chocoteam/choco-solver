@@ -27,13 +27,14 @@
 
 package choco.checker.fmk;
 
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +46,8 @@ import java.util.Random;
  * @since 01/13
  */
 public class Correctness {
+
+    private static final ILogger LOGGER = LoggerFactory.getLogger();
 
     public static final int INT = 0;
     public static final int BOOL = 1;
@@ -136,7 +139,7 @@ public class Correctness {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
+            LOGGER.info("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
@@ -145,9 +148,9 @@ public class Correctness {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            LoggerFactory.getLogger("test").error(e.getMessage());
-            LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
-            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
+            LOGGER.error(e.getMessage());
+            LOGGER.error("REF:\n{}\n", ref);
+            LOGGER.error("{}", f.getAbsolutePath());
             Assert.fail();
         }
         return ref;
@@ -158,25 +161,25 @@ public class Correctness {
         Solver test = m.model(nbVar, rvars, _domains, parameters);
         try {
             if (test.findSolution()) {
-                LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                         logObjects);
-                LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+                LOGGER.error("REF:\n{}\n", ref);
                 ref.getEnvironment().worldPop();
-                LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                 Assert.fail("one solution found");
             }
         } catch (Exception e) {
-            LoggerFactory.getLogger("test").error(e.getMessage());
-            LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+            LOGGER.error(e.getMessage());
+            LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                     logObjects);
-            LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+            LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
             File f = new File("SOLVER_ERROR.ser");
             try {
                 Solver.writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
+            LOGGER.error("{}", f.getAbsolutePath());
             Assert.fail();
         }
     }

@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -36,6 +35,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 /**
  * CSPLib prob019:<br/>
@@ -89,7 +89,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Magic series({})", n);
+        LoggerFactory.getLogger().info("Magic series({})", n);
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             st.append("\t");
@@ -102,7 +102,7 @@ public class MagicSeries extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
 
     }
 

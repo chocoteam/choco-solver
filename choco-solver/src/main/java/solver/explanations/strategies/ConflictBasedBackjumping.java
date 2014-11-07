@@ -26,8 +26,6 @@
  */
 package solver.explanations.strategies;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -41,6 +39,8 @@ import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 /**
  * This class describes operations to execute to perform Conflict-based back jumping.
@@ -53,7 +53,7 @@ import solver.search.strategy.decision.RootDecision;
  */
 public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitorSolution {
 
-    static Logger LOGGER = LoggerFactory.getLogger("explainer");
+    static ILogger LOGGER = LoggerFactory.getLogger();
     protected ExplanationEngine mExplanationEngine;
     protected Solver mSolver;
     boolean userE; // set to true, store the last explanation

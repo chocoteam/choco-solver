@@ -34,7 +34,6 @@ import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IEnvironment;
 import org.jgrapht.graph.DirectedMultigraph;
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -942,10 +941,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                LoggerFactory.getLogger("solver").error("z[" + i + "] in MCR should be instantiated : " + z[i]);
+                LOGGER.error("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
-                LoggerFactory.getLogger("solver").error("cost: " + gcost[i] + " != z:" + z[i].getValue());
+                LOGGER.error("cost: " + gcost[i] + " != z:" + z[i].getValue());
                 return false;
             }
 

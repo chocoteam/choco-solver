@@ -28,8 +28,6 @@
 package solver.search.loop;
 
 import memory.IEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -45,6 +43,8 @@ import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 import util.ESat;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object
@@ -85,7 +85,7 @@ public class SearchLoop implements ISearchLoop {
     // VARIABLES
     //***********************************************************************************
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
+    protected final static ILogger LOGGER = LoggerFactory.getLogger();
 
     // keep an int, that's faster than a long, and the domain of definition is large enough
     int timeStamp;
@@ -225,9 +225,6 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public final void interrupt(String message) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Search interruption: {}", message);
-        }
         nextState = RESUME;
         alive = false;
         smList.afterInterrupt();
@@ -463,7 +460,7 @@ public class SearchLoop implements ISearchLoop {
         if (!smList.contains(sm)) {
             smList.add(sm);
         } else {
-            LOGGER.warn("The search monitor already exists and is ignored");
+            LOGGER.info("The search monitor already exists and is ignored");
         }
     }
 

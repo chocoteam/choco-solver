@@ -27,10 +27,10 @@
 package solver.search.loop.monitors;
 
 import gnu.trove.map.hash.TObjectLongHashMap;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
+import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 /**
@@ -87,7 +87,7 @@ public class LogPropagationCount implements IMonitorClose {
         st.append("| ").append(StringUtils.pad("" + csum, -7, " "));
         st.append("|\n");
         st.append(StringUtils.pad(" ", 50, "-")).append("\n");
-        LoggerFactory.getLogger("solver").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
 
     }
 }

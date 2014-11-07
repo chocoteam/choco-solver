@@ -29,7 +29,6 @@ package samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -45,6 +44,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -139,7 +139,7 @@ public class AirPlaneLanding extends AbstractProblem {
             tardiness[i] = Max.var(ZERO, VariableFactory.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
-        List<BoolVar> booleans = new ArrayList<BoolVar>();
+        List<BoolVar> booleans = new ArrayList<>();
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -158,7 +158,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
         // build cost array
         costLAT = new int[2 * n];
-        maxCost = new TObjectIntHashMap<IntVar>();
+        maxCost = new TObjectIntHashMap<>();
         for (int i = 0; i < n; i++) {
             costLAT[i] = data[i][PCBT];
             costLAT[n + i] = data[i][PCAT];
@@ -204,7 +204,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Air plane landing({})", mData);
+        LoggerFactory.getLogger().info("Air plane landing({})", mData);
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
@@ -215,7 +215,7 @@ public class AirPlaneLanding extends AbstractProblem {
                         append("]\n");
             }
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

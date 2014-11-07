@@ -26,13 +26,13 @@
  */
 package solver.search.loop.lns.neighbors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.variables.IntVar;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 import java.util.BitSet;
 import java.util.Random;
@@ -46,7 +46,7 @@ import java.util.Random;
  */
 public class ActivityBasedNeighborhood extends ANeighbor {
 
-    public static final Logger logger = LoggerFactory.getLogger("solver");
+    public static final ILogger logger = LoggerFactory.getLogger();
 
     private final int n;
     private final IntVar[] vars;
