@@ -26,7 +26,6 @@
  */
 package solver.propagation;
 
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
@@ -34,6 +33,7 @@ import solver.exception.ContradictionException;
 import solver.variables.Variable;
 import solver.variables.events.IEventType;
 import solver.variables.events.PropagatorEventType;
+import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -50,20 +50,20 @@ public interface IPropagationEngine extends Serializable {
         ;
 
         public static void printPropagation(Variable v, Propagator p) {
-            LoggerFactory.getLogger("solver").info("[P] {}", "(" + v + "::" + p + ")");
+            LoggerFactory.getLogger().info("[P] {}", "(" + v + "::" + p + ")");
         }
 
         public static void printModification(Variable v, IEventType e, ICause c) {
-            LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", v, e, c);
+            LoggerFactory.getLogger().info("\t[M] {} {} ({})", v, e, c);
         }
 
 
         public static void printSchedule(Propagator p) {
-            LoggerFactory.getLogger("solver").info("\t\t[S] {}", p);
+            LoggerFactory.getLogger().info("\t\t[S] {}", p);
         }
 
         public static void printAlreadySchedule(Propagator p) {
-            LoggerFactory.getLogger("solver").info("\t\t[s] {}", p);
+            LoggerFactory.getLogger().info("\t\t[s] {}", p);
         }
     }
 

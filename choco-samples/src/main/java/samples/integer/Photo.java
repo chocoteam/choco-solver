@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -36,6 +35,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 import static solver.constraints.IntConstraintFactory.*;
@@ -105,14 +105,14 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Photo -- {}", data.name());
+        LoggerFactory.getLogger().info("Photo -- {}", data.name());
         StringBuilder st = new StringBuilder();
         st.append("\tPositions: ");
         for (int i = 0; i < data.people(); i++) {
             st.append(String.format("%d ", positions[i].getValue()));
         }
         st.append(String.format("\n\tViolations: %d", violations.getValue()));
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

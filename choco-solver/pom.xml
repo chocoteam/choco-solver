@@ -76,15 +76,6 @@
                         </goals>
                         <configuration>
                             <minimizeJar>true</minimizeJar>
-                            <filters>
-                                <filter>
-                                    <!-- remove logback.xml to avoid conflict on end-user application -->
-                                    <artifact>*:*:*:*</artifact>
-                                    <excludes>
-                                        <exclude>logback.xml</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>

@@ -30,11 +30,11 @@ package samples;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 /**
  * <br/>
@@ -119,7 +119,7 @@ public abstract class AbstractProblem {
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            final Logger log = LoggerFactory.getLogger("bench");
+            final ILogger log = LoggerFactory.getLogger();
             this.printDescription();
             this.createSolver();
             this.buildModel();

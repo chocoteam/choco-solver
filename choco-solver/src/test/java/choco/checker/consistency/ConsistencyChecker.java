@@ -29,12 +29,12 @@ package choco.checker.consistency;
 
 import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,11 +51,11 @@ import static choco.checker.DomainBuilder.buildFullDomains;
  */
 public class ConsistencyChecker {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("test");
-
     enum Consistency {
         ac, bc
     }
+
+    private static final ILogger LOGGER = LoggerFactory.getLogger();
 
     public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
@@ -155,6 +155,6 @@ public class ConsistencyChecker {
         } catch (IOException ee) {
             ee.printStackTrace();
         }
-        LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
+        LOGGER.error("{}", f.getAbsolutePath());
     }
 }

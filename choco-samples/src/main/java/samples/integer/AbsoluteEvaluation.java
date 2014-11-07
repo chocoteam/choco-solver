@@ -27,7 +27,6 @@
 
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -35,6 +34,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 
 import java.util.Random;
 
@@ -85,7 +85,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("AbsoluteEvaluation({})");
+        LoggerFactory.getLogger().info("AbsoluteEvaluation({})");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < vars.length - 1; i++) {
@@ -95,7 +95,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
             }
         }
         st.append(String.format("%d", vars[vars.length - 1].getValue()));
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -37,6 +36,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 import java.util.Arrays;
@@ -140,7 +140,7 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Warehouse location problem");
+        LoggerFactory.getLogger().info("Warehouse location problem");
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < nWH; i++) {
@@ -159,7 +159,7 @@ public class WarehouseLocation extends AbstractProblem {
             st.append("\tINFEASIBLE");
         }
 
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

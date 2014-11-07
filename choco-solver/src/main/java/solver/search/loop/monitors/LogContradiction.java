@@ -26,9 +26,9 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.exception.ContradictionException;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 /**
  * <br/>
@@ -38,12 +38,12 @@ import solver.exception.ContradictionException;
  */
 public class LogContradiction implements IMonitorContradiction {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+    private static ILogger LOGGER = LoggerFactory.getLogger();
 
     @Override
     public void onContradiction(ContradictionException cex) {
         if (LOGGER.isInfoEnabled()) {
-            LoggerFactory.getLogger("solver").info("\t/!\\ {}", cex.toString());
+            LOGGER.info("\t/!\\ {}", cex.toString());
         }
     }
 }

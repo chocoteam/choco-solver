@@ -26,13 +26,13 @@
  */
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.logger.LoggerFactory;
 
 /**
  * A verbal arithmetic puzzle:
@@ -94,13 +94,13 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("donald + gerald = robert ");
+        LoggerFactory.getLogger().info("donald + gerald = robert ");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < letters.length; i++) {
             st.append(String.format("%s : %d\n\t", letters[i].getName(), letters[i].getValue()));
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

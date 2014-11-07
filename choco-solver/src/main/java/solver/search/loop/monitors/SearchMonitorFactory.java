@@ -26,13 +26,13 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.search.limits.*;
 import solver.search.restart.GeometricalRestartStrategy;
 import solver.search.restart.LubyRestartStrategy;
 import solver.variables.Variable;
+import util.logger.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -48,7 +48,7 @@ public class SearchMonitorFactory {
     SearchMonitorFactory() {
     }
 
-    private static class DefaultSolutionMessage implements IMessage {
+    public static class DefaultSolutionMessage implements IMessage {
 
         private Solver solver;
 
@@ -76,7 +76,7 @@ public class SearchMonitorFactory {
 
     }
 
-    private static class DefaultDecisionMessage implements IMessage {
+    public static class DefaultDecisionMessage implements IMessage {
 
         private Solver solver;
 
@@ -176,14 +176,15 @@ public class SearchMonitorFactory {
 
     /**
      * Print statistics in one line
+     *
      * @param solver the solver to observe
      */
     public static void shortlog(final Solver solver) {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
-                    LoggerFactory.getLogger("solver").info(solver.getMeasures().toOneLineString());
+                if (LoggerFactory.getLogger().isInfoEnabled()) {
+                    LoggerFactory.getLogger().info(solver.getMeasures().toOneLineString());
                 }
             }
 

@@ -26,8 +26,6 @@
  */
 package solver.explanations.strategies;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -56,8 +54,6 @@ import java.util.*;
  * @since 03/07/13
  */
 public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
-
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     protected final ExplanationEngine mExplanationEngine; // the explanation engine -- it works faster when it's a lazy one
     protected final Random random;
@@ -91,14 +87,14 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         this.level = level;
         this.random = new Random(seed);
 
-        path = new ArrayList<Decision>(16);
+        path = new ArrayList<>(16);
         related2cut = new BitSet(16);
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
         refuted = new BitSet(16);
         // TEMPORARY DATA STRUCTURES
-        tmpDeductions = new ArrayList<Deduction>(16);
-        tmpValueDeductions = new HashSet<Deduction>(16);
+        tmpDeductions = new ArrayList<>(16);
+        tmpValueDeductions = new HashSet<>(16);
         mSolver.getSearchLoop().plugSearchMonitor(this);
     }
 
@@ -240,9 +236,6 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     private void explainCut() {
         // Goal: force the failure to get the set of decisions related to the cut
         forceCft = false;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("explain Cut");
-        }
         // 1. make a backup
         mSolver.getEnvironment().worldPush();
         Decision d;

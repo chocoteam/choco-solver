@@ -31,8 +31,6 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -64,8 +62,6 @@ import java.util.Comparator;
  */
 public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
         IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
-
-    public static final Logger logger = LoggerFactory.getLogger("solver");
 
     static final double ONE = 1.0f;
 
@@ -381,20 +377,12 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i].update(nb_probes);
             }
             // check if sampling is still required
-//            logger.info("<<<<START check");
             int idx = 0;
             while (idx < vars.length && checkInterval(idx)) {
                 idx++;
-//                logger.info("inc {}", idx);
             }
-//            logger.info(">>>>END check");
             //BEWARE: when it fails very soon (after 1 node), it worths forcing sampling
             if (nb_probes > samplingIterationForced && idx == vars.length) {
-                if (logger.isInfoEnabled()) {
-                    solver.getMeasures().updateTimeCount();
-                    //logger.info(">> STOP SAMPLING: {}", solver.getMeasures().toOneShortLineString());
-                    //logger.info(">> {}", Arrays.toString(mA));
-                }
                 sampling = false;
                 restartAfterEachFail = false;
                 // then copy values estimated

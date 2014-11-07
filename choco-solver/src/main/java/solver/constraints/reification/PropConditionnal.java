@@ -27,8 +27,6 @@
 package solver.constraints.reification;
 
 import memory.structure.Operation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -48,7 +46,6 @@ import util.ESat;
  * @since 06/02/2014
  */
 public abstract class PropConditionnal extends Propagator<Variable> {
-    private static Logger LOGGER = LoggerFactory.getLogger("propagator");
 
     Constraint[] condTrue;
     Constraint[] condFalse;
@@ -82,18 +79,12 @@ public abstract class PropConditionnal extends Propagator<Variable> {
     }
 
     private void postTemp(final Constraint c) throws ContradictionException {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("post " + c.toString());
-        }
         solver.postTemp(c);
         // the constraint has been added during the resolution.
         // it should be removed on backtrack -> create a new undo operation
         solver.getEnvironment().save(new Operation() {
             @Override
             public void undo() {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unpost " + c.toString());
-                }
                 solver.unpost(c);
             }
         });

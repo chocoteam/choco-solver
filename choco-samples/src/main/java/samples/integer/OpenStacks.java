@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -42,6 +41,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 /**
  * <br/>
@@ -142,7 +142,7 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Open stacks problem");
+        LoggerFactory.getLogger().info("Open stacks problem");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < nc; i++) {
@@ -169,7 +169,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("INFEASIBLE");
         }
         //st.append(solver.toString());
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {
@@ -214,7 +214,7 @@ public class OpenStacks extends AbstractProblem {
                 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
                 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
                 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
-        });;
+        });
         final int[] data;
 
         Data(int[] data) {

@@ -26,8 +26,9 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 /**
  * A search monitor logger which prints solution during the search.
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class LogSolutions implements IMonitorSolution {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+    private static ILogger LOGGER = LoggerFactory.getLogger();
     final IMessage message;
 
     public LogSolutions(IMessage message) {

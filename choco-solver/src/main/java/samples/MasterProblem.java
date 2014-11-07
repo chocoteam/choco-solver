@@ -34,10 +34,10 @@
 
 package samples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.thread.AbstractParallelMaster;
+import util.logger.ILogger;
+import util.logger.LoggerFactory;
 
 public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
 
@@ -45,8 +45,8 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
     // VARIABLES
     //***********************************************************************************
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
-    int bestVal;
+	protected static final ILogger LOGGER = LoggerFactory.getLogger();
+	int bestVal;
     int nbSol;
     boolean closeWithSuccess;
     ResolutionPolicy policy;
@@ -108,8 +108,6 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
      * A solution of cost val has been found
      * informs slaves that they must find better
      *
-     * @param val
-     * @param policy
      */
     public synchronized boolean newSol(int val, ResolutionPolicy policy) {
         this.policy = policy;

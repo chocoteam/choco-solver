@@ -27,7 +27,6 @@
 package samples.integer;
 
 import gnu.trove.map.hash.THashMap;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,6 +39,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.events.IntEventType;
 import util.ESat;
+import util.logger.LoggerFactory;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -104,12 +104,12 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Grocery");
+        LoggerFactory.getLogger().info("Grocery");
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < 4; i++) {
             st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

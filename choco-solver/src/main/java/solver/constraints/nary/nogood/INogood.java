@@ -26,8 +26,6 @@
  */
 package solver.constraints.nary.nogood;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.ESat;
@@ -46,8 +44,6 @@ import util.ESat;
  * @since 20/06/13
  */
 public interface INogood {
-
-    final static Logger LOGGER = LoggerFactory.getLogger(Nogood.class);
 
     void setIdx(int idx);
 

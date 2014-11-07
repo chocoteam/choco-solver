@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -37,6 +36,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
+import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 /**
@@ -171,7 +171,7 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Social golfer({},{},{})", new Object[]{g, s, w});
+        LoggerFactory.getLogger().info("Social golfer({},{},{})", new Object[]{g, s, w});
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             int p = g * s;
@@ -191,7 +191,7 @@ public class SocialGolfer extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger().info(st.toString());
     }
 
     public static void main(String[] args) {

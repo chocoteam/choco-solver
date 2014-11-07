@@ -27,8 +27,6 @@
 
 package samples.nqueen;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -37,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.propagation.PropagationEngineFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.logger.LoggerFactory;
 
 /**
  * <br/>
@@ -45,8 +44,6 @@ import solver.variables.Variable;
  * @since 30 sept. 2010
  */
 public class NQueenTest {
-    private static final Logger log = LoggerFactory.getLogger("test");
-
 
     public final static int NB_QUEENS_SOLUTION[] = {0, 0, 0, 0, 2, 10, 4, 40, 92, 352, 724, 2680, 14200, 73712, 365596};
 
@@ -92,7 +89,7 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testBinary() {
-        log.info("modelBinary {}", parameters());
+        LoggerFactory.getLogger().info("modelBinary {}", parameters());
         Solver s = modeler(new NQueenBinary(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -100,7 +97,7 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testLinBinary() {
-        log.info("modelBinary {}", parameters());
+        LoggerFactory.getLogger().info("modelBinary {}", parameters());
         Solver s = modeler(new NQueenLinearBinary(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -109,7 +106,7 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testGlobalBinary() {
-        log.info("modelBinaryGlobal {}", parameters());
+        LoggerFactory.getLogger().info("modelBinaryGlobal {}", parameters());
         Solver s = modeler(new NQueenBinaryGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -117,7 +114,7 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testGlobal() throws ContradictionException {
-        log.info("modelGlobal {}", parameters());
+        LoggerFactory.getLogger().info("modelGlobal {}", parameters());
         Solver s = modeler(new NQueenGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -125,7 +122,7 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testDualBinary() {
-        log.info("modelDualBinary {}", parameters());
+        LoggerFactory.getLogger().info("modelDualBinary {}", parameters());
         Solver s = modeler(new NQueenDualBinary(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -134,7 +131,7 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testDualGlobal() {
-        log.info("modelDualGlobal {}", parameters());
+        LoggerFactory.getLogger().info("modelDualGlobal {}", parameters());
         Solver s = modeler(new NQueenDualGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -195,7 +192,7 @@ public class NQueenTest {
         ((IntVar) vars[5+offset]).instantiateTo(16, Cause.Null);
         ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
         solver.propagate();
-        LoggerFactory.getLogger("test").error("*******************************************");
+        LoggerFactory.getLogger().error("*******************************************");
 //        System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {
