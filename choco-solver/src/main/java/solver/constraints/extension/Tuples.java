@@ -41,27 +41,33 @@ import java.util.List;
  */
 public class Tuples {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     protected final boolean feasible;
     protected final List<int[]> tuples;
     protected int arity;
     protected int[] ranges;
 
-	//***********************************************************************************
-	// CONSTRUCTOR
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     public Tuples(boolean feasible) {
         this.feasible = feasible;
+        if(!feasible)System.err.println("Declaring unfeasible tuples may lead to errors (See Issue#215)");
         tuples = new ArrayList<>();
     }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    // TODO: enable unfeasible tuples
+    public Tuples() {
+        this(true);
+    }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     /**
      * Add a new tuple to the set of tuples
@@ -82,6 +88,17 @@ public class Tuples {
         for (int i = 0; i < arity; i++) {
             ranges[i] = Math.min(ranges[i], tuple[i]);
             ranges[i + arity] = Math.max(ranges[i + arity], tuple[i]);
+        }
+    }
+
+    /**
+     * Add a tuple set
+     *
+     * @param tuples tuple set
+     */
+    public void add(int[]... tuples) {
+        for (int[] t : tuples) {
+            add(t);
         }
     }
 
@@ -125,7 +142,6 @@ public class Tuples {
 
     /**
      * Return the idx^th tuple
-     *
      */
     public int[] get(int idx) {
         return tuples.get(idx);
@@ -143,15 +159,15 @@ public class Tuples {
 
     }
 
-	/**
-	 * @return an array of tuples, each tuple is an int array
-	 */
-	public int[][] toMatrix(){
-		int i=0;
-		int[][] matrix = new int[tuples.size()][];
-		for(int[] tuple:tuples){
-			matrix[i++] = tuple.clone();
-		}
-		return matrix;
-	}
+    /**
+     * @return an array of tuples, each tuple is an int array
+     */
+    public int[][] toMatrix() {
+        int i = 0;
+        int[][] matrix = new int[tuples.size()][];
+        for (int[] tuple : tuples) {
+            matrix[i++] = tuple.clone();
+        }
+        return matrix;
+    }
 }

@@ -86,6 +86,7 @@ import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.exception.SolverException;
 import solver.variables.*;
+import util.objects.graphs.MultivaluedDecisionDiagram;
 import util.tools.ArrayUtils;
 import util.tools.StringUtils;
 
@@ -624,7 +625,6 @@ public class IntConstraintFactory {
      * @param BIN_LOAD  IntVar representing the load of each bin (i.e. the sum of the size of the items in it)
      * @param OFFSET    0 by default but typically 1 if used within MiniZinc
      *                  (which counts from 1 to n instead of from 0 to n-1)
-     * @return
      */
     public static Constraint[] bin_packing(IntVar[] ITEM_BIN, int[] ITEM_SIZE, IntVar[] BIN_LOAD, int OFFSET) {
         int nbBins = BIN_LOAD.length;
@@ -1092,6 +1092,16 @@ public class IntConstraintFactory {
      */
     public static Constraint maximum(BoolVar MAX, BoolVar[] VARS) {
         return new Constraint("MinOverBools", new PropBoolMax(VARS, MAX));
+    }
+
+    /**
+     * Create a constraint where solutions (tuples) are encoded by a multi-valued decision diagram.
+     * The order of the variables in VARS is important and must refer to the MDD.
+     * @param VARS the array of variables
+     * @param MDD the multi-valued decision diagram encoding solutions
+     */
+    public static Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD){
+        return new Constraint("mddc", new PropLargeMDDC(MDD, VARS));
     }
 
     /**
