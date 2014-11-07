@@ -12,7 +12,8 @@ NEXT MILESTONE
 - Fix #227: deal with initial propagation
 - fix #230: update release script
 - fix #231: correct addTrue in SatFactory
-- fix #234: improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly. 
+- fix #234: improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly.
+- fix #233: remove java8 compliant code (temporary)
 
 3.2.1 - 13 Oct 2014
 -------------------
