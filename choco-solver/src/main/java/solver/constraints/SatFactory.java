@@ -51,9 +51,9 @@ public class SatFactory {
         PropSat sat = solver.getMinisat().getPropSat();
         ILogical tree = LogicTreeToolBox.toCNF(logOp, solver);
         if (solver.ONE.equals(tree)) {
-            return addTrue(solver.ZERO);
-        } else if (solver.ZERO.equals(tree)) {
             return addTrue(solver.ONE);
+        } else if (solver.ZERO.equals(tree)) {
+            return addTrue(solver.ZERO);
         } else {
 
             ILogical[] clauses;
