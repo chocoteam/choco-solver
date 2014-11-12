@@ -30,7 +30,7 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
-import solver.search.loop.monitors.SMF;
+import solver.messages.Chatterbox;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
@@ -82,7 +82,9 @@ public class Grocery extends AbstractProblem {
     @Override
     public void configureSearch() {
         // choco branching
-        SMF.log(solver, true, true);
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
+        Chatterbox.showDecisions(solver);
         solver.set(IntStrategyFactory.lexico_UB(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));

@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
-import solver.search.loop.monitors.SMF;
+import solver.messages.Chatterbox;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
 
@@ -55,7 +55,8 @@ public class RealConstraintExamples {
                 Ibex.HC4,
                 x, y);
         solver.post(rc);
-        SMF.log(solver, true, false);
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
         solver.findSolution();
     }
 }

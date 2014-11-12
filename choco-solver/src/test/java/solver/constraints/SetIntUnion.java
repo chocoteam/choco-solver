@@ -37,7 +37,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.set.SCF;
-import solver.search.loop.monitors.SMF;
+import solver.messages.Chatterbox;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
@@ -47,49 +47,52 @@ public class SetIntUnion {
 
 	@Test(groups = "1s")
 	public void test1() {
-		Solver s = new Solver();
-		IntVar[] x = VF.enumeratedArray("ints",4,0,5,s);
-		SetVar values = VF.fixed("values", new int[]{0,1,4},s);
-		s.post(SCF.int_values_union(x,values));
-		SMF.log(s, true, false);
-		s.set(ISF.lexico_LB(x));
-		s.findAllSolutions();
-	}
+        Solver s = new Solver();
+        IntVar[] x = VF.enumeratedArray("ints", 4, 0, 5, s);
+        SetVar values = VF.fixed("values", new int[]{0, 1, 4}, s);
+        s.post(SCF.int_values_union(x, values));
+        Chatterbox.showStatistics(s);
+        Chatterbox.showSolutions(s);
+        s.set(ISF.lexico_LB(x));
+        s.findAllSolutions();
+    }
 
 	@Test(groups = "1s")
 	public void test2() {
-		Solver s = new Solver();
-		IntVar[] x = new IntVar[]{
-				VF.fixed(0,s)
-				,VF.fixed(2,s)
-				,VF.fixed(5, s)
-				,VF.fixed(0,s)
-				,VF.fixed(2,s)
-		};
-		SetVar values = VF.fixed("values", new int[]{0,1,4},s);
-		s.post(SCF.int_values_union(x,values));
-		SMF.log(s, true, false);
-		s.set(ISF.lexico_LB(x));
-		s.findAllSolutions();
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), 0);
-	}
+        Solver s = new Solver();
+        IntVar[] x = new IntVar[]{
+                VF.fixed(0, s)
+                , VF.fixed(2, s)
+                , VF.fixed(5, s)
+                , VF.fixed(0, s)
+                , VF.fixed(2, s)
+        };
+        SetVar values = VF.fixed("values", new int[]{0, 1, 4}, s);
+        s.post(SCF.int_values_union(x, values));
+        Chatterbox.showStatistics(s);
+        Chatterbox.showSolutions(s);
+        s.set(ISF.lexico_LB(x));
+        s.findAllSolutions();
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 0);
+    }
 
 	@Test(groups = "1s")
 	public void test3() {
-		Solver s = new Solver();
-		IntVar[] x = new IntVar[]{
-				VF.fixed(0,s)
-				,VF.fixed(2,s)
-				,VF.fixed(5, s)
-				,VF.fixed(0,s)
-				,VF.fixed(2,s)
-		};
-		SetVar values = VF.set("values", -1, 6, s);
-		s.post(SCF.int_values_union(x, values));
-		SMF.log(s, true, false);
-		s.set(ISF.lexico_LB(x));
-		s.findAllSolutions();
-		System.out.println(values);
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
-	}
+        Solver s = new Solver();
+        IntVar[] x = new IntVar[]{
+                VF.fixed(0, s)
+                , VF.fixed(2, s)
+                , VF.fixed(5, s)
+                , VF.fixed(0, s)
+                , VF.fixed(2, s)
+        };
+        SetVar values = VF.set("values", -1, 6, s);
+        s.post(SCF.int_values_union(x, values));
+        Chatterbox.showStatistics(s);
+        Chatterbox.showSolutions(s);
+        s.set(ISF.lexico_LB(x));
+        s.findAllSolutions();
+        System.out.println(values);
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
+    }
 }

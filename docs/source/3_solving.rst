@@ -41,8 +41,7 @@ A call to ``solver.findSolution()`` launches a resolution which stops on the fir
 
 .. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
    :language: java
-   :lines: 44-54
-   :emphasize-lines: 54
+   :lines: 45-57
    :linenos:
 
 If a solution has been found, the resolution process stops on that solution,

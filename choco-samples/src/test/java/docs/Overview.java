@@ -28,6 +28,7 @@ package docs;
 
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.messages.Chatterbox;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -52,5 +53,7 @@ public class Overview {
         solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
         // 5. Launch the resolution process
         solver.findSolution();
+        //6. Print search statistics
+        Chatterbox.printStatistics(solver);
     }
 }

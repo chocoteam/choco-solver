@@ -15,7 +15,7 @@ NEXT MILESTONE
 - fix #234: improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly.
 - fix #233: remove java8 compliant code (temporary)
 - Add a MDD-based propagator (ICF.mddc).
-- fix #235: remove dependencies to slf4j and logback, and define the main user entry point of Choco logging
+- fix #235: refactor logging fmwk. Add Chatterbox class as a unique entry point for messaging. Logging still relies on SLF4J.
 - fix #236: bug in SatSolver
 
 3.2.1 - 13 Oct 2014

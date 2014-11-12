@@ -32,10 +32,11 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
+import solver.messages.Chatterbox;
 
 import static java.lang.Runtime.getRuntime;
-import static samples.AbstractProblem.Level.*;
-import static solver.search.loop.monitors.SearchMonitorFactory.log;
+import static samples.AbstractProblem.Level.QUIET;
+import static samples.AbstractProblem.Level.SILENT;
 
 /**
  * <br/>
@@ -128,9 +129,9 @@ public abstract class AbstractProblem {
             overrideExplanation();
 
             if (level.getLevel() > SILENT.getLevel()) {
-                log(solver,
-                        level.getLevel() > VERBOSE.getLevel(),
-                        level.getLevel() > SOLUTION.getLevel());
+                Chatterbox.showStatistics(solver);
+                if (level.getLevel() > Level.VERBOSE.getLevel()) Chatterbox.showSolutions(solver);
+                if (level.getLevel() > Level.SOLUTION.getLevel()) Chatterbox.showDecisions(solver);
             }
 
             Thread statOnKill = new Thread() {

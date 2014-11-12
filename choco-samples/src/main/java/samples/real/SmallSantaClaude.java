@@ -30,8 +30,8 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.real.RealConstraint;
+import solver.messages.Chatterbox;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
@@ -94,7 +94,8 @@ public class SmallSantaClaude {
         // set search strategy (ABS)
         solver.set(IntStrategyFactory.minDom_LB(kid_gift));
         // displays resolution statistics
-        SearchMonitorFactory.log(solver, true, false);
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
         // print each solution
         solver.plugMonitor(new IMonitorSolution() {
             @Override

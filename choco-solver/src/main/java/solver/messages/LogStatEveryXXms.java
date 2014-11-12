@@ -24,45 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+
+package solver.messages;
 
 import solver.Solver;
-
-import static solver.Configuration.WELCOME_TITLE;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 
 /**
- * Basic search monitor logger, which prints welcome message at the beginning od the search and
- * search statistics at the end of the search.
- * <p/>
+ * A search monitor logger which prints statistics every XX ms.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 09/05/11
+ * @since 18 aug. 2010
  */
-public final class LogBasic implements IMonitorInitialize, IMonitorClose {
+public class LogStatEveryXXms implements IMonitorInitPropagation {
 
+    Thread printer;
 
-    final Solver solver;
+    public LogStatEveryXXms(final Solver solver, final long duration) {
 
-    public LogBasic(Solver solver) {
-        this.solver = solver;
+        printer = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    long sleep = duration;
+                    sleep(sleep);
+                    do {
+                        solver.getMeasures().updateTimeCount();
+                        solver.getMeasures().updatePropagationCount();
+                        System.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
+                        sleep(sleep);
+                    } while (true);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        };
+        printer.setDaemon(true);
     }
 
     @Override
-    public void beforeInitialize() {
-        System.out.println(WELCOME_TITLE);
+    public void beforeInitialPropagation() {
     }
 
     @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeClose() {
-        System.out.println(solver.getMeasures().toString());
-    }
-
-    @Override
-    public void afterClose() {
+    public void afterInitialPropagation() {
+        printer.start();
     }
 }
