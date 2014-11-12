@@ -66,8 +66,8 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
             myworld--;
         }
         Decision jmpBck = dec;
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
 
         // now we can explicitly enforce the jump
@@ -114,8 +114,8 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
             mSolver.getSearchLoop().setLastDecision(cobdec);
         }
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
 

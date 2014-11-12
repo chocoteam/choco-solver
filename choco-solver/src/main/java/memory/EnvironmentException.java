@@ -27,7 +27,7 @@
 
 package memory;
 
-import util.logger.LoggerFactory;
+import org.slf4j.LoggerFactory;
 
 /**
  * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
@@ -54,6 +54,6 @@ public class EnvironmentException extends RuntimeException {
      */
     public EnvironmentException(String message) {
 //		super(message);
-        LoggerFactory.getLogger().error(message);
+        LoggerFactory.getLogger(IEnvironment.class).error(message);
     }
 }

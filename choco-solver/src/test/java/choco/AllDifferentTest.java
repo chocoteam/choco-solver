@@ -28,6 +28,7 @@
 package choco;
 
 import choco.checker.DomainBuilder;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -40,7 +41,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -205,7 +205,7 @@ public class AllDifferentTest {
                         Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
                         Assert.assertTrue(ac.getMeasures().getFailCount() == 0 || b == 0, "nb nod incorrect" + seed);
 
-                        LoggerFactory.getLogger().info("{}ms - {}ms - {}ms - {}ms", neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
+                        LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
                                 bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount());
                     }
                 }

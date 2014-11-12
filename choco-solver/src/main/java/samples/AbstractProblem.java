@@ -32,9 +32,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
+
+import static java.lang.Runtime.getRuntime;
+import static samples.AbstractProblem.Level.*;
+import static solver.search.loop.monitors.SearchMonitorFactory.log;
 
 /**
  * <br/>
@@ -119,7 +120,6 @@ public abstract class AbstractProblem {
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            final ILogger log = LoggerFactory.getLogger();
             this.printDescription();
             this.createSolver();
             this.buildModel();
@@ -127,34 +127,34 @@ public abstract class AbstractProblem {
 
             overrideExplanation();
 
-            if (level.getLevel() > Level.SILENT.getLevel()) {
-                SearchMonitorFactory.log(solver,
-                        level.getLevel() > Level.VERBOSE.getLevel(),
-                        level.getLevel() > Level.SOLUTION.getLevel());
+            if (level.getLevel() > SILENT.getLevel()) {
+                log(solver,
+                        level.getLevel() > VERBOSE.getLevel(),
+                        level.getLevel() > SOLUTION.getLevel());
             }
 
             Thread statOnKill = new Thread() {
                 public void run() {
                     if (userInterruption()) {
-                        if (level.getLevel() > Level.SILENT.getLevel()) {
-                            log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                        if (level.getLevel() > SILENT.getLevel()) {
+                            System.out.println(String.format("[STATISTICS {%s]", solver.getMeasures().toOneLineString()));
                         }
-                        if (level.getLevel() > Level.SILENT.getLevel()) {
-                            log.info("Unexpected resolution interruption!");
+                        if (level.getLevel() > SILENT.getLevel()) {
+                            System.out.println("Unexpected resolution interruption!");
                         }
                     }
 
                 }
             };
 
-            Runtime.getRuntime().addShutdownHook(statOnKill);
+            getRuntime().addShutdownHook(statOnKill);
 
             this.solve();
-            if (level.getLevel() > Level.QUIET.getLevel()) {
+            if (level.getLevel() > QUIET.getLevel()) {
                 prettyOut();
             }
             userInterruption = false;
-            Runtime.getRuntime().removeShutdownHook(statOnKill);
+            getRuntime().removeShutdownHook(statOnKill);
         }
     }
 

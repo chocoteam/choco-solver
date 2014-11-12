@@ -41,16 +41,16 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         IMonitorInitialize, IMonitorInitPropagation, IMonitorInterruption, IMonitorOpenNode, IMonitorRestart,
         IMonitorSolution, IMonitorUpBranch {
 
-    List<IMonitorClose> mclos = new ArrayList<IMonitorClose>();
-    List<IMonitorContradiction> mcont = new ArrayList<IMonitorContradiction>();
-    List<IMonitorDownBranch> mdbra = new ArrayList<IMonitorDownBranch>();
-    List<IMonitorInitialize> minit = new ArrayList<IMonitorInitialize>();
-    List<IMonitorInitPropagation> mipro = new ArrayList<IMonitorInitPropagation>();
-    List<IMonitorInterruption> minte = new ArrayList<IMonitorInterruption>();
-    List<IMonitorOpenNode> mopno = new ArrayList<IMonitorOpenNode>();
-    List<IMonitorRestart> mrest = new ArrayList<IMonitorRestart>();
-    List<IMonitorSolution> msolu = new ArrayList<IMonitorSolution>();
-    List<IMonitorUpBranch> mubra = new ArrayList<IMonitorUpBranch>();
+    List<IMonitorClose> mclos = new ArrayList<>();
+    List<IMonitorContradiction> mcont = new ArrayList<>();
+    List<IMonitorDownBranch> mdbra = new ArrayList<>();
+    List<IMonitorInitialize> minit = new ArrayList<>();
+    List<IMonitorInitPropagation> mipro = new ArrayList<>();
+    List<IMonitorInterruption> minte = new ArrayList<>();
+    List<IMonitorOpenNode> mopno = new ArrayList<>();
+    List<IMonitorRestart> mrest = new ArrayList<>();
+    List<IMonitorSolution> msolu = new ArrayList<>();
+    List<IMonitorUpBranch> mubra = new ArrayList<>();
 
 
     @Override
@@ -222,53 +222,43 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     }
 
     public boolean contains(ISearchMonitor sm) {
+        boolean isPluggedIn = false;
         if (sm != null) {
-            boolean isPluggedIn = false;
             if (sm instanceof IMonitorClose) {
-                isPluggedIn |= mclos.contains(sm);
+                isPluggedIn = mclos.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorContradiction) {
-                isPluggedIn |= mcont.contains(sm);
+                isPluggedIn = mcont.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorDownBranch) {
-                isPluggedIn |= mdbra.contains(sm);
+                isPluggedIn = mdbra.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorInitialize) {
-                isPluggedIn |= minit.contains(sm);
+                isPluggedIn = minit.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorInitPropagation) {
-                isPluggedIn |= mipro.contains(sm);
+                isPluggedIn = mipro.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorInterruption) {
-                isPluggedIn |= minte.contains(sm);
+                isPluggedIn = minte.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorOpenNode) {
-                isPluggedIn |= mopno.contains(sm);
+                isPluggedIn = mopno.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorRestart) {
-                isPluggedIn |= mrest.contains(sm);
+                isPluggedIn = mrest.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorSolution) {
-                isPluggedIn |= msolu.contains(sm);
+                isPluggedIn = msolu.contains(sm);
             }
-            if (isPluggedIn) return true;
             if (sm instanceof IMonitorUpBranch) {
-                isPluggedIn |= mubra.contains(sm);
+                isPluggedIn = mubra.contains(sm);
             }
-            if (isPluggedIn) return true;
         }
-        return false;
+        return isPluggedIn;
     }
 
-    public void reset(){
+    public void reset() {
         mclos.clear();
         mcont.clear();
         mdbra.clear();

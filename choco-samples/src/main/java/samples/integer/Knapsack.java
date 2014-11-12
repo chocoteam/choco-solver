@@ -38,7 +38,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 /**
  * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
@@ -125,14 +124,13 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Knapsack -- {}", data.name());
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Knapsack -- %s\n", data.name()));
         st.append("\tItem: Count\n");
         for (int i = 0; i < objects.length; i++) {
             st.append(String.format("\t#%d: %d\n", i, objects[i].getValue()));
         }
         st.append(String.format("\n\tPower: %d", power.getValue()));
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

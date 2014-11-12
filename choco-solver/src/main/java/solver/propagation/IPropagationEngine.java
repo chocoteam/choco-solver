@@ -26,6 +26,8 @@
  */
 package solver.propagation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
@@ -33,7 +35,6 @@ import solver.exception.ContradictionException;
 import solver.variables.Variable;
 import solver.variables.events.IEventType;
 import solver.variables.events.PropagatorEventType;
-import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -46,24 +47,26 @@ import java.io.Serializable;
  */
 public interface IPropagationEngine extends Serializable {
 
+    final Logger LOGGER = LoggerFactory.getLogger(IPropagationEngine.class);
+
     public enum Trace {
         ;
 
         public static void printPropagation(Variable v, Propagator p) {
-            LoggerFactory.getLogger().info("[P] {}", "(" + v + "::" + p + ")");
+            LOGGER.debug("[P] {}", "(" + v + "::" + p + ")");
         }
 
         public static void printModification(Variable v, IEventType e, ICause c) {
-            LoggerFactory.getLogger().info("\t[M] {} {} ({})", v, e, c);
+            LOGGER.debug("\t[M] {} {} ({})", v, e, c);
         }
 
 
         public static void printSchedule(Propagator p) {
-            LoggerFactory.getLogger().info("\t\t[S] {}", p);
+            LOGGER.debug("\t\t[S] {}", p);
         }
 
         public static void printAlreadySchedule(Propagator p) {
-            LoggerFactory.getLogger().info("\t\t[s] {}", p);
+            LOGGER.debug("\t\t[s] {}", p);
         }
     }
 
@@ -102,7 +105,7 @@ public interface IPropagationEngine extends Serializable {
      *
      * @param variable modified variable
      * @param type
-	 * @throws ContradictionException
+     * @throws ContradictionException
      */
     void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException;
 

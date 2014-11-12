@@ -28,12 +28,12 @@ package solver.propagation;
 
 import gnu.trove.list.array.TIntArrayList;
 import memory.IEnvironment;
+import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.events.PropagatorEventType;
-import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -161,7 +161,7 @@ public class PropagationTrigger implements Serializable {
 
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
         if (Configuration.PRINT_PROPAGATION) {
-            LoggerFactory.getLogger().info("[A] {}", toPropagate);
+            LoggerFactory.getLogger(IPropagationEngine.class).debug("[A] {}", toPropagate);
         }
         if (toPropagate.isStateLess()) {
             toPropagate.setActive();

@@ -27,6 +27,8 @@
 
 package solver.explanations;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Propagator;
@@ -36,8 +38,6 @@ import solver.search.strategy.decision.Decision;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -50,7 +50,7 @@ import java.io.Serializable;
  * A class to manage explanations. The default behavior is to do nothing !
  */
 public class ExplanationEngine implements Serializable {
-    static ILogger LOGGER = LoggerFactory.getLogger();
+    static Logger LOGGER = LoggerFactory.getLogger(ExplanationEngine.class);
     Solver solver;
 
     /**
@@ -226,18 +226,18 @@ public class ExplanationEngine implements Serializable {
 
 
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
-        LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
+        LOGGER.debug("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
     }
 
     public void onActivatePropagator(Propagator propagator, Explanation explanation) {
-        LOGGER.info("::EXPL:: ACTIV. " + propagator + " BECAUSE OF " + flatten(explanation));
+        LOGGER.debug("::EXPL:: ACTIV. " + propagator + " BECAUSE OF " + flatten(explanation));
     }
 
     public void onContradiction(ContradictionException cex, Explanation explanation) {
         if (cex.v != null) {
-            LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
+            LOGGER.debug("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
         } else if (cex.c != null) {
-            LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
+            LOGGER.debug("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
         }
     }
 

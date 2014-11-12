@@ -101,7 +101,7 @@ public final class RestartManager implements IMonitorInitialize, IMonitorOpenNod
     @Override
     public void afterRestart() {
         if (restartFromStrategyCount >= restartLimit) {
-            //LOGGER.info("- Limit reached: stop restarting");
+            //LOGGER.debug("- Limit reached: stop restarting");
             //searchLoop.setRestartAfterEachSolution(false);
             restartStrategyLimit.overrideLimit(Long.MAX_VALUE);
         }

@@ -26,7 +26,8 @@
  */
 package solver.explanations.strategies;
 
-import solver.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -38,9 +39,11 @@ import solver.explanations.ExplanationEngine;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.RootDecision;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
+
+import static solver.Configuration.PRINT_EXPLANATION;
+import static solver.Configuration.PROP_IN_EXP;
+import static solver.explanations.Deduction.Type.DecLeft;
+import static solver.search.strategy.decision.RootDecision.ROOT;
 
 /**
  * This class describes operations to execute to perform Conflict-based back jumping.
@@ -53,7 +56,7 @@ import util.logger.LoggerFactory;
  */
 public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitorSolution {
 
-    static ILogger LOGGER = LoggerFactory.getLogger();
+    static Logger LOGGER = LoggerFactory.getLogger(ConflictBasedBackjumping.class);
     protected ExplanationEngine mExplanationEngine;
     protected Solver mSolver;
     boolean userE; // set to true, store the last explanation
@@ -78,7 +81,7 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
      * @param active true or false
      */
     public void activeUserExplanation(boolean active) {
-        if (!Configuration.PROP_IN_EXP) {
+        if (!PROP_IN_EXP) {
             throw new SolverException("Configuration.properties should be modified to allow storing propagators in explanations. (PROP_IN_EXP property).");
         }
         userE = active;
@@ -99,7 +102,7 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         if (userE) {
             lastOne = complete;
         }
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+        if (PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
             mExplanationEngine.onContradiction(cex, complete);
         }
         int upto = compute(complete, mSolver.getEnvironment().getWorldIndex());
@@ -111,13 +114,13 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
     public void onSolution() {
         // we need to prepare a "false" backtrack on this decision
         Decision dec = mSolver.getSearchLoop().getLastDecision();
-        while ((dec != RootDecision.ROOT) && (!dec.hasNext())) {
+        while ((dec != ROOT) && (!dec.hasNext())) {
             dec = dec.getPrevious();
         }
-        if (dec != RootDecision.ROOT) {
+        if (dec != ROOT) {
             Explanation explanation = new Explanation();
             Decision d = dec.getPrevious();
-            while ((d != RootDecision.ROOT)) {
+            while ((d != ROOT)) {
                 if (d.hasNext()) {
                     explanation.add(d.getPositiveDeduction());
                 }
@@ -137,31 +140,31 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
      */
     protected void updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
-        while (dec != RootDecision.ROOT && nworld > 1) {
+        while (dec != ROOT && nworld > 1) {
             dec = dec.getPrevious();
             nworld--;
         }
-        if (dec != RootDecision.ROOT) {
+        if (dec != ROOT) {
             if (!dec.hasNext())
                 throw new UnsupportedOperationException("RecorderExplanationEngine.updateVRExplain should get to a POSITIVE decision:" + dec);
             Deduction left = dec.getPositiveDeduction();
             expl.remove(left);
-            assert left.getmType() == Deduction.Type.DecLeft;
+            assert left.getmType() == DecLeft;
             BranchingDecision va = (BranchingDecision) left;
             mExplanationEngine.removeLeftDecisionFrom(va.getDecision(), va.getVar());
 
             Deduction right = dec.getNegativeDeduction();
             mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
         }
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+        if (PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
 
     /**
      * Compute the world to backtrack to
      *
-     * @param explanation current explanation
+     * @param explanation       current explanation
      * @param currentWorldIndex current world index
      * @return the number of world to backtrack to.
      */
@@ -170,7 +173,7 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         if (explanation.nbDeductions() > 0) {
             for (int d = 0; d < explanation.nbDeductions(); d++) {
                 Deduction dec = explanation.getDeduction(d);
-                if (dec.getmType() == Deduction.Type.DecLeft) {
+                if (dec.getmType() == DecLeft) {
                     int world = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
                     if (world > dworld) {
                         dworld = world;

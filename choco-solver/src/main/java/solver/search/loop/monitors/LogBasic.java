@@ -26,10 +26,9 @@
  */
 package solver.search.loop.monitors;
 
-import solver.Configuration;
 import solver.Solver;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
+
+import static solver.Configuration.WELCOME_TITLE;
 
 /**
  * Basic search monitor logger, which prints welcome message at the beginning od the search and
@@ -42,8 +41,6 @@ import util.logger.LoggerFactory;
  */
 public final class LogBasic implements IMonitorInitialize, IMonitorClose {
 
-    private static ILogger LOGGER = LoggerFactory.getLogger();
-
 
     final Solver solver;
 
@@ -53,10 +50,7 @@ public final class LogBasic implements IMonitorInitialize, IMonitorClose {
 
     @Override
     public void beforeInitialize() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(Configuration.WELCOME_TITLE);
-            LOGGER.info(Configuration.CALLER, solver.getName());
-        }
+        System.out.println(WELCOME_TITLE);
     }
 
     @Override
@@ -65,9 +59,7 @@ public final class LogBasic implements IMonitorInitialize, IMonitorClose {
 
     @Override
     public void beforeClose() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(solver.getMeasures().toString());
-        }
+        System.out.println(solver.getMeasures().toString());
     }
 
     @Override

@@ -175,15 +175,15 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (globalLB > globalUB) {
             return null;
         }
-		if(LOGGER.isInfoEnabled())
-			LOGGER.info("% objective in [" + globalLB + ", " + globalUB + "]");
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("% objective in [" + globalLB + ", " + globalUB + "]");
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         FastDecision dec = pool.getE();
         if (dec == null) dec = new FastDecision(pool);
         dec.set(obj, target, decOperator);
-		if(LOGGER.isInfoEnabled())
-			LOGGER.info("% trying " + obj+" "+(decOperator==decUB?"<=":">=")+" "+target);
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("% trying " + obj+" "+(decOperator==decUB?"<=":">=")+" "+target);
         return dec;
     }
 

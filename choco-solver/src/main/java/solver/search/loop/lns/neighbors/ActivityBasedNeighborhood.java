@@ -26,16 +26,18 @@
  */
 package solver.search.loop.lns.neighbors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.variables.IntVar;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.util.BitSet;
 import java.util.Random;
+
+import static java.lang.Integer.MIN_VALUE;
 
 /**
  * Large Neighborhood Search based on Activity Based Search to fix variables
@@ -46,7 +48,7 @@ import java.util.Random;
  */
 public class ActivityBasedNeighborhood extends ANeighbor {
 
-    public static final ILogger logger = LoggerFactory.getLogger();
+    public static final Logger logger = LoggerFactory.getLogger(ActivityBasedNeighborhood.class);
 
     private final int n;
     private final IntVar[] vars;
@@ -78,9 +80,9 @@ public class ActivityBasedNeighborhood extends ANeighbor {
     public void restrictLess() {
         nbFixedVars /= 2;
 //        System.out.println("nbFixedVars " + nbFixedVars);
-        if (logger.isInfoEnabled()) {
+        if (logger.isDebugEnabled()) {
             mSolver.getMeasures().updateTimeCount();
-            logger.info(">> nbFixedVars {}", nbFixedVars);
+            logger.debug(">> nbFixedVars {}", nbFixedVars);
         }
     }
 
@@ -108,7 +110,7 @@ public class ActivityBasedNeighborhood extends ANeighbor {
     private void activity(ICause cause) throws ContradictionException {
         BitSet selected = new BitSet(vars.length);
         while (selected.cardinality() < nbFixedVars) {
-            double a = Integer.MIN_VALUE;
+            double a = MIN_VALUE;
             int idx = -1;
             for (int k = 0; k < nbFixedVars; k++) {
                 double ao = abs.getActivity(vars[k]);

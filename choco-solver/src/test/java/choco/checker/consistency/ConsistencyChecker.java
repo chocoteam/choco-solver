@@ -29,12 +29,11 @@ package choco.checker.consistency;
 
 import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
-import org.testng.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +41,10 @@ import java.util.Random;
 
 import static choco.checker.DomainBuilder.buildDomainsFromVar;
 import static choco.checker.DomainBuilder.buildFullDomains;
+import static choco.checker.consistency.ConsistencyChecker.Consistency.valueOf;
+import static java.lang.System.arraycopy;
+import static org.testng.Assert.fail;
+import static solver.Solver.writeInFile;
 
 /**
  * <br/>
@@ -55,12 +58,12 @@ public class ConsistencyChecker {
         ac, bc
     }
 
-    private static final ILogger LOGGER = LoggerFactory.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
 //        System.out.printf("Running %s\n", modeler.name());
-        Consistency _consistency = Consistency.valueOf(consistency);
+        Consistency _consistency = valueOf(consistency);
 
         THashMap<int[], IntVar> map = new THashMap<>();
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
@@ -87,9 +90,9 @@ public class ConsistencyChecker {
                             int val = values[v];
                             int[][] _domains = new int[nbVar][];
 
-                            System.arraycopy(domains, 0, _domains, 0, d);
+                            arraycopy(domains, 0, _domains, 0, d);
                             _domains[d] = new int[]{val};
-                            System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
+                            arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
                             Solver test = modeler.model(nbVar, _domains, map, parameters);
                             try {
@@ -98,7 +101,7 @@ public class ConsistencyChecker {
                                             ds, ide, h, rvars[d], val, loop, seed);
                                     LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                     writeDown(ref);
-                                    Assert.fail("no solution found");
+                                    fail("no solution found");
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -107,7 +110,7 @@ public class ConsistencyChecker {
                                         ds, ide, h, rvars[d], val, loop, seed);
                                 LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                 writeDown(ref);
-                                Assert.fail();
+                                fail();
                             }
                         }
                     }
@@ -129,7 +132,7 @@ public class ConsistencyChecker {
             writeDown(ref);
             LOGGER.error(e.getMessage());
             LOGGER.error("REF:\n{}\n", ref);
-            Assert.fail();
+            fail();
         }
         return ref;
     }
@@ -152,7 +155,7 @@ public class ConsistencyChecker {
     protected static void writeDown(Solver ref) {
         File f = new File("SOLVER_ERROR.ser");
         try {
-            Solver.writeInFile(ref, f);
+            writeInFile(ref, f);
         } catch (IOException ee) {
             ee.printStackTrace();
         }

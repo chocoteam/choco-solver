@@ -28,8 +28,6 @@
 package solver.search.loop.monitors;
 
 import solver.Solver;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 /**
  * A search monitor logger which prints statistics every XX ms.
@@ -39,8 +37,6 @@ import util.logger.LoggerFactory;
  * @since 18 aug. 2010
  */
 class LogStatEveryXXms implements IMonitorInitPropagation {
-
-    private static ILogger LOGGER = LoggerFactory.getLogger();
 
     Thread printer;
 
@@ -52,14 +48,12 @@ class LogStatEveryXXms implements IMonitorInitPropagation {
             public void run() {
                 try {
                     long sleep = duration;
-                    Thread.sleep(sleep);
+                    sleep(sleep);
                     do {
                         solver.getMeasures().updateTimeCount();
                         solver.getMeasures().updatePropagationCount();
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info(">> {}", solver.getMeasures().toOneShortLineString());
-                        }
-                        Thread.sleep(sleep);
+                        System.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
+                        sleep(sleep);
                     } while (true);
                 } catch (InterruptedException ignored) {
                 }

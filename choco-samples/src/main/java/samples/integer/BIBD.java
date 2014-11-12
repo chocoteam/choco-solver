@@ -35,7 +35,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 /**
@@ -147,7 +146,7 @@ public class BIBD extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("BIBD({},{},{},{},{})", new Object[]{v, b, r, k, l});
+        System.out.println(String.format("BIBD(%d,%d,%d,%d,%d)", v, b, r, k, l));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < v; i++) {
@@ -160,7 +159,7 @@ public class BIBD extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

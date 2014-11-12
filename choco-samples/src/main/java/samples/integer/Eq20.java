@@ -33,7 +33,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -97,8 +96,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("20 equations");
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder("20 equations\n");
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(", ");
@@ -106,7 +104,7 @@ public class Eq20 extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -27,16 +27,18 @@
 package solver.search.loop.monitors;
 
 import solver.Solver;
+import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.search.limits.*;
 import solver.search.restart.GeometricalRestartStrategy;
 import solver.search.restart.LubyRestartStrategy;
 import solver.variables.Variable;
-import util.logger.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static util.tools.StringUtils.pad;
 
 /**
  * <br/>
@@ -110,13 +112,7 @@ public class SearchMonitorFactory {
      * @param choices  print choices
      */
     public static void log(Solver solver, boolean solution, boolean choices) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(new DefaultSolutionMessage(solver)));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
-        }
+        log(solver, solution, new DefaultSolutionMessage(solver), choices, new DefaultDecisionMessage(solver));
     }
 
     /**
@@ -128,13 +124,7 @@ public class SearchMonitorFactory {
      * @param choices         print choices
      */
     public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(solutionMessage));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
-        }
+        log(solver, solution, solutionMessage, choices, new DefaultDecisionMessage(solver));
     }
 
     /**
@@ -146,13 +136,7 @@ public class SearchMonitorFactory {
      * @param decisionMessage print the message on decisions
      */
     public static void log(Solver solver, boolean solution, boolean choices, IMessage decisionMessage) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(new DefaultSolutionMessage(solver)));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, decisionMessage));
-        }
+        log(solver, solution, new DefaultSolutionMessage(solver), choices, decisionMessage);
     }
 
     /**
@@ -164,13 +148,43 @@ public class SearchMonitorFactory {
      * @param choices         print choices
      * @param decisionMessage print the message on decisions
      */
-    public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices, IMessage decisionMessage) {
+    public static void log(final Solver solver, boolean solution, final IMessage solutionMessage, boolean choices, final IMessage decisionMessage) {
         solver.plugMonitor(new LogBasic(solver));
         if (solution) {
-            solver.plugMonitor(new LogSolutions(solutionMessage));
+            solver.plugMonitor(new IMonitorSolution() {
+
+                @Override
+                public void onSolution() {
+                    System.out.println(solutionMessage);
+                }
+            });
         }
         if (choices) {
-            solver.plugMonitor(new LogChoices(solver, decisionMessage));
+            solver.plugMonitor(new IMonitorDownBranch() {
+                @Override
+                public void beforeDownLeftBranch() {
+                    System.out.println(String.format("%s[L]%s //%s",
+                            pad("", solver.getEnvironment().getWorldIndex(), "."),
+                            solver.getSearchLoop().getLastDecision().toString(),
+                            decisionMessage.print()));
+                }
+
+                @Override
+                public void afterDownLeftBranch() {
+                }
+
+                @Override
+                public void beforeDownRightBranch() {
+                    System.out.println(String.format("%s[R]%s //%s",
+                            pad("", solver.getEnvironment().getWorldIndex(), "."),
+                            solver.getSearchLoop().getLastDecision().toString(),
+                            decisionMessage.print()));
+                }
+
+                @Override
+                public void afterDownRightBranch() {
+                }
+            });
         }
     }
 
@@ -183,9 +197,7 @@ public class SearchMonitorFactory {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                if (LoggerFactory.getLogger().isInfoEnabled()) {
-                    LoggerFactory.getLogger().info(solver.getMeasures().toOneLineString());
-                }
+                System.out.println(solver.getMeasures().toOneLineString());
             }
 
             @Override
@@ -200,9 +212,10 @@ public class SearchMonitorFactory {
      * @param solver a solver
      * @param s      starting choice number
      * @param e      ending choice number
+     * @deprecated Do nothing!
      */
+    @Deprecated
     public static void logWithRank(Solver solver, int s, int e) {
-        solver.plugMonitor(new LogChoicesWithRank(solver, s, e, new DefaultDecisionMessage(solver)));
     }
 
     /**
@@ -212,9 +225,10 @@ public class SearchMonitorFactory {
      * @param s               starting choice number
      * @param e               ending choice number
      * @param decisionMessage print the specific message
+     * @deprecated Do nothing!
      */
+    @Deprecated
     public static void logWithRank(Solver solver, int s, int e, IMessage decisionMessage) {
-        solver.plugMonitor(new LogChoicesWithRank(solver, s, e, decisionMessage));
     }
 
     /**
@@ -223,7 +237,12 @@ public class SearchMonitorFactory {
      * @param solver a solver
      */
     public static void logContradiction(Solver solver) {
-        solver.plugMonitor(new LogContradiction());
+        solver.plugMonitor(new IMonitorContradiction() {
+            @Override
+            public void onContradiction(ContradictionException cex) {
+                System.out.println(String.format("\t/!\\ %s", cex.toString()));
+            }
+        });
     }
 
     /**
@@ -276,9 +295,10 @@ public class SearchMonitorFactory {
      * Print the total number of propagation count per propagator
      *
      * @param solver a solver
+     * @deprecated do nothing
      */
+    @Deprecated
     public static void prop_count(Solver solver) {
-        solver.plugMonitor(new LogPropagationCount(solver));
     }
 
     /**

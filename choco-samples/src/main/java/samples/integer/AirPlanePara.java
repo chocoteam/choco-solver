@@ -44,7 +44,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -208,8 +207,7 @@ public class AirPlanePara extends ParallelizedProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Air plane landing({})", mData);
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Air plane landing (%s)\n", mData));
         if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
@@ -219,7 +217,7 @@ public class AirPlanePara extends ParallelizedProblem {
                         append("]\n");
             }
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

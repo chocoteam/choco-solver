@@ -190,7 +190,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         notFrozen.or(unrelated);
         // then build the fake decision path
         last = null;
-//        LOGGER.info("relax dom {}", notFrozen.cardinality());
+//        LOGGER.debug("relax dom {}", notFrozen.cardinality());
         for (int id = notFrozen.nextSetBit(0); id >= 0 && id < path.size(); id = notFrozen.nextSetBit(id + 1)) {
             //            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
             if (path.get(id).hasNext()) {

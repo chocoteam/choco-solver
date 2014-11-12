@@ -37,7 +37,6 @@ import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -175,7 +174,7 @@ public class Partition extends AbstractProblem {
         } else {
             st.append("INFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

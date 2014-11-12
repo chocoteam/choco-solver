@@ -26,18 +26,21 @@
  */
 package solver.search.bind;
 
-import solver.Configuration;
-import solver.search.bind.impl.StaticBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.search.bind.nop.NOPISearchBinder;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import static java.lang.ClassLoader.getSystemResources;
+import static java.util.Arrays.asList;
+import static solver.Configuration.SEARCH_BINDER_PATH;
+import static solver.search.bind.impl.StaticBinder.REQUESTED_API_VERSION;
+import static solver.search.bind.impl.StaticBinder.getSingleton;
 
 /**
  * A binder factory that provides default strategies for Solver.
@@ -50,7 +53,7 @@ import java.util.Set;
  */
 public class SearchBinderFactory {
 
-    private static final ILogger LOGGER = LoggerFactory.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchBinderFactory.class);
 
     static final int UNINITIALIZED = 0;
     static final int ONGOING_INITIALIZATION = 1;
@@ -58,7 +61,7 @@ public class SearchBinderFactory {
     static final int SUCCESSFUL_INITIALIZATION = 3;
     static final int NOP_FALLBACK_INITIALIZATION = 4;
 
-    static String CLASSPATH = Configuration.SEARCH_BINDER_PATH;
+    static String CLASSPATH = SEARCH_BINDER_PATH;
 
     static int INITIALIZATION_STATE = UNINITIALIZED;
 
@@ -84,13 +87,13 @@ public class SearchBinderFactory {
             Set<URL> staticLoggerBinderPathSet = findPossibleStaticLoggerBinderPathSet();
             reportMultipleBindingAmbiguity(staticLoggerBinderPathSet);
             // the next line does the binding
-            StaticBinder.getSingleton();
+            getSingleton();
             INITIALIZATION_STATE = SUCCESSFUL_INITIALIZATION;
             reportActualBinding(staticLoggerBinderPathSet);
         } catch (ExceptionInInitializerError ncde) {
             INITIALIZATION_STATE = NOP_FALLBACK_INITIALIZATION;
-            LOGGER.info("Failed to load class \"solver.search.bind.impl.StaticBinder\".");
-            LOGGER.info("Defaulting to no-operation (NOP) binder implementation");
+            LOGGER.warn("Failed to load class \"solver.search.bind.impl.StaticBinder\".");
+            LOGGER.warn("Defaulting to no-operation (NOP) binder implementation");
         } catch (Exception e) {
             failedBinding(e);
             throw new IllegalStateException("Unexpected initialization failure", e);
@@ -99,13 +102,13 @@ public class SearchBinderFactory {
 
     static void failedBinding(Throwable t) {
         INITIALIZATION_STATE = FAILED_INITIALIZATION;
-        LOGGER.info("Failed to instantiate choco-solver search binder", t);
+        LOGGER.error("Failed to instantiate choco-solver search binder", t);
     }
 
 
     private static void versionSanityCheck() {
         try {
-            String requested = StaticBinder.REQUESTED_API_VERSION;
+            String requested = REQUESTED_API_VERSION;
 
             boolean match = false;
             for (int i = 0; i < API_COMPATIBILITY_LIST.length; i++) {
@@ -114,13 +117,13 @@ public class SearchBinderFactory {
                 }
             }
             if (!match) {
-                LOGGER.info("The requested version " + requested
+                LOGGER.warn("The requested version " + requested
                         + " by your choco-solver binding is not compatible with "
-                        + Arrays.asList(API_COMPATIBILITY_LIST).toString());
+                        + asList(API_COMPATIBILITY_LIST).toString());
             }
-        } catch (java.lang.NoSuchFieldError ignored) {
+        } catch (NoSuchFieldError ignored) {
         } catch (Throwable e) {
-            LOGGER.info("Unexpected problem occurred during version sanity check", e);
+            LOGGER.error("Unexpected problem occurred during version sanity check", e);
         }
     }
 
@@ -132,7 +135,7 @@ public class SearchBinderFactory {
                     .getClassLoader();
             Enumeration<URL> paths;
             if (loggerFactoryClassLoader == null) {
-                paths = ClassLoader.getSystemResources(CLASSPATH);
+                paths = getSystemResources(CLASSPATH);
             } else {
                 paths = loggerFactoryClassLoader
                         .getResources(CLASSPATH);
@@ -142,7 +145,7 @@ public class SearchBinderFactory {
                 staticLoggerBinderPathSet.add(path);
             }
         } catch (IOException ioe) {
-            LOGGER.info("Error getting resources from path", ioe);
+            LOGGER.warn("Error getting resources from path", ioe);
         }
         return staticLoggerBinderPathSet;
     }
@@ -157,22 +160,22 @@ public class SearchBinderFactory {
      */
     private static void reportMultipleBindingAmbiguity(Set<URL> staticLoggerBinderPathSet) {
         if (isAmbiguousStaticLoggerBinderPathSet(staticLoggerBinderPathSet)) {
-            LOGGER.info("Class path contains multiple SLF4J bindings.");
+            LOGGER.warn("Class path contains multiple bindings.");
             for (URL path : staticLoggerBinderPathSet) {
-                LOGGER.info("Found binding in [" + path + "]");
+                LOGGER.warn("Found binding in [" + path + "]");
             }
         }
     }
 
     private static void reportActualBinding(Set<URL> staticLoggerBinderPathSet) {
         if (isAmbiguousStaticLoggerBinderPathSet(staticLoggerBinderPathSet)) {
-            LOGGER.info("Actual binding is of type ["
-                    + StaticBinder.getSingleton().getBinder().getClass().getName() + "]");
+            LOGGER.warn("Actual binding is of type ["
+                    + getSingleton().getBinder().getClass().getName() + "]");
         }
     }
 
     /**
-     * Return the {@link ISearchBinder} instance in use.
+     * Return the {@link solver.search.bind.ISearchBinder} instance in use.
      * <p/>
      * <p/>
      * ILoggerFactory instance is bound with this class at compile time.
@@ -186,7 +189,7 @@ public class SearchBinderFactory {
         }
         switch (INITIALIZATION_STATE) {
             case SUCCESSFUL_INITIALIZATION:
-                return StaticBinder.getSingleton().getBinder();
+                return getSingleton().getBinder();
             case NOP_FALLBACK_INITIALIZATION:
                 return NOP_FALLBACK_FACTORY;
             case FAILED_INITIALIZATION:
@@ -197,15 +200,14 @@ public class SearchBinderFactory {
     }
 
     /**
-     * Return the {@link ISearchBinder} instance in use.
+     * Return the {@link solver.search.bind.ISearchBinder} instance in use.
      * <p/>
      * <p/>
      * ILoggerFactory instance is bound with this class at compile time.
-     * Use the default classpath, set in {@link Configuration#SEARCH_BINDER_PATH}.
-     *
+     * Use the default classpath, set in {@link solver.Configuration#SEARCH_BINDER_PATH}.
      */
     public static void setSearchBinderClasspath(String CLASSPATH) {
-        INITIALIZATION_STATE = UNINITIALIZED;
+        SearchBinderFactory.INITIALIZATION_STATE = UNINITIALIZED;
         SearchBinderFactory.CLASSPATH = CLASSPATH;
     }
 
@@ -213,7 +215,7 @@ public class SearchBinderFactory {
      * Reset the default search binder to default one
      */
     public static void reset() {
-        INITIALIZATION_STATE = UNINITIALIZED;
-        SearchBinderFactory.CLASSPATH = Configuration.SEARCH_BINDER_PATH;
+        SearchBinderFactory.INITIALIZATION_STATE = UNINITIALIZED;
+        SearchBinderFactory.CLASSPATH = SEARCH_BINDER_PATH;
     }
 }
