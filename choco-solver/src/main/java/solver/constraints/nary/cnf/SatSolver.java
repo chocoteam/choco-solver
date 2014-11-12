@@ -109,6 +109,20 @@ public class SatSolver {
         assert 0 == trailMarker();
         if (!ok_) return false;
 
+        /**
+         * std::sort(clause->begin(), clause->end());
+         Literal p = kUndefinedLiteral;
+         int j = 0;
+         for (int i = 0; i < clause->size(); ++i) {
+         if (Value((*clause)[i]) == kTrue || (*clause)[i] == Negated(p)) {
+         return true;
+         } else if (Value((*clause)[i]) != kFalse && (*clause)[i] != p) {
+         (*clause)[j++] = p = (*clause)[i];
+         }
+         }
+         clause->resize(j);
+         */
+
         // Check if clause is satisfied and remove false/duplicated literals:
         ps.sort();
         int lit = kUndefinedLiteral;
@@ -121,8 +135,8 @@ public class SatSolver {
                 ps.set(j++, lit);
             }
         }
-        if (j < ps.size() - 1) {
-            ps.remove(j + 1, ps.size() - j - 1);
+        if (j < ps.size()) {
+            ps.remove(j, ps.size() - j);
         }
 
 

@@ -29,6 +29,8 @@ package util.objects;
 import memory.IEnvironment;
 import memory.IStateInt;
 
+import java.io.Serializable;
+
 /**
  * Implementation based on "Maintaining GAC on adhoc r-ary constraints", Cheng and Yap, CP12.
  * <p/>
@@ -36,7 +38,7 @@ import memory.IStateInt;
  * Created by cprudhom on 04/11/14.
  * Project: choco.
  */
-public class StoredSparseSet {
+public class StoredSparseSet implements Serializable{
 
     int[] sparse;
     int[] dense;

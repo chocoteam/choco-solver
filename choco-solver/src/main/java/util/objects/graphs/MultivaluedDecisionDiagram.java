@@ -6,6 +6,7 @@ import solver.Configuration;
 import solver.constraints.extension.Tuples;
 import solver.variables.IntVar;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -14,7 +15,7 @@ import java.util.Arrays;
  * <p/>
  * Created by cprudhom on 30/10/14.
  */
-public class MultivaluedDecisionDiagram {
+public class MultivaluedDecisionDiagram implements Serializable{
 
     /**
      * The terminal node. An extreme (likely unused) value is set
