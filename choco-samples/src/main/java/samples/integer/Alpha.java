@@ -32,7 +32,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 /**
  * A verbal arithmetic puzzle:
@@ -102,8 +101,7 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Alpha");
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder("Alpha\n");
         st.append("\t");
         for (int i = 0; i < 26; i++) {
             st.append(letters[i].getName()).append("= ").append(letters[i].getValue()).append(" ");
@@ -112,7 +110,7 @@ public class Alpha extends AbstractProblem {
             }
         }
         st.append("\n");
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -204,7 +204,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             expl.reset();
         }
         var.explain(VariableState.DOM, expl);
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
             onActivatePropagator(propagator, expl);
         }
         store(pa, expl);
@@ -225,7 +225,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         // 3. explain the value removal thanks to the cause
         cause.explain(vr, expl);
         // 4. explanations monitoring
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
             onRemoveValue(var, val, cause, expl);
         }
     }

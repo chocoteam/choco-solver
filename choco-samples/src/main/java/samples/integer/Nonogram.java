@@ -35,7 +35,6 @@ import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 import javax.swing.*;
@@ -118,7 +117,7 @@ public class Nonogram extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Nonogram -- {}", data.name());
+        System.out.println(String.format("Nonogram -- %s", data.name()));
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {
             st.append("\t");
@@ -127,7 +126,7 @@ public class Nonogram extends AbstractProblem {
             }
             st.append("\n");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
         if (frame) {
             JFrame frame = new JFrame();
             frame.setTitle("NonoGram");

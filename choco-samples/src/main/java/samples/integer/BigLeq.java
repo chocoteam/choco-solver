@@ -33,7 +33,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 /**
  * Simple example which sorts m integers in range [0,m-1]
@@ -75,7 +74,7 @@ public class BigLeq extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("bigleq({})", m);
+        System.out.println(String.format("bigleq(%d)", m));
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < m - 1; i++) {
@@ -85,7 +84,7 @@ public class BigLeq extends AbstractProblem {
             }
         }
         st.append(String.format("%d", vars[m - 1].getValue()));
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

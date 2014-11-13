@@ -30,7 +30,6 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 
 /**
@@ -89,13 +88,13 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("SEND + MORE = MONEY ");
+        System.out.println("SEND + MORE = MONEY ");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < ALL.length; i++) {
             st.append(String.format("%s : %d\n\t", ALL[i].getName(), ALL[i].getValue()));
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

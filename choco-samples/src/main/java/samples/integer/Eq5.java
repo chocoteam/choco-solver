@@ -35,7 +35,6 @@ import solver.search.strategy.strategy.IntStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 /**
  * A system of equations provided by N. Beldiceanu.
@@ -103,7 +102,7 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("15 equations");
+        System.out.println("15 equations");
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < 15; i++) {
@@ -112,7 +111,7 @@ public class Eq5 extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

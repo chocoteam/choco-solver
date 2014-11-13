@@ -41,7 +41,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 /**
  * <br/>
@@ -110,12 +109,12 @@ public class OpenStacks extends AbstractProblem {
             for (int j = 1; j < np + 1; j++) {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
                 LogicalConstraintFactory.ifThenElse(btmp[0],
-						IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver)),
-						IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver)));
+                        IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver)),
+                        IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver)));
 
                 LogicalConstraintFactory.ifThenElse(btmp[1],
-						IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
-						IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver)));
+                        IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
+                        IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver)));
                 SatFactory.addClauses(LogOp.ifOnlyIf(o2b[j - 1][i], LogOp.and(btmp[0], btmp[1])), solver);
             }
         }
@@ -142,8 +141,7 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Open stacks problem");
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder("Open stacks problem\n");
         st.append("\t");
         for (int i = 0; i < nc; i++) {
             for (int j = 0; j < np; j++) {
@@ -169,7 +167,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("INFEASIBLE");
         }
         //st.append(solver.toString());
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

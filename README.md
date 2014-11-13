@@ -18,6 +18,24 @@ Choco3 is distributed under BSD licence (Copyright (c) 1999-2014, Ecole des Mine
 
 Contact: choco@mines-nantes.fr
 
+## Overview ##
+
+
+```java
+// 1. Create a Solver
+Solver solver = new Solver("my first problem");
+// 2. Create variables through the variable factory
+IntVar x = VariableFactory.bounded("X", 0, 5, solver);
+IntVar y = VariableFactory.bounded("Y", 0, 5, solver);
+// 3. Create and post constraints by using constraint factories
+solver.post(IntConstraintFactory.arithm(x, "+", y, "<", 5));
+// 4. Define the search strategy
+solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
+// 5. Launch the resolution process
+solver.findSolution();
+//6. Print search statistics
+Chatterbox.printStatistics(solver);
+```
 
 ## Usage ##
 ### Inside a maven project ###

@@ -37,7 +37,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.search.loop.monitors.SMF;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
@@ -57,20 +57,21 @@ public class ExpTest {
 	}
 
 	private Solver test(int n, int m, int expMode) {
-		// infeasible problem
-		Solver s = new Solver();
-		IntVar[] x = VF.boundedArray("x",n,0,m,s);
-		s.post(ICF.alldifferent(x,"NEQS"));
-		s.post(ICF.arithm(x[n-2],"=",x[n-1]));
-		// explanations
-		if(expMode == 2){
-			ExplanationFactory.CBJ.plugin(s,true);
-		}else if(expMode == 3){
-			ExplanationFactory.DBT.plugin(s,true);
-		}
-		// logging and solution
-		SMF.log(s,true,false);
-		s.findAllSolutions();
-		return s;
-	}
+        // infeasible problem
+        Solver s = new Solver();
+        IntVar[] x = VF.boundedArray("x", n, 0, m, s);
+        s.post(ICF.alldifferent(x, "NEQS"));
+        s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
+        // explanations
+        if (expMode == 2) {
+            ExplanationFactory.CBJ.plugin(s, true);
+        } else if (expMode == 3) {
+            ExplanationFactory.DBT.plugin(s, true);
+        }
+        // logging and solution
+        Chatterbox.showStatistics(s);
+        Chatterbox.showSolutions(s);
+        s.findAllSolutions();
+        return s;
+    }
 }

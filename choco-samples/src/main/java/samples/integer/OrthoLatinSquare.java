@@ -34,7 +34,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +139,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Ortho latin square({})", m);
+        System.out.println(String.format("Ortho latin square(%s)", m));
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < m; i++) {
@@ -156,7 +155,7 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
             st.append("\n\t");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

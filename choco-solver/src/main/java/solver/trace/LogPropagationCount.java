@@ -24,13 +24,12 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.trace;
 
 import gnu.trove.map.hash.TObjectLongHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
-import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 /**
@@ -39,24 +38,12 @@ import util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 30/01/12
  */
-public class LogPropagationCount implements IMonitorClose {
+public class LogPropagationCount {
 
-    final Solver solver;
-
-    public LogPropagationCount(Solver solver) {
-        this.solver = solver;
-    }
-
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
+    public String print(Solver solver) {
         Constraint[] cstrs = solver.getCstrs();
-        TObjectLongHashMap<String> fcounter = new TObjectLongHashMap<String>();
-        TObjectLongHashMap<String> ccounter = new TObjectLongHashMap<String>();
+        TObjectLongHashMap<String> fcounter = new TObjectLongHashMap<>();
+        TObjectLongHashMap<String> ccounter = new TObjectLongHashMap<>();
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] props = cstrs[i].getPropagators();
             for (int j = 0; j < props.length; j++) {
@@ -87,7 +74,6 @@ public class LogPropagationCount implements IMonitorClose {
         st.append("| ").append(StringUtils.pad("" + csum, -7, " "));
         st.append("|\n");
         st.append(StringUtils.pad(" ", 50, "-")).append("\n");
-        LoggerFactory.getLogger().info(st.toString());
-
+        return st.toString();
     }
 }

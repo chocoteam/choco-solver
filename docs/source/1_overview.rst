@@ -123,17 +123,20 @@ Which jar to select ?
 
 We provide a zip file which contains the following files:
 
-- choco-solver-|release|.jar
-An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
+choco-solver-|release|.jar
+    An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
 
-- choco-solver-|release|-sources.jar
-The source of the core library.
+choco-solver-|release|-sources.jar
+    The source of the core library.
 
-- choco-samples-|release|-sources.jar
-The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
+choco-samples-|release|-sources.jar
+    The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
 
-- apidocs-|release|.zip
-Javadoc of Choco-|release|
+apidocs-|release|.zip
+    Javadoc of Choco-|release|
+
+logback.xml
+    The logback configuration file.
 
 Extensions
 ^^^^^^^^^^
@@ -209,18 +212,36 @@ Eclipse
 
    mvn eclipse:eclipse
 
+.. _1_log:
 
 Note about logging
 ------------------
 
-Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
-Choco defines a unique entry point to centralize console output for all classes of the project.
-The principle is to not rely on a specific logging framework, in order to avoid imposing a logging framework on end-user.
-By default it relies on ``System.out`` and ``System.err``, but it allows using a specific logging framework.
-The choice is made to not rely on SLF4J to reduce dependencies and ease usages.
-But, one can bind the static logger to its favorite one by implementing the ``util.logger.ILogger`` interface and setting it as default in the ``util.logger.LoggerFactory``.
+In Choco, we distinguish *user trace* and *developer trace*.
+*User trace* is mainly dedicated to printing resolution statistics and solutions (and other useful services).
+The ``Chatterbox`` class is devoted to such aim, it centralises (almost) all messaging services.
+*Developer trace* is for debugging purpose.
+In order to avoid imposing a logging framework on end-user [#flog]_, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
 
-If you don't know what is a logging framework, but want to, take a look at `SLF4J <http://www.slf4j.org/>`_.
+    "SLF4J is a simple facade for logging systems allowing the end-user to plug-in the desired logging system at deployment time."
+    -- http://www.slf4j.org/faq.html
+
+SLF4J is only a facade, meaning that it does not provide a complete logging solution, and a logging framework must be bound.
+Otherwise, you'll get the following error:
+
+.. parsed-literal::
+
+    SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+    SLF4J: Defaulting to no-operation (NOP) logger implementation
+    SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+
+
+Choco is developed using `Logback <http://logback.qos.ch/>`_,
+but other framework are available such as `log4j <http://logging.apache.org/log4j/1.2/index.html>`_
+(a exhaustive list is given on `SL4J <http://www.slf4j.org/manual.html>`_).
+Declaring a logging framework is as simple as adding jar files to the classpath of your application:
+
+.. [#flog] Indeed, Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
 
 
 Command-line
@@ -231,7 +252,9 @@ For logback:
     .. parsed-literal::
 
         java \\
-        -cp .:choco-solver-|release|.jar:logback-core-1.0.13.jar:logback-classic-1.0.13.jar \\
+        -cp .:choco-solver-|release|.jar\\
+        :logback-core-1.0.13.jar\\
+        :logback-classic-1.0.13.jar \\
         my.project.Main
 
 .. note::
@@ -244,7 +267,9 @@ For log4j:
 
     .. parsed-literal::
 
-        java -cp .:choco-solver-|release|.jar:slf4j-log4j12-1.7.7.jar my.project.Main
+        java -cp .:choco-solver-|release|.jar\\
+        :slf4j-log4j12-1.7.7.jar \\
+        my.project.Main
 
 
 Maven
@@ -303,7 +328,10 @@ To facilitate the modeling, Choco |version| provides factories for almost every 
 | ``SetStrategyFactory``       | SSF          |                                           |
 +------------------------------+--------------+-------------------------------------------+
 +------------------------------+--------------+-------------------------------------------+
-| ``SearchMonitorFactory``     | SMF          | log, resolution limits, restarts etc.     |
+| ``Chatterbox``               |              | Output messages and statistics.           |
++------------------------------+--------------+-------------------------------------------+
++------------------------------+--------------+-------------------------------------------+
+| ``SearchMonitorFactory``     | SMF          | resolution limits, restarts etc.          |
 +------------------------------+--------------+-------------------------------------------+
 
 Note that, in order to have a concise and readable model, factories have shortcut names. Furthermore, they can be imported in a static way:
@@ -319,8 +347,7 @@ Here is a short example which illustrates the main steps of a CSP modeling and r
 
 .. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
       :language: java
-      :lines: 44-54
-      :emphasize-lines: 44,45
+      :lines: 45-57
       :linenos:
 
 
@@ -406,9 +433,8 @@ Logging
 -------
 
 Logging the search is possible.
-There are variants but the main way to do it is made through the ``SMF.log(Solver, boolean, boolean)``.
-The first boolean indicates whether or not logging solutions, the second indicates whether or not logging search decisions.
-It also print, by default, main statistics of the search (time, nodes, fails, etc.)
+There are variants but the main way to do it is made through the ``Chatterbox.printStatistics(solver)``.
+It prints the main statistics of the search (time, nodes, fails, etc.)
 
 
 Solving
@@ -446,4 +472,8 @@ Choco |version| : changes
 - Fix #227: deal with initial propagation
 - fix #230: update release script
 - fix #231: correct addTrue in SatFactory
+- fix #234: improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly.
+- fix #233: remove java8 compliant code (temporary)
 - Add a MDD-based propagator (ICF.mddc).
+- fix #235: refactor logging fmwk. Add Chatterbox class as a unique entry point for messaging. Logging still relies on SLF4J.
+- fix #236: bug in SatSolver

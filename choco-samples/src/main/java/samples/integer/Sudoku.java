@@ -34,7 +34,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 /**
@@ -110,8 +109,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Sudoku -- {}", data.name());
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", data.name()));
         st.append("\t");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -120,7 +118,7 @@ public class Sudoku extends AbstractProblem {
             st.append("\n\t");
         }
 
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

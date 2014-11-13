@@ -24,26 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
 
-import solver.exception.ContradictionException;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
+package solver.trace;
+
+import solver.Solver;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 
 /**
+ * A search monitor logger which prints statistics every XX ms.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 13/12/12
+ * @since 18 aug. 2010
  */
-public class LogContradiction implements IMonitorContradiction {
+public class LogStatEveryXXms implements IMonitorInitPropagation {
 
-    private static ILogger LOGGER = LoggerFactory.getLogger();
+    Thread printer;
+
+    public LogStatEveryXXms(final Solver solver, final long duration) {
+
+        printer = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    sleep(duration);
+                    //noinspection InfiniteLoopStatement
+                    do {
+                        solver.getMeasures().updateTimeCount();
+                        solver.getMeasures().updatePropagationCount();
+                        System.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
+                        sleep(duration);
+                    } while (true);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        };
+        printer.setDaemon(true);
+    }
 
     @Override
-    public void onContradiction(ContradictionException cex) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("\t/!\\ {}", cex.toString());
-        }
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+        printer.start();
     }
 }

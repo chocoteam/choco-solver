@@ -33,7 +33,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 import java.text.MessageFormat;
@@ -111,7 +110,7 @@ public class LatinSquare extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

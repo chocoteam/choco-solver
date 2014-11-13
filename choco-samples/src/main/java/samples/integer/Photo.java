@@ -35,7 +35,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 import util.tools.StringUtils;
 
 import static solver.constraints.IntConstraintFactory.*;
@@ -105,14 +104,14 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Photo -- {}", data.name());
+        System.out.println(String.format("Photo -- %s", data.name()));
         StringBuilder st = new StringBuilder();
         st.append("\tPositions: ");
         for (int i = 0; i < data.people(); i++) {
             st.append(String.format("%d ", positions[i].getValue()));
         }
         st.append(String.format("\n\tViolations: %d", violations.getValue()));
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

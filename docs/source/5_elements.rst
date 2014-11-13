@@ -64,7 +64,7 @@ A signature offers the possibility to specify the filtering algorithm to use:
 
     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 231-235,237
+          :lines: 231-236,238
           :emphasize-lines: 235
           :linenos:
 
@@ -1020,6 +1020,7 @@ The `maximum` constraints involves a set of integer variables and a third party 
 **See also**: `maximum <http://sofdem.github.io/gccat/gccat/Cmaximum.html>`_ in the Global Constraint Catalog.
 
 **API**:  ::
+
     Constraint maximum(IntVar MAX, IntVar VAR1, IntVar VAR2)
     Constraint maximum(IntVar MAX, IntVar[] VARS)
     Constraint maximum(BoolVar MAX, BoolVar[] VARS)
@@ -1054,19 +1055,19 @@ A constraint which restricts the values a variable can be assigned to the soluti
 
     Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD)
 
-.. admonition:: Example 1
+.. admonition:: Example
 
     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples2.java
-:language: java
+          :language: java
           :lines: 49-55,57
-              :emphasize-lines: 59
-              :linenos:
+          :emphasize-lines: 59
+          :linenos:
 
-        The solutions of the problem are :
+    The solutions of the problem are :
 
-            - `X[0] = 0, X[1] = -1`
-            - `X[0] = 0, X[1] = 1`,
-            - `X[0] = 1, X[1] = -1`
+        - `X[0] = 0, X[1] = -1`
+        - `X[0] = 0, X[1] = 1`,
+        - `X[0] = 1, X[1] = -1`
 
 
 .. _51_icstr_mem:

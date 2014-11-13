@@ -28,6 +28,7 @@ package samples;
 
 import memory.Environments;
 import memory.IEnvironment;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.integer.AllIntervalSeries;
@@ -35,7 +36,6 @@ import solver.Configuration;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
-import util.logger.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -82,7 +82,7 @@ public class AllTest {
     @Test(groups = "1m")
     public void mainTest() {
         if (Configuration.PLUG_EXPLANATION) {
-            LoggerFactory.getLogger().info(this.toString());
+            LoggerFactory.getLogger("test").info(this.toString());
             prob.readArgs(args);
             prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
             prob.buildModel();

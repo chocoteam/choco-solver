@@ -34,10 +34,14 @@
 
 package samples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.thread.AbstractParallelMaster;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
+
+import static java.lang.System.exit;
+import static java.lang.Thread.sleep;
+import static solver.ResolutionPolicy.SATISFACTION;
 
 public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
 
@@ -45,8 +49,10 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
     // VARIABLES
     //***********************************************************************************
 
-	protected static final ILogger LOGGER = LoggerFactory.getLogger();
-	int bestVal;
+    //***********************************************************************************
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(MasterProblem.class);
+    int bestVal;
     int nbSol;
     boolean closeWithSuccess;
     ResolutionPolicy policy;
@@ -55,23 +61,23 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * @param probClassName	class name of the ParallelizedProblem to solve
-	 * @param nbThreads		number of threads to use
-	 */
+    /**
+     * @param probClassName class name of the ParallelizedProblem to solve
+     * @param nbThreads     number of threads to use
+     */
     public MasterProblem(final String probClassName, int nbThreads) {
         slaves = new SlaveProblem[nbThreads];
         for (int i = 0; i < nbThreads; i++) {
-            slaves[i] = new SlaveProblem(probClassName, this,i);
+            slaves[i] = new SlaveProblem(probClassName, this, i);
             slaves[i].workInParallel();
         }
         wait = true;
         try {
             while (wait)
-                mainThread.sleep(20);
+                sleep(20);
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(0);
+            exit(0);
         }
     }
 
@@ -91,7 +97,7 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
                     LOGGER.info("=====UNSATISFIABLE=====");
                 }
             } else {
-                if (!closeWithSuccess && (policy != null && policy != ResolutionPolicy.SATISFACTION)) {
+                if (!closeWithSuccess && (policy != null && policy != SATISFACTION)) {
                     LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");
@@ -100,14 +106,13 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
         }
         Number[] nbs = slaves[0].solver.getMeasures().toArray();
         nbs[0] = nbSol;
-        nbs[5] = policy != ResolutionPolicy.SATISFACTION ? bestVal : 0;
-        System.exit(0);
+        nbs[5] = policy != SATISFACTION ? bestVal : 0;
+        exit(0);
     }
 
     /**
      * A solution of cost val has been found
      * informs slaves that they must find better
-     *
      */
     public synchronized boolean newSol(int val, ResolutionPolicy policy) {
         this.policy = policy;

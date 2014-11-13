@@ -31,6 +31,8 @@ package solver.constraints;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.structure.Operation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -38,16 +40,18 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.explanations.VariableState;
 import solver.variables.Variable;
-import solver.variables.events.IEventType;
 import solver.variables.events.PropagatorEventType;
 import util.ESat;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.Arrays;
+
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOf;
+import static solver.constraints.PropagatorPriority.LINEAR;
+import static solver.explanations.VariableState.DOM;
+import static solver.variables.events.IEventType.ALL_EVENTS;
+import static solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
 
 
 /**
@@ -85,7 +89,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @version 0.01, june 2010
  * @see solver.variables.Variable
- * @see solver.constraints.Constraint
+ * @see Constraint
  * @since 0.01
  */
 public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
@@ -95,7 +99,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     //***********************************************************************************
 
     private static final long serialVersionUID = 2L;
-    protected final static ILogger LOGGER = LoggerFactory.getLogger();
+    protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
     private static ThreadLocal<TIntHashSet> set = new ThreadLocal<TIntHashSet>() {
         @Override
@@ -181,7 +185,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param vars variables of the propagator. Their modification will trigger filtering
      */
     protected Propagator(V... vars) {
-        this(vars, PropagatorPriority.LINEAR, false);
+        this(vars, LINEAR, false);
     }
 
     //***********************************************************************************
@@ -196,12 +200,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected void addVariable(V... nvars) {
         V[] tmp = vars;
-        vars = Arrays.copyOf(vars, vars.length + nvars.length);
-        System.arraycopy(tmp, 0, vars, 0, tmp.length);
-        System.arraycopy(nvars, 0, vars, tmp.length, nvars.length);
+        vars = copyOf(vars, vars.length + nvars.length);
+        arraycopy(tmp, 0, vars, 0, tmp.length);
+        arraycopy(nvars, 0, vars, tmp.length, nvars.length);
         int[] itmp = this.vindices;
         vindices = new int[vars.length];
-        System.arraycopy(itmp, 0, vindices, 0, itmp.length);
+        arraycopy(itmp, 0, vindices, 0, itmp.length);
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }
@@ -228,7 +232,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     protected int getPropagationConditions(int vIdx) {
-        return IEventType.ALL_EVENTS;
+        return ALL_EVENTS;
     }
 
     /**
@@ -241,7 +245,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
      * @param evtmask type of propagation event <code>this</code> must consider.
-     * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
+     * @throws solver.exception.ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
     public abstract void propagate(int evtmask) throws ContradictionException;
 
@@ -280,7 +284,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
                     "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
         }
-        propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());
+        propagate(CUSTOM_PROPAGATION.getStrengthenedMask());
     }
 
     /**
@@ -363,7 +367,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         e.add(solver.getExplainer().getPropagatorActivation(this));
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            v.explain(VariableState.DOM, e);
+            v.explain(DOM, e);
         }
         // and the application of the current propagator
         e.add(this);
@@ -436,7 +440,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param variable involved variable
      * @param message  detailed message
-     * @throws ContradictionException expected behavior
+     * @throws solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(aCause, variable, message);

@@ -28,23 +28,27 @@
 package solver.search.loop;
 
 import memory.IEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;
-import solver.propagation.NoPropagationEngine;
 import solver.search.bind.ISearchBinder;
-import solver.search.bind.SearchBinderFactory;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 import util.ESat;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
+
+import static solver.objective.ObjectiveManager.SAT;
+import static solver.propagation.NoPropagationEngine.SINGLETON;
+import static solver.search.bind.SearchBinderFactory.getSearchBinder;
+import static solver.search.loop.Reporting.fullReport;
+import static solver.search.strategy.decision.RootDecision.ROOT;
+import static util.ESat.*;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object
@@ -85,7 +89,9 @@ public class SearchLoop implements ISearchLoop {
     // VARIABLES
     //***********************************************************************************
 
-    protected final static ILogger LOGGER = LoggerFactory.getLogger();
+    //***********************************************************************************
+
+    protected final static Logger LOGGER = LoggerFactory.getLogger(SearchLoop.class);
 
     // keep an int, that's faster than a long, and the domain of definition is large enough
     int timeStamp;
@@ -130,7 +136,7 @@ public class SearchLoop implements ISearchLoop {
 
     private boolean alive;
 
-    public Decision decision = RootDecision.ROOT;
+    public Decision decision = ROOT;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -158,7 +164,7 @@ public class SearchLoop implements ISearchLoop {
             env.worldPopUntil(rootWorldIndex);
             timeStamp++;
             Decision tmp;
-            while (decision != RootDecision.ROOT) {
+            while (decision != ROOT) {
                 tmp = decision;
                 decision = tmp.getPrevious();
                 tmp.free();
@@ -167,8 +173,8 @@ public class SearchLoop implements ISearchLoop {
             rootWorldIndex = -1;
             searchWorldIndex = -1;
             measures.reset();
-            objectivemanager = ObjectiveManager.SAT();
-            solver.set(NoPropagationEngine.SINGLETON);
+            objectivemanager = SAT();
+            solver.set(SINGLETON);
         }
     }
 
@@ -216,7 +222,7 @@ public class SearchLoop implements ISearchLoop {
         env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
         timeStamp++; // to force clear delta, on solution recording
         Decision tmp;
-        while (decision != RootDecision.ROOT) {
+        while (decision != ROOT) {
             tmp = decision;
             decision = tmp.getPrevious();
             tmp.free();
@@ -317,7 +323,7 @@ public class SearchLoop implements ISearchLoop {
             solver.getEngine().propagate();
         } catch (ContradictionException e) {
             this.env.worldPop();
-            solver.setFeasible(ESat.FALSE);
+            solver.setFeasible(FALSE);
             solver.getEngine().flush();
             interrupt(MSG_INIT);
             return;
@@ -326,14 +332,14 @@ public class SearchLoop implements ISearchLoop {
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
-            ISearchBinder binder = SearchBinderFactory.getSearchBinder();
+            ISearchBinder binder = getSearchBinder();
             binder.configureSearch(solver);
         }
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
         } catch (ContradictionException cex) {
             this.env.worldPop();
-            solver.setFeasible(ESat.FALSE);
+            solver.setFeasible(FALSE);
             solver.getEngine().flush();
             interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage());
         }
@@ -357,8 +363,8 @@ public class SearchLoop implements ISearchLoop {
 
     private void recordSolution() {
         //todo: checker d'etat
-        solver.setFeasible(ESat.TRUE);
-        assert (ESat.TRUE.equals(solver.isSatisfied())) : Reporting.fullReport(solver);
+        solver.setFeasible(TRUE);
+        assert (TRUE.equals(solver.isSatisfied())) : fullReport(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
             interrupt(MSG_FIRST_SOL);
@@ -405,7 +411,7 @@ public class SearchLoop implements ISearchLoop {
      */
     private void upBranch() {
         env.worldPop();
-        if (decision == RootDecision.ROOT) {// Issue#55
+        if (decision == ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
             interrupt(MSG_ROOT);
         } else {
@@ -440,15 +446,15 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
-        ESat sat = ESat.FALSE;
+        ESat sat = FALSE;
         if (measures.getSolutionCount() > 0) {
-            sat = ESat.TRUE;
+            sat = TRUE;
             if (objectivemanager.isOptimization()) {
                 measures.setObjectiveOptimal(!hasReachedLimit);
             }
         } else if (hasReachedLimit) {
             measures.setObjectiveOptimal(false);
-            sat = ESat.UNDEFINED;
+            sat = UNDEFINED;
         }
         solver.setFeasible(sat);
     }
@@ -460,7 +466,7 @@ public class SearchLoop implements ISearchLoop {
         if (!smList.contains(sm)) {
             smList.add(sm);
         } else {
-            LOGGER.info("The search monitor already exists and is ignored");
+            LOGGER.debug("The search monitor already exists and is ignored");
         }
     }
 
@@ -515,7 +521,7 @@ public class SearchLoop implements ISearchLoop {
     public int getCurrentDepth() {
         int d = 0;
         Decision tmp = decision;
-        while (tmp != RootDecision.ROOT) {
+        while (tmp != ROOT) {
             tmp = tmp.getPrevious();
             d++;
         }

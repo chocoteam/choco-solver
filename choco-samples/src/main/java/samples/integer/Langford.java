@@ -35,7 +35,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 /**
  * CSPLib prob024:<br/>
@@ -107,8 +106,7 @@ public class Langford extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Langford's number ({},{})", k, n);
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Langford's number (%s,%s)\n", k, n));
         if (solver.isFeasible() == ESat.TRUE) {
             int[] values = new int[k * n];
             for (int i = 0; i < k; i++) {
@@ -124,7 +122,7 @@ public class Langford extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

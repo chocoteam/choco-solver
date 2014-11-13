@@ -27,7 +27,8 @@
 
 package solver.exception;
 
-import util.logger.LoggerFactory;
+import org.slf4j.LoggerFactory;
+import solver.Solver;
 
 /**
  * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
@@ -54,6 +55,6 @@ public class SolverException extends RuntimeException {
      */
     public SolverException(String message) {
 //		super(message);
-        LoggerFactory.getLogger().error(message);
+        LoggerFactory.getLogger(Solver.class).error(message);
     }
 }

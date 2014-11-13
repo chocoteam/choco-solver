@@ -36,7 +36,7 @@ package solver.constraints.nary;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.search.loop.monitors.SMF;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
@@ -44,11 +44,12 @@ public class TreeTest {
 
 	@Test(groups = "1s")
 	public void test1() {
-		Solver solver = new Solver();
-		IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-		IntVar NT = VF.enumerated("NT", 2, 3, solver);
-		solver.post(ICF.tree(VS, NT, 0));
-		SMF.log(solver, true, false);
-		solver.findAllSolutions();
-	}
+        Solver solver = new Solver();
+        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
+        IntVar NT = VF.enumerated("NT", 2, 3, solver);
+        solver.post(ICF.tree(VS, NT, 0));
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
+    }
 }

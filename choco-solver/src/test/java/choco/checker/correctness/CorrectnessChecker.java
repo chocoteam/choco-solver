@@ -29,19 +29,21 @@ package choco.checker.correctness;
 
 import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
-import org.testng.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
 
 import static choco.checker.DomainBuilder.buildFullDomains;
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+import static org.testng.Assert.fail;
+import static solver.Solver.writeInFile;
 
 /**
  * <br/>
@@ -51,7 +53,7 @@ import static choco.checker.DomainBuilder.buildFullDomains;
  */
 public class CorrectnessChecker {
 
-    private static final ILogger LOGGER = LoggerFactory.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
@@ -79,9 +81,9 @@ public class CorrectnessChecker {
                             int val = values[v];
                             int[][] _domains = new int[nbVar][];
 
-                            System.arraycopy(domains, 0, _domains, 0, d);
+                            arraycopy(domains, 0, _domains, 0, d);
                             _domains[d] = new int[]{val};
-                            System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
+                            arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
                             Solver test = modeler.model(nbVar, _domains, null, parameters);
                             try {
@@ -93,12 +95,12 @@ public class CorrectnessChecker {
                                     LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                     File f = new File("SOLVER_ERROR.ser");
                                     try {
-                                        Solver.writeInFile(ref, f);
+                                        writeInFile(ref, f);
                                     } catch (IOException ee) {
                                         ee.printStackTrace();
                                     }
                                     LOGGER.error("{}", f.getAbsolutePath());
-                                    Assert.fail("one solution found");
+                                    fail("one solution found");
                                 }
                             } catch (Exception e) {
                                 LOGGER.error(e.getMessage());
@@ -107,12 +109,12 @@ public class CorrectnessChecker {
                                 LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                 File f = new File("SOLVER_ERROR.ser");
                                 try {
-                                    Solver.writeInFile(ref, f);
+                                    writeInFile(ref, f);
                                 } catch (IOException ee) {
                                     ee.printStackTrace();
                                 }
                                 LOGGER.error("{}", f.getAbsolutePath());
-                                Assert.fail();
+                                fail();
                             }
                         }
                     }
@@ -133,14 +135,14 @@ public class CorrectnessChecker {
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
             try {
-                Solver.writeInFile(ref, f);
+                writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
             LOGGER.error(e.getMessage());
             LOGGER.error("REF:\n{}\n", ref);
             LOGGER.error("{}", f.getAbsolutePath());
-            Assert.fail();
+            fail();
         }
         return ref;
     }
@@ -153,7 +155,7 @@ public class CorrectnessChecker {
                 _values[k++] = domain[i];
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
 
 }

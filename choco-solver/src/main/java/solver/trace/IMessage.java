@@ -24,58 +24,19 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
-
-import solver.Solver;
-import solver.search.loop.ISearchLoop;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
-import util.tools.StringUtils;
+package solver.trace;
 
 /**
- * A search monitor logger which prints choices during the search.
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 09/05/11
+ * @since 20/12/12
  */
-public class LogChoices implements IMonitorDownBranch {
-
-    private static ILogger LOGGER = LoggerFactory.getLogger();
-
-    final Solver solver;
-    final ISearchLoop searchLoop;
-    final IMessage message;
-
-    public LogChoices(Solver solver, IMessage message) {
-        this.solver = solver;
-        this.searchLoop = solver.getSearchLoop();
-        this.message = message;
-    }
-
-
-    @Override
-    public void beforeDownLeftBranch() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("{}[L]{} //{}", StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.getLastDecision().toString(), message.print());
-        }
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("{}[R]{} //{}", StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.getLastDecision().toString(), message.print());
-        }
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
+public interface IMessage {
+    /**
+     * Define the solution format
+     *
+     * @return a String
+     */
+    String print();
 }

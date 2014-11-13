@@ -408,7 +408,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         if (!vars[idx].isInstantiated()) {
             double stdev = Math.sqrt(sA[idx] / (nb_probes - 1));
             double a = distribution(nb_probes) * stdev / Math.sqrt(nb_probes);
-//            logger.info("m: {}, v: {}, et: {} => {}", new Object[]{mA[idx], sA[idx], stdev, (a / mA[idx])});
+//            logger.debug("m: {}, v: {}, et: {} => {}", new Object[]{mA[idx], sA[idx], stdev, (a / mA[idx])});
             return (a / mA[idx]) < d;
         }
         return true;

@@ -27,11 +27,11 @@
 
 package solver.search.strategy.strategy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -49,7 +49,7 @@ import java.io.Serializable;
  */
 public abstract class AbstractStrategy<V extends Variable> implements Serializable {
 
-    protected final static ILogger LOGGER = LoggerFactory.getLogger();
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     protected final V[] vars;
 

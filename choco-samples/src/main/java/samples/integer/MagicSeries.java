@@ -35,7 +35,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 /**
  * CSPLib prob019:<br/>
@@ -89,7 +88,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Magic series({})", n);
+        System.out.println(String.format("Magic series(%d)", n));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             st.append("\t");
@@ -102,7 +101,7 @@ public class MagicSeries extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
 
     }
 

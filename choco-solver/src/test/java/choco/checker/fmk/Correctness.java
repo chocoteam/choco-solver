@@ -27,19 +27,24 @@
 
 package choco.checker.fmk;
 
-import org.testng.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
-import util.logger.ILogger;
-import util.logger.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
+
+import static choco.checker.fmk.Domain.*;
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+import static org.testng.Assert.fail;
+import static solver.Solver.writeInFile;
+import static solver.variables.SetVar.END;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme
@@ -47,7 +52,7 @@ import java.util.Random;
  */
 public class Correctness {
 
-    private static final ILogger LOGGER = LoggerFactory.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static final int INT = 0;
     public static final int BOOL = 1;
@@ -67,13 +72,13 @@ public class Correctness {
                     for (int i = 0; i < nbVar; i++) {
                         switch (types[i]) {
                             case BOOL:
-                                domains[i] = Domain.buildBoolDomain(r);
+                                domains[i] = buildBoolDomain(r);
                                 break;
                             case INT:
-                                domains[i] = Domain.buildIntDomain(lowerB, ds, r, densities[ide], homogeneous[h]);
+                                domains[i] = buildIntDomain(lowerB, ds, r, densities[ide], homogeneous[h]);
                                 break;
                             case SET:
-                                domains[i] = Domain.buildSetDomain(ds, r, densities[ide], homogeneous[h]);
+                                domains[i] = buildSetDomain(ds, r, densities[ide], homogeneous[h]);
                                 break;
                             default:
                                 throw new UnsupportedOperationException();
@@ -88,7 +93,7 @@ public class Correctness {
                             for (int v : values) {
                                 loop++;
                                 Domain[] _domains = new Domain[nbVar];
-                                System.arraycopy(domains, 0, _domains, 0, nbVar);
+                                arraycopy(domains, 0, _domains, 0, nbVar);
                                 _domains[d] = new Domain(new int[]{v});
                                 checkNoSol(modeler, rvars, _domains, parameters, ref, new Object[]{ds, ide, h, rvars[d], v, loop, seed});
                             }
@@ -100,10 +105,10 @@ public class Correctness {
                             for (int v : rems) {
                                 loop++;
                                 int[] newKer = new int[oldKer.length + 1];
-                                System.arraycopy(oldKer, 0, newKer, 0, oldKer.length);
+                                arraycopy(oldKer, 0, newKer, 0, oldKer.length);
                                 newKer[oldKer.length] = v;
                                 Domain[] _domains = new Domain[nbVar];
-                                System.arraycopy(domains, 0, _domains, 0, nbVar);
+                                arraycopy(domains, 0, _domains, 0, nbVar);
                                 _domains[d] = new Domain(oldEnv, newKer);
                                 checkNoSol(modeler, rvars, _domains, parameters, ref, new Object[]{ds, ide, h, rvars[d], v, loop, seed});
                             }
@@ -119,7 +124,7 @@ public class Correctness {
                                     }
                                 }
                                 Domain[] _domains = new Domain[nbVar];
-                                System.arraycopy(domains, 0, _domains, 0, nbVar);
+                                arraycopy(domains, 0, _domains, 0, nbVar);
                                 _domains[d] = new Domain(newEnv, oldKer);
                                 checkNoSol(modeler, rvars, _domains, parameters, ref, new Object[]{ds, ide, h, rvars[d], v, loop, seed});
                             }
@@ -144,14 +149,14 @@ public class Correctness {
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
             try {
-                Solver.writeInFile(ref, f);
+                writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
             LOGGER.error(e.getMessage());
             LOGGER.error("REF:\n{}\n", ref);
             LOGGER.error("{}", f.getAbsolutePath());
-            Assert.fail();
+            fail();
         }
         return ref;
     }
@@ -166,7 +171,7 @@ public class Correctness {
                 LOGGER.error("REF:\n{}\n", ref);
                 ref.getEnvironment().worldPop();
                 LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
-                Assert.fail("one solution found");
+                fail("one solution found");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -175,12 +180,12 @@ public class Correctness {
             LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
             File f = new File("SOLVER_ERROR.ser");
             try {
-                Solver.writeInFile(ref, f);
+                writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
             LOGGER.error("{}", f.getAbsolutePath());
-            Assert.fail();
+            fail();
         }
     }
 
@@ -194,7 +199,7 @@ public class Correctness {
                 _values[k++] = i;
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -206,14 +211,14 @@ public class Correctness {
                 _values[k++] = i;
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
 
     ////////////////////////////////////////////////////////////////////////
     private static int[] getForcedElements(SetVar v, int[] d) {
         int[] _values = new int[v.getKernelSize()];
         int k = 0;
-        for (int j = v.getKernelFirst(); j!=SetVar.END; j = v.getKernelNext()) {
+        for (int j = v.getKernelFirst(); j != END; j = v.getKernelNext()) {
             boolean newEl = true;
             for (int i : d) {
                 if (i == j) {
@@ -225,7 +230,7 @@ public class Correctness {
                 _values[k++] = j;
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
     ////////////////////////////////////////////////////////////////////////
 }

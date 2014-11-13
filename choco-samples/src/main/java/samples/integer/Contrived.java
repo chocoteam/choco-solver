@@ -34,7 +34,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 /**
  * It consists of two vectors v and w.
@@ -95,7 +94,7 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Contrived problem ({},{})", new Object[]{l, d});
+        System.out.println(String.format("Contrived problem (%d,%d)", l, d));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             st.append("\tV :");
@@ -111,7 +110,7 @@ public class Contrived extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

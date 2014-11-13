@@ -39,7 +39,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.events.IntEventType;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -104,12 +103,12 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Grocery");
+        System.out.println("Grocery");
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < 4; i++) {
             st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -34,7 +34,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 import java.util.Random;
 
@@ -85,7 +84,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("AbsoluteEvaluation({})");
+        System.out.println("AbsoluteEvaluation({})");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < vars.length - 1; i++) {
@@ -95,7 +94,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
             }
         }
         st.append(String.format("%d", vars[vars.length - 1].getValue()));
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -36,7 +36,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 /**
@@ -171,7 +170,7 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Social golfer({},{},{})", new Object[]{g, s, w});
+        System.out.println(String.format("Social golfer(%d,%d,%d)", g, s, w));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             int p = g * s;
@@ -191,7 +190,7 @@ public class SocialGolfer extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

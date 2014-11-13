@@ -28,6 +28,7 @@
 package choco;
 
 import choco.checker.DomainBuilder;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -41,7 +42,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
-import util.logger.LoggerFactory;
 
 import java.util.Random;
 
@@ -194,7 +194,7 @@ public class IntLinCombTest {
             intlincomb.findAllSolutions();
             Assert.assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
             Assert.assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
-            LoggerFactory.getLogger().info("({}) {}ms vs {}ms",
+            LoggerFactory.getLogger("test").info("({}) {}ms vs {}ms",
                     op, sum.getMeasures().getTimeCount(), intlincomb.getMeasures().getTimeCount());
         }
     }

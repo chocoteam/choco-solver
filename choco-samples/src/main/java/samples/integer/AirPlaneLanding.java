@@ -44,7 +44,6 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -204,7 +203,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Air plane landing({})", mData);
+        System.out.println(String.format("Air plane landing(%s)", mData));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
@@ -215,7 +214,7 @@ public class AirPlaneLanding extends AbstractProblem {
                         append("]\n");
             }
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

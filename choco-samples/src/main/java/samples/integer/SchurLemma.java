@@ -34,7 +34,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 import util.ESat;
-import util.logger.LoggerFactory;
 import util.tools.ArrayUtils;
 
 /**
@@ -99,7 +98,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger().info("Schur's lemma ({},{})", new Object[]{n, k});
+        System.out.println(String.format("Schur's lemma (%d,%d)", n, k));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < k; i++) {
@@ -114,7 +113,7 @@ public class SchurLemma extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger().info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

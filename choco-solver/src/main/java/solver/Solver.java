@@ -56,7 +56,6 @@ import solver.search.strategy.ISF;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 import util.ESat;
-import util.logger.LoggerFactory;
 
 import java.io.*;
 import java.util.Arrays;
@@ -179,7 +178,7 @@ public class Solver implements Serializable {
      * Create a solver object with default parameters.
      */
     public Solver() {
-        this(Environments.DEFAULT.make(),"");
+        this(Environments.DEFAULT.make(), "");
     }
 
     /**
@@ -844,9 +843,7 @@ public class Solver implements Serializable {
         for (int c = 0; c < cIdx; c++) {
             ESat satC = cstrs[c].isSatisfied();
             if (ESat.FALSE == satC) {
-                if (LoggerFactory.getLogger().isErrorEnabled()) {
-                    LoggerFactory.getLogger().error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
-                }
+                System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
                 return ESat.FALSE;
             } else if (ESat.TRUE == satC) {
                 OK++;

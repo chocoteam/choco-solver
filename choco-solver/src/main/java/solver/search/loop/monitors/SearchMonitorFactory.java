@@ -31,8 +31,8 @@ import solver.exception.SolverException;
 import solver.search.limits.*;
 import solver.search.restart.GeometricalRestartStrategy;
 import solver.search.restart.LubyRestartStrategy;
-import solver.variables.Variable;
-import util.logger.LoggerFactory;
+import solver.trace.Chatterbox;
+import solver.trace.IMessage;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -48,194 +48,168 @@ public class SearchMonitorFactory {
     SearchMonitorFactory() {
     }
 
-    public static class DefaultSolutionMessage implements IMessage {
-
-        private Solver solver;
-
-        private DefaultSolutionMessage(Solver solver) {
-            this.solver = solver;
-        }
-
-        @Override
-        public String print() {
-            return String.format("- Solution #%s found. %s \n\t%s.",
-                    solver.getMeasures().getSolutionCount(),
-                    solver.getMeasures().toOneShortLineString(),
-                    print(solver.getStrategy().getVariables())
-            );
-        }
-
-        private String print(Variable[] vars) {
-            StringBuilder s = new StringBuilder(32);
-            for (Variable v : vars) {
-                s.append(v).append(' ');
-            }
-            return s.toString();
-
-        }
-
-    }
-
-    public static class DefaultDecisionMessage implements IMessage {
-
-        private Solver solver;
-
-        private DefaultDecisionMessage(Solver solver) {
-            this.solver = solver;
-        }
-
-        @Override
-        public String print() {
-            int limit = 120;
-            Variable[] vars = solver.getStrategy().getVariables();
-            StringBuilder s = new StringBuilder(32);
-            for (int i = 0; i < vars.length && s.length() < limit; i++) {
-                s.append(vars[i]).append(' ');
-            }
-            if (s.length() >= limit) {
-                s.append("...");
-            }
-            return s.toString();
-        }
-
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Print statistics
+     * Print statistics.
+     * <p/>
+     * As of released 3.2.2, replaced by
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)} and
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)}
+     * <p/>
+     * Indeed, equivalent to:
+     * <pre>
+     * Chatterbox.showStatistics(solver);
+     * if(solution)Chatterbox.showSolutions(solver);
+     * if(choices)Chatterbox.showDecisions(solver);
+     * </pre>
      *
      * @param solver   solver to observe
      * @param solution print solutions
      * @param choices  print choices
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void log(Solver solver, boolean solution, boolean choices) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(new DefaultSolutionMessage(solver)));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
-        }
+        Chatterbox.showStatistics(solver);
+        if (solution) Chatterbox.showSolutions(solver);
+        if (choices) Chatterbox.showDecisions(solver);
     }
 
     /**
      * Print statistics
+     * As of released 3.2.2, replaced by
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver, solver.trace.IMessage)} and
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)}
+     * <p/>
+     * Indeed, equivalent to:
+     * <pre>
+     * Chatterbox.showStatistics(solver);
+     * if (solution) Chatterbox.showSolutions(solver, solutionMessage);
+     * if (choices) Chatterbox.showDecisions(solver);
+     * </pre>
      *
      * @param solver          solver to observe
      * @param solution        print solutions
      * @param solutionMessage print the message on solutions
      * @param choices         print choices
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(solutionMessage));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
-        }
+        Chatterbox.showStatistics(solver);
+        if (solution) Chatterbox.showSolutions(solver, solutionMessage);
+        if (choices) Chatterbox.showDecisions(solver);
     }
 
     /**
      * Print statistics
+     * As of released 3.2.2, replaced by
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)} and
+     * {@link solver.trace.Chatterbox#showDecisions(solver.Solver, solver.trace.IMessage)}
+     * <p/>
+     * Indeed, equivalent to:
+     * <pre>
+     * Chatterbox.showStatistics(solver);
+     * if (solution) Chatterbox.showSolutions(solver);
+     * if (choices) Chatterbox.showDecisions(solver, decisionMessage);
+     * </pre>
      *
      * @param solver          solver to observe
      * @param solution        print solutions
      * @param choices         print choices
      * @param decisionMessage print the message on decisions
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void log(Solver solver, boolean solution, boolean choices, IMessage decisionMessage) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(new DefaultSolutionMessage(solver)));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, decisionMessage));
-        }
+        Chatterbox.showStatistics(solver);
+        if (solution) Chatterbox.showSolutions(solver);
+        if (choices) Chatterbox.showDecisions(solver, decisionMessage);
     }
 
     /**
      * Print statistics
+     * As of released 3.2.2, replaced by
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver, solver.trace.IMessage)} and
+     * {@link solver.trace.Chatterbox#showDecisions(solver.Solver, solver.trace.IMessage)}
+     * <p/>
+     * Indeed, equivalent to:
+     * <pre>
+     * Chatterbox.showStatistics(solver);
+     * if (solution) Chatterbox.showSolutions(solver, solutionMessage);
+     * if (choices) Chatterbox.showDecisions(solver, decisionMessage);
+     * </pre>
      *
      * @param solver          solver to observe
      * @param solution        print solutions
      * @param solutionMessage print the message on solutions
      * @param choices         print choices
      * @param decisionMessage print the message on decisions
+     * @deprecated will be removed in release 3.3.0.
      */
-    public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices, IMessage decisionMessage) {
-        solver.plugMonitor(new LogBasic(solver));
-        if (solution) {
-            solver.plugMonitor(new LogSolutions(solutionMessage));
-        }
-        if (choices) {
-            solver.plugMonitor(new LogChoices(solver, decisionMessage));
-        }
+    @Deprecated
+    public static void log(final Solver solver, boolean solution, final IMessage solutionMessage, boolean choices, final IMessage decisionMessage) {
+        Chatterbox.showStatistics(solver);
+        if (solution) Chatterbox.showSolutions(solver, solutionMessage);
+        if (choices) Chatterbox.showDecisions(solver, decisionMessage);
     }
 
     /**
-     * Print statistics in one line
+     * Print statistics in one line.
+     * As of released 3.2.2, replaced by {@link solver.trace.Chatterbox#printShortStatistics(solver.Solver)}.
      *
      * @param solver the solver to observe
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void shortlog(final Solver solver) {
-        solver.plugMonitor(new IMonitorClose() {
-            @Override
-            public void beforeClose() {
-                if (LoggerFactory.getLogger().isInfoEnabled()) {
-                    LoggerFactory.getLogger().info(solver.getMeasures().toOneLineString());
-                }
-            }
-
-            @Override
-            public void afterClose() {
-            }
-        });
+        Chatterbox.showShortStatistics(solver);
     }
 
     /**
-     * Log execution during choices #s and #e
-     *
-     * @param solver a solver
-     * @param s      starting choice number
-     * @param e      ending choice number
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void logWithRank(Solver solver, int s, int e) {
-        solver.plugMonitor(new LogChoicesWithRank(solver, s, e, new DefaultDecisionMessage(solver)));
     }
 
     /**
-     * Log execution during choices #s and #e
-     *
-     * @param solver          a solver
-     * @param s               starting choice number
-     * @param e               ending choice number
-     * @param decisionMessage print the specific message
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void logWithRank(Solver solver, int s, int e, IMessage decisionMessage) {
-        solver.plugMonitor(new LogChoicesWithRank(solver, s, e, decisionMessage));
     }
 
     /**
      * Log contradictions thrown during the resolution
+     * <p/>
+     * As of released 3.2.2, replaced by {@link solver.trace.Chatterbox#showContradiction(solver.Solver)}
      *
      * @param solver a solver
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void logContradiction(Solver solver) {
-        solver.plugMonitor(new LogContradiction());
+        Chatterbox.showContradiction(solver);
     }
 
     /**
      * Print one-line statistics every XX ms
+     * <p/>
+     * As of released 3.2.2, replaced by {@link solver.trace.Chatterbox#showStatisticsDuringResolution(solver.Solver, long)}
      *
-     * @param solver
+     * @param solver the solver to evaluate
      * @param everyXXmms print one-line statistics every XX ms
+     * @deprecated will be removed in release 3.3.0.
      */
     public static void statEveryXXms(Solver solver, long everyXXmms) {
-        if (everyXXmms > 0) {
-            solver.plugMonitor(new LogStatEveryXXms(solver, everyXXmms));
-        }
+        Chatterbox.showStatisticsDuringResolution(solver, everyXXmms);
     }
 
     /**
@@ -276,9 +250,10 @@ public class SearchMonitorFactory {
      * Print the total number of propagation count per propagator
      *
      * @param solver a solver
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void prop_count(Solver solver) {
-        solver.plugMonitor(new LogPropagationCount(solver));
     }
 
     /**
@@ -438,16 +413,23 @@ public class SearchMonitorFactory {
 
 
     /**
-     * Output results to a CSV file (append in set to true).
+     * Output statistics to a CSV format (comma-separated, single line).
      *
      * @param solver   a solver
      * @param prefix   String identifying the instance that has been solved
      * @param filename absolute path of the CSV output file
+     * @deprecated will be removed in release 3.3.0.
      */
+    @Deprecated
     public static void toCSV(Solver solver, String prefix, String filename) {
-        solver.plugMonitor(new OutputCSV(solver, prefix, filename));
+        Chatterbox.printCSVStatistics(solver);
     }
 
+    /**
+     * Force the resolution to restart at root node after each solution.
+     *
+     * @param solver main solver
+     */
     public static void restartAfterEachSolution(final Solver solver) {
         solver.plugMonitor(new IMonitorSolution() {
             @Override

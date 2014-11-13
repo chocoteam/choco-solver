@@ -136,7 +136,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
         // then build the fake decision path
         last = null;
-//        LOGGER.info("relax cut {}", notFrozen.cardinality());
+//        LOGGER.debug("relax cut {}", notFrozen.cardinality());
         for (int id = notFrozen.nextSetBit(0); id >= 0 && id < path.size(); id = notFrozen.nextSetBit(id + 1)) {
 //            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
             if (path.get(id).hasNext()) {
