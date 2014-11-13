@@ -36,6 +36,7 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -115,6 +116,7 @@ public class Knapsack extends AbstractProblem {
         AbstractStrategy strat = IntStrategyFactory.lexico_LB(objects);
         // trick : top-down maximization
         solver.set(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN), strat);
+        Chatterbox.showDecisions(solver);
     }
 
     @Override

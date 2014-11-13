@@ -559,28 +559,35 @@ will return false if the second option is used.
 
     :ref:`Large Neighborhood Search <41_LNS_label>`, :ref:`Explanations <43_explanations_label>`.
 
-Logging
-=======
+Resolution statistics
+=====================
 
-Choco |version| has a simple logger which can be used by calling ::
+Choco |version| distinguishes *developer trace* and *user trace*.
+*Developer trace* is only dedicated to developers for debugging purpose (Choco depends on SLF4J, as described in :ref:`Note about logging <1_log>`).
+*User trace* is dedicated to users (and developers) to print information relative to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
 
- SearchMonitorFactory.log(Solver solver, boolean solution, boolean choices);
+Resolution data are available thanks to the ``Chatterbox`` class, which outputs to ``System.out``.
+It centralises widely used methods to have comprehensive feedbacks about the resolution process.
+There two main types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
 
-The first argument is the solver.
-The second indicates whether or not each solution (and associated resolution statistics) should be printed.
-The third argument indicates whether or not each branching decision should be printed. This may be useful for debugging.
+For instance, one can indicate to print the solutions all resolution long: ::
 
-In general, in order to have a reasonable amount of information, we set the first boolean to true and the second to false.
+    Chatterbox.showSolutions(solver);
+    solver.findAllSolutions();
 
-If the two booleans are set to false, the trace would start with a welcome message:
+Or to print the search statistics once the search ends: ::
 
+    solver.findSolution();
+    Chatterbox.printStatistics(solver);
+
+
+On a call to ``Chatterbox.printVersion()``, the following message will be printed:
 
 .. code-block:: none
 
     ** Choco 3.2.0 (2014-05) : Constraint Programming Solver, Copyleft (c) 2010-2014
-    ** Solve : myProblem
 
-Then, when the resolution process ends, a complementary message is printed, based on the measures recorded.
+On a call to ``Chatterbox.printVersion()``, the following message will be printed:
 
 .. code-block:: none
 
@@ -634,9 +641,9 @@ If the resolution process reached a limit before ending *naturally*, the title o
     - Incomplete search - Limit reached.
 
 The body of the message remains the same.
-The message is formated thanks to the ``IMeasureRecorder`` which is a :ref:`search monitor <44_monitors_label>`.
+The message is formatted thanks to the ``IMeasureRecorder`` which is a :ref:`search monitor <44_monitors_label>`.
 
-When the first boolean of ``SearchMonitorFactory.log(Solver, boolean, boolean);`` is set to true, on each solution the following message will be printed:
+On a call to ``Chatterbox.showSolutions(solver)``, on each solution the following message will be printed:
 
 .. code-block:: none
 
@@ -645,11 +652,16 @@ When the first boolean of ``SearchMonitorFactory.log(Solver, boolean, boolean);`
 
 followed by one line exposing the value of each decision variables (those involved in the search strategy).
 
-When the second boolean of ``SearchMonitorFactory.log(Solver, boolean, boolean);`` is set to true, on each node a message will be printed indicating which decision is applied.
+On a call to ``Chatterbox.showDecisions(solver)``, on each node of the search tree a message will be printed indicating which decision is applied.
 The message is prefixed by as many "." as nodes in the current branch of the search tree.
 A decision is prefixed with ``[R]`` and a refutation is prefixed by ``[L]``.
 
+.. code-block:: none
+
+    ..[L]x  ==  1 (0) //X = [0,5] Y = [0,6] ...
+
 .. warning::
 
-    Printing the choices slows down the search process.
+    ``Chatterbox.printDecisions(Solver solver)`` prints the tree search during the resolution.
+    Printing the decisions slows down the search process.
 

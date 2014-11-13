@@ -36,7 +36,7 @@ package solver.constraints.nary;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.messages.Chatterbox;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.VF;
 

@@ -30,8 +30,8 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.explanations.ExplanationFactory;
-import solver.messages.Chatterbox;
 import solver.search.strategy.ISF;
+import solver.trace.Chatterbox;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -54,8 +54,6 @@ public class ExplanationExamples {
         solver.set(ISF.lexico_LB(bvars));
         ExplanationFactory.CBJ.plugin(solver, true);
         Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
     }
 
@@ -71,8 +69,6 @@ public class ExplanationExamples {
         solver.set(ISF.lexico_LB(pigeon));
         ExplanationFactory.CBJ.plugin(solver, true);
         Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
     }
 }

@@ -28,11 +28,11 @@ package solver.search.loop.monitors;
 
 import solver.Solver;
 import solver.exception.SolverException;
-import solver.messages.Chatterbox;
-import solver.messages.IMessage;
 import solver.search.limits.*;
 import solver.search.restart.GeometricalRestartStrategy;
 import solver.search.restart.LubyRestartStrategy;
+import solver.trace.Chatterbox;
+import solver.trace.IMessage;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -55,9 +55,9 @@ public class SearchMonitorFactory {
      * Print statistics.
      * <p/>
      * As of released 3.2.2, replaced by
-     * {@link solver.messages.Chatterbox#showStatistics(solver.Solver)},
-     * {@link solver.messages.Chatterbox#showSolutions(solver.Solver)} and
-     * {@link solver.messages.Chatterbox#showSolutions(solver.Solver)}
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)} and
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)}
      * <p/>
      * Indeed, equivalent to:
      * <pre>
@@ -81,9 +81,9 @@ public class SearchMonitorFactory {
     /**
      * Print statistics
      * As of released 3.2.2, replaced by
-     * {@link solver.messages.Chatterbox#showStatistics(solver.Solver)},
-     * {@link solver.messages.Chatterbox#showSolutions(solver.Solver, solver.messages.IMessage)} and
-     * {@link solver.messages.Chatterbox#showSolutions(solver.Solver)}
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver, solver.trace.IMessage)} and
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)}
      * <p/>
      * Indeed, equivalent to:
      * <pre>
@@ -108,9 +108,9 @@ public class SearchMonitorFactory {
     /**
      * Print statistics
      * As of released 3.2.2, replaced by
-     * {@link solver.messages.Chatterbox#showStatistics(solver.Solver)},
-     * {@link solver.messages.Chatterbox#showSolutions(solver.Solver)} and
-     * {@link solver.messages.Chatterbox#showDecisions(solver.Solver, solver.messages.IMessage)}
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver)} and
+     * {@link solver.trace.Chatterbox#showDecisions(solver.Solver, solver.trace.IMessage)}
      * <p/>
      * Indeed, equivalent to:
      * <pre>
@@ -135,9 +135,9 @@ public class SearchMonitorFactory {
     /**
      * Print statistics
      * As of released 3.2.2, replaced by
-     * {@link solver.messages.Chatterbox#showStatistics(solver.Solver)},
-     * {@link solver.messages.Chatterbox#showSolutions(solver.Solver, solver.messages.IMessage)} and
-     * {@link solver.messages.Chatterbox#showDecisions(solver.Solver, solver.messages.IMessage)}
+     * {@link solver.trace.Chatterbox#showStatistics(solver.Solver)},
+     * {@link solver.trace.Chatterbox#showSolutions(solver.Solver, solver.trace.IMessage)} and
+     * {@link solver.trace.Chatterbox#showDecisions(solver.Solver, solver.trace.IMessage)}
      * <p/>
      * Indeed, equivalent to:
      * <pre>
@@ -162,7 +162,7 @@ public class SearchMonitorFactory {
 
     /**
      * Print statistics in one line.
-     * As of released 3.2.2, replaced by {@link solver.messages.Chatterbox#printShortStatistics(solver.Solver)}.
+     * As of released 3.2.2, replaced by {@link solver.trace.Chatterbox#printShortStatistics(solver.Solver)}.
      *
      * @param solver the solver to observe
      * @deprecated will be removed in release 3.3.0.
@@ -189,7 +189,7 @@ public class SearchMonitorFactory {
     /**
      * Log contradictions thrown during the resolution
      * <p/>
-     * As of released 3.2.2, replaced by {@link solver.messages.Chatterbox#showContradiction(solver.Solver)}
+     * As of released 3.2.2, replaced by {@link solver.trace.Chatterbox#showContradiction(solver.Solver)}
      *
      * @param solver a solver
      * @deprecated will be removed in release 3.3.0.
@@ -202,9 +202,9 @@ public class SearchMonitorFactory {
     /**
      * Print one-line statistics every XX ms
      * <p/>
-     * As of released 3.2.2, replaced by {@link solver.messages.Chatterbox#showStatisticsDuringResolution(solver.Solver, long)}
+     * As of released 3.2.2, replaced by {@link solver.trace.Chatterbox#showStatisticsDuringResolution(solver.Solver, long)}
      *
-     * @param solver
+     * @param solver the solver to evaluate
      * @param everyXXmms print one-line statistics every XX ms
      * @deprecated will be removed in release 3.3.0.
      */

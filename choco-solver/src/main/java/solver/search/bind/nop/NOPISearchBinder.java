@@ -52,7 +52,8 @@ public class NOPISearchBinder implements ISearchBinder {
 
     @Override
     public void configureSearch(Solver solver) {
-        LoggerFactory.getLogger(ISearchBinder.class).warn("No search strategies defined\nSet to default ones");
+        LoggerFactory.getLogger(ISearchBinder.class).warn("No search strategies defined");
+        LoggerFactory.getLogger(ISearchBinder.class).warn("Set to default ones");
 
         AbstractStrategy[] strats = new AbstractStrategy[5];
         int nb = 0;

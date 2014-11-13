@@ -24,19 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.messages;
+
+package solver.trace;
+
+import solver.Solver;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 
 /**
+ * A search monitor logger which prints statistics every XX ms.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 20/12/12
+ * @since 18 aug. 2010
  */
-public interface IMessage {
-    /**
-     * Define the solution format
-     *
-     * @return a String
-     */
-    String print();
+public class LogStatEveryXXms implements IMonitorInitPropagation {
+
+    Thread printer;
+
+    public LogStatEveryXXms(final Solver solver, final long duration) {
+
+        printer = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    sleep(duration);
+                    //noinspection InfiniteLoopStatement
+                    do {
+                        solver.getMeasures().updateTimeCount();
+                        solver.getMeasures().updatePropagationCount();
+                        System.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
+                        sleep(duration);
+                    } while (true);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        };
+        printer.setDaemon(true);
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+        printer.start();
+    }
 }

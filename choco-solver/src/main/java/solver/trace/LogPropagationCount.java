@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.messages;
+package solver.trace;
 
 import gnu.trove.map.hash.TObjectLongHashMap;
 import solver.Solver;
@@ -42,8 +42,8 @@ public class LogPropagationCount {
 
     public String print(Solver solver) {
         Constraint[] cstrs = solver.getCstrs();
-        TObjectLongHashMap<String> fcounter = new TObjectLongHashMap<String>();
-        TObjectLongHashMap<String> ccounter = new TObjectLongHashMap<String>();
+        TObjectLongHashMap<String> fcounter = new TObjectLongHashMap<>();
+        TObjectLongHashMap<String> ccounter = new TObjectLongHashMap<>();
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] props = cstrs[i].getPropagators();
             for (int j = 0; j < props.length; j++) {

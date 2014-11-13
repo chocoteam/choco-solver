@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.constraints.extension.Tuples;
-import solver.messages.Chatterbox;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.VF;
 import util.objects.graphs.MultivaluedDecisionDiagram;
@@ -53,7 +53,6 @@ public class IntConstraintExamples2 {
         tuples.add(1, -1);
         tuples.add(0, 1);
         solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }

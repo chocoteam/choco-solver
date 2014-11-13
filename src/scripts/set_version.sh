@@ -47,6 +47,9 @@ then
     ## The configuration file
     sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  choco-solver/src/main/resources/configuration.properties
 
+    ## The doc
+    sedInPlace "s%** Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  docs/source/3_solving.rst
+
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION
     REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"

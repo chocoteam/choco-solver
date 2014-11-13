@@ -32,7 +32,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.messages.Chatterbox;
+import solver.trace.Chatterbox;
 
 import static java.lang.Runtime.getRuntime;
 import static samples.AbstractProblem.Level.QUIET;

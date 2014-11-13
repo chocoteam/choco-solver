@@ -28,8 +28,8 @@ package docs;
 
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.messages.Chatterbox;
 import solver.search.strategy.IntStrategyFactory;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 

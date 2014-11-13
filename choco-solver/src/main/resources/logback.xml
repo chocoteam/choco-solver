@@ -1,0 +1,15 @@
+<configuration debug="false">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
+
+    <logger name="solver" level="off"/>
+    <root level="off">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

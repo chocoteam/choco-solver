@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
-import solver.messages.Chatterbox;
+import solver.trace.Chatterbox;
 import solver.variables.BoolVar;
 import solver.variables.VF;
 
@@ -48,7 +48,6 @@ public class SatConstraintExamples {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
         SatFactory.addAtMostNMinusOne(BVARS);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -58,7 +57,6 @@ public class SatConstraintExamples {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
         SatFactory.addAtMostOne(BVARS);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -68,7 +66,6 @@ public class SatConstraintExamples {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
         SatFactory.addBoolAndArrayEqualFalse(BVARS);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -78,7 +75,6 @@ public class SatConstraintExamples {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
         SatFactory.addBoolOrArrayEqualTrue(BVARS);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -90,7 +86,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolAndEqVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -101,7 +96,6 @@ public class SatConstraintExamples {
         BoolVar L = VF.bool("L", solver);
         BoolVar R = VF.bool("R", solver);
         SatFactory.addBoolEq(L, R);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -113,7 +107,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolIsEqVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -125,7 +118,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolIsLeVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -137,7 +129,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolIsLtVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -149,7 +140,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolIsNeqVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -160,7 +150,6 @@ public class SatConstraintExamples {
         BoolVar L = VF.bool("L", solver);
         BoolVar R = VF.bool("R", solver);
         SatFactory.addBoolLe(L, R);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -171,7 +160,6 @@ public class SatConstraintExamples {
         BoolVar L = VF.bool("L", solver);
         BoolVar R = VF.bool("R", solver);
         SatFactory.addBoolLt(L, R);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -182,7 +170,6 @@ public class SatConstraintExamples {
         BoolVar L = VF.bool("L", solver);
         BoolVar R = VF.bool("R", solver);
         SatFactory.addBoolNot(L, R);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -193,7 +180,6 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolAndArrayEqVar(BVARS, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -204,7 +190,6 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolOrArrayEqVar(BVARS, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -216,7 +201,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolOrEqVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -228,7 +212,6 @@ public class SatConstraintExamples {
         BoolVar R = VF.bool("R", solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addBoolXorEqVar(L, R, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -243,7 +226,6 @@ public class SatConstraintExamples {
         SatFactory.addClauses(
                 LogOp.ifThenElse(LogOp.nand(C1, C2), R, AR),
                 solver);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -256,7 +238,6 @@ public class SatConstraintExamples {
         BoolVar P3 = VF.bool("P3", solver);
         BoolVar N = VF.bool("N", solver);
         SatFactory.addClauses(new BoolVar[]{P1, P2, P3}, new BoolVar[]{N});
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -266,7 +247,6 @@ public class SatConstraintExamples {
         Solver solver = new Solver();
         BoolVar B = VF.bool("B", solver);
         SatFactory.addFalse(B);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -277,7 +257,6 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BS", 3, solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addMaxBoolArrayLessEqVar(BVARS, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -288,7 +267,6 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BS", 3, solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addSumBoolArrayGreaterEqVar(BVARS, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -299,7 +277,6 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BS", 3, solver);
         BoolVar T = VF.bool("T", solver);
         SatFactory.addSumBoolArrayLessEqVar(BVARS, T);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -309,7 +286,6 @@ public class SatConstraintExamples {
         Solver solver = new Solver();
         BoolVar B = VF.bool("B", solver);
         SatFactory.addTrue(B);
-        Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }

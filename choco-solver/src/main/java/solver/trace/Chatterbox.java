@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.messages;
+package solver.trace;
 
 import solver.Configuration;
 import solver.Solver;
@@ -36,7 +36,7 @@ import static util.tools.StringUtils.pad;
 
 /**
  * This is not a logging framework (Choco relies on SLF4J)
- * but aims at simplifying resolution messages output by providing
+ * but aims at simplifying resolution trace output by providing
  * a unique entry point for most (not to say all) resolution message.
  * <br/>
  *
@@ -99,7 +99,7 @@ public class Chatterbox {
      *     System.out.println(solver.getMeasures().toCSV());
      * </pre>
      *
-     * @param solver
+     * @param solver the solver to evaluate
      */
     public static void printCSVStatistics(Solver solver) {
         System.out.println(solver.getMeasures().toCSV());
@@ -113,7 +113,7 @@ public class Chatterbox {
      *
      * @param solver the solver to evaluate
      */
-    public static void showStatistics(Solver solver) {
+    public static void showStatistics(final Solver solver) {
         solver.plugMonitor(new IMonitorInitialize() {
 
             @Override
@@ -145,7 +145,7 @@ public class Chatterbox {
      *
      * @param solver the solver to evaluate
      */
-    public static void showShortStatistics(Solver solver) {
+    public static void showShortStatistics(final Solver solver) {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
@@ -166,12 +166,12 @@ public class Chatterbox {
      * @param solver  the solver to evaluate
      * @param message the message to print.
      */
-    public static void showSolutions(Solver solver, IMessage message) {
+    public static void showSolutions(Solver solver, final IMessage message) {
         solver.plugMonitor(new IMonitorSolution() {
 
             @Override
             public void onSolution() {
-                System.out.println(message);
+                System.out.println(message.print());
             }
         });
     }
@@ -182,7 +182,7 @@ public class Chatterbox {
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
-     * @see solver.messages.Chatterbox.DefaultSolutionMessage
+     * @see solver.trace.Chatterbox.DefaultSolutionMessage
      */
     public static void showSolutions(Solver solver) {
         showSolutions(solver, new DefaultSolutionMessage(solver));
@@ -196,7 +196,7 @@ public class Chatterbox {
      * @param solver  the solver to evaluate
      * @param message the message to print.
      */
-    public static void showDecisions(Solver solver, IMessage message) {
+    public static void showDecisions(final Solver solver, final IMessage message) {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownLeftBranch() {
@@ -230,7 +230,7 @@ public class Chatterbox {
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
-     * @see solver.messages.Chatterbox.DefaultSolutionMessage
+     * @see solver.trace.Chatterbox.DefaultSolutionMessage
      */
     public static void showDecisions(Solver solver) {
         showDecisions(solver, new DefaultDecisionMessage(solver));

@@ -123,17 +123,20 @@ Which jar to select ?
 
 We provide a zip file which contains the following files:
 
-- choco-solver-|release|.jar
-An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
+choco-solver-|release|.jar
+    An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
 
-- choco-solver-|release|-sources.jar
-The source of the core library.
+choco-solver-|release|-sources.jar
+    The source of the core library.
 
-- choco-samples-|release|-sources.jar
-The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
+choco-samples-|release|-sources.jar
+    The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
 
-- apidocs-|release|.zip
-Javadoc of Choco-|release|
+apidocs-|release|.zip
+    Javadoc of Choco-|release|
+
+logback.xml
+    The logback configuration file.
 
 Extensions
 ^^^^^^^^^^
@@ -209,17 +212,16 @@ Eclipse
 
    mvn eclipse:eclipse
 
+.. _1_log:
 
 Note about logging
 ------------------
 
-In Choco, we distinct messaging and logging.
-Messaging is mainly dedicated to printing resolution statistics and solutions (plus other useful services).
-The ``Chatterbox`` class is devoted to messaging, it centralises (almost) all messaging services.
-Logging is mainly dedicated to debugging purposes.
-In order to avoid imposing a logging framework on end-user [#f1]_, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
-
-.. [#f1] Indeed, Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
+In Choco, we distinguish *user trace* and *developer trace*.
+*User trace* is mainly dedicated to printing resolution statistics and solutions (and other useful services).
+The ``Chatterbox`` class is devoted to such aim, it centralises (almost) all messaging services.
+*Developer trace* is for debugging purpose.
+In order to avoid imposing a logging framework on end-user [#flog]_, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
 
     "SLF4J is a simple facade for logging systems allowing the end-user to plug-in the desired logging system at deployment time."
     -- http://www.slf4j.org/faq.html
@@ -233,24 +235,55 @@ Otherwise, you'll get the following error:
     SLF4J: Defaulting to no-operation (NOP) logger implementation
     SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
 
-Choco is developed using `log4j <http://logging.apache.org/log4j/1.2/index.html>`_,
-but other framework are available such as `Logback <http://logback.qos.ch/>`_
+
+Choco is developed using `Logback <http://logback.qos.ch/>`_,
+but other framework are available such as `log4j <http://logging.apache.org/log4j/1.2/index.html>`_
 (a exhaustive list is given on `SL4J <http://www.slf4j.org/manual.html>`_).
 Declaring a logging framework is as simple as adding jar files to the classpath of your application:
+
+.. [#flog] Indeed, Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
 
 
 Command-line
 ^^^^^^^^^^^^
 
+For logback:
+
+    .. parsed-literal::
+
+        java \\
+        -cp .:choco-solver-|release|.jar\\
+        :logback-core-1.0.13.jar\\
+        :logback-classic-1.0.13.jar \\
+        my.project.Main
+
+.. note::
+
+    Logback relies on property file, namely `logback.xml`, provided in the zip file.
+    `Where should the configuration files such as logback.groovy, logback-test.xml or logback.xml be located on the classpath? <http://logback.qos.ch/faq.html#configFileLocation>`_
+
+
 For log4j:
 
     .. parsed-literal::
 
-        java -cp .:choco-solver-|release|.jar:slf4j-log4j12-1.7.7.jar my.project.Main
+        java -cp .:choco-solver-|release|.jar\\
+        :slf4j-log4j12-1.7.7.jar \\
+        my.project.Main
 
 
 Maven
 ^^^^^
+
+For logback:
+
+    .. code-block:: xml
+
+        <dependency>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+          <version>1.0.13</version>
+        </dependency>
 
 For log4j:
 
@@ -298,7 +331,7 @@ To facilitate the modeling, Choco |version| provides factories for almost every 
 | ``Chatterbox``               |              | Output messages and statistics.           |
 +------------------------------+--------------+-------------------------------------------+
 +------------------------------+--------------+-------------------------------------------+
-| ``SearchMonitorFactory``     | SMF          | resolution limits, restarts etc.     |
+| ``SearchMonitorFactory``     | SMF          | resolution limits, restarts etc.          |
 +------------------------------+--------------+-------------------------------------------+
 
 Note that, in order to have a concise and readable model, factories have shortcut names. Furthermore, they can be imported in a static way:

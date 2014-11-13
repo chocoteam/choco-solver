@@ -35,8 +35,8 @@
 package samples;
 
 import solver.Solver;
-import solver.messages.Chatterbox;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import solver.trace.Chatterbox;
 
 public abstract class ParallelizedProblem extends AbstractProblem {
 
