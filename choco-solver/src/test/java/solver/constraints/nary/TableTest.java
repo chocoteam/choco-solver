@@ -250,7 +250,7 @@ public class TableTest {
                 solver.set(ISF.random_value(vars));
                 long nbs = solver.findAllSolutions();
                 long nbn = solver.getMeasures().getNodeCount();
-                LoggerFactory.getLogger("test").info("%s\n", solver.getMeasures().toOneLineString());
+                LoggerFactory.getLogger("test").info("{}", solver.getMeasures().toOneLineString());
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Solver tsolver = new Solver(ALGOS[a]);
@@ -259,7 +259,7 @@ public class TableTest {
                         tsolver.set(ISF.random_value(tvars));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
-                        LoggerFactory.getLogger("test").info("%s\n", tsolver.getMeasures().toOneLineString());
+                        LoggerFactory.getLogger("test").info("{}", tsolver.getMeasures().toOneLineString());
                     }
                 }
             }

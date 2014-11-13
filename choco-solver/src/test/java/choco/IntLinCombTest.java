@@ -34,14 +34,14 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Operator;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.VariableFactory;
+import solver.trace.Chatterbox;
+import solver.variables.*;
 
 import java.util.Random;
 
@@ -132,11 +132,12 @@ public class IntLinCombTest {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
         String opname = "=";
-        if (op == 0) {
-        } else if (op > 0) {
-            opname = ">=";
-        } else {
-            opname = "<=";
+        if (op != 0) {
+            if (op > 0) {
+                opname = ">=";
+            } else {
+                opname = "<=";
+            }
         }
         IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, solver);
         Constraint[] cstrs = new Constraint[]{
@@ -155,11 +156,12 @@ public class IntLinCombTest {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
         String opname = "=";
-        if (op == 0) {
-        } else if (op > 0) {
-            opname = ">=";
-        } else {
-            opname = "<=";
+        if (op != 0) {
+            if (op > 0) {
+                opname = ">=";
+            } else {
+                opname = "<=";
+            }
         }
         IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, solver);
         Constraint[] cstrs = new Constraint[]{
@@ -215,14 +217,23 @@ public class IntLinCombTest {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
         PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
-		int offSet = 2;// ZERO and ONE constants
-        ((IntVar) vars[0+offSet]).instantiateTo(-2, Cause.Null);
-        ((IntVar) vars[1+offSet]).instantiateTo(-1, Cause.Null);
+        int offSet = 2;// ZERO and ONE constants
+        ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
+        ((IntVar) vars[1 + offSet]).instantiateTo(-1, Cause.Null);
         sum.propagate();
 //        sum.getSearchLoop().timeStamp++;
-        ((IntVar) vars[2+offSet]).removeValue(-2, Cause.Null);
+        ((IntVar) vars[2 + offSet]).removeValue(-2, Cause.Null);
         sum.propagate();
-        Assert.assertTrue(vars[2+offSet].isInstantiated());
+        Assert.assertTrue(vars[2 + offSet].isInstantiated());
+    }
+
+    @Test(groups = "1s")
+    public void testIss237_1() {
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("b", 3, solver);
+        solver.post(ICF.scalar(bs, new int[]{1, 2, 3}, "=", VF.fixed(2, solver)));
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
     }
 
 }

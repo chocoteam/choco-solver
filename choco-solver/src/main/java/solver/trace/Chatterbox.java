@@ -45,7 +45,7 @@ import static util.tools.StringUtils.pad;
  * @since 12/11/14
  */
 public class Chatterbox {
-    ;
+    private Chatterbox() {}
 
     /**
      * Print the version message.
