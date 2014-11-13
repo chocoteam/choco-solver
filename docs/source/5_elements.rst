@@ -1998,6 +1998,22 @@ The `member` constraint involves:
         Constraint member(SetVar[] SETS, SetVar SET)
         Constraint member(IntVar INTEGER, SetVar SET)
 
+.. _51_scstr_nme:
+
+notmember
+=========
+
+The `not_member` constraint involves:
+
+    + an integer variable `INTEGER` and
+    + a set variable `SET`.
+
+    It ensures that `INTEGER` is not included in `SET`.
+
+**API**:  ::
+
+        Constraint not_member(IntVar INTEGER, SetVar SET)
+
 .. _51_scstr_min:
 
 min

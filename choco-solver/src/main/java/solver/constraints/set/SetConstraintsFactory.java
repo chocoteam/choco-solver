@@ -431,7 +431,12 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that INTEGER belongs to SET
      */
     public static Constraint member(IntVar INTEGER, SetVar SET) {
-		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER));
+		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER)){
+			@Override
+			public Constraint makeOpposite(){
+				return not_member(INTEGER,SET);
+			}
+		};
     }
 
 	/**
@@ -449,6 +454,13 @@ public class SetConstraintsFactory {
 			integer = VF.enumerated("enumViewOf("+INTEGER.getName()+")",INTEGER.getLB(),INTEGER.getUB(),s);
 			s.post(ICF.arithm(integer,"=",INTEGER));
 		}
-		return new Constraint("SetNotMember",new PropNotMemberIntSet(integer,SET),new PropNotMemberSetInt(integer,SET));
+		return new Constraint("SetNotMember",
+				new PropNotMemberIntSet(integer,SET),
+				new PropNotMemberSetInt(integer,SET)){
+			@Override
+			public Constraint makeOpposite(){
+				return member(INTEGER,SET);
+			}
+		};
 	}
 }

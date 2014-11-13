@@ -6,6 +6,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+- Fix #240: add notmember(IntVar, SetVar) constraint (more efficient than not(member))
 - Fix #225: fix PropCostRegular, wrt to S.Demassey instructions.
 - Fix #229: create MasterSolver and SlaveSolver classes to deal with multi-thread resolution
             + add external configuration of the search strategy through a binder
