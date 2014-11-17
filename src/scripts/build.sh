@@ -1,5 +1,10 @@
 #!/bin/bash
 
+function quit() {
+    echo "ERROR: $*"
+    exit 1
+}
+
 function getVersion {
     mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"
 }
@@ -25,30 +30,31 @@ if [ ${BRANCH} = "release" ]; then
     # Well, we assume the tests have been run before, and everything is OK for the release
     #mvn clean test ||exit 1
 
+    git fetch origin master:refs/remotes/origin/master||quit "Unable to fetch master"
     #Integrate with master and tag
     echo "** Integrate to master **"
-    git checkout master
-    git merge --no-ff ${COMMIT}
+    git checkout master ||quit "No master branch"
+    git merge --no-ff ${COMMIT} ||quit "Unable to integrate to master"
 
 #    NOT USED FOR THE MOMENT
 #    #Javadoc
 #    ./bin/push_javadoc apidocs.git ${VERSION}
 
-    git tag ${TAG} ||exit 1
-    git push --tags ||exit 1
-    git push origin master ||exit 1
+    git tag ${TAG} ||quit "Unable to tag with ${TAG}"
+    git push --tags ||quit "Unable to push the tag ${TAG}"
+    git push origin master ||quit "Unable to push master"
 
     #Set the next development version
     echo "** Prepare develop for the next version **"
-    git checkout develop
-    git merge --no-ff ${TAG}
+    git checkout develop ||quit "Unable to checkout develop"
+    git merge --no-ff ${TAG} ||quit "Unable to integrate to develop"
     ./src/scripts/set_version.sh --next ${VERSION}
-    git commit -m "Prepare the code for the next version" -a
+    git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to develop"
 
     #Push changes on develop, with the tag
-    git push origin develop ||exit 1
+    git push origin develop ||quit "Unable to push to develop"
 
-    git push --all && git push --tags
+    git push --all && git push --tags  || quit "Unable to push all and tags"
 
 #    NOT USED FOR THE MOMENT
 #    #Deploy the artifacts
@@ -56,7 +62,7 @@ if [ ${BRANCH} = "release" ]; then
 #    ./bin/deploy.sh ||exit 1
 
     #Clean
-    git push origin --delete release
+    git push origin --delete release ||quit "Unable to delete release"
 else
     mvn clean install -DtestFailureIgnore=true -Dgroups="1s,10s,1m,10m"
     mvn test -DtestFailureIgnore=true -Dgroups="30m"
