@@ -318,10 +318,10 @@ The `bin_packing` constraint involves:
  - an array of integer variables `BIN_LOAD` and
  - an integer `OFFSET`.
 
-It holds the Bin Packing Problem rules: a set of items with various to pack into bins with respect to the capacity of each bin.
+It holds the Bin Packing Problem rules: a set of items with various SIZES to pack into bins with respect to the capacity of each bin.
 
-- `ITEM_BIN` represents the bin of each item, that is, `ITEM_BIN[i] = j` states that the i :math:`^{th}` is put in the j :math:`^{th}` bin.
-- `ITEM_SIZE` represents the size of each size.
+- `ITEM_BIN` represents the bin of each item, that is, `ITEM_BIN[i] = j` states that the i :math:`^{th}` ITEM is put in the j :math:`^{th}` bin.
+- `ITEM_SIZE` represents the size of each item.
 - `BIN_LOAD` represents the load of each bin, that is, the sum of size of the items in it.
 
 This constraint is not a built-in constraint and is based on various propagators.
@@ -856,8 +856,8 @@ The `knapsack` constraint involves:
 
 It formulates the Knapsack Problem: to determine the count of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
 
-- `OCCURRENCES[i]` :math:`\times` `WEIGHT[i]` :math:`\leq` `TOTAL_WEIGHT` and
-- `OCCURRENCES[i]` :math:`\times` `ENERGY[i]` = `TOTAL_ENERGY`.
+- :math:`\sum` `OCCURRENCES[i]` :math:`\times` `WEIGHT[i]` :math:`\leq` `TOTAL_WEIGHT` and
+- :math:`\sum` `OCCURRENCES[i]` :math:`\times` `ENERGY[i]` = `TOTAL_ENERGY`.
 
 **API**:  ::
 

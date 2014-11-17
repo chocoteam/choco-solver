@@ -10,6 +10,10 @@ This document reports the release process, the version number 3.1.0 should be ad
 
     $ mvn versions:display-dependency-updates
 
+And update README.md with the correct versions of dependencies
+
+    $ mvn dependency:list | grep :compile
+
 3. Generate PDF documentation
 
     $ cd docs/
