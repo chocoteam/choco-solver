@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -75,7 +74,7 @@ public class BigLeq extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("bigleq({})", m);
+        System.out.println(String.format("bigleq(%d)", m));
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < m - 1; i++) {
@@ -85,7 +84,7 @@ public class BigLeq extends AbstractProblem {
             }
         }
         st.append(String.format("%d", vars[m - 1].getValue()));
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

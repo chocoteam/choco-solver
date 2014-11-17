@@ -28,7 +28,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -132,7 +131,7 @@ public class MagicSquare extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

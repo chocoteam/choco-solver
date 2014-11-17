@@ -29,18 +29,21 @@ package choco.checker.correctness;
 
 import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
 
 import static choco.checker.DomainBuilder.buildFullDomains;
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+import static org.testng.Assert.fail;
+import static solver.Solver.writeInFile;
 
 /**
  * <br/>
@@ -49,6 +52,8 @@ import static choco.checker.DomainBuilder.buildFullDomains;
  * @since 15/02/11
  */
 public class CorrectnessChecker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
@@ -76,40 +81,40 @@ public class CorrectnessChecker {
                             int val = values[v];
                             int[][] _domains = new int[nbVar][];
 
-                            System.arraycopy(domains, 0, _domains, 0, d);
+                            arraycopy(domains, 0, _domains, 0, d);
                             _domains[d] = new int[]{val};
-                            System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
+                            arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
                             Solver test = modeler.model(nbVar, _domains, null, parameters);
                             try {
                                 if (test.findSolution()) {
-                                    LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+                                    LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                             ds, ide, h, rvars[d], val, loop, seed);
-                                    LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+                                    LOGGER.error("REF:\n{}\n", ref);
                                     ref.getEnvironment().worldPop();
-                                    LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+                                    LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                     File f = new File("SOLVER_ERROR.ser");
                                     try {
-                                        Solver.writeInFile(ref, f);
+                                        writeInFile(ref, f);
                                     } catch (IOException ee) {
                                         ee.printStackTrace();
                                     }
-                                    LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
-                                    Assert.fail("one solution found");
+                                    LOGGER.error("{}", f.getAbsolutePath());
+                                    fail("one solution found");
                                 }
                             } catch (Exception e) {
-                                LoggerFactory.getLogger("test").error(e.getMessage());
-                                LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+                                LOGGER.error(e.getMessage());
+                                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                         ds, ide, h, rvars[d], val, loop, seed);
-                                LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+                                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
                                 File f = new File("SOLVER_ERROR.ser");
                                 try {
-                                    Solver.writeInFile(ref, f);
+                                    writeInFile(ref, f);
                                 } catch (IOException ee) {
                                     ee.printStackTrace();
                                 }
-                                LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
-                                Assert.fail();
+                                LOGGER.error("{}", f.getAbsolutePath());
+                                fail();
                             }
                         }
                     }
@@ -125,19 +130,19 @@ public class CorrectnessChecker {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
+            LOGGER.info("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
             try {
-                Solver.writeInFile(ref, f);
+                writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            LoggerFactory.getLogger("test").error(e.getMessage());
-            LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
-            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
-            Assert.fail();
+            LOGGER.error(e.getMessage());
+            LOGGER.error("REF:\n{}\n", ref);
+            LOGGER.error("{}", f.getAbsolutePath());
+            fail();
         }
         return ref;
     }
@@ -150,7 +155,7 @@ public class CorrectnessChecker {
                 _values[k++] = domain[i];
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
 
 }

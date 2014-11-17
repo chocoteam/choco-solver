@@ -28,7 +28,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -110,8 +109,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Sudoku -- {}", data.name());
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", data.name()));
         st.append("\t");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -120,7 +118,7 @@ public class Sudoku extends AbstractProblem {
             st.append("\n\t");
         }
 
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

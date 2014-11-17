@@ -36,31 +36,31 @@ package samples;
 
 import solver.Solver;
 import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.trace.Chatterbox;
 
 public abstract class ParallelizedProblem extends AbstractProblem {
 
-	protected int searchIdx;
+    protected int searchIdx;
 
-	public ParallelizedProblem(int searchIdx){
-		super();
-		this.searchIdx = searchIdx;
-		// abstract execution methods
-		this.printDescription();
-		this.createSolver();
-		this.buildModel();
-		this.configureSearch();
-		overrideExplanation();
-		solver.set(new TwoBucketPropagationEngine(solver));
-		if (level.getLevel() > Level.SILENT.getLevel()) {
-			SearchMonitorFactory.log(solver,
-					level.getLevel() > Level.VERBOSE.getLevel(),
-					level.getLevel() > Level.SOLUTION.getLevel());
-		}
-	}
+    public ParallelizedProblem(int searchIdx) {
+        super();
+        this.searchIdx = searchIdx;
+        // abstract execution methods
+        this.printDescription();
+        this.createSolver();
+        this.buildModel();
+        this.configureSearch();
+        overrideExplanation();
+        solver.set(new TwoBucketPropagationEngine(solver));
+        if (level.getLevel() > Level.SILENT.getLevel()) {
+            Chatterbox.showStatistics(solver);
+            if (level.getLevel() > Level.VERBOSE.getLevel()) Chatterbox.showSolutions(solver);
+            if (level.getLevel() > Level.SOLUTION.getLevel()) Chatterbox.showDecisions(solver);
+        }
+    }
 
-	@Override
-	public void createSolver() {
-		solver = new Solver();
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver();
+    }
 }

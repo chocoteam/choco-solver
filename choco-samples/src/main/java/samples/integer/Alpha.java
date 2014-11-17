@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -102,8 +101,7 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Alpha");
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder("Alpha\n");
         st.append("\t");
         for (int i = 0; i < 26; i++) {
             st.append(letters[i].getName()).append("= ").append(letters[i].getValue()).append(" ");
@@ -112,7 +110,7 @@ public class Alpha extends AbstractProblem {
             }
         }
         st.append("\n");
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

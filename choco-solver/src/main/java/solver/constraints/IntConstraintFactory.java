@@ -78,14 +78,14 @@ import solver.constraints.nary.nValue.amnv.rules.R1;
 import solver.constraints.nary.nValue.amnv.rules.R3;
 import solver.constraints.nary.sum.PropBoolSumCoarse;
 import solver.constraints.nary.sum.PropBoolSumIncremental;
-import solver.constraints.nary.sum.PropSumEq;
-import solver.constraints.nary.sum.Scalar;
+import solver.constraints.nary.sum.ScalarFactory;
 import solver.constraints.nary.tree.PropAntiArborescences;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.exception.SolverException;
 import solver.variables.*;
+import util.objects.graphs.MultivaluedDecisionDiagram;
 import util.tools.ArrayUtils;
 import util.tools.StringUtils;
 
@@ -428,6 +428,7 @@ public class IntConstraintFactory {
      * @param Y second variable
      * @param Z result variable
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     public static Constraint times(IntVar X, IntVar Y, IntVar Z) {
         if (Y.isInstantiated()) {
             return times(X, Y.getValue(), Z);
@@ -624,7 +625,6 @@ public class IntConstraintFactory {
      * @param BIN_LOAD  IntVar representing the load of each bin (i.e. the sum of the size of the items in it)
      * @param OFFSET    0 by default but typically 1 if used within MiniZinc
      *                  (which counts from 1 to n instead of from 0 to n-1)
-     * @return
      */
     public static Constraint[] bin_packing(IntVar[] ITEM_BIN, int[] ITEM_SIZE, IntVar[] BIN_LOAD, int OFFSET) {
         int nbBins = BIN_LOAD.length;
@@ -678,7 +678,7 @@ public class IntConstraintFactory {
      * The upper bound of VAR is given by 2<sup>n</sup>, where n is the size of the array BITS.
      *
      * @param BITS the array of bits
-     * @param VAR the numeric value
+     * @param VAR  the numeric value
      */
     public static Constraint bit_channeling(BoolVar[] BITS, IntVar VAR) {
         return new Constraint("bit_channeling", new PropBitChanneling(VAR, BITS));
@@ -1095,6 +1095,17 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Create a constraint where solutions (tuples) are encoded by a multi-valued decision diagram.
+     * The order of the variables in VARS is important and must refer to the MDD.
+     *
+     * @param VARS the array of variables
+     * @param MDD  the multi-valued decision diagram encoding solutions
+     */
+    public static Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD) {
+        return new Constraint("mddc", new PropLargeMDDC(MDD, VARS));
+    }
+
+    /**
      * MIN is the minimum value of the collection of domain variables VARS
      *
      * @param MIN  a variable
@@ -1227,125 +1238,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
-        // detect unaries and binaries
-        if (VARS.length == 0) {
-            return arithm(VF.fixed(0, SCALAR.getSolver()), OPERATOR, SCALAR);
-        }
-        if (COEFFS.length == 2 && SCALAR.isInstantiated()) {
-            int c = SCALAR.getValue();
-            if (COEFFS[0] == 1 && COEFFS[1] == 1) {
-                return ICF.arithm(VARS[0], "+", VARS[1], OPERATOR, c);
-            } else if (COEFFS[0] == 1 && COEFFS[1] == -1) {
-                return ICF.arithm(VARS[0], "-", VARS[1], OPERATOR, c);
-            } else if (COEFFS[0] == -1 && COEFFS[1] == 1) {
-                return ICF.arithm(VARS[1], "-", VARS[0], OPERATOR, c);
-            } else if (COEFFS[0] == -1 && COEFFS[1] == -1) {
-                return ICF.arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR), -c);
-            }
-        }
-        // detect sums
-        int n = VARS.length;
-        int nbOne = 0;
-        int nbMinusOne = 0;
-        int nbZero = 0;
-        for (int i = 0; i < n; i++) {
-            if (COEFFS[i] == 1) {
-                nbOne++;
-            } else if (COEFFS[i] == -1) {
-                nbMinusOne++;
-            } else if (COEFFS[i] == 0) {
-                nbZero++;
-            }
-        }
-        if (nbZero > 0) {
-            IntVar[] nonZerosVars = new IntVar[n - nbZero];
-            int[] nonZerosCoefs = new int[n - nbZero];
-            int k = 0;
-            for (int i = 0; i < n; i++) {
-                if (COEFFS[i] != 0) {
-                    nonZerosVars[k] = VARS[i];
-                    nonZerosCoefs[k] = COEFFS[i];
-                    k++;
-                }
-            }
-            return scalar(nonZerosVars, nonZerosCoefs, OPERATOR, SCALAR);
-        }
-        if (nbOne + nbMinusOne == n) {
-            if (nbOne == n) {
-                return sum(VARS, OPERATOR, SCALAR);
-            } else if (nbMinusOne == n) {
-                return sum(VARS, Operator.getFlip(OPERATOR), VF.minus(SCALAR));
-            } else if (SCALAR.isInstantiated()) {
-                if (nbMinusOne == 1) {
-                    IntVar[] v2 = new IntVar[n - 1];
-                    IntVar s2 = null;
-                    int k = 0;
-                    for (int i = 0; i < n; i++) {
-                        if (COEFFS[i] != -1) {
-                            v2[k++] = VARS[i];
-                        } else {
-                            s2 = VARS[i];
-                        }
-                    }
-                    return sum(v2, OPERATOR, VF.offset(s2, SCALAR.getValue()));
-                } else if (nbOne == 1) {
-                    IntVar[] v2 = new IntVar[n - 1];
-                    IntVar s2 = null;
-                    int k = 0;
-                    for (int i = 0; i < n; i++) {
-                        if (COEFFS[i] != 1) {
-                            v2[k++] = VARS[i];
-                        } else {
-                            s2 = VARS[i];
-                        }
-                    }
-                    return sum(v2, Operator.getFlip(OPERATOR), VF.offset(s2, -SCALAR.getValue()));
-                }
-            } else if (n == 2) {
-                if (COEFFS[0] == 1) {
-                    assert COEFFS[1] == -1;
-                    return sum(new IntVar[]{VARS[1], SCALAR}, Operator.getFlip(OPERATOR), VARS[0]);
-                } else {
-                    assert COEFFS[0] == -1;
-                    assert COEFFS[1] == 1;
-                    return sum(new IntVar[]{VARS[0], SCALAR}, Operator.getFlip(OPERATOR), VARS[1]);
-                }
-            }
-        }
-        // scalar
-        if (OPERATOR.equals("=")) {
-            return makeScalar(VARS, COEFFS, SCALAR, 1);
-        }
-        int[] b = Scalar.getScalarBounds(VARS, COEFFS);
-        Solver s = VARS[0].getSolver();
-        IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], s);
-        s.post(makeScalar(VARS, COEFFS, p, 1));
-        return arithm(p, OPERATOR, SCALAR);
-    }
-
-    private static Constraint makeScalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR, int SCALAR_COEF) {
-        int maxDomSize = SCALAR.getDomainSize();
-        int idx = -1;
-        int n = VARS.length;
-        for (int i = 0; i < n; i++) {
-            if (maxDomSize < VARS[i].getDomainSize()) {
-                maxDomSize = VARS[i].getDomainSize();
-                idx = i;
-            }
-        }
-        if (idx != -1) {
-            IntVar[] VARS2 = VARS.clone();
-            int[] COEFFS2 = COEFFS.clone();
-            VARS2[idx] = SCALAR;
-            COEFFS2[idx] = -SCALAR_COEF;
-            return makeScalar(VARS2, COEFFS2, VARS[idx], -COEFFS[idx]);
-        } else {
-            if (tupleIt(VARS) && SCALAR.hasEnumeratedDomain()) {
-                return table(ArrayUtils.append(VARS, new IntVar[]{SCALAR}), TuplesFactory.scalar(VARS, COEFFS, SCALAR, SCALAR_COEF), "");
-            } else {
-                return new Scalar(VARS, COEFFS, SCALAR, SCALAR_COEF);
-            }
-        }
+        return ScalarFactory.reduce(VARS, COEFFS, OPERATOR, SCALAR);
     }
 
     /**
@@ -1459,41 +1352,7 @@ public class IntConstraintFactory {
      * @return a sum constraint
      */
     public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
-        if (VARS.length == 1) {
-            if (SUM.isInstantiated()) {
-                return arithm(VARS[0], OPERATOR, SUM.getValue());
-            } else {
-                return arithm(VARS[0], OPERATOR, SUM);
-            }
-        } else if (VARS.length == 2 && SUM.isInstantiated()) {
-            return arithm(VARS[0], "+", VARS[1], OPERATOR, SUM.getValue());
-        } else {
-            int nbBools = 0;
-            for (IntVar left : VARS) {
-                if ((left.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
-                    nbBools++;
-                }
-            }
-            if (nbBools == VARS.length) {
-                BoolVar[] bvars = new BoolVar[nbBools];
-                for (int i = 0; i < nbBools; i++) {
-                    bvars[i] = (BoolVar) VARS[i];
-                }
-                return sum(bvars, OPERATOR, SUM);
-            }
-            if (OPERATOR.equals("=")) {
-                return new Constraint("Sum", new PropSumEq(VARS, SUM));
-            }
-            int lb = 0;
-            int ub = 0;
-            for (IntVar v : VARS) {
-                lb += v.getLB();
-                ub += v.getUB();
-            }
-            IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
-            SUM.getSolver().post(new Constraint("Sum", new PropSumEq(VARS, p)));
-            return arithm(p, OPERATOR, SUM);
-        }
+        return ScalarFactory.reduce(VARS, OPERATOR, SUM);
     }
 
     /**
@@ -1665,7 +1524,7 @@ public class IntConstraintFactory {
      * @param VARS list of variables involved
      * @return a boolean
      */
-    private static boolean tupleIt(IntVar... VARS) {
+    public static boolean tupleIt(IntVar... VARS) {
         if (!Configuration.ENABLE_TABLE_SUBS) {
             return false;
         }

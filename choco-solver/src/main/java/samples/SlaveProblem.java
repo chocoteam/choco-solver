@@ -37,7 +37,6 @@ package samples;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
-import solver.search.loop.ISearchLoop;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.thread.AbstractParallelSlave;
 
@@ -50,7 +49,7 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
     //***********************************************************************************
 
     Solver solver;
-	ParallelizedProblem model;
+    ParallelizedProblem model;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -58,17 +57,11 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
 
     public SlaveProblem(final String probClassName, final MasterProblem master, final int id) {
         super(master, id);
-		try {
-			model = (ParallelizedProblem) Class.forName(probClassName).getDeclaredConstructors()[0].newInstance(id);
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
+        try {
+            model = (ParallelizedProblem) Class.forName(probClassName).getDeclaredConstructors()[0].newInstance(id);
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     //***********************************************************************************
@@ -81,16 +74,15 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
             // plug monitor to communicate bounds (should not be added in the sequential phasis)
             solver = model.getSolver();
 
-			// communication
-			final ISearchLoop searchLoop = solver.getSearchLoop();
-			searchLoop.plugSearchMonitor(new IMonitorSolution() {
-				@Override
-				public void onSolution() {
-					ObjectiveManager om = searchLoop.getObjectiveManager();
-					int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
-					master.newSol(val, om.getPolicy());
-				}
-			});
+            // communication
+            solver.plugMonitor(new IMonitorSolution() {
+                @Override
+                public void onSolution() {
+                    ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
+                    int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
+                    master.newSol(val, om.getPolicy());
+                }
+            });
 
             model.solve();
             if (!solver.hasReachedLimit()) {
@@ -101,6 +93,7 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void findBetterThan(int val, ResolutionPolicy policy) {
         if (solver == null) return;// can happen if a solution is found before this thread is fully ready
         ObjectiveManager iom = solver.getSearchLoop().getObjectiveManager();

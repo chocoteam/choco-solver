@@ -27,7 +27,6 @@
 package samples.integer;
 
 import gnu.trove.map.hash.THashMap;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -104,12 +103,12 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Grocery");
+        System.out.println("Grocery");
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < 4; i++) {
             st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

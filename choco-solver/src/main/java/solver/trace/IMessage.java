@@ -24,56 +24,19 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.search.loop.monitors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.Solver;
+package solver.trace;
 
 /**
- * A search monitor logger which prints statistics every XX ms.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 aug. 2010
+ * @since 20/12/12
  */
-class LogStatEveryXXms implements IMonitorInitPropagation {
-
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
-
-    Thread printer;
-
-    public LogStatEveryXXms(final Solver solver, final long duration) {
-
-        printer = new Thread() {
-
-            @Override
-            public void run() {
-                try {
-                    long sleep = duration;
-                    Thread.sleep(sleep);
-                    do {
-                        solver.getMeasures().updateTimeCount();
-                        solver.getMeasures().updatePropagationCount();
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info(">> {}", solver.getMeasures().toOneShortLineString());
-                        }
-                        Thread.sleep(sleep);
-                    } while (true);
-                } catch (InterruptedException ignored) {
-                }
-            }
-        };
-        printer.setDaemon(true);
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-        printer.start();
-    }
+public interface IMessage {
+    /**
+     * Define the solution format
+     *
+     * @return a String
+     */
+    String print();
 }

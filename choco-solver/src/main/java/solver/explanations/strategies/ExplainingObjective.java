@@ -27,8 +27,6 @@
 package solver.explanations.strategies;
 
 import gnu.trove.list.array.TIntArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -60,8 +58,6 @@ import java.util.*;
  * @since 03/07/13
  */
 public class ExplainingObjective extends ANeighbor implements IMonitorInitPropagation, IMonitorUpBranch {
-
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     protected ExplanationEngine mExplanationEngine;
     private ObjectiveManager<IntVar,Integer> om;
@@ -108,8 +104,8 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         }
         this.mExplanationEngine = aSolver.getExplainer();
 
-        path = new ArrayList<Decision>(16);
-        valueDecisions = new ArrayList<Decision>(16);
+        path = new ArrayList<>(16);
+        valueDecisions = new ArrayList<>(16);
         clusters = new TIntArrayList(16);
         related2dom = new BitSet(16);
         notFrozen = new BitSet(16);
@@ -117,8 +113,8 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         refuted = new BitSet(16);
 
         // TEMPORARY DATA STRUCTURES
-        tmpDeductions = new ArrayList<Deduction>(16);
-        tmpValueDeductions = new HashSet<Deduction>(16);
+        tmpDeductions = new ArrayList<>(16);
+        tmpValueDeductions = new HashSet<>(16);
 
 
 		aSolver.plugMonitor(this);
@@ -194,7 +190,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         notFrozen.or(unrelated);
         // then build the fake decision path
         last = null;
-//        LOGGER.info("relax dom {}", notFrozen.cardinality());
+//        LOGGER.debug("relax dom {}", notFrozen.cardinality());
         for (int id = notFrozen.nextSetBit(0); id >= 0 && id < path.size(); id = notFrozen.nextSetBit(id + 1)) {
             //            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
             if (path.get(id).hasNext()) {

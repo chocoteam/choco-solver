@@ -26,8 +26,6 @@
  */
 package solver.search.loop.lns.neighbors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -44,8 +42,6 @@ import java.util.Random;
  * @since 18/04/13
  */
 public class RandomNeighborhood extends ANeighbor {
-
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     protected final int n;
     protected final IntVar[] vars;
@@ -78,15 +74,10 @@ public class RandomNeighborhood extends ANeighbor {
 
     @Override
     public void recordSolution() {
-        int count = 0;
         for (int i = 0; i < vars.length; i++) {
             previous[i] = bestSolution[i];
             bestSolution[i] = vars[i].getValue();
-            if (previous[i] == bestSolution[i]) {
-                count++;
-            }
         }
-        //System.out.printf("%d/%d = %.3f, -- %d -- %.3f\n", count, n, ((count * 1d) / (n * 1d)), fragment.cardinality(), nbFixedVariables);
         nbFixedVariables = 2. * n / 3. + 1;
         nbCall = 0;
         limit = 200; //geo.getNextCutoff(nbCall);

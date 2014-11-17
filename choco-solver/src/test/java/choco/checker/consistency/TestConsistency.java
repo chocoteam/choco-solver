@@ -39,8 +39,10 @@ import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
  */
 public class TestConsistency {
 
-    public TestConsistency(SearchLoops peType) {
+    public TestConsistency() {
     }
+    public TestConsistency(SearchLoops peType) {
+        }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -341,6 +343,27 @@ public class TestConsistency {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelSortBC, 8, -20, 20, null, seed + i, "bc");
+    }
+
+    @Test(groups = "1s")
+    public void testMDD1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelmddcAC, 1, 0, 10, null, seed + i, "ac");
+    }
+
+    @Test(groups = "1s")
+    public void testMDD2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelmddcAC, 2, 0, 2, null, seed + i, "ac");
+    }
+
+    @Test(groups = "1m")
+    public void testMDD3() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelmddcAC, 5, -4, 3, null, seed + i, "ac");
     }
 
     /*@Test

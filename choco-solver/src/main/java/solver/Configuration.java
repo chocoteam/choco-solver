@@ -26,10 +26,17 @@
  */
 package solver;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.Integer.parseInt;
+import static java.lang.Math.pow;
+import static java.lang.Short.parseShort;
+import static java.lang.System.exit;
 
 /**
  * Global settings
@@ -53,8 +60,8 @@ public enum Configuration {
         try {
             properties.load(Configuration.class.getResourceAsStream(PATH));
         } catch (Exception e) {
-            logger.error("Unable to load " + PATH + " file from classpath.", e);
-            System.exit(1);
+            logger.error("Unable to load {} file from classpath.\n{}\n", PATH, e);
+            exit(1);
         }
         // then override values, if any
         try {
@@ -62,7 +69,7 @@ public enum Configuration {
         } catch (NullPointerException e) {
             //            logger.warn("No user defined properties. Skip loading " + UDPATH + " file.");
         } catch (Exception e) {
-            logger.error("Unable to load " + UDPATH + " file from classpath.", e);
+            logger.error("Unable to load %s file from classpath.\n{}\n", UDPATH, e);
         }
         {
             String values = properties.getProperty("FINE_EVENT_QUEUES");
@@ -70,7 +77,7 @@ public enum Configuration {
             String[] values_ = values.split(",");
             short[] shorts = new short[values_.length];
             for (int i = 0; i < values_.length; i++) {
-                shorts[i] = Short.parseShort(values_[i]);
+                shorts[i] = parseShort(values_[i]);
             }
             FINE_EVENT_QUEUES = shorts;
         }
@@ -80,7 +87,7 @@ public enum Configuration {
             String[] values_ = values.split(",");
             short[] shorts = new short[values_.length];
             for (int i = 0; i < values_.length; i++) {
-                shorts[i] = Short.parseShort(values_[i]);
+                shorts[i] = parseShort(values_[i]);
             }
             COARSE_EVENT_QUEUES = shorts;
         }
@@ -88,37 +95,27 @@ public enum Configuration {
 
     public static final String WELCOME_TITLE = properties.getProperty("WELCOME_TITLE");
 
-    public static final String CALLER = properties.getProperty("CALLER");
-
     // Set to true to plug explanation engine in -- enable total disconnection
-    public static final boolean PLUG_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PLUG_EXPLANATION"));
+    public static final boolean PLUG_EXPLANATION = parseBoolean(properties.getProperty("PLUG_EXPLANATION"));
 
     // Set to true to print explanation information
-    public static final boolean PRINT_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PRINT_EXPLANATION"));
+    public static final boolean PRINT_EXPLANATION = parseBoolean(properties.getProperty("PRINT_EXPLANATION"));
 
     // Set to true to add propagators to explanation
-    public static final boolean PROP_IN_EXP = Boolean.parseBoolean(properties.getProperty("PROP_IN_EXP"));
+    public static final boolean PROP_IN_EXP = parseBoolean(properties.getProperty("PROP_IN_EXP"));
 
     // Set to true to print propagation information
-    public static final boolean PRINT_PROPAGATION = Boolean.parseBoolean(properties.getProperty("PRINT_PROPAGATION"));
+    public static final boolean PRINT_PROPAGATION = parseBoolean(properties.getProperty("PRINT_PROPAGATION"));
 
     // Set to true to print event occurring on variables
-    public static final boolean PRINT_VAR_EVENT = Boolean.parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));
+    public static final boolean PRINT_VAR_EVENT = parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));
 
     // Set to true to print scheduling information
-    public static final boolean PRINT_SCHEDULE = Boolean.parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
+    public static final boolean PRINT_SCHEDULE = parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
 
     // Set to true to allow the creation of views in the VariableFactory.
     // Creates new variables with channeling constraints otherwise.
-    public static final boolean ENABLE_VIEWS = Boolean.parseBoolean(properties.getProperty("ENABLE_VIEWS"));
-
-    public enum MOVP {
-        disabled, //throws an error when a variable occurs more than once
-        silent, // do not do anything
-        warn, // print a warning message when a variable occurs more than once
-        view, // detect each occurrence, replace additional occurrences with an EQ view
-        duplicate // detect each occurrence, duplicate the variable and post and EQ constraint
-    }
+    public static final boolean ENABLE_VIEWS = parseBoolean(properties.getProperty("ENABLE_VIEWS"));
 
     public enum Idem {
         disabled, // does not anything
@@ -134,10 +131,10 @@ public enum Configuration {
 
     // Defines the rounding precision for multicostregular algorithm
     // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
-    public static final int MCR_PRECISION = Integer.parseInt(properties.getProperty("MCR_PRECISION"));
+    public static final int MCR_PRECISION = parseInt(properties.getProperty("MCR_PRECISION"));
 
     // Defines the smallest used double for multicostregular
-    public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
+    public static final double MCR_DECIMAL_PREC = pow(10.0, -MCR_PRECISION);
 
     // Defines, for each priority, the queue the propagators of this priority should be scheduled in
     // /!\ for advanced use only
@@ -148,14 +145,18 @@ public enum Configuration {
 
     // Define the maximum domain size to force integer variable to be enumerated
     // instead of bounded while calling VariableFactory.integer
-    public static final int MAX_DOM_SIZE_FOR_ENUM = Integer.parseInt(properties.getProperty("MAX_DOM_SIZE_FOR_ENUM"));
+    public static final int MAX_DOM_SIZE_FOR_ENUM = parseInt(properties.getProperty("MAX_DOM_SIZE_FOR_ENUM"));
 
     // Set to true to allow intension constraint to extension constraint substitution
-    public static final boolean ENABLE_TABLE_SUBS = Boolean.parseBoolean(properties.getProperty("ENABLE_TABLE_SUBS"));
+    public static final boolean ENABLE_TABLE_SUBS = parseBoolean(properties.getProperty("ENABLE_TABLE_SUBS"));
 
     // Define the maximum domain size to enable intension constraint to extension constraint substitution
     // Only checked when ENABLE_TABLE_SUBS is set to true
-    public static final int MAX_TUPLES_FOR_TABLE_SUBS = Integer.parseInt(properties.getProperty("MAX_TUPLES_FOR_TABLE_SUBS"));
+    public static final int MAX_TUPLES_FOR_TABLE_SUBS = parseInt(properties.getProperty("MAX_TUPLES_FOR_TABLE_SUBS"));
 
+    // Define the search binder path
+    public static final String SEARCH_BINDER_PATH = properties.getProperty("SEARCH_BINDER_PATH");
 
+    // MDD compacting only once at the end (true) or after each addition (false)
+    public static final boolean COMPACT_MDD_ONLY_ONCE = parseBoolean(properties.getProperty("COMPACT_MDD_ONLY_ONCE"));
 }

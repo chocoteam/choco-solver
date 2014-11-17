@@ -27,8 +27,6 @@
 
 package solver.search.strategy.decision;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Identity;
 import solver.exception.ContradictionException;
@@ -45,8 +43,6 @@ import solver.variables.Variable;
  * @since 2 juil. 2010
  */
 public abstract class Decision<V extends Variable> implements Identity, ICause, Comparable<Decision<V>> {
-
-    Logger LOGGER = LoggerFactory.getLogger(Decision.class);
 
     public static int _ID = 0;
 

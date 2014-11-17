@@ -24,19 +24,23 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.search.binder;
+
+import org.testng.annotations.Test;
+import solver.search.bind.ISearchBinder;
+import solver.search.bind.SearchBinderFactory;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 20/12/12
+ * @version choco
+ * @since 23/10/14
  */
-public interface IMessage {
-    /**
-     * Define the solution format
-     *
-     * @return a String
-     */
-    String print();
+public class ISearchBinderTest {
+
+    @Test(groups = "1s")
+    public void test1() {
+        ISearchBinder ISearchBinder = SearchBinderFactory.getSearchBinder();
+    }
 }

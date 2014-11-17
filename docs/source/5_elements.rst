@@ -64,7 +64,7 @@ A signature offers the possibility to specify the filtering algorithm to use:
 
     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
           :language: java
-          :lines: 231-235,237
+          :lines: 231-236,238
           :emphasize-lines: 235
           :linenos:
 
@@ -318,10 +318,10 @@ The `bin_packing` constraint involves:
  - an array of integer variables `BIN_LOAD` and
  - an integer `OFFSET`.
 
-It holds the Bin Packing Problem rules: a set of items with various to pack into bins with respect to the capacity of each bin.
+It holds the Bin Packing Problem rules: a set of items with various SIZES to pack into bins with respect to the capacity of each bin.
 
-- `ITEM_BIN` represents the bin of each item, that is, `ITEM_BIN[i] = j` states that the i :math:`^{th}` is put in the j :math:`^{th}` bin.
-- `ITEM_SIZE` represents the size of each size.
+- `ITEM_BIN` represents the bin of each item, that is, `ITEM_BIN[i] = j` states that the i :math:`^{th}` ITEM is put in the j :math:`^{th}` bin.
+- `ITEM_SIZE` represents the size of each item.
 - `BIN_LOAD` represents the load of each bin, that is, the sum of size of the items in it.
 
 This constraint is not a built-in constraint and is based on various propagators.
@@ -856,8 +856,8 @@ The `knapsack` constraint involves:
 
 It formulates the Knapsack Problem: to determine the count of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
 
-- `OCCURRENCES[i]` :math:`\times` `WEIGHT[i]` :math:`\leq` `TOTAL_WEIGHT` and
-- `OCCURRENCES[i]` :math:`\times` `ENERGY[i]` = `TOTAL_ENERGY`.
+- :math:`\sum` `OCCURRENCES[i]` :math:`\times` `WEIGHT[i]` :math:`\leq` `TOTAL_WEIGHT` and
+- :math:`\sum` `OCCURRENCES[i]` :math:`\times` `ENERGY[i]` = `TOTAL_ENERGY`.
 
 **API**:  ::
 
@@ -1020,6 +1020,7 @@ The `maximum` constraints involves a set of integer variables and a third party 
 **See also**: `maximum <http://sofdem.github.io/gccat/gccat/Cmaximum.html>`_ in the Global Constraint Catalog.
 
 **API**:  ::
+
     Constraint maximum(IntVar MAX, IntVar VAR1, IntVar VAR2)
     Constraint maximum(IntVar MAX, IntVar[] VARS)
     Constraint maximum(BoolVar MAX, BoolVar[] VARS)
@@ -1040,6 +1041,33 @@ The `maximum` constraints involves a set of integer variables and a third party 
         - `MAX = 3, Y = -1, Z = 3`
         - `MAX = 3, Y = 0, Z = 3`
         - `MAX = 3, Y = 1, Z = 3`
+
+.. _51_icstr_mdd:
+
+mddc
+====
+
+A constraint which restricts the values a variable can be assigned to the solutions encoded with a multi-valued decision diagram.
+
+**Implementation based on**: :cite:`ChengY08`.
+
+**API**:  ::
+
+    Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples2.java
+          :language: java
+          :lines: 49-55,57
+          :emphasize-lines: 59
+          :linenos:
+
+    The solutions of the problem are :
+
+        - `X[0] = 0, X[1] = -1`
+        - `X[0] = 0, X[1] = 1`,
+        - `X[0] = 1, X[1] = -1`
 
 
 .. _51_icstr_mem:
@@ -1970,6 +1998,22 @@ The `member` constraint involves:
         Constraint member(SetVar[] SETS, SetVar SET)
         Constraint member(IntVar INTEGER, SetVar SET)
 
+.. _51_scstr_nme:
+
+notmember
+=========
+
+The `not_member` constraint involves:
+
+    + an integer variable `INTEGER` and
+    + a set variable `SET`.
+
+    It ensures that `INTEGER` is not included in `SET`.
+
+**API**:  ::
+
+        Constraint not_member(IntVar INTEGER, SetVar SET)
+
 .. _51_scstr_min:
 
 min
@@ -2172,36 +2216,57 @@ A complete list is available in the documentation of IBEX.
 Logical constraints
 *******************
 
-.. _51_lcstr_and:
-
-and
-===
-
-.. _51_lcstr_it:
-
-ifThen
-======
-
-.. _51_lcstr_ite:
-
-ifThenElse
-==========
+The ``LogicalConstraintFactory`` (or ``LCF``) provides various interesting constraints to manipulate other constraints.
+These constraints are based on the concept of reification.
+We say a constraint ``C`` is reified with a boolean variable ``b`` when we maintain
+the equivalence betwen ``b`` being equal to true and ``C`` being satisfied.
+This means the ``C`` constraint may be not satisfied, hence it should not be posted to the solver.
 
 .. _51_lcstr_not:
 
 not
 ===
 
-.. _51_lcstr_or:
+Creates the opposite constraint of the input constraint.
 
-or
-==
+While this works for any kind of constraint (including globals), it might be a bit naive and slow.
+
+.. _51_lcstr_it:
+
+ifThen
+======
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThen_reifiable`` (whose implementation differ)
+
+.. _51_lcstr_ite:
+
+ifThenElse
+==========
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well. Otherwise, the ELSE statement must be true.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThenElse_reifiable`` (whose implementation differ)
 
 .. _51_lcstr_rei:
 
 reification
 ===========
 
+Creates and automatically post a constraint maintaining the equivalent between
+a binary variable being equal to 1 and a constraint being satisfied.
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``reification_reifiable`` (whose implementation differ)
 
 .. _51_satsolver:
 

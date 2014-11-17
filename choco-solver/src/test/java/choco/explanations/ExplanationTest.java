@@ -36,8 +36,8 @@ import solver.explanations.Explanation;
 import solver.explanations.ExplanationFactory;
 import solver.explanations.RecorderExplanationEngine;
 import solver.explanations.strategies.ConflictBasedBackjumping;
-import solver.search.loop.monitors.SMF;
 import solver.search.strategy.ISF;
+import solver.trace.Chatterbox;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
@@ -185,7 +185,7 @@ public class ExplanationTest {
                 solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
                 solver.set(ISF.random_value(p, seed));
                 engines[e].plugin(solver, false);
-                SMF.shortlog(solver);
+                Chatterbox.showShortStatistics(solver);
                 Assert.assertFalse(solver.findSolution());
             }
         }
@@ -206,8 +206,9 @@ public class ExplanationTest {
             // p[0], p[1] are just for fun
             solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
             engines[e].plugin(solver, false);
-            SMF.log(solver,true, true);
-            SMF.shortlog(solver);
+            Chatterbox.showStatistics(solver);
+            Chatterbox.showSolutions(solver);
+            Chatterbox.showDecisions(solver);
             Assert.assertFalse(solver.findSolution());
         }
     }
@@ -227,8 +228,9 @@ public class ExplanationTest {
             // p[0], p[1] are just for fun
             solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
             engines[e].plugin(solver, false);
-            SMF.log(solver,true, true);
-            SMF.shortlog(solver);
+            Chatterbox.showStatistics(solver);
+            Chatterbox.showSolutions(solver);
+            Chatterbox.showDecisions(solver);
             Assert.assertFalse(solver.findSolution());
         }
     }

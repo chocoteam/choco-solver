@@ -54,9 +54,9 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testTIMES() {
-		for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-			CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, 1407157364513l, null);
-		}
+        for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, 1407157364513l, null);
+        }
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 8) + 1; n *= 2) {
@@ -416,6 +416,17 @@ public class TestCorrectness {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 6) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelSortBC, n, -n, 2 * n, seed, false);
+            }
+
+        }
+    }
+
+    @Test(groups = "10m")
+    public void testMDDAC() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < 10; n ++) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelmddcAC, n, -n / 2, n / 2, seed, null);
             }
 
         }

@@ -34,7 +34,6 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
 import util.ESat;
 import util.tools.ArrayUtils;
 
@@ -88,7 +87,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtMostNValues_BC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
         n = variables.length;
         minValue = vars[0].getLB();
         int maxValue = vars[0].getUB();
@@ -272,11 +271,6 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
             hasChanged |= pruneUB();
         } while (hasChanged);
 
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
     }
 
     //***********************************************************************************

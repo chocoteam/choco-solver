@@ -34,7 +34,7 @@ import solver.constraints.nary.alldifferent.conditions.Condition;
 import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.circuit.CircuitConf;
-import solver.search.loop.monitors.SMF;
+import solver.trace.Chatterbox;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Task;
@@ -54,7 +54,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = VF.enumerated("X", 1, 4, solver);
         solver.post(ICF.arithm(X, ">", 2));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -63,7 +63,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = VF.enumerated("X", 1, 4, solver);
         solver.post(ICF.member(X, new int[]{-2, -1, 0, 1, 2}));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -72,7 +72,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = VF.enumerated("X", 1, 4, solver);
         solver.post(ICF.member(X, 2, 5));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -81,7 +81,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = VF.enumerated("X", 1, 4, solver);
         solver.post(ICF.not_member(X, new int[]{-2, -1, 0, 1, 2}));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -91,7 +91,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = VF.enumerated("X", 1, 4, solver);
         solver.post(ICF.not_member(X, 2, 5));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -101,7 +101,7 @@ public class IntConstraintExamples {
         IntVar X = VF.enumerated("X", 0, 2, solver);
         IntVar Y = VF.enumerated("X", -6, 1, solver);
         solver.post(ICF.absolute(X, Y));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -111,7 +111,7 @@ public class IntConstraintExamples {
         IntVar X = VF.enumerated("X", 0, 2, solver);
         IntVar Y = VF.enumerated("X", -6, 1, solver);
         solver.post(ICF.arithm(X, "<=", Y, "+", 1));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -121,7 +121,7 @@ public class IntConstraintExamples {
         IntVar X = VF.enumerated("X", 0, 2, solver);
         IntVar Y = VF.enumerated("X", -3, 1, solver);
         solver.post(ICF.distance(X, Y, "=", 1));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -131,7 +131,7 @@ public class IntConstraintExamples {
         IntVar V = VF.enumerated("V", -2, 2, solver);
         IntVar I = VF.enumerated("I", 0, 5, solver);
         solver.post(ICF.element(V, new int[]{2, -2, 1, -1, 0}, I, 0, "none"));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -141,7 +141,7 @@ public class IntConstraintExamples {
         IntVar X = VF.enumerated("X", 0, 5, solver);
         IntVar Y = VF.enumerated("Y", -1, 3, solver);
         solver.post(ICF.square(X, Y));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -156,7 +156,7 @@ public class IntConstraintExamples {
         tuples.add(4, 2);
         tuples.add(1, 4);
         solver.post(ICF.table(X, Y, tuples, "AC2001"));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -167,7 +167,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", -1, 1, solver);
         IntVar Z = VF.enumerated("Z", 2, 3, solver);
         solver.post(ICF.distance(X, Y, "<", Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -178,7 +178,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", -1, 1, solver);
         IntVar Z = VF.enumerated("Z", 2, 3, solver);
         solver.post(ICF.eucl_div(X, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -189,7 +189,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", -1, 1, solver);
         IntVar Z = VF.enumerated("Z", 2, 3, solver);
         solver.post(ICF.maximum(MAX, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -200,7 +200,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", -1, 1, solver);
         IntVar Z = VF.enumerated("Z", 2, 3, solver);
         solver.post(ICF.minimum(MIN, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -211,7 +211,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", -1, 4, solver);
         IntVar Z = VF.enumerated("Z", 1, 3, solver);
         solver.post(ICF.mod(X, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -222,7 +222,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", 2, 4, solver);
         IntVar Z = VF.enumerated("Z", 5, 7, solver);
         solver.post(ICF.times(X, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -234,7 +234,7 @@ public class IntConstraintExamples {
         IntVar Y = VF.enumerated("Y", 2, 4, solver);
         IntVar Z = VF.enumerated("Z", 5, 7, solver);
         solver.post(ICF.alldifferent(new IntVar[]{W, X, Y, Z}));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -249,7 +249,7 @@ public class IntConstraintExamples {
                         return !x.contains(1) && !x.contains(3);
                     }
                 }));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -258,7 +258,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
         solver.post(ICF.alldifferent_except_0(XS));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -268,7 +268,7 @@ public class IntConstraintExamples {
         IntVar N = VF.enumerated("N", 2, 3, solver);
         IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 6, solver);
         solver.post(ICF.among(N, XS, new int[]{1, 2, 3}));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
 
     }
@@ -279,7 +279,7 @@ public class IntConstraintExamples {
         IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
         IntVar N = VF.enumerated("N", 2, 3, solver);
         solver.post(ICF.atleast_nvalues(XS, N, true));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -289,7 +289,7 @@ public class IntConstraintExamples {
         IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
         IntVar N = VF.enumerated("N", 1, 3, solver);
         solver.post(ICF.atmost_nvalues(XS, N, false));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -300,7 +300,7 @@ public class IntConstraintExamples {
         int[] sizes = new int[]{2, 3, 1, 4, 2};
         IntVar[] BLOADS = VF.enumeratedArray("BLOADS", 3, 0, 5, solver);
         solver.post(ICF.bin_packing(IBIN, sizes, BLOADS, 1));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -310,7 +310,7 @@ public class IntConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BVARS", 5, solver);
         IntVar VAR = VF.enumerated("VAR", 1, 5, solver);
         solver.post(ICF.boolean_channeling(BVARS, VAR, 1));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -319,7 +319,7 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] NODES = VF.enumeratedArray("NODES", 5, 0, 4, solver);
         solver.post(ICF.circuit(NODES, 0, CircuitConf.LIGHT));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -348,7 +348,7 @@ public class IntConstraintExamples {
         costs[4] = new int[]{2, 1, 3};
 
         solver.post(ICF.cost_regular(VARS, COST, CostAutomaton.makeSingleResource(fauto, costs, COST.getLB(), COST.getUB())));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -359,7 +359,7 @@ public class IntConstraintExamples {
         IntVar VA = VF.enumerated("VA", new int[]{1, 3}, solver);
         IntVar CO = VF.enumerated("CO", new int[]{0, 2, 4}, solver);
         solver.post(ICF.count(VA, VS, CO));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -379,7 +379,7 @@ public class IntConstraintExamples {
         }
         IntVar CA = VF.enumerated("CA", 1, 3, solver);
         solver.post(ICF.cumulative(TS, HE, CA, true));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -395,7 +395,7 @@ public class IntConstraintExamples {
             W[i] = VF.fixed("W_" + i, i + 1, solver);
         }
         solver.post(ICF.diffn(X, Y, D, W, true));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -406,7 +406,7 @@ public class IntConstraintExamples {
         int[] values = new int[]{-1, 1, 2};
         IntVar[] OCC = VF.boundedArray("OCC", 3, 0, 2, solver);
         solver.post(ICF.global_cardinality(VS, values, OCC, true));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -416,7 +416,7 @@ public class IntConstraintExamples {
         IntVar[] X = VF.enumeratedArray("X", 3, 0, 3, solver);
         IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 4, solver);
         solver.post(ICF.inverse_channeling(X, Y, 0, 1));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -432,7 +432,7 @@ public class IntConstraintExamples {
         int[] weights = new int[]{1, 3, 4};
         int[] energies = new int[]{1, 4, 6};
         solver.post(ICF.knapsack(IT, WE, EN, weights, energies));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -443,7 +443,7 @@ public class IntConstraintExamples {
         IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
         IntVar[] Z = VF.enumeratedArray("Z", 3, 0, 2, solver);
         solver.post(ICF.lex_chain_less(X, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -454,7 +454,7 @@ public class IntConstraintExamples {
         IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
         IntVar[] Z = VF.enumeratedArray("Z", 3, 0, 2, solver);
         solver.post(ICF.lex_chain_less_eq(X, Y, Z));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -464,7 +464,7 @@ public class IntConstraintExamples {
         IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
         IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
         solver.post(ICF.lex_less(X, Y));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -474,7 +474,7 @@ public class IntConstraintExamples {
         IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
         IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
         solver.post(ICF.lex_less_eq(X, Y));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -503,7 +503,7 @@ public class IntConstraintExamples {
 //        costs[4] = new int[]{2, 1, 3};
 
         solver.post(ICF.multicost_regular(VARS, CVARS, CostAutomaton.makeMultiResources(fauto, costs, CVARS)));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -513,7 +513,7 @@ public class IntConstraintExamples {
         IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 2, solver);
         IntVar N = VF.enumerated("N", 0, 3, solver);
         solver.post(ICF.nvalues(VS, N));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -524,7 +524,7 @@ public class IntConstraintExamples {
         IntVar S = VF.enumerated("S", 0, 3, solver);
         IntVar E = VF.enumerated("E", 0, 3, solver);
         solver.post(ICF.path(VS, S, E, 0));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -534,7 +534,7 @@ public class IntConstraintExamples {
         IntVar[] CS = VF.enumeratedArray("CS", 4, 1, 5, solver);
         solver.post(ICF.regular(CS,
                 new FiniteAutomaton("(1|2)(3*)(4|5)")));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -545,7 +545,7 @@ public class IntConstraintExamples {
         int[] coeffs = new int[]{1, 2, 3, 4};
         IntVar R = VF.bounded("R", 0, 20, solver);
         solver.post(ICF.scalar(CS, coeffs, R));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -555,7 +555,7 @@ public class IntConstraintExamples {
         IntVar[] X = VF.enumeratedArray("X", 3, 0, 2, solver);
         IntVar[] Y = VF.enumeratedArray("Y", 3, 0, 2, solver);
         solver.post(ICF.sort(X, Y));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -565,7 +565,7 @@ public class IntConstraintExamples {
         IntVar[] NODES = VF.enumeratedArray("NS", 5, 0, 4, solver);
         IntVar SI = VF.enumerated("SI", 2, 3, solver);
         solver.post(ICF.subcircuit(NODES, 0, SI));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -577,7 +577,7 @@ public class IntConstraintExamples {
         IntVar E = VF.enumerated("E", 0, 3, solver);
         IntVar SI = VF.enumerated("SI", 2, 3, solver);
         solver.post(ICF.subpath(VS, S, E, 0, SI));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -587,7 +587,7 @@ public class IntConstraintExamples {
         IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
         IntVar SU = VF.enumerated("SU", 2, 3, solver);
         solver.post(ICF.sum(VS, "<=", SU));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -597,7 +597,7 @@ public class IntConstraintExamples {
         IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
         IntVar NT = VF.enumerated("NT", 2, 3, solver);
         solver.post(ICF.tree(VS, NT, 0));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -608,7 +608,7 @@ public class IntConstraintExamples {
         IntVar CO = VF.enumerated("CO", 0, 15, solver);
         int[][] costs = new int[][]{{0, 1, 3, 7}, {1, 0, 1, 3}, {3, 1, 0, 1}, {7, 3, 1, 0}};
         solver.post(ICF.tsp(VS, CO, costs));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -618,7 +618,7 @@ public class IntConstraintExamples {
         BoolVar[] BVARS = VF.boolArray("BVARS", 4, solver);
         IntVar VAR = VF.enumerated("VAR", 0, 15, solver);
         solver.post(ICF.bit_channeling(BVARS, VAR));
-        SMF.log(solver, true, false);
+        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
 }

@@ -26,14 +26,13 @@
  */
 package samples.real;
 
-import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
+import solver.trace.Chatterbox;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
@@ -41,7 +40,7 @@ import util.tools.ArrayUtils;
 
 /**
  * <br/>
- *
+ * <p/>
  * DYLD_LIBRARY_PATH = /Users/gillou/ibex/lib
  *
  * @author Jean-Guillaume Fages, Charles Prud'homme
@@ -50,71 +49,70 @@ import util.tools.ArrayUtils;
 public class SmallSantaClaude {
 
 
-	public static void main(String[] args){
+    public static void main(String[] args) {
 
-		// solver
-		Solver solver = new Solver("Santa Claus");
+        // solver
+        Solver solver = new Solver("Santa Claus");
 
-		// input data
-		final int n_kids = 3;
-		final int n_gifts = 5;
-		final int[] gift_price = new int[]{11,24,5,23,16};
-		final int min_price = 5;
-		final int max_price = 24;
+        // input data
+        final int n_kids = 3;
+        final int n_gifts = 5;
+        final int[] gift_price = new int[]{11, 24, 5, 23, 16};
+        final int min_price = 5;
+        final int max_price = 24;
 
-		// FD variables
-		final IntVar[] kid_gift = VariableFactory.enumeratedArray("g2k", n_kids, 0, n_gifts, solver);
-		final IntVar[] kid_price = VariableFactory.boundedArray("p2k", n_kids, min_price, max_price, solver);
-		final IntVar total_cost = VariableFactory.bounded("total cost", min_price*n_kids, max_price * n_kids, solver);
+        // FD variables
+        final IntVar[] kid_gift = VariableFactory.enumeratedArray("g2k", n_kids, 0, n_gifts, solver);
+        final IntVar[] kid_price = VariableFactory.boundedArray("p2k", n_kids, min_price, max_price, solver);
+        final IntVar total_cost = VariableFactory.bounded("total cost", min_price * n_kids, max_price * n_kids, solver);
 
-		// CD variable
-		double precision = 1.e-4;
-		final RealVar average = VariableFactory.real("average", min_price, max_price, precision, solver);
-		final RealVar average_deviation = VariableFactory.real("average_deviation", 0, max_price, precision, solver);
+        // CD variable
+        double precision = 1.e-4;
+        final RealVar average = VariableFactory.real("average", min_price, max_price, precision, solver);
+        final RealVar average_deviation = VariableFactory.real("average_deviation", 0, max_price, precision, solver);
 
-		// continuous views of FD variables
-		RealVar[] realViews = VariableFactory.real(kid_price, precision);
+        // continuous views of FD variables
+        RealVar[] realViews = VariableFactory.real(kid_price, precision);
 
-		// kids must have different gifts
+        // kids must have different gifts
         solver.post(IntConstraintFactory.alldifferent(kid_gift, "AC"));
-		// associate each kid with his gift cost
+        // associate each kid with his gift cost
         for (int i = 0; i < n_kids; i++) {
             solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i]));
         }
-		// compute total cost
+        // compute total cost
         solver.post(IntConstraintFactory.sum(kid_price, total_cost));
 
-		// compute average cost (i.e. average gift cost per kid)
-		RealVar[] allRV = ArrayUtils.append(realViews,new RealVar[]{average,average_deviation});
-		solver.post(new RealConstraint(
-				"Avg/AvgDev",
-				"({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}",
-				allRV)
-		);
+        // compute average cost (i.e. average gift cost per kid)
+        RealVar[] allRV = ArrayUtils.append(realViews, new RealVar[]{average, average_deviation});
+        solver.post(new RealConstraint(
+                        "Avg/AvgDev",
+                        "({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}",
+                        allRV)
+        );
 
-		// set search strategy (ABS)
-		solver.set(IntStrategyFactory.minDom_LB(kid_gift));
-		// displays resolution statistics
-		SearchMonitorFactory.log(solver,true,false);
-		// print each solution
+        // set search strategy (ABS)
+        solver.set(IntStrategyFactory.minDom_LB(kid_gift));
+        // displays resolution statistics
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
+        // print each solution
         solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
-                if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
-                    LoggerFactory.getLogger("solver").info("*******************");
-                    for (int i = 0; i < n_kids; i++) {
-                        LoggerFactory.getLogger("solver").info("Kids #{} has received the gift #{} at a cost of {} euros",
-                                new Object[]{i, kid_gift[i].getValue(), kid_price[i].getValue()});
-                    }
-                    LoggerFactory.getLogger("solver").info("Total cost: {} euros", total_cost.getValue());
-					LoggerFactory.getLogger("solver").info("Average: {} euros per kid", average.getLB());
-					LoggerFactory.getLogger("solver").info("Average deviation: {} ", average_deviation.getLB());
+                System.out.println("*******************");
+                for (int i = 0; i < n_kids; i++) {
+                    System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
+                            i, kid_gift[i].getValue(), kid_price[i].getValue()));
                 }
+                System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
+                System.out.println(String.format("Average: %.3f euros per kid", average.getLB()));
+                System.out.println(String.format("Average deviation: %.3f ", average_deviation.getLB()));
             }
         });
-		// find optimal solution (Santa Claus is stingy)
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,average_deviation, precision);
-		// free IBEX structures from memory
-		solver.getIbex().release();
+        // find optimal solution (Santa Claus is stingy)
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, average_deviation, precision);
+        // free IBEX structures from memory
+        solver.getIbex().release();
     }
 }

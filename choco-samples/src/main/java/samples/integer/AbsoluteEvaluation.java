@@ -27,7 +27,6 @@
 
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -85,7 +84,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("AbsoluteEvaluation({})");
+        System.out.println("AbsoluteEvaluation({})");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < vars.length - 1; i++) {
@@ -95,7 +94,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
             }
         }
         st.append(String.format("%d", vars[vars.length - 1].getValue()));
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

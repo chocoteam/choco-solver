@@ -24,39 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.search.bind.impl;
 
-import solver.Solver;
+import solver.search.bind.ISearchBinder;
 
 /**
- * A search monitor logger which prints choices during the search.
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 09/05/11
+ * @version choco
+ * @since 23/10/14
  */
-public final class LogChoicesWithRank extends LogChoices {
+public class StaticBinder {
 
-    final int start, end;
+    /**
+     * The unique instance of this class.
+     */
+    private static final StaticBinder SINGLETON = new StaticBinder();
 
-    public LogChoicesWithRank(Solver solver, int start, int end, IMessage message) {
-        super(solver, message);
-        this.start = start;
-        this.end = end;
+    /**
+     * Return the singleton of this class.
+     *
+     * @return the StaticLoggerBinder singleton
+     */
+    public static StaticBinder getSingleton() {
+        return SINGLETON;
     }
 
-    @Override
-    public void beforeDownLeftBranch() {
-        if (solver.getMeasures().getNodeCount() >= start && solver.getMeasures().getNodeCount() <= end) {
-            super.beforeDownLeftBranch();
-        }
+    /**
+     * Declare the version of the CHOCO API this implementation is compiled against.
+     * The value of this field is usually modified with each release.
+     */
+    // to avoid constant folding by the compiler, this field must *not* be final
+    public static String REQUESTED_API_VERSION = "3.2.2";  // !final
+
+    private StaticBinder() {
+        throw new UnsupportedOperationException("This code should have never made it into slf4j-api.jar");
     }
 
-    @Override
-    public void beforeDownRightBranch() {
-        if (solver.getMeasures().getNodeCount() >= start && solver.getMeasures().getNodeCount() <= end) {
-            super.beforeDownRightBranch();
-        }
+    public ISearchBinder getBinder(){
+        throw new UnsupportedOperationException("This code should have never made it into slf4j-api.jar");
     }
 }

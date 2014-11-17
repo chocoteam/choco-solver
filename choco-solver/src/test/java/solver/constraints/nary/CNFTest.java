@@ -65,7 +65,7 @@ public class CNFTest {
                         a.not()
                 ), solver);
             }
-            solver.post(LogicalConstraintFactory.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
+            LogicalConstraintFactory.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
 //            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());

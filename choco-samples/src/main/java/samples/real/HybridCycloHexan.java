@@ -26,7 +26,6 @@
  */
 package samples.real;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.real.Ibex;
@@ -63,7 +62,7 @@ public class HybridCycloHexan extends AbstractProblem {
 		st.append("This example comes from the Elisa project (LINA) examples. \n");
 		st.append("This example restricts x to be integer, as an illustration to hybrid finite/continuous problems. \n");
 		st.append("It has no solution. \n");
-		LoggerFactory.getLogger("bench").info(st.toString());
+		System.out.println(st.toString());
 	}
 
 	@Override

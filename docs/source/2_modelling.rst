@@ -425,7 +425,8 @@ Available constraints
     On an undefined number of integer variables
 :ref:`51_icstr_elm`,
 :ref:`51_icstr_sor`,
-:ref:`51_icstr_tab`.
+:ref:`51_icstr_tab`,
+:ref:`51_icstr_mdd`.
 
 
 :ref:`51_icstr_alld`,
@@ -500,6 +501,7 @@ Available constraints
 :ref:`51_scstr_icha`,
 :ref:`51_scstr_max`,
 :ref:`51_scstr_mem`,
+:ref:`51_scstr_nme`,
 :ref:`51_scstr_min`,
 :ref:`51_scstr_sum`.
 

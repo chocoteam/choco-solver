@@ -24,32 +24,48 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.search.bind;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import solver.Solver;
 
 /**
- * A search monitor logger which prints solution during the search.
- * <p/>
+ * Define a search binder to configure or override the search strategies.
+ * When no search strategies is defined, the set of all variables
+ * (treated by type: IntVar, BoolVar, SetVar, etc) is considered.
+ * When one (or more) search strategies is already defined, the decision
+ * variables are extracted and considered as an input.
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 09/05/11
+ * @author Charles Prud'homme, Jean-Guillaume Fages
+ * @version choco
+ * @since 23/10/14
  */
-public final class LogSolutions implements IMonitorSolution {
+public interface ISearchBinder {
 
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
-    final IMessage message;
+    /**
+     * Configure or override the search strategies of the given solver.
+     *
+     * @param solver a solver
+     */
+    void configureSearch(Solver solver);
 
-    public LogSolutions(IMessage message) {
-        this.message = message;
-    }
-
-    @Override
-    public void onSolution() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(message.print());
+    /**
+     * Configure (or override) the search strategies of the given solvers.
+     *
+     * @param solvers a list of solver
+     */
+    void configureSearches(Solver[] solvers);/* {
+        for (int i = 0; i < solvers.length; i++) {
+            configureSearch(solvers, i);
         }
-    }
+    }*/
+
+
+    /**
+     * Configure (or override) the search strategies of the given solvers.
+     *
+     * @param solvers a list of solver
+     * @param sidx    index of the solver to configure
+     */
+    void configureSearch(Solver[] solvers, int sidx);
 }

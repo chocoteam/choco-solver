@@ -28,12 +28,11 @@
 
 package solver.constraints.set;
 
+import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.Propagator;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 import util.tools.ArrayUtils;
 
 /**
@@ -431,7 +430,37 @@ public class SetConstraintsFactory {
      * @param SET     a set variables representing possible values of INTEGER
      * @return a constraint ensuring that INTEGER belongs to SET
      */
-    public static Constraint member(IntVar INTEGER, SetVar SET) {
-		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER));
+    public static Constraint member(final IntVar INTEGER, final SetVar SET) {
+		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER)){
+			@Override
+			public Constraint makeOpposite(){
+				return not_member(INTEGER,SET);
+			}
+		};
     }
+
+	/**
+	 * NotMember constraint over an IntVar and a SetVar
+	 * states that INTEGER is not included in SET
+	 *
+	 * @param INTEGER an integer variables which does not take its values in SET
+	 * @param SET     a set variables representing impossible values of INTEGER
+	 * @return a constraint ensuring that INTEGER does not belong to SET
+	 */
+	public static Constraint not_member(final IntVar INTEGER, final SetVar SET) {
+		IntVar integer = INTEGER;
+		if(!INTEGER.hasEnumeratedDomain()){
+			Solver s = INTEGER.getSolver();
+			integer = VF.enumerated("enumViewOf("+INTEGER.getName()+")",INTEGER.getLB(),INTEGER.getUB(),s);
+			s.post(ICF.arithm(integer,"=",INTEGER));
+		}
+		return new Constraint("SetNotMember",
+				new PropNotMemberIntSet(integer,SET),
+				new PropNotMemberSetInt(integer,SET)){
+			@Override
+			public Constraint makeOpposite(){
+				return member(INTEGER,SET);
+			}
+		};
+	}
 }

@@ -26,7 +26,6 @@
  */
 package samples.real;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -58,7 +57,7 @@ public class SantaClaude extends AbstractProblem {
     IntVar total_cost;
     RealVar average;
 
-	@Override
+    @Override
     public void createSolver() {
         solver = new Solver("Santa Claude");
     }
@@ -86,12 +85,12 @@ public class SantaClaude extends AbstractProblem {
 
         StringBuilder funBuilder = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {
-			funBuilder.append("+{").append(i).append('}');
+            funBuilder.append("+{").append(i).append('}');
         }
-		funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
+        funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
         RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
-		String function = funBuilder.toString();
+        String function = funBuilder.toString();
 
         solver.post(new RealConstraint(function, all_vars));
     }
@@ -106,15 +105,13 @@ public class SantaClaude extends AbstractProblem {
         solver.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
-                if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
-                    LoggerFactory.getLogger("solver").info("*******************");
-                    for (int i = 0; i < n_kids; i++) {
-                        LoggerFactory.getLogger("solver").info("Kids #{} has received the gift #{} at a cost of {} euros",
-                                new Object[]{i, kid_gift[i].getValue(), kid_price[i].getValue()});
-                    }
-                    LoggerFactory.getLogger("solver").info("Total cost: {} euros", total_cost.getValue());
-                    LoggerFactory.getLogger("solver").info("Average: [{},{}] euros", average.getLB(), average.getUB());
+                System.out.println("*******************");
+                for (int i = 0; i < n_kids; i++) {
+                    System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
+                            i, kid_gift[i].getValue(), kid_price[i].getValue()));
                 }
+                System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
+                System.out.println(String.format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
             }
         });
         solver.findAllSolutions();
@@ -122,7 +119,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-		solver.getIbex().release();
+        solver.getIbex().release();
     }
 
     public static void main(String[] args) {

@@ -110,7 +110,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         this.split = (int) Math.pow(2, split);
         this.searchSpaceSize = solver.getEnvironment().makeFloat();
         random = new Random(seed);
-        decisionPool = new PoolManager<FastDecision>();
+        decisionPool = new PoolManager<>();
         this.nodeImpact = nodeImpact;
         if (!initOnly) solver.plugMonitor(this);
     }

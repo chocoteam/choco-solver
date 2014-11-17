@@ -29,10 +29,16 @@ package solver.constraints.nary;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.constraints.SatFactory;
+import solver.exception.ContradictionException;
+import solver.search.strategy.ISF;
 import solver.variables.BoolVar;
+import solver.variables.IntVar;
 import solver.variables.VF;
+import util.ESat;
 
 /**
  * <br/>
@@ -149,4 +155,51 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
+
+    @Test(groups = "1s")
+    public void test10() {
+        Solver solver = new Solver();
+        BoolVar b1;
+        b1 = VF.bool("b1", solver);
+        SatFactory.addTrue(b1);
+        //        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(b1.getBooleanValue(), ESat.TRUE);
+    }
+
+    @Test(groups = "1s")
+    public void test11() {
+        Solver solver = new Solver();
+        BoolVar b1;
+        b1 = VF.bool("b1", solver);
+        SatFactory.addFalse(b1);
+        //        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(b1.getBooleanValue(), ESat.FALSE);
+    }
+
+    @Test(groups = "1s")
+    public void testAlexLoboda() throws ContradictionException {
+        Solver solver = new Solver();
+        // VARS
+        IntVar var = VF.enumerated("var", new int[]{0, 2}, solver);
+        BoolVar eq2 = VF.bool("eq2", solver);
+        BoolVar bvar = VF.bool("already", solver);
+        BoolVar bvar2 = VF.bool("bvar2", solver);
+        BoolVar cond = VF.bool("cond", solver);
+        // CSTRS
+        SatFactory.addFalse(bvar);
+        ICF.arithm(var, "=", 2).reifyWith(eq2);
+        SatFactory.addBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
+        SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
+        SatFactory.addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
+        // SEARCH
+        solver.set(ISF.lexico_LB(var));
+
+        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, var);
+        Assert.assertEquals(var.getValue(), 2);
+
+    }
 }

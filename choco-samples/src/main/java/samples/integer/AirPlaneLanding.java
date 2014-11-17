@@ -29,7 +29,6 @@ package samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -139,7 +138,7 @@ public class AirPlaneLanding extends AbstractProblem {
             tardiness[i] = Max.var(ZERO, VariableFactory.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
-        List<BoolVar> booleans = new ArrayList<BoolVar>();
+        List<BoolVar> booleans = new ArrayList<>();
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -148,8 +147,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                Constraint cr = LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
-                solver.post(cr);
+                LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
             }
         }
 
@@ -159,7 +157,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
         // build cost array
         costLAT = new int[2 * n];
-        maxCost = new TObjectIntHashMap<IntVar>();
+        maxCost = new TObjectIntHashMap<>();
         for (int i = 0; i < n; i++) {
             costLAT[i] = data[i][PCBT];
             costLAT[n + i] = data[i][PCAT];
@@ -205,7 +203,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Air plane landing({})", mData);
+        System.out.println(String.format("Air plane landing(%s)", mData));
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
@@ -216,7 +214,7 @@ public class AirPlaneLanding extends AbstractProblem {
                         append("]\n");
             }
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -27,8 +27,8 @@
 
 package choco.checker.fmk;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -37,14 +37,22 @@ import solver.variables.Variable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
+
+import static choco.checker.fmk.Domain.*;
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+import static org.testng.Assert.fail;
+import static solver.Solver.writeInFile;
+import static solver.variables.SetVar.END;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme
  * @since 01/13
  */
 public class Correctness {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static final int INT = 0;
     public static final int BOOL = 1;
@@ -64,13 +72,13 @@ public class Correctness {
                     for (int i = 0; i < nbVar; i++) {
                         switch (types[i]) {
                             case BOOL:
-                                domains[i] = Domain.buildBoolDomain(r);
+                                domains[i] = buildBoolDomain(r);
                                 break;
                             case INT:
-                                domains[i] = Domain.buildIntDomain(lowerB, ds, r, densities[ide], homogeneous[h]);
+                                domains[i] = buildIntDomain(lowerB, ds, r, densities[ide], homogeneous[h]);
                                 break;
                             case SET:
-                                domains[i] = Domain.buildSetDomain(ds, r, densities[ide], homogeneous[h]);
+                                domains[i] = buildSetDomain(ds, r, densities[ide], homogeneous[h]);
                                 break;
                             default:
                                 throw new UnsupportedOperationException();
@@ -85,7 +93,7 @@ public class Correctness {
                             for (int v : values) {
                                 loop++;
                                 Domain[] _domains = new Domain[nbVar];
-                                System.arraycopy(domains, 0, _domains, 0, nbVar);
+                                arraycopy(domains, 0, _domains, 0, nbVar);
                                 _domains[d] = new Domain(new int[]{v});
                                 checkNoSol(modeler, rvars, _domains, parameters, ref, new Object[]{ds, ide, h, rvars[d], v, loop, seed});
                             }
@@ -97,10 +105,10 @@ public class Correctness {
                             for (int v : rems) {
                                 loop++;
                                 int[] newKer = new int[oldKer.length + 1];
-                                System.arraycopy(oldKer, 0, newKer, 0, oldKer.length);
+                                arraycopy(oldKer, 0, newKer, 0, oldKer.length);
                                 newKer[oldKer.length] = v;
                                 Domain[] _domains = new Domain[nbVar];
-                                System.arraycopy(domains, 0, _domains, 0, nbVar);
+                                arraycopy(domains, 0, _domains, 0, nbVar);
                                 _domains[d] = new Domain(oldEnv, newKer);
                                 checkNoSol(modeler, rvars, _domains, parameters, ref, new Object[]{ds, ide, h, rvars[d], v, loop, seed});
                             }
@@ -116,7 +124,7 @@ public class Correctness {
                                     }
                                 }
                                 Domain[] _domains = new Domain[nbVar];
-                                System.arraycopy(domains, 0, _domains, 0, nbVar);
+                                arraycopy(domains, 0, _domains, 0, nbVar);
                                 _domains[d] = new Domain(newEnv, oldKer);
                                 checkNoSol(modeler, rvars, _domains, parameters, ref, new Object[]{ds, ide, h, rvars[d], v, loop, seed});
                             }
@@ -136,19 +144,19 @@ public class Correctness {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
+            LOGGER.info("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
             try {
-                Solver.writeInFile(ref, f);
+                writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            LoggerFactory.getLogger("test").error(e.getMessage());
-            LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
-            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
-            Assert.fail();
+            LOGGER.error(e.getMessage());
+            LOGGER.error("REF:\n{}\n", ref);
+            LOGGER.error("{}", f.getAbsolutePath());
+            fail();
         }
         return ref;
     }
@@ -158,26 +166,26 @@ public class Correctness {
         Solver test = m.model(nbVar, rvars, _domains, parameters);
         try {
             if (test.findSolution()) {
-                LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                         logObjects);
-                LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+                LOGGER.error("REF:\n{}\n", ref);
                 ref.getEnvironment().worldPop();
-                LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
-                Assert.fail("one solution found");
+                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                fail("one solution found");
             }
         } catch (Exception e) {
-            LoggerFactory.getLogger("test").error(e.getMessage());
-            LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
+            LOGGER.error(e.getMessage());
+            LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                     logObjects);
-            LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+            LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
             File f = new File("SOLVER_ERROR.ser");
             try {
-                Solver.writeInFile(ref, f);
+                writeInFile(ref, f);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
-            Assert.fail();
+            LOGGER.error("{}", f.getAbsolutePath());
+            fail();
         }
     }
 
@@ -191,7 +199,7 @@ public class Correctness {
                 _values[k++] = i;
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -203,14 +211,14 @@ public class Correctness {
                 _values[k++] = i;
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
 
     ////////////////////////////////////////////////////////////////////////
     private static int[] getForcedElements(SetVar v, int[] d) {
         int[] _values = new int[v.getKernelSize()];
         int k = 0;
-        for (int j = v.getKernelFirst(); j!=SetVar.END; j = v.getKernelNext()) {
+        for (int j = v.getKernelFirst(); j != END; j = v.getKernelNext()) {
             boolean newEl = true;
             for (int i : d) {
                 if (i == j) {
@@ -222,7 +230,7 @@ public class Correctness {
                 _values[k++] = j;
             }
         }
-        return Arrays.copyOfRange(_values, 0, k);
+        return copyOfRange(_values, 0, k);
     }
     ////////////////////////////////////////////////////////////////////////
 }

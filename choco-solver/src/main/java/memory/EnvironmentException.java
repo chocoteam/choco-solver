@@ -54,6 +54,6 @@ public class EnvironmentException extends RuntimeException {
      */
     public EnvironmentException(String message) {
 //		super(message);
-        LoggerFactory.getLogger("solver").error(message);
+        LoggerFactory.getLogger(IEnvironment.class).error(message);
     }
 }

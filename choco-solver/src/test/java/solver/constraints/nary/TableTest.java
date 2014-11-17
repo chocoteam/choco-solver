@@ -33,6 +33,7 @@
  */
 package solver.constraints.nary;
 
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
@@ -40,12 +41,16 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.extension.TupleValidator;
 import solver.constraints.extension.Tuples;
 import solver.constraints.extension.TuplesFactory;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;
 import solver.variables.VF;
 import solver.variables.VariableFactory;
+import util.objects.graphs.MultivaluedDecisionDiagram;
+
+import java.util.Random;
 
 public class TableTest {
 
@@ -154,11 +159,11 @@ public class TableTest {
         solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
         Tuples tuples = new Tuples(true);
         tuples.add(1, 0);
-        tuples.add(2 , 1);
-        tuples.add(3 , 1);
-        tuples.add(4 , 1);
-        tuples.add(5 , 1);
-        tuples.add(6 , 1);
+        tuples.add(2, 1);
+        tuples.add(3, 1);
+        tuples.add(4, 1);
+        tuples.add(5, 1);
+        tuples.add(6, 1);
         tuples.add(10, 1);
         tuples.add(45, 1);
         tuples.add(57, 1);
@@ -190,14 +195,75 @@ public class TableTest {
         test("AC2001");
         test("FC");
     }
-	@Test(groups = "1s")
-	public static void testThierry() {
-		Solver solver = new Solver();
-		IntVar[] vars = VF.enumeratedArray("vars", 10, 0,100, solver);
-		Tuples t = new Tuples(false);
-		t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-		solver.post(ICF.table(vars, t, "GAC3rm"));
-		solver.findSolution();
-	}
+
+    @Test(groups = "1s")
+    public static void testThierry() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        solver.post(ICF.table(vars, t, "GAC3rm"));
+        solver.findSolution();
+    }
+
+    @Test(groups = "1s")
+    public void testMDD1() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+        Tuples tuples = new Tuples();
+        tuples.add(0, 0, 0);
+        tuples.add(1, 1, 1);
+        solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testMDD2() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("X", 3, 0, 2, solver);
+        Tuples tuples = new Tuples();
+        tuples.add(0, 1, 2);
+        tuples.add(2, 1, 0);
+        solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+    }
+
+
+    @Test(groups = "1m")
+    public void testRandom() {
+        int[][] params = {{3, 1, 3}, {5, 2, 9}, {5, -2, 3}, {10, 2, 4}};
+        final Random rnd = new Random();
+        for (int p = 0; p < params.length; p++) {
+            for (long seed = 0; seed < 10; seed++) {
+                Solver solver = new Solver();
+                IntVar[] vars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
+                rnd.setSeed(seed);
+                Tuples tuples = TuplesFactory.generateTuples(new TupleValidator() {
+                    @Override
+                    public boolean valid(int... values) {
+                        return rnd.nextBoolean();
+                    }
+                }, true, vars);
+                solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+                solver.set(ISF.random_value(vars));
+                long nbs = solver.findAllSolutions();
+                long nbn = solver.getMeasures().getNodeCount();
+                LoggerFactory.getLogger("test").info("%s\n", solver.getMeasures().toOneLineString());
+                for (int a = 0; a < ALGOS.length; a++) {
+                    for (int s = 0; s < 1; s++) {
+                        Solver tsolver = new Solver(ALGOS[a]);
+                        IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
+                        tsolver.post(ICF.table(tvars, tuples, ALGOS[a]));
+                        tsolver.set(ISF.random_value(tvars));
+                        Assert.assertEquals(tsolver.findAllSolutions(), nbs);
+                        if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                        LoggerFactory.getLogger("test").info("%s\n", tsolver.getMeasures().toOneLineString());
+                    }
+                }
+            }
+        }
+    }
 
 }

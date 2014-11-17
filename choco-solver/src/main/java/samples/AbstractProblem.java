@@ -30,11 +30,13 @@ package samples;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.trace.Chatterbox;
+
+import static java.lang.Runtime.getRuntime;
+import static samples.AbstractProblem.Level.QUIET;
+import static samples.AbstractProblem.Level.SILENT;
 
 /**
  * <br/>
@@ -119,7 +121,6 @@ public abstract class AbstractProblem {
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            final Logger log = LoggerFactory.getLogger("bench");
             this.printDescription();
             this.createSolver();
             this.buildModel();
@@ -127,34 +128,34 @@ public abstract class AbstractProblem {
 
             overrideExplanation();
 
-            if (level.getLevel() > Level.SILENT.getLevel()) {
-                SearchMonitorFactory.log(solver,
-                        level.getLevel() > Level.VERBOSE.getLevel(),
-                        level.getLevel() > Level.SOLUTION.getLevel());
+            if (level.getLevel() > SILENT.getLevel()) {
+                Chatterbox.showStatistics(solver);
+                if (level.getLevel() > Level.VERBOSE.getLevel()) Chatterbox.showSolutions(solver);
+                if (level.getLevel() > Level.SOLUTION.getLevel()) Chatterbox.showDecisions(solver);
             }
 
             Thread statOnKill = new Thread() {
                 public void run() {
                     if (userInterruption()) {
-                        if (level.getLevel() > Level.SILENT.getLevel()) {
-                            log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                        if (level.getLevel() > SILENT.getLevel()) {
+                            System.out.println(String.format("[STATISTICS {%s]", solver.getMeasures().toOneLineString()));
                         }
-                        if (level.getLevel() > Level.SILENT.getLevel()) {
-                            log.info("Unexpected resolution interruption!");
+                        if (level.getLevel() > SILENT.getLevel()) {
+                            System.out.println("Unexpected resolution interruption!");
                         }
                     }
 
                 }
             };
 
-            Runtime.getRuntime().addShutdownHook(statOnKill);
+            getRuntime().addShutdownHook(statOnKill);
 
             this.solve();
-            if (level.getLevel() > Level.QUIET.getLevel()) {
+            if (level.getLevel() > QUIET.getLevel()) {
                 prettyOut();
             }
             userInterruption = false;
-            Runtime.getRuntime().removeShutdownHook(statOnKill);
+            getRuntime().removeShutdownHook(statOnKill);
         }
     }
 

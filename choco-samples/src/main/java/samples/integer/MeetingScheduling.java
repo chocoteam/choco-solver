@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -149,7 +148,7 @@ public class MeetingScheduling extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Meeting Scheduling Problem ({})", mData);
+        System.out.println(String.format("Meeting Scheduling Problem (%s)", mData));
 
         StringBuilder st = new StringBuilder();
         if (solver.isFeasible() != ESat.TRUE) {
@@ -159,7 +158,7 @@ public class MeetingScheduling extends AbstractProblem {
                 st.append("Meeting ").append(i).append(" scheduled at time ").append(meetingTime[i].getValue()).append("\n");
             }
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -161,7 +161,7 @@ public class PropagationTrigger implements Serializable {
 
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
         if (Configuration.PRINT_PROPAGATION) {
-            LoggerFactory.getLogger("solver").info("[A] {}", toPropagate);
+            LoggerFactory.getLogger(IPropagationEngine.class).debug("[A] {}", toPropagate);
         }
         if (toPropagate.isStateLess()) {
             toPropagate.setActive();

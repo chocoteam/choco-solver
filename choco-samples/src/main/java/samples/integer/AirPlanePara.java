@@ -28,7 +28,6 @@
 package samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import org.slf4j.LoggerFactory;
 import samples.MasterProblem;
 import samples.ParallelizedProblem;
 import solver.ResolutionPolicy;
@@ -146,8 +145,7 @@ public class AirPlanePara extends ParallelizedProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                Constraint cr = LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
-                solver.post(cr);
+                LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
             }
         }
 
@@ -209,8 +207,7 @@ public class AirPlanePara extends ParallelizedProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Air plane landing({})", mData);
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Air plane landing (%s)\n", mData));
         if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
@@ -220,7 +217,7 @@ public class AirPlanePara extends ParallelizedProblem {
                         append("]\n");
             }
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

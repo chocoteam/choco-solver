@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -94,13 +93,13 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("donald + gerald = robert ");
+        System.out.println("donald + gerald = robert ");
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < letters.length; i++) {
             st.append(String.format("%s : %d\n\t", letters[i].getName(), letters[i].getValue()));
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

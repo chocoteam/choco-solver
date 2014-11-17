@@ -28,7 +28,6 @@
 package choco.checker.consistency;
 
 import org.testng.annotations.Factory;
-import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +44,8 @@ public class TestConsistencyFactory {
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
-        for (SearchLoops sl : SearchLoops.values()) {
 //            System.out.println("CONSISTENCY : " + sl.name());
-            lresult.add(new TestConsistency(sl));
-        }
+        lresult.add(new TestConsistency());
         return lresult.toArray();
     }
 

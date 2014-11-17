@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -118,7 +117,7 @@ public class Nonogram extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Nonogram -- {}", data.name());
+        System.out.println(String.format("Nonogram -- %s", data.name()));
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {
             st.append("\t");
@@ -127,7 +126,7 @@ public class Nonogram extends AbstractProblem {
             }
             st.append("\n");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
         if (frame) {
             JFrame frame = new JFrame();
             frame.setTitle("NonoGram");

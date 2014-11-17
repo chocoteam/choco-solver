@@ -21,47 +21,55 @@ REPO_URL="http://www.emn.fr/z-info/choco-repo/mvn/repository/choco"
 
 if [ $1 == "--next" ]; then
     VERSION=$(guess $2)
+    NEXTMIL="no"
 else
     VERSION=$1
+    NEXTMIL="yes"
 fi
 echo "New version is ${VERSION}"
 #Update the poms
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 
-DAT=`LANG=en_US.utf8 date +"%Y-%m"`
-YEAR=`LANG=en_US.utf8 date +"%Y"`
-d=`LANG=en_US.utf8 date +"%d %b %Y"`
+if test "${NEXTMIL}" = "yes"
+then
+    DAT=`LANG=en_US.utf8 date +"%Y-%m"`
+    YEAR=`LANG=en_US.utf8 date +"%Y"`
+    d=`LANG=en_US.utf8 date +"%d %b %Y"`
 
-## The README.md
-# Update of the version number for maven usage
+    ## The README.md
+    # Update of the version number for maven usage
 
-sedInPlace "s%Current stable version is .*.%Current stable version is $VERSION ($d).%"  README.md
-sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
-sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD licence \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
-snapshot=0
-echo $VERSION | grep "\-SNAPSHOT$" > /dev/null && snapshot=1
+    sedInPlace "s%Current stable version is .*.%Current stable version is $VERSION ($d).%"  README.md
+    sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/%" README.md
+    sedInPlace "s%The name of the jar file terms the packaging: .*%The name of the jar file terms the packaging: \`choco\-solver\-$VERSION\-with\-dependencies\.jar\` or \`choco\-solver\-$VERSION.jar\`.%" README.md
+    sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
+    sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD licence \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
 
-if [ $snapshot = 0 ]; then
-    # Update the bundle and the apidoc location
-    sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/choco\-solver\-$VERSION\-jar\-with\-dependencies\.jar%" README.md
-else
-    # Update the bundle and the apidoc location
-    sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/choco\-solver\-$VERSION\-jar\-with\-dependencies\.jar%" README.md
+    ## The configuration file
+    sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  choco-solver/src/main/resources/configuration.properties
+
+    ## The doc
+    sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  docs/source/3_solving.rst
+
+    ## The CHANGES.md
+    # replace the 'NEXT MILESTONE' version by VERSION
+    REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"
+    sedInPlace "${REGEX}" CHANGES.md
+    # add a new empty line in CHANGES.md
+
+    sedInPlace '5 i\
+    \
+    NEXT MILESTONE\
+    -------------------\
+    \
+    ' CHANGES.md
+
+    sedInPlace "s%copyright = .*%copyright = u'${YEAR}, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\\\'homme'%" ./docs/source/conf.py
+    sedInPlace "s%release = .*%release = '${VERSION}'%" ./docs/source/conf.py
+
+    cd ./docs/
+    make latexpdf
+    make latexpdf
+    make latexpdf
+
 fi
-
-
-## The configuration file
-sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  choco-solver/src/main/resources/configuration.properties
-
-## The CHANGES.md
-# replace the 'NEXT MILESTONE' version by VERSION
-REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"
-sedInPlace "${REGEX}" CHANGES.md
-# add a new empty line in CHANGES.md
-sedInPlace '5 i\
-\
-NEXT MILESTONE\
--------------------\
-\
-' CHANGES.md
-

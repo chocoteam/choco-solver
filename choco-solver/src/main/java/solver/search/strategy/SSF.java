@@ -24,53 +24,12 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.Configuration;
-import solver.Solver;
+package solver.search.strategy;
 
 /**
- * Basic search monitor logger, which prints welcome message at the beginning od the search and
- * search statistics at the end of the search.
- * <p/>
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 09/05/11
+ * @author Jean-Guillaume Fages
  */
-public final class LogBasic implements IMonitorInitialize, IMonitorClose {
-
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
-
-
-    final Solver solver;
-
-    public LogBasic(Solver solver) {
-        this.solver = solver;
-    }
-
-    @Override
-    public void beforeInitialize() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(Configuration.WELCOME_TITLE);
-            LOGGER.info(Configuration.CALLER, solver.getName());
-        }
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeClose() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(solver.getMeasures().toString());
-        }
-    }
-
-    @Override
-    public void afterClose() {
-    }
+public class SSF extends SetStrategyFactory{
+	// SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
 }

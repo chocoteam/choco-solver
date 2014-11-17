@@ -26,7 +26,6 @@
  */
 package samples.real;
 
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.real.Ibex;
@@ -60,7 +59,7 @@ public class CycloHexan extends AbstractProblem {
                 " z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n");
         st.append("This example comes from the Elisa project (LINA) examples. \n");
 
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     @Override
@@ -104,8 +103,8 @@ public class CycloHexan extends AbstractProblem {
 				for (int i = 0; i < vars.length; i++) {
 					st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
 				}
-				LoggerFactory.getLogger("bench").info("CycloHexan");
-				LoggerFactory.getLogger("bench").info(st.toString());
+				System.out.println("CycloHexan");
+				System.out.println(st.toString());
 			}
 		});
         solver.findAllSolutions();

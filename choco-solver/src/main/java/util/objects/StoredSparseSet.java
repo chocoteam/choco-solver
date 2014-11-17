@@ -24,84 +24,74 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package util.objects;
 
-import solver.Solver;
+import memory.IEnvironment;
+import memory.IStateInt;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.Serializable;
 
 /**
- * A search monitor that trace the results in a CSV format file
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 06/09/12
+ * Implementation based on "Maintaining GAC on adhoc r-ary constraints", Cheng and Yap, CP12.
+ * <p/>
+ * <p/>
+ * Created by cprudhom on 04/11/14.
+ * Project: choco.
  */
-public class OutputCSV implements IMonitorClose {
+public class StoredSparseSet implements Serializable{
 
-    final Solver solver;
-    final String prefix;
-    final String fileName;
-
-    public OutputCSV(Solver solver, String prefix, String fileName) {
-        this.solver = solver;
-        this.prefix = prefix;
-        this.fileName = fileName;
-    }
+    int[] sparse;
+    int[] dense;
+    IStateInt members;
 
 
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
-        record(solver, prefix, fileName);
-    }
-
-
-    /**
-     * Record results
-     *
-     * @param solver
-     * @param prefix     String identifying the instance that has been solved
-     * @param outputFile absolute path of the CSV output file
-     */
-    public static void record(Solver solver, String prefix, String outputFile) {
-        String line = prefix + ";" + solver.getMeasures().toCSV() + "\n";
-        writeTextInto(line, outputFile);
+    public StoredSparseSet(IEnvironment environment) {
+        members = environment.makeInt(0);
+        sparse = new int[16];
+        dense = new int[16];
     }
 
     /**
-     * Add text at the end of file
+     * Return if a value is contained.
      *
-     * @param text
-     * @param file
+     * @param k the value to test
+     * @return true if `k` is contained, false otherwise
      */
-    public static void writeTextInto(String text, String file) {
-        try {
-            FileWriter out = new FileWriter(file, true);
-            out.write(text);
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public boolean contains(int k) {
+        if (k < sparse.length) {
+            int a = sparse[k];
+            return a < members.get() && dense[a] == k;
+        } else return false;
+    }
+
+    /**
+     * Add the value `k` to the set.
+     *
+     * @param k value to add
+     */
+    public void add(int k) {
+        ensureCapacity(k+1);
+        int a = sparse[k];
+        int b = members.get();
+        if (a >= b || dense[a] != k) {
+            sparse[k] = b;
+            dense[b] = k;
+            members.set(b + 1);
         }
     }
 
-    /**
-     * Empty file
-     *
-     * @param file
-     */
-    public static void clearFile(String file) {
-        try {
-            FileWriter out = new FileWriter(file, false);
-            out.write("");
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void ensureCapacity(int k) {
+        if (k > sparse.length) {
+            int[] tmp = sparse;
+            int nsize = Math.max(k+1, tmp.length * 3 / 2 + 1);
+            sparse = new int[nsize];
+            sparse = new int[nsize];
+            System.arraycopy(tmp, 0, sparse, 0, tmp.length);
+            tmp = dense;
+            dense = new int[nsize];
+            System.arraycopy(tmp, 0, dense, 0, tmp.length);
         }
+
     }
+
 }

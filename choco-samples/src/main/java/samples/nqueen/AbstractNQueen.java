@@ -78,6 +78,6 @@ public abstract class AbstractNQueen extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        LoggerFactory.getLogger("bench").info(st.toString());*/
+        System.out.println(st.toString());*/
     }
 }

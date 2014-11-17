@@ -27,7 +27,6 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -107,8 +106,7 @@ public class Langford extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Langford's number ({},{})", k, n);
-        StringBuilder st = new StringBuilder();
+        StringBuilder st = new StringBuilder(String.format("Langford's number (%s,%s)\n", k, n));
         if (solver.isFeasible() == ESat.TRUE) {
             int[] values = new int[k * n];
             for (int i = 0; i < k; i++) {
@@ -124,7 +122,7 @@ public class Langford extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

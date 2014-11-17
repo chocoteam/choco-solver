@@ -5,9 +5,9 @@
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>3.2.1</version>
+    <version>3.2.2</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
-    <url>http://www.emn.fr/z-info/choco-solver/</url>
+    <url>http://choco-solver.org/</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
