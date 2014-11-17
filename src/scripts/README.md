@@ -28,7 +28,13 @@ And update README.md with the correct versions of dependencies
 
     ./src/scripts/release.sh
 
-7. Then, everything is achieved by Travis. However, deployment and zip file (jar files, user guide, logback configuration file and javadoc) need to be done locally:
+
+7. Then, everything is achieved by Travis.
+Or, one can run the command by itself:
+
+    ./src/scripts/build.sh
+
+However, deployment and zip file (jar files, user guide, logback configuration file and javadoc) need to be done locally:
 
     ./src/scripts/package.sh X.Y.Z
 
