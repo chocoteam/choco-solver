@@ -430,7 +430,7 @@ public class SetConstraintsFactory {
      * @param SET     a set variables representing possible values of INTEGER
      * @return a constraint ensuring that INTEGER belongs to SET
      */
-    public static Constraint member(IntVar INTEGER, SetVar SET) {
+    public static Constraint member(final IntVar INTEGER, final SetVar SET) {
 		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER)){
 			@Override
 			public Constraint makeOpposite(){
@@ -447,7 +447,7 @@ public class SetConstraintsFactory {
 	 * @param SET     a set variables representing impossible values of INTEGER
 	 * @return a constraint ensuring that INTEGER does not belong to SET
 	 */
-	public static Constraint not_member(IntVar INTEGER, SetVar SET) {
+	public static Constraint not_member(final IntVar INTEGER, final SetVar SET) {
 		IntVar integer = INTEGER;
 		if(!INTEGER.hasEnumeratedDomain()){
 			Solver s = INTEGER.getSolver();

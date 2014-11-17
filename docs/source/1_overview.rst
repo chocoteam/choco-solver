@@ -123,8 +123,15 @@ Which jar to select ?
 
 We provide a zip file which contains the following files:
 
+choco-solver-|release|-with-dependencies.jar
+    An ready-to-use jar file including dependencies;
+    it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc.
+    In a few words, it enables modeling and solving CP problems.
+
 choco-solver-|release|.jar
-    An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
+    A jar file excluding all dependencies and configuration file;
+    Enable using choco-solver as a dependency of an application.
+    Otherwise, it provides the same code as the jar with dependencies.
 
 choco-solver-|release|-sources.jar
     The source of the core library.
@@ -136,7 +143,9 @@ apidocs-|release|.zip
     Javadoc of Choco-|release|
 
 logback.xml
-    The logback configuration file.
+    The logback configuration file; may be needed when choco-solver is used as a library.
+
+Please, refer to `README.md` for more details.
 
 Extensions
 ^^^^^^^^^^
@@ -156,11 +165,6 @@ Update the classpath
 
 Simply add the jar file to the classpath of your project (in a terminal or in your favorite IDE).
 
-.. parsed-literal::
-
-   java -cp .:choco-solver-|release|.jar my.project.Main
-
-
 As a Maven Dependency
 ---------------------
 
@@ -176,6 +180,8 @@ To declare Choco as a dependency of your project, simply update the ``pom.xml`` 
    </dependency>
 
 where ``X.Y.Z`` is replaced by |release|.
+Note that the artifact does not include any dependencies or `logback.xml`.
+Please, refer to `README.md` for the list of required dependencies.
 
 You need to add a new repository to the list of declared ones in the ``pom.xml`` of your project:
 
@@ -463,17 +469,16 @@ Choco |version| : changes
 =========================
 
 
-|release|
----------
+3.2.2
+-----
 
-- Fix #225: fix PropCostRegular, wrt to S.Demassey instructions.
-- Fix #229: create MasterSolver and SlaveSolver classes to deal with multi-thread resolution
-            + add external configuration of the search strategy through a binder
-- Fix #227: deal with initial propagation
-- fix #230: update release script
-- fix #231: correct addTrue in SatFactory
-- fix #234: improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly.
-- fix #233: remove java8 compliant code (temporary)
+- Add notmember(IntVar, SetVar) constraint (more efficient than not(member)) -- #240.
+- Create MasterSolver and SlaveSolver classes to deal with multi-thread resolution -- #229.
+- Add external configuration of the search strategy through a binder -- #229.
+- Improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly. -- #234.
 - Add a MDD-based propagator (ICF.mddc).
-- fix #235: refactor logging fmwk. Add Chatterbox class as a unique entry point for messaging. Logging still relies on SLF4J.
-- fix #236: bug in SatSolver
+- Refactor logging fmwk: add Chatterbox class as a unique entry point for messaging; Logging still relies on SLF4J. -- #235.
+
+Bug fixes: #225, #227, #231, #233, #236.
+
+

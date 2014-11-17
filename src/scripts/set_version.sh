@@ -40,9 +40,10 @@ then
     # Update of the version number for maven usage
 
     sedInPlace "s%Current stable version is .*.%Current stable version is $VERSION ($d).%"  README.md
+    sedInPlace "s%The name of the jar file terms the packaging: .*%The name of the jar file terms the packaging: `choco\-solver\-$VERSION\-with\-dependencies\.jar` or `choco\-solver\-$VERSION.jar`.%" README.md
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
     sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD licence \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
-    sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/choco\-solver\-$VERSION\-jar\-with\-dependencies\.jar%" README.md
+    sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/%" README.md
 
     ## The configuration file
     sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  choco-solver/src/main/resources/configuration.properties

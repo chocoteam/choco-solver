@@ -37,7 +37,37 @@ solver.findSolution();
 Chatterbox.printStatistics(solver);
 ```
 
-## Usage ##
+## Download and installation ##
+
+Requirements:
+* JDK 7+
+* maven 3+
+
+In the following, we distinguish two usages of Choco:
+
+- as a standalone application: the jar file includes all required dependencies and configuration file (that is, `logback.xml`),
+- as a library: the jar file excludes all dependencies and configuration file (that is, `logback.xml`).
+
+The name of the jar file terms the packaging: `choco-solver-3.2.1-with-dependencies.jar` or `choco-solver-3.2.1.jar`.
+
+The jar files can be downloaded from this URL:
+
+* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/3.2.1/
+
+### As a stand-alone application ###
+
+The jar file contains all required dependencies (including SLF4J, Logback and logback.xml).
+The next step is simply to add the jar file to your classpath of your application.
+Note that if your program depends on dependencies declared in the jar file,
+you should consider using choco as a library.
+
+### As a library ###
+
+The jar file does not contains any dependencies or Logback configuration file,
+as of being used as a dependency of another application.
+The next step is to add the jar file to your classpath of your application and add also add the required dependencies.
+
+
 ### Inside a maven project ###
 
 The maven artifact is available through a private repository
@@ -52,7 +82,7 @@ so you have first to edit your `pom.xml` to declare it:
 </repositories>
 ```
 
-Next, just declare the dependency:
+Next, just declare the following library dependency:
 
 ```xml
 <dependency>
@@ -62,19 +92,20 @@ Next, just declare the dependency:
 </dependency>
 ```
 
-### Inside a non-maven project ###
+### Dependencies ###
 
-The jar can be downloaded from this URL:
+The required dependencies for compilation are:
 
-* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/3.2.1/choco-solver-3.2.1.jar
+    jgrapht:jgrapht:jar:0.8.1
+    dk.brics.automaton:automaton:jar:1.11-8
+    args4j:args4j:jar:2.0.29
+    net.sf.trove4j:trove4j:jar:3.0.3
+    org.slf4j:slf4j-api:jar:1.7.7
 
-The file contains `choco-solver` artifacts and its dependencies.
+They are available on Maven Repository (http://mvnrepository.com/).
 
-## Building from sources ##
 
-Requirements:
-* JDK 8+
-* maven 3+
+### Building from sources ###
 
 The source of the released versions are directly available in the `Tag` section.
 You can also download them using github features.
