@@ -11,7 +11,7 @@
             <outputDirectory>/</outputDirectory>
             <scope>runtime</scope>
             <useProjectArtifact>true</useProjectArtifact>
-            <unpack>false</unpack>
+            <unpack>true</unpack>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/</outputDirectory>
@@ -20,7 +20,7 @@
                 <include>ch.qos.logback:*</include>
             </includes>
             <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
+            <unpack>true</unpack>
         </dependencySet>
     </dependencySets>
     <fileSets>
