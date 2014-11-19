@@ -24,20 +24,19 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store;
+package org.chocosolver.memory.trailing.trail;
 
-import memory.IStorage;
-import memory.copy.Rc#E#;
+import org.chocosolver.memory.trailing.Stored#E#;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/05/13
+ * @since 29/04/13
  */
-public interface IStored#E#Copy extends IStorage {
+public interface IStored#E#Trail extends ITrailStorage {
 
-    void add(Rc#E# rc);
+    void savePreviousState(Stored#E# v, #e# oldValue, int oldStamp);
 
-    void buildFakeHistory(Rc#E# v, #e# initValue, int olderStamp);
+    void buildFakeHistory(Stored#E# v, #e# initValue, int fromStamp);
 }
