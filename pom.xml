@@ -8,11 +8,30 @@
     <version>3.2.3-SNAPSHOT</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://choco-solver.org/</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
+    <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
+        It aims at describing real combinatorial problems in the form of Constraint Satisfaction Problems
+        and to solve them with Constraint Programming techniques.
+    </description>
+    <licenses>
+        <license>
+            <name>The BSD 3-Clause License</name>
+            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Charles Prud'homme</name>
+            <email>charles.prudhomme@mines-nantes.fr</email>
+            <organization>TASC, INRIA Rennes, LINA CNRS UMR 6241</organization>
+            <organizationUrl>http://www.emn.fr/z-info/ppc/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Jean-Guillaume Fages</name>
+            <email>jg.fages@cosling.com</email>
+            <organization>COSLING S.A.S.</organization>
+            <organizationUrl>http://www.cosling.com</organizationUrl>
+        </developer>
+    </developers>
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco3.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco3</url>
@@ -24,6 +43,11 @@
         <module>choco-solver</module>
         <module>choco-samples</module>
     </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
@@ -64,48 +88,9 @@
             <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>
-    <repositories>
-        <repository>
-            <id>central.repos</id>
-            <url>http://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>download.java.net.repos</id>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
-        <repository>
-            <id>choco.repo</id>
-            <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-
-    </pluginRepositories>
     <build>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <arguments>-DskipTests</arguments>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                    <!-- release.sh will perform the pushes -->
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -115,6 +100,39 @@
                     <target>1.7</target>
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
+                    <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
+                    <!--<quiet />-->
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
