@@ -44,6 +44,10 @@ if [ ${BRANCH} = "release" ]; then
     git push --tags ||quit "Unable to push the tag ${TAG}"
     git push origin master ||quit "Unable to push master"
 
+#    #Deploy the artifacts
+    echo "** Deploying the artifacts **"
+    mvn -q -P release clean javadoc:jar source:jar deploy ||quit "Unable to deploy"
+
     #Set the next development version
     echo "** Prepare develop for the next version **"
     git checkout develop ||quit "Unable to checkout develop"
@@ -54,12 +58,6 @@ if [ ${BRANCH} = "release" ]; then
     #Push changes on develop, with the tag
     git push origin develop ||quit "Unable to push to develop"
 
-    git push --all && git push --tags  || quit "Unable to push all and tags"
-
-#    NOT USED FOR THE MOMENT
-#    #Deploy the artifacts
-#    echo "** Deploying the artifacts **"
-#    ./bin/deploy.sh ||exit 1
 
     #Clean
     git push origin --delete release ||quit "Unable to delete release"
