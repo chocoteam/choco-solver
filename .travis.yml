@@ -4,9 +4,10 @@ jdk:
 before_script:
   - "export MAVEN_OPTS='-Xmx4096m -Xms1024 -Xss64m -server'"
 env:
-  - GROUP=1s,10s
-  - GROUP=1m,10m
-  - GROUP=30m
+  - GROUP=1s
+  - GROUP=10s
+  - GROUP=1m
+  - GROUP=10m
 script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
