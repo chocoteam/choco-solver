@@ -51,7 +51,7 @@ public class RealTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", enabled = false)
     public void test1() {
 
         Ibex ibex = new Ibex();
@@ -75,7 +75,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", enabled = false)
     public void test2() {
         Ibex ibex = new Ibex();
         ibex.add_contractor(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
@@ -111,7 +111,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", enabled = false)
     public void test3() {
         Ibex ibex = new Ibex();
         ibex.add_contractor(2, "{0}^2+{1}^2<=1",Ibex.COMPO);
@@ -137,7 +137,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", enabled = false)
     public void test4() {
         Solver solver = new Solver();
 
