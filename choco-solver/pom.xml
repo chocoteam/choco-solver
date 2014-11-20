@@ -105,7 +105,7 @@
                         <property>
                             <name>listener</name>
                             <value>
-                                util.CustomListener
+                                org.chocosolver.util.CustomListener
                             </value>
                         </property>
                     </properties>
