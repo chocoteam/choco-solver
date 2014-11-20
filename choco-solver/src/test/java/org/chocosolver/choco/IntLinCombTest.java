@@ -218,7 +218,7 @@ public class IntLinCombTest {
         PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
         int offSet = 2;// ZERO and ONE constants
-        ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
+        ((IntVar) vars[offSet]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1 + offSet]).instantiateTo(-1, Cause.Null);
         sum.propagate();
 //        sum.getSearchLoop().timeStamp++;
