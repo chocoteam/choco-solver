@@ -46,7 +46,7 @@ if [ ${BRANCH} = "release" ]; then
 
 #    #Deploy the artifacts
     echo "** Deploying the artifacts **"
-    mvn -q -P release clean javadoc:jar source:jar deploy ||quit "Unable to deploy"
+    mvn -q -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
 
     #Set the next development version
     echo "** Prepare develop for the next version **"
