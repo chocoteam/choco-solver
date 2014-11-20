@@ -144,7 +144,7 @@ public class Correctness {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LOGGER.info("Pas de solution pour ce probleme => rien a tester !");
+            LOGGER.debug("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
