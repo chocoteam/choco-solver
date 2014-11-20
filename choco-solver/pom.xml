@@ -30,7 +30,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>choco</artifactId>
-        <groupId>choco</groupId>
+        <groupId>org.choco-solver</groupId>
         <version>3.2.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>

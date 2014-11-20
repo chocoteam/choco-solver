@@ -2,7 +2,7 @@ language: java
 jdk:
 - oraclejdk8
 before_script:
-  - "export MAVEN_OPTS='-Xmx4096m -Xms1024 -Xss64m -server'"
+  - export MAVEN_OPTS="-Xmx4096m -Xms1024 -Xss64m -server"
 env:
   - GROUP=1s
   - GROUP=10s
