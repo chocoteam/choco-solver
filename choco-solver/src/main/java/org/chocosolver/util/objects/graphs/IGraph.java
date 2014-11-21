@@ -27,6 +27,8 @@
 
 package org.chocosolver.util.objects.graphs;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -117,4 +119,6 @@ public interface IGraph extends Serializable {
      * @return true if and only if <code>this</code> is a directed graph
      */
     boolean isDirected();
+
+    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
 }

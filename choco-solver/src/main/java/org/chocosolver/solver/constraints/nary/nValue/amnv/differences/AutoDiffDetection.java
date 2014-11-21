@@ -33,7 +33,10 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.differences;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -41,37 +44,49 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class AutoDiffDetection implements D {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	public static boolean DYNAMIC_ADDITIONS = false;
+    public static boolean DYNAMIC_ADDITIONS = false;
 
-	protected Variable[] scope;
+    protected Variable[] scope;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public AutoDiffDetection(Variable[] scope){
-		this.scope = scope;
-	}
+    public AutoDiffDetection(Variable[] scope) {
+        this.scope = scope;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public boolean mustBeDifferent(int i1, int i2) {
-		// automatic detection of binary disequalities and alldifferent constraints
-		if(DYNAMIC_ADDITIONS || scope[i1].getSolver().getEnvironment().getWorldIndex()<=1) {
-			for (Propagator p : scope[i1].getPropagators())
-				if (p.isActive())
-					if (p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))
-						for (Variable v : p.getVars())
-							if (v == scope[i2])
-								return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean mustBeDifferent(int i1, int i2) {
+        // automatic detection of binary disequalities and alldifferent constraints
+        if (DYNAMIC_ADDITIONS || scope[i1].getSolver().getEnvironment().getWorldIndex() <= 1) {
+            for (Propagator p : scope[i1].getPropagators())
+                if (p.isActive())
+                    if (p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))
+                        for (Variable v : p.getVars())
+                            if (v == scope[i2])
+                                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public D duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        int size = this.scope.length;
+        IntVar[] aVars = new IntVar[size];
+        for (int i = 0; i < size; i++) {
+            this.scope[i].duplicate(solver, identitymap);
+            aVars[i] = (IntVar) identitymap.get(this.scope[i]);
+        }
+        return new AutoDiffDetection(aVars);
+    }
+
 }

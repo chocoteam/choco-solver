@@ -26,6 +26,8 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.graph.G;
@@ -42,73 +44,100 @@ import org.chocosolver.util.tools.ArrayUtils;
  * Propagator for the atMostNValues constraint
  * The number of distinct values in the set of variables vars is at most equal to nValues
  *
- * @since 01/01/2014
  * @author Jean-Guillaume Fages
+ * @since 01/01/2014
  */
 public class PropAMNV extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected G graph;
-	protected F heur;
-	protected R[] rules;
+    protected G graph;
+    protected F heur;
+    protected R[] rules;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Creates a propagator for the atMostNValues constraint
-	 * The number of distinct values in X is at most equal to N
-	 */
-	public PropAMNV(IntVar[] X, IntVar N, G graph, F heur, R[] rules){
-		super(ArrayUtils.append(X, new IntVar[]{N}), PropagatorPriority.CUBIC, true);
-		this.graph = graph;
-		this.heur  = heur;
-		this.rules = rules;
-		graph.build();
-	}
+    /**
+     * Creates a propagator for the atMostNValues constraint
+     * The number of distinct values in X is at most equal to N
+     */
+    public PropAMNV(IntVar[] X, IntVar N, G graph, F heur, R[] rules) {
+        super(ArrayUtils.append(X, new IntVar[]{N}), PropagatorPriority.CUBIC, true);
+        this.graph = graph;
+        this.heur = heur;
+        this.rules = rules;
+        graph.build();
+    }
 
-	//***********************************************************************************
-	// ALGORITHMS
-	//***********************************************************************************
+    //***********************************************************************************
+    // ALGORITHMS
+    //***********************************************************************************
 
-	@Override
-	protected int getPropagationConditions(int i) {
-		return IntEventType.all();
-	}
+    @Override
+    protected int getPropagationConditions(int i) {
+        return IntEventType.all();
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if(PropagatorEventType.isFullPropagation(evtmask)) {
-			graph.update();
-		}
-		heur.prepare();
-		do{
-			heur.computeMIS();
-			for(R rule:rules){
-				rule.filter(vars,graph,heur,aCause);
-			}
-		}while(heur.hasNextMIS());
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
+            graph.update();
+        }
+        heur.prepare();
+        do {
+            heur.computeMIS();
+            for (R rule : rules) {
+                rule.filter(vars, graph, heur, aCause);
+            }
+        } while (heur.hasNextMIS());
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp<vars.length-1){
-			graph.update(idxVarInProp);
-		}
-		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if (idxVarInProp < vars.length - 1) {
+            graph.update(idxVarInProp);
+        }
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public ESat isEntailed() {
-		// this is only a redundant propagator (solution checking uses the default NValue propagator)
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        // this is only a redundant propagator (solution checking uses the default NValue propagator)
+        return ESat.TRUE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.vars.length - 1;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            this.vars[size].duplicate(solver, identitymap);
+            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
+
+            // First duplicate graph
+            graph.duplicate(solver, identitymap);
+            G g = (G) identitymap.get(graph);
+            // Then the heuristic
+            heur.duplicate(solver, identitymap);
+            F h = (F) identitymap.get(heur);
+            // And the rules
+            R[] nrules = new R[rules.length];
+            for (int i = 0; i < nrules.length; i++) {
+                nrules[i] = rules[i].duplicate(solver);
+            }
+            identitymap.put(this, new PropAMNV(aVars, aVar, g, h, nrules));
+        }
+    }
 }

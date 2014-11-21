@@ -27,6 +27,8 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
@@ -35,82 +37,93 @@ import java.util.Random;
 /**
  * Min Degree + Random k heuristic
  *
- * @since 01/01/2014
  * @author Jean-Guillaume Fages
+ * @since 01/01/2014
  */
-public class MDRk extends MD{
+public class MDRk extends MD {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected int k, iter;
-	protected Random rd;
+    protected int k, iter;
+    protected Random rd;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
-	 * @param graph
-	 * @param k number of random iterations
-	 */
-	public MDRk(UndirectedGraph graph, int k){
-		super(graph);
-		this.k=k;
-		this.rd = new Random(0);
-	}
+    /**
+     * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
+     *
+     * @param graph the grah
+     * @param k     number of random iterations
+     */
+    public MDRk(UndirectedGraph graph, int k) {
+        super(graph);
+        this.k = k;
+        this.rd = new Random(0);
+    }
 
-	/**
-	 * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
-	 * @param graph
-	 */
-	public MDRk(UndirectedGraph graph){
-		this(graph,Rk.DEFAULT_K);
-	}
+    /**
+     * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
+     *
+     * @param graph the graph
+     */
+    public MDRk(UndirectedGraph graph) {
+        this(graph, Rk.DEFAULT_K);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void prepare() {
-		iter=0;
-	}
+    @Override
+    public void prepare() {
+        iter = 0;
+    }
 
-	@Override
-	public void computeMIS() {
-		iter++;
-		if(iter==1){
-			super.computeMIS();
-		}else{
-			computeMISRk();
-		}
-	}
+    @Override
+    public void computeMIS() {
+        iter++;
+        if (iter == 1) {
+            super.computeMIS();
+        } else {
+            computeMISRk();
+        }
+    }
 
-	protected void computeMISRk() {
-		iter++;
-		out.clear();
-		inMIS.clear();
-		while (out.cardinality() < n) {
-			int nb = rd.nextInt(n - out.cardinality());
-			int idx = out.nextClearBit(0);
-			for (int i = idx; i >= 0 && i < n && nb >= 0; i = out.nextClearBit(i + 1)) {
-				idx = i;
-				nb--;
-			}
-			inMIS.set(idx);
-			out.set(idx);
-			ISet nei = graph.getNeighOf(idx);
-			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-				out.set(j);
-			}
-		}
-	}
+    protected void computeMISRk() {
+        iter++;
+        out.clear();
+        inMIS.clear();
+        while (out.cardinality() < n) {
+            int nb = rd.nextInt(n - out.cardinality());
+            int idx = out.nextClearBit(0);
+            for (int i = idx; i >= 0 && i < n && nb >= 0; i = out.nextClearBit(i + 1)) {
+                idx = i;
+                nb--;
+            }
+            inMIS.set(idx);
+            out.set(idx);
+            ISet nei = graph.getNeighOf(idx);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                out.set(j);
+            }
+        }
+    }
 
-	@Override
-	public boolean hasNextMIS(){
-		return iter<k;
-	}
+    @Override
+    public boolean hasNextMIS() {
+        return iter < k;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            graph.duplicate(solver, identitymap);
+            UndirectedGraph g = (UndirectedGraph) identitymap.get(graph);
+            identitymap.put(this, new MDRk(g, k));
+        }
+    }
 }

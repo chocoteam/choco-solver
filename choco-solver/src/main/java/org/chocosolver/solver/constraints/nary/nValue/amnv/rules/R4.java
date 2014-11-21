@@ -27,6 +27,7 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
@@ -39,25 +40,30 @@ import java.util.BitSet;
 /**
  * R4 filtering rule (AllDifferent propagation)
  *
- * @since 01/01/2014
  * @author Jean-Guillaume Fages
+ * @since 01/01/2014
  */
 public class R4 implements R {
 
-	private AlgoAllDiffBC filter;
+    private AlgoAllDiffBC filter;
 
-	public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException{
-		int n = vars.length-1;
-		BitSet mis = heur.getMIS();
-		if(mis.cardinality()==vars[n].getUB()){
-			IntVar[] vs = new IntVar[mis.cardinality()];
-			int idx = 0;
-			for(int x=mis.nextSetBit(0);x>=0;x=mis.nextSetBit(x+1)){
-				vs[idx++] = vars[x];
-			}
-			if(filter==null)filter=new AlgoAllDiffBC(aCause);
-			filter.reset(vs);
-			filter.filter();
-		}
-	}
+    public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException {
+        int n = vars.length - 1;
+        BitSet mis = heur.getMIS();
+        if (mis.cardinality() == vars[n].getUB()) {
+            IntVar[] vs = new IntVar[mis.cardinality()];
+            int idx = 0;
+            for (int x = mis.nextSetBit(0); x >= 0; x = mis.nextSetBit(x + 1)) {
+                vs[idx++] = vars[x];
+            }
+            if (filter == null) filter = new AlgoAllDiffBC(aCause);
+            filter.reset(vs);
+            filter.filter();
+        }
+    }
+
+    @Override
+    public R duplicate(Solver solver) {
+        return new R4();
+    }
 }

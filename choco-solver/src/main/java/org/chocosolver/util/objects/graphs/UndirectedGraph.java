@@ -27,6 +27,7 @@
 
 package org.chocosolver.util.objects.graphs;
 
+import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
@@ -105,12 +106,12 @@ public class UndirectedGraph implements IGraph {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("nodes : \n" + nodes+"\n");
+        sb.append("nodes : \n").append(nodes).append("\n");
         sb.append("neighbors : \n");
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            sb.append(i + " -> {");
+            sb.append(i).append(" -> {");
             for (int j = neighbors[i].getFirstElement(); j >= 0; j = neighbors[i].getNextElement()) {
-                sb.append(j + " ");
+                sb.append(j).append(" ");
             }
             sb.append("}\n");
         }
@@ -244,5 +245,10 @@ public class UndirectedGraph implements IGraph {
     @Override
     public boolean isDirected() {
         return false;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new UnsupportedOperationException("Cannot duplicate DirectedGraph yet");
     }
 }

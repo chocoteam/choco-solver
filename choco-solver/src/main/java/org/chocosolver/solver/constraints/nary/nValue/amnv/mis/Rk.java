@@ -27,6 +27,8 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
@@ -36,90 +38,101 @@ import java.util.Random;
 /**
  * Random heuristic
  *
- * @since 01/01/2014
  * @author Jean-Guillaume Fages
+ * @since 01/01/2014
  */
-public class Rk implements F{
+public class Rk implements F {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	public static int DEFAULT_K = 30;
+    public static int DEFAULT_K = 30;
 
-	protected UndirectedGraph graph;
-	protected int n, k, iter;
-	protected BitSet out, inMIS;
-	protected Random rd;
+    protected UndirectedGraph graph;
+    protected int n, k, iter;
+    protected BitSet out, inMIS;
+    protected Random rd;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Creates an instance of the Random heuristic to compute independent sets on graph
-	 * @param graph	on which IS have to be computed
-	 * @param k		number of iterations (i.e. number of expected IS per propagation)
-	 */
-	public Rk(UndirectedGraph graph, int k){
-		this.graph = graph;
-		this.k = k;
-		n = graph.getNbMaxNodes();
-		out = new BitSet(n);
-		inMIS = new BitSet(n);
-		rd = new Random(0);
-	}
+    /**
+     * Creates an instance of the Random heuristic to compute independent sets on graph
+     *
+     * @param graph on which IS have to be computed
+     * @param k     number of iterations (i.e. number of expected IS per propagation)
+     */
+    public Rk(UndirectedGraph graph, int k) {
+        this.graph = graph;
+        this.k = k;
+        n = graph.getNbMaxNodes();
+        out = new BitSet(n);
+        inMIS = new BitSet(n);
+        rd = new Random(0);
+    }
 
-	/**
-	 * Creates an instance of the Random heuristic to compute independent sets on graph
-	 * uses the default setting DEFAULT_K=30
-	 * @param graph	on which IS have to be computed
-	 */
-	public Rk(UndirectedGraph graph){
-		this(graph,DEFAULT_K);
-	}
+    /**
+     * Creates an instance of the Random heuristic to compute independent sets on graph
+     * uses the default setting DEFAULT_K=30
+     *
+     * @param graph on which IS have to be computed
+     */
+    public Rk(UndirectedGraph graph) {
+        this(graph, DEFAULT_K);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void prepare() {
-		iter = 0;
-	}
+    @Override
+    public void prepare() {
+        iter = 0;
+    }
 
-	@Override
-	public void computeMIS() {
-		iter++;
-		out.clear();
-		inMIS.clear();
-		while (out.cardinality() < n) {
-			int nb = rd.nextInt(n - out.cardinality());
-			int idx = out.nextClearBit(0);
-			for (int i = idx; i >= 0 && i < n && nb >= 0; i = out.nextClearBit(i + 1)) {
-				idx = i;
-				nb--;
-			}
-			inMIS.set(idx);
-			out.set(idx);
-			ISet nei = graph.getNeighOf(idx);
-			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-				out.set(j);
-			}
-		}
-	}
+    @Override
+    public void computeMIS() {
+        iter++;
+        out.clear();
+        inMIS.clear();
+        while (out.cardinality() < n) {
+            int nb = rd.nextInt(n - out.cardinality());
+            int idx = out.nextClearBit(0);
+            for (int i = idx; i >= 0 && i < n && nb >= 0; i = out.nextClearBit(i + 1)) {
+                idx = i;
+                nb--;
+            }
+            inMIS.set(idx);
+            out.set(idx);
+            ISet nei = graph.getNeighOf(idx);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                out.set(j);
+            }
+        }
+    }
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
 
-	@Override
-	public BitSet getMIS(){
-		return inMIS;
-	}
+    @Override
+    public BitSet getMIS() {
+        return inMIS;
+    }
 
-	@Override
-	public boolean hasNextMIS(){
-		return iter<k;
-	}
+    @Override
+    public boolean hasNextMIS() {
+        return iter < k;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            graph.duplicate(solver, identitymap);
+            UndirectedGraph g = (UndirectedGraph) identitymap.get(graph);
+            identitymap.put(this, new Rk(g, k));
+        }
+    }
 }

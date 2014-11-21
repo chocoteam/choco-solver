@@ -27,82 +27,100 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Intersection Graph
  *
- * @since 01/01/2014
  * @author Jean-Guillaume Fages
+ * @since 01/01/2014
  */
-public class Gi extends G{
+public class Gi extends G {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	IntVar[] X;
+    IntVar[] X;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Creates the intersection graph of X
-	 * @param X		integer variable
-	 */
-	public Gi(IntVar[] X) {
-		super(X[0].getSolver(), X.length);
-		this.X = X;
-	}
+    /**
+     * Creates the intersection graph of X
+     *
+     * @param X integer variable
+     */
+    public Gi(IntVar[] X) {
+        super(X[0].getSolver(), X.length);
+        this.X = X;
+    }
 
-	//***********************************************************************************
-	// ALGORITHMS
-	//***********************************************************************************
+    //***********************************************************************************
+    // ALGORITHMS
+    //***********************************************************************************
 
-	public void build() {
-		int n = getNbMaxNodes();
-		for (int i = 0; i < n; i++) {
-			getNeighOf(i).clear();
-		}
-		for (int i = 0; i < n; i++) {
-			for (int i2 = i + 1; i2 < n; i2++) {
-				if (intersect(i, i2)) {
-					addEdge(i, i2);
-				}
-			}
-		}
-	}
+    public void build() {
+        int n = getNbMaxNodes();
+        for (int i = 0; i < n; i++) {
+            getNeighOf(i).clear();
+        }
+        for (int i = 0; i < n; i++) {
+            for (int i2 = i + 1; i2 < n; i2++) {
+                if (intersect(i, i2)) {
+                    addEdge(i, i2);
+                }
+            }
+        }
+    }
 
-	public void update() {
-		int n = getNbMaxNodes();
-		for (int i = 0; i < n; i++) {
-			update(i);
-		}
-	}
+    public void update() {
+        int n = getNbMaxNodes();
+        for (int i = 0; i < n; i++) {
+            update(i);
+        }
+    }
 
-	public void update(int i) {
-		ISet nei = getNeighOf(i);
-		for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-			if (!intersect(i, j)) {
-				removeEdge(i, j);
-			}
-		}
-	}
+    public void update(int i) {
+        ISet nei = getNeighOf(i);
+        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            if (!intersect(i, j)) {
+                removeEdge(i, j);
+            }
+        }
+    }
 
-	protected boolean intersect(int i, int j) {
-		IntVar x = X[i];
-		IntVar y = X[j];
-		if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
-			return false;
-		}
-		int ub = x.getUB();
-		for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-			if (y.contains(val)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    protected boolean intersect(int i, int j) {
+        IntVar x = X[i];
+        IntVar y = X[j];
+        if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
+            return false;
+        }
+        int ub = x.getUB();
+        for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+            if (y.contains(val)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            int size = this.X.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.X[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.X[i]);
+            }
+            identitymap.put(this, new Gi(aVars));
+        }
+    }
+
 }

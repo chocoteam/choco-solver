@@ -27,6 +27,8 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.D;
 import org.chocosolver.solver.variables.IntVar;
@@ -34,49 +36,61 @@ import org.chocosolver.solver.variables.IntVar;
 /**
  * Constrained intersection graph
  *
- * @since 01/01/2014
  * @author Jean-Guillaume Fages
+ * @since 01/01/2014
  */
-public class Gci extends Gi{
+public class Gci extends Gi {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	D D;
+    D D;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Creates the constrained intersection graph of X and D
-	 * @param X		integer variables
-	 * @param D		set of difference constraints
-	 */
-	public Gci(IntVar[] X, D D) {
-		super(X);
-		this.D = D;
-	}
+    /**
+     * Creates the constrained intersection graph of X and D
+     *
+     * @param X integer variables
+     * @param D set of difference constraints
+     */
+    public Gci(IntVar[] X, D D) {
+        super(X);
+        this.D = D;
+    }
 
-	/**
-	 * Creates the constrained intersection graph of X and D
-	 * by automatically detecting disequalities and alldifferent constraints.
-	 *
-	 * @param X		integer variables
-	 */
-	public Gci(IntVar[] X) {
-		this(X,new AutoDiffDetection(X));
-	}
+    /**
+     * Creates the constrained intersection graph of X and D
+     * by automatically detecting disequalities and alldifferent constraints.
+     *
+     * @param X integer variables
+     */
+    public Gci(IntVar[] X) {
+        this(X, new AutoDiffDetection(X));
+    }
 
-	//***********************************************************************************
-	// ALGORITHMS
-	//***********************************************************************************
+    //***********************************************************************************
+    // ALGORITHMS
+    //***********************************************************************************
 
-	protected boolean intersect(int i, int j) {
-		if(D.mustBeDifferent(i,j)){
-			return false;
-		}
-		return super.intersect(i,j);
-	}
+    protected boolean intersect(int i, int j) {
+        return !D.mustBeDifferent(i, j) && super.intersect(i, j);
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            D d = D.duplicate(solver, identitymap);
+            int size = this.X.length;
+            IntVar[] aVars = new IntVar[size];
+            for (int i = 0; i < size; i++) {
+                this.X[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.X[i]);
+            }
+            identitymap.put(this, new Gci(aVars, d));
+        }
+    }
 }

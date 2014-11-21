@@ -27,6 +27,7 @@
 
 package org.chocosolver.util.objects.graphs;
 
+import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
@@ -110,12 +111,12 @@ public class DirectedGraph implements IGraph {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("nodes : \n" + nodes+"\n");
+        sb.append("nodes : \n").append(nodes).append("\n");
         sb.append("successors : \n");
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            sb.append(i + " -> {");
+            sb.append(i).append(" -> {");
             for (int j = successors[i].getFirstElement(); j >= 0; j = successors[i].getNextElement()) {
-                sb.append(j + " ");
+                sb.append(j).append(" ");
             }
             sb.append("}\n");
         }
@@ -139,11 +140,7 @@ public class DirectedGraph implements IGraph {
 
     @Override
     public boolean addNode(int x) {
-        if (!nodes.contain(x)) {
-            return nodes.add(x);
-        } else {
-            return false;
-        }
+        return !nodes.contain(x) && nodes.add(x);
     }
 
     @Override
@@ -253,5 +250,10 @@ public class DirectedGraph implements IGraph {
     @Override
     public ISet getPredOrNeighOf(int x) {
         return predecessors[x];
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new UnsupportedOperationException("Cannot duplicate DirectedGraph yet");
     }
 }

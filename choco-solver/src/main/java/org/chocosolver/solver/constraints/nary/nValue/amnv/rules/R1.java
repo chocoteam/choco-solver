@@ -27,6 +27,7 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -44,5 +45,10 @@ public class R1 implements R {
 	public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException{
 		int LB = heur.getMIS().cardinality();
 		vars[vars.length-1].updateLowerBound(LB, aCause);
+	}
+
+	@Override
+	public R duplicate(Solver solver) {
+		return new R1();
 	}
 }

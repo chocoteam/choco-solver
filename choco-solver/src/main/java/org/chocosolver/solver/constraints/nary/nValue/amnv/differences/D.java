@@ -27,6 +27,9 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.differences;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
+
 /**
  * Interface to represent a set of difference constraints
  *
@@ -39,5 +42,7 @@ public interface D {
 	 * @return true iff var[i1] and var[i2] must be different
 	 */
 	public boolean mustBeDifferent(int i1, int i2);
+
+	public D duplicate(Solver solver, THashMap<Object, Object> identitymap);
 
 }

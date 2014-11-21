@@ -27,6 +27,8 @@
 
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
@@ -55,7 +57,7 @@ public class MD implements F{
 
 	/**
 	 * Creates an instance of the Min Degree heuristic to compute independent sets on graph
-	 * @param graph
+	 * @param graph the graph
 	 */
 	public MD(UndirectedGraph graph){
 		this.graph = graph;
@@ -123,5 +125,14 @@ public class MD implements F{
 	@Override
 	public boolean hasNextMIS(){
 		return false;
+	}
+
+	@Override
+	public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+		if(!identitymap.containsKey(this)){
+			graph.duplicate(solver, identitymap);
+			UndirectedGraph g = (UndirectedGraph)identitymap.get(graph);
+			identitymap.put(this, new MD(g));
+		}
 	}
 }
