@@ -44,6 +44,8 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Random;
+
 /**
  * <br/>
  *
@@ -667,8 +669,53 @@ public class DuplicateTest {
     @Test(groups = "1s")
     public void test33() {
         Solver solver = new Solver("Choco");
-        // todo
-        solver.post(ICF.cumulative(null, null, null, true));
+        IntVar capa = VF.fixed(6, solver);
+        int n = 4;
+        int max = 3;
+        IntVar[] start = VF.boundedArray("start", n, 0, max, solver);
+        IntVar[] end = new IntVar[n];
+        IntVar[] duration = new IntVar[n];
+        IntVar[] height = new IntVar[n];
+        Task[] task = new Task[n];
+        Random rd = new Random(0);
+        for (int i = 0; i < n; i++) {
+            duration[i] = VF.fixed(rd.nextInt(20) + 1, solver);
+            height[i] = VF.fixed(rd.nextInt(5) + 1, solver);
+            end[i] = VF.offset(start[i], duration[i].getValue());
+            task[i] = new Task(start[i], duration[i], end[i]);
+        }
+        solver.post(ICF.cumulative(task, height, capa, true));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test33bis() {
+        Solver solver = new Solver("Choco");
+        IntVar capa = VF.fixed(6, solver);
+        int n = 4;
+        int max = 3;
+        IntVar[] start = VF.boundedArray("start", n, 0, max, solver);
+        IntVar[] end = new IntVar[n];
+        IntVar[] duration = new IntVar[n];
+        IntVar[] height = new IntVar[n];
+        Task[] task = new Task[n];
+        Random rd = new Random(0);
+        for (int i = 0; i < n; i++) {
+            duration[i] = VF.fixed(rd.nextInt(20) + 1, solver);
+            height[i] = VF.fixed(rd.nextInt(5) + 1, solver);
+            end[i] = VF.offset(start[i], duration[i].getValue());
+            task[i] = new Task(start[i], duration[i], end[i]);
+        }
+        solver.post(ICF.cumulative(task, height, capa, false));
 
         Solver copy = solver.duplicateModel();
 
