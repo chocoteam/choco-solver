@@ -28,17 +28,17 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.binary.PropScale;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
 import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
@@ -599,10 +599,22 @@ public class DuplicateTest {
 
     @Test(groups = "1s")
     public void test30() {
+        int n = 14;
+        FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
+        int[][][] c2 = new int[n][3][auto.getNbStates()];
+        for (int i = 0; i < n; i++) {
+            for (int k = 0; k < auto.getNbStates(); k++) {
+                c2[i][0][k] = 1;
+                c2[i][1][k] = 2;
+            }
+        }
         Solver solver = new Solver("Choco");
-        IntVar[] vs = VF.enumeratedArray("vs", 4, 1, 4, solver);
-        IntVar x = VF.enumerated("x", 1, 4, solver);
-        solver.post(ICF.cost_regular(vs, x, null));
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < n; i++) {
+            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+        }
+        IntVar cost = VariableFactory.bounded("z", n / 2, n / 2 + 1, solver);
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, c2, cost.getLB(), cost.getUB())));
 
         Solver copy = solver.duplicateModel();
 
@@ -933,10 +945,55 @@ public class DuplicateTest {
 
     @Test(groups = "1s")
     public void test48() {
-        Solver solver = new Solver("Choco");
-        IntVar[] vs = VF.enumeratedArray("vs", 4, 1, 4, solver);
-        IntVar[] ws = VF.enumeratedArray("ws", 4, 1, 4, solver);
-        solver.post(ICF.multicost_regular(vs, ws, null));
+        Solver solver = new Solver();
+        int period = 5;
+        IntVar[] sequence = VariableFactory.enumeratedArray("x", period, 0, 2, solver);
+        IntVar[] bounds = new IntVar[4];
+        bounds[0] = VariableFactory.bounded("z_0", 0, 80, solver);
+        bounds[1] = VariableFactory.bounded("day", 0, 28, solver);
+        bounds[2] = VariableFactory.bounded("night", 0, 28, solver);
+        bounds[3] = VariableFactory.bounded("rest", 0, 28, solver);
+
+        FiniteAutomaton auto = new FiniteAutomaton();
+        int idx = auto.addState();
+        auto.setInitialState(idx);
+        auto.setFinal(idx);
+        idx = auto.addState();
+        int DAY = 0;
+        auto.addTransition(auto.getInitialState(), idx, DAY);
+        int next = auto.addState();
+        int NIGHT = 1;
+        auto.addTransition(idx, next, DAY, NIGHT);
+        int REST = 2;
+        auto.addTransition(next, auto.getInitialState(), REST);
+        auto.addTransition(auto.getInitialState(), next, NIGHT);
+
+        int[][][][] costMatrix = new int[period][3][4][auto.getNbStates()];
+        for (int i = 0; i < costMatrix.length; i++) {
+            for (int j = 0; j < costMatrix[i].length; j++) {
+                for (int r = 0; r < costMatrix[i][j].length; r++) {
+                    if (r == 0) {
+                        if (j == DAY)
+                            costMatrix[i][j][r] = new int[]{3, 5, 0};
+                        else if (j == NIGHT)
+                            costMatrix[i][j][r] = new int[]{8, 9, 0};
+                        else if (j == REST)
+                            costMatrix[i][j][r] = new int[]{0, 0, 2};
+                    } else if (r == 1) {
+                        if (j == DAY)
+                            costMatrix[i][j][r] = new int[]{1, 1, 0};
+                    } else if (r == 2) {
+                        if (j == NIGHT)
+                            costMatrix[i][j][r] = new int[]{1, 1, 0};
+                    } else if (r == 3) {
+                        if (j != REST)
+                            costMatrix[i][j][r] = new int[]{1, 1, 0};
+                    }
+                }
+            }
+        }
+        ICostAutomaton costAutomaton = CostAutomaton.makeMultiResources(auto, costMatrix, bounds);
+        solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, costAutomaton));
 
         Solver copy = solver.duplicateModel();
 
