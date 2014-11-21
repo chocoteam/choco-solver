@@ -39,7 +39,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>choco</groupId>
+            <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
