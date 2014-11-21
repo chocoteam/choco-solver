@@ -39,8 +39,7 @@
         <tag>HEAD</tag>
     </scm>
     <prerequisites>
-        <maven>3.1.1
-        </maven>
+        <maven>3.2.3</maven>
     </prerequisites>
 
 
@@ -98,8 +97,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>

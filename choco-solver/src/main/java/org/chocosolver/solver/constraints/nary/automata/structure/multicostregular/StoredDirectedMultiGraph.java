@@ -74,7 +74,6 @@ public class StoredDirectedMultiGraph {
                 DisposableIntIterator it = this.GNodes.outArcs[n].getIterator();
                 while (it.hasNext()) {
                     int arc = it.next();
-                    int val = this.GArcs.values[arc];
                     int orig = this.GArcs.origs[arc];
                     int dest = this.GArcs.dests[arc];
                     for (int k : dim) {
@@ -372,14 +371,6 @@ public class StoredDirectedMultiGraph {
 
     }
 
-    private static boolean contains(int[] arr, int elem) {
-        int lg = arr.length - 1;
-        for (int s = lg; s >= 0; s--) {
-            if (arr[s] == elem) return true;
-        }
-        return false;
-    }
-
     public void updateRight(TIntStack updateRight, TIntStack toRemove, int dim, boolean[] modBound,
                             Propagator<IntVar> propagator) throws ContradictionException {
 
@@ -564,15 +555,6 @@ public class StoredDirectedMultiGraph {
         inStack.set(idx);
     }
 
-    /**
-     * Clear the idx th bit of the to be removed bitset
-     *
-     * @param idx the index of the bit
-     */
-    public final void clearInStack(int idx) {
-        inStack.clear(idx);
-    }
-
     public int getRegret(int layer, int value, int... resources) {
         int result = Integer.MAX_VALUE;
         StoredIndexedBipartiteSetWithOffset arcs = this.getUBport(layer, value);
@@ -595,9 +577,8 @@ public class StoredDirectedMultiGraph {
         for (int r : resources) {
             result -= pf.spft[sourceIndex][r];
         }
-        if (result < 0)
-            ;//   System.err.println("STR");
-
+//        if (result < 0)
+//            ;//   System.err.println("STR");//
         return result;
     }
 

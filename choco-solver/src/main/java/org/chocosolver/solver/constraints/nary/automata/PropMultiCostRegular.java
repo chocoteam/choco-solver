@@ -78,27 +78,25 @@ import java.util.*;
  * Resource constrained  shortest/longest path problems
  */
 public final class PropMultiCostRegular extends Propagator<IntVar> {
-
-
     /**
      * Maximum number of iteration during a bound computation
      */
-    public static int MAXBOUNDITER = 10;
+    public static final int MAXBOUNDITER = 10;
 
     /**
      * Maximum number of non improving iteration while computing a bound
      */
-    public static int MAXNONIMPROVEITER = 15;
+    public static final int MAXNONIMPROVEITER = 15;
 
     /**
      * Constant coefficient of the lagrangian relaxation
      */
-    public static double U0 = 10.0;
+    public static final double U0 = 10.0;
 
     /**
      * Lagrangian multiplier decreasing factor
      */
-    public static double RO = 0.7;
+    public static final double RO = 0.7;
 
 
     /**
@@ -253,8 +251,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     /**
      * Build internal structure of the propagator, if necessary
      *
-     * @throws solver.exception.ContradictionException
-     *          if initialisation encounters a contradiction
+     * @throws org.chocosolver.solver.exception.ContradictionException if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
         checkBounds();
@@ -329,17 +326,17 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         DirectedMultigraph<Node, Arc> graph;
 
         int n = offset;
-        graph = new DirectedMultigraph<Node, Arc>(new Arc.ArcFacroty());
-        ArrayList<HashSet<Arc>> tmp = new ArrayList<HashSet<Arc>>(totalSizes);
-        for (int i = 0; i < totalSizes; i++)
+        graph = new DirectedMultigraph<>(new Arc.ArcFactory());
+        ArrayList<HashSet<Arc>> tmp = new ArrayList<>(totalSizes);
+        for (int i = 0; i < totalSizes; i++) {
             tmp.add(new HashSet<Arc>());
-
+        }
 
         int i, j, k;
         TIntIterator layerIter;
         TIntIterator qijIter;
 
-        ArrayList<TIntHashSet> layer = new ArrayList<TIntHashSet>();
+        ArrayList<TIntHashSet> layer = new ArrayList<>();
         TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
         // DLList[vars.length+1];
 
@@ -348,7 +345,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
 
         //forward pass, construct all paths described by the automaton for word of length nbVars.
-
         layer.get(0).add(pi.getInitialState());
         TIntHashSet nexts = new TIntHashSet();
 
@@ -378,7 +374,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
 
         //removing reachable non accepting states
-
         layerIter = layer.get(n).iterator();
         while (layerIter.hasNext()) {
             k = layerIter.next();
@@ -387,7 +382,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             }
 
         }
-
 
         //backward pass, removing arcs that does not lead to an accepting state
         int nbNodes = pi.getNbStates();
@@ -478,7 +472,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         intLayer[n + 1] = new int[]{tink.id};
 
         if (intLayer[0].length > 0) {
-			IEnvironment environment = solver.getEnvironment();
+            IEnvironment environment = solver.getEnvironment();
             this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
             this.graph.makePathFinder();
         }

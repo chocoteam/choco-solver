@@ -46,75 +46,54 @@ import org.testng.annotations.Test;
  */
 public class MultiCostRegularTest {
 
-    /**
-     * Model variable for the
-     */
-    IntVar[] sequence;
+    private Solver make(int period, long seed) {;
 
-    /**
-     * Bounds within whoms the accepted schedule must cost.
-     */
-    IntVar[] bounds;
-
-    /**
-     * The cost matrix which gives assgnement cost (used for counters too)
-     */
-    int[][][][] costMatrix;
-
-    /**
-     * Automaton which embeds the work regulations that may be
-     * represented by regular expressions
-     */
-    FiniteAutomaton auto;
-
-    private Solver make(int period, long seed) {
         Solver solver = new Solver();
-        this.sequence = VariableFactory.enumeratedArray("x", period, 0, 2, solver);
-        this.bounds = new IntVar[4];
-        this.bounds[0] = VariableFactory.bounded("z_0", 0, 80, solver);
-        this.bounds[1] = VariableFactory.bounded("day", 0, 28, solver);
-        this.bounds[2] = VariableFactory.bounded("night", 0, 28, solver);
-        this.bounds[3] = VariableFactory.bounded("rest", 0, 28, solver);
+        IntVar[] sequence = VariableFactory.enumeratedArray("x", period, 0, 2, solver);
+        IntVar[] bounds = new IntVar[4];
+        bounds[0] = VariableFactory.bounded("z_0", 0, 80, solver);
+        bounds[1] = VariableFactory.bounded("day", 0, 28, solver);
+        bounds[2] = VariableFactory.bounded("night", 0, 28, solver);
+        bounds[3] = VariableFactory.bounded("rest", 0, 28, solver);
 
-        this.auto = new FiniteAutomaton();
-        int idx = this.auto.addState();
-        this.auto.setInitialState(idx);
-        this.auto.setFinal(idx);
-        idx = this.auto.addState();
+        FiniteAutomaton auto = new FiniteAutomaton();
+        int idx = auto.addState();
+        auto.setInitialState(idx);
+        auto.setFinal(idx);
+        idx = auto.addState();
         int DAY = 0;
-        this.auto.addTransition(this.auto.getInitialState(), idx, DAY);
-        int next = this.auto.addState();
+        auto.addTransition(auto.getInitialState(), idx, DAY);
+        int next = auto.addState();
         int NIGHT = 1;
-        this.auto.addTransition(idx, next, DAY, NIGHT);
+        auto.addTransition(idx, next, DAY, NIGHT);
         int REST = 2;
-        this.auto.addTransition(next, auto.getInitialState(), REST);
+        auto.addTransition(next, auto.getInitialState(), REST);
         auto.addTransition(auto.getInitialState(), next, NIGHT);
 
-        int[][][][] csts = new int[period][3][4][this.auto.getNbStates()];
-        for (int i = 0; i < csts.length; i++) {
-            for (int j = 0; j < csts[i].length; j++) {
-                for (int r = 0; r < csts[i][j].length; r++) {
+        int[][][][] costMatrix = new int[period][3][4][auto.getNbStates()];
+        for (int i = 0; i < costMatrix.length; i++) {
+            for (int j = 0; j < costMatrix[i].length; j++) {
+                for (int r = 0; r < costMatrix[i][j].length; r++) {
                     if (r == 0) {
                         if (j == DAY)
-                            csts[i][j][r] = new int[]{3, 5, 0};
+                            costMatrix[i][j][r] = new int[]{3, 5, 0};
                         else if (j == NIGHT)
-                            csts[i][j][r] = new int[]{8, 9, 0};
+                            costMatrix[i][j][r] = new int[]{8, 9, 0};
                         else if (j == REST)
-                            csts[i][j][r] = new int[]{0, 0, 2};
+                            costMatrix[i][j][r] = new int[]{0, 0, 2};
                     } else if (r == 1) {
                         if (j == DAY)
-                            csts[i][j][r] = new int[]{1, 1, 0};
+                            costMatrix[i][j][r] = new int[]{1, 1, 0};
                     } else if (r == 2) {
                         if (j == NIGHT)
-                            csts[i][j][r] = new int[]{1, 1, 0};
+                            costMatrix[i][j][r] = new int[]{1, 1, 0};
                     } else if (r == 3) {
                         if (j != REST)
-                            csts[i][j][r] = new int[]{1, 1, 0};
+                            costMatrix[i][j][r] = new int[]{1, 1, 0};
                     }
                 }
             }
         }
-        this.costMatrix = csts;
         ICostAutomaton costAutomaton = CostAutomaton.makeMultiResources(auto, costMatrix, bounds);
         solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, costAutomaton));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
@@ -125,8 +104,7 @@ public class MultiCostRegularTest {
 
     @Test(groups = "10s")
     public void test1() {
-        long seed = System.currentTimeMillis();
-        System.out.printf("SEED1:%d\n", seed);
+        long seed = 0;
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(5, i + seed);
             solver.findAllSolutions();
@@ -136,8 +114,7 @@ public class MultiCostRegularTest {
 
     @Test(groups = "10s")
     public void test2() {
-        long seed = System.currentTimeMillis();
-        System.out.printf("SEED:%d\n", seed);
+        long seed = 0;
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(7, i);
             solver.findAllSolutions();
