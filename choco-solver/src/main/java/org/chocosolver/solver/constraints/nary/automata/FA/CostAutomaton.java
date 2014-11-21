@@ -47,13 +47,13 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
 
     public CostAutomaton() {
         super();
-        this.counters = new ArrayList<ICounter>();
+        this.counters = new ArrayList<>();
     }
 
 
     public CostAutomaton(IAutomaton auto) {
         super((FiniteAutomaton) auto);
-        this.counters = new ArrayList<ICounter>();
+        this.counters = new ArrayList<>();
     }
 
     public CostAutomaton(IAutomaton auto, List<ICounter> counters) {
@@ -98,7 +98,7 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
 
     public static ICostAutomaton makeSingleResource(IAutomaton pi, int[][][] costs, int inf, int sup) {
         ICounter c = new CounterState(costs, inf, sup);
-        ArrayList<ICounter> tmp = new ArrayList<ICounter>();
+        ArrayList<ICounter> tmp = new ArrayList<>();
         tmp.add(c);
         return (pi == null) ? null :
                 new CostAutomaton(pi, tmp);
@@ -106,7 +106,7 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
 
     public static ICostAutomaton makeSingleResource(IAutomaton pi, int[][] costs, int inf, int sup) {
         ICounter c = new Counter(costs, inf, sup);
-        ArrayList<ICounter> tmp = new ArrayList<ICounter>();
+        ArrayList<ICounter> tmp = new ArrayList<>();
         tmp.add(c);
         return (pi == null) ? null :
                 new CostAutomaton(pi, tmp);
@@ -114,7 +114,7 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
 
     public static ICostAutomaton makeMultiResources(IAutomaton pi, int[][][] layer_value_resource, int[] infs, int[] sups) {
         int[][][] ordered = new int[infs.length][layer_value_resource.length][];
-        ArrayList<ICounter> tmp = new ArrayList<ICounter>();
+        ArrayList<ICounter> tmp = new ArrayList<>();
         for (int k = 0; k < infs.length; k++) {
             for (int i = 0; i < layer_value_resource.length; i++) {
                 ordered[k][i] = new int[layer_value_resource[i].length];
@@ -130,7 +130,7 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
 
     public static ICostAutomaton makeMultiResources(IAutomaton pi, int[][][][] layer_value_resource_state, int[] infs, int[] sups) {
         int[][][][] ordered = new int[infs.length][layer_value_resource_state.length][][];
-        ArrayList<ICounter> tmp = new ArrayList<ICounter>();
+        ArrayList<ICounter> tmp = new ArrayList<>();
         for (int k = 0; k < infs.length; k++) {
             boolean stateDependant = true;
             for (int i = 0; i < layer_value_resource_state.length; i++) {
@@ -178,4 +178,14 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
     }
 
 
+    @Override
+    public FiniteAutomaton clone() throws CloneNotSupportedException {
+        CostAutomaton auto = (CostAutomaton) super.clone();
+        auto.counters = new ArrayList<>();
+        for (ICounter c : this.counters) {
+            //TODO: duplicate?
+            auto.addCounter(c);
+        }
+        return auto;
+    }
 }

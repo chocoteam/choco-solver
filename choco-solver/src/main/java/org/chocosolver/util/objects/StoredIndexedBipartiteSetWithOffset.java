@@ -29,6 +29,8 @@ package org.chocosolver.util.objects;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.IndexedObject;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.SolverException;
 
 import java.util.ArrayList;
 
@@ -99,5 +101,21 @@ public class StoredIndexedBipartiteSetWithOffset extends StoredIndexedBipartiteS
 
     public final int getOffset() {
         return offset;
+    }
+
+    public StoredIndexedBipartiteSetWithOffset duplicate(Solver solver) {
+        StoredIndexedBipartiteSetWithOffset copy = new StoredIndexedBipartiteSetWithOffset(solver.getEnvironment(), list.clone());
+        if (this.idxToObjects != null) {
+            copy.idxToObjects = new IndexedObject[position.length];
+            for (int i = 0; i < idxToObjects.length; i++) {
+                try {
+                    copy.idxToObjects[i] = idxToObjects[i].clone();
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                    throw new SolverException("Clone not supported");
+                }
+            }
+        }
+        return copy;
     }
 }

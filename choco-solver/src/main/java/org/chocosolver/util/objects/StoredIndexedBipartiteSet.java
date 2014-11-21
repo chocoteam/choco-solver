@@ -30,6 +30,7 @@ package org.chocosolver.util.objects;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.structure.IndexedObject;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 
@@ -45,7 +46,7 @@ import java.util.ArrayList;
  * the index of the first element.
  * IT DOES NOT PRESERVE THE ORDER OF THE LIST
  */
-public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
+public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
 
     /**
      * The list of values
@@ -65,7 +66,7 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
      * indexes is needed.
      * idxToObjects[i] = o <=> o.getObjectIdx() == i
      */
-    private IndexedObject[] idxToObjects;
+    protected IndexedObject[] idxToObjects;
 
     /**
      * The first element of the list
@@ -74,8 +75,12 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
 
     protected BipartiteSetIterator _cachedIterator;
 
+    private StoredIndexedBipartiteSet() {
+
+    }
+
     /**
-     * @param environment
+     * @param environment the environment
      * @param values:     a set of DIFFERENT positive integer values !
      */
     public StoredIndexedBipartiteSet(final IEnvironment environment, final int[] values) {
@@ -83,7 +88,7 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
     }
 
     /**
-     * @param environment
+     * @param environment the environment
      * @param values:     a set of IndexObjects which have different indexes !
      */
     public StoredIndexedBipartiteSet(final IEnvironment environment, final IndexedObject[] values) {
@@ -99,7 +104,7 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
     }
 
     /**
-     * @param environment
+     * @param environment the environment
      * @param values:     a set of IndexObjects which have different indexes !
      */
     public StoredIndexedBipartiteSet(final IEnvironment environment, final ArrayList<IndexedObject> values) {
@@ -133,8 +138,8 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
      * Create a stored bipartite set with a size.
      * Thus the value stored will go from 0 to nbValues.
      *
-     * @param environment
-     * @param nbValues
+     * @param environment the environment
+     * @param nbValues nb values
      */
     public StoredIndexedBipartiteSet(final IEnvironment environment, final int nbValues) {
         final int[] values = new int[nbValues];
@@ -316,8 +321,7 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
          * Returns the next element in the iteration.
          *
          * @return the next element in the iteration.
-         * @throws java.util.NoSuchElementException
-         *          iteration has no more elements.
+         * @throws java.util.NoSuchElementException iteration has no more elements.
          */
         @Override
         public int next() {
@@ -360,5 +364,24 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */{
                 nlast--;
             }
         }
+    }
+
+    public StoredIndexedBipartiteSet duplicate(Solver solver) {
+        StoredIndexedBipartiteSet copy = new StoredIndexedBipartiteSet();
+        copy.list = list.clone();
+        copy.position = position.clone();
+        copy.last = solver.getEnvironment().makeInt(list.length - 1);
+        if (this.idxToObjects != null) {
+            copy.idxToObjects = new IndexedObject[position.length];
+            for (int i = 0; i < idxToObjects.length; i++) {
+                try {
+                    copy.idxToObjects[i] = idxToObjects[i].clone();
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                    throw new SolverException("Clone not supported");
+                }
+            }
+        }
+        return copy;
     }
 }

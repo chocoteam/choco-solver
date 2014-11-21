@@ -31,8 +31,10 @@ package org.chocosolver.memory.structure;
  * Interface to manipulate object as integers in some StoredData Structures :
  * e.g : StoredIndexedBipartiteSet
  */
-public interface IndexedObject {
+public interface IndexedObject extends Cloneable {
 
     public int getObjectIdx();
+
+    public IndexedObject clone() throws CloneNotSupportedException;
 
 }

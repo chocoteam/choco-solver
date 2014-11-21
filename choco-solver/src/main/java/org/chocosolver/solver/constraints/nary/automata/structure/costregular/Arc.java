@@ -85,4 +85,18 @@ public class Arc extends DefaultWeightedEdge implements IndexedObject {
         }
     }
 
+    @Override
+    public Arc clone() {
+        Arc arc = (Arc) super.clone();
+        arc.id = id;
+        try {
+            arc.orig = orig.clone();
+            arc.dest = dest.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        arc.value = value;
+        arc.cost = cost;
+        return arc;
+    }
 }

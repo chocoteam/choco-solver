@@ -34,6 +34,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateDoubleVector;
 import org.chocosolver.memory.IStateIntVector;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -100,6 +101,9 @@ public class StoredValuedDirectedMultiGraph {
     public Nodes GNodes;
     public Arcs GArcs;
 
+
+    private StoredValuedDirectedMultiGraph() {
+    }
 
     public StoredValuedDirectedMultiGraph(IEnvironment environment,
                                           DirectedMultigraph<Node, Arc> graph, int[][] layers, int[] starts,
@@ -638,4 +642,64 @@ public class StoredValuedDirectedMultiGraph {
         inStack.clear(idx);
     }
 
+    public StoredValuedDirectedMultiGraph duplicate(Solver solver) {
+        StoredValuedDirectedMultiGraph graph = new StoredValuedDirectedMultiGraph();
+        IEnvironment environment = solver.getEnvironment();
+        graph.starts = starts.clone();
+        graph.offsets = offsets.clone();
+        graph.layers = layers.clone();
+        graph.sourceIndex = layers[0][0];
+        graph.tinkIndex = layers[layers.length - 1][0];
+        graph.toUpdateLeft = new TIntArrayStack();
+        graph.toUpdateRight = new TIntArrayStack();
+
+        graph.GNodes = new Nodes();
+        graph.GArcs = new Arcs();
+
+        int supportLength = this.supports.length;
+
+        graph.supports = new StoredIndexedBipartiteSetWithOffset[supportLength];
+
+        int asize = GArcs.values.length;
+        graph.inStack = new BitSet(asize);//constraint.getSolver().getEnvironment().makeBitSet(asize);
+        graph.GArcs.values = GArcs.values.clone();
+        graph.GArcs.dests = GArcs.dests.clone();
+        graph.GArcs.origs = GArcs.origs.clone();
+        graph.GArcs.costs = GArcs.costs.clone();
+
+        graph.inGraph = inGraph.duplicate(solver);
+
+        for (int i = 0; i < this.supports.length; i++) {
+            graph.supports[i] = this.supports[i].duplicate(solver);
+        }
+
+        int nsize = this.GNodes.outArcs.length;
+        graph.GNodes.outArcs = new StoredIndexedBipartiteSetWithOffset[nsize];
+        graph.GNodes.inArcs = new StoredIndexedBipartiteSetWithOffset[nsize];
+        graph.GNodes.layers = new int[nsize];
+        graph.GNodes.states = new int[nsize];
+
+        graph.GNodes.prevLP = environment.makeIntVector(nsize, Integer.MIN_VALUE);
+        graph.GNodes.nextLP = environment.makeIntVector(nsize, Integer.MIN_VALUE);
+        graph.GNodes.prevSP = environment.makeIntVector(nsize, Integer.MIN_VALUE);
+        graph.GNodes.nextSP = environment.makeIntVector(nsize, Integer.MIN_VALUE);
+
+
+        graph.GNodes.lpfs = environment.makeDoubleVector(nsize, Double.NEGATIVE_INFINITY);
+        graph.GNodes.lpft = environment.makeDoubleVector(nsize, Double.NEGATIVE_INFINITY);
+        graph.GNodes.spfs = environment.makeDoubleVector(nsize, Double.POSITIVE_INFINITY);
+        graph.GNodes.spft = environment.makeDoubleVector(nsize, Double.POSITIVE_INFINITY);
+
+
+        for (int n = 0; n < nsize; n++) {
+            graph.GNodes.layers[n] = GNodes.layers[n];
+            graph.GNodes.states[n] = GNodes.states[n];
+            if (GNodes.outArcs[n] != null) graph.GNodes.outArcs[n] = GNodes.outArcs[n].duplicate(solver);
+            if (GNodes.inArcs[n] != null) graph.GNodes.inArcs[n] = GNodes.inArcs[n].duplicate(solver);
+        }
+
+        graph.initPathInfo();
+        return graph;
+
+    }
 }

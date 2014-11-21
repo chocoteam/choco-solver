@@ -70,4 +70,14 @@ public class Arc implements IndexedObject {
         }
     }
 
+    @Override
+    public Arc clone() throws CloneNotSupportedException {
+        Arc arc = (Arc) super.clone();
+        arc.orig = orig.clone();
+        arc.dest = dest.clone();
+        arc.id = id;
+        arc.value = value;
+        return arc;
+    }
+
 }

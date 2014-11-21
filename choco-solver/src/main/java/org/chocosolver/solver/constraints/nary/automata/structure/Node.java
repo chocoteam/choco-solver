@@ -33,7 +33,7 @@ package org.chocosolver.solver.constraints.nary.automata.structure;
  * Date: Oct 30, 2009
  * Time: 3:46:54 PM
  */
-public class Node {
+public class Node implements Cloneable {
 
 
     public int id;
@@ -51,4 +51,12 @@ public class Node {
 
     }
 
+    @Override
+    public Node clone() throws CloneNotSupportedException {
+        Node node = (Node) super.clone();
+        node.id = id;
+        node.state = state;
+        node.layer = layer;
+        return node;
+    }
 }

@@ -26,10 +26,12 @@
  */
 package org.chocosolver.solver.constraints.nary.automata;
 
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBool;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -70,8 +72,8 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     public PropCostRegular(IntVar[] variables, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph) {
         super(variables, PropagatorPriority.CUBIC, true);
-        this.idms = new IIntDeltaMonitor[this.vars.length-1];
-        for (int i = 0; i < this.vars.length-1; i++) {
+        this.idms = new IIntDeltaMonitor[this.vars.length - 1];
+        for (int i = 0; i < this.vars.length - 1; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         this.zIdx = vars.length - 1;
@@ -91,8 +93,7 @@ public class PropCostRegular extends Propagator<IntVar> {
     /**
      * Build internal structure of the propagator, if necessary
      *
-     * @throws solver.exception.ContradictionException
-     *          if initialisation encounters a contradiction
+     * @throws org.chocosolver.solver.exception.ContradictionException if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
@@ -107,7 +108,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             initialize();
         }
         filter();
-        for (int i = 0; i < idms.length-1; i++) {
+        for (int i = 0; i < idms.length - 1; i++) {
             idms[i].unfreeze();
         }
     }
@@ -131,7 +132,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             int first = this.graph.sourceIndex;
             boolean found;
             double cost = 0.0;
-            int[] str = new int[vars.length-1];
+            int[] str = new int[vars.length - 1];
             for (int i = 0; i < vars.length - 1; i++) {
                 found = false;
                 str[i] = vars[i].getValue();
@@ -309,6 +310,24 @@ public class PropCostRegular extends Propagator<IntVar> {
                 }
                 it.dispose();
             }
+        }
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntVar[] aVars = new IntVar[this.vars.length];
+            for (int i = 0; i < this.vars.length; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            ICostAutomaton nauto = null;
+            try {
+                nauto = (ICostAutomaton) cautomaton.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            identitymap.put(this, new PropCostRegular(aVars, nauto, graph.duplicate(solver)));
         }
     }
 }
