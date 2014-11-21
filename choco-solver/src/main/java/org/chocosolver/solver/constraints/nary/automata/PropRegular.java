@@ -27,8 +27,10 @@
 package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
@@ -72,7 +74,7 @@ public class PropRegular extends Propagator<IntVar> {
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
-		graph = initGraph(solver.getEnvironment(), vars, automaton);
+        graph = initGraph(solver.getEnvironment(), vars, automaton);
     }
 
     @Override
@@ -127,14 +129,14 @@ public class PropRegular extends Propagator<IntVar> {
 
         @Override
         public void execute(int i) throws ContradictionException {
-			p.graph.clearSupports(idxVar,i , p);
+            p.graph.clearSupports(idxVar, i, p);
         }
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
-        sb.append("Regular@").append(_num).append("(");
+        sb.append("Regular").append("(");
         for (int i = 0; i < vars.length; i++) {
             if (i > 0) sb.append(", ");
             Variable var = vars[i];
@@ -169,8 +171,8 @@ public class PropRegular extends Propagator<IntVar> {
         DirectedMultigraph<Node, Arc> graph;
 
         int n = vars.length;
-        graph = new DirectedMultigraph<Node, Arc>(new Arc.ArcFactory());
-        ArrayList<HashSet<Arc>> tmp = new ArrayList<HashSet<Arc>>(totalSizes);
+        graph = new DirectedMultigraph<>(new Arc.ArcFactory());
+        ArrayList<HashSet<Arc>> tmp = new ArrayList<>(totalSizes);
         for (int i = 0; i < totalSizes; i++)
             tmp.add(new HashSet<Arc>());
 
@@ -181,11 +183,11 @@ public class PropRegular extends Propagator<IntVar> {
 
 
         //forward pass, construct all paths described by the automaton for word of length nbVars.
-		TIntHashSet[] layer = new TIntHashSet[n+1];
-		TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
-		for (i = 0; i <= n; i++) {
-			layer[i] = new TIntHashSet();
-		}
+        TIntHashSet[] layer = new TIntHashSet[n + 1];
+        TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
+        for (i = 0; i <= n; i++) {
+            layer[i] = new TIntHashSet();
+        }
         layer[0].add(auto.getInitialState());
         TIntHashSet nexts = new TIntHashSet();
         for (i = 0; i < n; i++) {
@@ -198,7 +200,7 @@ public class PropRegular extends Propagator<IntVar> {
                     auto.delta(k, j, nexts);
                     for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
                         int succ = it.next();
-                        layer[i+1].add(succ);
+                        layer[i + 1].add(succ);
                     }
                     if (!nexts.isEmpty()) {
                         int idx = starts[i] + j - offsets[i];
@@ -239,7 +241,7 @@ public class PropRegular extends Propagator<IntVar> {
                         boolean added = false;
                         for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
                             int qn = it.next();
-                            if (layer[i+1].contains(qn)) {
+                            if (layer[i + 1].contains(qn)) {
 
                                 added = true;
                                 Node a = in[i * auto.getNbStates() + k];
@@ -278,4 +280,21 @@ public class PropRegular extends Propagator<IntVar> {
         return new StoredDirectedMultiGraph(environment, graph, starts, offsets, totalSizes);
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            IntVar[] aVars = new IntVar[this.vars.length];
+            for (int i = 0; i < this.vars.length; i++) {
+                this.vars[i].duplicate(solver, identitymap);
+                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+            }
+            IAutomaton nauto = null;
+            try {
+                nauto = automaton.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            identitymap.put(this, new PropRegular(aVars, nauto));
+        }
+    }
 }

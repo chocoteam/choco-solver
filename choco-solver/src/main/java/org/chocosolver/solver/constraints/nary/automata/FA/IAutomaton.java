@@ -36,7 +36,7 @@ import gnu.trove.set.hash.TIntHashSet;
  * Date: Nov 19, 2010
  * Time: 2:06:37 PM
  */
-public interface IAutomaton {
+public interface IAutomaton extends Cloneable {
 
 
     IAutomaton clone() throws CloneNotSupportedException;

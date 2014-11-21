@@ -31,6 +31,7 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.binary.PropScale;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
 import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
@@ -989,7 +990,8 @@ public class DuplicateTest {
     public void test51() {
         Solver solver = new Solver("Choco");
         IntVar[] vs = VF.enumeratedArray("vs", 4, 1, 4, solver);
-        solver.post(ICF.regular(vs, null));
+        FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
+        solver.post(ICF.regular(vs, auto));
 
         Solver copy = solver.duplicateModel();
 
