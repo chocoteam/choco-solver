@@ -44,8 +44,8 @@ import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.SearchLoop;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
@@ -70,8 +70,8 @@ import java.util.Arrays;
  * @author Xavier Lorca
  * @author Charles Prud'homme
  * @version 0.01, june 2010
- * @see solver.variables.Variable
- * @see solver.constraints.Constraint
+ * @see org.chocosolver.solver.variables.Variable
+ * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
 public class Solver implements Serializable {
@@ -472,7 +472,7 @@ public class Solver implements Serializable {
     /**
      * Unlink the variable from <code>this</code>.
      *
-     * @param variable
+     * @param variable variable to un-associate
      */
     public void unassociates(Variable variable) {
         if (variable.getNbProps() > 0) {
@@ -651,7 +651,7 @@ public class Solver implements Serializable {
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}: the optimal solution has been found and
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
      */
@@ -661,9 +661,9 @@ public class Solver implements Serializable {
 
     /**
      * Attempts to find the first solution of the declared problem.
-     * Then, following solutions can be found using {@link solver.Solver#nextSolution()}.
+     * Then, following solutions can be found using {@link org.chocosolver.solver.Solver#nextSolution()}.
      * <p/>
-     * An alternative is to call {@link solver.Solver#isFeasible()} which tells, whether or not, a solution has been found.
+     * An alternative is to call {@link org.chocosolver.solver.Solver#isFeasible()} which tells, whether or not, a solution has been found.
      *
      * @return <code>true</code> if and only if a solution has been found.
      */
@@ -809,7 +809,7 @@ public class Solver implements Serializable {
      */
     protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new TwoBucketPropagationEngine(this));
+            this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
@@ -823,7 +823,7 @@ public class Solver implements Serializable {
      */
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new TwoBucketPropagationEngine(this));
+            this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
         engine.propagate();
     }
@@ -953,7 +953,7 @@ public class Solver implements Serializable {
      * Indeed, duplicating a solver should only be considered while dealing with multi-threading.
      *
      * @return a copy of <code>this</code>
-     * @throws solver.exception.SolverException if the search has already begun.
+     * @throws org.chocosolver.solver.exception.SolverException if the search has already begun.
      */
     public Solver duplicateModel() {
         if (environment.getWorldIndex() > 0) {

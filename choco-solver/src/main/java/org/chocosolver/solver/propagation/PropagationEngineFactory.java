@@ -66,7 +66,7 @@ public enum PropagationEngineFactory {
     DEFAULT() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return TWOBUCKETPROPAGATIONENGINE.make(solver);
+            return PROPAGATORDRIVEN_7QD.make(solver);
         }
     };
 
