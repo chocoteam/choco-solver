@@ -33,9 +33,11 @@ import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
+import solver.variables.delta.ISetDeltaMonitor;
 import solver.variables.events.IntEventType;
 import solver.variables.events.SetEventType;
 import util.ESat;
+import util.procedure.IntProcedure;
 
 /**
  * 	Not Member propagator filtering Set->Int
@@ -49,15 +51,24 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 
 	IntVar iv;
 	SetVar sv;
+	ISetDeltaMonitor sdm;
+	IntProcedure elemRem;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNotMemberSetInt(IntVar iv, SetVar sv){
-		super(new SetVar[]{sv}, PropagatorPriority.UNARY, true);
-		this.iv = iv;
-		this.sv = sv;
+	public PropNotMemberSetInt(IntVar intVar, SetVar setVar){
+		super(new SetVar[]{setVar}, PropagatorPriority.UNARY, true);
+		this.iv = intVar;
+		this.sv = setVar;
+		this.sdm = sv.monitorDelta(aCause);
+		this.elemRem = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				iv.removeValue(i, aCause);
+			}
+		};
 	}
 
 	//***********************************************************************************
@@ -74,6 +85,16 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 		for(int v=sv.getKernelFirst();v!=SetVar.END;v=sv.getKernelNext()){
 			iv.removeValue(v,aCause);
 		}
+		if(sv.isInstantiated()) setPassive();
+		sdm.unfreeze();
+	}
+
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		sdm.freeze();
+		sdm.forEach(elemRem, SetEventType.ADD_TO_KER);
+		sdm.unfreeze();
+		if(sv.isInstantiated()) setPassive();
 	}
 
 	@Override

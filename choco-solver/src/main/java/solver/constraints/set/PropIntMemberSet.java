@@ -196,7 +196,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
             if (!set.envelopeContains(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.isInstantiated()) {
+                if (set.kernelContains(iv.getValue())) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;
