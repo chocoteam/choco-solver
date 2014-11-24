@@ -11,13 +11,15 @@ else
 fi
 
 if [ ${BRANCH} = "release" ]; then
+    echo "Start release"
     #Extract the version
-    VERSION=getVersion
+    VERSION=$(getVersion)
     TAG="choco-${VERSION}"
     COMMIT=$(git rev-parse HEAD)
+    echo $VERSION
 
     #Quit if tag already exists
-    git ls-remote --exit-code --tags origin ${TAG} ||exit 1
+    git ls-remote --exit-code --tags origin ${TAG} && quit "tag ${TAG} already exists"
 
     #Working version ?
     # Well, we assume the tests have been run before, and everything is OK for the release
