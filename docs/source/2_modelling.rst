@@ -509,8 +509,12 @@ Available constraints
 :ref:`51_rcstr_main`.
 
 
+.. _512_constraint_things_to_know:
+
 Things to know about constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _512_automaton:
 
 Automaton-based Constraints
 """""""""""""""""""""""""""
@@ -646,3 +650,41 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 :ref:`51_lcstr_maxboolarraylesseqvar`,
 :ref:`51_lcstr_sumboolarraygreatereqvar`,
 :ref:`51_lcstr_sumboolarraylesseqvar`.
+
+.. _542_complex_clauses:
+
+Declaring complex clauses
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is a convenient way to declare complex clauses by calling :ref:`51_lcstr_clauses`.
+The method takes a ``LogOp`` and an instance of ``Solver`` as input, extracts the underlying clauses and add them to the ``SatFactory``.
+
+
+A ``LogOp`` is an implementation of ``ILogical``, just like ``BoolVar``, and provides the following API:
+
+  ``LogOp and(ILogical... operands)`` : create a conjunction, results in `true` if all of its operands are `true`.
+
+  ``LogOp ifOnlyIf(ILogical a, ILogical b)``:  create a biconditional, results in `true` if and only if both operands are false or both operands are `true`.
+
+  ``LogOp ifThenElse(ILogical a, ILogical b, ILogical c)`` : create an implication, results in `true` if ``a`` is `true` and ``b`` is `true` or ``a`` is ``false` and ``c`` is `true.
+
+  ``LogOp implies(ILogical a, ILogical b)`` : create an implication, results in `true` if ``a`` is `false` or ``b`` is `true`.
+
+  ``LogOp reified(BoolVar b, ILogical tree)`` : create a logical connection between ``b`` and ``tree``.
+
+  ``LogOp or(ILogical... operands)`` : create a disjunction, results in `true` whenever one or more of its operands are `true`.
+
+  ``LogOp nand(ILogical... operands)`` : create an alternative denial, results in if at least one of its operands is `false`.
+
+  ``LogOp nor(ILogical... operands)`` : create a joint denial, results in `true` if all of its operands are `false`.
+
+  ``LogOp xor(ILogical a, ILogical b)`` : create an exclusive disjunction, results in `true` whenever both operands differ.
+
+  ``ILogical negate(ILogical l)`` : return the logical complement of `l`.
+
+The resulting logical operation can be very verbose, but certainly more easy to declare: ::
+
+    SatFactory.addClauses(LogOp.and(LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d)), e));
+    SatFactory.addClauses(LogOp.nor(LogOp.or(LogOp.nand(a, b), c), d));
+    SatFactory.addClauses(LogOp.and(LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d)), e));
+

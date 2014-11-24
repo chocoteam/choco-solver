@@ -469,16 +469,11 @@ Choco |version| : changes
 =========================
 
 
-3.2.2
+3.3.0
 -----
 
-- Add notmember(IntVar, SetVar) constraint (more efficient than not(member)) -- #240.
-- Create MasterSolver and SlaveSolver classes to deal with multi-thread resolution -- #229.
-- Add external configuration of the search strategy through a binder -- #229.
-- Improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly. -- #234.
-- Add a MDD-based propagator (ICF.mddc).
-- Refactor logging fmwk: add Chatterbox class as a unique entry point for messaging; Logging still relies on SLF4J. -- #235.
-
-Bug fixes: #225, #227, #231, #233, #236.
+- :ref:`512_constraint_things_to_know`
+- :ref:`512_automaton`
+- :ref:`542_complex_clauses`
 
 

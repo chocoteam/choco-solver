@@ -82,14 +82,36 @@ public final class LogOp implements ILogical {
     }
 
 
-    public static LogOp and(ILogical... children) {
-        return new LogOp(Operator.AND, Type.POSITIVE, children);
+    /**
+     * Create a conjunction, results in true if all of its operands are true
+     *
+     * @param op operands
+     * @return a new logical operator
+     */
+    public static LogOp and(ILogical... op) {
+        return new LogOp(Operator.AND, Type.POSITIVE, op);
     }
 
+    /**
+     * Create a biconditional, results in true if and only if both operands are false
+     * or both operands are true
+     *
+     * @param a operand
+     * @param b operand
+     * @return a new logical operator
+     */
     public static LogOp ifOnlyIf(ILogical a, ILogical b) {
         return and(implies(a, b), implies(b, a));
     }
 
+    /**
+     * Create an implication, results in true if a is true` and b is true or a is false and c is true.
+     *
+     * @param a operand
+     * @param b operand
+     * @param c operand
+     * @return a new logical operator
+     */
     public static LogOp ifThenElse(ILogical a, ILogical b, ILogical c) {
         try {
             ILogical na = negate(a);
@@ -100,6 +122,13 @@ public final class LogOp implements ILogical {
         return null;
     }
 
+    /**
+     * Create an implication, results in true if a is false or b is true.
+     *
+     * @param a operand
+     * @param b operand
+     * @return a new logical operator
+     */
     public static LogOp implies(ILogical a, ILogical b) {
         try {
             ILogical na = negate(a);
@@ -110,6 +139,12 @@ public final class LogOp implements ILogical {
         return null;
     }
 
+    /**
+     * create a logical connection between ``b`` and ``tree``.
+     * @param b operand
+     * @param tree operand
+     * @return
+     */
     public static LogOp reified(BoolVar b, ILogical tree) {
         try {
             BoolVar nb = b.not();
@@ -121,18 +156,43 @@ public final class LogOp implements ILogical {
         return null;
     }
 
-    public static LogOp or(ILogical... children) {
-        return new LogOp(Operator.OR, Type.POSITIVE, children);
+    /**
+     * Create a disjunction, results in true whenever one or more of its operands are true
+     *
+     * @param op operands
+     * @return a new logical operator
+     */
+    public static LogOp or(ILogical... op) {
+        return new LogOp(Operator.OR, Type.POSITIVE, op);
     }
 
-    public static LogOp nand(ILogical... children) {
-        return new LogOp(Operator.AND, Type.NEGATIVE, children);
+    /**
+     * Create an alternative denial, results in if at least one of its operands is false.
+     *
+     * @param op operands
+     * @return a new logical operator
+     */
+    public static LogOp nand(ILogical... op) {
+        return new LogOp(Operator.AND, Type.NEGATIVE, op);
     }
 
-    public static LogOp nor(ILogical... children) {
-        return new LogOp(Operator.OR, Type.NEGATIVE, children);
+    /**
+     * Create a joint denial, results in `true` if all of its operands are false.
+     *
+     * @param op operands
+     * @return a new logical operator
+     */
+    public static LogOp nor(ILogical... op) {
+        return new LogOp(Operator.OR, Type.NEGATIVE, op);
     }
 
+    /**
+     * Create an exclusive disjunction, results in true whenever both operands differ.
+     *
+     * @param a operand
+     * @param b operand
+     * @return a new logical operator
+     */
     public static LogOp xor(ILogical a, ILogical b) {
         try {
             ILogical na = negate(a);
@@ -144,6 +204,13 @@ public final class LogOp implements ILogical {
         return null;
     }
 
+    /**
+     * Create the logical complement of <code>l</code>.
+     *
+     * @param l operand
+     * @return a new ILogical
+     * @throws CloneNotSupportedException
+     */
     private static ILogical negate(ILogical l) throws CloneNotSupportedException {
         if (l.isLit()) {
             return ((BoolVar) l).not();
@@ -180,10 +247,10 @@ public final class LogOp implements ILogical {
         return false;
     }
 
-	@Override
-	public void setNot(boolean isNot){
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void setNot(boolean isNot) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Returns the number of direct children of <code>this</code>
