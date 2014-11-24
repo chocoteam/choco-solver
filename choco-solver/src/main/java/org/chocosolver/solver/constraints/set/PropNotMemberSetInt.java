@@ -28,6 +28,8 @@
 
 package org.chocosolver.solver.constraints.set;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -48,10 +50,10 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-	IntVar iv;
-	SetVar sv;
-	ISetDeltaMonitor sdm;
-	IntProcedure elemRem;
+    IntVar iv;
+    SetVar sv;
+    ISetDeltaMonitor sdm;
+    IntProcedure elemRem;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -96,26 +98,40 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 		if(sv.isInstantiated()) setPassive();
 	}
 
-	@Override
-	public ESat isEntailed() {
-		if(iv.isInstantiated()){
-			int v = iv.getValue();
-			if(sv.envelopeContains(v)){
-				if(sv.kernelContains(v)){
-					return ESat.FALSE;
-				}else{
-					return ESat.UNDEFINED;
-				}
-			}else{
-				return ESat.TRUE;
-			}
-		}else{
-			for(int v=iv.getLB();v<=iv.getUB();v=iv.nextValue(v)){
-				if(!sv.kernelContains(v)){
-					return ESat.UNDEFINED;
-				}
-			}
-		}
-		return ESat.FALSE;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (iv.isInstantiated()) {
+            int v = iv.getValue();
+            if (sv.envelopeContains(v)) {
+                if (sv.kernelContains(v)) {
+                    return ESat.FALSE;
+                } else {
+                    return ESat.UNDEFINED;
+                }
+            } else {
+                return ESat.TRUE;
+            }
+        } else {
+            for (int v = iv.getLB(); v <= iv.getUB(); v = iv.nextValue(v)) {
+                if (!sv.kernelContains(v)) {
+                    return ESat.UNDEFINED;
+                }
+            }
+        }
+        return ESat.FALSE;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        if (!identitymap.containsKey(this)) {
+            sv.duplicate(solver, identitymap);
+            SetVar S = (SetVar) identitymap.get(sv);
+
+            iv.duplicate(solver, identitymap);
+            IntVar I = (IntVar) identitymap.get(iv);
+
+            identitymap.put(this, new PropNotMemberSetInt(I, S));
+        }
+
+    }
 }

@@ -1744,5 +1744,24 @@ public class DuplicateTest {
         Assert.assertEquals(copy.toString(), solver.toString());
         Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
     }
+
+    @Test(groups = "1s")
+    public void test84() {
+        Solver solver = new Solver("Choco");
+        IntVar I = VF.enumerated("I", 1, 5, solver);
+        SetVar T = VF.set("T", 1, 3, solver);
+
+        solver.post(SCF.not_member(I, T));
+
+        Solver copy = solver.duplicateModel();
+
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
 }
 
