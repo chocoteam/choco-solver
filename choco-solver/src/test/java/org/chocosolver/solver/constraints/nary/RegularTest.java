@@ -30,6 +30,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
@@ -195,5 +196,23 @@ public class RegularTest {
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4371696);
+    }
+
+    @Test(groups = "1m")
+    public void compareVersionSpeedNew2() {
+        int n = 5;
+        FiniteAutomaton auto = new FiniteAutomaton("(0|<10>|<20>)*(0|<10>)");
+
+        Solver solver = new Solver();
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < n; i++) {
+            vars[i] = VariableFactory.enumerated("x_" + i, new int[]{0, 10, 20}, solver);
+        }
+        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.set(IntStrategyFactory.lexico_LB(vars));
+
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 162);
     }
 }

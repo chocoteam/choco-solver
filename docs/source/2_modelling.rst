@@ -509,6 +509,34 @@ Available constraints
 :ref:`51_rcstr_main`.
 
 
+Things to know about constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Automaton-based Constraints
+"""""""""""""""""""""""""""
+
+:ref:`51_icstr_creg`, :ref:`51_icstr_mcreg` and :ref:`51_icstr_reg` rely on an automaton, declared implicitly or explicitly.
+There are two kinds of ``IAutomaton`` : ``FiniteAutomaton``, needed for :ref:`51_icstr_creg`, and `CostAutomaton`, required for :ref:`51_icstr_mcreg` and :ref:`51_icstr_reg`.
+A ``CostAutomaton`` is an extension of ``FiniteAutomaton`` where costs can be declared per transition.
+
+``FiniteAutomaton`` embeds an ``Automaton`` object provided by the ``dk.brics.automaton`` library.
+Such an automaton accepts fixed-size words made of multiple ``char`` s, but the regular constraints rely on ``IntVar`` s.
+So,  mapping between ``char`` (needed by the underlying library) and ``int`` (declared in ``IntVar``) is made.
+The mapping enables declaring regular expressions where a symbol is not only a digit between `0` and `9` but any positive number.
+Then to distinct, in the word `101`, the symbols `0`, `1`, `10` and `101`, two additional ``char`` are allowed in a regexp: `<` and `>` which delimits numbers.
+
+In summary, a valid regexp for the :ref:`51_icstr_creg`, :ref:`51_icstr_mcreg` and :ref:`51_icstr_reg` constraints
+is a combination of **digits** and Java Regexp special characters.
+
+.. admonition:: Examples of allowed RegExp
+
+        ``"0*11111110+10+10+11111110*"``, ``"11(0|1|2)*00"``, ``"(0|<10> |<20>)*(0|<10>)"``.
+
+.. admonition:: Example of forbidden RegExp
+
+        ``"abc(a|b|c)*"``.
+
+
 Posting constraints
 -------------------
 
@@ -618,4 +646,3 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 :ref:`51_lcstr_maxboolarraylesseqvar`,
 :ref:`51_lcstr_sumboolarraygreatereqvar`,
 :ref:`51_lcstr_sumboolarraylesseqvar`.
-
