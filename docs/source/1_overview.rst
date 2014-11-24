@@ -85,7 +85,7 @@ A reference to this manual, or more globally to Choco |version|, is made like th
       author        = {Charles Prud'homme, Jean-Guillaume Fages, Xavier Lorca},
       title         = {Choco3 Documentation},
       year          = {2014},
-      organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241},
+      organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241, COSLING S.A.S.},
       timestamp     = {Thu, 02 Oct 2014},
       url           = {http://www.choco-solver.org },
     }
@@ -93,17 +93,17 @@ A reference to this manual, or more globally to Choco |version|, is made like th
 Who contribute to Choco ?
 =========================
 
-+------------------------------------+-----------------------------------------------------------------------------+
-|**Core developers**                 |  Charles Prud'homme and Jean-Guillaume Fages.                               |
-+------------------------------------+-----------------------------------------------------------------------------+
-+------------------------------------+-----------------------------------------------------------------------------+
-|**Main contributors**               |  Xavier Lorca, Narendra Jussien, Fabien Hermenier, Jimmy Liang.             |
-+------------------------------------+-----------------------------------------------------------------------------+
-+------------------------------------+-----------------------------------------------------------------------------+
-|**Previous versions contributors**  |  François Laburthe, Hadrien Cambazard, Guillaume Rochart, Arnaud Malapert,  |
-|                                    |  Sophie Demassey, Nicolas Beldiceanu, Julien Menana, Guillaume Richaud,     |
-|                                    |  Thierry Petit, Julien Vion, Stéphane Zampelli.                             |
-+------------------------------------+-----------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
+|**Core developers**                 |  Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241) and Jean-Guillaume Fages (COSLING S.A.S.).   |
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
+|**Main contributors**               |  Xavier Lorca, Narendra Jussien, Fabien Hermenier, Jimmy Liang.                                           |
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
+|**Previous versions contributors**  |  François Laburthe, Hadrien Cambazard, Guillaume Rochart, Arnaud Malapert,                                |
+|                                    |  Sophie Demassey, Nicolas Beldiceanu, Julien Menana, Guillaume Richaud,                                   |
+|                                    |  Thierry Petit, Julien Vion, Stéphane Zampelli.                                                           |
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
 
 If you want to contribute, let us know.
 
