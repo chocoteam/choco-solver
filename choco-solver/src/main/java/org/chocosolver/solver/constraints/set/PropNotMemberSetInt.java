@@ -52,6 +52,7 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 
     IntVar iv;
     SetVar sv;
+
     ISetDeltaMonitor sdm;
     IntProcedure elemRem;
 
