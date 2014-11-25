@@ -27,7 +27,6 @@
 
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -42,7 +41,7 @@ import java.util.Arrays;
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).
  * <br/>
- * <p/>
+ * <p>
  * Note that, for the sack of readability, the Java naming convention is not respected for methods arguments.
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
@@ -121,9 +120,9 @@ public class VariableFactory {
      * Build an integer variable whose domain representation is abstracted by two integers:
      * a lower bound and an upper bound.
      * <p/> Its initial domain is [MIN,MAX]
-     * <p/>
+     * <p>
      * This API automatically selects the way the domain is represented by checking its size and by comparing
-     * it to {@code Configuration.MAX_DOM_SIZE_FOR_ENUM}:
+     * it to {@link org.chocosolver.solver.Settings#getMaxDomSizeForEnumerated()}:
      * a domain size below this value calls {@code VariableFactory.enumerated}, {@code VariableFactory.bounded} otherwise.
      *
      * @param NAME   name of the variable
@@ -131,12 +130,12 @@ public class VariableFactory {
      * @param MAX    initial upper bound
      * @param SOLVER solver involving the variable
      * @return an integer variable with a bounded domain
-     * @see solver.variables.VariableFactory#bounded(String, int, int, solver.Solver)
-     * @see solver.variables.VariableFactory#enumerated(String, int, int, solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.Solver)
      */
     public static IntVar integer(String NAME, int MIN, int MAX, Solver SOLVER) {
         int size = MAX - MIN + 1;
-        if (size < Configuration.MAX_DOM_SIZE_FOR_ENUM) {
+        if (size < SOLVER.getSettings().getMaxDomSizeForEnumerated()) {
             return enumerated(NAME, MIN, MAX, SOLVER);
         } else {
             return bounded(NAME, MIN, MAX, SOLVER);
@@ -153,9 +152,9 @@ public class VariableFactory {
      * @param MAX    initial upper bound
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with bounded domains
-     * @see solver.variables.VariableFactory#integer(String, int, int, solver.Solver)
-     * @see solver.variables.VariableFactory#bounded(String, int, int, solver.Solver)
-     * @see solver.variables.VariableFactory#enumerated(String, int, int, solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.Solver)
      */
     public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
@@ -176,9 +175,9 @@ public class VariableFactory {
      * @param MAX    initial upper bound
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with bounded domains
-     * @see solver.variables.VariableFactory#integer(String, int, int, solver.Solver)
-     * @see solver.variables.VariableFactory#bounded(String, int, int, solver.Solver)
-     * @see solver.variables.VariableFactory#enumerated(String, int, int, solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.Solver)
      */
     public static IntVar[][] integerMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
@@ -479,8 +478,8 @@ public class VariableFactory {
      * Uses a BitSet representation for both the envelope and the kernel
      *
      * @param NAME        name of the variable
-     * @param MIN_ELEMENT
-     * @param MAX_ELEMENT
+     * @param MIN_ELEMENT lower bound
+     * @param MAX_ELEMENT upper bound
      * @param SOLVER      solver involving the variable
      * @return a set variable
      */
@@ -563,7 +562,7 @@ public class VariableFactory {
      * Sorts the input array if it is not already sorted,
      * and removes multiple occurrences of the same value
      *
-     * @param values
+     * @param values array of values
      * @return a sorted array containing each value of values exactly once
      */
     private static int[] sortIfNot(int[] values) {
@@ -621,11 +620,11 @@ public class VariableFactory {
 
     /**
      * Create a specific integer variable whom domain is reduced to the singleton {VALUE}.
-     * <p/>
+     * <p>
      * This API does not require any name, a default one will be assigned to the variable.
      * Furthermore, the object created will be cached, if not already, to avoid creating multiple occurrence of the
      * same "constant" variable.
-     * <p/>
+     * <p>
      * If one want to avoid the caching process, the following API should be used:
      * VariableFactory#fixed(String NAME, int VALUE, Solver SOLVER)
      *
@@ -638,7 +637,7 @@ public class VariableFactory {
 
     /**
      * Retrieve the specific zero/false boolvar.
-     * <p/>
+     * <p>
      *
      * @param SOLVER the solver to build the integer variable in.
      */
@@ -648,7 +647,7 @@ public class VariableFactory {
 
     /**
      * Retrieve the specific one/true boolvar.
-     * <p/>
+     * <p>
      *
      * @param SOLVER the solver to build the integer variable in.
      */
@@ -662,7 +661,7 @@ public class VariableFactory {
 
     /**
      * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
-     * <p/>
+     * <p>
      * <b>Beware: if the name start with "cste -- ", the resulting variable will be cached.</b>
      *
      * @param NAME   name of the constant
@@ -673,12 +672,12 @@ public class VariableFactory {
         if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
-		IntVar cste;
-		if(VALUE == 0 || VALUE == 1){
-			cste = new FixedBoolVarImpl(NAME, VALUE, SOLVER);
-		}else {
-			cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
-		}
+        IntVar cste;
+        if (VALUE == 0 || VALUE == 1) {
+            cste = new FixedBoolVarImpl(NAME, VALUE, SOLVER);
+        } else {
+            cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
+        }
         if (NAME.equals(CSTE_NAME + VALUE)) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
@@ -717,7 +716,7 @@ public class VariableFactory {
 
     /**
      * Create an offset view based on VAR, such that, the resulting view is defined on VAR + CSTE.
-     * <p/>
+     * <p>
      * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
      * Any operations on this will transformed to operations on VAR following the offset rules.
      *
@@ -728,7 +727,7 @@ public class VariableFactory {
         if (CSTE == 0) {
             return VAR;
         }
-        if (Configuration.ENABLE_VIEWS) {
+        if (VAR.getSolver().getSettings().enableViews()) {
             return new OffsetView(VAR, CSTE, VAR.getSolver());
         } else {
             Solver s = VAR.getSolver();
@@ -748,7 +747,7 @@ public class VariableFactory {
 
     /**
      * Create a kind of clone of VAR (an offset view with CSTE= 0), such that, the resulting view is defined on VAR.
-     * <p/>
+     * <p>
      * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
      * Any operations on this will transformed to operations on VAR following the offset rules.
      *
@@ -765,7 +764,7 @@ public class VariableFactory {
 
     /**
      * Create a kind of clone of VAR such that, the resulting view is defined on VAR.
-     * <p/>
+     * <p>
      * The resulting BoolVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
      * Any operations on this will transformed to operations on VAR.
      *
@@ -776,7 +775,7 @@ public class VariableFactory {
     }
 
     private static IntVar eqint(IntVar ivar) {
-        if (Configuration.ENABLE_VIEWS) {
+        if (ivar.getSolver().getSettings().enableViews()) {
             return new EqView(ivar, ivar.getSolver());
         } else {
             IntVar ov = ivar.duplicate();
@@ -786,7 +785,7 @@ public class VariableFactory {
     }
 
     private static BoolVar eqbool(BoolVar BOOL) {
-        if (Configuration.ENABLE_VIEWS) {
+        if (BOOL.getSolver().getSettings().enableViews()) {
             return new BoolEqView(BOOL, BOOL.getSolver());
 
         } else {
@@ -802,14 +801,14 @@ public class VariableFactory {
 
     /**
      * Create a view over BOOL holding the logical negation of BOOL (ie, &not;BOOL).
-     * <p/>
+     * <p>
      * The resulting BoolVar does not have explicit domain: it relies on the domain of BOOL for reading and writing operations.
      * Any operations on this will transformed to operations on VAR following the "not" rules.
      *
      * @param BOOL a boolean variable.
      */
     public static BoolVar not(BoolVar BOOL) {
-        if (Configuration.ENABLE_VIEWS) {
+        if (BOOL.getSolver().getSettings().enableViews()) {
             return new BoolNotView(BOOL, BOOL.getSolver());
         } else {
             if (BOOL.hasNot()) {
@@ -829,14 +828,14 @@ public class VariableFactory {
     /**
      * Create a view over VAR holding : &minus;VAR.
      * That is if VAR = [a,b], then this = [-b,-a].
-     * <p/>
+     * <p>
      * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
      * Any operations on this will transformed to operations on VAR following the "minus" rules.
      *
      * @param VAR an integer variable
      */
     public static IntVar minus(IntVar VAR) {
-        if (Configuration.ENABLE_VIEWS) {
+        if (VAR.getSolver().getSettings().enableViews()) {
             return new MinusView(VAR, VAR.getSolver());
         } else {
             Solver s = VAR.getSolver();
@@ -856,13 +855,13 @@ public class VariableFactory {
 
     /**
      * Create a view over VAR such that: VAR&times;CSTE (CSTE&gt;-2).
-     * <p/>
+     * <p>
      * <br/>- if CSTE &lt; -1, throws an exception;
      * <br/>- if CSTE = -1, returns a minus view;
      * <br/>- if CSTE = 0, returns a fixed variable;
      * <br/>- if CSTE = 1, returns VAR;
      * <br/>- otherwise, returns a scale view;
-     * <p/>
+     * <p>
      * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
      * Any operations on this will transformed to operations on VAR following the "scale" rules.
      *
@@ -882,7 +881,7 @@ public class VariableFactory {
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
-                if (Configuration.ENABLE_VIEWS) {
+                if (VAR.getSolver().getSettings().enableViews()) {
                     var = new ScaleView(VAR, CSTE, VAR.getSolver());
                 } else {
                     Solver s = VAR.getSolver();
@@ -905,12 +904,12 @@ public class VariableFactory {
 
     /**
      * Create a view over VAR such that: |VAR|.
-     * <p/>
+     * <p>
      * <br/>- if VAR is already instantiated, returns a fixed variable;
      * <br/>- if the lower bound of VAR is greater or equal to 0, returns VAR;
      * <br/>- if the upper bound of VAR is less or equal to 0, return a minus view;
      * <br/>- otherwise, returns an absolute view;
-     * <p/>
+     * <p>
      * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
      * Any operations on this will transformed to operations on VAR following the "absolute" rules.
      *
@@ -947,7 +946,7 @@ public class VariableFactory {
      * @param PRECISION used to evaluate the instantiation of the view.
      */
     public static RealVar real(IntVar VAR, double PRECISION) {
-        if (Configuration.ENABLE_VIEWS) {
+        if (VAR.getSolver().getSettings().enableViews()) {
             return new RealView(VAR, PRECISION);
         } else {
             Solver s = VAR.getSolver();
@@ -966,11 +965,11 @@ public class VariableFactory {
      *
      * @param VARS      array of integer variables
      * @param PRECISION used to evaluate the instantiation of each view.
-     * @return
+     * @return array of RealVar
      */
     public static RealVar[] real(IntVar[] VARS, double PRECISION) {
         RealVar[] reals = new RealVar[VARS.length];
-        if (Configuration.ENABLE_VIEWS) {
+        if (VARS[0].getSolver().getSettings().enableViews()) {
             for (int i = 0; i < VARS.length; i++) {
                 reals[i] = real(VARS[i], PRECISION);
             }

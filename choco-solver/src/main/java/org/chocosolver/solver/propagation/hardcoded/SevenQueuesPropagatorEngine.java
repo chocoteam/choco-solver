@@ -27,8 +27,8 @@
 package org.chocosolver.solver.propagation.hardcoded;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -42,6 +42,8 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.queues.CircularQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,13 +52,15 @@ import java.util.List;
  * This engine is priority-driven constraint-oriented seven queues engine.
  * <br/>On a call to {@code onVariableUpdate}, it stores the event generated and schedules the propagator in
  * one of the 7 queues wrt to its priority for future revision.
- * <p/>
+ * <p>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 05/07/12
  */
 public class SevenQueuesPropagatorEngine implements IPropagationEngine {
+
+    final Logger LOGGER = LoggerFactory.getLogger(SevenQueuesPropagatorEngine.class);
 
     private static final int WORD_MASK = 0xffffffff;
 
@@ -76,11 +80,14 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     final PropagationTrigger trigger; // an object that starts the propagation
 
+    final Settings.Idem idemStrat;
+
 
     public SevenQueuesPropagatorEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
+        this.idemStrat = solver.getSettings().getIdempotencyStrategy();
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<>();
@@ -157,7 +164,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     while (evtset.size() > 0) {
                         int v = evtset.pollFirst();
                         assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                        if (Configuration.PRINT_PROPAGATION) {
+                        if (LOGGER.isDebugEnabled()) {
                             IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                         }
                         // clear event
@@ -168,15 +175,15 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         lastProp.fineERcalls++;
                         lastProp.propagate(v, mask);
                     }
-                } else if(lastProp.isActive()){ // need to be checked due to views
+                } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                    if (Configuration.PRINT_PROPAGATION) {
+                    if (LOGGER.isDebugEnabled()) {
                         IPropagationEngine.Trace.printPropagation(null, lastProp);
                     }
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 // This part is for debugging only!!
-                if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
+                if (Settings.Idem.disabled != idemStrat) {
                     FakeEngine.checkIdempotency(lastProp);
                 }
             }
@@ -232,7 +239,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        if (Configuration.PRINT_VAR_EVENT) {
+        if (LOGGER.isDebugEnabled()) {
             IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         Propagator[] vpropagators = variable.getPropagators();
@@ -250,12 +257,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     boolean needSched = (eventmasks[aid][pindice] == 0);
                     eventmasks[aid][pindice] |= type.getStrengthenedMask();
                     if (needSched) {
-                        if (Configuration.PRINT_SCHEDULE) {
+                        if (LOGGER.isDebugEnabled()) {
                             IPropagationEngine.Trace.printSchedule(prop);
                         }
                         prop.incNbPendingEvt();
                         eventsets[aid].addLast(pindice);
-                    } else if (Configuration.PRINT_SCHEDULE) {
+                    } else if (LOGGER.isDebugEnabled()) {
                         IPropagationEngine.Trace.printAlreadySchedule(prop);
                     }
                 }
@@ -273,7 +280,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         if (propagator.getNbPendingEvt() == 0) {
-            if (Configuration.PRINT_PROPAGATION) {
+            if (LOGGER.isDebugEnabled()) {
                 IPropagationEngine.Trace.printPropagation(null, propagator);
             }
             propagator.coarseERcalls++;
@@ -289,8 +296,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         if (propagator.reactToFineEvent()) {
-        int pid = propagator.getId();
-        int aid = p2i.get(pid);
+            int pid = propagator.getId();
+            int aid = p2i.get(pid);
             if (aid > -1) {
                 assert aid > -1 : "try to desactivate an unknown constraint";
                 // we don't remove the element from its master to avoid costly operations

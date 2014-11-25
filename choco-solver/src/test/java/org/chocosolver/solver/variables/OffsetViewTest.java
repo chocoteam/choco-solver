@@ -28,7 +28,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.choco.checker.DomainBuilder;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -220,7 +219,7 @@ public class OffsetViewTest {
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.enumerated("o", domains[0], solver);
             IntVar v = VariableFactory.offset(o, 2);
-			if(!Configuration.ENABLE_VIEWS){
+			if(!solver.getSettings().enableViews()){
 				try {
 					solver.propagate();
 				}catch (Exception e){

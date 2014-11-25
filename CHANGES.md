@@ -7,6 +7,8 @@ NEXT MILESTONE
 -------------------
 
 - Update User Guide (#217,#245)
+- Add modifiable settings (#250)
+- Simplify search binder (#229)
 
 Bug fixes: #246, #226
 

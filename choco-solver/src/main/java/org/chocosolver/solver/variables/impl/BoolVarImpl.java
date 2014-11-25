@@ -29,7 +29,6 @@ package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -118,7 +117,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws solver.exception.ContradictionException if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
@@ -165,7 +164,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @param value instantiation value (int)
      * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
-     * @throws solver.exception.ContradictionException if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
@@ -175,7 +174,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         if (this.isInstantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
@@ -190,13 +189,13 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                     delta.add(1 - value, cause);
                 }
                 mValue = value;
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
@@ -220,7 +219,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @param value new lower bound (included)
      * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
-     * @throws solver.exception.ContradictionException if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
@@ -243,7 +242,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @param value new upper bound (included)
      * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
-     * @throws solver.exception.ContradictionException if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {

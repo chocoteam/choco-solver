@@ -30,7 +30,6 @@ package org.chocosolver.solver.variables.impl;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -99,7 +98,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws solver.exception.ContradictionException if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
@@ -108,7 +107,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            if (Configuration.PLUG_EXPLANATION) {
+            if (_plugexpl) {
                 solver.getExplainer().removeValue(this, value, cause);
             }
             this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
@@ -135,12 +134,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().removeValue(this, value, cause);
                 }
                 this.contradiction(cause, IntEventType.REMOVE, MSG_EMPTY);
             }
-            if (Configuration.PLUG_EXPLANATION) {
+            if (_plugexpl) {
                 solver.getExplainer().removeValue(this, value, cause);
             }
             return true;
@@ -183,7 +182,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         if (this.isInstantiated()) {
             int cvalue = this.getValue();
             if (value != cvalue) {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
@@ -199,7 +198,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 ub = this.UB.get();
                 if (lb <= value - 1) delta.add(lb, value - 1, cause);
                 if (value + 1 <= ub) delta.add(value + 1, ub, cause);
-            } else if (Configuration.PLUG_EXPLANATION) {
+            } else if (_plugexpl) {
                 lb = LB.get();
                 ub = UB.get();
             }
@@ -207,13 +206,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             this.UB.set(value);
             this.SIZE.set(1);
 
-            if (Configuration.PLUG_EXPLANATION) {
+            if (_plugexpl) {
                 solver.getExplainer().instantiateTo(this, value, cause, lb, ub);
             }
             this.notifyPropagators(e, cause);
             return true;
         } else {
-            if (Configuration.PLUG_EXPLANATION) {
+            if (_plugexpl) {
                 solver.getExplainer().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
             this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
@@ -245,7 +244,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         if (old < value) {
             int oub = this.getUB();
             if (oub < value) {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
@@ -262,7 +261,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
 
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                 }
                 return true;
@@ -296,7 +295,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         if (old > value) {
             int olb = this.getLB();
             if (olb > value) {
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
@@ -313,7 +312,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (Configuration.PLUG_EXPLANATION) {
+                if (_plugexpl) {
                     solver.getExplainer().updateUpperBound(this, old, value, cause);
                 }
                 return true;

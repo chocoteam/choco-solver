@@ -28,7 +28,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.choco.checker.DomainBuilder;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -205,7 +204,7 @@ public class ScaleViewTest {
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.enumerated("o", domains[0], solver);
             IntVar v = VariableFactory.scale(o, 2);
-			if(!Configuration.ENABLE_VIEWS){
+			if(!solver.getSettings().enableViews()){
 				try {
 					// currently, the propagation is not sufficient (bound)
 					// could be fixed with an extension filtering

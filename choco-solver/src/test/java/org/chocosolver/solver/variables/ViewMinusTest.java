@@ -28,7 +28,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.choco.checker.DomainBuilder;
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -57,7 +56,7 @@ public class ViewMinusTest {
         IntVar Y = VariableFactory.minus(X);
 
         try {
-			if(!Configuration.ENABLE_VIEWS)
+			if(!solver.getSettings().enableViews())
 				solver.propagate();
             Assert.assertFalse(Y.isInstantiated());
             Assert.assertEquals(Y.getLB(), -10);
@@ -71,25 +70,25 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.previousValue(-10), Integer.MIN_VALUE);
 
             Y.updateLowerBound(-9, Cause.Null);
-			if(!Configuration.ENABLE_VIEWS)
+			if(!solver.getSettings().enableViews())
 				solver.propagate();
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 
             Y.updateUpperBound(-2, Cause.Null);
-			if(!Configuration.ENABLE_VIEWS)
+			if(!solver.getSettings().enableViews())
 				solver.propagate();
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Cause.Null);
-			if(!Configuration.ENABLE_VIEWS)
+			if(!solver.getSettings().enableViews())
 				solver.propagate();
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Cause.Null);
-			if(!Configuration.ENABLE_VIEWS)
+			if(!solver.getSettings().enableViews())
 				solver.propagate();
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
@@ -102,7 +101,7 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Cause.Null);
-			if(!Configuration.ENABLE_VIEWS)
+			if(!solver.getSettings().enableViews())
 				solver.propagate();
             Assert.assertTrue(X.isInstantiated());
             Assert.assertTrue(Y.isInstantiated());
@@ -213,7 +212,7 @@ public class ViewMinusTest {
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.enumerated("o", domains[0], solver);
             IntVar v = VariableFactory.minus(o);
-			if(!Configuration.ENABLE_VIEWS){
+			if(!solver.getSettings().enableViews()){
 				try {
 					solver.propagate();
 				}catch (Exception e){

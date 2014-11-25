@@ -46,7 +46,7 @@ then
     sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD licence \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
 
     ## The configuration file
-    sedInPlace "s%WELCOME_TITLE=.*%WELCOME_TITLE=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  choco-solver/src/main/resources/configuration.properties
+    sedInPlace 's%.*Constraint Programming Solver, Copyleft.*%        return "** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR";%'  choco-solver/src/main/java/org/chocosolver/solver/Settings.java
 
     ## The doc
     sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  docs/source/3_solving.rst

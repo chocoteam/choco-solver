@@ -27,8 +27,8 @@
 
 package org.chocosolver.samples;
 
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -66,23 +66,23 @@ public class PertTest {
         garden = VariableFactory.enumerated("garden", 0, horizon, solver);
         objective = VariableFactory.enumerated("moving", 0, horizon - 1, solver);
 
-        solver.post(precedence(masonry, 7, carpentry, solver));
-        solver.post(precedence(masonry, 7, plumbing, solver));
-        solver.post(precedence(masonry, 7, ceiling, solver));
-        solver.post(precedence(carpentry, 3, roofing, solver));
-        solver.post(precedence(ceiling, 3, roofing, solver));
-        solver.post(precedence(roofing, 1, windows, solver));
-        solver.post(precedence(windows, 1, painting, solver));
-        solver.post(precedence(roofing, 1, facade, solver));
-        solver.post(precedence(plumbing, 8, facade, solver));
-        solver.post(precedence(roofing, 1, garden, solver));
-        solver.post(precedence(plumbing, 8, garden, solver));
-        solver.post(precedence(facade, 2, objective, solver));
-        solver.post(precedence(garden, 1, objective, solver));
-        solver.post(precedence(painting, 2, objective, solver));
+        solver.post(precedence(masonry, 7, carpentry));
+        solver.post(precedence(masonry, 7, plumbing));
+        solver.post(precedence(masonry, 7, ceiling));
+        solver.post(precedence(carpentry, 3, roofing));
+        solver.post(precedence(ceiling, 3, roofing));
+        solver.post(precedence(roofing, 1, windows));
+        solver.post(precedence(windows, 1, painting));
+        solver.post(precedence(roofing, 1, facade));
+        solver.post(precedence(plumbing, 8, facade));
+        solver.post(precedence(roofing, 1, garden));
+        solver.post(precedence(plumbing, 8, garden));
+        solver.post(precedence(facade, 2, objective));
+        solver.post(precedence(garden, 1, objective));
+        solver.post(precedence(painting, 2, objective));
 
         solver.set(IntStrategyFactory.minDom_LB(new IntVar[]{masonry, carpentry, plumbing, ceiling,
-				roofing, painting, windows, facade, garden, objective}));
+                roofing, painting, windows, facade, garden, objective}));
         return solver;
 
     }
@@ -90,26 +90,30 @@ public class PertTest {
     /**
      * x + d < y
      */
-    private static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
+    private static Constraint precedence(IntVar x, int duration, IntVar y) {
         return IntConstraintFactory.arithm(VariableFactory.offset(x, duration), "<", y);
     }
 
     @Test(groups = "1s")
     public void testAll() {
-        if (Configuration.PLUG_EXPLANATION) {
-            Solver sol;
-            sol = modeler();
-            PropagationEngineFactory.values()[0].make(sol);
-            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
-            long nbsol = sol.getMeasures().getSolutionCount();
-            long node = sol.getMeasures().getNodeCount();
-            for (int t = 1; t < PropagationEngineFactory.values().length; t++) {
-                sol = modeler();
-                PropagationEngineFactory.values()[t].make(sol);
-                sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
-                Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
-                Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
+        Solver sol;
+        sol = modeler();
+        sol.set(new Settings() {
+            @Override
+            public boolean plugExplanationIn() {
+                return true;
             }
+        });
+        PropagationEngineFactory.values()[0].make(sol);
+        sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        long nbsol = sol.getMeasures().getSolutionCount();
+        long node = sol.getMeasures().getNodeCount();
+        for (int t = 1; t < PropagationEngineFactory.values().length; t++) {
+            sol = modeler();
+            PropagationEngineFactory.values()[t].make(sol);
+            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+            Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
+            Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
         }
     }
 }

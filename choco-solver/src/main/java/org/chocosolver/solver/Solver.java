@@ -78,6 +78,8 @@ public class Solver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private Settings settings = new Settings(){};
+
     private ExplanationEngine explainer;
 
     /**
@@ -392,7 +394,7 @@ public class Solver implements Serializable {
      * The first strategy in parameter is first called to compute a decision, if possible.
      * If it cannot provide a new decision, the second strategy is called ...
      * and so on, until the last strategy.
-     * <p/>
+     * <p>
      *
      * @param strategies the search strategies to use.
      */
@@ -447,6 +449,24 @@ public class Solver implements Serializable {
      */
     public void plugMonitor(ISearchMonitor sm) {
         search.plugSearchMonitor(sm);
+    }
+
+    /**
+     * Return the current settings for the solver
+     *
+     * @return a {@link org.chocosolver.solver.Settings}
+     */
+    public Settings getSettings() {
+        return this.settings;
+    }
+
+    /**
+     * Override the default {@link org.chocosolver.solver.Settings} object.
+     *
+     * @param defaults new settings
+     */
+    public void set(Settings defaults) {
+        this.settings = defaults;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -616,7 +636,7 @@ public class Solver implements Serializable {
 
     /**
      * Returns information on the feasibility of the current problem defined by the solver.
-     * <p/>
+     * <p>
      * Possible back values are:
      * <br/>- {@link ESat#TRUE}: a solution has been found,
      * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
@@ -631,7 +651,7 @@ public class Solver implements Serializable {
 
     /**
      * Changes the current feasibility state of the <code>Solver</code> object.
-     * <p/>
+     * <p>
      * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
      *
      * @param feasible new state
@@ -642,11 +662,11 @@ public class Solver implements Serializable {
 
     /**
      * Returns information on the completeness of the search process.
-     * <p/>
+     * <p>
      * A call to {@link #isFeasible()} may provide complementary information.
-     * <p/>
+     * <p>
      * Possible back values are:
-     * <p/>
+     * <p>
      * <br/>- <code>false</code> : the resolution is complete and
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
@@ -662,7 +682,7 @@ public class Solver implements Serializable {
     /**
      * Attempts to find the first solution of the declared problem.
      * Then, following solutions can be found using {@link org.chocosolver.solver.Solver#nextSolution()}.
-     * <p/>
+     * <p>
      * An alternative is to call {@link org.chocosolver.solver.Solver#isFeasible()} which tells, whether or not, a solution has been found.
      *
      * @return <code>true</code> if and only if a solution has been found.
@@ -674,7 +694,7 @@ public class Solver implements Serializable {
 
     /**
      * Once {@link Solver#findSolution()} has been called once, other solutions can be found using this method.
-     * <p/>
+     * <p>
      * The search is then resume to the last found solution point.
      *
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
@@ -830,12 +850,12 @@ public class Solver implements Serializable {
 
     /**
      * Return the current state of the CSP.
-     * <p/>
+     * <p>
      * Given the current domains, it can return a value among:
      * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
      * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
      * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-     * <p/>
+     * <p>
      * Presumably, not all variables are instantiated.
      */
     public ESat isSatisfied() {
@@ -945,9 +965,9 @@ public class Solver implements Serializable {
      * propagation engine (set to NONE), objective manager (set to SAT), solution recorder (set to LastSolutionRecorder) and
      * feasibility (set to UNDEFINED).
      * The search strategies and search monitors are simply not reported in the copy.
-     * <p/>
+     * <p>
      * Note that a new instance of the environment is made, preserving the initial choice.
-     * <p/>
+     * <p>
      * Duplicating a solver is only possible before any resolution process began.
      * This is a strong restriction which may be removed in the future.
      * Indeed, duplicating a solver should only be considered while dealing with multi-threading.

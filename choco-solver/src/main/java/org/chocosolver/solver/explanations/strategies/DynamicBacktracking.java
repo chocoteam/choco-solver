@@ -26,8 +26,6 @@
  */
 package org.chocosolver.solver.explanations.strategies;
 
-
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.explanations.BranchingDecision;
 import org.chocosolver.solver.explanations.Deduction;
@@ -35,6 +33,8 @@ import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A dynamic backtracking algorithm.
@@ -44,6 +44,8 @@ import org.chocosolver.solver.search.strategy.decision.RootDecision;
  * @since 01/10/12
  */
 public class DynamicBacktracking extends ConflictBasedBackjumping {
+
+    static Logger LOGGER = LoggerFactory.getLogger(DynamicBacktracking.class);
 
     DecisionsSet cobdec;
 
@@ -66,7 +68,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
             myworld--;
         }
         Decision jmpBck = dec;
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
 
@@ -114,7 +116,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
             mSolver.getSearchLoop().setLastDecision(cobdec);
         }
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }

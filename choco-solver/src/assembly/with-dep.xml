@@ -29,7 +29,6 @@
             <useDefaultExcludes>true</useDefaultExcludes>
             <includes>
                 <include>src/main/resources/logback.xml</include>
-                <include>src/main/resources/configuration.properties</include>
             </includes>
         </fileSet>
     </fileSets>

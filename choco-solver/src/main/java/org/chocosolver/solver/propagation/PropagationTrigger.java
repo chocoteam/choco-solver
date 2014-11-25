@@ -28,7 +28,6 @@ package org.chocosolver.solver.propagation;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -57,9 +56,9 @@ public class PropagationTrigger implements Serializable {
     final Solver solver;
 
     // stores the static propagators
-    ArrayList<Propagator> sta_propagators = new ArrayList<Propagator>();
+    ArrayList<Propagator> sta_propagators = new ArrayList<>();
     // stores the dynamic propagators, ie cut
-    ArrayList<Propagator> perm_propagators = new ArrayList<Propagator>();
+    ArrayList<Propagator> perm_propagators = new ArrayList<>();
     // stores the world of the last propagation of the cuts
     TIntArrayList perm_world = new TIntArrayList();
 
@@ -160,7 +159,7 @@ public class PropagationTrigger implements Serializable {
     }
 
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
-        if (Configuration.PRINT_PROPAGATION) {
+        if (LoggerFactory.getLogger(IPropagationEngine.class).isDebugEnabled()) {
             LoggerFactory.getLogger(IPropagationEngine.class).debug("[A] {}", toPropagate);
         }
         if (toPropagate.isStateLess()) {

@@ -24,10 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.bind.nop;
+package org.chocosolver.solver.search.bind;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
@@ -48,7 +47,7 @@ import java.util.Arrays;
  * @version choco
  * @since 23/10/14
  */
-public class NOPISearchBinder implements ISearchBinder {
+public class DefaultSearchBinder implements ISearchBinder {
 
     @Override
     public void configureSearch(Solver solver) {
@@ -88,18 +87,6 @@ public class NOPISearchBinder implements ISearchBinder {
         } else {
             solver.set(Arrays.copyOf(strats, nb));
         }
-    }
-
-    @Override
-    public void configureSearches(Solver[] solvers) {
-        for (int i = 0; i < solvers.length; i++) {
-            configureSearch(solvers, i);
-        }
-    }
-
-    @Override
-    public void configureSearch(Solver[] solvers, int sidx) {
-        configureSearch(solvers[sidx]);
     }
 
     @SuppressWarnings("unchecked")

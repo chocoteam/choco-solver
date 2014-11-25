@@ -28,7 +28,6 @@
 package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.constraints.Propagator;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ import java.util.List;
  * The deductions are stored in a list, and the uniqueness of elements is ensured during the add operation.
  * This allows fast iteration over elements.
  * The propagators are stored in the same way.
- * <p/>
+ * <p>
  * Created by IntelliJ IDEA.
  * User: njussien
  * Date: 26 oct. 2010
@@ -81,7 +80,7 @@ public class Explanation extends Deduction {
             }
 
             // 2. add all propagators of expl
-            if (Configuration.PROP_IN_EXP) {
+            if (nbp > 0 && expl.getPropagator(0).getSolver().getSettings().enablePropagatorInExplanation()) {
                 for (int i = 0; i < nbp; i++) {
                     add(expl.getPropagator(i));
                 }
@@ -95,9 +94,9 @@ public class Explanation extends Deduction {
      * @param p propagator to add
      */
     public void add(Propagator p) {
-        if (Configuration.PROP_IN_EXP) {
+        if (p.getSolver().getSettings().enablePropagatorInExplanation()) {
             if (this.propagators == null) {
-                this.propagators = new ArrayList<Propagator>(4);
+                this.propagators = new ArrayList<>(4);
                 this.pid = new TIntHashSet(4);
             }
             if (this.pid.add(p.getId())) {
@@ -123,7 +122,7 @@ public class Explanation extends Deduction {
             }
 
             if (this.deductions == null) {
-                this.deductions = new ArrayList<Deduction>(4);
+                this.deductions = new ArrayList<>(4);
                 this.did = new TIntHashSet();
             }
             if (this.did.add(d.id)) {
@@ -219,16 +218,14 @@ public class Explanation extends Deduction {
             }
         }
 
-        if (Configuration.PROP_IN_EXP) {
-            bf.append(" ; P:");
-            if (this.propagators != null) {
-                bf.append("(").append(this.propagators.size()).append(") ");
-                for (Propagator p : this.propagators) {
-                    bf.append(p).append(", ");
-                }
-                if (propagators.size() > 1) {
-                    bf.delete(bf.lastIndexOf(","), bf.length() - 1);
-                }
+        bf.append(" ; P:");
+        if (this.propagators != null) {
+            bf.append("(").append(this.propagators.size()).append(") ");
+            for (Propagator p : this.propagators) {
+                bf.append(p).append(", ");
+            }
+            if (propagators.size() > 1) {
+                bf.delete(bf.lastIndexOf(","), bf.length() - 1);
             }
         }
 

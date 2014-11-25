@@ -93,7 +93,6 @@ public class MasterSolverTests {
         Solver s0 = langford(3, 9);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 0);
-        ms.configureSearches();
         Assert.assertTrue(ms.findSolution());
     }
 
@@ -102,7 +101,7 @@ public class MasterSolverTests {
         Solver s0 = langford(3, 9);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 1);
-        ms.configureSearches();
+
         Assert.assertTrue(ms.findSolution());
     }
 
@@ -111,7 +110,7 @@ public class MasterSolverTests {
         Solver s0 = langford(3, 9);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 3);
-        ms.configureSearches();
+
         Assert.assertTrue(ms.findSolution());
     }
 
@@ -120,7 +119,7 @@ public class MasterSolverTests {
         Solver s0 = langford(3, 8);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 0);
-        ms.configureSearches();
+
         Assert.assertFalse(ms.findSolution());
     }
 
@@ -129,7 +128,7 @@ public class MasterSolverTests {
         Solver s0 = langford(3, 8);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 1);
-        ms.configureSearches();
+
         Assert.assertFalse(ms.findSolution());
     }
 
@@ -138,7 +137,7 @@ public class MasterSolverTests {
         Solver s0 = langford(3, 8);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 3);
-        ms.configureSearches();
+
         Assert.assertFalse(ms.findSolution());
     }
 
@@ -148,7 +147,7 @@ public class MasterSolverTests {
         Solver s0 = golomb(10);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 0);
-        ms.configureSearches();
+
         ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
         Assert.assertEquals(ESat.TRUE, ms.isFeasible());
         Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
@@ -159,7 +158,7 @@ public class MasterSolverTests {
         Solver s0 = golomb(10);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 1);
-        ms.configureSearches();
+
         ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
         Assert.assertEquals(ESat.TRUE, ms.isFeasible());
         Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
@@ -170,7 +169,7 @@ public class MasterSolverTests {
         Solver s0 = golomb(10);
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 3);
-        ms.configureSearches();
+
         ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
         Assert.assertEquals(ESat.TRUE, ms.isFeasible());
         Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
@@ -182,7 +181,7 @@ public class MasterSolverTests {
         s0.post(ICF.arithm((IntVar) s0.getVars()[9], "=", (IntVar) s0.getVars()[0]));
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 0);
-        ms.configureSearches();
+
         ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
         Assert.assertEquals(ESat.FALSE, ms.isFeasible());
     }
@@ -193,7 +192,7 @@ public class MasterSolverTests {
         s0.post(ICF.arithm((IntVar) s0.getVars()[9], "=", (IntVar) s0.getVars()[0]));
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 1);
-        ms.configureSearches();
+
         ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
         Assert.assertEquals(ESat.FALSE, ms.isFeasible());
     }
@@ -204,7 +203,7 @@ public class MasterSolverTests {
         s0.post(ICF.arithm((IntVar) s0.getVars()[9], "=", (IntVar) s0.getVars()[0]));
         MasterSolver ms = new MasterSolver();
         ms.populate(s0, 3);
-        ms.configureSearches();
+
         ms.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0.getVars()[9]);
         Assert.assertEquals(ESat.FALSE, ms.isFeasible());
     }

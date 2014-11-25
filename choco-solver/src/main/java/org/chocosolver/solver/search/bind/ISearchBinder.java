@@ -48,24 +48,4 @@ public interface ISearchBinder {
      * @param solver a solver
      */
     void configureSearch(Solver solver);
-
-    /**
-     * Configure (or override) the search strategies of the given solvers.
-     *
-     * @param solvers a list of solver
-     */
-    void configureSearches(Solver[] solvers);/* {
-        for (int i = 0; i < solvers.length; i++) {
-            configureSearch(solvers, i);
-        }
-    }*/
-
-
-    /**
-     * Configure (or override) the search strategies of the given solvers.
-     *
-     * @param solvers a list of solver
-     * @param sidx    index of the solver to configure
-     */
-    void configureSearch(Solver[] solvers, int sidx);
 }

@@ -27,7 +27,7 @@
 
 package org.chocosolver.choco.explanations;
 
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -58,17 +58,27 @@ public class EqualXYCExplTest {
         for (int i = 0; i < values.length; i++) {
             values[i] = r.nextInt(nbvars);
         }
+        Settings nset = new Settings() {
+            @Override
+            public boolean plugExplanationIn() {
+                return true;
+            }
+        };
+
 
         Solver ref = new Solver();
         Solver sol = new Solver();
+        ref.set(nset);
+        sol.set(nset);
+
         ExplanationFactory.CBJ.plugin(sol, true);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
-        List<Constraint> lcstrsr = new ArrayList<Constraint>(1);
+        List<Constraint> lcstrsr = new ArrayList<>(1);
         IntVar[] varss = new IntVar[nbvars];
         IntVar[] indicess = new IntVar[nbvars];
-        List<Constraint> lcstrss = new ArrayList<Constraint>(1);
+        List<Constraint> lcstrss = new ArrayList<>(1);
 
         for (int i = 0; i < varsr.length; i++) {
             varsr[i] = VariableFactory.enumerated("v_" + i, 0, nbvars, ref);
@@ -106,11 +116,9 @@ public class EqualXYCExplTest {
 
     @Test(groups = "1s")
     public void test1() {
-        if (Configuration.PLUG_EXPLANATION) {
-            model(125, 4);
-            model(125, 10);
-            model(153, 15);
-            model(1234, 12);
-        }
+        model(125, 4);
+        model(125, 10);
+        model(153, 15);
+        model(1234, 12);
     }
 }

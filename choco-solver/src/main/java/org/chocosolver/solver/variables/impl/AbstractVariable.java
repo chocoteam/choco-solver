@@ -45,7 +45,7 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Jean-Guillaume Fages
- * @revision CPRU: remove effectless procedures (before + on contradiction)
+ * @author Charles Prud'homme
  * @since 30 june 2011
  */
 public abstract class AbstractVariable implements Variable {
@@ -76,6 +76,8 @@ public abstract class AbstractVariable implements Variable {
 
     protected int modificationEvents;
 
+    protected final boolean _plugexpl;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     protected AbstractVariable(String name, Solver solver) {
@@ -86,6 +88,7 @@ public abstract class AbstractVariable implements Variable {
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
+        _plugexpl = solver.getSettings().plugExplanationIn();
         solver.associates(this);
     }
 

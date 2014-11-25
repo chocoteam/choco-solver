@@ -27,7 +27,7 @@
 
 package org.chocosolver.samples;
 
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -73,40 +73,45 @@ public class CycleLtTest {
 
     @Test(groups = "1s")
     public void testAll() {
-        if (Configuration.PLUG_EXPLANATION) {
-            StringBuilder st = new StringBuilder("\nCycle LT \n");
+        StringBuilder st = new StringBuilder("\nCycle LT \n");
 
-            int n = 6;
-            int nbIt = 4;
-            st.append(StringUtils.pad("TIME ", -7, " "));
-            st.append(StringUtils.pad("NODES ", -7, " "));
-            st.append(StringUtils.pad("BCKT ", -7, " "));
-            st.append(StringUtils.pad("FILTER ", -15, " "));
-            st.append(StringUtils.pad("EVENTS ", -15, " "));
-            st.append(StringUtils.pad("PUSHED ", -15, " "));
-            st.append(StringUtils.pad("POPPED ", -15, " "));
-            st.append(StringUtils.pad("(DIFF)", -15, " "));
-            float[] times = new float[nbIt];
-            for (int j = 0; j < PropagationEngineFactory.values().length; j++) {
-                LoggerFactory.getLogger("test").info(st.toString());
-                st.setLength(0);
-                st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
-                for (int i = 0; i < nbIt; i++) {
-                    Solver rand = modeler(n);
-                    PropagationEngineFactory.values()[j].make(rand);
-                    rand.findAllSolutions();
-                    st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
-                    times[i] = rand.getMeasures().getInitialPropagationTimeCount();
-                    st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
-                    st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
-                    LoggerFactory.getLogger("test").info(st.toString());
-                    st.setLength(0);
-                }
-                st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));
-                st.append(StringUtils.pad(String.format("DEVIATION : %fms ", standarddeviation(prepare(times))), -15, " "));
+        Settings nset = new Settings() {
+            @Override
+            public boolean plugExplanationIn() {
+                return true;
+            }
+        };
+        int n = 6;
+        int nbIt = 4;
+        st.append(StringUtils.pad("TIME ", -7, " "));
+        st.append(StringUtils.pad("NODES ", -7, " "));
+        st.append(StringUtils.pad("BCKT ", -7, " "));
+        st.append(StringUtils.pad("FILTER ", -15, " "));
+        st.append(StringUtils.pad("EVENTS ", -15, " "));
+        st.append(StringUtils.pad("PUSHED ", -15, " "));
+        st.append(StringUtils.pad("POPPED ", -15, " "));
+        st.append(StringUtils.pad("(DIFF)", -15, " "));
+        float[] times = new float[nbIt];
+        for (int j = 0; j < PropagationEngineFactory.values().length; j++) {
+            LoggerFactory.getLogger("test").info(st.toString());
+            st.setLength(0);
+            st.append("-- ").append(j).append(" ------------------------------------------------------------------------------------\n");
+            for (int i = 0; i < nbIt; i++) {
+                Solver rand = modeler(n);
+                rand.set(nset);
+                PropagationEngineFactory.values()[j].make(rand);
+                rand.findAllSolutions();
+                st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
+                times[i] = rand.getMeasures().getInitialPropagationTimeCount();
+                st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
+                st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
                 LoggerFactory.getLogger("test").info(st.toString());
                 st.setLength(0);
             }
+            st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));
+            st.append(StringUtils.pad(String.format("DEVIATION : %fms ", standarddeviation(prepare(times))), -15, " "));
+            LoggerFactory.getLogger("test").info(st.toString());
+            st.setLength(0);
         }
     }
 

@@ -27,7 +27,7 @@
 
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -58,11 +58,11 @@ public class ElementTest {
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
 
-		if(!(index.hasEnumeratedDomain() && var.hasEnumeratedDomain())){
-			s.set(IntStrategyFactory.random_bound(allvars, System.currentTimeMillis()));
-		}else{
-			s.set(IntStrategyFactory.random_value(allvars, System.currentTimeMillis()));
-		}
+        if (!(index.hasEnumeratedDomain() && var.hasEnumeratedDomain())) {
+            s.set(IntStrategyFactory.random_bound(allvars, System.currentTimeMillis()));
+        } else {
+            s.set(IntStrategyFactory.random_value(allvars, System.currentTimeMillis()));
+        }
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
@@ -112,36 +112,40 @@ public class ElementTest {
 
     @Test(groups = "1s")
     public void test5() {
-        if (Configuration.PLUG_EXPLANATION) {
-            Solver s = new Solver();
-            ExplanationFactory.CBJ.plugin(s, false);
-
-            Random r = new Random(125);
-            int[] values = new int[10];
-            for (int i = 0; i < values.length; i++) {
-                values[i] = r.nextInt(5);
+        Solver s = new Solver();
+        s.set(new Settings() {
+            @Override
+            public boolean plugExplanationIn() {
+                return true;
             }
+        });
+        ExplanationFactory.CBJ.plugin(s, false);
 
-            IntVar[] vars = new IntVar[3];
-            IntVar[] indices = new IntVar[3];
-            List<Constraint> lcstrs = new ArrayList<Constraint>(1);
-
-            for (int i = 0; i < vars.length; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
-                indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
-                lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0, "detect"));
-            }
-
-            for (int i = 0; i < vars.length - 1; i++) {
-                lcstrs.add(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
-            }
-
-            Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-            s.post(cstrs);
-
-            s.findAllSolutions();
-            Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
+        Random r = new Random(125);
+        int[] values = new int[10];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = r.nextInt(5);
         }
+
+        IntVar[] vars = new IntVar[3];
+        IntVar[] indices = new IntVar[3];
+        List<Constraint> lcstrs = new ArrayList<>(1);
+
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
+            indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
+            lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0, "detect"));
+        }
+
+        for (int i = 0; i < vars.length - 1; i++) {
+            lcstrs.add(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
+        }
+
+        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+        s.post(cstrs);
+
+        s.findAllSolutions();
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
     }
 
     public void nasty(int seed, int nbvars, int nbsols) {
@@ -156,7 +160,7 @@ public class ElementTest {
         Solver ref = new Solver();
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
-        List<Constraint> lcstrsr = new ArrayList<Constraint>(1);
+        List<Constraint> lcstrsr = new ArrayList<>(1);
 
         for (int i = 0; i < varsr.length; i++) {
             varsr[i] = VariableFactory.enumerated("v_" + i, 0, nbvars, ref);

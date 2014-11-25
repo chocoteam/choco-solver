@@ -26,9 +26,7 @@
  */
 package org.chocosolver.solver.trace;
 
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.variables.Variable;
 
@@ -49,9 +47,10 @@ public class Chatterbox {
 
     /**
      * Print the version message.
+     * @param solver the solver
      */
-    public static void printVersion() {
-        System.out.println(Configuration.WELCOME_TITLE);
+    public static void printVersion(Solver solver) {
+        System.out.println(solver.getSettings().getWelcomeMessage());
     }
 
 
@@ -106,7 +105,7 @@ public class Chatterbox {
     }
 
     /**
-     * Plug a search monitor which calls {@link #printVersion()}
+     * Plug a search monitor which calls {@link #printVersion(org.chocosolver.solver.Solver)}
      * and {@link #printStatistics(Solver)} before closing the search.
      * <p/>
      * Recommended usage: to be called before the resolution step.
@@ -118,7 +117,7 @@ public class Chatterbox {
 
             @Override
             public void beforeInitialize() {
-                printVersion();
+                printVersion(solver);
             }
 
             @Override
@@ -139,7 +138,7 @@ public class Chatterbox {
     }
 
     /**
-     * Plug a search monitor which calls {@link #printShortStatistics(solver.Solver)} before closing the search.
+     * Plug a search monitor which calls {@link #printShortStatistics(Solver)} before closing the search.
      * <p/>
      * Recommended usage: to be called before the resolution step.
      *
@@ -167,13 +166,7 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showSolutions(Solver solver, final IMessage message) {
-        solver.plugMonitor(new IMonitorSolution() {
-
-            @Override
-            public void onSolution() {
-                System.out.println(message.print());
-            }
-        });
+        solver.plugMonitor((IMonitorSolution) () -> System.out.println(message.print()));
     }
 
     /**
@@ -182,7 +175,7 @@ public class Chatterbox {
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
-     * @see solver.trace.Chatterbox.DefaultSolutionMessage
+     * @see Chatterbox.DefaultSolutionMessage
      */
     public static void showSolutions(Solver solver) {
         showSolutions(solver, new DefaultSolutionMessage(solver));
@@ -230,7 +223,7 @@ public class Chatterbox {
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
-     * @see solver.trace.Chatterbox.DefaultSolutionMessage
+     * @see Chatterbox.DefaultSolutionMessage
      */
     public static void showDecisions(Solver solver) {
         showDecisions(solver, new DefaultDecisionMessage(solver));
@@ -242,12 +235,7 @@ public class Chatterbox {
      * @param solver the solver to evaluate
      */
     public static void showContradiction(Solver solver) {
-        solver.plugMonitor(new IMonitorContradiction() {
-            @Override
-            public void onContradiction(ContradictionException cex) {
-                System.out.println(String.format("\t/!\\ %s", cex.toString()));
-            }
-        });
+        solver.plugMonitor((IMonitorContradiction) cex -> System.out.println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**

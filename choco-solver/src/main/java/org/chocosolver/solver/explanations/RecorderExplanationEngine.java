@@ -29,7 +29,6 @@ package org.chocosolver.solver.explanations;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
@@ -41,6 +40,8 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.queues.CircularQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -53,6 +54,8 @@ import org.chocosolver.util.objects.queues.CircularQueue;
  * <p/>
  */
 public class RecorderExplanationEngine extends ExplanationEngine implements IMonitorInitPropagation {
+
+    static Logger LOGGER = LoggerFactory.getLogger(RecorderExplanationEngine.class);
 
     TIntObjectHashMap<AntiDomain> removedvalues; // maintien du domaine courant
     TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintain deduction base
@@ -69,7 +72,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
-        if (!Configuration.PLUG_EXPLANATION) {
+        if (!solver.getSettings().plugExplanationIn()) {
             throw new SolverException("\nExplanations are not plugged in.\n" +
                     "To activate explanations, create a user.property file at project root directory " +
                     "which contains the following two lines:\n" +
@@ -204,7 +207,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             expl.reset();
         }
         var.explain(VariableState.DOM, expl);
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             onActivatePropagator(propagator, expl);
         }
         store(pa, expl);
@@ -225,7 +228,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         // 3. explain the value removal thanks to the cause
         cause.explain(vr, expl);
         // 4. explanations monitoring
-        if (Configuration.PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             onRemoveValue(var, val, cause, expl);
         }
     }

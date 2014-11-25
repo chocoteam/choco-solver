@@ -440,7 +440,8 @@ Available strategies
 Default search strategies
 -------------------------
 
-If no search strategy is specified in the model, Choco |version| will generate a default one. In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
+If no search strategy is specified in the model, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
+In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
 The default search strategy distincts variables per types and defines a specific search strategy per each type:
 
 #. integer variables (but boolean variables: ``IntStrategyFactory.minDom_LB(ivars)``
@@ -451,6 +452,27 @@ The default search strategy distincts variables per types and defines a specific
 Constants are excluded from search strategies' variable scope.
 
 ``IntStrategyFactory``, ``SetStrategyFactory`` and ``GraphStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
+
+
+.. _31_searchbinder:
+
+Search binder
+^^^^^^^^^^^^^
+
+It is possible to override the default search strategy by implementing an ``ISearchBinder``.
+By default, a ``Solver`` is created with a ``DefaultSearchBinder`` declared in its settings.
+
+
+An ``ISearchBinder`` has the following API:
+
+``void configureSearch(Solver solver)``
+    Configure the search strategy, and even more, of the given solver.
+    The method is called from the search loop, after the initial propagation, if no search strategy is defined.
+    Otherwise, it should be called before running the resolution.
+
+The search binder to use must be declared in the ``Setting`` attached to a ``Solver`` (see :ref:`41_settings_label`).
+
+
 
 Composition of strategies
 -------------------------

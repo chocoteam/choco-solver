@@ -26,7 +26,7 @@
  */
 package org.chocosolver.choco.explanations;
 
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -81,22 +81,26 @@ public class ExplanationTest {
 
     @Test(groups = "1s")
     public void testUserExpl() {
-        if (Configuration.PROP_IN_EXP) {
-            int n = 7;
-            final Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
-            solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
-            solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
-            solver.set(ISF.lexico_LB(vars));
+        int n = 7;
+        final Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public boolean enablePropagatorInExplanation() {
+                return true;
+            }
+        });
+        IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
+        solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
+        solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
+        solver.set(ISF.lexico_LB(vars));
 
-            solver.set(new RecorderExplanationEngine(solver));
-            ConflictBasedBackjumping cbj = new ConflictBasedBackjumping(solver.getExplainer());
-            cbj.activeUserExplanation(true);
+        solver.set(new RecorderExplanationEngine(solver));
+        ConflictBasedBackjumping cbj = new ConflictBasedBackjumping(solver.getExplainer());
+        cbj.activeUserExplanation(true);
 //            SMF.shortlog(solver);
-            Assert.assertFalse(solver.findSolution());
-            Explanation exp = cbj.getUserExplanation();
-            Assert.assertEquals(2, exp.nbPropagators());
-        }
+        Assert.assertFalse(solver.findSolution());
+        Explanation exp = cbj.getUserExplanation();
+        Assert.assertEquals(2, exp.nbPropagators());
     }
 
     @Test(groups = "1s")

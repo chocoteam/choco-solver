@@ -27,7 +27,7 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -253,14 +253,14 @@ public class IteratorTest {
     public void testOffset1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.next());
@@ -275,14 +275,14 @@ public class IteratorTest {
     public void testOffset2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(6, vit.previous());
@@ -297,14 +297,14 @@ public class IteratorTest {
     public void testOffset3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.min());
@@ -321,14 +321,14 @@ public class IteratorTest {
     public void testOffset4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(6, vit.min());
@@ -344,33 +344,33 @@ public class IteratorTest {
     @Test(groups = "1s")
     public void testScale1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(VariableFactory.bounded("b",1,4, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        IntVar var = VariableFactory.scale(VariableFactory.bounded("b", 1, 4, solver), 2);
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         Assert.assertEquals(2, var.getLB());
-		Assert.assertEquals(8, var.getUB());
+        Assert.assertEquals(8, var.getUB());
     }
 
     @Test(groups = "1s")
     public void testScale2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				// currently, the propagation is not sufficient (bound)
-				// could be fixed with an extension filtering
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                // currently, the propagation is not sufficient (bound)
+                // could be fixed with an extension filtering
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.previous());
@@ -385,16 +385,16 @@ public class IteratorTest {
     public void testScale3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				// currently, the propagation is not sufficient (bound)
-				// could be fixed with an extension filtering
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                // currently, the propagation is not sufficient (bound)
+                // could be fixed with an extension filtering
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(2, vit.min());
@@ -415,16 +415,16 @@ public class IteratorTest {
     public void testScale4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				// currently, the propagation is not sufficient (bound)
-				// could be fixed with an extension filtering
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                // currently, the propagation is not sufficient (bound)
+                // could be fixed with an extension filtering
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.min());
@@ -445,14 +445,14 @@ public class IteratorTest {
     public void testMinus1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(-4, vit.next());
@@ -467,14 +467,14 @@ public class IteratorTest {
     public void testMinus2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(-1, vit.previous());
@@ -489,14 +489,14 @@ public class IteratorTest {
     public void testMinus3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(-4, vit.min());
@@ -513,14 +513,14 @@ public class IteratorTest {
     public void testMinus4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
-		if(!Configuration.ENABLE_VIEWS){
-			try {
-				solver.propagate();
-			}catch (Exception e){
-				e.printStackTrace();
-				throw new UnsupportedOperationException();
-			}
-		}
+        if (!solver.getSettings().enableViews()) {
+            try {
+                solver.propagate();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UnsupportedOperationException();
+            }
+        }
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(-2, vit.min());

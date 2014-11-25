@@ -27,7 +27,6 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.bind.SearchBinderFactory;
 import org.chocosolver.solver.thread.AbstractParallelMaster;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -42,8 +41,8 @@ import org.chocosolver.util.ESat;
  * advises the others.
  * On optimisation problem, the best value found so far is shared among
  * all the solvers.
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * The expected ways to solve a problem using MasterSolver is:
  * <pre>
  *     Solver solver = new Solver();
@@ -115,7 +114,6 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
      *
      * @param model the model to duplicate
      * @param n     number of of copies to make.
-     * @return
      */
     public void populate(Solver model, int n) {
         solvers = new Solver[n + 1];
@@ -132,9 +130,10 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
      *
      * @param solvers the set of solvers to drive.
      */
-    public void declare(Solver[] solvers) {
+    public void declare(Solver... solvers) {
         this.solvers = solvers;
     }
+
 
     /**
      * Return the solvers to drive
@@ -146,13 +145,16 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
     }
 
     /**
-     * Configure the search strategies for each solver.
-     * It relies on a search binder (a default one already exists).
-     * Defining a search strategy, even dummy, which shows the decision variables is
-     * highly recommended.
+     * Declare a specific {@link org.chocosolver.solver.Settings} to each solver.
+     * Calling this method is highly recommended to, at least, configure the search strategies for each solver.
+     *
+     * @param settings array of settings
      */
-    public void configureSearches() {
-        SearchBinderFactory.getSearchBinder().configureSearches(solvers);
+    public void declareSettings(Settings... settings) {
+        assert settings.length == solvers.length;
+        for (int i = 0; i < settings.length; i++) {
+            solvers[i].set(settings[i]);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,14 +163,14 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
 
     /**
      * Returns information on the feasibility of the current problem defined by the solver.
-     * <p/>
+     * <p>
      * Possible back values are:
-     * <br/>- {@link util.ESat#TRUE}: a solution has been found,
-     * <br/>- {@link util.ESat#FALSE}: the CSP has been proven to have no solution,
-     * <br/>- {@link util.ESat#UNDEFINED}: no solution has been found so far (within given limits)
+     * <br/>- {@link org.chocosolver.util.ESat#TRUE}: a solution has been found,
+     * <br/>- {@link org.chocosolver.util.ESat#FALSE}: the CSP has been proven to have no solution,
+     * <br/>- {@link org.chocosolver.util.ESat#UNDEFINED}: no solution has been found so far (within given limits)
      * without proving the unfeasibility, though.
      *
-     * @return an {@link util.ESat}.
+     * @return an {@link org.chocosolver.util.ESat}.
      */
     public ESat isFeasible() {
         if (nbSolution > 0) return ESat.TRUE;
@@ -178,14 +180,14 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
 
     /**
      * Returns information on the completeness of the search process.
-     * <p/>
+     * <p>
      * A call to {@link #isFeasible()} may provide complementary information.
-     * <p/>
+     * <p>
      * Possible back values are:
-     * <p/>
+     * <p>
      * <br/>- <code>false</code> : the resolution is complete and
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, IntVar)} : the optimal solution has been found and
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
      */
@@ -235,7 +237,7 @@ public class MasterSolver extends AbstractParallelMaster<SlaveSolver> {
      *
      * @param solver    solver to inspect
      * @param objective the variable to optimize, the variable must be declared in solvers[0].
-     * @return
+     * @return index of the objective variable
      */
     private static int findIndexOfObjective(Solver solver, IntVar objective) {
         int idx = 0;

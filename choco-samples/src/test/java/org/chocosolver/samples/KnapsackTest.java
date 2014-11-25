@@ -51,7 +51,6 @@ public class KnapsackTest {
         pb.readArgs("-d", data, "-n", "" + n);
         pb.createSolver();
         pb.buildModel();
-//		pb.configureSearch();
 
         for (IntVar v : pb.objects) {
             if (v == null) {

@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
-import static org.chocosolver.solver.search.bind.SearchBinderFactory.getSearchBinder;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 import static org.chocosolver.util.ESat.*;
@@ -332,7 +331,7 @@ public class SearchLoop implements ISearchLoop {
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
-            ISearchBinder binder = getSearchBinder();
+            ISearchBinder binder = solver.getSettings().getSearchBinder();
             binder.configureSearch(solver);
         }
         try {
@@ -404,7 +403,7 @@ public class SearchLoop implements ISearchLoop {
 
     /**
      * Goes up in the tree search : reconsider the current decision.
-     * <p/>
+     * <p>
      * Rolls back the previous state.
      * Then, if it goes back to the base world, stop the search.
      * Otherwise, gets the opposite decision, applies it and calls the propagation.

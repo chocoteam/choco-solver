@@ -30,8 +30,7 @@ package org.chocosolver.solver.constraints.nary.automata.structure.multicostregu
 
 import gnu.trove.stack.TIntStack;
 import org.chocosolver.memory.IStateIntVector;
-import org.chocosolver.solver.Configuration;
-import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableIntIterator;
@@ -87,7 +86,7 @@ public class FastPathFinder {
 
     }
 
-    private final double getCost(int e, int resource, double[] u, boolean lagrange, boolean max) {
+    private double getCost(int e, int resource, double[] u, boolean lagrange, boolean max) {
         double cost;
         if (!lagrange)
             cost = graph.GArcs.originalCost[e][resource];
@@ -121,7 +120,7 @@ public class FastPathFinder {
 
 
     public void computeLongestPath(TIntStack removed, double lb, double[] u, boolean lagrange, boolean max,
-                                   int resource, Propagator<IntVar> propagator) throws ContradictionException {
+                                   int resource, PropMultiCostRegular propagator) throws ContradictionException {
 
         boolean update;
         if (lagrange) {
@@ -195,7 +194,7 @@ public class FastPathFinder {
                     if (!graph.isInStack(e)) {
                         int next = graph.GArcs.dests[e];
                         double newCost = graph.GNodes.lpft[next] + graph.GArcs.temporaryCost[e];//cost[graph.GNodes.layers[next]][graph.GArcs.values[e]];
-                        if (newCost + graph.GNodes.lpfs[orig] - lb <= -Configuration.MCR_DECIMAL_PREC) {
+                        if (newCost + graph.GNodes.lpfs[orig] - lb <= -propagator._MCR_DECIMAL_PREC) {
                             graph.setInStack(e);
                             removed.push(e);
                         } else if (graph.GNodes.lpft[orig] < newCost) {
@@ -234,7 +233,7 @@ public class FastPathFinder {
 
 
     public void computeShortestPath(TIntStack removed, double ub, double[] u, boolean lagrange, boolean max,
-                                    int resource, Propagator<IntVar> propagator) throws ContradictionException {
+                                    int resource, PropMultiCostRegular propagator) throws ContradictionException {
 
         graph.GNodes.spfs[graph.sourceIndex] = 0.0;
         graph.GNodes.spft[graph.tinIndex] = 0.0;
@@ -305,7 +304,7 @@ public class FastPathFinder {
                     if (!graph.isInStack(e)) {
                         int dest = graph.GArcs.dests[e];//e.getOrigin()  ;
                         double newCost = graph.GNodes.spft[dest] + graph.GArcs.temporaryCost[e];
-                        if (newCost + graph.GNodes.spfs[orig] - ub >= Configuration.MCR_DECIMAL_PREC) {
+                        if (newCost + graph.GNodes.spfs[orig] - ub >= propagator._MCR_DECIMAL_PREC) {
                             graph.setInStack(e);
                             removed.push(e);
                         } else if (graph.GNodes.spft[orig] > newCost) {
@@ -343,7 +342,7 @@ public class FastPathFinder {
 
 
     public void computeShortestAndLongestPath(IStateIntVector removed, int lb, int ub, double[] u, boolean lagrange,
-                                              boolean max, int resource, Propagator<IntVar> propagator)
+                                              boolean max, int resource, PropMultiCostRegular propagator)
             throws ContradictionException {
 
         graph.GNodes.spfs[graph.sourceIndex] = 0.0;
@@ -415,7 +414,7 @@ public class FastPathFinder {
                         double cost = graph.GArcs.temporaryCost[e];
 
                         double newCost = graph.GNodes.spft[dest] + cost;//cost[graph.GNodes.layers[next]][graph.GArcs.values[e]];
-                        if (newCost + graph.GNodes.spfs[orig] - ub >= Configuration.MCR_DECIMAL_PREC) {
+                        if (newCost + graph.GNodes.spfs[orig] - ub >= propagator._MCR_DECIMAL_PREC) {
                             graph.getInStack().set(e);
                             removed.add(e);
                         } else if (graph.GNodes.spft[orig] > newCost) {
@@ -425,7 +424,7 @@ public class FastPathFinder {
                         }
 
                         double newCost2 = graph.GNodes.lpft[dest] + cost;//cost[graph.GNodes.layers[next]][graph.GArcs.values[e]];
-                        if (newCost2 + graph.GNodes.lpfs[orig] - lb <= -Configuration.MCR_DECIMAL_PREC) {
+                        if (newCost2 + graph.GNodes.lpfs[orig] - lb <= -propagator._MCR_DECIMAL_PREC) {
                             graph.setInStack(e);
                             removed.add(e);
                         } else if (graph.GNodes.lpft[orig] < newCost2) {
@@ -448,7 +447,7 @@ public class FastPathFinder {
     }
 
     public boolean[] computeShortestAndLongestPath(TIntStack removed, IntVar[] z,
-                                                   Propagator<IntVar> propagator) throws ContradictionException {
+                                                   PropMultiCostRegular propagator) throws ContradictionException {
 
         int nbr = z.length;
 
@@ -528,7 +527,7 @@ public class FastPathFinder {
                         double[] cost = graph.GArcs.originalCost[e];
 
                         for (int d = 0; d < nbr; d++) {
-                            if (spft[dest][d] + cost[d] + spfs[orig][d] - z[d].getUB() >= Configuration.MCR_DECIMAL_PREC) {
+                            if (spft[dest][d] + cost[d] + spfs[orig][d] - z[d].getUB() >= propagator._MCR_DECIMAL_PREC) {
                                 graph.getInStack().set(e);
                                 removed.push(e);
                                 break;
@@ -538,7 +537,7 @@ public class FastPathFinder {
                                 update = true;
                             }
 
-                            if (lpft[dest][d] + cost[d] + lpfs[orig][d] - z[d].getLB() <= -Configuration.MCR_DECIMAL_PREC) {
+                            if (lpft[dest][d] + cost[d] + lpfs[orig][d] - z[d].getLB() <= -propagator._MCR_DECIMAL_PREC) {
                                 graph.setInStack(e);
                                 removed.push(e);
                                 break;

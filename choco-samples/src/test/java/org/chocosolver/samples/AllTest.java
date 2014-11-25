@@ -29,7 +29,7 @@ package org.chocosolver.samples;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.samples.integer.AllIntervalSeries;
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
@@ -81,17 +81,21 @@ public class AllTest {
 
     @Test(groups = "1m")
     public void mainTest() {
-        if (Configuration.PLUG_EXPLANATION) {
-            LoggerFactory.getLogger("test").info(this.toString());
-            prob.readArgs(args);
-            prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
-            prob.buildModel();
-            prob.configureSearch();
-            efact.plugin(prob.solver, true);
-            prob.solver.findAllSolutions();
+        LoggerFactory.getLogger("test").info(this.toString());
+        prob.readArgs(args);
+        prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
+        prob.solver.set(new Settings() {
+            @Override
+            public boolean plugExplanationIn() {
+                return true;
+            }
+        });
+        prob.buildModel();
+        prob.configureSearch();
+        efact.plugin(prob.solver, true);
+        prob.solver.findAllSolutions();
 
-            Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
-        }
+        Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

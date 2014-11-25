@@ -2,7 +2,6 @@ package org.chocosolver.util.objects.graphs;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -12,10 +11,10 @@ import java.util.Arrays;
 
 /**
  * A Multi-valued Decision Diagram (MDD for short) to store
- * <p/>
+ * <p>
  * Created by cprudhom on 30/10/14.
  */
-public class MultivaluedDecisionDiagram implements Serializable{
+public class MultivaluedDecisionDiagram implements Serializable {
 
     /**
      * The terminal node. An extreme (likely unused) value is set
@@ -49,6 +48,8 @@ public class MultivaluedDecisionDiagram implements Serializable{
      * Point to the first clear cell in 'mdds'
      */
     private int nextFreeCell;
+
+    private static boolean COMPACT_MDD_ONLY_ONCE = false;
 
     // TEMPORARY DATA STRUCTURE, PREFIX WITH "_", CLEARED AFTER USAGE
     private TIntIntHashMap _nodesToRemove; // store the nodes to remove and the size of each node
@@ -104,6 +105,7 @@ public class MultivaluedDecisionDiagram implements Serializable{
 
     /**
      * Create a new MDD, perfect copy of the input one.
+     *
      * @param MDD input MDD
      */
     @SuppressWarnings("unchecked")
@@ -132,7 +134,7 @@ public class MultivaluedDecisionDiagram implements Serializable{
         // Then add tuples
         if (TUPLES.nbTuples() > 0) {
             addTuples(TUPLES);
-            if (Configuration.COMPACT_MDD_ONLY_ONCE) { // compact at the end, or not
+            if (COMPACT_MDD_ONLY_ONCE) { // compact at the end, or not
                 compact();
             }
         }
@@ -174,7 +176,7 @@ public class MultivaluedDecisionDiagram implements Serializable{
                 p = mdd[p];
             }
         }
-        if (!Configuration.COMPACT_MDD_ONLY_ONCE) { // compact during the addition or not
+        if (!COMPACT_MDD_ONLY_ONCE) { // compact during the addition or not
             compact();
         }
     }

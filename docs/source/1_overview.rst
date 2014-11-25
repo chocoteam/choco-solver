@@ -475,5 +475,7 @@ Choco |version| : changes
 - :ref:`512_constraint_things_to_know`
 - :ref:`512_automaton`
 - :ref:`542_complex_clauses`
+- :ref:`41_settings_label`
+- :ref:`31_searchbinder`
 
 

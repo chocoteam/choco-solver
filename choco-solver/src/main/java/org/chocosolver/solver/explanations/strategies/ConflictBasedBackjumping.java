@@ -40,8 +40,6 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.chocosolver.solver.Configuration.PRINT_EXPLANATION;
-import static org.chocosolver.solver.Configuration.PROP_IN_EXP;
 import static org.chocosolver.solver.explanations.Deduction.Type.DecLeft;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
@@ -81,8 +79,8 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
      * @param active true or false
      */
     public void activeUserExplanation(boolean active) {
-        if (!PROP_IN_EXP) {
-            throw new SolverException("Configuration.properties should be modified to allow storing propagators in explanations. (PROP_IN_EXP property).");
+        if (!mSolver.getSettings().enablePropagatorInExplanation()) {
+            throw new SolverException("Solver's settings should be modified to allow storing propagators in explanations.");
         }
         userE = active;
     }
@@ -102,7 +100,7 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         if (userE) {
             lastOne = complete;
         }
-        if (PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             mExplanationEngine.onContradiction(cex, complete);
         }
         int upto = compute(complete, mSolver.getEnvironment().getWorldIndex());
@@ -156,7 +154,7 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
             Deduction right = dec.getNegativeDeduction();
             mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
         }
-        if (PRINT_EXPLANATION && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }

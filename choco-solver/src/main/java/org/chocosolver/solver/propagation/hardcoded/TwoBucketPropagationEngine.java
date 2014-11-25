@@ -28,8 +28,8 @@
 package org.chocosolver.solver.propagation.hardcoded;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Configuration;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -44,6 +44,8 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.objects.IntCircularQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -57,14 +59,14 @@ import java.util.List;
  * UNARY, BINARY, TERNARY propagators are stored in the top-priority queue,
  * LINEAR propagators are stored in the mid-priority queue,
  * QUADRATIC, CUBIC, VERY_SLOW propagators are stored in the low priority queue.
- * <p/>
+ * <p>
  * Then, managing coarse events (that is, delayed calls to `propagate(int)') is made thanks to 4 additional queues:
  * UNARY, BINARY, TERNARY propagators cannot be delayed!
  * LINEAR propagators are in the top-priority queue,
  * QUADRATIC propagators are in the second-priority queue,
  * CUBIC propagators are in the second-priority queue,
  * VERY_SLOW propagators are in the second-priority queue.
- * <p/>
+ * <p>
  * The engine empties the first queue, then propagates one event from the following one, and check the first queue again, etc.
  *
  * @author Charles Prud'homme
@@ -72,27 +74,15 @@ import java.util.List;
  */
 public class TwoBucketPropagationEngine implements IPropagationEngine {
 
+    final Logger LOGGER = LoggerFactory.getLogger(TwoBucketPropagationEngine.class);
+
     private static final int WORD_MASK = 0xffffffff;
-    private static final short[] match_f = Configuration.FINE_EVENT_QUEUES;
-    private static final short[] match_c = Configuration.COARSE_EVENT_QUEUES;
+    private final short[] match_f;
+    private final short[] match_c;
 
-    private static final short max_f;
-    private static final short max_c;
+    private final short max_f;
+    private final short max_c;
 
-    static {
-        short _max_ = -1;
-        for (int i = 0; i < match_f.length; i++) {
-            if (_max_ < match_f[i]) _max_ = match_f[i];
-        }
-        _max_++;
-        max_f = _max_;
-        _max_ = -1;
-        for (int i = 0; i < match_c.length; i++) {
-            if (_max_ < match_c[i]) _max_ = match_c[i];
-        }
-        _max_++;
-        max_c = _max_;
-    }
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
@@ -115,11 +105,13 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private boolean init; // is ready to propagate?
 
     final PropagationTrigger trigger; // an object that starts the propagation
+    final Settings.Idem idemStrat;
 
     public TwoBucketPropagationEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
+        this.idemStrat = solver.getSettings().getIdempotencyStrategy();
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<>();
@@ -142,6 +134,22 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             p2i.set(propagators[j].getId(), j);
         }
         trigger.addAll(propagators);
+
+        match_f = solver.getSettings().getFineEventPriority();
+        match_c = solver.getSettings().getCoarseEventPriority();
+
+        short _max_ = -1;
+        for (int i = 0; i < match_f.length; i++) {
+            if (_max_ < match_f[i]) _max_ = match_f[i];
+        }
+        _max_++;
+        max_f = _max_;
+        _max_ = -1;
+        for (int i = 0; i < match_c.length; i++) {
+            if (_max_ < match_c[i]) _max_ = match_c[i];
+        }
+        _max_++;
+        max_c = _max_;
 
         pro_queue_f = new ArrayDeque[max_f];
         for (int i = 0; i < max_f; i++) {
@@ -234,7 +242,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             while (!evtset.isEmpty()) {
                 int v = evtset.pollFirst();
                 assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                if (Configuration.PRINT_PROPAGATION) {
+                if (LOGGER.isDebugEnabled()) {
                     Trace.printPropagation(lastProp.getVar(v), lastProp);
                 }
                 // clear event
@@ -244,15 +252,15 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 lastProp.fineERcalls++;
                 lastProp.propagate(v, mask);
             }
-        } else if(lastProp.isActive()){ // need to be checked due to views
+        } else if (lastProp.isActive()) { // need to be checked due to views
             //assert lastProp.isActive() : "propagator is not active:" + lastProp;
-            if (Configuration.PRINT_PROPAGATION) {
+            if (LOGGER.isDebugEnabled()) {
                 Trace.printPropagation(null, lastProp);
             }
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
         // This part is for debugging only!!
-        if (Configuration.Idem.disabled != Configuration.IDEMPOTENCY) {
+        if (Settings.Idem.disabled != idemStrat) {
             FakeEngine.checkIdempotency(lastProp);
         }
     }
@@ -263,10 +271,10 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         int aid = p2i.get(lastProp.getId());
         assert schedule_c[aid] : "try to propagate an unscheduled propagator";
         schedule_c[aid] = false;
-		PropagatorEventType evt = event_c[aid];
+        PropagatorEventType evt = event_c[aid];
         event_c[aid] = PropagatorEventType.VOID;
         assert lastProp.isActive() : "propagator is not active:" + lastProp;
-        if (Configuration.PRINT_PROPAGATION) {
+        if (LOGGER.isDebugEnabled()) {
             Trace.printPropagation(null, lastProp);
         }
         lastProp.coarseERcalls++;
@@ -316,7 +324,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        if (Configuration.PRINT_VAR_EVENT) {
+        if (LOGGER.isDebugEnabled()) {
             Trace.printModification(variable, type, cause);
         }
         int nbp = variable.getNbProps();
@@ -330,11 +338,11 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                     eventmasks[aid][pindice] |= type.getStrengthenedMask();
                     if (needSched) {
                         //assert !event_f[aid].get(pindice);
-                        if (Configuration.PRINT_SCHEDULE) {
+                        if (LOGGER.isDebugEnabled()) {
                             Trace.printSchedule(prop);
                         }
                         event_f[aid].addLast(pindice);
-                    } else if (Configuration.PRINT_SCHEDULE) {
+                    } else if (LOGGER.isDebugEnabled()) {
                         Trace.printAlreadySchedule(prop);
                     }
                 }
@@ -414,7 +422,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 event_f[i] = new IntCircularQueue(propagators[i].getNbVars());
             }
         }
-		PropagatorEventType[] _event_c = event_c;
+        PropagatorEventType[] _event_c = event_c;
         event_c = new PropagatorEventType[nsize];
         System.arraycopy(_event_c, 0, event_c, 0, osize);
         Arrays.fill(event_c, osize, nsize, PropagatorEventType.VOID);
@@ -468,9 +476,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
 
             // 5. remove event_f
-			PropagatorEventType ettm = event_c[idtm];
+            PropagatorEventType ettm = event_c[idtm];
             assert event_c[idtd] == PropagatorEventType.VOID : "try to delete a propagator which has events to propagate (coarse)";
-			PropagatorEventType[] _event_c = event_c;
+            PropagatorEventType[] _event_c = event_c;
             event_c = new PropagatorEventType[nsize];
             System.arraycopy(_event_c, 0, event_c, 0, nsize);
 

@@ -29,7 +29,7 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -1525,16 +1525,17 @@ public class IntConstraintFactory {
      * @return a boolean
      */
     public static boolean tupleIt(IntVar... VARS) {
-        if (!Configuration.ENABLE_TABLE_SUBS) {
+        Settings settings = VARS[0].getSolver().getSettings();
+        if (!settings.enableTableSubstitution()) {
             return false;
         }
         long doms = 1;
-        for (int i = 0; i < VARS.length && doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS; i++) {
+        for (int i = 0; i < VARS.length && doms < settings.getMaxTupleSizeForSubstitution(); i++) {
             if (!VARS[i].hasEnumeratedDomain()) {
                 return false;
             }
             doms *= VARS[i].getDomainSize();
         }
-        return (doms < Configuration.MAX_TUPLES_FOR_TABLE_SUBS);
+        return (doms < settings.getMaxTupleSizeForSubstitution());
     }
 }
