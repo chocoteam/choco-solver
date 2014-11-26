@@ -28,8 +28,14 @@
 package org.chocosolver.choco.checker.correctness;
 
 import org.chocosolver.choco.checker.Modeler;
+import org.chocosolver.solver.constraints.extension.TupleValidator;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.search.loop.SearchLoops;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.annotations.Test;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -421,12 +427,30 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void testMDDAC() {
+        Random rnd = new Random();
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
-            for (int n = 2; n < 10; n ++) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelmddcAC, n, -n / 2, n / 2, seed, null);
+            rnd.setSeed(seed);
+            for (int n = 2; n < 10; n++) {
+                final int finalN = n;
+                int[][] doms = new int[n][n];
+                for (int j = 0; j < n; j++) {
+                    for (int k = 0; k < n; k++) {
+                        doms[j][k] = k - n / 2;
+                    }
+                }
+                Tuples tuples = TuplesFactory.generateTuples(
+                        new TupleValidator() {
+                            int nb = 4 * finalN;
+
+                            @Override
+                            public boolean valid(int... values) {
+                                return rnd.nextBoolean() && nb-- > 0;
+                            }
+                        }, true, doms);
+                CorrectnessChecker.checkCorrectness(Modeler.modelmddcAC, n, -n / 2, n / 2, seed, new MultivaluedDecisionDiagram(doms, tuples));
             }
 
         }

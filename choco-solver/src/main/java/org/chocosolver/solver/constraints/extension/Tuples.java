@@ -30,6 +30,7 @@ import org.chocosolver.solver.exception.SolverException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -56,7 +57,7 @@ public class Tuples {
 
     public Tuples(boolean feasible) {
         this.feasible = feasible;
-        if(!feasible)System.err.println("Declaring unfeasible tuples may lead to errors (See Issue#215)");
+        if (!feasible) System.err.println("Declaring unfeasible tuples may lead to errors (See Issue#215)");
         tuples = new ArrayList<>();
     }
 
@@ -73,7 +74,7 @@ public class Tuples {
      * Add a new tuple to the set of tuples
      *
      * @param tuple a tuple.
-     * @throws solver.exception.SolverException if the size of the tuple added does not correspond to a the previous ones (if any).
+     * @throws org.chocosolver.solver.exception.SolverException if the size of the tuple added does not correspond to a the previous ones (if any).
      */
     public void add(int... tuple) {
         if (tuples.size() == 0) {
@@ -169,5 +170,22 @@ public class Tuples {
             matrix[i++] = tuple.clone();
         }
         return matrix;
+    }
+
+    public void sort() {
+        tuples.sort(new TupleComparator());
+    }
+
+    private static class TupleComparator implements Comparator<int[]> {
+
+        @Override
+        public int compare(int[] o1, int[] o2) {
+            int i = 0;
+            int l = o1.length;
+            while (i < l && o1[i] == o2[i]) {
+                i++;
+            }
+            return (i == l ? 0 : o1[i] - o2[i]);
+        }
     }
 }

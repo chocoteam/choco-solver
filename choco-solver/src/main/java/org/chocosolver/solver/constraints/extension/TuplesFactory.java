@@ -44,6 +44,43 @@ public class TuplesFactory {
     TuplesFactory() {
     }
 
+
+    /**
+     * A method that generates all tuples from a set of variables and stores (and returns) the valid tuples wrt to the <code>filter</code>.
+     * One may keep in mind that tuples generation directly depends on the product of domain cardinality, but also on the algorithm defines in the filter.
+     *
+     * @param filter   tuple validator
+     * @param feasible are tuples feasible (or infeasible)
+     * @param doms     domains
+     * @return the valid tuples wrt to <code>filter</code>
+     * @see <a href="http://stackoverflow.com/questions/8804852/generate-all-tuples-with-c-better-way-than-nested-loops">source</a>
+     */
+    public static Tuples generateTuples(TupleValidator filter, boolean feasible, int[]... doms) {
+        Tuples tuples = new Tuples(feasible);
+        int n = doms.length;
+        int[] t = new int[n];
+        int[] i = new int[n];
+        for (int j = 0; j < n; j++) {
+            t[j] = doms[j][0];
+        }
+        while (true) {
+            if (filter.valid(t)) tuples.add(t.clone());
+            int j;
+            for (j = 0; j < n; j++) {
+                i[j]++;
+                if (i[j] < n) {
+                    t[j] = doms[j][i[j]];
+                    break;
+                }
+                i[j] = 0;
+                t[j] = doms[j][0];
+            }
+            if (j == n) break;
+        }
+        return tuples;
+
+    }
+
     /**
      * A method that generates all tuples from a set of variables and stores (and returns) the valid tuples wrt to the <code>filter</code>.
      * One may keep in mind that tuples generation directly depends on the product of domain cardinality, but also on the algorithm defines in the filter.
@@ -89,12 +126,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples absolute(IntVar VAR1, IntVar VAR2) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] == Math.abs(values[1]);
-            }
-        }, true, VAR1, VAR2);
+        return generateTuples(values -> values[0] == Math.abs(values[1]), true, VAR1, VAR2);
     }
 
     /**
@@ -104,45 +136,43 @@ public class TuplesFactory {
      */
     public static Tuples arithm(IntVar VAR1, String OP, IntVar VAR2) {
         final Operator op = Operator.get(OP);
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                switch (op) {
-                    case LT:
-                        return values[0] < values[1];
-                    case GT:
-                        return values[0] > values[1];
-                    case LE:
-                        return values[0] <= values[1];
-                    case GE:
-                        return values[0] >= values[1];
-                    case NQ:
-                        return values[0] != values[1];
-                    case EQ:
-                        return values[0] == values[1];
-                }
-                return false;
+        return generateTuples(values -> {
+            switch (op) {
+                case LT:
+                    return values[0] < values[1];
+                case GT:
+                    return values[0] > values[1];
+                case LE:
+                    return values[0] <= values[1];
+                case GE:
+                    return values[0] >= values[1];
+                case NQ:
+                    return values[0] != values[1];
+                case EQ:
+                    return values[0] == values[1];
             }
+            return false;
         }, true, VAR1, VAR2);
     }
 
-	/**
-	 * Generate valid tuples for an element constraint : TABLE[INDEX-OFFSET] = VALUE
-	 * @param VALUE
-	 * @param TABLE
-	 * @param INDEX
-	 * @param OFFSET
-	 * @return a Tuples object, reserved for a table constraint
-	 */
-	public static Tuples element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET){
-		Tuples t = new Tuples(true);
-		for(int v=INDEX.getLB();v<=INDEX.getUB();v=INDEX.nextValue(v)){
-			if(v-OFFSET>=0 && v-OFFSET<TABLE.length && VALUE.contains(TABLE[v-OFFSET])) {
-				t.add(TABLE[v - OFFSET], v);
-			}
-		}
-		return t;
-	}
+    /**
+     * Generate valid tuples for an element constraint : TABLE[INDEX-OFFSET] = VALUE
+     *
+     * @param VALUE  an integer variable taking its value in TABLE
+     * @param TABLE  an array of integer values
+     * @param INDEX  an integer variable representing the value of VALUE in TABLE
+     * @param OFFSET offset matching INDEX.LB and TABLE[0] (Generally 0)
+     * @return a Tuples object, reserved for a table constraint
+     */
+    public static Tuples element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
+        Tuples t = new Tuples(true);
+        for (int v = INDEX.getLB(); v <= INDEX.getUB(); v = INDEX.nextValue(v)) {
+            if (v - OFFSET >= 0 && v - OFFSET < TABLE.length && VALUE.contains(TABLE[v - OFFSET])) {
+                t.add(TABLE[v - OFFSET], v);
+            }
+        }
+        return t;
+    }
 
     /**
      * Generate valid tuples for absolute constraint: VAR1  = VAR2^POWER
@@ -150,12 +180,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples power(IntVar VAR1, IntVar VAR2, final int POWER) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] == Math.pow(values[1], POWER);
-            }
-        }, true, VAR1, VAR2);
+        return generateTuples(values -> values[0] == Math.pow(values[1], POWER), true, VAR1, VAR2);
     }
 
     /**
@@ -164,12 +189,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples square(IntVar VAR1, IntVar VAR2) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] == Math.pow(values[1], 2);
-            }
-        }, true, VAR1, VAR2);
+        return generateTuples(values -> values[0] == Math.pow(values[1], 2), true, VAR1, VAR2);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,12 +202,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples eucl_div(IntVar DIVIDEND, IntVar DIVISOR, IntVar RESULT) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] / values[1] == values[2];
-            }
-        }, true, DIVIDEND, DIVISOR, RESULT);
+        return generateTuples(values -> values[0] / values[1] == values[2], true, DIVIDEND, DIVISOR, RESULT);
     }
 
     /**
@@ -196,12 +211,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples maximum(IntVar VAR1, IntVar VAR2, IntVar MAX) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] == Math.max(values[1], values[2]);
-            }
-        }, true, MAX, VAR1, VAR2);
+        return generateTuples(values -> values[0] == Math.max(values[1], values[2]), true, MAX, VAR1, VAR2);
     }
 
     /**
@@ -210,12 +220,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples minimum(IntVar VAR1, IntVar VAR2, IntVar MIN) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] == Math.min(values[1], values[2]);
-            }
-        }, true, MIN, VAR1, VAR2);
+        return generateTuples(values -> values[0] == Math.min(values[1], values[2]), true, MIN, VAR1, VAR2);
     }
 
     /**
@@ -224,12 +229,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples modulo(IntVar VAR1, IntVar VAR2, IntVar MOD) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] == values[1] % values[2];
-            }
-        }, true, MOD, VAR1, VAR2);
+        return generateTuples(values -> values[0] == values[1] % values[2], true, MOD, VAR1, VAR2);
     }
 
 
@@ -239,12 +239,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples minus(IntVar VAR1, IntVar VAR2, IntVar RESULT) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] - values[1] == values[2];
-            }
-        }, true, VAR1, VAR2, RESULT);
+        return generateTuples(values -> values[0] - values[1] == values[2], true, VAR1, VAR2, RESULT);
     }
 
     /**
@@ -253,12 +248,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples plus(IntVar VAR1, IntVar VAR2, IntVar RESULT) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] + values[1] == values[2];
-            }
-        }, true, VAR1, VAR2, RESULT);
+        return generateTuples(values -> values[0] + values[1] == values[2], true, VAR1, VAR2, RESULT);
     }
 
     /**
@@ -267,12 +257,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples times(IntVar VAR1, IntVar VAR2, IntVar RESULT) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                return values[0] * values[1] == values[2];
-            }
-        }, true, VAR1, VAR2, RESULT);
+        return generateTuples(values -> values[0] * values[1] == values[2], true, VAR1, VAR2, RESULT);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -286,16 +271,13 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples allDifferent(IntVar... VARS) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                for (int i = 0; i < values.length - 1; i++) {
-                    for (int j = i + 1; j < values.length; j++) {
-                        if (values[j] == values[i]) return false;
-                    }
+        return generateTuples(values -> {
+            for (int i = 0; i < values.length - 1; i++) {
+                for (int j = i + 1; j < values.length; j++) {
+                    if (values[j] == values[i]) return false;
                 }
-                return true;
             }
+            return true;
         }, true, VARS);
     }
 
@@ -306,16 +288,16 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples allEquals(IntVar... VARS) {
-        int min  = Integer.MIN_VALUE;
+        int min = Integer.MIN_VALUE;
         int max = Integer.MAX_VALUE;
-        for(int i = 0 ; i < VARS.length; i++){
+        for (int i = 0; i < VARS.length; i++) {
             min = Math.max(min, VARS[i].getLB());
             max = Math.min(max, VARS[i].getUB());
         }
         Tuples tuples = new Tuples(true);
-        for(int k = min; k <= max; k++){
+        for (int k = min; k <= max; k++) {
             int[] t = new int[VARS.length];
-            for(int i = 0; i < VARS.length; i++){
+            for (int i = 0; i < VARS.length; i++) {
                 t[i] = k;
             }
             tuples.add(t.clone());
@@ -339,14 +321,11 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples lex_chain_less(IntVar... VARS) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                for (int i = 0; i < values.length - 1; i++) {
-                    if (values[i] < values[i + 1]) return false;
-                }
-                return true;
+        return generateTuples(values -> {
+            for (int i = 0; i < values.length - 1; i++) {
+                if (values[i] < values[i + 1]) return false;
             }
+            return true;
         }, true, VARS);
     }
 
@@ -357,80 +336,72 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples lex_chain_less_eq(IntVar... VARS) {
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                for (int i = 0; i < values.length - 1; i++) {
-                    if (values[i] <= values[i + 1]) return false;
-                }
-                return true;
+        return generateTuples(values -> {
+            for (int i = 0; i < values.length - 1; i++) {
+                if (values[i] <= values[i + 1]) return false;
             }
+            return true;
         }, true, VARS);
     }
 
-	/**
-	 * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
-	 *
-	 * @param VARS concerned variables
-	 * @return a Tuples object, reserved for a table constraint
-	 */
-	public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, IntVar SCALAR, final int SCALAR_COEFF) {
-		Tuples left = generateTuples(TupleValidator.TRUE,true,VARS);
-		Tuples tuples = new Tuples(true);
-		int n = VARS.length;
-		for(int[] tleft:left.tuples){
-			int right = 0;
-			for (int i = 0; i < n; i++) {
-				right += tleft[i] * COEFFS[i];
-			}
-			if(right%SCALAR_COEFF==0 && SCALAR.contains(right/SCALAR_COEFF)) {
-				int[] t = new int[n+1];
-				for(int i=0;i<n;i++){
-					t[i] = tleft[i];
-				}
-                t[n] = right/SCALAR_COEFF;
-				tuples.add(t);
-			}
-		}
-		return tuples;
-	}
-
-	/**
-	 * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
-	 *
-	 * @param VARS concerned variables
-	 * @return a Tuples object, reserved for a table constraint
-	 */
-	public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, final String OPERATOR, IntVar SCALAR, final int SCALAR_COEFF) {
-		if(OPERATOR.equals("=")){
-			return scalar(VARS,COEFFS,SCALAR,SCALAR_COEFF);
-		}
-		final Operator op = Operator.get(OPERATOR);
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                int scalar = 0;
-                for (int i = 0; i < values.length - 1; i++) {
-                    scalar += values[i] * COEFFS[i];
-                }
-                switch (op) {
-                    case LT:
-                        return scalar < values[values.length - 1]*SCALAR_COEFF;
-                    case GT:
-                        return scalar > values[values.length - 1]*SCALAR_COEFF;
-                    case LE:
-                        return scalar <= values[values.length - 1]*SCALAR_COEFF;
-                    case GE:
-                        return scalar >= values[values.length - 1]*SCALAR_COEFF;
-                    case NQ:
-                        return scalar != values[values.length - 1]*SCALAR_COEFF;
-                    case EQ:
-                        return scalar == values[values.length - 1]*SCALAR_COEFF;
-                }
-                return false;
+    /**
+     * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
+     *
+     * @param VARS concerned variables
+     * @return a Tuples object, reserved for a table constraint
+     */
+    public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, IntVar SCALAR, final int SCALAR_COEFF) {
+        Tuples left = generateTuples(TupleValidator.TRUE, true, VARS);
+        Tuples tuples = new Tuples(true);
+        int n = VARS.length;
+        for (int[] tleft : left.tuples) {
+            int right = 0;
+            for (int i = 0; i < n; i++) {
+                right += tleft[i] * COEFFS[i];
             }
+            if (right % SCALAR_COEFF == 0 && SCALAR.contains(right / SCALAR_COEFF)) {
+                int[] t = new int[n + 1];
+                System.arraycopy(tleft, 0, t, 0, n);
+                t[n] = right / SCALAR_COEFF;
+                tuples.add(t);
+            }
+        }
+        return tuples;
+    }
+
+    /**
+     * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR
+     *
+     * @param VARS concerned variables
+     * @return a Tuples object, reserved for a table constraint
+     */
+    public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, final String OPERATOR, IntVar SCALAR, final int SCALAR_COEFF) {
+        if (OPERATOR.equals("=")) {
+            return scalar(VARS, COEFFS, SCALAR, SCALAR_COEFF);
+        }
+        final Operator op = Operator.get(OPERATOR);
+        return generateTuples(values -> {
+            int scalar = 0;
+            for (int i = 0; i < values.length - 1; i++) {
+                scalar += values[i] * COEFFS[i];
+            }
+            switch (op) {
+                case LT:
+                    return scalar < values[values.length - 1] * SCALAR_COEFF;
+                case GT:
+                    return scalar > values[values.length - 1] * SCALAR_COEFF;
+                case LE:
+                    return scalar <= values[values.length - 1] * SCALAR_COEFF;
+                case GE:
+                    return scalar >= values[values.length - 1] * SCALAR_COEFF;
+                case NQ:
+                    return scalar != values[values.length - 1] * SCALAR_COEFF;
+                case EQ:
+                    return scalar == values[values.length - 1] * SCALAR_COEFF;
+            }
+            return false;
         }, true, ArrayUtils.append(VARS, new IntVar[]{SCALAR}));
-	}
+    }
 
     /**
      * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM
@@ -440,29 +411,26 @@ public class TuplesFactory {
      */
     public static Tuples sum(IntVar[] VARS, final String OPERATOR, IntVar SUM) {
         final Operator op = Operator.get(OPERATOR);
-        return generateTuples(new TupleValidator() {
-            @Override
-            public boolean valid(int... values) {
-                int sum = 0;
-                for (int i = 0; i < values.length - 1; i++) {
-                    sum += values[i];
-                }
-                switch (op) {
-                    case LT:
-                        return sum < values[values.length - 1];
-                    case GT:
-                        return sum > values[values.length - 1];
-                    case LE:
-                        return sum <= values[values.length - 1];
-                    case GE:
-                        return sum >= values[values.length - 1];
-                    case NQ:
-                        return sum != values[values.length - 1];
-                    case EQ:
-                        return sum == values[values.length - 1];
-                }
-                return false;
+        return generateTuples(values -> {
+            int sum = 0;
+            for (int i = 0; i < values.length - 1; i++) {
+                sum += values[i];
             }
+            switch (op) {
+                case LT:
+                    return sum < values[values.length - 1];
+                case GT:
+                    return sum > values[values.length - 1];
+                case LE:
+                    return sum <= values[values.length - 1];
+                case GE:
+                    return sum >= values[values.length - 1];
+                case NQ:
+                    return sum != values[values.length - 1];
+                case EQ:
+                    return sum == values[values.length - 1];
+            }
+            return false;
         }, true, ArrayUtils.append(VARS, new IntVar[]{SUM}));
     }
 

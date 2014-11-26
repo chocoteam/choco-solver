@@ -28,8 +28,14 @@
 package org.chocosolver.choco.checker.consistency;
 
 import org.chocosolver.choco.checker.Modeler;
+import org.chocosolver.solver.constraints.extension.TupleValidator;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.search.loop.SearchLoops;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.annotations.Test;
+
+import java.util.Random;
 
 import static org.chocosolver.choco.checker.consistency.ConsistencyChecker.checkConsistency;
 
@@ -41,8 +47,9 @@ public class TestConsistency {
 
     public TestConsistency() {
     }
+
     public TestConsistency(SearchLoops peType) {
-        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,22 +355,76 @@ public class TestConsistency {
     @Test(groups = "1s")
     public void testMDD1() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelmddcAC, 1, 0, 10, null, seed + i, "ac");
+        Random rnd = new Random();
+        for (int i = 0; i < 99; i++) {
+            rnd.setSeed(seed + i);
+            int[][] doms = new int[1][10];
+            for (int j = 0; j < 1; j++) {
+                for (int k = 0; k < 10; k++) {
+                    doms[j][k] = k;
+                }
+            }
+            Tuples tuples = TuplesFactory.generateTuples(
+                    new TupleValidator() {
+                        int nb = 4;
+
+                        @Override
+                        public boolean valid(int... values) {
+                            return rnd.nextBoolean() && nb-- > 0;
+                        }
+                    }, true, doms);
+            checkConsistency(Modeler.modelmddcAC, 1, 0, 10, new MultivaluedDecisionDiagram(doms, tuples), seed + i, "ac");
+        }
     }
 
     @Test(groups = "1s")
     public void testMDD2() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelmddcAC, 2, 0, 2, null, seed + i, "ac");
+        Random rnd = new Random();
+        for (int i = 0; i < 99; i++) {
+            rnd.setSeed(seed + i);
+            int[][] doms = new int[2][2];
+            for (int j = 0; j < 2; j++) {
+                for (int k = 0; k < 2; k++) {
+                    doms[j][k] = k;
+                }
+            }
+            Tuples tuples = TuplesFactory.generateTuples(
+                    new TupleValidator() {
+                        int nb = 3;
+
+                        @Override
+                        public boolean valid(int... values) {
+                            return rnd.nextBoolean() && nb-- > 0;
+                        }
+                    }, true, doms);
+            checkConsistency(Modeler.modelmddcAC, 2, 0, 2, new MultivaluedDecisionDiagram(doms, tuples), seed + i, "ac");
+        }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testMDD3() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelmddcAC, 5, -4, 3, null, seed + i, "ac");
+        Random rnd = new Random();
+        for (int i = 0; i < 999; i++) {
+            rnd.setSeed(seed + i);
+            int[][] doms = new int[5][8];
+            for (int j = 0; j < 5; j++) {
+                for (int k = 0; k < 8; k++) {
+                    doms[j][k] = k - 4;
+                }
+            }
+            Tuples tuples = TuplesFactory.generateTuples(
+                    new TupleValidator() {
+                        int nb = 20;
+
+                        @Override
+                        public boolean valid(int... values) {
+                            return rnd.nextBoolean() && nb-- > 0;
+                        }
+                    }, true, doms);
+            checkConsistency(Modeler.modelmddcAC, 5, -4, 3, new MultivaluedDecisionDiagram(doms, tuples), seed + i, "ac");
+        }
     }
 
     /*@Test

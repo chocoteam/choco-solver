@@ -32,7 +32,6 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -44,8 +43,6 @@ import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
-
-import java.util.Arrays;
 
 /**
  * <br/>
@@ -762,7 +759,8 @@ public interface Modeler {
                 vars[i] = VF.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, TuplesFactory.sum(Arrays.copyOfRange(vars, 0, vars.length - 1), "=", vars[vars.length - 1]))));
+
+            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram)parameters));
             s.set(ISF.random_value(vars));
             return s;
         }

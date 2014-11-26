@@ -4,6 +4,8 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import java.util.Arrays;
  * Created by cprudhom on 30/10/14.
  */
 public class MultivaluedDecisionDiagram implements Serializable {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(MultivaluedDecisionDiagram.class);
 
     /**
      * The terminal node. An extreme (likely unused) value is set
@@ -49,7 +53,8 @@ public class MultivaluedDecisionDiagram implements Serializable {
      */
     private int nextFreeCell;
 
-    private static boolean COMPACT_MDD_ONLY_ONCE = false;
+    private final boolean compactOnce;
+    private final boolean sortTuples;
 
     // TEMPORARY DATA STRUCTURE, PREFIX WITH "_", CLEARED AFTER USAGE
     private TIntIntHashMap _nodesToRemove; // store the nodes to remove and the size of each node
@@ -59,6 +64,20 @@ public class MultivaluedDecisionDiagram implements Serializable {
     private int[] _pos;
 
 
+    private static int[][] flattenDomain(IntVar[] VARIABLES) {
+        int[][] FLATDOM = new int[VARIABLES.length][];
+        for (int i = 0; i < VARIABLES.length; i++) {
+            int lb = VARIABLES[i].getLB();
+            int ub = VARIABLES[i].getUB();
+            int size = ub - lb + 1;
+            FLATDOM[i] = new int[size];
+            for (int j = 0; j < size; j++) {
+                FLATDOM[i][j] = j + lb;
+            }
+        }
+        return FLATDOM;
+    }
+
     /**
      * Create an MDD based on an array of flatten domains and a set of tuples
      *
@@ -66,19 +85,19 @@ public class MultivaluedDecisionDiagram implements Serializable {
      * @param TUPLES    set of (allowed) tuples
      */
     public MultivaluedDecisionDiagram(IntVar[] VARIABLES, Tuples TUPLES) {
-        this.nbLayers = VARIABLES.length;
-        this.offsets = new int[nbLayers];
-        this.sizes = new int[nbLayers];
-        int maxDom = 0;
-        for (int i = 0; i < nbLayers; i++) {
-            offsets[i] = VARIABLES[i].getLB();
-            sizes[i] = VARIABLES[i].getUB() - VARIABLES[i].getLB() + 1;
-            if (maxDom < sizes[i]) {
-                maxDom = sizes[i];
-            }
-        }
-        mdd = new int[nbLayers * maxDom];
-        init(TUPLES);
+        this(flattenDomain(VARIABLES), TUPLES);
+    }
+
+    /**
+     * Create an MDD based on an array of flatten domains and a set of tuples
+     *
+     * @param VARIABLES   array of flatten domains
+     * @param TUPLES      set of (allowed) tuples
+     * @param compactOnce set to true to compact the MDD after having added all the TUPLES, set to false to try to compact the MDD after each tuple addition
+     * @param sortTuple   set to true to sort the TUPLES in increasing order before adding them
+     */
+    public MultivaluedDecisionDiagram(IntVar[] VARIABLES, Tuples TUPLES, boolean compactOnce, boolean sortTuple) {
+        this(flattenDomain(VARIABLES), TUPLES, compactOnce, sortTuple);
     }
 
     /**
@@ -88,13 +107,27 @@ public class MultivaluedDecisionDiagram implements Serializable {
      * @param TUPLES  set of (allowed) tuples
      */
     public MultivaluedDecisionDiagram(int[][] FLATDOM, Tuples TUPLES) {
+        this(FLATDOM, TUPLES, true, false);
+    }
+
+    /**
+     * Create an MDD based on an array of flatten domains and a set of tuples
+     *
+     * @param FLATDOM     array of flatten domains
+     * @param TUPLES      set of (allowed) tuples
+     * @param compactOnce set to true to compact the MDD after having added all the TUPLES, set to false to try to compact the MDD after each tuple addition
+     * @param sortTuple   set to true to sort the TUPLES in increasing order before adding them
+     */
+    public MultivaluedDecisionDiagram(int[][] FLATDOM, Tuples TUPLES, boolean compactOnce, boolean sortTuple) {
         this.nbLayers = FLATDOM.length;
         this.offsets = new int[nbLayers];
         this.sizes = new int[nbLayers];
+        this.compactOnce = compactOnce;
+        this.sortTuples = sortTuple;
         int maxDom = 0;
         for (int i = 0; i < nbLayers; i++) {
             offsets[i] = FLATDOM[i][0];
-            sizes[i] = FLATDOM[i][FLATDOM[i].length] - FLATDOM[i][0] + 1;
+            sizes[i] = FLATDOM[i][FLATDOM[i].length - 1] - FLATDOM[i][0] + 1;
             if (maxDom < sizes[i]) {
                 maxDom = sizes[i];
             }
@@ -109,13 +142,15 @@ public class MultivaluedDecisionDiagram implements Serializable {
      * @param MDD input MDD
      */
     @SuppressWarnings("unchecked")
-    public MultivaluedDecisionDiagram(MultivaluedDecisionDiagram MDD) {
+    private MultivaluedDecisionDiagram(MultivaluedDecisionDiagram MDD) {
         this.nbLayers = MDD.nbLayers;
         this.offsets = MDD.offsets.clone();
         this.sizes = MDD.sizes.clone();
+        this.compactOnce = MDD.compactOnce;
+        this.sortTuples = MDD.sortTuples;
         this.mdd = MDD.mdd.clone();
         this.nextFreeCell = sizes[0];
-        this._nodesToRemove = new TIntIntHashMap();
+        this._nodesToRemove = new TIntIntHashMap(16, .5f, -1, -1);
         this._identicalNodes = new ArrayList[nbLayers][];
         this._nodeId = new TIntArrayList[nbLayers][];
         this._removedCells = MDD._removedCells;
@@ -127,14 +162,17 @@ public class MultivaluedDecisionDiagram implements Serializable {
         nextFreeCell = sizes[0];
         _pos = new int[nbLayers];
 
-        _nodesToRemove = new TIntIntHashMap();
+        _nodesToRemove = new TIntIntHashMap(16, .5f, -1, -1);
         _identicalNodes = new ArrayList[nbLayers][];
         _nodeId = new TIntArrayList[nbLayers][];
 
+        if(LOGGER.isDebugEnabled()){
+            LOGGER.debug("Add {} tuples", TUPLES.nbTuples());
+        }
         // Then add tuples
         if (TUPLES.nbTuples() > 0) {
             addTuples(TUPLES);
-            if (COMPACT_MDD_ONLY_ONCE) { // compact at the end, or not
+            if (compactOnce) { // compact at the end, or not
                 compact();
             }
         }
@@ -146,6 +184,7 @@ public class MultivaluedDecisionDiagram implements Serializable {
      * @param TUPLES tuples to add
      */
     public void addTuples(Tuples TUPLES) {
+        if (sortTuples) TUPLES.sort();
         for (int t = 0; t < TUPLES.nbTuples(); t++) {
             addTuple(TUPLES.get(t));
         }
@@ -157,6 +196,9 @@ public class MultivaluedDecisionDiagram implements Serializable {
      * @param TUPLE tuple to add
      */
     public void addTuple(int[] TUPLE) {
+        if(LOGGER.isDebugEnabled()){
+            LOGGER.debug("Add: {}", Arrays.toString(TUPLE));
+        }
         for (int i = 0; i < nbLayers; i++) {
             // get the position of the value relatively to the offset of each variable
             _pos[i] = TUPLE[i] - offsets[i];
@@ -176,7 +218,7 @@ public class MultivaluedDecisionDiagram implements Serializable {
                 p = mdd[p];
             }
         }
-        if (!COMPACT_MDD_ONLY_ONCE) { // compact during the addition or not
+        if (!compactOnce) { // compact during the addition or not
             compact();
         }
     }
@@ -233,28 +275,33 @@ public class MultivaluedDecisionDiagram implements Serializable {
                     mdd[node + i] = nodeChild[i] = detectIsomorphism(mdd[node + i], layer + 1);
             }
         }
+        boolean known = false;
         if (_identicalNodes[layer][nbChild] == null) {
             _identicalNodes[layer][nbChild] = new ArrayList<>();
             _nodeId[layer][nbChild] = new TIntArrayList();
         } else {
             for (int j = _identicalNodes[layer][nbChild].size() - 1; j >= 0; j--) {
                 int[] currentNode = _identicalNodes[layer][nbChild].get(j);
-                boolean equal = true;
-                for (int i = currentNode.length - 1; i >= 0 && equal; i--) {
+                boolean found = _nodeId[layer][nbChild].get(j) != node;  // deal with previously analyzed nodes
+                known |= !found;
+                for (int i = currentNode.length - 1; i >= 0 && found; i--) {
                     if (currentNode[i] != nodeChild[i]) {
-                        equal = false;
+                        found = false;
                     }
                 }
-                if (equal
-                        && _nodeId[layer][nbChild].get(j) != node) { // deal with previously reduced nodes
-                    _nodesToRemove.put(node, sizes[layer]);
-                    _removedCells += sizes[layer];
+                if (found) {
+                    int insert = _nodesToRemove.put(node, sizes[layer]);
+                    if (insert == -1) {
+                        _removedCells += sizes[layer];
+                    }
                     return _nodeId[layer][nbChild].get(j);
                 }
             }
         }
-        _nodeId[layer][nbChild].add(node);
-        _identicalNodes[layer][nbChild].add(nodeChild);
+        if (!known) {
+            _nodeId[layer][nbChild].add(node);
+            _identicalNodes[layer][nbChild].add(nodeChild);
+        }
 
         return node;
     }
@@ -292,8 +339,7 @@ public class MultivaluedDecisionDiagram implements Serializable {
 
             for (int i = 0; i < compacted.length; i++) {
                 if (compacted[i] > EMPTY) {
-                    compacted[i] -= gains[
-                            searchClosest(nodes, compacted[i])];
+                    compacted[i] -= gains[searchClosest(nodes, compacted[i])];
                 }
             }
             mdd = compacted;
@@ -358,6 +404,29 @@ public class MultivaluedDecisionDiagram implements Serializable {
     }
 
     /**
+     * Return true is PATH has a support in the mdd
+     *
+     * @param PATH array of value
+     * @return true if PATH is valid
+     */
+    public boolean exists(int... PATH) {
+        if (PATH.length == nbLayers) {
+            int p = 0;
+            for (int i = 0; i < nbLayers; i++) {
+                p += PATH[i] - offsets[i];
+                if (p >= mdd.length || mdd[p] == EMPTY) {
+                    return false;
+                } else if (i + 1 == nbLayers) { // if this is the last variable => terminal node
+                    return mdd[p] == TERMINAL;
+                } else {
+                    p = mdd[p];
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Duplicate the current MDD
      *
      * @return a copy of the current MDD
@@ -365,4 +434,5 @@ public class MultivaluedDecisionDiagram implements Serializable {
     public MultivaluedDecisionDiagram duplicate() {
         return new MultivaluedDecisionDiagram(this);
     }
+
 }
