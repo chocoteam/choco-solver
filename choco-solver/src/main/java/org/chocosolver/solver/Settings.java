@@ -29,6 +29,8 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 
+import java.io.Serializable;
+
 /**
  * Settings for {@link org.chocosolver.solver.Solver}.
  * Since java8, acts as default settings.
@@ -36,7 +38,7 @@ import org.chocosolver.solver.search.bind.ISearchBinder;
  * Created by cprudhom on 25/11/14.
  * Project: choco.
  */
-public interface Settings {
+public interface Settings extends Serializable {
 
     public enum Idem {
         disabled, // does not anything
