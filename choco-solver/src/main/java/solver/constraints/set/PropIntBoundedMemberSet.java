@@ -204,10 +204,10 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
                 }
             }
         } else {
-            int minVal = iv.getLB();
-            int maxVal = iv.getUB();
+            int lb = iv.getLB();
+            int ub = iv.getUB();
             boolean all = true;
-            for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
+            for (int i = lb; i <= ub; i++) {
                 if (!set.kernelContains(i)) {
                     all = false;
                     break;
@@ -216,7 +216,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
             if (all) {
                 return ESat.TRUE;
             }
-            for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
+            for (int i = lb; i <= ub; i++) {
                 if (set.envelopeContains(i)) {
                     return ESat.UNDEFINED;
                 }
