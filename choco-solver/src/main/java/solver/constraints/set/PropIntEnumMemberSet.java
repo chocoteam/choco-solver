@@ -114,7 +114,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
         int ub = iv.getUB();
         for (int i = iv.getLB(); i <= ub; i++) {
             if (!set.envelopeContains(i)) {
-                iv.removeValue(i, this);
+                iv.removeValue(i, aCause);
             }
         }
         // now iv \subseteq set
@@ -122,11 +122,12 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             set.addToKernel(iv.getValue(), aCause);
             setPassive();
         }
+        sdm.unfreeze();
     }
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
-        if (i == 2) {
+        if (i == 0) {
             sdm.freeze();
             sdm.forEach(elemRem, SetEventType.REMOVE_FROM_ENVELOPE);
             sdm.unfreeze();
