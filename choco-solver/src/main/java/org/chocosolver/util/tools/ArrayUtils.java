@@ -92,6 +92,7 @@ public enum ArrayUtils {
         return null;
     }
 
+    @SafeVarargs
     public static <T> int length(final T[]... arrays) {
         int length = 0;
         for (T[] array : arrays) {
@@ -107,6 +108,7 @@ public enum ArrayUtils {
         return false;
     }
 
+    @SafeVarargs
     public static <T> T get(int index, final T[]... arrays) {
         int shift = index;
         for (T[] tab : arrays) {
@@ -120,6 +122,7 @@ public enum ArrayUtils {
     }
 
 
+    @SafeVarargs
     public static <T> T get(int index, final List<T>... arrays) {
         int shift = index;
         for (List<T> tab : arrays) {
@@ -230,6 +233,7 @@ public enum ArrayUtils {
         return list.toArray((T[]) java.lang.reflect.Array.newInstance(c, list.size()));
     }
 
+    @SafeVarargs
     public static <T> T[] toArray(T... elt) {
         return elt;
     }
@@ -279,7 +283,7 @@ public enum ArrayUtils {
     }
 
     public static <T> T[] flatten(T[][][] matrix) {
-        List<T> elt = new ArrayList<T>();
+        List<T> elt = new ArrayList<>();
         for (T[][] t : matrix) {
             for (T[] tt : t) {
                 elt.addAll(Arrays.asList(tt));
@@ -327,7 +331,7 @@ public enum ArrayUtils {
 
     @SuppressWarnings("unchecked")
     public static <T extends Comparable<T>> T[] sort(Set<T> set) {
-        final LinkedList<T> tmpl = new LinkedList<T>(set);
+        final LinkedList<T> tmpl = new LinkedList<>(set);
         if (tmpl.isEmpty()) {
             return null;
         } else {
@@ -382,7 +386,7 @@ public enum ArrayUtils {
     public static int[] zeroToNShuffle(int nb, long seed) {
         Random r = new Random(seed);
         int[] ret = new int[nb];
-        ArrayList<Integer> tmp = new ArrayList<Integer>();
+        ArrayList<Integer> tmp = new ArrayList<>();
         for (int i = 0; i < nb; i++) tmp.add(i);
 
         for (int i = 0; i < nb; i++) {

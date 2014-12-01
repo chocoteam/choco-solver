@@ -69,7 +69,7 @@ public class SetStrategyFactory {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy force_first(SetVar... sets) {
-        return custom(new InputOrder<SetVar>(), new SetDomainMin(), true, sets);
+        return custom(new InputOrder<>(), new SetDomainMin(), true, sets);
     }
 
     /**
@@ -79,7 +79,7 @@ public class SetStrategyFactory {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy remove_first(SetVar... sets) {
-        return custom(new InputOrder<SetVar>(), new SetDomainMin(), false, sets);
+        return custom(new InputOrder<>(), new SetDomainMin(), false, sets);
     }
 
     /**

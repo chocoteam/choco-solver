@@ -65,7 +65,7 @@ public class PertReified extends Pert {
                 }
             }
         }
-        List<BoolVar> lbvars = new ArrayList<BoolVar>();
+        List<BoolVar> lbvars = new ArrayList<>();
         for (int i = 0; i < alldiffLayers.length; i++) {
             BitSet disjoint = alldiffLayers[i];
             IntVar[] _vars = new IntVar[disjoint.cardinality()];

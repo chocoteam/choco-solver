@@ -50,8 +50,8 @@ public class DominatingSetOfQueens {
 	 * Domination de graphes de reines. Peux t on "dominer" un echiquier
 	 * de taille n*n par val reines (toutes les cases sont attaquees).
 	 *
-	 * @param n
-	 * @param val
+	 * @param n size fo the chessboard
+	 * @param val number of queens
 	 * @return la liste des positions des reines.
 	 */
 	public static List<Integer> dominationQueen(int n, int val) {
@@ -84,7 +84,7 @@ public class DominatingSetOfQueens {
 		System.out.println("Back  : " + pb.getMeasures().getBackTrackCount());
 		System.out.println("Time  : " + pb.getMeasures().getTimeCount()+" (sec)");
 
-		List<Integer> values = new LinkedList<Integer>();
+		List<Integer> values = new LinkedList<>();
 		if (pb.isFeasible() == ESat.TRUE) {
 			for (int i = 0; i < n * n; i++) {
 				if (!values.contains(X[i].getValue()))

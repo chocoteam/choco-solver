@@ -67,7 +67,7 @@ public class GlobalCardinality extends Constraint {
 	}
 
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
-        List<Constraint> cstrs = new ArrayList<Constraint>();
+        List<Constraint> cstrs = new ArrayList<>();
         for (int i = 0; i < card.length; i++) {
             IntVar cste = VF.fixed(i, solver);
             BoolVar[] bs = VF.boolArray("b_" + i, vars.length, solver);

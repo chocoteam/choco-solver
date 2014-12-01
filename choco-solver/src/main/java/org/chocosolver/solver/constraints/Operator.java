@@ -44,7 +44,7 @@ public enum Operator {
         this.num = num;
     }
 
-    static THashMap<String, Operator> operators = new THashMap<String, Operator>();
+    static THashMap<String, Operator> operators = new THashMap<>();
 
     static {
         operators.put("@", Operator.NONE);
@@ -79,7 +79,7 @@ public enum Operator {
 
 	/**
 	 * Flips the direction of an inequality
-	 * @param operator
+	 * @param operator op to flip
 	 */
 	public static String getFlip(String operator) {
 		switch (get(operator)){

@@ -72,9 +72,9 @@ public class PropAtMostNValues extends Propagator<IntVar> {
      * The number of distinct values among concerned values in the set of variables vars is exactly equal to nValues
      * No level of consistency for the filtering
      *
-     * @param variables
+     * @param variables array of variables
      * @param concernedValues will be sorted!
-     * @param nValues
+     * @param nValues integer variable
      */
     public PropAtMostNValues(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
         super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
@@ -202,7 +202,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     }
 
     private void intersectionDomains() {
-        final List<Integer> inter = new LinkedList<Integer>();
+        final List<Integer> inter = new LinkedList<>();
         IntVar v = vars[dVar.get(0)];
         for (int val = v.getLB(); val <= v.getUB(); val = v.nextValue(val)) {
             inter.add(val);

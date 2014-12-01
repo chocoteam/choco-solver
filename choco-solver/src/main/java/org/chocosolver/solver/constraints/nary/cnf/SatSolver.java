@@ -84,10 +84,10 @@ public class SatSolver {
         this.ok_ = true;
         this.qhead_ = 0;
         num_vars_ = 0;
-        this.clauses = new ArrayList<Clause>();
-        this.watches_ = new TIntObjectHashMap<ArrayList<Watcher>>();
-        this.implies_ = new TIntObjectHashMap<TIntList>();
-        this.assignment_ = new TIntObjectHashMap<Boolean>();
+        this.clauses = new ArrayList<>();
+        this.watches_ = new TIntObjectHashMap<>();
+        this.implies_ = new TIntObjectHashMap<>();
+        this.assignment_ = new TIntObjectHashMap<>();
         this.trail_ = new TIntArrayList();
         this.trail_markers_ = new TIntArrayList();
         this.temporary_add_vector_ = new TIntArrayList();
@@ -298,20 +298,19 @@ public class SatSolver {
 
     // Attach a clause to watcher lists.
     void attachClause(Clause cr) {
-        Clause c = cr;
-        assert c.size() > 1;
-        ArrayList<Watcher> l0 = watches_.get(negated(c._g(0)));
+        assert cr.size() > 1;
+        ArrayList<Watcher> l0 = watches_.get(negated(cr._g(0)));
         if (l0 == null) {
-            l0 = new ArrayList<Watcher>();
-            watches_.put(negated(c._g(0)), l0);
+            l0 = new ArrayList<>();
+            watches_.put(negated(cr._g(0)), l0);
         }
-        ArrayList<Watcher> l1 = watches_.get(negated(c._g(1)));
+        ArrayList<Watcher> l1 = watches_.get(negated(cr._g(1)));
         if (l1 == null) {
-            l1 = new ArrayList<Watcher>();
-            watches_.put(negated(c._g(1)), l1);
+            l1 = new ArrayList<>();
+            watches_.put(negated(cr._g(1)), l1);
         }
-        l0.add(new Watcher(cr, c._g(1)));
-        l1.add(new Watcher(cr, c._g(0)));
+        l0.add(new Watcher(cr, cr._g(1)));
+        l1.add(new Watcher(cr, cr._g(0)));
     }
 
     // Perform unit propagation. returns true upon success.
@@ -344,17 +343,16 @@ public class SatSolver {
 
                 // Make sure the false literal is data[1]:
                 Clause cr = ws.get(i).clause;
-                Clause c = cr;
                 final int false_lit = negated(p);
-                if (c._g(0) == false_lit) {
-                    c._s(0, c._g(1));
-                    c._s(1, false_lit);
+                if (cr._g(0) == false_lit) {
+                    cr._s(0, cr._g(1));
+                    cr._s(1, false_lit);
                 }
-                assert (c._g(1) == false_lit);
+                assert (cr._g(1) == false_lit);
                 i++;
 
                 // If 0th watch is true, then clause is already satisfied.
-                final int first = c._g(0);
+                final int first = cr._g(0);
                 Watcher w = new Watcher(cr, first);
                 if (first != blocker && valueLit(first) == Boolean.kTrue) {
                     ws.set(j++, w);
@@ -363,14 +361,14 @@ public class SatSolver {
 
                 // Look for new watch:
                 boolean cont = false;
-                for (int k = 2; k < c.size(); k++) {
-                    if (valueLit(c._g(k)) != Boolean.kFalse) {
-                        c._s(1, c._g(k));
-                        c._s(k, false_lit);
-                        ArrayList<Watcher> lw = watches_.get(negated(c._g(1)));
+                for (int k = 2; k < cr.size(); k++) {
+                    if (valueLit(cr._g(k)) != Boolean.kFalse) {
+                        cr._s(1, cr._g(k));
+                        cr._s(k, false_lit);
+                        ArrayList<Watcher> lw = watches_.get(negated(cr._g(1)));
                         if (lw == null) {
-                            lw = new ArrayList<Watcher>();
-                            watches_.put(negated(c._g(1)), lw);
+                            lw = new ArrayList<>();
+                            watches_.put(negated(cr._g(1)), lw);
                         }
                         lw.add(w);
                         cont = true;

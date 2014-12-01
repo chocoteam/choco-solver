@@ -50,7 +50,7 @@ public class Set_Trail implements ISet {
     public Set_Trail(EnvironmentTrailing environment, ISet set) {
         super();
         this.environment = environment;
-        this.operationPoolGC = new PoolManager<ListOP>();
+        this.operationPoolGC = new PoolManager<>();
         this.set = set;
     }
 

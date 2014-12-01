@@ -74,7 +74,7 @@ public class Scalar extends Constraint {
 
 	private static Propagator<IntVar> makeProp(IntVar[] vars, int[] coeffs, int result) {
 		// aggregate multiple variable occurrences
-		TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
+		TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<>();
 		for (int i = 0; i < vars.length; i++) {
 			map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
 			if (map.get(vars[i]) == 0) {

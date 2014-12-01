@@ -47,7 +47,7 @@ public class NQueenBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        set = new HashSet<Constraint>();
+        set = new HashSet<>();
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);

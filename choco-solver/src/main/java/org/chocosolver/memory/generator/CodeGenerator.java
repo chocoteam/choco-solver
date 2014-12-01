@@ -109,7 +109,7 @@ public class CodeGenerator {
 
         int arg_index = 0;
         File input_directory = new File(args[arg_index++]);
-        File output_directory = new File(args[arg_index++]);
+        File output_directory = new File(args[arg_index]);
         if (!input_directory.exists()) {
             System.err.println("Directory \"" + input_directory + "\" not found.");
             System.exit(-1);
@@ -128,7 +128,7 @@ public class CodeGenerator {
      * Creates dirs, throw IllegalArgumentException or IllegalStateException if
      * argument is invalid or creation fails
      *
-     * @param directory
+     * @param directory directoy of the files
      */
     private static void makeDirs(File directory) {
         if (directory.exists() && !directory.isDirectory())
@@ -146,6 +146,7 @@ public class CodeGenerator {
             throws IOException {
 
         File[] files = input_directory.listFiles();
+        assert files != null;
         for (File file : files) {
             // Ignore hidden files
             if (file.isHidden()) continue;
@@ -363,7 +364,7 @@ public class CodeGenerator {
     /**
      * Delete the given file, throws IllegalStateException if delete operation fails
      *
-     * @param output_file
+     * @param output_file output file
      */
     private static void delete(File output_file) {
         if (!output_file.exists())
@@ -481,7 +482,7 @@ public class CodeGenerator {
                 String number = line.substring(number_start_index, number_end_index);
                 Integer number_obj = Integer.valueOf(number);
 
-                if (to_return == null) to_return = new HashMap<Integer, String>();
+                if (to_return == null) to_return = new HashMap<>();
                 to_return.put(number_obj, buffer.toString());
 
                 in_replicated_block = false;

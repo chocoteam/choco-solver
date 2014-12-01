@@ -46,7 +46,7 @@ public class PoolManager<E> implements Serializable {
     }
 
     public PoolManager(int initialSize) {
-        elements = new ArrayDeque<E>(initialSize);
+        elements = new ArrayDeque<>(initialSize);
     }
 
     public E getE() {

@@ -43,7 +43,7 @@ public class TestConsistencyFactory {
 
     @Factory
     public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+        List<Object> lresult = new ArrayList<>(12);
 //            System.out.println("CONSISTENCY : " + sl.name());
         lresult.add(new TestConsistency());
         return lresult.toArray();

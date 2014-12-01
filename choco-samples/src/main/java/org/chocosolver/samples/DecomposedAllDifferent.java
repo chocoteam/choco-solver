@@ -73,7 +73,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
         int u = union[union.length - 1];
 
         BoolVar[][][] mA = new BoolVar[i][][];
-        List<BoolVar> listA = new ArrayList<BoolVar>();
+        List<BoolVar> listA = new ArrayList<>();
 //                List<BoolVar> Blist = new ArrayList<BoolVar>();
         for (int j = 0; j < i; j++) {
             mA[j] = new BoolVar[u - l + 1][];
@@ -98,12 +98,12 @@ public class DecomposedAllDifferent extends AbstractProblem {
         }
 //                BoolVar[] B =  Blist.toArray(new BoolVar[Blist.size()]);
 
-        ArrayList<ArrayList<ArrayList<BoolVar>>> apmA = new ArrayList<ArrayList<ArrayList<BoolVar>>>();
+        ArrayList<ArrayList<ArrayList<BoolVar>>> apmA = new ArrayList<>();
 
         for (int p = l; p <= u; p++) {
-            apmA.add(p - l, new ArrayList<ArrayList<BoolVar>>());
+            apmA.add(p - l, new ArrayList<>());
             for (int q = p; q <= u; q++) {
-                apmA.get(p - l).add(q - p, new ArrayList<BoolVar>());
+                apmA.get(p - l).add(q - p, new ArrayList<>());
                 for (int j = 0; j < i; j++) {
                     apmA.get(p - l).get(q - p).add(mA[j][p - l][q - p]);
                 }

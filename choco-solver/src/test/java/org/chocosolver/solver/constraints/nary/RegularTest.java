@@ -89,7 +89,7 @@ public class RegularTest {
         }
 
         // different rules are formulated as patterns that must NOT be matched by x
-        List<String> forbiddenRegExps = new ArrayList<String>();
+        List<String> forbiddenRegExps = new ArrayList<>();
         // do not end with '00' if start with '11'
         forbiddenRegExps.add("11(0|1|2)*00");
         // at most three consecutive 0

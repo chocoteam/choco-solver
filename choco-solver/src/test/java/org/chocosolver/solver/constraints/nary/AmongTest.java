@@ -152,7 +152,7 @@ public class AmongTest {
                 vars = VariableFactory.boundedArray("e", nbVar, 0, sizeDom, solver);
             }
 
-            List<IntVar> lvs = new LinkedList<IntVar>();
+            List<IntVar> lvs = new LinkedList<>();
             lvs.addAll(Arrays.asList(vars));
 
             Random rand = new Random(seed);
@@ -205,7 +205,7 @@ public class AmongTest {
                 vars = VariableFactory.boundedArray("e", nbVar, 0, sizeDom, solver);
             }
 
-            List<IntVar> lvs = new LinkedList<IntVar>();
+            List<IntVar> lvs = new LinkedList<>();
             lvs.addAll(Arrays.asList(vars));
 
             Random rand = new Random(seed);

@@ -55,9 +55,9 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
 
     @SuppressWarnings({"unchecked"})
     public LinkedList() {
-        header = new Entry<E>();
+        header = new Entry<>();
         header.next = header.previous = header;
-        free = new Entry<E>();
+        free = new Entry<>();
     }
 
     public boolean isEmpty() {
@@ -102,7 +102,7 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
             newEntry = free.next;
             free.next = newEntry.next;
         } else {
-            newEntry = new Entry<E>();
+            newEntry = new Entry<>();
         }
 
         newEntry.element = e;

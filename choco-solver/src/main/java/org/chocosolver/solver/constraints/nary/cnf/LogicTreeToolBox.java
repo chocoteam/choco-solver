@@ -150,7 +150,7 @@ public class LogicTreeToolBox {
         if (n.is(LogOp.Operator.OR)) {
             // OR with only LITS
             ILogical[] children = n.getChildren();
-            HashMap<BoolVar, ILogical> lits = new HashMap<BoolVar, ILogical>();
+            HashMap<BoolVar, ILogical> lits = new HashMap<>();
             for (int i = 0; i < children.length; i++) {
                 BoolVar var = extract(children[i])[0];
                 var = var.isNot() ? var.not() : var;
@@ -166,7 +166,7 @@ public class LogicTreeToolBox {
         } else if (!n.hasOrChild()) {
             // AND with only LITS
             ILogical[] children = n.getChildren();
-            HashMap<BoolVar, ILogical> lits = new HashMap<BoolVar, ILogical>();
+            HashMap<BoolVar, ILogical> lits = new HashMap<>();
             for (int i = 0; i < children.length; i++) {
                 BoolVar var = extract(children[i])[0];
                 var = var.isNot() ? var.not() : var;
@@ -195,7 +195,7 @@ public class LogicTreeToolBox {
         if (l.isLit()) return l;
         LogOp t = (LogOp) l;
         ILogical[] children = t.getChildren();
-        ArrayList<ILogical> toRemove = new ArrayList<ILogical>();
+        ArrayList<ILogical> toRemove = new ArrayList<>();
         for (int i = 0; i < children.length; i++) {
             if (solver.ONE.equals(children[i])) {
                 toRemove.add(children[i]);
@@ -215,8 +215,8 @@ public class LogicTreeToolBox {
      * - lit OR lit ... OR lit
      * - (lit OR lit ... OR lit) AND (lit OR lit ... OR lit) ... AND (lit OR lit ... OR lit)
      *
-     * @param logOp
-     * @return
+     * @param logOp logical operator
+     * @return an ILogical
      */
     public static ILogical toCNF(LogOp logOp, Solver solver) {
         expandNot(logOp);

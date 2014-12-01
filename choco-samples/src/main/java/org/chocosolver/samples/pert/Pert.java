@@ -111,7 +111,7 @@ public class Pert extends AbstractProblem {
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];
         int i = 0;
-        Deque<Integer> toTreat = new ArrayDeque<Integer>();
+        Deque<Integer> toTreat = new ArrayDeque<>();
         toTreat.push(i);
         rank[i] = 0;
         while (!toTreat.isEmpty()) {

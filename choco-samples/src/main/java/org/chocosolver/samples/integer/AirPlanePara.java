@@ -136,7 +136,7 @@ public class AirPlanePara extends ParallelizedProblem {
             tardiness[i] = Max.var(ZERO, VariableFactory.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
-        List<BoolVar> booleans = new ArrayList<BoolVar>();
+        List<BoolVar> booleans = new ArrayList<>();
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -155,7 +155,7 @@ public class AirPlanePara extends ParallelizedProblem {
 
         // build cost array
         costLAT = new int[2 * n];
-        maxCost = new TObjectIntHashMap<IntVar>();
+        maxCost = new TObjectIntHashMap<>();
         for (int i = 0; i < n; i++) {
             costLAT[i] = data[i][PCBT];
             costLAT[n + i] = data[i][PCAT];

@@ -65,7 +65,7 @@ public class OrthoLatinSquare extends AbstractProblem {
         square2 = VariableFactory.boundedArray("s2", mm, 1, m, solver);
         vars = VariableFactory.enumeratedArray("vars", mm, 0, mm - 1, solver);
 
-        List<Constraint> ADS = new ArrayList<Constraint>();
+        List<Constraint> ADS = new ArrayList<>();
 
         Constraint cc = IntConstraintFactory.alldifferent(vars, "AC");
         solver.post(cc);

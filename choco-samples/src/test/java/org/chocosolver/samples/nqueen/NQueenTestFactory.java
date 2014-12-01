@@ -50,7 +50,7 @@ public class NQueenTestFactory {
 
     @Factory
     public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+        List<Object> lresult = new ArrayList<>(12);
 
         for (int s = 0; s < size.length; s++) {
             int _size = size[s];

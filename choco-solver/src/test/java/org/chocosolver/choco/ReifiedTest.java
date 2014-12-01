@@ -93,7 +93,6 @@ public class ReifiedTest {
         IntVar x = VariableFactory.enumerated("x", 1, 3, s);
         IntVar y = VariableFactory.enumerated("y", 1, 1, s);
         IntVar z = VariableFactory.enumerated("z", 1, 2, s);
-        z.toString();
 
         LogicalConstraintFactory.ifThenElse(a, member(x, new int[]{1, 1}), not_member(x, new int[]{1, 1}));
         LogicalConstraintFactory.ifThenElse(b, member(y, new int[]{1, 1}), not_member(y, new int[]{1, 1}));
@@ -171,7 +170,7 @@ public class ReifiedTest {
         int u = union[union.length - 1];
 
         BoolVar[][][] mA = new BoolVar[i][][];
-        List<BoolVar> listA = new ArrayList<BoolVar>();
+        List<BoolVar> listA = new ArrayList<>();
 //                List<BoolVar> Blist = new ArrayList<BoolVar>();
         for (int j = 0; j < i; j++) {
             mA[j] = new BoolVar[u - l + 1][];
@@ -196,12 +195,12 @@ public class ReifiedTest {
         }
 //                BoolVar[] B =  Blist.toArray(new BoolVar[Blist.size()]);
 
-        ArrayList<ArrayList<ArrayList<BoolVar>>> apmA = new ArrayList<ArrayList<ArrayList<BoolVar>>>();
+        ArrayList<ArrayList<ArrayList<BoolVar>>> apmA = new ArrayList<>();
 
         for (int p = l; p <= u; p++) {
-            apmA.add(p - l, new ArrayList<ArrayList<BoolVar>>());
+            apmA.add(p - l, new ArrayList<>());
             for (int q = p; q <= u; q++) {
-                apmA.get(p - l).add(q - p, new ArrayList<BoolVar>());
+                apmA.get(p - l).add(q - p, new ArrayList<>());
                 for (int j = 0; j < i; j++) {
                     apmA.get(p - l).get(q - p).add(mA[j][p - l][q - p]);
                 }
@@ -466,15 +465,7 @@ public class ReifiedTest {
                 a,
                 LogicalConstraintFactory.ifThen_reifiable(b, IntConstraintFactory.arithm(c, "=", 1)));
         solver.set(IntStrategyFactory.minDom_LB(new BoolVar[]{a, b, c}));
-        if (solver.findSolution()) {
-            int index = 0;
-            do {
-                index++;
-//                System.out.println(index + " : a=" + a.getValue() + ", b=" + b.getValue() + ",c= " + c.getValue());
-            }
-            while (solver.nextSolution());
-//            System.out.println("nombre total de solutions = " + index);
-        }
+        solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 

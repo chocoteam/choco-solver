@@ -14,7 +14,6 @@ import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap_Arra
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -188,7 +187,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
             last_size = env.makeInt(0);
             indice = indice_;
             nb_consistant = 0;
-            index_map = new TreeMap<Integer, Integer>();
+            index_map = new TreeMap<>();
             int key = 0;
             for (int[] t : table) {
                 if (!index_map.containsKey(t[indice])) {
@@ -213,9 +212,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         }
 
         void remove_unsupported_value() throws ContradictionException {
-            Iterator<Entry<Integer, Integer>> it = index_map.entrySet().iterator();
-            while (it.hasNext()) {
-                Entry<Integer, Integer> e = it.next();
+            for (Entry<Integer, Integer> e : index_map.entrySet()) {
                 if (var.contains(e.getKey()) && !GAC_Val.get(e.getValue())) {
                     var.removeValue(e.getKey(), aCause);
                 }

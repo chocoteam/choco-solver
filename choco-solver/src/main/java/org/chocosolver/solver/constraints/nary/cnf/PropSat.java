@@ -58,7 +58,7 @@ public class PropSat extends Propagator<BoolVar> {
         super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
 		this.vars = new BoolVar[0];	// erase solver.ONE from the variable scope
 
-        this.indices_ = new TObjectIntHashMap<BoolVar>();
+        this.indices_ = new TObjectIntHashMap<>();
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = solver.getEnvironment().makeInt();
@@ -115,15 +115,14 @@ public class PropSat extends Propagator<BoolVar> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public int Literal(BoolVar expr) {
-        boolean expr_negated = false;
         if (indices_.containsKey(expr)) {
-            return SatSolver.makeLiteral(indices_.get(expr), !expr_negated);
+            return SatSolver.makeLiteral(indices_.get(expr), true);
         } else {
             int var = sat_.newVariable();
             assert (vars.length == var);
             addVariable(expr);
             indices_.put(expr, var);
-            return SatSolver.makeLiteral(var, !expr_negated);
+            return SatSolver.makeLiteral(var, true);
         }
     }
 

@@ -67,7 +67,7 @@ public class NurseSchedulingProblem {
      *
      * @param data    the instance data
      * @param options the model configuration
-     * @param solver
+     * @param solver the solver
      */
     public NurseSchedulingProblem(NSData data, String options, Solver solver) {
         super();
@@ -190,7 +190,7 @@ public class NurseSchedulingProblem {
     }
 
     private void parseOptions(String options) {
-        this.options = new HashMap<String, String>();
+        this.options = new HashMap<>();
         if (options == null) return;
         String[] opts = options.trim().split(" ");
         for (String opt : opts) {

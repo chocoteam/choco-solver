@@ -46,7 +46,7 @@ public class DynamicPostTestFactory {
 
     @Factory
     public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+        List<Object> lresult = new ArrayList<>(12);
 
         for (int e = 0; e < engines.length; e++) {
             PropagationEngineFactory engine = engines[e];

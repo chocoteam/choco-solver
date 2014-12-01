@@ -143,7 +143,7 @@ public class RLFAP extends AbstractProblem {
         rank = new int[n];
         boolean[] treated = new boolean[n];
         int i = 0;
-        Deque<Integer> toTreat = new ArrayDeque<Integer>();
+        Deque<Integer> toTreat = new ArrayDeque<>();
         toTreat.push(i);
         rank[i] = 0;
         while (!toTreat.isEmpty()) {
@@ -212,7 +212,7 @@ public class RLFAP extends AbstractProblem {
         try {
             f = new FileReader(filename);
             BufferedReader r = new BufferedReader(f);
-            List<int[]> domains = new ArrayList<int[]>();
+            List<int[]> domains = new ArrayList<>();
             while ((line = r.readLine()) != null) {
                 Scanner sc = new Scanner(line);
                 sc.nextInt();
@@ -243,7 +243,7 @@ public class RLFAP extends AbstractProblem {
         try {
             f = new FileReader(filename);
             BufferedReader r = new BufferedReader(f);
-            List<int[]> ints = new ArrayList<int[]>();
+            List<int[]> ints = new ArrayList<>();
             while ((line = r.readLine()) != null) {
                 Scanner sc = new Scanner(line);
                 while (sc.hasNextInt()) {
@@ -273,7 +273,7 @@ public class RLFAP extends AbstractProblem {
         try {
             f = new FileReader(filename);
             BufferedReader r = new BufferedReader(f);
-            List<int[]> ints = new ArrayList<int[]>();
+            List<int[]> ints = new ArrayList<>();
             while ((line = r.readLine()) != null) {
                 Scanner sc = new Scanner(line);
                 values.add(sc.nextInt());

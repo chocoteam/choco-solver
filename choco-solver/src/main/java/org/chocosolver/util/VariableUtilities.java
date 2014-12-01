@@ -41,7 +41,7 @@ public enum VariableUtilities {
     ;
 
     public static BoolVar[] nonReundantVars(BoolVar[] v) {
-        LinkedHashSet<BoolVar> nonRedundantBs = new LinkedHashSet<BoolVar>();
+        LinkedHashSet<BoolVar> nonRedundantBs = new LinkedHashSet<>();
         for (int j = 0; j < v.length; j++) {
             if (!nonRedundantBs.contains(v[j])) {
                 nonRedundantBs.add(v[j]);
@@ -51,7 +51,7 @@ public enum VariableUtilities {
     }
 
     public static IntVar[] nonReundantVars(IntVar[] v) {
-        LinkedHashSet<IntVar> nonRedundantBs = new LinkedHashSet<IntVar>();
+        LinkedHashSet<IntVar> nonRedundantBs = new LinkedHashSet<>();
         for (int j = 0; j < v.length; j++) {
             if (!nonRedundantBs.contains(v[j])) {
                 nonRedundantBs.add(v[j]);

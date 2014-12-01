@@ -43,7 +43,7 @@ public class TestCorrectnessFactory {
 
     @Factory
     public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+        List<Object> lresult = new ArrayList<>(12);
 
         for (SearchLoops sl : SearchLoops.values()) {
 //            System.out.println("CORRECTNESS : " + sl.name());

@@ -23,7 +23,7 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
 
     public DecisionsSet(DynamicBacktracking dynamicBacktracking) {
         this.dynamicBacktracking = dynamicBacktracking;
-        this.decision_path = new ArrayDeque<Decision>(8);
+        this.decision_path = new ArrayDeque<>(8);
     }
 
     public void clearDecisionPath() {

@@ -44,7 +44,7 @@ public class BinaryTreeHeap implements IHeap {
     boolean mergeSide; // when a removal has to be executed, alternatively change the side of the merge operation is performed
 
     public BinaryTreeHeap(int[] elements, int[] values) {
-        this.freeNodes = new ArrayDeque<Node>();
+        this.freeNodes = new ArrayDeque<>();
         this.mergeSide = true;
         this.size = elements.length;
         this.nodeFromElement = new Node[this.size];
@@ -59,7 +59,7 @@ public class BinaryTreeHeap implements IHeap {
 
     // WARNING : size nodes are allocated in the dynamic pool of nodes
     public BinaryTreeHeap(int size) {
-        this.freeNodes = new ArrayDeque<Node>();
+        this.freeNodes = new ArrayDeque<>();
         this.mergeSide = true;
         this.size = size;
         this.nodeFromElement = new Node[this.size];
@@ -136,7 +136,7 @@ public class BinaryTreeHeap implements IHeap {
     }
 
     private boolean flattenBinTree(Type t) {
-        sortedNodes = new ArrayList<Node>();
+        sortedNodes = new ArrayList<>();
         if (root != null) {
             openNode(root);
         }

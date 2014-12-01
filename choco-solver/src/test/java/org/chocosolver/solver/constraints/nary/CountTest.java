@@ -132,7 +132,7 @@ public class CountTest {
                 vars = VariableFactory.boundedArray("e", nbVar, 0, sizeDom, solver);
             }
 
-            List<IntVar> lvs = new LinkedList<IntVar>();
+            List<IntVar> lvs = new LinkedList<>();
             lvs.addAll(Arrays.asList(vars));
 
             Random rand = new Random(seed);
@@ -146,7 +146,7 @@ public class CountTest {
                 IntVar ivc = lvs.get(rand.nextInt(lvs.size()));
                 int val = rand.nextInt(sizeDom);
                 if (gac) {
-                    solver.post(getTableForOccurence(solver, vs, ivc, val, sizeDom));
+                    solver.post(getTableForOccurence(vs, ivc, val, sizeDom));
                 } else {
                     solver.post(IntConstraintFactory.count(val, vs, ivc));
                 }
@@ -184,7 +184,7 @@ public class CountTest {
      * @param ub  upper bound
      * @return Constraint
      */
-    public Constraint getTableForOccurence(Solver solverO, IntVar[] vs, IntVar occ, int val, int ub) {
+    public Constraint getTableForOccurence(IntVar[] vs, IntVar occ, int val, int ub) {
         Solver solver = new Solver();
         IntVar[] vars = VariableFactory.enumeratedArray("e", vs.length + 1, 0, ub, solver);
 
@@ -209,13 +209,6 @@ public class CountTest {
         System.arraycopy(vs, 0, newvs, 0, vs.length);
         newvs[vs.length] = occ;
 
-        int n = newvs.length;
-        int[] offsets = new int[n];
-        int[] sizes = new int[n];
-        for (int i = 0; i < n; i++) {
-            sizes[i] = newvs[i].getUB() - newvs[i].getLB() + 1;
-            offsets[i] = newvs[i].getLB();
-        }
         return IntConstraintFactory.table(newvs, tuples, "AC3rm");
     }
 

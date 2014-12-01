@@ -83,17 +83,17 @@ public class CostRegular extends Constraint {
 
 
         DirectedMultigraph<Node, Arc> graph;
-        graph = new DirectedMultigraph<Node, Arc>(new Arc.ArcFacroty());
-        ArrayList<HashSet<Arc>> tmp = new ArrayList<HashSet<Arc>>(totalSizes);
+        graph = new DirectedMultigraph<>(new Arc.ArcFacroty());
+        ArrayList<HashSet<Arc>> tmp = new ArrayList<>(totalSizes);
         for (int i = 0; i < totalSizes; i++)
-            tmp.add(new HashSet<Arc>());
+            tmp.add(new HashSet<>());
 
 
         int i, j, k;
         TIntIterator layerIter;
         TIntIterator qijIter;
 
-        ArrayList<TIntHashSet> layer = new ArrayList<TIntHashSet>();
+        ArrayList<TIntHashSet> layer = new ArrayList<>();
         TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
         // DLList[vars.length+1];
 

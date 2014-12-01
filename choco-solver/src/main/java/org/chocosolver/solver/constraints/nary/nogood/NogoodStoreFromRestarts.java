@@ -66,13 +66,13 @@ public class NogoodStoreFromRestarts extends Constraint implements IMonitorResta
 	 * - Cannot be reified
 	 * - Only works for integer variables
 	 * - Only works if branching decisions are assignments (neither domain split nor value removal)
-	 * @param vars
+	 * @param vars variables to build nogoods on
 	 */
     public NogoodStoreFromRestarts(IntVar[] vars) {
         super("NogoodStoreFromRestarts",new PropNogoodStore(vars));
 		png = (PropNogoodStore) propagators[0];
-        decisions = new CircularQueue<Decision<IntVar>>(16);
-        nogoods = new CircularQueue<INogood>(16);
+        decisions = new CircularQueue<>(16);
+        nogoods = new CircularQueue<>(16);
 
     }
 

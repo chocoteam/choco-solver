@@ -174,7 +174,7 @@ public class PropRegular extends Propagator<IntVar> {
         graph = new DirectedMultigraph<>(new Arc.ArcFactory());
         ArrayList<HashSet<Arc>> tmp = new ArrayList<>(totalSizes);
         for (int i = 0; i < totalSizes; i++)
-            tmp.add(new HashSet<Arc>());
+            tmp.add(new HashSet<>());
 
 
         int i, j, k;

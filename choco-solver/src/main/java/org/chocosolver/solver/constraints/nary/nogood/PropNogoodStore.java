@@ -63,11 +63,11 @@ public class PropNogoodStore extends Propagator<IntVar> {
 
     public PropNogoodStore(IntVar[] vars) {
         super(vars, PropagatorPriority.VERY_SLOW, true);
-        vars2nogood = new TIntObjectHashMap<TIntList>();
-        vars2idxinng = new TIntObjectHashMap<TIntList>();
-        allnogoods = new ArrayList<INogood>();
-        units = new ArrayList<INogood>();
-        hasChanged = new CircularQueue<IntVar>(8);
+        vars2nogood = new TIntObjectHashMap<>();
+        vars2idxinng = new TIntObjectHashMap<>();
+        allnogoods = new ArrayList<>();
+        units = new ArrayList<>();
+        hasChanged = new CircularQueue<>(8);
     }
 
     @Override

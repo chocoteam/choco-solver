@@ -36,7 +36,7 @@ import java.util.ArrayList;
 public class NSParser {
 
     public static String[] titles;
-    public static ArrayList<String[]> data = new ArrayList<String[]>();
+    public static ArrayList<String[]> data = new ArrayList<>();
     public static final String NB_DAYS = "nb_days";
     public static final String NB_EMPLOYEES = "nb_employees";
     public static final String NB_FULL_TIME = "nb_full_time";
@@ -88,7 +88,7 @@ public class NSParser {
      * in the titles list
      */
     public static String[] searchStringTab(String name) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
 
         for (int i = 0; i < titles.length; i++) {
             if (titles[i].equals(name)) {
