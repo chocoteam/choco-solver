@@ -124,10 +124,10 @@ public class LCAGraphManager {
             if (j < 0) {
                 if (i == root) {
                     finished = true;
-                    break;
-                }
-                first = false;
-                i = nodeOfDfsNumber[father[dfsNumberOfNode[i]]];
+                }else {
+					first = false;
+					i = nodeOfDfsNumber[father[dfsNumberOfNode[i]]];
+				}
             } else {
                 if (dfsNumberOfNode[j] == -1) {
                     father[k] = dfsNumberOfNode[i];
