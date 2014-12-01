@@ -182,10 +182,8 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
     public FiniteAutomaton clone() throws CloneNotSupportedException {
         CostAutomaton auto = (CostAutomaton) super.clone();
         auto.counters = new ArrayList<>();
-        for (ICounter c : this.counters) {
-            //TODO: duplicate?
-            auto.addCounter(c);
-        }
+        //TODO: duplicate?
+        this.counters.forEach(auto::addCounter);
         return auto;
     }
 }

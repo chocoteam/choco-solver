@@ -163,23 +163,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeEquity() {
         description += "equity ";
-        for (int[] group : data.equityEmployeeGroups()) {
-            this.makeEquityDirect(group);
-        }
-    }
-
-    private void makeEquityWithEq(Solver solver, int[] group) {
-        IntVar[][] occ = new IntVar[group.length][];
-        for (int i = 0; i < occ.length; i++) {
-            occ[i] = occurrences[group[i]];
-        }
-        for (int i = 1; i < occ.length; i++) {
-            for (int j = 0; j < i; j++) {
-                for (int a = 0; a < occ[0].length; a++) {
-                    solver.post(IntConstraintFactory.arithm(occ[i][a], "=", occ[j][a]));
-                }
-            }
-        }
+        data.equityEmployeeGroups().forEach(this::makeEquityDirect);
     }
 
     private void makeEquityDirect(int[] group) {
@@ -644,32 +628,6 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
     }
 
-
-    private void makeForbiddenPatternsAndMonthlyAndRestWeeklyCountersWithMultiCostRegular(Solver solver) {
-        FiniteAutomaton automaton = this.makeForbiddenPatternsAsAutomaton();
-
-        int[][][] costs = new int[data.nbDays()][data.nbActivities()][data.nbActivities() + data.nbWeeks()];
-        for (int a = 0; a < data.nbActivities(); a++) {
-            for (int t = 0; t < data.nbDays(); t++) {
-                costs[t][a][a] = 1;
-            }
-        }
-        description += "pat[MCRegular/" + automaton.getNbStates() + "/" + costs[0][0].length + "] ";
-
-        int r = data.getValue("REST");
-        for (int w = 0; w < data.nbWeeks(); w++) {
-            for (int t = 0; t < 7; t++) {
-                costs[7 * w + t][r][data.nbActivities() + w] = 1;
-            }
-        }
-        for (int e = 0; e < data.nbEmployees(); e++) {
-            int lb = data.getWeekCounterLB(e, r);
-            int ub = data.getWeekCounterUB(e, r);
-            IntVar[] occs = VariableFactory.boundedArray("nWR", data.nbWeeks(), lb, ub, solver);
-            IntVar[] cv = ArrayUtils.append(occurrences[e], occs);
-            solver.post(IntConstraintFactory.multicost_regular(shifts[e], cv, CostAutomaton.makeMultiResources(automaton, costs, cv)));
-        }
-    }
 
 }
 

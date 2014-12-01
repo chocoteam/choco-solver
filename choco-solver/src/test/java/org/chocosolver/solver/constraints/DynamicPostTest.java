@@ -60,6 +60,7 @@ public class DynamicPostTest {
         this(PropagationEngineFactory.DEFAULT);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     @Test(groups = "1s")
     public void test0() {
         final Solver solver = new Solver();
@@ -166,9 +167,7 @@ public class DynamicPostTest {
     }
 
     private static void popAll(List<Constraint> stack, Solver solver) {
-        for (Constraint constraint : stack) {
-            solver.unpost(constraint);
-        }
+        stack.forEach(solver::unpost);
     }
 
     private static void push(Constraint constraint, List<Constraint> stack, Solver solver) {
@@ -176,6 +175,7 @@ public class DynamicPostTest {
         solver.post(constraint);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     @Test(groups = "1s")
     public void testJLpareto() {
         // Objectives are to maximize "a" and maximize "b".

@@ -201,9 +201,7 @@ public class LogicTreeToolBox {
                 toRemove.add(children[i]);
             }
         }
-        for (ILogical lt : toRemove) {
-            t.removeChild(lt);
-        }
+        toRemove.forEach(t::removeChild);
         if (t.getNbChildren() == 1) {
             return t.getChildren()[0];
         }
