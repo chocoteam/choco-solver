@@ -74,8 +74,8 @@ public class PropBoolChannel extends Propagator<Variable> {
      * Channeling between a set variable and boolean variables
      * i in setVar <=> boolVars[i-offSet] = TRUE
      *
-     * @param setVar
-     * @param boolVars
+     * @param setVar a set variable
+     * @param boolVars an array of boolean variables
      */
     public PropBoolChannel(SetVar setVar, BoolVar[] boolVars, final int offSet) {
         super(ArrayUtils.append(boolVars, new Variable[]{setVar}), PropagatorPriority.UNARY, true);
@@ -88,18 +88,8 @@ public class PropBoolChannel extends Propagator<Variable> {
         this.sdm = this.set.monitorDelta(this);
         this.offSet = offSet;
         // PROCEDURES
-        setForced = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                bools[element - offSet].setToTrue(aCause);
-            }
-        };
-        setRemoved = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                bools[element - offSet].setToFalse(aCause);
-            }
-        };
+        setForced = element -> bools[element - offSet].setToTrue(aCause);
+        setRemoved = element -> bools[element - offSet].setToFalse(aCause);
     }
 
     //***********************************************************************************

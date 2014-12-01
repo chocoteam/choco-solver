@@ -124,10 +124,7 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     private boolean mayOverlap(int i, int j) {
-        if (disjoint(i, j, true) || disjoint(i, j, false)) {
-            return false;
-        }
-        return true;
+        return !(disjoint(i, j, true) || disjoint(i, j, false));
     }
 
     private boolean disjoint(int i, int j, boolean horizontal) {
@@ -227,10 +224,10 @@ public class PropDiffN extends Propagator<IntVar> {
         sb.append("");
         for (int i = 0; i < n; i++) {
             if (i > 0) sb.append(",");
-            sb.append("[" + vars[i].toString());
-            sb.append("," + vars[i + n].toString());
-            sb.append("," + vars[i + 2 * n].toString());
-            sb.append("," + vars[i + 3 * n].toString() + "]");
+            sb.append("[").append(vars[i].toString());
+            sb.append(",").append(vars[i + n].toString());
+            sb.append(",").append(vars[i + 2 * n].toString());
+            sb.append(",").append(vars[i + 3 * n].toString()).append("]");
         }
         sb.append(")");
         return sb.toString();

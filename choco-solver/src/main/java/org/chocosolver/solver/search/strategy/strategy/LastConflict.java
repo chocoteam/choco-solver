@@ -107,9 +107,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 				conflictingVariables[nbCV++] = curDecVar;
 			}else{
 				assert nbCV==conflictingVariables.length;
-				for(int i=0;i<nbCV-1;i++){
-					conflictingVariables[i] = conflictingVariables[i+1];
-				}
+				System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
 				conflictingVariables[nbCV-1] = curDecVar;
 			}
 		}

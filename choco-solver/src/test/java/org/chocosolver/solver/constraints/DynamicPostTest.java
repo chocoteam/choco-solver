@@ -155,12 +155,9 @@ public class DynamicPostTest {
         final Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
         solver.post(c1);
         solver.post(c2);
-        solver.plugMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                solver.unpost(c1);
-                solver.unpost(c2);
-            }
+        solver.plugMonitor((IMonitorSolution) () -> {
+            solver.unpost(c1);
+            solver.unpost(c2);
         });
         solver.set(engine.make(solver));
         solver.findAllSolutions();

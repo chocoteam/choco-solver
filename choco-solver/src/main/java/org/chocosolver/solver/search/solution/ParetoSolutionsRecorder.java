@@ -76,35 +76,32 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
 
 	@Override
 	protected IMonitorSolution createRecMonitor() {
-		return new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				int[] vals = new int[n];
-				for(int i=0;i<n;i++){
-					vals[i] = objectives[i].getValue();
-				}
-				// update solution set
-				for(int i=solutions.size()-1;i>=0;i--){
-					if(dominatedSolution(solutions.get(i),vals)){
-						solutions.remove(i);
-					}
-				}
-				// store current solution
-				Solution solution = new Solution();
-				solution.record(solver);
-				solutions.add(solution);
-				// aim at better solutions
-				Constraint[] better = new Constraint[n];
-				Operator symbol = Operator.GT;
-				if(policy==ResolutionPolicy.MINIMIZE){
-                    symbol = Operator.LT;
-				}
-				for(int i=0;i<n;i++){
-					better[i] = ICF.arithm(objectives[i],symbol.toString(),vals[i]);
-				}
-				solver.post(LCF.or(better));
-			}
-		};
+		return () -> {
+            int[] vals = new int[n];
+            for(int i=0;i<n;i++){
+                vals[i] = objectives[i].getValue();
+            }
+            // update solution set
+            for(int i=solutions.size()-1;i>=0;i--){
+                if(dominatedSolution(solutions.get(i),vals)){
+                    solutions.remove(i);
+                }
+            }
+            // store current solution
+            Solution solution = new Solution();
+            solution.record(solver);
+            solutions.add(solution);
+            // aim at better solutions
+            Constraint[] better = new Constraint[n];
+            Operator symbol = Operator.GT;
+            if(policy==ResolutionPolicy.MINIMIZE){
+symbol = Operator.LT;
+            }
+            for(int i=0;i<n;i++){
+                better[i] = ICF.arithm(objectives[i],symbol.toString(),vals[i]);
+            }
+            solver.post(LCF.or(better));
+        };
 	}
 
 	private boolean dominatedSolution(Solution solution, int[] vals) {

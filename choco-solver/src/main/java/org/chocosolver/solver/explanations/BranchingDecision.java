@@ -59,8 +59,6 @@ public class BranchingDecision extends Deduction {
 
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder("");
-        s.append("assign(").append(mType == Type.DecLeft ? "[L]" : "[R]").append(decision.toString()).append(")");
-        return s.toString();
+        return "" + "assign(" + (mType == Type.DecLeft ? "[L]" : "[R]") + decision.toString() + ")";
     }
 }

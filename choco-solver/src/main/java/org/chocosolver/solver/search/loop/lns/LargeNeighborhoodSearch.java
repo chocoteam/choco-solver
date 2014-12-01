@@ -65,14 +65,11 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public LargeNeighborhoodSearch(final Solver solver, INeighbor neighbor, final boolean restartAfterEachSolution) {
         this.solver = solver;
         this.neighbor = neighbor;
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				if(restartAfterEachSolution){
-					solver.getSearchLoop().restart();
-				}
-			}
-		});
+		solver.plugMonitor((IMonitorSolution) () -> {
+            if(restartAfterEachSolution){
+                solver.getSearchLoop().restart();
+            }
+        });
     }
 
     //***********************************************************************************

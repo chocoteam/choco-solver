@@ -69,17 +69,14 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
 
 	@Override
 	protected IMonitorSolution createRecMonitor() {
-		return new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				if(objective.getValue()!=lastValue){
-					lastValue = objective.getValue();
-					solutions.clear();
-				}
-				Solution solution = new Solution();
-				solution.record(solver);
-				solutions.add(solution);
-			}
-		};
+		return () -> {
+            if(objective.getValue()!=lastValue){
+                lastValue = objective.getValue();
+                solutions.clear();
+            }
+            Solution solution = new Solution();
+            solution.record(solver);
+            solutions.add(solution);
+        };
 	}
 }

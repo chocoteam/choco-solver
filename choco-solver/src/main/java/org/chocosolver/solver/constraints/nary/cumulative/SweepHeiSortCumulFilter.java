@@ -58,12 +58,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		super(n,cause);
 		sortedTasks = new int[n];
 		taskSorter = new ArraySort(n,false,true);
-		comparator = new IntComparator() {
-			@Override
-			public int compare(int i1, int i2) {
-				return hlb[map[i2]]-hlb[map[i1]];
-			}
-		};
+		comparator = (i1, i2) -> hlb[map[i2]]-hlb[map[i1]];
 	}
 
 	//***********************************************************************************

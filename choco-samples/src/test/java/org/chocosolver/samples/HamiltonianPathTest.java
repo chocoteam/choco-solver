@@ -122,9 +122,7 @@ public class HamiltonianPathTest {
 		int n = m.length + 1;
 		boolean[][] matrix = new boolean[n][n];
 		for (int i = 0; i < n - 1; i++) {
-			for (int j = 1; j < n - 1; j++) {
-				matrix[i][j] = m[i][j];
-			}
+			System.arraycopy(m[i], 1, matrix[i], 1, n - 1 - 1);
 			matrix[i][n - 1] = m[i][0];
 		}
 		return matrix;

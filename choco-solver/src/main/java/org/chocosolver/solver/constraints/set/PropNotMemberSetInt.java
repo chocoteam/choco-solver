@@ -60,17 +60,12 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNotMemberSetInt(IntVar intVar, SetVar setVar){
-		super(new SetVar[]{setVar}, PropagatorPriority.UNARY, true);
-		this.iv = intVar;
-		this.sv = setVar;
-		this.sdm = sv.monitorDelta(aCause);
-		this.elemRem = new IntProcedure() {
-			@Override
-			public void execute(int i) throws ContradictionException {
-				iv.removeValue(i, aCause);
-			}
-		};
+    public PropNotMemberSetInt(IntVar intVar, SetVar setVar) {
+        super(new SetVar[]{setVar}, PropagatorPriority.UNARY, true);
+        this.iv = intVar;
+        this.sv = setVar;
+        this.sdm = sv.monitorDelta(aCause);
+        this.elemRem = i -> iv.removeValue(i, aCause);
 	}
 
 	//***********************************************************************************

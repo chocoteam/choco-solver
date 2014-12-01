@@ -69,8 +69,8 @@ public class PropBoolSumIncremental extends Propagator<IntVar> {
      * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
      * Works in O(1) per instantiation event
      *
-     * @param variables
-     * @param sum
+     * @param variables array of boolean variables to sum
+     * @param sum resulting integer variable
      */
     public PropBoolSumIncremental(BoolVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, true);
@@ -165,10 +165,10 @@ public class PropBoolSumIncremental extends Propagator<IntVar> {
         StringBuilder sb = new StringBuilder();
         sb.append("PropBoolSumIncremental(");
         for (int i = 0; i < vars.length - 2; i++) {
-            sb.append(vars[i] + "+");
+            sb.append(vars[i]).append("+");
         }
-        sb.append(vars[vars.length - 2] + ")");
-        sb.append(" = " + vars[vars.length - 1]);
+        sb.append(vars[vars.length - 2]).append(")");
+        sb.append(" = ").append(vars[vars.length - 1]);
         return sb.toString();
     }
 

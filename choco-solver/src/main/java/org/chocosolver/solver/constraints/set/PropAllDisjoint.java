@@ -63,7 +63,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
      * Ensures that all non-empty sets are disjoint
      * In order to forbid multiple empty set, use propagator PropAtMost1Empty in addition
      *
-     * @param sets
+     * @param sets array of set variables
      */
     public PropAllDisjoint(SetVar[] sets) {
         super(sets, PropagatorPriority.LINEAR, true);
@@ -73,13 +73,10 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                for (int i = 0; i < n; i++) {
-                    if (i != currentSet) {
-                        vars[i].removeFromEnvelope(element, aCause);
-                    }
+        elementForced = element -> {
+            for (int i = 0; i < n; i++) {
+                if (i != currentSet) {
+                    vars[i].removeFromEnvelope(element, aCause);
                 }
             }
         };

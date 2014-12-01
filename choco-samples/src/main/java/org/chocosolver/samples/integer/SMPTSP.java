@@ -115,13 +115,10 @@ public class SMPTSP extends AbstractProblem {
 				System.out.println("bound after initial propagation : " + nbValues);
 			}
 		});
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				bestObj = nbValues.getValue();
-				System.out.println("Solution found! Objective = "+bestObj);
-			}
-		});
+		solver.plugMonitor((IMonitorSolution) () -> {
+            bestObj = nbValues.getValue();
+            System.out.println("Solution found! Objective = "+bestObj);
+        });
 	}
 
 	@Override

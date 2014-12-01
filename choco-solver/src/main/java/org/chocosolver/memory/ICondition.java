@@ -42,10 +42,5 @@ public interface ICondition extends Serializable{
     /**
      * False condition, never satisfied
      */
-    public final static ICondition FALSE = new ICondition() {
-        @Override
-        public boolean satisfied() {
-            return false;
-        }
-    };
+    public final static ICondition FALSE = () -> false;
 }

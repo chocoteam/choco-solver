@@ -45,19 +45,16 @@ public class AllSolutionsRecorder implements ISolutionRecorder {
 
 	public AllSolutionsRecorder(final Solver solver){
 		this.solver = solver;
-		this.solutions = new LinkedList();
+		this.solutions = new LinkedList<>();
 		solver.plugMonitor(createRecMonitor());
 	}
 
 	protected IMonitorSolution createRecMonitor() {
-		return new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				Solution solution = new Solution();
-				solution.record(solver);
-				solutions.addLast(solution);
-			}
-		};
+		return () -> {
+            Solution solution = new Solution();
+            solution.record(solver);
+            solutions.addLast(solution);
+        };
 	}
 
 	@Override

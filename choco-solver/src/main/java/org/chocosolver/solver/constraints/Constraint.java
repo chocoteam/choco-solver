@@ -38,6 +38,7 @@ import org.chocosolver.util.tools.StringUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,9 +50,9 @@ import java.util.Set;
  * @author Xavier Lorca
  * @author Charles Prud'homme
  * @version major revision 13/01/2014
- * @see solver.variables.Variable
+ * @see org.chocosolver.solver.variables.Variable
  * @see Propagator
- * @see solver.propagation.IPropagationEngine
+ * @see org.chocosolver.solver.propagation.IPropagationEngine
  * @since 0.01
  */
 public class Constraint implements Serializable {
@@ -144,7 +145,7 @@ public class Constraint implements Serializable {
      * Reifies the constraint with a boolean variable
      * If the reified boolean variable already exists, an additional (equality) constraint is automatically posted.
      *
-     * @param bool
+     * @param bool the variable to reify with
      */
     public final void reifyWith(BoolVar bool) {
         Solver s = propagators[0].getSolver();
@@ -198,11 +199,9 @@ public class Constraint implements Serializable {
         } else {
             Set<Variable> allvars = new HashSet<>();
             for (Propagator p : propagators) {
-                for (Variable v : p.vars) {
-                    allvars.add(v);
-                }
+                Collections.addAll(allvars, p.vars);
             }
-            vars = allvars.toArray(new Variable[0]);
+            vars = allvars.toArray(new Variable[allvars.size()]);
         }
         return new Constraint("DefaultOppositeOf" + name, new PropOpposite(this, vars));
     }
@@ -210,7 +209,7 @@ public class Constraint implements Serializable {
     /**
      * Changes the name of <code>this</code> constraint
      *
-     * @param newName
+     * @param newName the name of the constraint
      */
     public void setName(String newName) {
         name = newName;

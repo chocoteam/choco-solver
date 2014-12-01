@@ -36,7 +36,7 @@ package org.chocosolver.util.sort;
 
 import java.util.Comparator;
 
-public class ArraySort<T extends Object> {
+public class ArraySort<T> {
 
 	//***********************************************************************************
 	// VARIABLES

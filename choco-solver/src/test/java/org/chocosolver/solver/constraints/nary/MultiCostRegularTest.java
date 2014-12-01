@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
  */
 public class MultiCostRegularTest {
 
-    private Solver make(int period, long seed) {;
+    private Solver make(int period, long seed) {
 
         Solver solver = new Solver();
         IntVar[] sequence = VariableFactory.enumeratedArray("x", period, 0, 2, solver);

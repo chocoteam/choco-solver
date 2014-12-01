@@ -82,16 +82,13 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				System.out.println("////////////////");
-				System.out.println(x);
-				System.out.println(y);
-				System.out.println(z);
-				System.out.println();
-			}
-		});
+		solver.plugMonitor((IMonitorSolution) () -> {
+            System.out.println("////////////////");
+            System.out.println(x);
+            System.out.println(y);
+            System.out.println(z);
+            System.out.println();
+        });
 		solver.findAllSolutions();
 	}
 

@@ -84,16 +84,13 @@ public class BinPacking extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		solver.set(ISF.random_value(bins, 0));
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				String s = minLoad+" : ";
-				for(IntVar l:loads){
-					s+=" "+l.getValue();
-				}
-				System.out.println(s);
-			}
-		});
+		solver.plugMonitor((IMonitorSolution) () -> {
+            String s = minLoad+" : ";
+            for(IntVar l:loads){
+                s+=" "+l.getValue();
+            }
+            System.out.println(s);
+        });
 	}
 
 	@Override

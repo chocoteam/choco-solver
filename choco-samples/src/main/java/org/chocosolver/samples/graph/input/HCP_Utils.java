@@ -51,9 +51,7 @@ public class HCP_Utils {
         int n = size * size;
         boolean[][] m2 = new boolean[n + 1][n + 1];
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                m2[i][j] = m1[i][j];
-            }
+            System.arraycopy(m1[i], 0, m2[i], 0, n);
         }
         for (int i = 0; i < n; i++) {
             m2[n][i] = m2[i][n] = true;
@@ -161,10 +159,7 @@ public class HCP_Utils {
 	}
 
     private static boolean inChessboard(int a, int b, int n) {
-        if (a < 0 || a >= n || b < 0 || b >= n) {
-            return false;
-        }
-        return true;
+        return !(a < 0 || a >= n || b < 0 || b >= n);
     }
 
     //***********************************************************************************
@@ -178,14 +173,14 @@ public class HCP_Utils {
             String line = buf.readLine();
             String name = line.split(":")[1].replaceAll(" ", "");
             System.out.println("parsing instance " + name + "...");
-            line = buf.readLine();
-            line = buf.readLine();
-            line = buf.readLine();
+            buf.readLine();
+            buf.readLine();
+            buf.readLine();
             int n = Integer.parseInt(line.split(":")[1].replaceAll(" ", ""));
             boolean[][] matrix = new boolean[n][n];
-            line = buf.readLine();
-            line = buf.readLine();
-            line = buf.readLine();
+            buf.readLine();
+            buf.readLine();
+            buf.readLine();
             String[] lineNumbers;
             int i, j;
             while (!line.equals("-1")) {
@@ -212,9 +207,7 @@ public class HCP_Utils {
         int n = m.length + 1;
         boolean[][] matrix = new boolean[n][n];
         for (int i = 0; i < n - 1; i++) {
-            for (int j = 1; j < n - 1; j++) {
-                matrix[i][j] = m[i][j];
-            }
+            System.arraycopy(m[i], 1, matrix[i], 1, n - 1 - 1);
             matrix[i][n - 1] = m[i][0];
             matrix[i][0] = false;
         }

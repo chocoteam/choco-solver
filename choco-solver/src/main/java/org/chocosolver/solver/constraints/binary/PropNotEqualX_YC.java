@@ -129,10 +129,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".NEQ.").append(vars[1].getName());
-        bf.append("+").append(cste).append(")");
-        return bf.toString();
+        return "prop(" + vars[0].getName() + ".NEQ." + vars[1].getName() + "+" + cste + ")";
     }
 
     @Override

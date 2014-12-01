@@ -99,9 +99,7 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append(x.getName()).append(" + ").append(y.getName()).append(" <= ").append(cste);
-        return st.toString();
+        return x.getName() + " + " + y.getName() + " <= " + cste;
     }
 
     @Override

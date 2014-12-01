@@ -28,7 +28,6 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ACounter;
-import org.chocosolver.solver.search.limits.ICounterAction;
 
 /**
  * An abstract class for neighbor, to manage the counter
@@ -56,12 +55,9 @@ public abstract class ANeighbor implements INeighbor {
     public void activeFastRestart() {
         if (counter != null) {
             counter.setAction(
-                    new ICounterAction() {
-                        @Override
-                        public void onLimitReached() {
-                            mSolver.getSearchLoop().restart();
-                            counter.reset();
-                        }
+                    () -> {
+                        mSolver.getSearchLoop().restart();
+                        counter.reset();
                     });
             mSolver.plugMonitor(counter);
         }

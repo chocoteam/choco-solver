@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.kohsuke.args4j.Option;
@@ -91,21 +90,18 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 		SMF.limitTime(solver, limit);
 		solver.set(ISF.custom(
 				ISF.minDomainSize_var_selector(),
-				new IntValueSelector() {
-					@Override
-					public int selectValue(IntVar var) {
-						int ub = var.getUB();
-						int size = succ.length + 1;
-						int val = -1;
-						for (int j = var.getLB(); j <= ub; j = var.nextValue(j)) {
-							if (succ[j].getDomainSize() < size) {
-								val = j;
-								size = succ[j].getDomainSize();
-							}
-						}
-						return val;
-					}
-				},
+                var -> {
+                    int ub = var.getUB();
+                    int size = succ.length + 1;
+                    int val = -1;
+                    for (int j = var.getLB(); j <= ub; j = var.nextValue(j)) {
+                        if (succ[j].getDomainSize() < size) {
+                            val = j;
+                            size = succ[j].getDomainSize();
+                        }
+                    }
+                    return val;
+                },
 				succ
 		));
     }

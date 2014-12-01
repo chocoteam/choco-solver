@@ -59,8 +59,6 @@ public class ValueRemoval extends Deduction {
 
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder("");
-        s.append("(").append(this.var.getName()).append(" =/= ").append(this.val).append(")");
-        return s.toString();
+        return "" + "(" + this.var.getName() + " =/= " + this.val + ")";
     }
 }

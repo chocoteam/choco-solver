@@ -91,9 +91,7 @@ public class UnitNogood implements INogood {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(var.getName()).append("==").append(value).append(',');
-        return sb.toString();
+        return var.getName() + "==" + value + ',';
     }
 
     @Override

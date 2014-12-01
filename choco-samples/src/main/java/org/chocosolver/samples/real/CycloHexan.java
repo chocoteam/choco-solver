@@ -51,15 +51,11 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void printDescription() {
-        StringBuilder st = new StringBuilder(24);
-        st.append("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n");
-        st.append("It is decribed with a system of three non linear equations : \n");
-        st.append(" y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
-                " x^2 * (1 + y^2) + y * (y - 24 * x) = -13 \n" +
-                " z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n");
-        st.append("This example comes from the Elisa project (LINA) examples. \n");
 
-        System.out.println(st.toString());
+        System.out.println("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n" +
+                "It is decribed with a system of three non linear equations : \n" + " y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
+                " x^2 * (1 + y^2) + y * (y - 24 * x) = -13 \n" +
+                " z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n" + "This example comes from the Elisa project (LINA) examples. \n");
     }
 
     @Override
@@ -95,18 +91,15 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				StringBuilder st = new StringBuilder();
-				st.append("\t");
-				for (int i = 0; i < vars.length; i++) {
-					st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
-				}
-				System.out.println("CycloHexan");
-				System.out.println(st.toString());
-			}
-		});
+		solver.plugMonitor((IMonitorSolution) () -> {
+            StringBuilder st = new StringBuilder();
+            st.append("\t");
+            for (int i = 0; i < vars.length; i++) {
+                st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
+            }
+            System.out.println("CycloHexan");
+            System.out.println(st.toString());
+        });
         solver.findAllSolutions();
 		solver.getIbex().release();
     }

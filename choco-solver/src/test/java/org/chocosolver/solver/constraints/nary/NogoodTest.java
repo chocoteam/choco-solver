@@ -29,7 +29,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodStoreFromRestarts;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
-import org.chocosolver.solver.search.limits.ICounterAction;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -53,12 +52,9 @@ public class NogoodTest {
         solver.post(ngs);
         solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(30);
-        sc.setAction(new ICounterAction() {
-            @Override
-            public void onLimitReached() {
-                solver.getSearchLoop().restart();
-                sc.reset();
-            }
+        sc.setAction(() -> {
+            solver.getSearchLoop().restart();
+            sc.reset();
         });
         solver.getSearchLoop().plugSearchMonitor(sc);
         solver.getSearchLoop().plugSearchMonitor(ngs);
@@ -76,12 +72,9 @@ public class NogoodTest {
         solver.post(ngs);
         solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(32);
-        sc.setAction(new ICounterAction() {
-            @Override
-            public void onLimitReached() {
-                solver.getSearchLoop().restart();
-                sc.reset();
-            }
+        sc.setAction(() -> {
+            solver.getSearchLoop().restart();
+            sc.reset();
         });
         solver.getSearchLoop().plugSearchMonitor(sc);
         solver.getSearchLoop().plugSearchMonitor(ngs);

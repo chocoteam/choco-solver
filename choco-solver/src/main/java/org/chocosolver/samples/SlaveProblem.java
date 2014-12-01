@@ -75,13 +75,10 @@ public class SlaveProblem extends AbstractParallelSlave<MasterProblem> {
             solver = model.getSolver();
 
             // communication
-            solver.plugMonitor(new IMonitorSolution() {
-                @Override
-                public void onSolution() {
-                    ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
-                    int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
-                    master.newSol(val, om.getPolicy());
-                }
+            solver.plugMonitor((IMonitorSolution) () -> {
+                ObjectiveManager om = solver.getSearchLoop().getObjectiveManager();
+                int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
+                master.newSol(val, om.getPolicy());
             });
 
             model.solve();

@@ -65,18 +65,8 @@ public class PropOffSet extends Propagator<SetVar> {
         sdm = new ISetDeltaMonitor[2];
         sdm[0] = vars[0].monitorDelta(this);
         sdm[1] = vars[1].monitorDelta(this);
-        this.forced = new IntProcedure() {
-            @Override
-            public void execute(int i) throws ContradictionException {
-                tmpSet.addToKernel(i + tmp, aCause);
-            }
-        };
-        this.removed = new IntProcedure() {
-            @Override
-            public void execute(int i) throws ContradictionException {
-                tmpSet.removeFromEnvelope(i + tmp, aCause);
-            }
-        };
+        this.forced = i -> tmpSet.addToKernel(i + tmp, aCause);
+        this.removed = i -> tmpSet.removeFromEnvelope(i + tmp, aCause);
     }
 
     //***********************************************************************************

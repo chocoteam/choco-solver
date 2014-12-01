@@ -65,8 +65,8 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
     /**
      * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
      *
-     * @param variables
-     * @param sum
+     * @param variables the boolean variables to sum
+     * @param sum the resulting integer variable
      */
     public PropBoolSumCoarse(BoolVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
@@ -139,10 +139,10 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
         StringBuilder sb = new StringBuilder();
         sb.append("PropBoolSumCoarse(");
         for (int i = 0; i < vars.length - 2; i++) {
-            sb.append(vars[i] + "+");
+            sb.append(vars[i]).append("+");
         }
-        sb.append(vars[vars.length - 2] + ")");
-        sb.append(" = " + vars[vars.length - 1]);
+        sb.append(vars[vars.length - 2]).append(")");
+        sb.append(" = ").append(vars[vars.length - 1]);
         return sb.toString();
     }
 

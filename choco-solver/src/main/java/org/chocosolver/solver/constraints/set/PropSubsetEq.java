@@ -66,8 +66,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
     /**
      * Ensures that X subseteq Y
      *
-     * @param X
-     * @param Y
+     * @param X a set variable
+     * @param Y a set variable
      */
     public PropSubsetEq(SetVar X, SetVar Y) {
         super(new SetVar[]{X, Y}, PropagatorPriority.LINEAR, true);
@@ -76,18 +76,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
         for (int i = 0; i < 2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                vars[1].addToKernel(element, aCause);
-            }
-        };
-        elementRemoved = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                vars[0].removeFromEnvelope(element, aCause);
-            }
-        };
+        elementForced = element -> vars[1].addToKernel(element, aCause);
+        elementRemoved = element -> vars[0].removeFromEnvelope(element, aCause);
     }
 
     //***********************************************************************************

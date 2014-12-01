@@ -202,14 +202,14 @@ public class NSData {
         // employees
         this.nbEmployees = nbEmployees;
         this.nbFullTimeEmployees = nbFullTimeEmployees;
-        this.symmetricEmployeeGroups = new ArrayList<int[]>();
-        this.equityEmployeeGroups = new ArrayList<int[]>();
+        this.symmetricEmployeeGroups = new ArrayList<>();
+        this.equityEmployeeGroups = new ArrayList<>();
 
         // activities
         this.nbActivities = workActivities.length + 1;
         this.literals = new char[nbActivities];
-        this.activityValue = new TObjectIntHashMap<String>(nbActivities);
-        this.literalValue = new TObjectIntHashMap<Character>(nbActivities);
+        this.activityValue = new TObjectIntHashMap<>(nbActivities);
+        this.literalValue = new TObjectIntHashMap<>(nbActivities);
         for (int a = 0; a < workActivities.length; a++) {
             activityValue.put(workActivities[a], a);
             char literal = workActivities[a].charAt(0);
@@ -223,11 +223,11 @@ public class NSData {
         this.initActivityRegExps(workActivities.length);
 
         // rules for FullTime and PartTime contracts
-        this.fullCounters = new HashMap<CounterType, int[][]>();
-        this.partCounters = new HashMap<CounterType, int[][]>();
-        this.forbiddenPatterns = new ArrayList<String>();
-        this.forbiddenRegExps = new ArrayList<String>();
-        this.preAssignments = new ArrayList<int[]>();
+        this.fullCounters = new HashMap<>();
+        this.partCounters = new HashMap<>();
+        this.forbiddenPatterns = new ArrayList<>();
+        this.forbiddenRegExps = new ArrayList<>();
+        this.preAssignments = new ArrayList<>();
     }
 
     /**
@@ -236,7 +236,7 @@ public class NSData {
      * @param nbWorkActs number of work activities
      */
     private void initActivityRegExps(int nbWorkActs) {
-        StringBuffer b = new StringBuffer("(0");
+        StringBuilder b = new StringBuilder("(0");
         for (int a = 1; a < nbWorkActs; a++)
             b.append("|").append(a);
         regExpWork = b.toString() + ")";
@@ -251,7 +251,7 @@ public class NSData {
      */
     private String makeValueRegExp(String literalPattern) {
         char[] literals = literalPattern.toCharArray();
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         for (char c : literals) {
             switch (c) {
                 case WORK_LITERAL:
@@ -274,8 +274,7 @@ public class NSData {
      */
     private void addForbiddenPattern(String literalPattern) {
         forbiddenPatterns.add("9" + literalPattern);
-        StringBuffer b = new StringBuffer(regExpAny).append("*").append(this.makeValueRegExp(literalPattern)).append(regExpAny).append("*");
-        forbiddenRegExps.add(b.toString());
+        forbiddenRegExps.add(regExpAny + "*" + this.makeValueRegExp(literalPattern) + regExpAny + "*");
     }
 
     /**
@@ -286,10 +285,7 @@ public class NSData {
      */
     private void addForbiddenPattern(String literalPattern, int offset) {
         forbiddenPatterns.add(offset + literalPattern);
-        StringBuffer b = new StringBuffer("(").append(regExpAny).append("{7})*");
-        b.append(regExpAny).append("{").append(offset).append("}");
-        b.append(this.makeValueRegExp(literalPattern)).append(regExpAny).append("*");
-        forbiddenRegExps.add(b.toString());
+        forbiddenRegExps.add("(" + regExpAny + "{7})*" + regExpAny + "{" + offset + "}" + this.makeValueRegExp(literalPattern) + regExpAny + "*");
     }
 
     /**

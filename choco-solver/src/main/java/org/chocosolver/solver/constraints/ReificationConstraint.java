@@ -101,7 +101,7 @@ public class ReificationConstraint extends Constraint {
                 }
             }
         }
-        Variable[] allVars = ArrayUtils.append(new Variable[]{bVar}, setOfVars.toArray(new Variable[0]));
+        Variable[] allVars = ArrayUtils.append(new Variable[]{bVar}, setOfVars.toArray(new Variable[setOfVars.size()]));
         PropReif reifProp = new PropReif(allVars, trueCons, falseCons);
         return ArrayUtils.append(new Propagator[]{reifProp},
                 trueCons.getPropagators().clone(),

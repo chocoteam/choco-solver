@@ -87,18 +87,8 @@ public class PropInverse extends Propagator<SetVar> {
         for (int i = 0; i < n + n2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                toFilter[element - offSet].addToKernel(idx, aCause);
-            }
-        };
-        elementRemoved = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                toFilter[element - offSet].removeFromEnvelope(idx, aCause);
-            }
-        };
+        elementForced = element -> toFilter[element - offSet].addToKernel(idx, aCause);
+        elementRemoved = element -> toFilter[element - offSet].removeFromEnvelope(idx, aCause);
     }
 
     //***********************************************************************************

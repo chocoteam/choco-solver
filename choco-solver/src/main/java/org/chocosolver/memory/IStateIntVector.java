@@ -61,7 +61,6 @@ public abstract class IStateIntVector implements Serializable {
 
     public IStateIntVector(IEnvironment env, int initialSize, int initialValue) {
         int initialCapacity = MIN_CAPACITY;
-        int w = env.getWorldIndex();
 
         if (initialCapacity < initialSize)
             initialCapacity = initialSize;
@@ -77,7 +76,6 @@ public abstract class IStateIntVector implements Serializable {
 
     public IStateIntVector(IEnvironment env, int[] entries) {
         int initialCapacity = MIN_CAPACITY;
-        int w = env.getWorldIndex();
         int initialSize = entries.length;
 
         if (initialCapacity < initialSize)
@@ -85,9 +83,7 @@ public abstract class IStateIntVector implements Serializable {
 
         this.environment = env;
         this.elementData = new int[initialCapacity];
-        for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = entries[i]; // could be a System.arrayCopy but since the loop is needed...
-        }
+        System.arraycopy(entries, 0, this.elementData, 0, initialSize);
         this.size = env.makeInt(initialSize);
     }
 
@@ -163,8 +159,8 @@ public abstract class IStateIntVector implements Serializable {
     /**
      * access an element without any bound check
      *
-     * @param index
-     * @return
+     * @param index index of the element
+     * @return the value
      */
     public int quickGet(int index) {
         assert (rangeCheck(index));

@@ -96,24 +96,9 @@ public class PropIntChannel extends Propagator<Variable> {
             this.sdm[i] = this.sets[i].monitorDelta(this);
         }
         // procedures
-        elementForced = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                ints[element - offSet2].instantiateTo(idx, aCause);
-            }
-        };
-        elementRemoved = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                ints[element - offSet2].removeValue(idx, aCause);
-            }
-        };
-        valRem = new IntProcedure() {
-            @Override
-            public void execute(int element) throws ContradictionException {
-                sets[element - offSet1].removeFromEnvelope(idx, aCause);
-            }
-        };
+        elementForced = element -> ints[element - offSet2].instantiateTo(idx, aCause);
+        elementRemoved = element -> ints[element - offSet2].removeValue(idx, aCause);
+        valRem = element -> sets[element - offSet1].removeFromEnvelope(idx, aCause);
     }
 
     //***********************************************************************************

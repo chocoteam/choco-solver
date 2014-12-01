@@ -53,16 +53,14 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void printDescription() {
-		StringBuilder st = new StringBuilder(24);
-		st.append("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n");
-		st.append("It is decribed with a system of three non linear equations : \n");
-		st.append(" y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
+		System.out.println("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n"
+				+ "It is decribed with a system of three non linear equations : \n"
+				+ " y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
 				" x^2 * (1 + y^2) + y * (y - 24 * x) = -13 \n" +
-				" z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n");
-		st.append("This example comes from the Elisa project (LINA) examples. \n");
-		st.append("This example restricts x to be integer, as an illustration to hybrid finite/continuous problems. \n");
-		st.append("It has no solution. \n");
-		System.out.println(st.toString());
+				" z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n" +
+				"This example comes from the Elisa project (LINA) examples. \n" +
+				"This example restricts x to be integer, as an illustration to hybrid finite/continuous problems. \n" +
+				"It has no solution. \n");
 	}
 
 	@Override

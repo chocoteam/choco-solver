@@ -52,12 +52,7 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 		this.solver = solver;
 		this.solution = solution;
 		this.restoreOnClose = restoreOnClose;
-		solver.plugMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				solution.record(solver);
-			}
-		});
+		solver.plugMonitor((IMonitorSolution) () -> solution.record(solver));
 		if(restoreOnClose){
 			solver.plugMonitor(new IMonitorClose() {
 				@Override

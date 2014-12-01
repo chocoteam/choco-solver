@@ -163,9 +163,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName()).append(")");
-        return bf.toString();
+        return "prop(" + vars[0].getName() + ".EQ." + vars[1].getName() + ")";
     }
 
     @Override

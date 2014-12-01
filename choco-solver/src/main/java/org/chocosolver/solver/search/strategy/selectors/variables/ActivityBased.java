@@ -32,7 +32,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
@@ -171,17 +170,14 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
 		SMF.restartAfterEachSolution(solver);
-		solver.plugMonitor(new IMonitorContradiction() {
-			@Override
-			public void onContradiction(ContradictionException cex) {
-				if(restartAfterEachFail){
-					solver.getSearchLoop().restart();
-				}
-			}
-		});
+		solver.plugMonitor((IMonitorContradiction) cex -> {
+            if(restartAfterEachFail){
+                solver.getSearchLoop().restart();
+            }
+        });
 
         solver.getSearchLoop().plugSearchMonitor(this);
-        decisionPool = new PoolManager<FastDecision>();
+        decisionPool = new PoolManager<>();
 //        init(vars);
     }
 

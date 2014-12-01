@@ -40,17 +40,18 @@ public class ActionCounterFactory {
     private ActionCounterFactory() {
     }
 
-    private static ThreadLocal<ICounterAction> none = new ThreadLocal<ICounterAction>() {
-        @Override
-        protected ICounterAction initialValue() {
-            return new ICounterAction() {
-                @Override
-                public void onLimitReached() {
+    private static ThreadLocal<ICounterAction> none;
+
+    static {
+        none = new ThreadLocal<ICounterAction>() {
+            @Override
+            protected ICounterAction initialValue() {
+                return () -> {
                     // nothing
-                }
-            };
-        }
-    };
+                };
+            }
+        };
+    }
 
     public static ICounterAction none() {
         return none.get();
@@ -58,20 +59,10 @@ public class ActionCounterFactory {
 
 
     public static ICounterAction interruptSearch(final ISearchLoop searchLoop) {
-        return new ICounterAction() {
-            @Override
-            public void onLimitReached() {
-                searchLoop.reachLimit();
-            }
-        };
+        return searchLoop::reachLimit;
     }
 
     public static ICounterAction restartSearch(final ISearchLoop searchLoop) {
-        return new ICounterAction() {
-            @Override
-            public void onLimitReached() {
-                searchLoop.restart();
-            }
-        };
+        return searchLoop::restart;
     }
 }
