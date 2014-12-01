@@ -1,22 +1,24 @@
 /**
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 2014,
+ *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ *       Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
@@ -118,7 +119,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         assert cause != null;
-        ICause antipromo = cause;
         if (value < values[LB.get()] || value > values[UB.get()]) {
             return false;
         }
@@ -132,7 +132,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (index != -1) {
             if (SIZE.get() == 1) {
                 if (_plugexpl) {
-                    solver.getExplainer().removeValue(this, value, antipromo);
+                    solver.getExplainer().removeValue(this, value, cause);
                 }
                 //            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
@@ -156,7 +156,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             this.notifyPropagators(e, cause);
             if (_plugexpl) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+                solver.getExplainer().removeValue(this, value, cause);
             }
             return true;
         } else {
@@ -279,19 +279,20 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    solver.getExplainer().updateLowerBound(this, old, oub + 1, antipromo);
+                    solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
 				IntEventType e = IntEventType.INCLOW;
                 int index;
-                for (index = indexes.nextSetBit(LB.get()); index >= 0 && values[index] < value; index = indexes.nextSetBit(index + 1)) {
+                index = indexes.nextSetBit(LB.get());
+                while (index >= 0 && values[index] < value) {
+                    index = indexes.nextSetBit(index + 1);
                 }
                 assert index >= 0 && values[index] >= value;
                 if (reactOnRemoval) {
@@ -309,7 +310,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 }
                 return true;
             }
@@ -348,7 +349,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else {
 				IntEventType e = IntEventType.DECUPP;
                 int index;
-                for (index = indexes.prevSetBit(UB.get()); index >= 0 && values[index] > value; index = indexes.prevSetBit(index - 1)) {
+                index = indexes.prevSetBit(UB.get());
+                while (index >= 0 && values[index] > value) {
+                    index = indexes.prevSetBit(index - 1);
                 }
                 assert index >= 0 && values[index] <= value;
                 if (reactOnRemoval) {
@@ -446,7 +449,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (aValue < lb) return lb;
         if (aValue >= getUB()) return Integer.MAX_VALUE;
         int i;
-        for (i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= aValue; i = indexes.nextSetBit(i + 1)) {
+        i = indexes.nextSetBit(LB.get());
+        while (i >= 0 && values[i] <= aValue) {
+            i = indexes.nextSetBit(i + 1);
         }
         return (i >= 0) ? values[i] : Integer.MAX_VALUE;
     }
@@ -457,7 +462,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (aValue > ub) return ub;
         if (aValue <= getLB()) return Integer.MIN_VALUE;
         int i;
-        for (i = indexes.prevSetBit(UB.get()); i >= 0 && values[i] >= aValue; i = indexes.prevSetBit(i - 1)) {
+        i = indexes.prevSetBit(UB.get());
+        while (i >= 0 && values[i] >= aValue) {
+            i = indexes.prevSetBit(i - 1);
         }
         return (i >= 0) ? values[i] : Integer.MIN_VALUE;
     }

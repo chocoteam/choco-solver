@@ -67,7 +67,7 @@ public abstract class IState#E# implements Serializable {
     /**
      * modifying a StoredInt by an increment
      *
-     * @param delta
+     * @param delta increment value
      * @return the new value
      */
     public final #e# add(#e# delta) {

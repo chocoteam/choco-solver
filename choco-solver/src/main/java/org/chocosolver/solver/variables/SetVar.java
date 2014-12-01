@@ -1,22 +1,24 @@
-/*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2014,
+ *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ *       Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
@@ -87,7 +88,7 @@ public interface SetVar extends Variable {
 
 	/**
 	 * Test whether element is present or not in the kernel
-	 * @param element
+	 * @param element value to test
 	 * @return true iff element is present in the kernel
 	 */
 	public boolean kernelContains(int element);
@@ -128,7 +129,7 @@ public interface SetVar extends Variable {
 
 	/**
 	 * Test whether element is present or not in the envelope
-	 * @param element
+	 * @param element value to test
 	 * @return true iff element is present in the envelope
 	 */
 	public boolean envelopeContains(int element);
@@ -137,8 +138,8 @@ public interface SetVar extends Variable {
      * Adds element to the kernel, i.e. enforces that the set variable
      * will contain element in every solution
      *
-     * @param element
-     * @param cause
+     * @param element value to add
+     * @param cause cause of value addition
      * @return true iff value was not already in the kernel
      * @throws ContradictionException
      */
@@ -147,8 +148,8 @@ public interface SetVar extends Variable {
     /**
      * Removes element from the envelop, i.e. the set variable cannot contain element anymore
      *
-     * @param element
-     * @param cause
+     * @param element value to remove
+     * @param cause cause of value removal
      * @return true iff value was present in the envelope
      * @throws ContradictionException
      */
@@ -158,7 +159,7 @@ public interface SetVar extends Variable {
      * Enforces the set variable to contain exactly the set of integers given in parameter
      *
      * @param value a set of integers
-     * @param cause
+     * @param cause cause of instantiation
      * @return true iff a domain modification occurred
      * @throws ContradictionException
      */
@@ -174,7 +175,7 @@ public interface SetVar extends Variable {
     /**
      * Allow propagator to monitor element removal/enforcing of this
      *
-     * @param propagator
+     * @param propagator observer
      * @return a new SetDeltaMonitor
      */
     public ISetDeltaMonitor monitorDelta(ICause propagator);

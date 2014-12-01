@@ -1,22 +1,24 @@
-/*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2014,
+ *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ *       Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.choco;
 
 import org.chocosolver.solver.Solver;
@@ -47,20 +48,18 @@ public class TestSolveur {
     public void testBinaryCliqueNeq() {
         int nbSol = 1;
         for (int kk = 2; kk <= 9; kk++) {
-            int n = kk;
-            int m = (n * (n - 1)) / 2;
+            int m = (kk * (kk - 1)) / 2;
             int min = 1;
-            int max = n;
             nbSol *= kk;
             Solver s = new Solver();
-            IntVar[] vars = new IntVar[n];
+            IntVar[] vars = new IntVar[kk];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, min, max, s);
+                vars[i] = VariableFactory.enumerated("v_" + i, min, kk, s);
             }
             Constraint[] cstrs = new Constraint[m];
             int k = 0;
-            for (int i = 0; i < n - 1; i++) {
-                for (int j = i + 1; j < n; j++) {
+            for (int i = 0; i < kk - 1; i++) {
+                for (int j = i + 1; j < kk; j++) {
                     //System.out.print("C"+k+" :: "+ vars[i]+ " != " + vars[j]);
                     cstrs[k] = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
                     //System.out.println(cstrs[k]+ " ");
@@ -79,15 +78,13 @@ public class TestSolveur {
     public void testOneAllDiff() {
         int nbSol = 1;
         for (int k = 2; k <= 9; k++) {
-            int n = k;
             int m = 1;
             int min = 1;
-            int max = n;
             nbSol *= k;
             Solver s = new Solver();
-            IntVar[] vars = new IntVar[n];
+            IntVar[] vars = new IntVar[k];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, min, max, s);
+                vars[i] = VariableFactory.enumerated("v_" + i, min, k, s);
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
@@ -143,23 +140,22 @@ public class TestSolveur {
     @Test(groups = {"1s"})
     public void testCycleLt() {
         for (int k = 5; k <= 12; k++) {
-            int n = k;
-            int m = n - 1;
+            int m = k - 1;
             int min = 1;
-            int max = 2 * n;
+            int max = 2 * k;
             Solver s = new Solver();
-            IntVar[] vars = new IntVar[n];
+            IntVar[] vars = new IntVar[k];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = VariableFactory.enumerated("v_" + i, min, max, s);
             }
             Constraint[] cstrs = new Constraint[m + 1];
             int i;
-            for (i = 0; i < n - 1; i++) {
+            for (i = 0; i < k - 1; i++) {
                 //System.out.println("C("+vars[i]+","+vars[i+1]+")");
                 cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             }
             //System.out.println("C("+vars[n-1]+","+vars[0]+")");
-            cstrs[i] = IntConstraintFactory.arithm(vars[n - 1], "<", vars[0]);
+            cstrs[i] = IntConstraintFactory.arithm(vars[k - 1], "<", vars[0]);
 
             s.post(cstrs);
             s.set(IntStrategyFactory.lexico_LB(vars));
@@ -218,7 +214,6 @@ public class TestSolveur {
 
     private static void testDecompOpt(int k, int nbSol, int nbNod) {
         int n = (2 * k);
-        int m = n - 1;
         int min = 1;
         int max = k - 2;
         Solver s = new Solver();

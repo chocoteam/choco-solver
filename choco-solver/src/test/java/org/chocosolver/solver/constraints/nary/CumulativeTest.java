@@ -1,30 +1,31 @@
 /**
- *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+ * Copyright (c) 2014,
+ *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * All rights reserved.
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.ResolutionPolicy;
@@ -130,17 +131,17 @@ public class CumulativeTest {
 				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ},
 				{Cumulative.Filter.TIME,Cumulative.Filter.HEIGHTS,Cumulative.Filter.SWEEP,Cumulative.Filter.SWEEP_HEI_SORT,Cumulative.Filter.NRJ}
 		};
-		long ref = solve(n,capamax,dmin,hmax,seed,true, filters[0],mode);
+		long ref = solve(n,capamax,dmin,hmax,seed,true, mode);
 		if(ref==-1)return;
 		for(boolean g : new boolean[]{true,false})	// graph-based
 			for(int f=1;f<filters.length;f++){
-				long val = solve(n,capamax,dmin,hmax,seed,g,filters[f],mode);
+				long val = solve(n,capamax,dmin,hmax,seed,g, mode);
 				assert ref == val || val==-1 :"filter "+f+" failed (can be due to the heuristic in case of timeout)";
 			}
 	}
 
 	public static long solve(int n, int capamax, int dmin, int hmax, long seed,
-							 boolean graph, Cumulative.Filter[] f, int mode) {
+							 boolean graph, int mode) {
 		final Solver solver = new Solver();
 		int dmax = 5+dmin*2;
 		final IntVar[] s = VF.enumeratedArray("s",n,0,n*dmax,solver);
@@ -161,34 +162,16 @@ public class CumulativeTest {
 		SMF.limitTime(solver,5000);
 		switch (mode){
 			case 0:	solver.findSolution();
-//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			case 1:	solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,last);
-//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getBestSolutionValue().longValue();
 			case 2:	solver.findAllSolutions();// too many solutions to be used
-//				print(solver,last,graph,f);
 				if(solver.hasReachedLimit())return -1;
 				return solver.getMeasures().getSolutionCount();
 			default:throw new UnsupportedOperationException();
 		}
 	}
 
-	private static void print(Solver solver, IntVar obj, boolean graph, Cumulative.Filter[] f){
-		if(VERBOSE){
-			String st = "";
-			for(Cumulative.Filter fi:f){
-				st+=fi.name()+",";
-			}
-			long nbSol = solver.getMeasures().getSolutionCount();
-			System.out.println((graph?"graph":"\t")
-					+"\t"+(int)solver.getMeasures().getTimeCount()+" ms"
-					+"\t"+(int)solver.getMeasures().getFailCount()+" fs"
-					+"\t"+nbSol+" ss"
-					+"\t"+(nbSol>0?obj.getValue()+" obj":"")
-			);
-		}
-	}
 }

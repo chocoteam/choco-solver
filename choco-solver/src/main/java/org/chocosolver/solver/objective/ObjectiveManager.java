@@ -1,22 +1,24 @@
-/*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2014,
+ *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ *       Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.solver.objective;
 
 import org.chocosolver.solver.ICause;
@@ -60,7 +61,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	protected N bestProvedLB, bestProvedUB; // best bounds found so far
 
 	// creates an objective manager for satisfaction problems
-	public static final ObjectiveManager SAT(){
+	public static ObjectiveManager SAT(){
 		return new ObjectiveManager(null,ResolutionPolicy.SATISFACTION,false);
 	}
 
@@ -89,6 +90,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 * @param strict    Forces to compute strictly better solutions.
 	 *                  Enables to enumerate better or equal solutions when set to false.
 	 */
+	@SuppressWarnings("unchecked")
 	public ObjectiveManager(IntVar objective, ResolutionPolicy policy, boolean strict){
 		this((V)objective,policy,0,strict,true);
 	}
@@ -104,6 +106,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	 * @param strict    Forces to compute strictly better solutions.
 	 *                  Enables to enumerate better or equal solutions when set to false.
 	 */
+	@SuppressWarnings("unchecked")
 	public ObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision, boolean strict) {
 		this((V)objective,policy,precision,strict,false);
 	}
@@ -122,8 +125,8 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	/**
 	 * Updates the lower (or upper) bound of the objective variable, considering its best know value.
 	 *
-	 * @param decision
-	 * @throws solver.exception.ContradictionException if this application leads to a contradiction  @param decision
+	 * @param decision decision to apply
+	 * @throws org.chocosolver.solver.exception.ContradictionException if this application leads to a contradiction  @param decision
 	 */
 	public void apply(Decision decision) throws ContradictionException {
 		decision.apply();
@@ -138,7 +141,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 
 	@Override
 	public String toString() {
-		String st = "";
+		String st;
 		switch (policy) {
 			case SATISFACTION:
 				return "SAT";
@@ -181,7 +184,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	/**
 	 * Prevent the solver from computing worse quality solutions
 	 *
-	 * @throws solver.exception.ContradictionException
+	 * @throws org.chocosolver.solver.exception.ContradictionException
 	 */
 	public void postDynamicCut() throws ContradictionException {
 		if(isOptimization()){
@@ -252,6 +255,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private N getObjLB(){
 		assert isOptimization();
 		if(intOrReal){
@@ -261,6 +265,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private N getObjUB(){
 		assert isOptimization();
 		if(intOrReal){
