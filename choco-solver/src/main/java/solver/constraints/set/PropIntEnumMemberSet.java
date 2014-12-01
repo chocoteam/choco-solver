@@ -35,7 +35,6 @@
 package solver.constraints.set;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -73,8 +72,8 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
      * Propagator for Member constraint
      * val(intVar) is in setVar
      *
-     * @param setVar
-     * @param intVar
+     * @param setVar a set variable
+     * @param intVar an integer variable
      */
     public PropIntEnumMemberSet(SetVar setVar, IntVar intVar) {
         super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY, true);
@@ -82,7 +81,6 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
         this.set = (SetVar) vars[0];
         this.iv = (IntVar) vars[1];
         this.sdm = set.monitorDelta(this);
-        IEnvironment environment = solver.getEnvironment();
         elemRem = new IntProcedure() {
             @Override
             public void execute(int i) throws ContradictionException {
@@ -112,7 +110,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             return;
         }
         int ub = iv.getUB();
-        for (int i = iv.getLB(); i <= ub; iv.nextValue(i)) {
+        for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
             if (!set.envelopeContains(i)) {
                 iv.removeValue(i, aCause);
             }
