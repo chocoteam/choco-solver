@@ -102,7 +102,7 @@ public class NurseSchedulingProblem {
         if (ESat.TRUE != s.isFeasible()) {
             return null;
         }
-        StringBuffer buf = new StringBuffer(100);
+        StringBuilder buf = new StringBuilder(100);
 
         for (int e = 0; e < shifts.length; e++) {
             for (IntVar v : shifts[e]) {
