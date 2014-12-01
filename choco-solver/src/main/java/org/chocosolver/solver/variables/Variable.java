@@ -69,16 +69,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      */
     boolean isInstantiated();
 
-	/**
-	 * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
-	 * Deprecated use isInstantiated instead.
-	 * This method will be removed in the next release.
-	 *
-	 * @return <code>true</code> if <code>this</code> is instantiated
-	 */
-	@Deprecated
-	boolean instantiated();
-
     /**
      * Returns the name of <code>this</code>
      *
@@ -186,7 +176,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      *
      * @param event event on this object
      * @param cause object which leads to the modification of this object
-     * @throws solver.exception.ContradictionException
+     * @throws ContradictionException
      *          if a contradiction occurs during notification
      */
     void notifyPropagators(IEventType event, ICause cause) throws ContradictionException;

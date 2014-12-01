@@ -251,12 +251,7 @@ public abstract class AbstractVariable implements Variable {
         return getName();
     }
 
-    @Override
-    public boolean instantiated() {
-        return isInstantiated();
-    }
-
-	public boolean isBool(){
+    public boolean isBool(){
 		return (getTypeAndKind()&KIND)==BOOL;
 	}
 }

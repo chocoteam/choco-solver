@@ -339,11 +339,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return isInstantiatedTo(value);
-    }
-
-    @Override
     public boolean contains(int aValue) {
         return ((aValue >= LB.get()) && (aValue <= UB.get()));
     }

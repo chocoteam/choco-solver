@@ -404,11 +404,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean instantiatedTo(int value) {
-        return isInstantiatedTo(value);
-    }
-
-    @Override
     public boolean contains(int aValue) {
         aValue -= OFFSET;
         return aValue >= 0 && this.VALUES.get(aValue);

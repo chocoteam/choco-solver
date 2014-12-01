@@ -61,7 +61,7 @@ public interface IntVar extends Variable {
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws solver.exception.ContradictionException
+     * @throws ContradictionException
      *          if the domain become empty due to this action
      */
     boolean removeValue(int value, ICause cause) throws ContradictionException;
@@ -81,7 +81,7 @@ public interface IntVar extends Variable {
      * @param to    upper bound of the interval to remove(int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws solver.exception.ContradictionException
+     * @throws ContradictionException
      *          if the domain become empty due to this action
      */
     boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
@@ -164,17 +164,6 @@ public interface IntVar extends Variable {
 	 * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
 	 */
 	boolean isInstantiatedTo(int value);
-
-	/**
-	 * Checks wether <code>this</code> is instantiated to <code>val</code>
-	 * Deprecated : use isInstantiatedTo instead.
-	 * This method will be removed in the next release.
-	 *
-	 * @param value int
-	 * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
-	 */
-	@Deprecated
-	boolean instantiatedTo(int value);
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
