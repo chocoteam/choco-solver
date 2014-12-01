@@ -111,21 +111,25 @@
                     <failIfMissing>false</failIfMissing>
                     <aggregate>true</aggregate>
                     <properties>
-                        <owner>Ecole des Mines de Nantes</owner>
+                        <owner1>Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241)</owner1>
+                        <owner2>Jean-Guillaume Fages (COSLING S.A.S.)</owner2>
+                        <email>choco@mines-nantes.fr</email>
                         <year>2014</year>
                     </properties>
-                    <strictCheck>true</strictCheck>
                     <includes>
                         <include>**/*.java</include>
                     </includes>
-                    <excludes>
-                        <exclude>**/site/**</exclude>
-                        <exclude>**/target/**</exclude>
-                    </excludes>
                     <headerDefinitions>
                         <headerDefinition>src/etc/old.xml</headerDefinition>
                     </headerDefinitions>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.bsc.maven</groupId>
