@@ -77,7 +77,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
      */
     public PropIntEnumMemberSet(SetVar setVar, IntVar intVar) {
         super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY, true);
-        assert intVar.hasEnumeratedDomain():iv.toString()+" does not an enumerated domain";
+        assert intVar.hasEnumeratedDomain() : iv.toString() + " does not an enumerated domain";
         this.set = (SetVar) vars[0];
         this.iv = (IntVar) vars[1];
         this.sdm = set.monitorDelta(this);
