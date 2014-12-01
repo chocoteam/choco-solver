@@ -431,7 +431,10 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that INTEGER belongs to SET
      */
     public static Constraint member(final IntVar INTEGER, final SetVar SET) {
-		return new Constraint("SetMember",new PropIntMemberSet(SET, INTEGER)){
+		return new Constraint("SetMember",
+                INTEGER.hasEnumeratedDomain()?
+                        new PropIntEnumMemberSet(SET, INTEGER):
+                        new PropIntBoundedMemberSet(SET, INTEGER)){
 			@Override
 			public Constraint makeOpposite(){
 				return not_member(INTEGER,SET);
