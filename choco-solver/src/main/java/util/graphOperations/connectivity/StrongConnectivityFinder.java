@@ -125,9 +125,8 @@ public class StrongConnectivityFinder implements Serializable {
         successors[k] = graph.getSuccOf(start);
         int j;
         // algo
-        boolean notFinished = true;
         boolean first = true;
-        while (notFinished) {
+        while (true) {
             if (first) {
                 j = successors[i].getFirstElement();
             } else {
@@ -153,7 +152,6 @@ public class StrongConnectivityFinder implements Serializable {
                 }
             } else {
                 if (i == 0) {
-                    notFinished = false;
                     break;
                 }
                 if (inf[i] >= i) {
