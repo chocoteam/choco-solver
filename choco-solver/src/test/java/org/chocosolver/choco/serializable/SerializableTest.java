@@ -88,9 +88,7 @@ public class SerializableTest {
         Assert.assertNull(solver);
         try {
             solver = (Solver) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(solver);
@@ -109,9 +107,7 @@ public class SerializableTest {
         Assert.assertNull(eng);
         try {
             eng = (IPropagationEngine) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(eng);
@@ -130,9 +126,7 @@ public class SerializableTest {
         Assert.assertNull(eng);
         try {
             eng = (IPropagationEngine) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(eng);
@@ -151,9 +145,7 @@ public class SerializableTest {
         var = null;
         try {
             var = (IntVar) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(var);
@@ -173,9 +165,7 @@ public class SerializableTest {
         c = null;
         try {
             c = (Constraint) read(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Assert.assertNotNull(c);
@@ -240,6 +230,6 @@ public class SerializableTest {
             }
         }
         Solver clone = s.duplicateModel();
-        Assert.assertNotNull(s);
+        Assert.assertNotNull(clone);
     }
 }

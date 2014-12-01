@@ -55,9 +55,7 @@ public class FrontEndBenchmarking extends AbstractBenchmarking {
             }
         } catch (ClassNotFoundException e) {
             System.out.printf("unknown class %s\n", cmd[0]);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }

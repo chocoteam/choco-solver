@@ -15,7 +15,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -199,8 +198,6 @@ public class NurseScheduling {
         try {
             writer = new BufferedWriter(new FileWriter("out.txt", true));
             writer.write(contentCSV);
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
