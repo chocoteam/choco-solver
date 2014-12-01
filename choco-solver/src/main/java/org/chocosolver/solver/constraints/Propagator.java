@@ -29,7 +29,6 @@ package org.chocosolver.solver.constraints;
 
 
 import gnu.trove.map.hash.THashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -81,14 +80,14 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * <p/>
  * The developer of a propagator must respect some rules to create a efficient propagator:
  * <br/>- internal references to variables must be achieved referencing the <code>this.vars</code> after the call to super,
- * this prevents from wrong references when a variable occurs more than once in the scope (See {@link solver.constraints.nary.count.PropCount_AC} for instance).
+ * this prevents from wrong references when a variable occurs more than once in the scope (See {@link org.chocosolver.solver.constraints.nary.count.PropCount_AC} for instance).
  * <br/>- //to complete
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
  * @version 0.01, june 2010
- * @see solver.variables.Variable
+ * @see org.chocosolver.solver.variables.Variable
  * @see Constraint
  * @since 0.01
  */
@@ -101,12 +100,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private static final long serialVersionUID = 2L;
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
-    private static ThreadLocal<TIntHashSet> set = new ThreadLocal<TIntHashSet>() {
-        @Override
-        protected TIntHashSet initialValue() {
-            return new TIntHashSet();
-        }
-    };
 
     // propagator attributes
     private final int ID; // unique id of this
@@ -184,6 +177,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param vars variables of the propagator. Their modification will trigger filtering
      */
+    @SafeVarargs
     protected Propagator(V... vars) {
         this(vars, LINEAR, false);
     }
@@ -198,7 +192,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param nvars variables to be added to this propagator
      */
-    protected void addVariable(V... nvars) {
+    @SafeVarargs
+    protected final void addVariable(V... nvars) {
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
         arraycopy(tmp, 0, vars, 0, tmp.length);
@@ -245,7 +240,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
      * @param evtmask type of propagation event <code>this</code> must consider.
-     * @throws solver.exception.ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
+     * @throws org.chocosolver.solver.exception.ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
     public abstract void propagate(int evtmask) throws ContradictionException;
 
@@ -273,7 +268,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
-     * @throws solver.exception.ContradictionException if a contradiction occurs
+     * @throws org.chocosolver.solver.exception.ContradictionException if a contradiction occurs
      */
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (reactToFineEvt) {
@@ -360,7 +355,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param d : a <code>Deduction</code> to explain
      * @param e : the explanation to feed
-     * @return a set of constraints and past decisions
      */
     @Override
     public void explain(Deduction d, Explanation e) {
@@ -440,7 +434,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param variable involved variable
      * @param message  detailed message
-     * @throws solver.exception.ContradictionException expected behavior
+     * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(aCause, variable, message);
