@@ -415,14 +415,16 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeForbiddenPatterns(Solver solver) {
         String option = this.getConstraintOption("pat");
-        if (option.equals("reif")) {
-            this.makeForbiddenPatternsWithExtensionOrReified(solver);
-        } else if (option.equals("MCRegular")) {
-            this.makeForbiddenPatternsAndMonthlyCountersWithMultiCostRegular(solver);
-        } /*else if (option.equals("MCRegularWeek")) {
-            this.makeForbiddenPatternsAndMonthlyAndRestWeeklyCountersWithMultiCostRegular(solver);
-        } */ else {
-            this.makeForbiddenPatternsWithRegular(solver);
+        switch (option) {
+            case "reif":
+                this.makeForbiddenPatternsWithExtensionOrReified(solver);
+                break;
+            case "MCRegular":
+                this.makeForbiddenPatternsAndMonthlyCountersWithMultiCostRegular(solver);
+                break;
+            default:
+                this.makeForbiddenPatternsWithRegular(solver);
+                break;
         }
     }
 
