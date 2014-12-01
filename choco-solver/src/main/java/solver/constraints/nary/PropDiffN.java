@@ -155,8 +155,8 @@ public class PropDiffN extends Propagator<IntVar> {
             }
         }
         // mandatory part based filtering
-        boolean horizontal = true;
-        boolean vertical = false;
+        final boolean horizontal = true;
+        final boolean vertical = false;
         for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
             if (doOverlap(i, j, horizontal)) {
                 filter(i, j, vertical);
