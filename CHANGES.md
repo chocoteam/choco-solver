@@ -10,7 +10,7 @@ NEXT MILESTONE
 - Add modifiable settings (#250)
 - Simplify search binder (#229)
 
-Bug fixes: #246, #226, #255
+Bug fixes: #246, #226, #255, #258
 
 3.2.2 - 17 Nov 2014
 -------------------
