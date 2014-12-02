@@ -29,13 +29,12 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.store.BufferedEventStore;
+import org.chocosolver.solver.explanations.store.EventConsumer;
 import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
 import org.chocosolver.solver.explanations.strategies.DynamicBacktracking;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
-import solver.explanations.ThreadExplanationEngine;
-import solver.explanations.store.BufferedEventStore;
-import solver.explanations.store.EventConsumer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

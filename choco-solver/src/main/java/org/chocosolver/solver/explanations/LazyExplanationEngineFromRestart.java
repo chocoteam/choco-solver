@@ -28,13 +28,12 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.explanations.store.ArrayEventStore;
+import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.BoolVar;
@@ -43,8 +42,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import solver.explanations.store.ArrayEventStore;
-import solver.explanations.store.IEventStore;
 
 /**
  * A explanation engine that works in a lazy way.

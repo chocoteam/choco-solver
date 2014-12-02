@@ -24,35 +24,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.store;
+package org.chocosolver.solver.explanations.store;
+
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 
 /**
- * A event consumer which pop event stored in BufferedEventStore and explain it, one by one.
- * <p/>
- * Created by cprudhom on 18/11/14.
+ * Created by cprudhom on 13/11/14.
  * Project: choco.
  */
-public class EventConsumer implements Runnable {
+public interface IEventStore {
 
-    private final BufferedEventStore eventStore;
-    private volatile boolean alive;
+    public void pushEvent(IntVar var, ICause cause, IEventType mask, int one, int two, int three);
 
-    public EventConsumer(BufferedEventStore eventStore) {
-        this.eventStore = eventStore;
-        this.alive = true;
-    }
+    public void popEvent();
 
+    public boolean isUptodate();
 
-    @Override
-    public void run() {
-        boolean _a = alive;
-        while (_a) {
-            eventStore.pop();
-            _a = alive;
-        }
-    }
+    public void setUptodate(boolean b);
 
-    public synchronized void kill() {
-        alive = false;
-    }
+    public int getSize();
+
+    public IntVar getVariable(int evt);
+
+    public IEventType getEventType(int evt);
+
+    public ICause getCause(int evt);
+
+    public int getFirstValue(int evt);
+
+    public int getSecondValue(int evt);
+
+    public int getThirdValue(int evt);
+
+    public void clear();
+
 }
