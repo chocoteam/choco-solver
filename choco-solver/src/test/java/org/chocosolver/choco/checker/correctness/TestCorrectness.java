@@ -51,7 +51,7 @@ public class TestCorrectness {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testTIMES() {
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
             CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, 1407157364513l, null);
@@ -64,7 +64,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testABSOLUTE() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -75,7 +75,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testNEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -98,7 +98,7 @@ public class TestCorrectness {
     }
 
     // ALLDIFFERENT
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testALLDIFFERENTAC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -109,7 +109,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testALLDIFFERENTBC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -120,7 +120,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testGCC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -130,7 +130,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testGCC2() {
         for (int n = 2; n < 33; n *= 2) {
             for (int i = 0; i < 20; i++) {
@@ -141,7 +141,7 @@ public class TestCorrectness {
     }
 
     // INVERSE
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testINVERSECHANNELING_AC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -152,7 +152,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testINVERSECHANNELING_Bounds() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -164,7 +164,7 @@ public class TestCorrectness {
     }
 
     // COUNT
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCOUNTBCEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -175,7 +175,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCOUNTACEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -186,7 +186,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCOUNTBCLEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -197,7 +197,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCOUNTACLEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -208,7 +208,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCOUNTBCGEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -219,7 +219,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCOUNTACGEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -231,7 +231,7 @@ public class TestCorrectness {
     }
 
     // LEX
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testLEX1() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -242,7 +242,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testLEX2() {
         for (int i = 0; i < 50; i++) {
             long seed = System.currentTimeMillis();
@@ -254,7 +254,7 @@ public class TestCorrectness {
     }
 
     // LEX CHAIN
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testLEXCH1() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -265,7 +265,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testLEXCH2() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -277,7 +277,7 @@ public class TestCorrectness {
     }
 
     // ELEMENT
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testELEMENTBC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -289,7 +289,7 @@ public class TestCorrectness {
     }
 
     // AMONG
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testAMONGAC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -300,7 +300,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testAMONGBC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -311,7 +311,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "correctness.10m")
     public void testNVALUES() {
         String[][] filters = new String[][]{
                 {"at_most_BC"},
@@ -324,7 +324,7 @@ public class TestCorrectness {
         };
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
+            for (int n = 2; n < 21; n += 2) {
                 for (String[] f : filters)
                     CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, f);
             }
@@ -332,7 +332,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testTree() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 25; i++) {
@@ -343,7 +343,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCircuit() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 50; i++) {
@@ -353,7 +353,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testPath() {
         for (int n = 3; n < 25; n += 5) {
             for (int i = 0; i < 50; i++) {
@@ -363,7 +363,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testSubcircuit() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 50; i++) {
@@ -373,7 +373,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testDiffn() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 30; i++) {
@@ -383,7 +383,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testCumulative() {
         int nBugSweep = 32;
         long seedBugSweep = 1368003588936l;
@@ -398,7 +398,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testSORT1() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -409,7 +409,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testSORT2() {
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
@@ -420,7 +420,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "correctness.1m")
     public void testMDDAC() {
         Random rnd = new Random();
         for (int i = 0; i < 10; i++) {

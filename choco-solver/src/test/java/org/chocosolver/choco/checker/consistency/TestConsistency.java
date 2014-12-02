@@ -52,14 +52,14 @@ public class TestConsistency {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // EQ *******************************************************
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testEQ1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelEqAC, 2, 0, 2, null, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testEQ2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -67,14 +67,14 @@ public class TestConsistency {
     }
 
     // NEQ *******************************************************
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testNEQ2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelNeqAC, 2, 0, 2, null, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testNEQ() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -82,35 +82,35 @@ public class TestConsistency {
     }
 
     // AllDifferent AC *******************************************************
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testALLDIFFERENT1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffAC, 1, 0, 10, null, seed + i, "ac");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testALLDIFFERENT2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffAC, 2, 0, 2, null, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testALLDIFFERENT3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, null, seed + i, "ac");
     }
 
-    @Test(groups = "30m")
+    @Test(groups = "consistency.30m")
     public void testALLDIFFERENT4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffAC, 10, 0, 100, null, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testALLDIFFERENTGRAPHAC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -119,21 +119,21 @@ public class TestConsistency {
 
     // InverseChanneling AC*******************************************************
 //	// InverseChanneling no longer ensures AC but default (because it uses the allDifferent.DEFAULT, which is fast)
-//    @Test(groups = "10s")
+//    @Test(groups = "consistency.10s")
 //    public void testINVERSECHANNELING_AC1() {
 //        long seed = System.currentTimeMillis();
 //        for (int i = 0; i < 20; i++)
 //            checkConsistency(Modeler.modelInverseChannelingAC, 20, 0, 40, null, seed + i, "ac");
 //    }
 //
-//    @Test(groups = "10s")
+//    @Test(groups = "consistency.10s")
 //    public void testINVERSECHANNELING_AC2() {
 //        long seed = System.currentTimeMillis();
 //        for (int i = 0; i < 20; i++)
 //            checkConsistency(Modeler.modelInverseChannelingAC, 10, 10, 120, null, seed + i, "ac");
 //    }
 //
-//    @Test(groups = "10s")
+//    @Test(groups = "consistency.10s")
 //    public void testINVERSECHANNELING_AC3() {
 //        long seed = System.currentTimeMillis();
 //        for (int i = 0; i < 20; i++)
@@ -141,35 +141,35 @@ public class TestConsistency {
 //    }
 
     // AllDifferent BC *******************************************************
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testALLDIFFERENTBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffBC, 1, 0, 10, null, seed + i, "bc");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testALLDIFFERENTBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffBC, 2, 0, 2, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "consistency.10s")
     public void testALLDIFFERENTBC3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffBC, 5, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testALLDIFFERENTBC4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, null, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testALLDIFFERENTGRAPHBC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -177,14 +177,14 @@ public class TestConsistency {
     }
 
 //    NO CONSISTENCY ON TIMES CONSTRAINT
-//    @Test(groups = "10s")
+//    @Test(groups = "consistency.10s")
 //    public void testTIMES1() {
 //        long seed = System.currentTimeMillis();
 //        for (int i = 0; i < 20; i++)
 //            checkConsistency(Modeler.modelTimes, 3, 2, 50, null, seed + i, "bc");
 //    }
 //
-//    @Test(groups = "10s")
+//    @Test(groups = "consistency.10s")
 //    public void testTIMES2() {
 //        long seed = System.currentTimeMillis();
 //        for (int i = 0; i < 20; i++)
@@ -192,21 +192,21 @@ public class TestConsistency {
 //    }
 //
 //
-//    @Test(groups = "10s")
+//    @Test(groups = "consistency.10s")
 //    public void testTIMES3() {
 //        long seed = System.currentTimeMillis();
 //        for (int i = 0; i < 20; i++)
 //            checkConsistency(Modeler.modelTimes, 3, -50, -3, null, seed + i, "bc");
 //    }
 
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testABSOLUTEBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAbsolute, 2, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testABSOLUTEBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -214,21 +214,21 @@ public class TestConsistency {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "consistency.10s")
     public void testABSOLUTEBC3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAbsolute, 2, -50, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testABSOLUTEAC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAbsolute, 2, 2, 50, null, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testABSOLUTEAC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
@@ -236,70 +236,70 @@ public class TestConsistency {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testABSOLUTEAC3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAbsolute, 2, -50, 50, null, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testCOUNTBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 999; i++)
             checkConsistency(Modeler.modelCountBC, 2, 2, 50, new int[]{0, 1}, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testCOUNTAC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelCountAC, 2, 2, 50, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testCOUNTBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 999; i++)
             checkConsistency(Modeler.modelCountBC, 5, -10, 10, new int[]{0, 1}, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testCOUNTAC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testLEX1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, true, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testLEX2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, false, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testLEXC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexChainAC, 9, -10, 10, true, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testLEXC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexChainAC, 9, -10, 10, false, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testELEMENTBC1() {
         long seed = 0;//System.currentTimeMillis();
         for (int i = 0; i < 999; i++) {
@@ -307,49 +307,49 @@ public class TestConsistency {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testAMONGBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAmongBC, 2, 2, 50, new int[]{0, 1}, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testAMONGAC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAmongAC, 2, 2, 50, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testAMONGBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAmongBC, 5, -10, 10, new int[]{0, 1}, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testAMONGAC2() {
         long seed = 0;
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAmongAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "consistency.10s")
     public void testSORT1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelSortBC, 6, 0, 10, null, seed + i, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "consistency.1m")
     public void testSORT2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelSortBC, 8, -20, 20, null, seed + i, "bc");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testMDD1() {
         long seed = System.currentTimeMillis();
         Random rnd = new Random();
@@ -374,7 +374,7 @@ public class TestConsistency {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "consistency.1s")
     public void testMDD2() {
         long seed = System.currentTimeMillis();
         Random rnd = new Random();
@@ -399,7 +399,7 @@ public class TestConsistency {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "consistency.10s")
     public void testMDD3() {
         long seed = System.currentTimeMillis();
         Random rnd = new Random();

@@ -66,7 +66,7 @@ public class ThreadSolverTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test1() throws InterruptedException {
         int n = 12;
 
@@ -96,7 +96,7 @@ public class ThreadSolverTest {
                 + ts2.solver.getMeasures().getSolutionCount(), nbSol);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void test2() throws InterruptedException {
         int n = 10;
 
