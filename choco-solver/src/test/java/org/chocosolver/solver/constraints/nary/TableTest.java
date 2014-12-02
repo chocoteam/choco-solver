@@ -41,6 +41,10 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.extension.nary.LargeRelation;
+import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
+import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
+import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -197,12 +201,35 @@ public class TableTest {
     }
 
     @Test(groups = "1s")
-    public static void testThierry() {
+    public static void testThierry1() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
+        solver.post(ICF.table(vars, t, "FC"));
+        solver.findSolution();
+    }
+
+    @Test(groups = "1s")
+    public static void testThierry2() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
         solver.post(ICF.table(vars, t, "GAC3rm"));
+        solver.findSolution();
+    }
+
+    @Test(groups = "1s")
+    public static void testThierry3() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
+        solver.post(ICF.table(vars, t, "GAC2001"));
         solver.findSolution();
     }
 
@@ -259,6 +286,141 @@ public class TableTest {
                 }
             }
         }
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesTable1() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(true);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesTable tt = new TuplesTable(t, vars);
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 2, 1, 1}));
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesTable2() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesTable tt = new TuplesTable(t, vars);
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesLargeTable1() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(true);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesLargeTable tt = new TuplesLargeTable(t, vars);
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 2, 1, 1}));
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesLargeTable2() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesLargeTable tt = new TuplesLargeTable(t, vars);
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesVeryLargeTable1() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(true);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesVeryLargeTable tt = new TuplesVeryLargeTable(t, vars);
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 2, 1, 1}));
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesVeryLargeTable2() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesVeryLargeTable tt = new TuplesVeryLargeTable(t, vars);
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
+    }
+
+    @Test(groups = "1s")
+    public void testTuplesVeryLargeTableDuplicate() {
+        Solver solver = new Solver();
+        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        Tuples t = new Tuples(false);
+        t.add(1, 1, 1, 1);
+        t.add(1, 1, 2, 1);
+        TuplesVeryLargeTable or = new TuplesVeryLargeTable(t, vars);
+        LargeRelation tt = or.duplicate();
+
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
+        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
+        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
+
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 1, 1}));
+        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 2, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{2, 1, 1, 1}));
+        Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
 }

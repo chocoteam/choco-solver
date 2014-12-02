@@ -59,7 +59,6 @@ public class Tuples {
 
     public Tuples(boolean feasible) {
         this.feasible = feasible;
-        if (!feasible) System.err.println("Declaring unfeasible tuples may lead to errors (See Issue#215)");
         tuples = new ArrayList<>();
     }
 

@@ -102,7 +102,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
             totalSize *= vars[i].getDomainSize();
         }
         if (totalSize < 0) {
-            throw new SolverException("Tuples required too much memory ...");
+            return new TuplesVeryLargeTable(tuples, vars);
         }
         if (totalSize / 8 > 50 * 1024 * 1024) {
             return new TuplesLargeTable(tuples, vars);

@@ -32,7 +32,6 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -95,7 +94,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             totalSize *= vars[i].getDomainSize();
         }
         if (totalSize < 0) {
-            throw new SolverException("Tuples required too much memory ...");
+            return new TuplesVeryLargeTable(tuples, vars);
         }
         if (totalSize / 8 > 50 * 1024 * 1024) {
             return new TuplesLargeTable(tuples, vars);
