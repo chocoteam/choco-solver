@@ -33,10 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ValueRemoval;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -135,9 +132,8 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
-        e.add(this);
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
         if (d != null && d.getmType() == Deduction.Type.ValRem) {
             ValueRemoval vr = (ValueRemoval) d;
             IntVar var = (IntVar) vr.getVar();
@@ -147,28 +143,28 @@ public class PropSumEq extends Propagator<IntVar> {
             if (val < var.getLB()) { // explain LB
                 for (int i = 0; i < n; i++) { // first the positive coefficients
                     if (vars[i] != var) {
-                        vars[i].explain(ispos ? VariableState.UB : VariableState.LB, e);
+                        vars[i].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
                     }
                 }
                 // then the negative one
                 if (vars[n] != var) {
-                    vars[n].explain(ispos ? VariableState.LB : VariableState.UB, e);
+                    vars[n].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
                 }
             } else if (val > var.getUB()) { // explain UB
                 for (int i = 0; i < n; i++) { // first the positive coefficients
                     if (vars[i] != var) {
-                        vars[i].explain(ispos ? VariableState.LB : VariableState.UB, e);
+                        vars[i].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
                     }
                 }
                 // then the negative one
                 if (vars[n] != var) {
-                    vars[n].explain(ispos ? VariableState.UB : VariableState.LB, e);
+                    vars[n].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
                 }
             } else {
-                super.explain(d, e);
+                super.explain(xengine, d, e);
             }
         } else {
-            super.explain(d, e);
+            super.explain(xengine, d, e);
         }
     }
 

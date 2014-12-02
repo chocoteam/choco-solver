@@ -268,9 +268,9 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
                 // 3. explain the failure
                 Explanation expl = new Explanation();
                 if (cex.v != null) {
-                    cex.v.explain(VariableState.DOM, expl);
+                    cex.v.explain(mExplanationEngine, VariableState.DOM, expl);
                 } else {
-                    cex.c.explain(null, expl);
+                    cex.c.explain(mExplanationEngine, null, expl);
                 }
                 Explanation complete = mExplanationEngine.flatten(expl);
                 ExplanationToolbox.extractDecision(complete, tmpValueDeductions);

@@ -38,6 +38,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
@@ -354,18 +355,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * returns a explanation for the decision mentioned in parameters
      *
+     *
+     * @param xengine an explanation engine
      * @param d : a <code>Deduction</code> to explain
      * @param e : the explanation to feed
      */
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            v.explain(DOM, e);
+            v.explain(xengine, DOM, e);
         }
-        // and the application of the current propagator
-        e.add(this);
     }
 
     /**

@@ -207,7 +207,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         } else {
             expl.reset();
         }
-        var.explain(VariableState.DOM, expl);
+        var.explain(this, VariableState.DOM, expl);
         if (LOGGER.isDebugEnabled()) {
             onActivatePropagator(propagator, expl);
         }
@@ -227,7 +227,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             expl.reset();
         }
         // 3. explain the value removal thanks to the cause
-        cause.explain(vr, expl);
+        cause.explain(this, vr, expl);
         // 4. explanations monitoring
         if (LOGGER.isDebugEnabled()) {
             onRemoveValue(var, val, cause, expl);
@@ -358,10 +358,6 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             Explanation e = database.get(ded.id);
 //            System.out.printf("%s \n", ded);
             if (e != null) {
-                int nbp = e.nbPropagators();
-                for (int i = 0; i < nbp; i++) {
-                    toreturn.add(e.getPropagator(i));
-                }
                 nbd = e.nbDeductions();
                 for (int i = 0; i < nbd; i++) {
                     ded = e.getDeduction(i);

@@ -35,6 +35,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.SetVar;
@@ -182,12 +183,12 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
         throw new UnsupportedOperationException("SetConstantView does not (yet) implement method explain(...)");
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
         throw new UnsupportedOperationException("SetConstantView does not (yet) implement method explain(...)");
     }
 

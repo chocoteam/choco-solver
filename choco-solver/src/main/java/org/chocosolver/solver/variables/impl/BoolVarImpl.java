@@ -34,6 +34,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.antidom.AntiDomBool;
 import org.chocosolver.solver.explanations.antidom.AntiDomain;
@@ -402,30 +403,24 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         return new AntiDomBool(this);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param what
-     * @param to
-     */
     @Override
-    public void explain(VariableState what, Explanation to) {
-        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
+        AntiDomain invdom = xengine.getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
             if ((what == VariableState.LB && val < this.getLB())
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
-                to.add(solver.getExplainer().explain(this, val));
+                to.add(xengine.explain(this, val));
             }
         }
         it.dispose();
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
-        to.add(solver.getExplainer().explain(this, val));
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
+        to.add(xengine.explain(this, val));
     }
 
     @Override

@@ -81,7 +81,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
             if (!dec.hasNext()) {
                 // on a right branch, necessarily have an explanation (it is a refutation)
 
-                if (!mExplanationEngine.flatten(dec.getNegativeDeduction()).contain(jmpBck.getPositiveDeduction())) {
+                if (!mExplanationEngine.flatten(dec.getNegativeDeduction(mExplanationEngine)).contain(jmpBck.getPositiveDeduction(mExplanationEngine))) {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
                     dec.rewind();
@@ -107,13 +107,13 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
                 throw new UnsupportedOperationException("DynamicBacktracking.updatVRExplain should get to a POSITIVE decision");
             }
             cobdec.setDecisionToRefute(dec);
-            Deduction left = dec.getPositiveDeduction();
+            Deduction left = dec.getPositiveDeduction(mExplanationEngine);
             expl.remove(left);
             assert left.getmType() == Deduction.Type.DecLeft;
             BranchingDecision va = (BranchingDecision) left;
             mExplanationEngine.removeLeftDecisionFrom(va.getDecision(), va.getVar());
 
-            Deduction right = dec.getNegativeDeduction();
+            Deduction right = dec.getNegativeDeduction(mExplanationEngine);
             mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
 
             mSolver.getSearchLoop().setLastDecision(cobdec);

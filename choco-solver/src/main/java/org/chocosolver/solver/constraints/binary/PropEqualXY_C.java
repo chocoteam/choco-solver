@@ -33,10 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ValueRemoval;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -156,25 +153,23 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         if (d.getVar() == x) {
-            e.add(solver.getExplainer().getPropagatorActivation(this));
-            e.add(aCause);
+            e.add(xengine.getPropagatorActivation(this));
             if (d.getmType() == Deduction.Type.ValRem) {
-                y.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
+                y.explain(xengine, VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == y) {
-            e.add(solver.getExplainer().getPropagatorActivation(this));
-            e.add(aCause);
+            e.add(xengine.getPropagatorActivation(this));
             if (d.getmType() == Deduction.Type.ValRem) {
-                x.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
+                x.explain(xengine, VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
             }
         } else {
-            super.explain(d, e);
+            super.explain(xengine, d, e);
         }
     }
 

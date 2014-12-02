@@ -38,6 +38,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
@@ -148,18 +149,16 @@ public class PropReif extends Propagator<Variable> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
-        e.add(this);
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
         if (d.getVar() == bVar) {
             // the current deduction is due to the current domain of the involved variables
             for (Variable v : vars) {
-                v.explain(VariableState.DOM, e);
+                v.explain(xengine, VariableState.DOM, e);
             }
         } else {
             throw new UnsupportedOperationException();
         }
-        // and the application of the current propagator
     }
 
     @Override

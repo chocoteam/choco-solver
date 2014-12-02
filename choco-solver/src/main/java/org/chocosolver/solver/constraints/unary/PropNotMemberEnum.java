@@ -37,6 +37,7 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
@@ -107,9 +108,8 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
-        e.add(aCause);
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
     }
 
     @Override

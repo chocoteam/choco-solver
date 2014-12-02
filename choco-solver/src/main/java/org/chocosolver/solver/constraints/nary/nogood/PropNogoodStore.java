@@ -34,10 +34,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ValueRemoval;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -131,9 +128,8 @@ public class PropNogoodStore extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
-        e.add(this);
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
         if (d != null && d.getmType() == Deduction.Type.ValRem) {
             ValueRemoval vr = (ValueRemoval) d;
             IntVar var = (IntVar) vr.getVar();
@@ -147,13 +143,13 @@ public class PropNogoodStore extends Propagator<IntVar> {
                     for (int j = 0; j < ng.size(); j++) {
                         if (ng.getVar(j) != var) {
 //                            ng.getVar(j).explain(VariableState.REM, ng.getVal(j), e);
-                            ng.getVar(j).explain(VariableState.DOM, e);
+                            ng.getVar(j).explain(xengine, VariableState.DOM, e);
                         }
                     }
                 }
             }
         } else {
-            super.explain(d, e);
+            super.explain(xengine, d, e);
         }
     }
 

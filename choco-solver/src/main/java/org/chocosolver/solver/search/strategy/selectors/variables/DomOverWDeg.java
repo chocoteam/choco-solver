@@ -40,6 +40,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -180,7 +181,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         throw new SolverException("DomOverWDeg does not modify variables on IVariableMonitor.onUpdate.\n" +
                 "So it cannot explain value removals.");
     }

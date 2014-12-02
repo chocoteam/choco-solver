@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 
 import java.io.Serializable;
 
@@ -50,10 +51,11 @@ public interface ICause extends Serializable {
     /**
      * Feeds an explanation based on <code>this</code>.
      *
+     * @param xengine explanation engine
      * @param d the deduction
      * @param e explanation to feed
      */
-    void explain(Deduction d, Explanation e);
+    void explain(ExplanationEngine xengine, Deduction d, Explanation e);
 
 
 }

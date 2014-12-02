@@ -35,6 +35,7 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -125,17 +126,15 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
         Variable var = d.getVar();
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
-            y.explain(VariableState.DOM, e);
+            y.explain(xengine, VariableState.DOM, e);
         } else if (var != null) {
-            x.explain(VariableState.DOM, e);
+            x.explain(xengine, VariableState.DOM, e);
         }
-        // and the application of the current propagator
-        e.add(aCause);
     }
 
     @Override

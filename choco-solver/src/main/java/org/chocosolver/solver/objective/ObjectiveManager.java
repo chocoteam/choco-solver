@@ -33,6 +33,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
@@ -133,9 +134,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 	}
 
 	@Override
-	public void explain(Deduction val, Explanation e) {
+	public void explain(ExplanationEngine xengine, Deduction val, Explanation e) {
 		if (isOptimization()) {
-			objective.explain(VariableState.DOM, e);
+			objective.explain(xengine, VariableState.DOM, e);
 		}
 	}
 

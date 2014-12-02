@@ -29,7 +29,6 @@
 package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.constraints.Propagator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +56,6 @@ public class Explanation extends Deduction {
 
     private List<Deduction> deductions;
     private TIntHashSet did;
-    private List<Propagator> propagators;
-    private TIntHashSet pid;
 
     public Explanation() {
         super(Type.Exp);
@@ -73,35 +70,10 @@ public class Explanation extends Deduction {
      */
     public void add(Explanation expl) {
         int nbd = expl.nbDeductions();
-        int nbp = expl.nbPropagators();
-        if (nbd > 0 || nbp > 0) {
+        if (nbd > 0) {
             // 1. add all deductions of expl
             for (int i = 0; i < nbd; i++) {
                 add(expl.getDeduction(i));
-            }
-
-            // 2. add all propagators of expl
-            if (nbp > 0 && expl.getPropagator(0).getSolver().getSettings().enablePropagatorInExplanation()) {
-                for (int i = 0; i < nbp; i++) {
-                    add(expl.getPropagator(i));
-                }
-            }
-        }
-    }
-
-    /**
-     * Add a propagator to the set of propagators of this
-     *
-     * @param p propagator to add
-     */
-    public void add(Propagator p) {
-        if (p.getSolver().getSettings().enablePropagatorInExplanation()) {
-            if (this.propagators == null) {
-                this.propagators = new ArrayList<>(4);
-                this.pid = new TIntHashSet(4);
-            }
-            if (this.pid.add(p.getId())) {
-                this.propagators.add(p);
             }
         }
     }
@@ -151,10 +123,6 @@ public class Explanation extends Deduction {
      * Reset internal strucutre, forget all deductions and propagators.
      */
     public void reset() {
-        if (this.propagators != null) {
-            this.propagators.clear();
-            this.pid.clear();
-        }
         if (this.deductions != null) {
             this.deductions.clear();
             this.did.clear();
@@ -182,26 +150,6 @@ public class Explanation extends Deduction {
         return deductions.get(i);
     }
 
-    /**
-     * Return the size of propagator set
-     *
-     * @return number of propagators
-     */
-    public int nbPropagators() {
-        return propagators == null ? 0 : propagators.size();
-    }
-
-    /**
-     * Return the i^th propagators contains in this.
-     * Propagators are stored in a list, their uniqueness is ensured during the add operation.
-     * This allows simple iteration over propagators of an explanation.
-     *
-     * @param i index of the propagator
-     * @return the propagator at rank i
-     */
-    public Propagator getPropagator(int i) {
-        return propagators.get(i);
-    }
 
     @Override
     public String toString() {
@@ -219,17 +167,7 @@ public class Explanation extends Deduction {
             }
         }
 
-        bf.append(" ; P:");
-        if (this.propagators != null) {
-            bf.append("(").append(this.propagators.size()).append(") ");
-            for (Propagator p : this.propagators) {
-                bf.append(p).append(", ");
-            }
-            if (propagators.size() > 1) {
-                bf.delete(bf.lastIndexOf(","), bf.length() - 1);
-            }
-        }
-
+        bf.append(" ;");
         return bf.toString();
     }
 }

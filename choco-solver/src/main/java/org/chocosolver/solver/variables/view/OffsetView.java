@@ -33,6 +33,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -231,8 +232,8 @@ public final class OffsetView extends IntView {
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
-        var.explain(what, val - cste, to);
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
+        var.explain(xengine, what, val - cste, to);
     }
 
     @Override

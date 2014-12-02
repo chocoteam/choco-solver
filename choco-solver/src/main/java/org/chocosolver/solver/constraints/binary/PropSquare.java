@@ -33,10 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ValueRemoval;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -263,29 +260,27 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         //        return super.explain(d);
         if (d.getVar() == vars[0]) {
-            e.add(solver.getExplainer().getPropagatorActivation(this));
-            e.add(aCause);
+            e.add(xengine.getPropagatorActivation(this));
             if (d instanceof ValueRemoval) {
                 int val = (int) Math.sqrt(((ValueRemoval) d).getVal());
-                vars[1].explain(VariableState.REM, val, e);
-                vars[1].explain(VariableState.REM, -val, e);
+                vars[1].explain(xengine, VariableState.REM, val, e);
+                vars[1].explain(xengine, VariableState.REM, -val, e);
             } else {
                 throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == vars[1]) {
-            e.add(solver.getExplainer().getPropagatorActivation(this));
-            e.add(aCause);
+            e.add(xengine.getPropagatorActivation(this));
             if (d instanceof ValueRemoval) {
                 int val = ((ValueRemoval) d).getVal() ^ 2;
-                vars[0].explain(VariableState.REM, val, e);
+                vars[0].explain(xengine, VariableState.REM, val, e);
             } else {
                 throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
             }
         } else {
-            super.explain(d, e);
+            super.explain(xengine, d, e);
         }
     }
 

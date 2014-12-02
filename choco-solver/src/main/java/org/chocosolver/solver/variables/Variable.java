@@ -35,6 +35,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -125,13 +126,22 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     /**
      * returns an explanation of the current state of the Variable
      *
+     * @param xengine explanation engine
      * @param what specifies what we are interested in
      * @param to   explanation to feed
      */
 
-    void explain(VariableState what, Explanation to);
+    void explain(ExplanationEngine xengine, VariableState what, Explanation to);
 
-    void explain(VariableState what, int val, Explanation to);
+    /**
+     * returns an explanation of the current state of the Variable
+     *
+     * @param xengine explanation engine
+     * @param what specifies what we are interested in
+     * @param val a value
+     * @param to   explanation to feed
+     */
+    void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to);
 
     /**
      * Return the delta domain of this

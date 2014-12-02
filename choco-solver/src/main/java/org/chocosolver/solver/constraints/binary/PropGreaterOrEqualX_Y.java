@@ -35,6 +35,7 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -108,18 +109,17 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
-        e.add(aCause);
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
         // the current deduction is due to the current domain of the involved variables
         Variable var = d.getVar();
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
-            y.explain(VariableState.LB, e);
+            y.explain(xengine, VariableState.LB, e);
         } else if (var.equals(y)) {
-            x.explain(VariableState.UB, e);
+            x.explain(xengine, VariableState.UB, e);
         } else {
-            super.explain(d, e);
+            super.explain(xengine, d, e);
         }
     }
 

@@ -31,6 +31,7 @@ package org.chocosolver.solver.exception;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.Variable;
 
@@ -91,12 +92,12 @@ public final class ContradictionException extends Exception {
         return this;
     }
 
-    public Explanation explain() {
+    public Explanation explain(ExplanationEngine xengine) {
         Explanation expl = new Explanation();
         if (v != null) {
-            v.explain(VariableState.DOM, expl);
+            v.explain(xengine, VariableState.DOM, expl);
         } else {
-            c.explain(null, expl);
+            c.explain(xengine, null, expl);
         }
         return expl;
     }

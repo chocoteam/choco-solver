@@ -174,23 +174,22 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
 
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        ExplanationEngine explainer = var.getSolver().getExplainer();
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         if (branch == 1) {
-            e.add(explainer.explain(getPositiveDeduction()));
+            e.add(xengine.explain(getPositiveDeduction(xengine)));
         } else if (branch == 2) {
-            e.add(explainer.explain(getNegativeDeduction()));
+            e.add(xengine.explain(getNegativeDeduction(xengine)));
         } else {
-            throw new SolverException("Cannot explain a decision which has not been applied or refuted");
+            throw new SolverException("Cannot explain a decision which has not been applied or refuted: "+ this);
         }
     }
 
-    public Deduction getNegativeDeduction() {
-        return var.getSolver().getExplainer().getDecision(this, false);
+    public Deduction getNegativeDeduction(ExplanationEngine xengine) {
+        return xengine.getDecision(this, false);
     }
 
-    public Deduction getPositiveDeduction() {
-        return var.getSolver().getExplainer().getDecision(this, true);
+    public Deduction getPositiveDeduction(ExplanationEngine xengine) {
+        return xengine.getDecision(this, true);
     }
 
     @Override

@@ -320,7 +320,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         tmpValueDeductions.clear();
 
         Explanation explanation = new Explanation();
-        objective.explain(VariableState.REM, value, explanation);
+        objective.explain(mExplanationEngine, VariableState.REM, value, explanation);
         explanation = mExplanationEngine.flatten(explanation);
         ExplanationToolbox.extractDecision(explanation, tmpValueDeductions);
 

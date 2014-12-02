@@ -33,6 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -117,7 +118,7 @@ public class Solution implements ICause {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         e.add(Explanation.SYSTEM.get());
     }
 

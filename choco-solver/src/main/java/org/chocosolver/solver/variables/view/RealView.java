@@ -35,6 +35,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -197,14 +198,14 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
     }
 }

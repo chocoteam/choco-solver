@@ -130,6 +130,16 @@ public class ExplanationEngine implements Serializable {
     }
 
     /**
+     * Get the deduction associated with the value removed from the variable
+     * @param var a variable
+     * @param val a value
+     * @return a deduction
+     */
+    public ValueRemoval getValueRemoval(IntVar var, int val){
+        return null;
+    }
+
+    /**
      * Provides an explanation for the removal of value <code>val</code> from variable
      * <code>var</code> ; the implementation is recording policy dependent
      * for a flattened policy, the database is checked (automatically flattening explanations)
@@ -199,6 +209,12 @@ public class ExplanationEngine implements Serializable {
         return null;
     }
 
+    /**
+     * Provides an explanation of the activation of a propagator.
+     * Only valuated for reified propagators.
+     * @param propagator
+     * @return
+     */
     public PropagatorActivation getPropagatorActivation(Propagator propagator) {
         return null;
     }
@@ -247,5 +263,9 @@ public class ExplanationEngine implements Serializable {
 
     public Solver getSolver() {
         return solver;
+    }
+
+    public void request() {
+        // only usefull for multi-thread
     }
 }

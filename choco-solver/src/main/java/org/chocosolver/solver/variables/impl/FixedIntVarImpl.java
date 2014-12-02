@@ -34,6 +34,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
 import org.chocosolver.solver.explanations.antidom.AntiDomain;
@@ -202,16 +203,16 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
         if (empty.get()) {
-            to.add(solver.getExplainer().explain(this, constante));
+            to.add(xengine.explain(this, constante));
         }
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
         if (empty.get()) {
-            to.add(solver.getExplainer().explain(this, constante));
+            to.add(xengine.explain(this, constante));
         }
     }
 

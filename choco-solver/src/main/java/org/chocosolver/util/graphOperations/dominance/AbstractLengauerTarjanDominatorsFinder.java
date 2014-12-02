@@ -161,10 +161,10 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
             } else {
                 if (node == root) {
                     notFinished = false;
-                }else {
-					node = parent[node];
-					first = false;
-				}
+                    break;
+                }
+                node = parent[node];
+                first = false;
             }
         }
     }
@@ -297,10 +297,10 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
                 semi[currentNode] = time;
                 if (currentNode == root) {
                     finished = true;
-                }else {
-					first = false;
-					currentNode = parent[currentNode];
-				}
+                    break;
+                }
+                first = false;
+                currentNode = parent[currentNode];
             } else {
                 if (parent[nextNode] == -1) {
                     time++;

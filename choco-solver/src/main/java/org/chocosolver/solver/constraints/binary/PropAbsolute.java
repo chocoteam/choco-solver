@@ -33,10 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ValueRemoval;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -207,26 +204,24 @@ public class PropAbsolute extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         if (d.getVar() == vars[0]) {
-            e.add(solver.getExplainer().getPropagatorActivation(this));
-            e.add(aCause);
+            e.add(xengine.getPropagatorActivation(this));
             if (d.getmType() == Deduction.Type.ValRem) {
-                vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
-                vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal(), e);
+                vars[1].explain(xengine, VariableState.REM, ((ValueRemoval) d).getVal(), e);
+                vars[1].explain(xengine, VariableState.REM, -((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == vars[1]) {
-            e.add(solver.getExplainer().getPropagatorActivation(this));
-            e.add(aCause);
+            e.add(xengine.getPropagatorActivation(this));
             if (d.getmType() == Deduction.Type.ValRem) {
-                vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);
+                vars[0].explain(xengine, VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);
             } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
         } else {
-            super.explain(d, e);
+            super.explain(xengine, d, e);
         }
     }
 

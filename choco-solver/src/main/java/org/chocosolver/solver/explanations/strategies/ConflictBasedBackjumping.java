@@ -98,7 +98,8 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
     @Override
     public void onContradiction(ContradictionException cex) {
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
-        Explanation complete = mExplanationEngine.flatten(cex.explain());
+        mExplanationEngine.request();
+        Explanation complete = mExplanationEngine.flatten(cex.explain(mExplanationEngine));
         if (userE) {
             lastOne = complete;
         }
@@ -122,11 +123,11 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
             Decision d = dec.getPrevious();
             while ((d != ROOT)) {
                 if (d.hasNext()) {
-                    explanation.add(d.getPositiveDeduction());
+                    explanation.add(d.getPositiveDeduction(mExplanationEngine));
                 }
                 d = d.getPrevious();
             }
-            mExplanationEngine.store(dec.getNegativeDeduction(), explanation);
+            mExplanationEngine.store(dec.getNegativeDeduction(mExplanationEngine), explanation);
         }
         mSolver.getSearchLoop().overridePreviousWorld(1);
     }
@@ -147,13 +148,13 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         if (dec != ROOT) {
             if (!dec.hasNext())
                 throw new UnsupportedOperationException("RecorderExplanationEngine.updateVRExplain should get to a POSITIVE decision:" + dec);
-            Deduction left = dec.getPositiveDeduction();
+            Deduction left = dec.getPositiveDeduction(mExplanationEngine);
             expl.remove(left);
             assert left.getmType() == DecLeft;
             BranchingDecision va = (BranchingDecision) left;
             mExplanationEngine.removeLeftDecisionFrom(va.getDecision(), va.getVar());
 
-            Deduction right = dec.getNegativeDeduction();
+            Deduction right = dec.getNegativeDeduction(mExplanationEngine);
             mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
         }
         if (LOGGER.isDebugEnabled()) {

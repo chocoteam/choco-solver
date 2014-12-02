@@ -33,6 +33,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
@@ -185,8 +186,8 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
-        var.explain(what, val, to);
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
+        var.explain(xengine, what, val, to);
     }
 
     @Override

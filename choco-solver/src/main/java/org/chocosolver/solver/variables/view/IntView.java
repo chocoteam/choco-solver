@@ -34,6 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
 import org.chocosolver.solver.explanations.antidom.AntiDomain;
@@ -137,13 +138,13 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
-        var.explain(what, to);
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
+        var.explain(xengine, what, to);
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
-        var.explain(VariableState.DOM, e);
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        var.explain(xengine, VariableState.DOM, e);
     }
 
     @Override

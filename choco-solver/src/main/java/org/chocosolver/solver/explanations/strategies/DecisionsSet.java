@@ -32,6 +32,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
@@ -162,17 +163,17 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
     }
 
     @Override
-    public Deduction getNegativeDeduction() {
+    public Deduction getNegativeDeduction(ExplanationEngine xengine) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Deduction getPositiveDeduction() {
+    public Deduction getPositiveDeduction(ExplanationEngine xengine) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void explain(Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         throw new UnsupportedOperationException();
     }
 

@@ -39,6 +39,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 
@@ -93,7 +94,7 @@ public class Task {
                 }
 
                 @Override
-                public void explain(Deduction d, Explanation e) {
+                public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
                     throw new SolverException("A task cannot explain itself yet.");
                 }
 
@@ -114,7 +115,7 @@ public class Task {
                 }
 
                 @Override
-                public void explain(Deduction d, Explanation e) {
+                public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
                     throw new SolverException("A task cannot explain itself yet.");
                 }
 

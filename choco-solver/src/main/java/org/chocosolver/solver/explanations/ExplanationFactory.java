@@ -31,6 +31,14 @@ package org.chocosolver.solver.explanations;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
 import org.chocosolver.solver.explanations.strategies.DynamicBacktracking;
+import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
+import solver.explanations.ThreadExplanationEngine;
+import solver.explanations.store.BufferedEventStore;
+import solver.explanations.store.EventConsumer;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -74,7 +82,7 @@ public enum ExplanationFactory {
     CBJ {
         @Override
         public void plugin(Solver solver, boolean flattened) {
-            plugExpl(solver, flattened);
+            plugExpl(solver, flattened, false);
             new ConflictBasedBackjumping(solver.getExplainer());
         }
     },
@@ -85,24 +93,65 @@ public enum ExplanationFactory {
     DBT {
         @Override
         public void plugin(Solver solver, boolean flattened) {
-            plugExpl(solver, flattened);
+            plugExpl(solver, flattened, false);
             new DynamicBacktracking(solver.getExplainer());
         }
     };
 
     /**
      * Plug explanations into coe<code>solver</code>.
-     *
-     * @param solver    the solver to observe
+     *  @param solver    the solver to observe
      * @param flattened should explanations be flattened?
      */
     public abstract void plugin(Solver solver, boolean flattened);
 
 
-    private static void plugExpl(Solver solver, boolean flattened) {
-        assert solver.getExplainer()==null || !solver.getExplainer().isActive() : "Explanations are already turn on!";
-        solver.set(flattened ? new FlattenedRecorderExplanationEngine(solver)
-                : new RecorderExplanationEngine(solver));
+    /**
+     * Plug an explanation engine to the solver
+     * @param solver solver to explain
+     * @param flattened whether or not the explanation engine should flatten explanation during computation
+     * @param thread (unsafe) should explanations be computed in a thread
+     */
+    public static void plugExpl(Solver solver, boolean flattened, boolean thread) {
+        assert solver.getExplainer() == null || !solver.getExplainer().isActive() : "Explanations are already turn on!";
+        ExplanationEngine e;
+        if (flattened) {
+            e = new FlattenedRecorderExplanationEngine(solver);
+        } else {
+            e = new RecorderExplanationEngine(solver);
+        }
+        if (thread) {
+            final BufferedEventStore eventStore = new BufferedEventStore(e);
+            e = new ThreadExplanationEngine(solver, eventStore);
+            final EventConsumer[] eventCons = new EventConsumer[1];
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
+            solver.plugMonitor(new IMonitorInitialize() {
+                @Override
+                public void beforeInitialize() {
+                    eventCons[0] = new EventConsumer(eventStore);
+                    executor.submit(eventCons[0]);
+                }
+
+                @Override
+                public void afterInitialize() {
+
+                }
+            });
+            solver.plugMonitor(new IMonitorClose() {
+                @Override
+                public void beforeClose() {
+                    eventCons[0].kill();
+                    executor.shutdownNow();
+                }
+
+                @Override
+                public void afterClose() {
+
+                }
+            });
+
+        }
+        solver.set(e);
     }
 
 //    /**

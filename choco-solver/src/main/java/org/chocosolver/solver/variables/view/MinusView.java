@@ -33,6 +33,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -218,23 +219,23 @@ public class MinusView extends IntView {
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
         switch (what) {
             case UB:
-                var.explain(VariableState.LB, to);
+                var.explain(xengine, VariableState.LB, to);
                 break;
             case LB:
-                var.explain(VariableState.UB, to);
+                var.explain(xengine, VariableState.UB, to);
                 break;
             default:
-                var.explain(what, to);
+                var.explain(xengine, what, to);
                 break;
         }
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
-        var.explain(what, -val, to);
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
+        var.explain(xengine, what, -val, to);
     }
 
     @Override

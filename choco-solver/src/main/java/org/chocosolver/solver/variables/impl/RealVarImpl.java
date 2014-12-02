@@ -35,6 +35,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -165,11 +166,11 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
     }
 
     @Override

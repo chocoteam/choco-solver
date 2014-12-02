@@ -58,7 +58,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that the union of SET_VARS is equal to SET_UNION
      */
     public static Constraint union(SetVar[] SETS, SetVar UNION) {
-        return new Constraint("SetUnion",new PropUnion(SETS, UNION), new PropUnion(SETS, UNION));
+        return new Constraint("SetUnion", new PropUnion(SETS, UNION), new PropUnion(SETS, UNION));
     }
 
     /**
@@ -69,7 +69,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that the intersection of sets is equal to set intersection
      */
     public static Constraint intersection(SetVar[] SETS, SetVar INTERSECTION) {
-        return new Constraint("SetIntersection",new PropIntersection(SETS, INTERSECTION), new PropIntersection(SETS, INTERSECTION));
+        return new Constraint("SetIntersection", new PropIntersection(SETS, INTERSECTION), new PropIntersection(SETS, INTERSECTION));
     }
 
     /**
@@ -79,11 +79,11 @@ public class SetConstraintsFactory {
      * @return A constraint which ensures that i<j <=> SET_VARS[i] subseteq SET_VARS[j]
      */
     public static Constraint subsetEq(SetVar[] SETS) {
-		Propagator[] props = new Propagator[SETS.length-1];
+        Propagator[] props = new Propagator[SETS.length - 1];
         for (int i = 0; i < SETS.length - 1; i++) {
             props[i] = new PropSubsetEq(SETS[i], SETS[i + 1]);
         }
-        return new Constraint("SetSubsetEq",props);
+        return new Constraint("SetSubsetEq", props);
     }
 
     /**
@@ -95,7 +95,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that |SET_VAR| = CARD
      */
     public static Constraint cardinality(SetVar SET, IntVar CARD) {
-		return new Constraint("SetCard",new PropCardinality(SET, CARD));
+        return new Constraint("SetCard", new PropCardinality(SET, CARD));
     }
 
     /**
@@ -107,7 +107,7 @@ public class SetConstraintsFactory {
      * @return A constraint ensuring that |{s in SETS such that |s|=0}| = NB_EMPTY_SETS
      */
     public static Constraint nbEmpty(SetVar[] SETS, IntVar NB_EMPTY_SETS) {
-		return new Constraint("SetNbEmpty",new PropNbEmpty(SETS, NB_EMPTY_SETS));
+        return new Constraint("SetNbEmpty", new PropNbEmpty(SETS, NB_EMPTY_SETS));
     }
 
     /**
@@ -120,17 +120,18 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SET_1 <=> x+OFFSET in SET_2
      */
     public static Constraint offSet(SetVar SET_1, SetVar SET_2, int OFFSET) {
-		return new Constraint("SetOffset",new PropOffSet(SET_1, SET_2, OFFSET));
+        return new Constraint("SetOffset", new PropOffSet(SET_1, SET_2, OFFSET));
     }
 
-	/**
-	 * Prevents SET to be empty
-	 * @param SET a SetVar
-	 * @return a constraint ensuring that SET is not empty
-	 */
-	public static Constraint notEmpty(SetVar SET){
-		return new Constraint("SetNotEmpty",new PropNotEmpty(SET));
-	}
+    /**
+     * Prevents SET to be empty
+     *
+     * @param SET a SetVar
+     * @return a constraint ensuring that SET is not empty
+     */
+    public static Constraint notEmpty(SetVar SET) {
+        return new Constraint("SetNotEmpty", new PropNotEmpty(SET));
+    }
 
     //***********************************************************************************
     // SUM - MAX - MIN
@@ -140,10 +141,10 @@ public class SetConstraintsFactory {
      * Sums elements of a SET
      * sum{i | i in set} = SUM
      *
-     * @param SET a set variable
-     * @param SUM an integer variable representing sum{i | i in SET}
-	 * @param NOT_EMPTY true : the set variable cannot be empty
-	 *                  false : the set may be empty (if so, the SUM constraint is not applied)
+     * @param SET       a set variable
+     * @param SUM       an integer variable representing sum{i | i in SET}
+     * @param NOT_EMPTY true : the set variable cannot be empty
+     *                  false : the set may be empty (if so, the SUM constraint is not applied)
      * @return a constraint ensuring that sum{i | i in set} = SUM
      */
     public static Constraint sum(SetVar SET, IntVar SUM, boolean NOT_EMPTY) {
@@ -154,22 +155,22 @@ public class SetConstraintsFactory {
      * Sums weights given by a set of indexes INDEXES:
      * sum{WEIGHTS[i-OFFSET] | i in INDEXES} = SUM
      *
-     * @param INDEXES set variables
-     * @param WEIGHTS integers
-     * @param OFFSET  offset index : should be 0 by default
-     *                but generally 1 with MiniZinc API
-     *                which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
-     * @param SUM     an integer variable representing sum{WEIGHTS[i-OFFSET] | i in INDEXES}
-	 * @param NOT_EMPTY true : the set variable cannot be empty
-	 *                  false : the set may be empty (if so, the SUM constraint is not applied)
+     * @param INDEXES   set variables
+     * @param WEIGHTS   integers
+     * @param OFFSET    offset index : should be 0 by default
+     *                  but generally 1 with MiniZinc API
+     *                  which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+     * @param SUM       an integer variable representing sum{WEIGHTS[i-OFFSET] | i in INDEXES}
+     * @param NOT_EMPTY true : the set variable cannot be empty
+     *                  false : the set may be empty (if so, the SUM constraint is not applied)
      * @return a constraint ensuring that sum{WEIGHTS[i-OFFSET] | i in INDEXES} = SUM
      */
     public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM, boolean NOT_EMPTY) {
-		if (NOT_EMPTY) {
-			return new Constraint("SetSum_NotEmpty",new PropNotEmpty(INDEXES),new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, true));
-		}else{
-			return new Constraint("SetSum",new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, false));
-		}
+        if (NOT_EMPTY) {
+            return new Constraint("SetSum_NotEmpty", new PropNotEmpty(INDEXES), new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, true));
+        } else {
+            return new Constraint("SetSum", new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, false));
+        }
     }
 
     /**
@@ -178,8 +179,8 @@ public class SetConstraintsFactory {
      *
      * @param SET               a set variable
      * @param MAX_ELEMENT_VALUE an integer variable representing max{i | i in SET}
-	 * @param NOT_EMPTY true : the set variable cannot be empty
-	 *                  false : the set may be empty (if so, the MAX constraint is not applied)
+     * @param NOT_EMPTY         true : the set variable cannot be empty
+     *                          false : the set may be empty (if so, the MAX constraint is not applied)
      * @return a constraint ensuring that max{i | i in set} = MAX_ELEMENT_VALUE
      */
     public static Constraint max(SetVar SET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY) {
@@ -196,16 +197,16 @@ public class SetConstraintsFactory {
      *                          but generally 1 with MiniZinc API
      *                          which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
      * @param MAX_ELEMENT_VALUE an integer variable representing max{WEIGHTS[i-OFFSET] | i in INDEXES}
-	 * @param NOT_EMPTY true : the set variable cannot be empty
-	 *                  false : the set may be empty (if so, the MAX constraint is not applied)
+     * @param NOT_EMPTY         true : the set variable cannot be empty
+     *                          false : the set may be empty (if so, the MAX constraint is not applied)
      * @return a constraint ensuring that max{WEIGHTS[i-OFFSET] | i in INDEXES} = MAX_ELEMENT_VALUE
      */
     public static Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY) {
-		if (NOT_EMPTY) {
-			return new Constraint("SetMax_NotEmpty",new PropNotEmpty(INDEXES),new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, true));
-		}else{
-			return new Constraint("SetMax",new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, false));
-		}
+        if (NOT_EMPTY) {
+            return new Constraint("SetMax_NotEmpty", new PropNotEmpty(INDEXES), new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, true));
+        } else {
+            return new Constraint("SetMax", new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, false));
+        }
     }
 
     /**
@@ -214,8 +215,8 @@ public class SetConstraintsFactory {
      *
      * @param SET               a set variable
      * @param MIN_ELEMENT_VALUE an integer variable representing min{i | i in SET}
-	 * @param NOT_EMPTY true : the set variable cannot be empty
-	 *                  false : the set may be empty (if so, the MIN constraint is not applied)
+     * @param NOT_EMPTY         true : the set variable cannot be empty
+     *                          false : the set may be empty (if so, the MIN constraint is not applied)
      * @return a constraint ensuring that min{i | i in SET} = MIN_ELEMENT_VALUE
      */
     public static Constraint min(SetVar SET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY) {
@@ -232,16 +233,16 @@ public class SetConstraintsFactory {
      *                          but generally 1 with MiniZinc API
      *                          which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
      * @param MIN_ELEMENT_VALUE integer variable representing min{WEIGHTS[i-OFFSET] | i in INDEXES}
-	 * @param NOT_EMPTY true : the set variable cannot be empty
-	 *                  false : the set may be empty (if so, the MIN constraint is not applied)
+     * @param NOT_EMPTY         true : the set variable cannot be empty
+     *                          false : the set may be empty (if so, the MIN constraint is not applied)
      * @return a constraint ensuring that min{WEIGHTS[i-OFFSET] | i in INDEXES} = MIN_ELEMENT_VALUE
      */
     public static Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY) {
-		if (NOT_EMPTY) {
-			return new Constraint("SetMin_NotEmpty",new PropNotEmpty(INDEXES),new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, true));
-		}else{
-			return new Constraint("SetMin",new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, false));
-		}
+        if (NOT_EMPTY) {
+            return new Constraint("SetMin_NotEmpty", new PropNotEmpty(INDEXES), new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, true));
+        } else {
+            return new Constraint("SetMin", new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, false));
+        }
     }
 
     //***********************************************************************************
@@ -260,7 +261,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that i in SET <=> BOOLEANS[i-OFFSET] = TRUE
      */
     public static Constraint bool_channel(BoolVar[] BOOLEANS, SetVar SET, int OFFSET) {
-		return new Constraint("SetBoolChanneling",new PropBoolChannel(SET, BOOLEANS, OFFSET));
+        return new Constraint("SetBoolChanneling", new PropBoolChannel(SET, BOOLEANS, OFFSET));
     }
 
     /**
@@ -278,25 +279,26 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SETS[y-OFFSET_1] <=> INTEGERS[x-OFFSET_2] = y
      */
     public static Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2) {
-		return new Constraint("SetIntChanneling",
-				new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),
-                new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),new PropAllDisjoint(SETS)
-		);
+        return new Constraint("SetIntChanneling",
+                new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),
+                new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2), new PropAllDisjoint(SETS)
+        );
     }
 
-	/**
-	 * Channeling constraint ensuring that
-	 * VALUES is exactly the set of values taken by VARS,
-	 * @param VARS		integer variables
-	 * @param VALUES	a set variable
-	 * @return	a channeling constraint ensuring that VALUES = {value(x) | x in VARS}
-	 */
-	public static Constraint int_values_union(IntVar[] VARS, SetVar VALUES){
-		return new Constraint("SetIntValuesUnion"
-				,new PropSetIntValuesUnion(VARS,VALUES)
-				,new PropSetIntValuesUnion(VARS,VALUES)
-		);
-	}
+    /**
+     * Channeling constraint ensuring that
+     * VALUES is exactly the set of values taken by VARS,
+     *
+     * @param VARS   integer variables
+     * @param VALUES a set variable
+     * @return a channeling constraint ensuring that VALUES = {value(x) | x in VARS}
+     */
+    public static Constraint int_values_union(IntVar[] VARS, SetVar VALUES) {
+        return new Constraint("SetIntValuesUnion"
+                , new PropSetIntValuesUnion(VARS, VALUES)
+                , new PropSetIntValuesUnion(VARS, VALUES)
+        );
+    }
 
     //***********************************************************************************
     // MINIZINC API
@@ -322,7 +324,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that non-empty sets are all disjoint
      */
     public static Constraint all_disjoint(SetVar[] SETS) {
-		return new Constraint("SetAllDisjoint",new PropAllDisjoint(SETS));
+        return new Constraint("SetAllDisjoint", new PropAllDisjoint(SETS));
     }
 
     /**
@@ -333,9 +335,9 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that SETS are all different
      */
     public static Constraint all_different(SetVar[] SETS) {
-		return new Constraint("SetAllDifferent",new PropAllDiff(SETS),
-				new PropAllDiff(SETS),new PropAtMost1Empty(SETS)
-		);
+        return new Constraint("SetAllDifferent", new PropAllDiff(SETS),
+                new PropAllDiff(SETS), new PropAtMost1Empty(SETS)
+        );
     }
 
     /**
@@ -345,7 +347,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that all sets in SETS are equal
      */
     public static Constraint all_equal(SetVar[] SETS) {
-		return new Constraint("SetAllEqual",new PropAllEqual(SETS));
+        return new Constraint("SetAllEqual", new PropAllEqual(SETS));
     }
 
     /**
@@ -356,10 +358,10 @@ public class SetConstraintsFactory {
      * @return a constraint which ensures that SETS form a partition of UNIVERSE
      */
     public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
-        return new Constraint("SetPartition",ArrayUtils.append(
-				all_disjoint(SETS).getPropagators(),
-				new Propagator[]{new PropUnion(SETS, UNIVERSE), new PropUnion(SETS, UNIVERSE)}
-		));
+        return new Constraint("SetPartition", ArrayUtils.append(
+                all_disjoint(SETS).getPropagators(),
+                new Propagator[]{new PropUnion(SETS, UNIVERSE), new PropUnion(SETS, UNIVERSE)}
+        ));
     }
 
     /**
@@ -377,7 +379,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SETS[y-OFFSET_1] <=> y in INVERSE_SETS[x-OFFSET_2]
      */
     public static Constraint inverse_set(SetVar[] SETS, SetVar[] INVERSE_SETS, int OFFSET_1, int OFFSET_2) {
-		return new Constraint("SetInverse",new PropInverse(SETS, INVERSE_SETS, OFFSET_1, OFFSET_2));
+        return new Constraint("SetInverse", new PropInverse(SETS, INVERSE_SETS, OFFSET_1, OFFSET_2));
     }
 
     /**
@@ -391,7 +393,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that x in SETS[y-OFFSET] <=> y in SETS[x-OFFSET]
      */
     public static Constraint symmetric(SetVar[] SETS, int OFFSET) {
-		return new Constraint("SetSymmetric",new PropSymmetric(SETS, OFFSET));
+        return new Constraint("SetSymmetric", new PropSymmetric(SETS, OFFSET));
     }
 
     /**
@@ -407,7 +409,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that SETS[INDEX-OFFSET] = SET
      */
     public static Constraint element(IntVar INDEX, SetVar[] SETS, int OFFSET, SetVar SET) {
-		return new Constraint("SetElement",new PropElement(INDEX, SETS, OFFSET, SET), new PropElement(INDEX, SETS, OFFSET, SET));
+        return new Constraint("SetElement", new PropElement(INDEX, SETS, OFFSET, SET), new PropElement(INDEX, SETS, OFFSET, SET));
     }
 
     /**
@@ -432,39 +434,39 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that INTEGER belongs to SET
      */
     public static Constraint member(final IntVar INTEGER, final SetVar SET) {
-		return new Constraint("SetMember",
-                INTEGER.hasEnumeratedDomain()?
-                        new PropIntEnumMemberSet(SET, INTEGER):
-                        new PropIntBoundedMemberSet(SET, INTEGER)){
-			@Override
-			public Constraint makeOpposite(){
-				return not_member(INTEGER,SET);
-			}
-		};
+        return new Constraint("SetMember",
+                INTEGER.hasEnumeratedDomain() ?
+                        new PropIntEnumMemberSet(SET, INTEGER) :
+                        new PropIntBoundedMemberSet(SET, INTEGER)) {
+            @Override
+            public Constraint makeOpposite() {
+                return not_member(INTEGER, SET);
+            }
+        };
     }
 
-	/**
-	 * NotMember constraint over an IntVar and a SetVar
-	 * states that INTEGER is not included in SET
-	 *
-	 * @param INTEGER an integer variables which does not take its values in SET
-	 * @param SET     a set variables representing impossible values of INTEGER
-	 * @return a constraint ensuring that INTEGER does not belong to SET
-	 */
-	public static Constraint not_member(final IntVar INTEGER, final SetVar SET) {
-		IntVar integer = INTEGER;
-		if(!INTEGER.hasEnumeratedDomain()){
-			Solver s = INTEGER.getSolver();
-			integer = VF.enumerated("enumViewOf("+INTEGER.getName()+")",INTEGER.getLB(),INTEGER.getUB(),s);
-			s.post(ICF.arithm(integer,"=",INTEGER));
-		}
-		return new Constraint("SetNotMember",
-				new PropNotMemberIntSet(integer,SET),
-				new PropNotMemberSetInt(integer,SET)){
-			@Override
-			public Constraint makeOpposite(){
-				return member(INTEGER,SET);
-			}
-		};
-	}
+    /**
+     * NotMember constraint over an IntVar and a SetVar
+     * states that INTEGER is not included in SET
+     *
+     * @param INTEGER an integer variables which does not take its values in SET
+     * @param SET     a set variables representing impossible values of INTEGER
+     * @return a constraint ensuring that INTEGER does not belong to SET
+     */
+    public static Constraint not_member(final IntVar INTEGER, final SetVar SET) {
+        IntVar integer = INTEGER;
+        if (!INTEGER.hasEnumeratedDomain()) {
+            Solver s = INTEGER.getSolver();
+            integer = VF.enumerated("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), s);
+            s.post(ICF.arithm(integer, "=", INTEGER));
+        }
+        return new Constraint("SetNotMember",
+                new PropNotMemberIntSet(integer, SET),
+                new PropNotMemberSetInt(integer, SET)) {
+            @Override
+            public Constraint makeOpposite() {
+                return member(INTEGER, SET);
+            }
+        };
+    }
 }

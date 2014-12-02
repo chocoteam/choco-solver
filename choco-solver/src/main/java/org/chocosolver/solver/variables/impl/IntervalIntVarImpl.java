@@ -35,6 +35,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.antidom.AntiDomInterval;
 import org.chocosolver.solver.explanations.antidom.AntiDomain;
@@ -455,8 +456,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    public void explain(VariableState what, Explanation to) {
-        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
+    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
+        AntiDomain invdom = xengine.getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
@@ -464,15 +465,15 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
 //                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
-                to.add(solver.getExplainer().explain(this, val));
+                to.add(xengine.explain(this, val));
             }
         }
         it.dispose();
     }
 
     @Override
-    public void explain(VariableState what, int val, Explanation to) {
-        to.add(solver.getExplainer().explain(this, val));
+    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
+        to.add(xengine.explain(this, val));
     }
 
     @Override
