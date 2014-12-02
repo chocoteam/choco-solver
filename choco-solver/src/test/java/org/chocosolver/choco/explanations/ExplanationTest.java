@@ -1,27 +1,3 @@
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.explanations.RecorderExplanationEngine;
-import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.trace.Chatterbox;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import solver.constraints.Propagator;
-import solver.explanations.PropagatorActivation;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Copyright (c) 2014,
  *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
@@ -51,6 +27,30 @@ import java.util.List;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.chocosolver.choco.explanations;
+
+import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.explanations.PropagatorActivation;
+import org.chocosolver.solver.explanations.RecorderExplanationEngine;
+import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * <br/>
@@ -118,14 +118,6 @@ public class ExplanationTest {
     public void testUserExpl() {
         int n = 7;
         final Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
-        solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
-        solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
-        solver.set(ISF.lexico_LB(vars));
-
-        solver.set(new RecorderExplanationEngine(solver));
-        ConflictBasedBackjumping cbj = new ConflictBasedBackjumping(solver.getExplainer());
-        cbj.activeUserExplanation(true);
         solver.set(new Settings() {
             @Override
             public boolean enablePropagatorInExplanation() {
@@ -148,7 +140,8 @@ public class ExplanationTest {
             if (exp.getDeduction(i).getmType() == Explanation.Type.PropAct) {
                 pas.add(((PropagatorActivation) exp.getDeduction(i)).getPropagator());
             }
-        Assert.assertEquals(2, exp.nbPropagators());
+        }
+        Assert.assertEquals(2, pas.size());
     }
 
     @Test(groups = "1s")
@@ -220,7 +213,6 @@ public class ExplanationTest {
                 }
             }
         }
-        Assert.assertEquals(2, pas.size());
     }
 
     @Test(groups = "1s")
@@ -286,5 +278,29 @@ public class ExplanationTest {
             Chatterbox.showDecisions(solver);
             Assert.assertFalse(solver.findSolution());
         }
+    }
+
+    @Test(groups = "1s")
+    public void testLazy() {
+        Solver solver = new Solver();
+        // The set of variables
+        IntVar[] p = VF.enumeratedArray("p", 5, 0, 4, solver);
+        // The initial constraints
+        solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 3), ">=", VF.fixed(3, solver)));
+        solver.post(ICF.arithm(p[2], "+", p[3], ">=", 1));
+        solver.post(ICF.arithm(p[3], "+", p[4], ">", 4));
+
+        // The false constraints
+        BoolVar[] bs = new BoolVar[2];
+        bs[0] = ICF.arithm(p[3], "=", p[4]).reif();
+        bs[1] = ICF.arithm(p[3], "!=", p[4]).reif();
+        solver.post(ICF.arithm(bs[0], "=", bs[1]));
+
+        solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[2], p[3], p[4]));
+        ExplanationFactory.DBT.plugin(solver, false);
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
+        Chatterbox.showDecisions(solver);
+        Assert.assertFalse(solver.findSolution());
     }
 }
