@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.cnf;
+package org.chocosolver.solver.constraints.nary.cnf;
 
-import solver.Solver;
-import solver.variables.BoolVar;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.ArrayList;
 import java.util.Arrays;

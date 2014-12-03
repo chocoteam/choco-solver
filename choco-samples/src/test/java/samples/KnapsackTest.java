@@ -25,15 +25,15 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package org.chocosolver.samples;
 
 import gnu.trove.list.array.TFloatArrayList;
+import org.chocosolver.samples.integer.Knapsack;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.Knapsack;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.variables.IntVar;
 
 import java.io.IOException;
 

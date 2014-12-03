@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.selectors.variables;
+package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.search.strategy.selectors.VariableEvaluator;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.Variable;
+import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * <b>Random</b> variable selector.

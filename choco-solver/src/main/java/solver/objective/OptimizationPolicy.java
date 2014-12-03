@@ -32,7 +32,7 @@
  * Time: 14:03
  */
 
-package solver.objective;
+package org.chocosolver.solver.objective;
 
 /**
  * Class which defines a policy to adopt for the optimization process

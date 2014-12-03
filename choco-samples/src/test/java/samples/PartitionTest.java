@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package org.chocosolver.samples;
 
+import org.chocosolver.samples.integer.Partition;
+import org.chocosolver.solver.Solver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.Partition;
-import solver.Solver;
 
 /**
  * <br/>

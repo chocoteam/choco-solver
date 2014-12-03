@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.antidom;
+package org.chocosolver.solver.explanations.antidom;
 
-import memory.structure.BasicIndexedBipartiteSet;
-import solver.variables.impl.BoolVarImpl;
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
+import org.chocosolver.solver.variables.impl.BoolVarImpl;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

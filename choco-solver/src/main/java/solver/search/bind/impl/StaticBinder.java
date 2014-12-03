@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.bind.impl;
+package org.chocosolver.solver.search.bind.impl;
 
-import solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.search.bind.ISearchBinder;
 
 /**
  * <br/>

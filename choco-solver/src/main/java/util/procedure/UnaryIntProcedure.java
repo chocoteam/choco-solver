@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.procedure;
+package org.chocosolver.util.procedure;
 
 public interface UnaryIntProcedure<A> extends IntProcedure {
     UnaryIntProcedure set(A a);

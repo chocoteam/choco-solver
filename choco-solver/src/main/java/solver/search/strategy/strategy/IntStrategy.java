@@ -25,15 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.selectors.IntValueSelector;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.IntVar;
-import util.PoolManager;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.PoolManager;
 
 /**
  * Class to perform branching decisions over integer variables

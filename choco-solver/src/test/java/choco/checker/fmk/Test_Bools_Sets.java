@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.fmk;
+package org.chocosolver.choco.checker.fmk;
 
+import org.chocosolver.solver.search.loop.SearchLoops;
 import org.testng.annotations.Test;
-import solver.search.loop.SearchLoops;
 
 
 /**

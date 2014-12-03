@@ -25,18 +25,18 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import samples.AbstractProblem;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.search.loop.monitors.IMonitorInitPropagation;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.solution.Solution;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VF;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 
 /**
  * simple CP model to solve a toy SMPTSP instance

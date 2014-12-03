@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.channeling;
+package org.chocosolver.solver.constraints.nary.channeling;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.delta.IIntDeltaMonitor;
-import util.ESat;
-import util.procedure.UnaryIntProcedure;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.procedure.UnaryIntProcedure;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
 

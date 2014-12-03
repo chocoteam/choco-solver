@@ -24,20 +24,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.view;
+package org.chocosolver.solver.variables.view;
 
 import gnu.trove.map.hash.THashMap;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
  * A specific view for equality on bool var

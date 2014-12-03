@@ -31,7 +31,7 @@
  * @since 29/05/14
  * Created by IntelliJ IDEA.
  */
-package solver.constraints.nary.circuit;
+package org.chocosolver.solver.constraints.nary.circuit;
 
 public enum  CircuitConf {
 

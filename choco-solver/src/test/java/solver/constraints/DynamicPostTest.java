@@ -24,20 +24,20 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.reification.PropConditionnal;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.reification.PropConditionnal;
-import solver.propagation.PropagationEngineFactory;
-import solver.search.loop.monitors.IMonitorOpenNode;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import solver.variables.VariableFactory;
-import util.ESat;
 
 import java.util.ArrayList;
 import java.util.List;

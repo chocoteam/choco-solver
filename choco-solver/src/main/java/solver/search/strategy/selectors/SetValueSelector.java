@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.selectors;
+package org.chocosolver.solver.search.strategy.selectors;
 
-import solver.variables.SetVar;
+import org.chocosolver.solver.variables.SetVar;
 
 /**
  * Heuristic for branching on a given SetVar

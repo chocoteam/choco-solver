@@ -24,26 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.strategies;
+package org.chocosolver.solver.explanations.strategies;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.ICause;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.*;
-import solver.explanations.antidom.AntiDomain;
-import solver.objective.ObjectiveManager;
-import solver.search.loop.lns.neighbors.ANeighbor;
-import solver.search.loop.monitors.IMonitorInitPropagation;
-import solver.search.loop.monitors.IMonitorUpBranch;
-import solver.search.restart.GeometricalRestartStrategy;
-import solver.search.restart.IRestartStrategy;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.RootDecision;
-import solver.variables.IntVar;
-import util.iterators.DisposableValueIterator;
-import util.tools.StatisticUtils;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.loop.lns.neighbors.ANeighbor;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
+import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
+import org.chocosolver.solver.search.restart.IRestartStrategy;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.tools.StatisticUtils;
 
 import java.util.*;
 

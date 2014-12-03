@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.copy;
+package org.chocosolver.memory.copy;
 
-import memory.*;
-import memory.copy.store.*;
-import memory.structure.Operation;
+import org.chocosolver.memory.*;
+import org.chocosolver.memory.copy.store.*;
+import org.chocosolver.memory.structure.Operation;
 
 public class EnvironmentCopying extends AbstractEnvironment {
 

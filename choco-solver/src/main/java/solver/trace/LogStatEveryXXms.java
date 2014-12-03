@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.trace;
+package org.chocosolver.solver.trace;
 
-import solver.Solver;
-import solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 
 /**
  * A search monitor logger which prints statistics every XX ms.

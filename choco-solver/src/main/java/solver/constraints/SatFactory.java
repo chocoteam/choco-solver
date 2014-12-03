@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import solver.Solver;
-import solver.constraints.nary.cnf.*;
-import solver.variables.BoolVar;
-import solver.variables.VF;
-import util.tools.StringUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.cnf.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * A factory dedicated to SAT.

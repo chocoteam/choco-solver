@@ -25,35 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata;
+package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.Bounds;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
+import org.chocosolver.solver.constraints.nary.automata.structure.Node;
+import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.Arc;
+import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
+import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.iterators.DisposableIntIterator;
+import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
+import org.chocosolver.util.procedure.UnaryIntProcedure;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.jgrapht.graph.DirectedMultigraph;
-import solver.Configuration;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.nary.automata.FA.ICostAutomaton;
-import solver.constraints.nary.automata.FA.utils.Bounds;
-import solver.constraints.nary.automata.FA.utils.ICounter;
-import solver.constraints.nary.automata.structure.Node;
-import solver.constraints.nary.automata.structure.multicostregular.Arc;
-import solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
-import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.iterators.DisposableIntIterator;
-import util.objects.StoredIndexedBipartiteSet;
-import util.procedure.UnaryIntProcedure;
-import util.tools.ArrayUtils;
 
 import java.util.*;
 

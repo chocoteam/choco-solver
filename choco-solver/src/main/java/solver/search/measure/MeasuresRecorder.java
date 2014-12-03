@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.measure;
+package org.chocosolver.solver.search.measure;
 
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.*;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.*;
 
 /**
  * Object which stores resolution information to get statistics

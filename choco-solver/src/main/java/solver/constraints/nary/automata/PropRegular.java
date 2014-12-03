@@ -24,24 +24,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.automata;
+package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.structure.Node;
+import org.chocosolver.solver.constraints.nary.automata.structure.regular.Arc;
+import org.chocosolver.solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGraph;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.jgrapht.graph.DirectedMultigraph;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.nary.automata.FA.IAutomaton;
-import solver.constraints.nary.automata.structure.Node;
-import solver.constraints.nary.automata.structure.regular.Arc;
-import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGraph;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.delta.IIntDeltaMonitor;
-import util.ESat;
-import util.procedure.UnaryIntProcedure;
 
 import java.util.ArrayList;
 import java.util.BitSet;

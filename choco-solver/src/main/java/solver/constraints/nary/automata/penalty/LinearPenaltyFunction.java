@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.penalty;
+package org.chocosolver.solver.constraints.nary.automata.penalty;
 
 /**
  * Created by IntelliJ IDEA.

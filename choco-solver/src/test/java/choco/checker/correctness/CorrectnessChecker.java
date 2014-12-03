@@ -25,25 +25,25 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.correctness;
+package org.chocosolver.choco.checker.correctness;
 
-import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
+import org.chocosolver.choco.checker.Modeler;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import static choco.checker.DomainBuilder.buildFullDomains;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
+import static org.chocosolver.choco.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.solver.Solver.writeInFile;
 import static org.testng.Assert.fail;
-import static solver.Solver.writeInFile;
 
 /**
  * <br/>

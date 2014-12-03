@@ -24,16 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.ternary;
+package org.chocosolver.solver.constraints.ternary;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
 
 /**
  * X/Y = Z

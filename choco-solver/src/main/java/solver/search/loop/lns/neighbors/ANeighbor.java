@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.lns.neighbors;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import solver.Solver;
-import solver.search.limits.ACounter;
-import solver.search.limits.ICounterAction;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.limits.ICounterAction;
 
 /**
  * An abstract class for neighbor, to manage the counter

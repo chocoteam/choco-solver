@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.alldifferent.algo;
+package org.chocosolver.solver.constraints.nary.alldifferent.algo;
 
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.sort.ArraySort;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.sort.ArraySort;
 
 import java.io.Serializable;
 import java.util.Comparator;

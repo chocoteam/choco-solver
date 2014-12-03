@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy;
+package org.chocosolver.solver.search.strategy;
 
 /**
  * @author Jean-Guillaume Fages

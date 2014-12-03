@@ -24,22 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples.integer;
+package org.chocosolver.samples.integer;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.search.limits.FailCounter;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
 
 import java.io.BufferedReader;
 import java.io.File;

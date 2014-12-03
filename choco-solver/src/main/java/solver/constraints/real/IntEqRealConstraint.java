@@ -25,16 +25,16 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.real;
+package org.chocosolver.solver.constraints.real;
 
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.RealVar;
-import solver.variables.Variable;
-import util.ESat;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Channeling constraint between integers and reals, to avoid views

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.structure;
+package org.chocosolver.solver.constraints.nary.automata.structure;
 
 /**
  * Created by IntelliJ IDEA.

@@ -25,15 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package org.chocosolver.samples;
 
+import org.chocosolver.samples.integer.GolombRuler;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.GolombRuler;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.propagation.PropagationEngineFactory;
-import solver.variables.IntVar;
 
 /**
  * <br/>

@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import solver.Solver;
-import solver.explanations.strategies.ConflictBasedBackjumping;
-import solver.explanations.strategies.DynamicBacktracking;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
+import org.chocosolver.solver.explanations.strategies.DynamicBacktracking;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.

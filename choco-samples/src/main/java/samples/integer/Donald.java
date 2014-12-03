@@ -24,14 +24,14 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * A verbal arithmetic puzzle:

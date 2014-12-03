@@ -24,18 +24,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples.real;
+package org.chocosolver.samples.real;
 
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.real.Ibex;
-import solver.constraints.real.RealConstraint;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.selectors.values.RealDomainMiddle;
-import solver.search.strategy.selectors.variables.Cyclic;
-import solver.search.strategy.strategy.RealStrategy;
-import solver.variables.RealVar;
-import solver.variables.VariableFactory;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.real.Ibex;
+import org.chocosolver.solver.constraints.real.RealConstraint;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
+import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * The cyclo hexan problem.

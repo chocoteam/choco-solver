@@ -24,17 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
+import org.chocosolver.solver.explanations.antidom.AntiDomInterval;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.explanations.antidom.AntiDomBitset;
-import solver.explanations.antidom.AntiDomInterval;
-import solver.explanations.antidom.AntiDomain;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

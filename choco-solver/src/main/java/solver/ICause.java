@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver;
+package org.chocosolver.solver;
 
 
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
 
 import java.io.Serializable;
 

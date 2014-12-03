@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.trace;
+package org.chocosolver.solver.trace;
 
-import solver.Configuration;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.*;
-import solver.variables.Variable;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.*;
+import org.chocosolver.solver.variables.Variable;
 
-import static util.tools.StringUtils.pad;
+import static org.chocosolver.util.tools.StringUtils.pad;
 
 /**
  * This is not a logging framework (Choco relies on SLF4J)

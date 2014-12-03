@@ -32,13 +32,13 @@
  * Time: 13:30
  */
 
-package choco.checker.fmk;
+package org.chocosolver.choco.checker.fmk;
 
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.Random;
 
-import static choco.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.choco.checker.DomainBuilder.buildFullDomains;
 
 /**
  * @author Jean-Guillaume Fages

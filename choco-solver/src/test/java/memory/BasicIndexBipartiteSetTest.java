@@ -1,4 +1,4 @@
-package memory; /**
+package org.chocosolver.memory; /**
  *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,8 @@ package memory; /**
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import memory.structure.BasicIndexedBipartiteSet;
-import memory.trailing.EnvironmentTrailing;
+import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

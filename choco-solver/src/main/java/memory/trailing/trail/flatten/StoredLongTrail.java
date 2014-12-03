@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail.flatten;
+package org.chocosolver.memory.trailing.trail.flatten;
 
-import memory.trailing.StoredLong;
-import memory.trailing.trail.IStoredLongTrail;
+import org.chocosolver.memory.trailing.StoredLong;
+import org.chocosolver.memory.trailing.trail.IStoredLongTrail;
 
 
 public class StoredLongTrail implements IStoredLongTrail {

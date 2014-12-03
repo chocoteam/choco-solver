@@ -25,15 +25,15 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.explanation;
+package org.chocosolver.samples.explanation;
 
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.explanations.ExplanationFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Created by IntelliJ IDEA.

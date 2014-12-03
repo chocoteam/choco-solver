@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.reification;
+package org.chocosolver.solver.constraints.reification;
 
-import memory.structure.Operation;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.Variable;
-import util.ESat;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
 
 /**
  * A specific propagator which posts constraint on condition.

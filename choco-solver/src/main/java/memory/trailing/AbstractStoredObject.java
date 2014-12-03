@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing;
+package org.chocosolver.memory.trailing;
 
 import java.io.Serializable;
 

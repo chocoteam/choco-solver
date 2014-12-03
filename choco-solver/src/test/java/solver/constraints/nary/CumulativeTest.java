@@ -25,19 +25,19 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
+import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.nary.cumulative.Cumulative;
-import solver.search.loop.monitors.SMF;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VF;
 
 /**
  * Tests the various filtering algorithms of the cumulative constraint

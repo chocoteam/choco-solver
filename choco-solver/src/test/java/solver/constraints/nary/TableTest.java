@@ -31,24 +31,24 @@
  * @since 10/04/14
  * Created by IntelliJ IDEA.
  */
-package solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.extension.TupleValidator;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.extension.TupleValidator;
-import solver.constraints.extension.Tuples;
-import solver.constraints.extension.TuplesFactory;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import solver.variables.VariableFactory;
-import util.objects.graphs.MultivaluedDecisionDiagram;
 
 import java.util.Random;
 

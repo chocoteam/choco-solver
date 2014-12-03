@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.objective;
+package org.chocosolver.solver.objective;
 
-import solver.ICause;
-import solver.ResolutionPolicy;
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.search.strategy.decision.Decision;
-import solver.variables.IntVar;
-import solver.variables.RealVar;
-import solver.variables.Variable;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * Class to monitor the objective function and avoid exploring "worse" solutions

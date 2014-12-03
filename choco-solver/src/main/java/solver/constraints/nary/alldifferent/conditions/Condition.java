@@ -32,9 +32,9 @@
  * Time: 11:06
  */
 
-package solver.constraints.nary.alldifferent.conditions;
+package org.chocosolver.solver.constraints.nary.alldifferent.conditions;
 
-import solver.variables.IntVar;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * A condition over integer variables

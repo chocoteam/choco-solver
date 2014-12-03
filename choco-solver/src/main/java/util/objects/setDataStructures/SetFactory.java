@@ -32,20 +32,20 @@
  * Time: 01:56
  */
 
-package util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures;
 
-import memory.IEnvironment;
-import memory.copy.EnvironmentCopying;
-import memory.trailing.EnvironmentTrailing;
-import solver.Solver;
-import util.objects.setDataStructures.linkedlist.*;
-import util.objects.setDataStructures.matrix.Set_Array;
-import util.objects.setDataStructures.matrix.Set_BitSet;
-import util.objects.setDataStructures.matrix.Set_Std_Array;
-import util.objects.setDataStructures.swapList.Set_Std_Swap_Array;
-import util.objects.setDataStructures.swapList.Set_Std_Swap_Hash;
-import util.objects.setDataStructures.swapList.Set_Swap_Array;
-import util.objects.setDataStructures.swapList.Set_Swap_Hash;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.copy.EnvironmentCopying;
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.util.objects.setDataStructures.linkedlist.*;
+import org.chocosolver.util.objects.setDataStructures.matrix.Set_Array;
+import org.chocosolver.util.objects.setDataStructures.matrix.Set_BitSet;
+import org.chocosolver.util.objects.setDataStructures.matrix.Set_Std_Array;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap_Array;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap_Hash;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap_Array;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap_Hash;
 
 /**
  * Factory for creating sets

@@ -32,13 +32,13 @@
  * Time: 23:06
  */
 
-package samples;
+package org.chocosolver.samples;
 
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.objective.ObjectiveManager;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.thread.AbstractParallelSlave;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.thread.AbstractParallelSlave;
 
 import java.lang.reflect.InvocationTargetException;
 

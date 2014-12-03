@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package org.chocosolver.solver.search.loop.monitors;
 
-import solver.search.limits.ICounter;
-import solver.search.loop.ISearchLoop;
-import solver.search.restart.IRestartStrategy;
+import org.chocosolver.solver.search.limits.ICounter;
+import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.restart.IRestartStrategy;
 
 /**
  * <br/>

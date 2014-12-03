@@ -24,23 +24,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples.integer;
+package org.chocosolver.samples.integer;
 
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.LogicalConstraintFactory;
+import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
-import solver.constraints.SatFactory;
-import solver.constraints.nary.cnf.LogOp;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
 
 /**
  * <br/>

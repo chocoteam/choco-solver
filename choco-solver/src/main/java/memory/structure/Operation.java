@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.structure;
+package org.chocosolver.memory.structure;
 
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
 
 import java.io.Serializable;
 

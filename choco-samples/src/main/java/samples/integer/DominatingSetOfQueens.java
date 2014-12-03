@@ -25,14 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
 
 import java.util.LinkedList;
 import java.util.List;

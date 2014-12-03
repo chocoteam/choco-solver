@@ -32,7 +32,7 @@
  * Time: 22:26
  */
 
-package util.objects.graphs;
+package org.chocosolver.util.objects.graphs;
 
 public enum Orientation {
     SUCCESSORS, PREDECESSORS

@@ -24,23 +24,23 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Cause;
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.RootDecision;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.events.IEventType;
-import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 
 /**
  * A explanation engine that works in a lazy way.

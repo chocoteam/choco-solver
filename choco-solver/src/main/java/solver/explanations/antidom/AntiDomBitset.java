@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.antidom;
+package org.chocosolver.solver.explanations.antidom;
 
-import memory.IStateBitSet;
-import solver.variables.IntVar;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.memory.IStateBitSet;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
  * Created by IntelliJ IDEA.

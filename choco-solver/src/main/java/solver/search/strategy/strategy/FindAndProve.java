@@ -26,12 +26,12 @@
  */
 
 
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * Enables to switch from one heuristic to another once a solution has been found

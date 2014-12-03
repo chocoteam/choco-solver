@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.structure;
+package org.chocosolver.memory.structure;
 
-import memory.IEnvironment;
-import memory.IStateBitSet;
-import memory.IStateInt;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateBitSet;
+import org.chocosolver.memory.IStateInt;
 
 import java.lang.reflect.Array;
 import java.util.BitSet;

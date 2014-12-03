@@ -24,17 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.alldifferent.conditions;
+package org.chocosolver.solver.constraints.nary.alldifferent.conditions;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
 
 /**
  * Propagator for AllDifferent AC constraint for integer variables

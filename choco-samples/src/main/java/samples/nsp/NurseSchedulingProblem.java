@@ -4,12 +4,12 @@
  * Date: Jul 27, 2010 - 1:53:16 PM
  */
 
-package samples.nsp;
+package org.chocosolver.samples.nsp;
 
-import solver.Solver;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
 import java.util.Map;

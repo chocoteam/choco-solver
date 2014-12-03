@@ -24,14 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.decision;
+package org.chocosolver.solver.search.strategy.decision;
 
 
-import solver.exception.ContradictionException;
-import solver.explanations.BranchingDecision;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.variables.Variable;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.BranchingDecision;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * <br/>

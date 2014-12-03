@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary;
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,20 +35,20 @@ package solver.constraints.nary;
  * LexChain test file
  */
 
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.*;
+import org.chocosolver.solver.constraints.nary.cnf.ILogical;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.constraints.*;
-import solver.constraints.nary.cnf.ILogical;
-import solver.constraints.nary.cnf.LogOp;
-import solver.exception.ContradictionException;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
-import util.tools.ArrayUtils;
 
 import java.util.Random;
 

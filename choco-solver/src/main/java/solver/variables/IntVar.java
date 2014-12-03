@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.explanations.antidom.AntiDomain;
-import solver.variables.delta.IIntDeltaMonitor;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 
 /**

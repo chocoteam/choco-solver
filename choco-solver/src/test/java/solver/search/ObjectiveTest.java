@@ -24,29 +24,29 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search;
+package org.chocosolver.solver.search;
 
 
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodStoreFromSolutions;
+import org.chocosolver.solver.constraints.reification.PropConditionnal;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
+import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.nary.nogood.NogoodStoreFromSolutions;
-import solver.constraints.reification.PropConditionnal;
-import solver.objective.ObjectiveManager;
-import solver.objective.ObjectiveStrategy;
-import solver.objective.OptimizationPolicy;
-import solver.propagation.NoPropagationEngine;
-import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SMF;
-import solver.search.strategy.ISF;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import util.ESat;
 
 import java.util.Random;
 

@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 
 /**
  * A Set Variable is defined by a domain which is a set interval [kernel,envelope]

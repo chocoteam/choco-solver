@@ -25,26 +25,26 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.set;
+package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.Variable;
-import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
-import solver.variables.events.SetEventType;
-import util.ESat;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
-import util.tools.ArrayUtils;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Restricts the number of empty sets

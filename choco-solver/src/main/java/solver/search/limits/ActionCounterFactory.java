@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.limits;
+package org.chocosolver.solver.search.limits;
 
-import solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.loop.ISearchLoop;
 
 /**
  * A factory dedicated to counter actions; action to be performed when a counter reached its limit.

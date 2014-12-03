@@ -24,23 +24,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.among;
+package org.chocosolver.solver.constraints.nary.among;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
 

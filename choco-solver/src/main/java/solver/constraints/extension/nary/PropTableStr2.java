@@ -1,16 +1,16 @@
-package solver.constraints.extension.nary;
+package org.chocosolver.solver.constraints.extension.nary;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.ESat;
-import util.iterators.DisposableValueIterator;
-import util.objects.setDataStructures.swapList.Set_Std_Swap_Array;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap_Array;
 
 import java.util.ArrayList;
 import java.util.BitSet;

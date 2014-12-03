@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.differences;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.differences;
 
 /**
  * Interface to represent a set of difference constraints

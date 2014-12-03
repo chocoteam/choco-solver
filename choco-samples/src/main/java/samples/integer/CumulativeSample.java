@@ -32,16 +32,16 @@
  * Time: 15:11
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import samples.AbstractProblem;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VF;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.VF;
 
 import java.util.Random;
 

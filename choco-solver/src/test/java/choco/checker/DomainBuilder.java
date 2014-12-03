@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package org.chocosolver.choco.checker;
 
-import solver.variables.IntVar;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
 import java.util.Random;

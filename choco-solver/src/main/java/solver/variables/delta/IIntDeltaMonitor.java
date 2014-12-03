@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta;
+package org.chocosolver.solver.variables.delta;
 
-import solver.exception.ContradictionException;
-import util.procedure.IntProcedure;
-import util.procedure.SafeIntProcedure;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.procedure.SafeIntProcedure;
 
 /**
  * <br/>

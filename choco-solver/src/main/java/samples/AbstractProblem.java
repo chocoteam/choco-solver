@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package org.chocosolver.samples;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import solver.Solver;
-import solver.explanations.ExplanationFactory;
-import solver.trace.Chatterbox;
 
 import static java.lang.Runtime.getRuntime;
-import static samples.AbstractProblem.Level.QUIET;
-import static samples.AbstractProblem.Level.SILENT;
+import static org.chocosolver.samples.AbstractProblem.Level.QUIET;
+import static org.chocosolver.samples.AbstractProblem.Level.SILENT;
 
 /**
  * <br/>

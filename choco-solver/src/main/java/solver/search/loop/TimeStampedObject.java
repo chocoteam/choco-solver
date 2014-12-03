@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
 /**
  * Class for factorizing code of time stamped objects

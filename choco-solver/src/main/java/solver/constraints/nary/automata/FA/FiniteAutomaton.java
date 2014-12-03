@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.FA;
+package org.chocosolver.solver.constraints.nary.automata.FA;
 
 import dk.brics.automaton.*;
 import gnu.trove.iterator.TIntIterator;
@@ -33,7 +33,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import util.tools.StringUtils;
+import org.chocosolver.util.tools.StringUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;

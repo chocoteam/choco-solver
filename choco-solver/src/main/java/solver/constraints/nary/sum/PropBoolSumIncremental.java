@@ -32,20 +32,20 @@
  * Time: 18:32
  */
 
-package solver.constraints.nary.sum;
+package org.chocosolver.solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.events.IntEventType;
-import util.ESat;
-import util.tools.ArrayUtils;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum

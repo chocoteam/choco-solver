@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package docs;
+package org.chocosolver.docs;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.SatFactory;
-import solver.constraints.nary.cnf.LogOp;
-import solver.trace.Chatterbox;
-import solver.variables.BoolVar;
-import solver.variables.VF;
 
 /**
  * <br/>

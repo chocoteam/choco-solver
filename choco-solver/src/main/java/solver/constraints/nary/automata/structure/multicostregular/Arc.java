@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.structure.multicostregular;
+package org.chocosolver.solver.constraints.nary.automata.structure.multicostregular;
 
-import memory.structure.IndexedObject;
+import org.chocosolver.memory.structure.IndexedObject;
+import org.chocosolver.solver.constraints.nary.automata.structure.Node;
 import org.jgrapht.EdgeFactory;
-import solver.constraints.nary.automata.structure.Node;
 
 /**
  * Created by IntelliJ IDEA.

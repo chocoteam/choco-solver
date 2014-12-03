@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory;
+package org.chocosolver.memory;
 
-import memory.structure.BasicIndexedBipartiteSet;
-import memory.structure.OneWordS32BitSet;
-import memory.structure.OneWordS64BitSet;
-import memory.structure.S64BitSet;
+import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
+import org.chocosolver.memory.structure.OneWordS32BitSet;
+import org.chocosolver.memory.structure.OneWordS64BitSet;
+import org.chocosolver.memory.structure.S64BitSet;
 
 /**
  * Super class of all environments !

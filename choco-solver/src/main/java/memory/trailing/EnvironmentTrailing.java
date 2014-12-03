@@ -25,18 +25,18 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing;
+package org.chocosolver.memory.trailing;
 
 
-import memory.*;
-import memory.structure.Operation;
-import memory.trailing.trail.*;
-import memory.trailing.trail.chunck.*;
-import memory.trailing.trail.flatten.*;
-import memory.trailing.trail.unsafe.UnsafeBoolTrail;
-import memory.trailing.trail.unsafe.UnsafeDoubleTrail;
-import memory.trailing.trail.unsafe.UnsafeIntTrail;
-import memory.trailing.trail.unsafe.UnsafeLongTrail;
+import org.chocosolver.memory.*;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.trailing.trail.*;
+import org.chocosolver.memory.trailing.trail.chunck.*;
+import org.chocosolver.memory.trailing.trail.flatten.*;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 
 /**
  * The root class for managing memory and sessions.

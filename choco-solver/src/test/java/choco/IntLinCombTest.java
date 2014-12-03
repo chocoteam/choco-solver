@@ -25,23 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco;
+package org.chocosolver.choco;
 
-import choco.checker.DomainBuilder;
+import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.*;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.Operator;
-import solver.exception.ContradictionException;
-import solver.propagation.PropagationEngineFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.trace.Chatterbox;
-import solver.variables.*;
 
 import java.util.Random;
 

@@ -25,20 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
+import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.objective.ObjectiveStrategy;
-import solver.objective.OptimizationPolicy;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.trace.Chatterbox;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
  * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>

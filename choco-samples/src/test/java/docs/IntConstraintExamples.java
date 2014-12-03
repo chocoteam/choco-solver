@@ -24,21 +24,21 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package docs;
+package org.chocosolver.docs;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
+import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.constraints.extension.Tuples;
-import solver.constraints.nary.alldifferent.conditions.Condition;
-import solver.constraints.nary.automata.FA.CostAutomaton;
-import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.circuit.CircuitConf;
-import solver.trace.Chatterbox;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VF;
 
 /**
  * BEWARE: 5_elements.rst SHOULD BE UPDATED ANYTIME THIS CLASS IS CHANGED

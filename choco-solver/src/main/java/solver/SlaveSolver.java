@@ -24,12 +24,12 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+package org.chocosolver.solver;
 
-import solver.objective.ObjectiveManager;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.thread.AbstractParallelSlave;
-import solver.variables.IntVar;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.thread.AbstractParallelSlave;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * <br/>

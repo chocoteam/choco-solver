@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.mis;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
 import java.util.BitSet;
 

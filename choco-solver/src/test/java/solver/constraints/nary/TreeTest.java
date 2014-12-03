@@ -31,14 +31,14 @@
  * @since 19/09/14
  * Created by IntelliJ IDEA.
  */
-package solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.trace.Chatterbox;
-import solver.variables.IntVar;
-import solver.variables.VF;
 
 public class TreeTest {
 

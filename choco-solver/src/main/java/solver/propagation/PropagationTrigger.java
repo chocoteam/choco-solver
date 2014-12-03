@@ -24,16 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation;
+package org.chocosolver.solver.propagation;
 
 import gnu.trove.list.array.TIntArrayList;
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.slf4j.LoggerFactory;
-import solver.Configuration;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.events.PropagatorEventType;
 
 import java.io.Serializable;
 import java.util.ArrayList;

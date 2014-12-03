@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.tools;
+package org.chocosolver.util.tools;
 
-import solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 
 /*
 * User : charles

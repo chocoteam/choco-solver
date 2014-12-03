@@ -1,12 +1,13 @@
-package solver.explanations.strategies;
+package org.chocosolver.solver.explanations.strategies;
 
-import memory.IEnvironment;
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.search.loop.ISearchLoop;
-import solver.search.strategy.decision.Decision;
-import solver.variables.IntVar;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.IntVar;
+
 import java.io.Serializable;
 import java.util.ArrayDeque;
 

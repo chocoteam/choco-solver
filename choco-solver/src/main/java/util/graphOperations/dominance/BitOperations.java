@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.graphOperations.dominance;
+package org.chocosolver.util.graphOperations.dominance;
 
 /**
  * Class containing some Bit operations useful to LCA queries

@@ -25,23 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.tree;
+package org.chocosolver.solver.constraints.nary.tree;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import util.graphOperations.dominance.AlphaDominatorsFinder;
-import util.graphOperations.dominance.SimpleDominatorsFinder;
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import org.chocosolver.util.graphOperations.dominance.AlphaDominatorsFinder;
+import org.chocosolver.util.graphOperations.dominance.SimpleDominatorsFinder;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * AntiArborescences propagation (simplification from tree constraint) based on dominators

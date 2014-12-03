@@ -25,15 +25,15 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorContradiction;
-import solver.search.loop.monitors.IMonitorRestart;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme

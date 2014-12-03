@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.selectors.variables.ImpactBased;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.pert;
+package org.chocosolver.samples.pert;
 
 import java.util.BitSet;
 import java.util.Random;

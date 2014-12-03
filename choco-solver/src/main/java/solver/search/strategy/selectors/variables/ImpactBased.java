@@ -24,29 +24,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.selectors.variables;
+package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import memory.IStateDouble;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.search.loop.ISearchLoop;
-import solver.search.loop.monitors.IMonitorContradiction;
-import solver.search.loop.monitors.IMonitorDownBranch;
-import solver.search.loop.monitors.IMonitorRestart;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.PoolManager;
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.memory.IStateDouble;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.PoolManager;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Random;
 

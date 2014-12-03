@@ -32,11 +32,11 @@
  * Time: 23:52
  */
 
-package samples;
+package org.chocosolver.samples;
 
-import solver.Solver;
-import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.trace.Chatterbox;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import org.chocosolver.solver.trace.Chatterbox;
 
 public abstract class ParallelizedProblem extends AbstractProblem {
 

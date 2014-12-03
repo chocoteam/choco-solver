@@ -32,16 +32,16 @@
  * Time: 22:59
  */
 
-package samples;
+package org.chocosolver.samples;
 
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.thread.AbstractParallelMaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ResolutionPolicy;
-import solver.thread.AbstractParallelMaster;
 
 import static java.lang.System.exit;
 import static java.lang.Thread.sleep;
-import static solver.ResolutionPolicy.SATISFACTION;
+import static org.chocosolver.solver.ResolutionPolicy.SATISFACTION;
 
 public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
 

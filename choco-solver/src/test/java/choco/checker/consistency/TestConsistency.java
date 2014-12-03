@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.consistency;
+package org.chocosolver.choco.checker.consistency;
 
-import choco.checker.Modeler;
+import org.chocosolver.choco.checker.Modeler;
+import org.chocosolver.solver.search.loop.SearchLoops;
 import org.testng.annotations.Test;
-import solver.search.loop.SearchLoops;
 
-import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
+import static org.chocosolver.choco.checker.consistency.ConsistencyChecker.checkConsistency;
 
 /**
  * Created by IntelliJ IDEA.

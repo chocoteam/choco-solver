@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.mis;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
-import util.objects.graphs.UndirectedGraph;
-import util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
 import java.util.Random;

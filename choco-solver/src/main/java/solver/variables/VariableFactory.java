@@ -25,17 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import solver.Configuration;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.real.IntEqRealConstraint;
-import solver.exception.SolverException;
-import solver.variables.impl.*;
-import solver.variables.view.*;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.impl.*;
+import org.chocosolver.solver.variables.view.*;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
 

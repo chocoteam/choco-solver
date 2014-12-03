@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.graphOperations.connectivity;
+package org.chocosolver.util.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
-import util.objects.graphs.IGraph;
-import util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.graphs.IGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Class containing algorithms to find all connected components and articulation points of graph by performing one dfs

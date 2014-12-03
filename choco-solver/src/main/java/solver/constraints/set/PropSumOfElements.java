@@ -32,19 +32,19 @@
  * Time: 16:36
  */
 
-package solver.constraints.set;
+package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.Variable;
-import solver.variables.events.IntEventType;
-import solver.variables.events.SetEventType;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.ESat;
 
 /**
  * Sums elements given by a set variable

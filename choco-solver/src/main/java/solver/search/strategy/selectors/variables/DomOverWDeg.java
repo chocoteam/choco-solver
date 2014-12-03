@@ -24,31 +24,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.selectors.variables;
+package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.search.loop.monitors.FailPerPropagator;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.selectors.IntValueSelector;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IVariableMonitor;
-import solver.variables.IntVar;
-import solver.variables.events.IEventType;
-import solver.variables.events.IntEventType;
-import util.PoolManager;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IVariableMonitor;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.PoolManager;
 
 /**
  * <br/>

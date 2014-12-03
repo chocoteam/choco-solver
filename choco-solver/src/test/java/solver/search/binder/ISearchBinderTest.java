@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.binder;
+package org.chocosolver.solver.search.binder;
 
+import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.search.bind.SearchBinderFactory;
 import org.testng.annotations.Test;
-import solver.search.bind.ISearchBinder;
-import solver.search.bind.SearchBinderFactory;
 
 /**
  * <br/>

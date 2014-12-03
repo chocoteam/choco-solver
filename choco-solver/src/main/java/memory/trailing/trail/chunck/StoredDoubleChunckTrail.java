@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail.chunck;
+package org.chocosolver.memory.trailing.trail.chunck;
 
-import memory.trailing.StoredDouble;
-import memory.trailing.trail.IStoredDoubleTrail;
+import org.chocosolver.memory.trailing.StoredDouble;
+import org.chocosolver.memory.trailing.trail.IStoredDoubleTrail;
 
 
 /**

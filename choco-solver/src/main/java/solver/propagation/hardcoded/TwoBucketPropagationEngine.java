@@ -25,25 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.hardcoded;
+package org.chocosolver.solver.propagation.hardcoded;
 
-import memory.IEnvironment;
-import solver.Configuration;
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationTrigger;
-import solver.propagation.hardcoded.util.IId2AbId;
-import solver.propagation.hardcoded.util.MId2AbId;
-import solver.variables.Variable;
-import solver.variables.events.IEventType;
-import solver.variables.events.PropagatorEventType;
-import util.objects.IntCircularQueue;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.propagation.PropagationTrigger;
+import org.chocosolver.solver.propagation.hardcoded.util.IId2AbId;
+import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.objects.IntCircularQueue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

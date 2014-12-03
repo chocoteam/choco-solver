@@ -25,22 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import solver.Configuration;
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.exception.SolverException;
-import solver.explanations.antidom.AntiDomain;
-import solver.search.loop.monitors.IMonitorInitPropagation;
-import solver.search.strategy.decision.Decision;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.objects.queues.CircularQueue;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.objects.queues.CircularQueue;
 
 /**
  * Created by IntelliJ IDEA.

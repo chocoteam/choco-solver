@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.thread;
+package org.chocosolver.solver.thread;
 
 /**
  * Slave born to be mastered and work in parallel

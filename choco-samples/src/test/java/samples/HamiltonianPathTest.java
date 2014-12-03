@@ -25,26 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package org.chocosolver.samples;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.samples.graph.input.GraphGenerator;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.util.PoolManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.graph.input.GraphGenerator;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.measure.IMeasures;
-import solver.search.strategy.ISF;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import util.PoolManager;
-import util.objects.setDataStructures.SetType;
 
 /**
  * Find a Hamiltonian path in a sparse graph with incremental algorithm

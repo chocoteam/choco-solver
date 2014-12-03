@@ -24,14 +24,14 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.lns;
+package org.chocosolver.solver.search.loop.lns;
 
-import solver.Solver;
-import solver.explanations.LazyExplanationEngineFromRestart;
-import solver.explanations.strategies.*;
-import solver.search.limits.ACounter;
-import solver.search.loop.lns.neighbors.*;
-import solver.variables.IntVar;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.LazyExplanationEngineFromRestart;
+import org.chocosolver.solver.explanations.strategies.*;
+import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * A Factory for Large Neighborhood Search, with pre-defined configurations.

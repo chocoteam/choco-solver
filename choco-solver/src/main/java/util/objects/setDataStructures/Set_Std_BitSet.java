@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures;
 
-import memory.IEnvironment;
-import memory.IStateInt;
-import memory.structure.S64BitSet;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.memory.structure.S64BitSet;
 
 /**
  * Created by IntelliJ IDEA.

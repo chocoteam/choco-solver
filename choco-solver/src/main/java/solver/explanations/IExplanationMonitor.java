@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.search.strategy.decision.Decision;
-import solver.variables.IntVar;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.io.Serializable;
 

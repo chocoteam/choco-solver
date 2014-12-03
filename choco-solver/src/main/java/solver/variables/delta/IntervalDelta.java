@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.delta;
+package org.chocosolver.solver.variables.delta;
 
-import solver.ICause;
-import solver.search.loop.ISearchLoop;
-import solver.search.loop.TimeStampedObject;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.loop.TimeStampedObject;
 
 /**
  * A class to store the removed intervals of an integer variable.

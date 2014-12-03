@@ -25,19 +25,19 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.ternary;
+package org.chocosolver.solver.constraints.ternary;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import solver.variables.events.PropagatorEventType;
 
 /**
  * <br/>

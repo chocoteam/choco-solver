@@ -25,17 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.structure.multicostregular;
+package org.chocosolver.solver.constraints.nary.automata.structure.multicostregular;
 
 
 import gnu.trove.stack.TIntStack;
-import memory.IStateIntVector;
-import solver.Configuration;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.iterators.DisposableIntIterator;
-import util.objects.StoredIndexedBipartiteSet;
+import org.chocosolver.memory.IStateIntVector;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableIntIterator;
+import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
 
 import java.util.Arrays;
 

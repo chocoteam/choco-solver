@@ -25,23 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.structure.costregular;
+package org.chocosolver.solver.constraints.nary.automata.structure.costregular;
 
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import memory.IEnvironment;
-import memory.IStateDoubleVector;
-import memory.IStateIntVector;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateDoubleVector;
+import org.chocosolver.memory.IStateIntVector;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.automata.structure.Node;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableIntIterator;
+import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
+import org.chocosolver.util.objects.StoredIndexedBipartiteSetWithOffset;
 import org.jgrapht.graph.DirectedMultigraph;
-import solver.ICause;
-import solver.constraints.Propagator;
-import solver.constraints.nary.automata.structure.Node;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.iterators.DisposableIntIterator;
-import util.objects.StoredIndexedBipartiteSet;
-import util.objects.StoredIndexedBipartiteSetWithOffset;
 
 import java.util.BitSet;
 import java.util.Set;

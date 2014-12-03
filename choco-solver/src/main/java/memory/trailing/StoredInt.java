@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing;
+package org.chocosolver.memory.trailing;
 
-import memory.IStateInt;
-import memory.trailing.trail.IStoredIntTrail;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.memory.trailing.trail.IStoredIntTrail;
 
 
 /**

@@ -24,10 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.real;
+package org.chocosolver.solver.constraints.real;
 
-import solver.constraints.Constraint;
-import solver.variables.RealVar;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.RealVar;
 
 /**
  * A constraint on real variables, solved using IBEX.

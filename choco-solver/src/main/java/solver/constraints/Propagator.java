@@ -25,33 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import memory.structure.Operation;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Identity;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ICause;
-import solver.Identity;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.variables.Variable;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
 
 import java.io.Serializable;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
-import static solver.constraints.PropagatorPriority.LINEAR;
-import static solver.explanations.VariableState.DOM;
-import static solver.variables.events.IEventType.ALL_EVENTS;
-import static solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
+import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
+import static org.chocosolver.solver.explanations.VariableState.DOM;
+import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
+import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
 
 
 /**

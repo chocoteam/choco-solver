@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.limits;
+package org.chocosolver.solver.search.limits;
 
-import solver.search.loop.monitors.IMonitorOpenNode;
+import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 
 /**
  * Set a limit over the number of nodes opened allowed during the search.

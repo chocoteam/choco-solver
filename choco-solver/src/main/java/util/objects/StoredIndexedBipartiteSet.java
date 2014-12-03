@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects;
+package org.chocosolver.util.objects;
 
-import memory.IEnvironment;
-import memory.IStateInt;
-import memory.structure.IndexedObject;
-import solver.exception.SolverException;
-import util.iterators.DisposableIntIterator;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.memory.structure.IndexedObject;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.util.iterators.DisposableIntIterator;
 
 import java.util.ArrayList;
 

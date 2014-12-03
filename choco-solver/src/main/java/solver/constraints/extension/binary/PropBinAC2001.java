@@ -24,16 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.extension.binary;
+package org.chocosolver.solver.constraints.extension.binary;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.extension.Tuples;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.IntEventType;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
 
 /**
  * AC2001 algorithm for binary table constraint

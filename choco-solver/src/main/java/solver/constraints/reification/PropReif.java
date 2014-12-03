@@ -25,22 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.reification;
+package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.ReificationConstraint;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.BoolVar;
-import solver.variables.Variable;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.ReificationConstraint;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
 
 /**
  * Implication propagator

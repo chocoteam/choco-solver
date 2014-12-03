@@ -1,12 +1,12 @@
-package util;
+package org.chocosolver.util;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.extension.Tuples;
-import solver.variables.IntVar;
-import solver.variables.VF;
-import util.objects.graphs.MultivaluedDecisionDiagram;
 
 /**
  * Created by cprudhom on 04/11/14.

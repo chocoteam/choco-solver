@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures.swapList;
+package org.chocosolver.util.objects.setDataStructures.swapList;
 
-import memory.IEnvironment;
-import memory.IStateInt;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
 
 /**
  * Backtrable List of m elements based on Array int_swaping

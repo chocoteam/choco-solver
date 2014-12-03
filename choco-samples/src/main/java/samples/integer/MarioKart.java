@@ -25,20 +25,20 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import samples.AbstractProblem;
-import samples.graph.input.TSP_Utils;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.ArrayUtils;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.samples.graph.input.TSP_Utils;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Random;
 

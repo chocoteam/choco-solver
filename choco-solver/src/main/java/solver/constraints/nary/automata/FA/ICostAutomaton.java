@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.FA;
+package org.chocosolver.solver.constraints.nary.automata.FA;
 
-import solver.constraints.nary.automata.FA.utils.ICounter;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
 
 import java.util.List;
 

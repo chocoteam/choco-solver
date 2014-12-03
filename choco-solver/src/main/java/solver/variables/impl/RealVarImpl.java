@@ -24,21 +24,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.impl;
+package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IStateDouble;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.RealVar;
-import solver.variables.delta.NoDelta;
-import solver.variables.events.IEventType;
-import solver.variables.events.RealEventType;
-import util.tools.StringUtils;
+import org.chocosolver.memory.IStateDouble;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.RealEventType;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * An implementation of RealVar, variable for continuous constraints (solved using IBEX).

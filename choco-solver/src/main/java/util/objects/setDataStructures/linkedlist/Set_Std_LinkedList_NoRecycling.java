@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures.linkedlist;
+package org.chocosolver.util.objects.setDataStructures.linkedlist;
 
-import memory.IEnvironment;
-import memory.structure.Operation;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.structure.Operation;
 
 /**
  * Backtrable LinkedList of m elements

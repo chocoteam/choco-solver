@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver;
+package org.chocosolver.solver;
 
 /**
  * User : cprudhom<br/>

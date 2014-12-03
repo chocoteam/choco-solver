@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
-import solver.constraints.binary.*;
-import solver.constraints.unary.PropEqualXC;
-import solver.constraints.unary.PropGreaterOrEqualXC;
-import solver.constraints.unary.PropLessOrEqualXC;
-import solver.constraints.unary.PropNotEqualXC;
-import solver.exception.SolverException;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.binary.*;
+import org.chocosolver.solver.constraints.unary.PropEqualXC;
+import org.chocosolver.solver.constraints.unary.PropGreaterOrEqualXC;
+import org.chocosolver.solver.constraints.unary.PropLessOrEqualXC;
+import org.chocosolver.solver.constraints.unary.PropNotEqualXC;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * A constraint dedicated to arithmetic operations.

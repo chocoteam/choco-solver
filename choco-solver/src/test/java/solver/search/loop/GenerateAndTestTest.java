@@ -24,16 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VF;
 
-import static solver.constraints.IntConstraintFactory.arithm;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.arithm;
 
 /**
  * <br/>

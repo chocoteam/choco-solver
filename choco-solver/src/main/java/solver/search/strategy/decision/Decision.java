@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.decision;
+package org.chocosolver.solver.search.strategy.decision;
 
-import solver.ICause;
-import solver.Identity;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
-import solver.variables.Variable;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Identity;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * <br/>

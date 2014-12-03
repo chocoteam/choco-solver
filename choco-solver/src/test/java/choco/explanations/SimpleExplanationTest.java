@@ -25,18 +25,18 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.explanations;
+package org.chocosolver.choco.explanations;
 
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
  * Created by IntelliJ IDEA.

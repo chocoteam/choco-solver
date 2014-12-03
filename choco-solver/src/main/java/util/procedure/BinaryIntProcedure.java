@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.procedure;
+package org.chocosolver.util.procedure;
 
 /**
  * <br/>

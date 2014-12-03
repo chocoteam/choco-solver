@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.tools;
+package org.chocosolver.util.tools;
 
 import gnu.trove.list.array.TIntArrayList;
 

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.structure;
+package org.chocosolver.memory.structure;
 
 /**
  * Interface to manipulate object as integers in some StoredData Structures :

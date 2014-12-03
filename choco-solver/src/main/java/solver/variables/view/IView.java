@@ -24,12 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.view;
+package org.chocosolver.solver.variables.view;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.variables.Variable;
-import solver.variables.events.IEventType;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 
 /**
  * An interface to define views.

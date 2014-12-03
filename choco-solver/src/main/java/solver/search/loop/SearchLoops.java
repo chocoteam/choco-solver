@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
-import solver.Solver;
+import org.chocosolver.solver.Solver;
 
 /**
  * <br/>

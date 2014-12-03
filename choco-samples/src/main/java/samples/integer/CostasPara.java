@@ -32,15 +32,15 @@
  * Time: 23:10
  */
 
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import samples.MasterProblem;
-import samples.ParallelizedProblem;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.StringUtils;
+import org.chocosolver.samples.MasterProblem;
+import org.chocosolver.samples.ParallelizedProblem;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.tools.StringUtils;
 
 public class CostasPara extends ParallelizedProblem {
 

@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.graph;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
-import solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
-import solver.constraints.nary.nValue.amnv.differences.D;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
+import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.D;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Constrained intersection graph

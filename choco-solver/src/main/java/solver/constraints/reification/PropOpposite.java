@@ -25,17 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.reification;
+package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.variables.Variable;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
 
 /**
  * Constraint representing the negation of a given constraint

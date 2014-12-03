@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.delta;
+package org.chocosolver.solver.variables.delta;
 
-import solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.loop.ISearchLoop;
 
 import java.io.Serializable;
 

@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.exception.ContradictionException;
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
-import util.tools.ArrayUtils;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * A <code>StrategiesSequencer</code> is class for <code>AbstractStrategy</code> composition.

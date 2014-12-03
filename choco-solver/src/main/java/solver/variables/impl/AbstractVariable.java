@@ -25,17 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.impl;
+package org.chocosolver.solver.variables.impl;
 
-import solver.Cause;
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IVariableMonitor;
-import solver.variables.Variable;
-import solver.variables.events.IEventType;
-import solver.variables.view.IView;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IVariableMonitor;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.view.IView;
 
 import java.util.Arrays;
 

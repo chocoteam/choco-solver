@@ -25,17 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco;
+package org.chocosolver.choco;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SMF;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
  * <br/>

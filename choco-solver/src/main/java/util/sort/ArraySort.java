@@ -32,7 +32,7 @@
  * Time: 17:59
  */
 
-package util.sort;
+package org.chocosolver.util.sort;
 
 import java.util.Comparator;
 

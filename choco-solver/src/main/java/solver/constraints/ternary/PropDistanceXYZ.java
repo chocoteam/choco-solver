@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.ternary;
+package org.chocosolver.solver.constraints.ternary;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Operator;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.variables.IntVar;
-import solver.variables.events.IntEventType;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
 
 /**
  * A constraint to state |x0 - x1| operator x2

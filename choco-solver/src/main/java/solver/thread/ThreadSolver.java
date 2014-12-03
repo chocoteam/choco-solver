@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.thread;
+package org.chocosolver.solver.thread;
 
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.objective.ObjectiveManager;
-import solver.propagation.NoPropagationEngine;
-import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.variables.IntVar;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * <br/>

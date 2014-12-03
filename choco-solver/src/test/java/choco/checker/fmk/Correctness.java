@@ -25,26 +25,26 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.fmk;
+package org.chocosolver.choco.checker.fmk;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.Variable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import static choco.checker.fmk.Domain.*;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
+import static org.chocosolver.choco.checker.fmk.Domain.*;
+import static org.chocosolver.solver.Solver.writeInFile;
+import static org.chocosolver.solver.variables.SetVar.END;
 import static org.testng.Assert.fail;
-import static solver.Solver.writeInFile;
-import static solver.variables.SetVar.END;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme

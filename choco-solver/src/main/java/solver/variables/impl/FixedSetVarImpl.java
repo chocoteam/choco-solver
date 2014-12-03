@@ -1,22 +1,22 @@
-package solver.variables.impl;
+package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.IVariableMonitor;
-import solver.variables.SetVar;
-import solver.variables.Variable;
-import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.delta.NoDelta;
-import solver.variables.events.IEventType;
-import solver.variables.events.SetEventType;
-import solver.variables.view.IView;
-import util.tools.StringUtils;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.IVariableMonitor;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.tools.StringUtils;
 
 import java.util.Arrays;
 

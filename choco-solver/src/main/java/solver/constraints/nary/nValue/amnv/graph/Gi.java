@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.graph;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
-import solver.variables.IntVar;
-import util.objects.setDataStructures.ISet;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Intersection Graph

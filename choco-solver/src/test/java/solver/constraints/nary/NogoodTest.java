@@ -24,18 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodStoreFromRestarts;
+import org.chocosolver.solver.search.limits.BacktrackCounter;
+import org.chocosolver.solver.search.limits.ICounterAction;
+import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.nary.nogood.NogoodStoreFromRestarts;
-import solver.search.limits.BacktrackCounter;
-import solver.search.limits.ICounterAction;
-import solver.search.loop.monitors.SMF;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VF;
 
 /**
  * <br/>

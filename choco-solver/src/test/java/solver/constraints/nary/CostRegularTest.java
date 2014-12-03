@@ -24,20 +24,20 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.automata.FA.CostAutomaton;
-import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.FA.utils.Counter;
-import solver.constraints.nary.automata.FA.utils.CounterState;
-import solver.constraints.nary.automata.FA.utils.ICounter;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 import java.util.ArrayList;
 import java.util.List;

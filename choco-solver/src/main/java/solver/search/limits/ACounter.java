@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.limits;
+package org.chocosolver.solver.search.limits;
 
-import solver.search.loop.monitors.IMonitorInitialize;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 
 /**
  * <br/>

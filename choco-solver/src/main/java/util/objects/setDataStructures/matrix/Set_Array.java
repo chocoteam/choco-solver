@@ -32,10 +32,10 @@
  * Time: 01:43
  */
 
-package util.objects.setDataStructures.matrix;
+package org.chocosolver.util.objects.setDataStructures.matrix;
 
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * Set represented by an array of booleans

@@ -4,15 +4,15 @@
  * Date: Jul 27, 2010 - 1:45:04 PM
  */
 
-package samples.nsp;
+package org.chocosolver.samples.nsp;
 
-import solver.Solver;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;

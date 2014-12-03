@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.bind;
+package org.chocosolver.solver.search.bind;
 
+import org.chocosolver.solver.search.bind.nop.NOPISearchBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.search.bind.nop.NOPISearchBinder;
 
 import java.io.IOException;
 import java.net.URL;
@@ -38,9 +38,9 @@ import java.util.Set;
 
 import static java.lang.ClassLoader.getSystemResources;
 import static java.util.Arrays.asList;
-import static solver.Configuration.SEARCH_BINDER_PATH;
-import static solver.search.bind.impl.StaticBinder.REQUESTED_API_VERSION;
-import static solver.search.bind.impl.StaticBinder.getSingleton;
+import static org.chocosolver.solver.Configuration.SEARCH_BINDER_PATH;
+import static org.chocosolver.solver.search.bind.impl.StaticBinder.REQUESTED_API_VERSION;
+import static org.chocosolver.solver.search.bind.impl.StaticBinder.getSingleton;
 
 /**
  * A binder factory that provides default strategies for Solver.

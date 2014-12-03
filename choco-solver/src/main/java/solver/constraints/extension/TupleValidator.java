@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.extension;
+package org.chocosolver.solver.constraints.extension;
 
 /**
  * An interface to implement to filter valid tuples automatically generated through TuplesFactory

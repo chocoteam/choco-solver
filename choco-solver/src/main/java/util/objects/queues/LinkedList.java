@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.queues;
+package org.chocosolver.util.objects.queues;
 
 import java.io.Serializable;
 import java.util.NoSuchElementException;

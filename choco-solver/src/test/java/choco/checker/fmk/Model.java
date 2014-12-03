@@ -25,19 +25,19 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.fmk;
+package org.chocosolver.choco.checker.fmk;
 
-import solver.Cause;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.set.SetConstraintsFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.SetStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.*;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.SetStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * @author Jean-Guillaume Fages

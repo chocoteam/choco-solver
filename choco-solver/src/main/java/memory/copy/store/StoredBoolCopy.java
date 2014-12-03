@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store;
+package org.chocosolver.memory.copy.store;
 
-import memory.copy.RcBool;
+import org.chocosolver.memory.copy.RcBool;
 
 /**
  * <br/>

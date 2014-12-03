@@ -24,15 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package org.chocosolver.solver.search.loop.monitors;
 
-import solver.Solver;
-import solver.exception.SolverException;
-import solver.search.limits.*;
-import solver.search.restart.GeometricalRestartStrategy;
-import solver.search.restart.LubyRestartStrategy;
-import solver.trace.Chatterbox;
-import solver.trace.IMessage;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.limits.*;
+import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
+import org.chocosolver.solver.search.restart.LubyRestartStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.trace.IMessage;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;

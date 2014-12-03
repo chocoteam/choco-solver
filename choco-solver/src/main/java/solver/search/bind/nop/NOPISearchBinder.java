@@ -24,18 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.bind.nop;
+package org.chocosolver.solver.search.bind.nop;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.SetStrategyFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
+import org.chocosolver.solver.variables.*;
 import org.slf4j.LoggerFactory;
-import solver.Solver;
-import solver.search.bind.ISearchBinder;
-import solver.search.strategy.ISF;
-import solver.search.strategy.SetStrategyFactory;
-import solver.search.strategy.selectors.values.RealDomainMiddle;
-import solver.search.strategy.selectors.variables.Cyclic;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.RealStrategy;
-import solver.variables.*;
 
 import java.util.Arrays;
 

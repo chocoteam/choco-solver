@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.nqueen;
+package org.chocosolver.samples.nqueen;
 
 import org.testng.annotations.Factory;
 

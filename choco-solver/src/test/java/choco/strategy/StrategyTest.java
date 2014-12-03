@@ -25,31 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.strategy;
+package org.chocosolver.choco.strategy;
 
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.*;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.Once;
+import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.constraints.set.SetConstraintsFactory;
-import solver.exception.ContradictionException;
-import solver.search.strategy.ISF;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.selectors.IntValueSelector;
-import solver.search.strategy.selectors.VariableEvaluator;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.search.strategy.selectors.values.IntDomainMin;
-import solver.search.strategy.selectors.variables.*;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.Once;
-import solver.search.strategy.strategy.StrategiesSequencer;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VF;
-import solver.variables.VariableFactory;
 
 /**
  * <br/>

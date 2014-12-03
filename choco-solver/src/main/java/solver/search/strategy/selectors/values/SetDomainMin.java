@@ -24,10 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.selectors.values;
+package org.chocosolver.solver.search.strategy.selectors.values;
 
-import solver.search.strategy.selectors.SetValueSelector;
-import solver.variables.SetVar;
+import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
+import org.chocosolver.solver.variables.SetVar;
 
 /**
  * Selects the first integer in the envelope and not in the kernel

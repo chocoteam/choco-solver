@@ -24,16 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.monitor;
+package org.chocosolver.solver.variables.delta.monitor;
 
-import solver.Cause;
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.search.loop.TimeStampedObject;
-import solver.variables.delta.IEnumDelta;
-import solver.variables.delta.IIntDeltaMonitor;
-import util.procedure.IntProcedure;
-import util.procedure.SafeIntProcedure;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.TimeStampedObject;
+import org.chocosolver.solver.variables.delta.IEnumDelta;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.procedure.SafeIntProcedure;
 
 /**
  * <br/>

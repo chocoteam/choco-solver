@@ -24,24 +24,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.nValue;
+package org.chocosolver.solver.constraints.nary.nValue;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.graphOperations.connectivity.StrongConnectivityFinder;
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetType;
-import util.procedure.UnaryIntProcedure;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.procedure.UnaryIntProcedure;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 

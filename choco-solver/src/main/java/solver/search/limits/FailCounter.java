@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.limits;
+package org.chocosolver.solver.search.limits;
 
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 
 /**
  * Set a limit over the number of fails allowed during the search.

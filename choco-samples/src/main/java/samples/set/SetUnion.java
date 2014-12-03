@@ -32,14 +32,14 @@
  * Time: 18:25
  */
 
-package samples.set;
+package org.chocosolver.samples.set;
 
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.set.SetConstraintsFactory;
-import solver.search.strategy.SetStrategyFactory;
-import solver.variables.SetVar;
-import solver.variables.VariableFactory;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
+import org.chocosolver.solver.search.strategy.SetStrategyFactory;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Small problem to illustrate how to use set variables

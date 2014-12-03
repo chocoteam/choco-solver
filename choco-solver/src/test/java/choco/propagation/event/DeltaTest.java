@@ -25,18 +25,18 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.propagation.event;
+package org.chocosolver.choco.propagation.event;
 
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.delta.EnumDelta;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.set.SCF;
-import solver.exception.ContradictionException;
-import solver.search.strategy.ISF;
-import solver.variables.*;
-import solver.variables.delta.EnumDelta;
 
 /**
  * <br/>

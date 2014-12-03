@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
-import solver.objective.ObjectiveManager;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.SearchMonitorList;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
 import java.io.Serializable;
 

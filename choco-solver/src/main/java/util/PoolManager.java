@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util;
+package org.chocosolver.util;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;

@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.nqueen;
+package org.chocosolver.samples.nqueen;
 
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
 
 /**
  * <br/>

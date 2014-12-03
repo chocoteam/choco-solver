@@ -24,10 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
 
 /**
  * An interface to declare variable for continuous constraints (solved using IBEX).

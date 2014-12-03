@@ -32,14 +32,14 @@
  * Time: 15:48
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.variables.events.IEventType;
-import solver.variables.events.IntEventType;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 
 /**
  * Container representing a task:

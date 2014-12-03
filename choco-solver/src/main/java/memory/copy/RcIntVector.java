@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.copy;
+package org.chocosolver.memory.copy;
 
-import memory.IStateIntVector;
+import org.chocosolver.memory.IStateIntVector;
 
 /* 
  * Created by IntelliJ IDEA.

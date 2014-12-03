@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing;
+package org.chocosolver.memory.trailing;
 
-import memory.IStateIntVector;
-import memory.trailing.trail.StoredIntVectorTrail;
+import org.chocosolver.memory.IStateIntVector;
+import org.chocosolver.memory.trailing.trail.StoredIntVectorTrail;
 
 /**
  * Implements a backtrackable search vector.

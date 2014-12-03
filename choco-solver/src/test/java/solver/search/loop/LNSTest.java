@@ -24,24 +24,24 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.explanations.strategies.ExplainingCut;
+import org.chocosolver.solver.explanations.strategies.ExplainingObjective;
+import org.chocosolver.solver.explanations.strategies.RandomNeighborhood4Explanation;
+import org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch;
+import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.explanations.strategies.ExplainingCut;
-import solver.explanations.strategies.ExplainingObjective;
-import solver.explanations.strategies.RandomNeighborhood4Explanation;
-import solver.search.loop.lns.LargeNeighborhoodSearch;
-import solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
-import solver.search.loop.lns.neighbors.RandomNeighborhood;
-import solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
-import solver.search.loop.lns.neighbors.SequenceNeighborhood;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
  * <br/>

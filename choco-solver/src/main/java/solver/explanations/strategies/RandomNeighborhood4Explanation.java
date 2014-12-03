@@ -24,17 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.strategies;
+package org.chocosolver.solver.explanations.strategies;
 
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.search.loop.lns.neighbors.RandomNeighborhood;
-import solver.search.loop.monitors.IMonitorUpBranch;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.variables.IntVar;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
+import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * This class extends {@link solver.search.loop.lns.neighbors.RandomNeighborhood}, but, instead of instantiating variables

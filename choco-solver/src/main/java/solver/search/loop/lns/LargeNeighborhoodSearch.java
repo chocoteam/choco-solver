@@ -32,17 +32,17 @@
  * Time: 16:51
  */
 
-package solver.search.loop.lns;
+package org.chocosolver.solver.search.loop.lns;
 
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.search.loop.lns.neighbors.INeighbor;
-import solver.search.loop.monitors.IMonitorInterruption;
-import solver.search.loop.monitors.IMonitorRestart;
-import solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInterruption;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 
 /**
  * How to branch a Large Neighborhood Search ?

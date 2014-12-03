@@ -25,9 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.graphOperations.dominance;
+package org.chocosolver.util.graphOperations.dominance;
 
-import util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 
 /**
  * Class that finds dominators of a given flow graph g(s)

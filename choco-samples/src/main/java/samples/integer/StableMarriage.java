@@ -1,4 +1,4 @@
-package samples.integer; /**
+package org.chocosolver.samples.integer; /**
  *
  * Stable marriage problem in Choco3
  *
@@ -12,20 +12,21 @@ package samples.integer; /**
  *
  */
 
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.LogicalConstraintFactory;
+import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.LogicalConstraintFactory;
-import solver.constraints.SatFactory;
-import solver.constraints.nary.cnf.LogOp;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import util.ESat;
-import util.tools.ArrayUtils;
 
-import static solver.constraints.IntConstraintFactory.*;
-import static solver.variables.VariableFactory.*;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.alldifferent;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.element;
+import static org.chocosolver.solver.variables.VariableFactory.*;
 
 public class StableMarriage extends AbstractProblem {
 

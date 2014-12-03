@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.structure;
+package org.chocosolver.memory.structure;
 
-import memory.EnvironmentException;
-import memory.IEnvironment;
-import memory.IStateInt;
-import memory.IStateIntVector;
+import org.chocosolver.memory.EnvironmentException;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.memory.IStateIntVector;
 
 /**
  * A stored list dedicated to positive integers and three operations :

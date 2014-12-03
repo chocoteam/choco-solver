@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.circuit;
+package org.chocosolver.solver.constraints.nary.circuit;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
 
 public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 

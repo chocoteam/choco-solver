@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.serializable;
+package org.chocosolver.choco.serializable;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 import java.io.*;
 

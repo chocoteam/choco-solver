@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.Propagator;
 
 /**
  * A deduction dedicated to propagator activation.

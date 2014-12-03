@@ -25,16 +25,16 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import solver.exception.ContradictionException;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecisionSet;
-import solver.search.strategy.selectors.SetValueSelector;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.SetVar;
-import util.PoolManager;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecisionSet;
+import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.PoolManager;
 
 /**
  * Strategy for branching on set variables

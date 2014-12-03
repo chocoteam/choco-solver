@@ -24,19 +24,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.extension.nary;
+package org.chocosolver.solver.constraints.extension.nary;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.ESat;
-import util.objects.StoredSparseSet;
-import util.objects.graphs.MultivaluedDecisionDiagram;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.StoredSparseSet;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 
 /**
  * Implementation based on "Maintaining GAC on adhoc r-ary constraints", Cheng and Yap, CP12.

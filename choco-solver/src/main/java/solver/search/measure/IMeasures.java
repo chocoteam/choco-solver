@@ -25,9 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.measure;
+package org.chocosolver.solver.search.measure;
 
-import solver.search.loop.monitors.ISearchMonitor;
+import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 
 import java.io.Serializable;
 

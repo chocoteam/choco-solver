@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.cnf;
+package org.chocosolver.solver.constraints.nary.cnf;
 
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.BoolVar;
-import solver.variables.events.IntEventType;
-import util.ESat;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
 
 /**
  * <br/>

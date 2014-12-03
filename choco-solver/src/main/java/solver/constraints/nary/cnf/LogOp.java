@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.cnf;
+package org.chocosolver.solver.constraints.nary.cnf;
 
-import solver.variables.BoolVar;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Logical Operator, to ease clause definition.

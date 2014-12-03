@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.extension.nary;
+package org.chocosolver.solver.constraints.extension.nary;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import solver.variables.IntVar;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.io.Serializable;
 import java.util.Arrays;

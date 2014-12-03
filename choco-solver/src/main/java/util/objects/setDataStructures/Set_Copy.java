@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures;
 
-import memory.copy.EnvironmentCopying;
-import memory.copy.RcObject;
-import memory.copy.RecomputableElement;
-import memory.copy.store.StoredObjectCopy;
+import org.chocosolver.memory.copy.EnvironmentCopying;
+import org.chocosolver.memory.copy.RcObject;
+import org.chocosolver.memory.copy.RecomputableElement;
+import org.chocosolver.memory.copy.store.StoredObjectCopy;
 
 /**
  * Backtrable set

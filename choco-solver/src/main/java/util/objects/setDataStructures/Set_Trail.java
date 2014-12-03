@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures;
 
-import memory.structure.Operation;
-import memory.trailing.EnvironmentTrailing;
-import util.PoolManager;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.util.PoolManager;
 
 /**
  * Backtrable set

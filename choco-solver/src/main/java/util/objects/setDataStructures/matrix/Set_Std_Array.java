@@ -32,13 +32,13 @@
  * Time: 01:43
  */
 
-package util.objects.setDataStructures.matrix;
+package org.chocosolver.util.objects.setDataStructures.matrix;
 
-import memory.IEnvironment;
-import memory.IStateBool;
-import memory.IStateInt;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateBool;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * Set represented by an array of backtrable booleans

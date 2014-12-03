@@ -25,16 +25,16 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.reification.PropOpposite;
-import solver.variables.BoolVar;
-import solver.variables.VF;
-import solver.variables.Variable;
-import util.ESat;
-import util.tools.StringUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.reification.PropOpposite;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.StringUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;

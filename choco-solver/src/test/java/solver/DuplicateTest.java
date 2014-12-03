@@ -24,24 +24,24 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+package org.chocosolver.solver;
 
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.binary.PropScale;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
+import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.binary.PropScale;
-import solver.constraints.extension.Tuples;
-import solver.constraints.extension.TuplesFactory;
-import solver.constraints.nary.circuit.CircuitConf;
-import solver.constraints.set.SCF;
-import solver.constraints.ternary.PropTimesNaive;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VF;
-import util.objects.graphs.MultivaluedDecisionDiagram;
-import util.objects.setDataStructures.SetType;
 
 /**
  * <br/>

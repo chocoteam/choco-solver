@@ -24,13 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package org.chocosolver.samples;
 
-import memory.Environments;
+import org.chocosolver.memory.Environments;
+import org.chocosolver.samples.integer.AbsoluteEvaluation;
+import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.annotations.Factory;
-import samples.integer.AbsoluteEvaluation;
-import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationEngineFactory;
 
 import java.util.ArrayList;
 import java.util.List;

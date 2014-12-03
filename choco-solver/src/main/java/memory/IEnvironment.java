@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory;
+package org.chocosolver.memory;
 
-import memory.structure.BasicIndexedBipartiteSet;
-import memory.structure.Operation;
+import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
+import org.chocosolver.memory.structure.Operation;
 
 import java.io.Serializable;
 

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
 /**
  * Enumeration of variable possible states.

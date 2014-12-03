@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects;
+package org.chocosolver.util.objects;
 
 import java.io.Serializable;
 

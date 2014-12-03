@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.copy;
+package org.chocosolver.memory.copy;
 
 
-import memory.IStateBool;
+import org.chocosolver.memory.IStateBool;
 
 /**
  * <br/>

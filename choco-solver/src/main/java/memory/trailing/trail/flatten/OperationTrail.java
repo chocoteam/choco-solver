@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail.flatten;
+package org.chocosolver.memory.trailing.trail.flatten;
 
-import memory.structure.Operation;
-import memory.trailing.trail.IOperationTrail;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.trailing.trail.IOperationTrail;
 
 /**
  * Created by IntelliJ IDEA.

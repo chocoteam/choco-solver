@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.thread;
+package org.chocosolver.solver.thread;
 
 /**
  * Master a set of slaves which will work in parallel

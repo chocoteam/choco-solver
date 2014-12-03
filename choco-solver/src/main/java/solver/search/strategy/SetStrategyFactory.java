@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy;
+package org.chocosolver.solver.search.strategy;
 
-import solver.search.strategy.selectors.SetValueSelector;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.search.strategy.selectors.values.SetDomainMin;
-import solver.search.strategy.selectors.variables.InputOrder;
-import solver.search.strategy.selectors.variables.MaxDelta;
-import solver.search.strategy.selectors.variables.MinDelta;
-import solver.search.strategy.strategy.SetStrategy;
-import solver.variables.SetVar;
+import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.selectors.variables.MaxDelta;
+import org.chocosolver.solver.search.strategy.selectors.variables.MinDelta;
+import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
+import org.chocosolver.solver.variables.SetVar;
 
 /**
  * Strategies over set variables

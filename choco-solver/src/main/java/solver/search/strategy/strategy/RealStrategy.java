@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecisionReal;
-import solver.search.strategy.selectors.RealValueSelector;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.RealVar;
-import util.PoolManager;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecisionReal;
+import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.util.PoolManager;
 
 /**
  * <br/>

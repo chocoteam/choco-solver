@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.cumulative;
+package org.chocosolver.solver.constraints.nary.cumulative;
 
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Filtering (sweep-based) algorithm to filter task maximum heights

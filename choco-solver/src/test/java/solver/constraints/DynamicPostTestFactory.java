@@ -24,10 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.annotations.Factory;
-import solver.propagation.PropagationEngineFactory;
 
 import java.util.ArrayList;
 import java.util.List;

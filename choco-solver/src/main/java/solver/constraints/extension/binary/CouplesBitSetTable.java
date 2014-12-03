@@ -24,10 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.extension.binary;
+package org.chocosolver.solver.constraints.extension.binary;
 
-import solver.constraints.extension.Tuples;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.util.BitSet;
 

@@ -25,14 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
-import solver.Solver;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
-import util.tools.StringUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * Created by IntelliJ IDEA.

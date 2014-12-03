@@ -26,14 +26,14 @@
  */
 
 
-package solver.constraints.set;
+package org.chocosolver.solver.constraints.set;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.Propagator;
-import solver.variables.*;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Constraints over set variables

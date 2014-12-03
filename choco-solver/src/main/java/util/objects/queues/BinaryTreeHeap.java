@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package util.objects.queues;
+package org.chocosolver.util.objects.queues;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

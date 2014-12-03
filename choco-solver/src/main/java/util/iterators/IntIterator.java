@@ -26,7 +26,7 @@
  */
 
 
-package util.iterators;
+package org.chocosolver.util.iterators;
 
 import java.io.Serializable;
 

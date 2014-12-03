@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.sort;
+package org.chocosolver.util.sort;
 
 /**
  * Comparator to sort primitive integers (presumably indexes)

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures;
 
 import java.io.Serializable;
 

@@ -25,34 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.impl;
+package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
-import memory.structure.BasicIndexedBipartiteSet;
-import solver.Configuration;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.explanations.antidom.AntiDomBool;
-import solver.explanations.antidom.AntiDomain;
-import solver.variables.BoolVar;
-import solver.variables.VF;
-import solver.variables.VariableFactory;
-import solver.variables.delta.IEnumDelta;
-import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.NoDelta;
-import solver.variables.delta.OneValueDelta;
-import solver.variables.delta.monitor.OneValueDeltaMonitor;
-import solver.variables.events.IEventType;
-import solver.variables.events.IntEventType;
-import util.ESat;
-import util.iterators.DisposableRangeBoundIterator;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueBoundIterator;
-import util.iterators.DisposableValueIterator;
-import util.tools.StringUtils;
+import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.antidom.AntiDomBool;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.variables.delta.IEnumDelta;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.delta.OneValueDelta;
+import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueBoundIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * <br/>

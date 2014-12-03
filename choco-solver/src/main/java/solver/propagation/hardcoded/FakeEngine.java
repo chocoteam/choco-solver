@@ -24,18 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.hardcoded;
+package org.chocosolver.solver.propagation.hardcoded;
 
-import solver.Configuration;
-import solver.ICause;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.propagation.IPropagationEngine;
-import solver.variables.Variable;
-import solver.variables.events.IEventType;
-import solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 
 /**
  * An fake propagation engine for debugging uses only.

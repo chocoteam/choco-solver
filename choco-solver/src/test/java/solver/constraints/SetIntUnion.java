@@ -31,17 +31,17 @@
  * @since 08/10/14
  * Created by IntelliJ IDEA.
  */
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.set.SCF;
-import solver.search.strategy.ISF;
-import solver.trace.Chatterbox;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VF;
 
 public class SetIntUnion {
 

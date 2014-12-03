@@ -24,18 +24,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package org.chocosolver.samples;
 
-import memory.Environments;
-import memory.IEnvironment;
+import org.chocosolver.memory.Environments;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.samples.integer.AllIntervalSeries;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.AllIntervalSeries;
-import solver.Configuration;
-import solver.Solver;
-import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationEngineFactory;
 
 import java.util.Arrays;
 

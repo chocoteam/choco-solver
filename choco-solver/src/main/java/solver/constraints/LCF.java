@@ -32,6 +32,6 @@
  * Time: 19:58
  */
 
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
 public class LCF extends LogicalConstraintFactory{}

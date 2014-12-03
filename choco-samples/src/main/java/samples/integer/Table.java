@@ -1,12 +1,12 @@
-package samples.integer;
+package org.chocosolver.samples.integer;
 
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.constraints.extension.Tuples;
-import solver.search.strategy.ISF;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.Random;
 

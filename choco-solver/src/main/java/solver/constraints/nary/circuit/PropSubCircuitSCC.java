@@ -32,21 +32,21 @@
  * Time: 10:42
  */
 
-package solver.constraints.nary.circuit;
+package org.chocosolver.solver.constraints.nary.circuit;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.graphOperations.connectivity.StrongConnectivityFinder;
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
 import java.util.Random;

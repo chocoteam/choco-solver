@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.sum;
+package org.chocosolver.solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.variables.IntVar;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * <br/>

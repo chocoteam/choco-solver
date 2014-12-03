@@ -25,25 +25,25 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package org.chocosolver.choco.checker;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.extension.TuplesFactory;
-import solver.constraints.nary.nValue.PropAtLeastNValues_AC;
-import solver.constraints.nary.nValue.PropAtMostNValues_BC;
-import solver.search.strategy.ISF;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VF;
-import solver.variables.VariableFactory;
-import util.objects.graphs.MultivaluedDecisionDiagram;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
+import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
 

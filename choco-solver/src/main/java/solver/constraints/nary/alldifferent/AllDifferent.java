@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.alldifferent;
+package org.chocosolver.solver.constraints.nary.alldifferent;
 
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.constraints.binary.PropNotEqualX_Y;
-import solver.constraints.nary.cnf.PropTrue;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.binary.PropNotEqualX_Y;
+import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Ensures that all variables from VARS take a different value.

@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.procedure;
+package org.chocosolver.util.procedure;
 
-import solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.ContradictionException;
 
 import java.io.Serializable;
 

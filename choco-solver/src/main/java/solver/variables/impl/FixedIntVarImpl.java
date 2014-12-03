@@ -25,27 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.impl;
+package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IStateBool;
-import solver.Configuration;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.explanations.antidom.AntiDomBitset;
-import solver.explanations.antidom.AntiDomain;
-import solver.variables.*;
-import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.NoDelta;
-import solver.variables.events.IEventType;
-import solver.variables.events.IntEventType;
-import solver.variables.view.IView;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueIterator;
-import util.tools.StringUtils;
+import org.chocosolver.memory.IStateBool;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * A IntVar with one domain value.

@@ -25,19 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
 import gnu.trove.map.hash.THashMap;
-import solver.ICause;
-import solver.Identity;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.delta.IDelta;
-import solver.variables.events.IEventType;
-import solver.variables.view.IView;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Identity;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.delta.IDelta;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.view.IView;
 
 import java.io.Serializable;
 

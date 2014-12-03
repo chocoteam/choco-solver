@@ -31,15 +31,15 @@
  * @since 07/10/14
  * Created by IntelliJ IDEA.
  */
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.ICF;
-import solver.trace.Chatterbox;
-import solver.variables.IntVar;
-import solver.variables.VF;
 
 public class ExpTest {
 

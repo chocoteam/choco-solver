@@ -24,17 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.real;
+package org.chocosolver.solver.constraints.real;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
+import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.search.strategy.selectors.values.RealDomainMiddle;
-import solver.search.strategy.selectors.variables.Cyclic;
-import solver.search.strategy.strategy.RealStrategy;
-import solver.variables.IntVar;
-import solver.variables.RealVar;
-import solver.variables.VariableFactory;
 
 /**
  * <br/>

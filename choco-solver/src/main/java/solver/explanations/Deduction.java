@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import solver.Identity;
-import solver.variables.Variable;
+import org.chocosolver.solver.Identity;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * An abstract class to explain event occurring on variables during the search.

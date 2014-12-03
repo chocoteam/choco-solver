@@ -24,26 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.strategies;
+package org.chocosolver.solver.explanations.strategies;
 
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.BranchingDecision;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.BranchingDecision;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
-import solver.search.loop.monitors.IMonitorContradiction;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.decision.Decision;
 
-import static solver.Configuration.PRINT_EXPLANATION;
-import static solver.Configuration.PROP_IN_EXP;
-import static solver.explanations.Deduction.Type.DecLeft;
-import static solver.search.strategy.decision.RootDecision.ROOT;
+import static org.chocosolver.solver.Configuration.PRINT_EXPLANATION;
+import static org.chocosolver.solver.Configuration.PROP_IN_EXP;
+import static org.chocosolver.solver.explanations.Deduction.Type.DecLeft;
+import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
 /**
  * This class describes operations to execute to perform Conflict-based back jumping.

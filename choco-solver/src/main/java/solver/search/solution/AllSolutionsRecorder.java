@@ -25,10 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.solution;
+package org.chocosolver.solver.search.solution;
 
-import solver.Solver;
-import solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+
 import java.util.LinkedList;
 import java.util.List;
 

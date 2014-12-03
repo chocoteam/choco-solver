@@ -24,12 +24,12 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package org.chocosolver.samples;
 
+import org.chocosolver.samples.integer.*;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.Assert;
-import samples.integer.*;
-import solver.Solver;
-import solver.propagation.PropagationEngineFactory;
 
 import java.util.Arrays;
 

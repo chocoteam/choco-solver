@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.correctness;
+package org.chocosolver.choco.checker.correctness;
 
-import choco.checker.Modeler;
+import org.chocosolver.choco.checker.Modeler;
+import org.chocosolver.solver.search.loop.SearchLoops;
 import org.testng.annotations.Test;
-import solver.search.loop.SearchLoops;
 
 /**
  * <br/>

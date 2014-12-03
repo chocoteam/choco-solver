@@ -24,13 +24,13 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.nogood;
+package org.chocosolver.solver.constraints.nary.nogood;
 
-import solver.constraints.Constraint;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorRestart;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Avoid exploring same solutions (useful with restart on solution)

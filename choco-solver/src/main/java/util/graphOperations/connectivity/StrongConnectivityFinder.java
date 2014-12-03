@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.graphOperations.connectivity;
+package org.chocosolver.util.graphOperations.connectivity;
 
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.io.Serializable;
 import java.util.BitSet;

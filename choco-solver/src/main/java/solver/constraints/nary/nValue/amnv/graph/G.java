@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.graph;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
-import solver.Solver;
-import util.objects.graphs.UndirectedGraph;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * Backtrackable undirected graph

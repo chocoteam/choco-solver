@@ -25,17 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.nqueen;
+package org.chocosolver.samples.nqueen;
 
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.propagation.PropagationEngineFactory;
-import solver.variables.IntVar;
-import solver.variables.Variable;
 
 /**
  * <br/>

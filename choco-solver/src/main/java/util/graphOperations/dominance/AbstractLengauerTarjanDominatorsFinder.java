@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.graphOperations.dominance;
+package org.chocosolver.util.graphOperations.dominance;
 
 import gnu.trove.list.array.TIntArrayList;
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * Class that finds dominators of a given flow graph g(s)

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.consistency;
+package org.chocosolver.choco.checker.consistency;
 
 import org.testng.annotations.Factory;
 

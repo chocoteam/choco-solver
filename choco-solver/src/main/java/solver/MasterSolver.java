@@ -24,13 +24,13 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+package org.chocosolver.solver;
 
-import solver.exception.SolverException;
-import solver.search.bind.SearchBinderFactory;
-import solver.thread.AbstractParallelMaster;
-import solver.variables.IntVar;
-import util.ESat;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.bind.SearchBinderFactory;
+import org.chocosolver.solver.thread.AbstractParallelMaster;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ESat;
 
 /**
  * A MasterSolver which enables multi-thread resolution.

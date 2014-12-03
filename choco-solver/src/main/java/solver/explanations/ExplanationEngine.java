@@ -25,19 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.decision.Decision;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Variable;
 
 import java.io.Serializable;
 

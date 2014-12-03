@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.limits;
+package org.chocosolver.solver.search.limits;
 
-import solver.Solver;
-import solver.search.loop.monitors.IMonitorOpenNode;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 
 /**
  * A limit over run time.

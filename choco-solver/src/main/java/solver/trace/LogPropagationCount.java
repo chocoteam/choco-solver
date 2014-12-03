@@ -24,13 +24,13 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.trace;
+package org.chocosolver.solver.trace;
 
 import gnu.trove.map.hash.TObjectLongHashMap;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import util.tools.StringUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * <br/>

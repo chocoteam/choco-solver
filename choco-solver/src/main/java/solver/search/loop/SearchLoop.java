@@ -25,30 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
-import memory.IEnvironment;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
+import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.objective.ObjectiveManager;
-import solver.search.bind.ISearchBinder;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.SearchMonitorList;
-import solver.search.measure.IMeasures;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.Variable;
-import util.ESat;
 
-import static solver.objective.ObjectiveManager.SAT;
-import static solver.propagation.NoPropagationEngine.SINGLETON;
-import static solver.search.bind.SearchBinderFactory.getSearchBinder;
-import static solver.search.loop.Reporting.fullReport;
-import static solver.search.strategy.decision.RootDecision.ROOT;
-import static util.ESat.*;
+import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
+import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
+import static org.chocosolver.solver.search.bind.SearchBinderFactory.getSearchBinder;
+import static org.chocosolver.solver.search.loop.Reporting.fullReport;
+import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object

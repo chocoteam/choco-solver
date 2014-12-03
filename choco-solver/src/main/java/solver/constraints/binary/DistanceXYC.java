@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.binary;
+package org.chocosolver.solver.constraints.binary;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Operator;
-import solver.exception.SolverException;
-import solver.variables.IntVar;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Ensures: <br/>

@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.antidom;
+package org.chocosolver.solver.explanations.antidom;
 
-import memory.IEnvironment;
-import memory.IStateInt;
-import solver.exception.SolverException;
-import solver.variables.IntVar;
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
  * Created by IntelliJ IDEA.

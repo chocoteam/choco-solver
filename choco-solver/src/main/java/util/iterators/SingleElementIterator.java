@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.iterators;
+package org.chocosolver.util.iterators;
 
 public final class SingleElementIterator<E> extends DisposableIterator<E> {
 

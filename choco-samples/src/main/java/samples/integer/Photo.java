@@ -24,21 +24,21 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples.integer;
+package org.chocosolver.samples.integer;
 
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
-import samples.AbstractProblem;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.StringUtils;
 
-import static solver.constraints.IntConstraintFactory.*;
-import static solver.constraints.LogicalConstraintFactory.ifThenElse;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.alldifferent;
+import static org.chocosolver.solver.constraints.LogicalConstraintFactory.ifThenElse;
 
 /**
  * <a href="http://www.gecode.org">gecode</a>:<br/>

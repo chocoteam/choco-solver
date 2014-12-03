@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.antidom;
+package org.chocosolver.solver.explanations.antidom;
 
-import util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
  * An interface for anti-domain, ie, values removed from a specific domain.

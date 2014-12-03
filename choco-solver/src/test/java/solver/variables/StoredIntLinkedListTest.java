@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import memory.trailing.EnvironmentTrailing;
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_Std_LinkedList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import util.objects.setDataStructures.linkedlist.Set_Std_LinkedList;
 
 /**
  * <br/>

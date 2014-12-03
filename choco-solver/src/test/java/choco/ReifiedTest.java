@@ -25,30 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco;
+package org.chocosolver.choco;
 
-import choco.checker.DomainBuilder;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.LogicalConstraintFactory;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
-import solver.exception.ContradictionException;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static solver.constraints.IntConstraintFactory.member;
-import static solver.constraints.IntConstraintFactory.not_member;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.member;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.not_member;
 
 /**
  * <br/>

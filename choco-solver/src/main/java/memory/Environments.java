@@ -24,10 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory;
+package org.chocosolver.memory;
 
-import memory.copy.EnvironmentCopying;
-import memory.trailing.EnvironmentTrailing;
+import org.chocosolver.memory.copy.EnvironmentCopying;
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
 
 /**
  * <br/>

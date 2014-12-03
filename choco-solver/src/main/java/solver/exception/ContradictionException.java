@@ -25,13 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.exception;
+package org.chocosolver.solver.exception;
 
-import solver.Cause;
-import solver.ICause;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.Variable;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * A specific <code>Exception</code> to deal with contradiction.

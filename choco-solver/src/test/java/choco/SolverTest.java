@@ -25,16 +25,16 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco;
+package org.chocosolver.choco;
 
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.exception.SolverException;
-import solver.search.strategy.IntStrategyFactory;
-import solver.variables.*;
 
 import java.text.MessageFormat;
 

@@ -24,17 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
+package org.chocosolver.solver.variables;
 
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ternary.Max;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Configuration;
-import solver.Solver;
-import solver.constraints.ternary.Max;
-import solver.exception.ContradictionException;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

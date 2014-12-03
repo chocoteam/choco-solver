@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.extension;
+package org.chocosolver.solver.constraints.extension;
 
-import solver.exception.SolverException;
+import org.chocosolver.solver.exception.SolverException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

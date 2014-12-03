@@ -24,19 +24,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.nValue;
+package org.chocosolver.solver.constraints.nary.nValue;
 
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.constraints.nary.nValue.amnv.graph.G;
-import solver.constraints.nary.nValue.amnv.mis.F;
-import solver.constraints.nary.nValue.amnv.rules.R;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.IntEventType;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.nary.nValue.amnv.graph.G;
+import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
+import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Propagator for the atMostNValues constraint

@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata.FA;
+package org.chocosolver.solver.constraints.nary.automata.FA;
 
-import solver.constraints.nary.automata.FA.utils.Counter;
-import solver.constraints.nary.automata.FA.utils.CounterState;
-import solver.constraints.nary.automata.FA.utils.ICounter;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
+import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
 import java.util.List;

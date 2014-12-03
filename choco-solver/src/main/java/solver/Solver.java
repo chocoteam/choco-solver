@@ -25,37 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver;
+package org.chocosolver.solver;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import memory.Environments;
-import memory.IEnvironment;
-import solver.constraints.Constraint;
-import solver.constraints.ICF;
-import solver.constraints.Propagator;
-import solver.constraints.nary.cnf.PropFalse;
-import solver.constraints.nary.cnf.PropTrue;
-import solver.constraints.nary.cnf.SatConstraint;
-import solver.constraints.real.Ibex;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.ExplanationEngine;
-import solver.objective.ObjectiveManager;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.NoPropagationEngine;
-import solver.propagation.PropagationTrigger;
-import solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import solver.search.loop.ISearchLoop;
-import solver.search.loop.SearchLoop;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.measure.IMeasures;
-import solver.search.measure.MeasuresRecorder;
-import solver.search.solution.*;
-import solver.search.strategy.ISF;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.*;
-import util.ESat;
+import org.chocosolver.memory.Environments;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
+import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
+import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
+import org.chocosolver.solver.constraints.real.Ibex;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.propagation.PropagationTrigger;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.loop.SearchLoop;
+import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
+import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.measure.MeasuresRecorder;
+import org.chocosolver.solver.search.solution.*;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.ESat;
 
 import java.io.*;
 import java.util.Arrays;

@@ -25,23 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.impl;
+package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.SetVar;
-import solver.variables.delta.SetDelta;
-import solver.variables.delta.monitor.SetDeltaMonitor;
-import solver.variables.events.IEventType;
-import solver.variables.events.SetEventType;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
-import util.tools.StringUtils;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.SetDelta;
+import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.tools.StringUtils;
 
 import java.util.BitSet;
 

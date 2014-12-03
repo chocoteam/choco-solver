@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package org.chocosolver.solver.variables;
 
-import solver.ICause;
-import solver.constraints.nary.cnf.ILogical;
-import solver.exception.ContradictionException;
-import util.ESat;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.nary.cnf.ILogical;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.util.ESat;
 
 /**
  * <br/>

@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
-import solver.Configuration;
-import solver.constraints.Propagator;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.constraints.Propagator;
 
 import java.util.ArrayList;
 import java.util.List;

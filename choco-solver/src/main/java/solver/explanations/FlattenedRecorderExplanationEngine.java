@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import solver.Solver;
-import solver.explanations.antidom.AntiDomain;
-import solver.variables.IntVar;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Created by IntelliJ IDEA.

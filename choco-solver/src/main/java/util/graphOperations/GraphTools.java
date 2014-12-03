@@ -24,10 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package util.graphOperations;
+package org.chocosolver.util.graphOperations;
 
-import util.objects.graphs.DirectedGraph;
-import util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
 

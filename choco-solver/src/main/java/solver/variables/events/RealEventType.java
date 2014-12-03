@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.events;
+package org.chocosolver.solver.variables.events;
 
 /**
  * An enum defining the real variable event types:

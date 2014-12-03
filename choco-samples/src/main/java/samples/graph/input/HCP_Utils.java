@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph.input;
+package org.chocosolver.samples.graph.input;
 
 import gnu.trove.list.array.TIntArrayList;
 

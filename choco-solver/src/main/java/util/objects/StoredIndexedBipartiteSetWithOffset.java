@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects;
+package org.chocosolver.util.objects;
 
-import memory.IEnvironment;
-import memory.structure.IndexedObject;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.structure.IndexedObject;
 
 import java.util.ArrayList;
 

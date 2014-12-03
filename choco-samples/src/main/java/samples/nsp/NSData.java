@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.nsp;
+package org.chocosolver.samples.nsp;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 

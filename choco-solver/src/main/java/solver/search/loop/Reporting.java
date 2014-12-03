@@ -24,14 +24,14 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop;
+package org.chocosolver.solver.search.loop;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
-import util.ESat;
-import util.tools.StringUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.StringUtils;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

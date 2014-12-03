@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.extension.binary;
+package org.chocosolver.solver.constraints.extension.binary;
 
 public abstract class BinRelation {
 

@@ -25,24 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.binary;
+package org.chocosolver.solver.constraints.binary;
 
 import gnu.trove.map.hash.THashMap;
-import memory.IEnvironment;
-import memory.structure.Operation;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.events.IntEventType;
-import util.ESat;
-import util.iterators.DisposableValueIterator;
-import util.tools.ArrayUtils;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * VALUE = TABLE[INDEX]

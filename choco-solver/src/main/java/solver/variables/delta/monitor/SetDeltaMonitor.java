@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.monitor;
+package org.chocosolver.solver.variables.delta.monitor;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.variables.delta.ISetDelta;
-import solver.variables.delta.ISetDeltaMonitor;
-import solver.search.loop.TimeStampedObject;
-import solver.variables.events.SetEventType;
-import util.procedure.IntProcedure;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.TimeStampedObject;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * @author Jean-Guillaume Fages

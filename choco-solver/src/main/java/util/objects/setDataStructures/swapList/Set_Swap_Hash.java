@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package util.objects.setDataStructures.swapList;
+package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * List of m elements based on Array int_swaping with an HashMap

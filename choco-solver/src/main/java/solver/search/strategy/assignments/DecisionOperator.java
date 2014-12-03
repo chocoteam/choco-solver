@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.assignments;
+package org.chocosolver.solver.search.strategy.assignments;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.Variable;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 
 import java.io.Serializable;
 

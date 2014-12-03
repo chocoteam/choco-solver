@@ -25,9 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package org.chocosolver.solver.explanations;
 
-import solver.variables.Variable;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * A specific deduction : value removal.

@@ -25,12 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.solution;
+package org.chocosolver.solver.search.solution;
 
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorClose;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.variables.IntVar;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Class to store best solutions found.

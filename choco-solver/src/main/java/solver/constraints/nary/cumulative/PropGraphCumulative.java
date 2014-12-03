@@ -24,16 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.cumulative;
+package org.chocosolver.solver.constraints.nary.cumulative;
 
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.events.PropagatorEventType;
-import util.objects.graphs.UndirectedGraph;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
-import util.sort.ArraySort;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.sort.ArraySort;
 
 import java.util.BitSet;
 import java.util.Comparator;

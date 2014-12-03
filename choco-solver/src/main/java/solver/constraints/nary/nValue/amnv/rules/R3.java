@@ -25,17 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.nValue.amnv.rules;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.nary.nValue.amnv.mis.F;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import util.objects.graphs.UndirectedGraph;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
 

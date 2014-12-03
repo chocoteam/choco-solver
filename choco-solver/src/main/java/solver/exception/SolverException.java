@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.exception;
+package org.chocosolver.solver.exception;
 
+import org.chocosolver.solver.Solver;
 import org.slf4j.LoggerFactory;
-import solver.Solver;
 
 /**
  * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the

@@ -24,23 +24,23 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import memory.structure.Operation;
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.propagation.IPropagationEngine;
-import solver.search.strategy.decision.Decision;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.events.IEventType;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.tools.ArrayUtils;
+import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * A strategy, dedicated to IntVars, that simulates a Generate and Test behavior through a specific internal decision.

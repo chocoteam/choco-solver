@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.cnf;
+package org.chocosolver.solver.constraints.nary.cnf;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import util.ESat;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.util.ESat;
 
 /**
  * <br/>

@@ -26,15 +26,14 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import choco.checker.DomainBuilder;
+import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.set.SCF;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VF;
 
 import java.util.Arrays;
 import java.util.Random;

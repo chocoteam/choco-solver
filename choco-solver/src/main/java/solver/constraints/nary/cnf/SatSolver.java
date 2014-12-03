@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.cnf;
+package org.chocosolver.solver.constraints.nary.cnf;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;

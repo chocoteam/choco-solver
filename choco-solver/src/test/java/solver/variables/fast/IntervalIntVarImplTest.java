@@ -24,16 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.fast;
+package org.chocosolver.solver.variables.fast;
 
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.variables.Variable;
-import solver.variables.impl.IntervalIntVarImpl;
-import util.iterators.DisposableRangeIterator;
-import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

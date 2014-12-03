@@ -31,10 +31,10 @@
  * @since 03/04/14
  * Created by IntelliJ IDEA.
  */
-package solver.constraints.nary.nValue.amnv.differences;
+package org.chocosolver.solver.constraints.nary.nValue.amnv.differences;
 
-import solver.constraints.Propagator;
-import solver.variables.Variable;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * automatic detection of binary disequalities and alldifferent constraints

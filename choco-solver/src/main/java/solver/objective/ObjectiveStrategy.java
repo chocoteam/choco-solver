@@ -32,19 +32,19 @@
  * Time: 15:39
  */
 
-package solver.objective;
+package org.chocosolver.solver.objective;
 
-import solver.ICause;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SMF;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import util.PoolManager;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.PoolManager;
 
 /**
  * Class that defines a branching strategy over the objective variable

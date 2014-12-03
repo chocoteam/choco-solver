@@ -25,17 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints;
+package org.chocosolver.solver.constraints;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.reification.PropReif;
-import solver.exception.ContradictionException;
-import solver.variables.BoolVar;
-import solver.variables.Variable;
-import solver.variables.events.PropagatorEventType;
-import util.ESat;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.reification.PropReif;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.HashSet;
 import java.util.Set;

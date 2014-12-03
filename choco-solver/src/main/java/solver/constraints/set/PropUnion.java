@@ -32,20 +32,20 @@
  * Time: 16:36
  */
 
-package solver.constraints.set;
+package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.map.hash.THashMap;
-import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.SetVar;
-import solver.variables.delta.ISetDeltaMonitor;
-import solver.variables.events.PropagatorEventType;
-import solver.variables.events.SetEventType;
-import util.ESat;
-import util.procedure.IntProcedure;
-import util.tools.ArrayUtils;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.tools.ArrayUtils;
 
 public class PropUnion extends Propagator<SetVar> {
 

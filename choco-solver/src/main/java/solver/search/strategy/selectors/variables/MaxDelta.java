@@ -24,11 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.selectors.variables;
+package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import solver.search.strategy.selectors.VariableEvaluator;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.variables.SetVar;
+import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.variables.SetVar;
 
 /**
  * Selects the variables maximising envelopeSize-kernelSize.

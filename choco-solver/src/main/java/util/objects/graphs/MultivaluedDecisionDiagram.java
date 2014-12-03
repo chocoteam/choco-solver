@@ -1,10 +1,10 @@
-package util.objects.graphs;
+package org.chocosolver.util.objects.graphs;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import solver.Configuration;
-import solver.constraints.extension.Tuples;
-import solver.variables.IntVar;
+import org.chocosolver.solver.Configuration;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.io.Serializable;
 import java.util.ArrayList;

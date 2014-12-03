@@ -24,10 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.trailing.trail.unsafe;
+package org.chocosolver.memory.trailing.trail.unsafe;
 
-import memory.trailing.StoredDouble;
-import memory.trailing.trail.IStoredDoubleTrail;
+import org.chocosolver.memory.trailing.StoredDouble;
+import org.chocosolver.memory.trailing.trail.IStoredDoubleTrail;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;

@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker.correctness;
+package org.chocosolver.choco.checker.correctness;
 
+import org.chocosolver.solver.search.loop.SearchLoops;
 import org.testng.annotations.Factory;
-import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
