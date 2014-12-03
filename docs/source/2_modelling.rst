@@ -170,6 +170,18 @@ An integer variable is based on domain made with integer values.
 There exists under three different forms: **bounded**, **enumerated** or **boolean**.
 An alternative is to declare variable-based views.
 
+.. important::
+
+    It is highly advisable not to define domain like ``[Integer.MIN_VALUE, Integer.MAX_VALUE]``.
+    Indeed, such domain definition may lead to :
+
+    - incorrect domain size (``Integer.MAX_VALUE - Integer.MIN_VALUE +1 = 0``)
+    - and to numeric overflow/underflow operations during propagation.
+
+    If *undefined* domain is really required, the following range should be considered:
+    ``[VariableFactory.MIN_INT_BOUND, VariableFactory.MAX_INT_BOUND]``.
+    Such an interval defines `42949673` values, from `-21474836` to `21474836`.
+
 Bounded variable
 ^^^^^^^^^^^^^^^^
 
