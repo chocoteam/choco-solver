@@ -88,7 +88,7 @@ public class ExplanationTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ignored")
     public void testNosolCBJThread1() {
         long pn = 0;
         for (int n = 7; n < 100; n++) {

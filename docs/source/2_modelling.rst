@@ -507,6 +507,7 @@ Available constraints
 :ref:`51_scstr_icha`,
 :ref:`51_scstr_max`,
 :ref:`51_scstr_mem`,
+:ref:`51_scstr_nme`,
 :ref:`51_scstr_min`,
 :ref:`51_scstr_sum`.
 
