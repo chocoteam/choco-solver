@@ -123,7 +123,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>memory.generator.CodeGenerator</mainClass>
+                            <mainClass>org.chocosolver.memory.generator.CodeGenerator</mainClass>
                             <arguments>
                                 &lt;!&ndash;<argument>-c</argument>&ndash;&gt;
                                 <argument>${basedir}/src/main/resources/</argument>
