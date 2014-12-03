@@ -45,7 +45,7 @@ import org.testng.annotations.Test;
  */
 public class RestartTest {
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test1() {
 
         for (int j = 1; j < 5; j++) {

@@ -74,7 +74,7 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testOneAllDiff() {
         int nbSol = 1;
         for (int k = 2; k <= 9; k++) {

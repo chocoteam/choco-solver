@@ -260,7 +260,7 @@ public class TableTest {
 
     @Test(groups = "1m")
     public void testRandom() {
-        int[][] params = {{3, 1, 3}, {5, 2, 9}, {5, -2, 3}, {10, 2, 4}};
+        int[][] params = {{3, 1, 3}, {5, 2, 9}, {5, -2, 3}, {7, 2, 4}};
         final Random rnd = new Random();
         for (int p = 0; p < params.length; p++) {
             for (long seed = 0; seed < 10; seed++) {

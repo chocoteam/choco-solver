@@ -94,7 +94,7 @@ public class MaxViewTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testMax2() {
         Random random = new Random();
         for (int seed = 169; seed < 9999; seed++) {

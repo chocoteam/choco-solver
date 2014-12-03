@@ -41,6 +41,7 @@ import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuided
 import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
@@ -57,7 +58,6 @@ public class LNSTest {
     IntVar[] vars;
 
     private void knapsack20(final int lns) {
-
         int[] capacities = {99, 1101};
         int[] volumes = {54, 12, 47, 33, 30, 65, 56, 57, 91, 88, 77, 99, 29, 23, 39, 86, 12, 85, 22, 64};
         int[] energies = {38, 57, 69, 90, 79, 89, 28, 70, 38, 71, 46, 41, 49, 43, 36, 68, 92, 33, 84, 90};
@@ -114,7 +114,7 @@ public class LNSTest {
             case 6:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new ExplainingObjective(solver, 200, 123456L), true));
-                SearchMonitorFactory.limitThreadTime(solver, 200000);
+                SearchMonitorFactory.limitThreadTime(solver, 2000);
                 break;
             case 7:
                 SequenceNeighborhood ngb = new SequenceNeighborhood(
@@ -122,15 +122,16 @@ public class LNSTest {
                         new ExplainingCut(solver, 200, 123456L),
                         new RandomNeighborhood4Explanation(solver, objects, 200, 123456L));
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver, ngb, true));
-                SearchMonitorFactory.limitThreadTime(solver, 200000);
+                SearchMonitorFactory.limitThreadTime(solver, 2000);
                 break;
         }
 
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
+        Chatterbox.printShortStatistics(solver);
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "10s")
     public void test1() {
         // opt: 8372
         knapsack20(0);

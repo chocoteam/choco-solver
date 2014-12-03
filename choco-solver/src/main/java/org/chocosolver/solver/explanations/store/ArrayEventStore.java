@@ -76,7 +76,7 @@ public class ArrayEventStore implements IEventStore {
         }
         assert cause != Cause.Null : "cause null";
         int idx = size.get();
-        if (idx > varChunks.length) {
+        if (idx >= varChunks.length) {
             increase();
         }
         varChunks[idx] = var;

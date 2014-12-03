@@ -133,7 +133,7 @@ public class OffsetViewTest {
         return s;
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
@@ -163,7 +163,7 @@ public class OffsetViewTest {
 
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testRandom3() {
         int N = 9999;
         for (int i = 1; i < 10; i++) {

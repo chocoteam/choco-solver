@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 public class BottleneckTest {
 
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testStynes1() {
         for (int n = 100; n < 201; n += 50) {
             Solver solver = new Solver();
@@ -72,7 +72,7 @@ public class BottleneckTest {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "10s")
     public void testStynes2() {
         int n = 10000;
         {

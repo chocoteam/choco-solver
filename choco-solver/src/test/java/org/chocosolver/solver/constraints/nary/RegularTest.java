@@ -154,7 +154,7 @@ public class RegularTest {
 
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void isCorrect2() {
         Solver solver = new Solver();
 
@@ -183,7 +183,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1594323);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void compareVersionSpeedNew() {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
@@ -200,7 +200,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4371696);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1s")
     public void compareVersionSpeedNew2() {
         int n = 5;
         FiniteAutomaton auto = new FiniteAutomaton("(0|<10>|<20>)*(0|<10>)");

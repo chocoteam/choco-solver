@@ -54,19 +54,19 @@ import org.testng.annotations.Test;
  */
 public class HamiltonianPathTest {
 
-	private final static long TIME_LIMIT = 3000;
+	private final static long TIME_LIMIT = 2000;
 
-	@Test(groups = "10m")
+	@Test(groups = "1m")
 	public static void test() {
-		int[] sizes = new int[]{20, 50};
+		int[] sizes = new int[]{20, 40};
 		long s;
 		int[] nbVoisins = new int[]{3, 5, 10};
 		boolean[][] matrix;
 		for (int n : sizes) {
 			for (int nb : nbVoisins) {
-				for (int ks = 0; ks < 50; ks++) {
+				for (int ks = 0; ks < 20; ks++) {
 					s = System.currentTimeMillis();
-//					System.out.println("n:" + n + " nbVoisins:" + nb + " s:" + s);
+					System.out.println("n:" + n + " nbVoisins:" + nb + " s:" + s);
 					GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = transformMatrix(gg.neighborBasedGenerator(nb));
 					testInt(matrix, s, true, false);

@@ -7,7 +7,6 @@ env:
   - GROUP=1s
   - GROUP=10s
   - GROUP=1m
-  - GROUP=10m
   - GROUP="correctness.*"
   - GROUP="consistency.*"
 script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP

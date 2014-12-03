@@ -134,7 +134,7 @@ public class ScaleViewTest {
         return s;
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {

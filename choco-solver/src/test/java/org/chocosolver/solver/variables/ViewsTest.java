@@ -301,7 +301,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void test2() {
         // Z = X - Y
         for (int seed = 0; seed < 9999; seed++) {
