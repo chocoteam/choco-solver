@@ -37,7 +37,7 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.constraints.IntConstraintFactory.alldifferent;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
 import static org.chocosolver.solver.constraints.LogicalConstraintFactory.ifThenElse;
 
 /**

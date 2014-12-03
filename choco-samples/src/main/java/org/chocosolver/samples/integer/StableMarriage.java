@@ -24,8 +24,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.constraints.IntConstraintFactory.alldifferent;
-import static org.chocosolver.solver.constraints.IntConstraintFactory.element;
+import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
 import static org.chocosolver.solver.variables.VariableFactory.*;
 
 public class StableMarriage extends AbstractProblem {
