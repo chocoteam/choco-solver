@@ -63,10 +63,10 @@ public class ExplanationTest {
 
     private final ExplanationFactory[] engines = {ExplanationFactory.NONE, ExplanationFactory.CBJ, ExplanationFactory.DBT};
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testNosol0() {
         long pn = 0;
-        for (int n = 5; n < 10; n++) {
+        for (int n = 4; n < 9; n++) {
             for (int e = 0; e < engines.length - 1; e++) {
                 for (int flat = 0; flat < 2; flat++) {
                     final Solver solver = new Solver();

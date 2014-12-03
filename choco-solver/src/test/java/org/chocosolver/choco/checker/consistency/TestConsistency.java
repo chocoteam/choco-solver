@@ -103,7 +103,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, null, seed + i, "ac");
     }
 
-    @Test(groups = "consistency.30m")
+    @Test(groups = "ignored")
     public void testALLDIFFERENT4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
