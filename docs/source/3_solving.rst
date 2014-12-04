@@ -581,6 +581,8 @@ will return false if the second option is used.
 
     :ref:`Large Neighborhood Search <41_LNS_label>`, :ref:`Explanations <43_explanations_label>`.
 
+.. _34_chatternbox_label:
+
 Resolution statistics
 =====================
 

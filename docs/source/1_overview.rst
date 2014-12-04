@@ -169,7 +169,7 @@ As a Maven Dependency
 ---------------------
 
 Choco is build and managed using `Maven3 <http://maven.apache.org/download.cgi>`_.
-To declare Choco as a dependency of your project, simply update the ``pom.xml`` of your project by adding the following instruction:
+Choco is available on Maven Central Repository, to declare Choco as a dependency of your project, simply update the ``pom.xml`` of your project by adding the following instruction:
 
 .. code-block:: xml
 
@@ -182,16 +182,6 @@ To declare Choco as a dependency of your project, simply update the ``pom.xml`` 
 where ``X.Y.Z`` is replaced by |release|.
 Note that the artifact does not include any dependencies or `logback.xml`.
 Please, refer to `README.md` for the list of required dependencies.
-
-You need to add a new repository to the list of declared ones in the ``pom.xml`` of your project:
-
-.. code-block:: xml
-
- <repository>
-   <id>choco.repos</id>
-   <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
- </repository>
-
 
 Compiling sources
 -----------------
@@ -472,10 +462,18 @@ Choco |version| : changes
 3.3.0
 -----
 
-- :ref:`512_constraint_things_to_know`
-- :ref:`512_automaton`
-- :ref:`542_complex_clauses`
-- :ref:`41_settings_label`
-- :ref:`31_searchbinder`
+- Addition:
+    - :ref:`512_constraint_things_to_know`
+    - :ref:`512_automaton`
+    - :ref:`542_complex_clauses`
+    - :ref:`41_settings_label`
+    - :ref:`31_searchbinder`
+    - :ref:`34_chatternbox_label`
 
+- New constraints:
+    - :ref:`51_icstr_mdd`
+    - :ref:`51_scstr_nme`
 
+-  Major modification:
+    - :ref:`44_multithreading_label`
+    - :ref:`45_define_search_label`

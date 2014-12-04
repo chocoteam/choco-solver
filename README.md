@@ -70,19 +70,8 @@ The next step is to add the jar file to your classpath of your application and a
 
 ### Inside a maven project ###
 
-The maven artifact is available through a private repository
-so you have first to edit your `pom.xml` to declare it:
-
-```xml
-<repositories>
-    <repository>
-        <id>choco.repos</id>
-        <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
-    </repository>
-</repositories>
-```
-
-Next, just declare the following library dependency:
+Choco is available on Maven Central Repository.
+So you only have to edit your `pom.xml` to declare the following library dependency:
 
 ```xml
 <dependency>
