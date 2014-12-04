@@ -101,7 +101,7 @@ You can also download them using github features.
 Once downloaded, move to the source directory then execute the following command
 to make the jar:
 
-    $ mvn clean install -DskipTests
+    $ mvn clean package -DskipTests
 
 If the build succeeded, the resulting jar will be automatically
 installed in your local maven repository and available in the `target` sub-folders.
