@@ -52,7 +52,7 @@ The name of the jar file terms the packaging: `choco-solver-3.3.0-with-dependenc
 
 The jar files can be downloaded from this URL:
 
-* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/3.2.2/
+* http://choco-solver.org/?q=Download
 
 ### As a stand-alone application ###
 
@@ -101,7 +101,7 @@ You can also download them using github features.
 Once downloaded, move to the source directory then execute the following command
 to make the jar:
 
-    $ mvn clean install -DskipTests
+    $ mvn clean package -DskipTests
 
 If the build succeeded, the resulting jar will be automatically
 installed in your local maven repository and available in the `target` sub-folders.

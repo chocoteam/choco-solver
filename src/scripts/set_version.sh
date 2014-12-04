@@ -42,6 +42,9 @@ then
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
     sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD licence \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
 
+    ## The LICENSE
+    sedInPlace "s%Copyright.*.%Copyright (c) $YEAR,%"  LICENSE
+
     ## The configuration file
     sedInPlace "s%.*Constraint Programming Solver, Copyleft.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR\";%"  choco-solver/src/main/java/org/chocosolver/solver/Settings.java
 

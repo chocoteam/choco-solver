@@ -90,6 +90,59 @@
         </snapshotRepository>
     </distributionManagement>
 
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- We need the GPG Plugin to self-sign the jar files. A valid signature
+                        for the jar files is a requirement for deploying to Maven Central. -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.10.1</version>
+                        <configuration>
+                            <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
+                            <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
+                            <!--<quiet />-->
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -107,15 +160,16 @@
                 <artifactId>maven-license-plugin</artifactId>
                 <version>1.10.b1</version>
                 <configuration>
-                    <header>src/etc/header.txt</header>
+                    <header>LICENSE</header>
                     <failIfMissing>false</failIfMissing>
+                    <strictCheck>true</strictCheck>
                     <aggregate>true</aggregate>
-                    <properties>
-                        <owner1>Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241)</owner1>
-                        <owner2>Jean-Guillaume Fages (COSLING S.A.S.)</owner2>
-                        <email>choco@mines-nantes.fr</email>
-                        <year>2014</year>
-                    </properties>
+                    <!--<properties>-->
+                        <!--<owner1>Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241)</owner1>-->
+                        <!--<owner2>Jean-Guillaume Fages (COSLING S.A.S.)</owner2>-->
+                        <!--<email>choco@mines-nantes.fr</email>-->
+                        <!--<year>2014</year>-->
+                    <!--</properties>-->
                     <includes>
                         <include>**/*.java</include>
                     </includes>
@@ -167,40 +221,6 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
-                <configuration>
-                    <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
-                    <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
-                    <!--<quiet />-->
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>deploy</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
