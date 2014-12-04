@@ -6,11 +6,15 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
-- Update User Guide (#217,#245)
+- Preparation to MCR (#248)
+- Update User Guide (#226, #243, #245)
 - Add modifiable settings (#250)
 - Simplify search binder (#229)
+- All propagators of constraint factory allow duplication (#217)
+- Update license and header (#241)
+- Rollback to old release process (#246)
 
-Bug fixes: #246, #226, #255, #258, #215
+Bug fixes: #215, #252, #253, #255, #256, #258
 
 3.2.2 - 17 Nov 2014
 -------------------

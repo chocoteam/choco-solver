@@ -85,7 +85,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 
 The required dependencies for compilation are:
 
-    jgrapht:jgrapht:jar:0.8.1
+    org.javabits.jgrapht:jgrapht-core:jar:0.9.3
     dk.brics.automaton:automaton:jar:1.11-8
     args4j:args4j:jar:2.0.29
     net.sf.trove4j:trove4j:jar:3.0.3

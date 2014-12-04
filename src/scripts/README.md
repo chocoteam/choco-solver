@@ -10,6 +10,7 @@ This document reports the release process.
 2. Check maven dependencies, update if necessary, and clean also (using archiva f-ex.)
 
     $ mvn versions:display-dependency-updates
+
     $ mvn versions:display-plugin-updates
 
 And update README.md with the correct versions of dependencies
@@ -19,29 +20,24 @@ And update README.md with the correct versions of dependencies
 3. Generate PDF documentation
 
     $ cd docs/
+
     $ make latexpdf
 
 4. Check that ALL issues are reported in CHANGES.md files
 
-5. Mount the /Volumes/choco-repo samba point (required to upload files for maven)
+    $ git log master..develop | grep "#[0-9]"
 
-6. The release process relies on Travis and is executed automatically once a 'release' branch is pushed. So simply call:
+5. Run the command :
 
-    ./src/scripts/release.sh
+    $ ./src/scripts/release.sh
 
+    $ ./src/scripts/build.sh
 
-7. Then, everything is achieved by Travis.
-Or, one can run the command by itself:
-
-    ./src/scripts/build.sh
-
-However, deployment and zip file (jar files, user guide, logback configuration file and javadoc) need to be done locally:
+    However, deployment and zip file (jar files, user guide, logback configuration file and javadoc) need to be done locally:
 
     ./src/scripts/package.sh X.Y.Z
 
-7. Publish choco-repo/ intranet to internet
-
-8. Upload the zip file onto the website
+6. Upload the zip file onto the website
 
 ===================
 The Choco3 dev team.
