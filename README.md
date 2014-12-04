@@ -52,7 +52,7 @@ The name of the jar file terms the packaging: `choco-solver-3.3.0-with-dependenc
 
 The jar files can be downloaded from this URL:
 
-* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/3.2.2/
+* https://github.com/chocoteam/choco3/releases/tag/choco-3.3.0
 
 ### As a stand-alone application ###
 
