@@ -5,7 +5,7 @@ VERSION=$2
 echo "${LOCAL}"
 set -x
 git -C ${LOCAL} init
-git -C ${LOCAL} remote add origin git@github.com:btrplace/${REMOTE} || exit 1
+git -C ${LOCAL} remote add origin git@github.com:chocoteam/${REMOTE} || exit 1
 git -C ${LOCAL} pull origin gh-pages || exit 1
 git -C ${LOCAL} checkout gh-pages || exit 1
 

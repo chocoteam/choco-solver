@@ -1,4 +1,4 @@
-<configuration>
+<configuration debug="false">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -8,12 +8,8 @@
 
     <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
 
-    <logger name="choco" level="WARN"/>
-    <logger name="choco.util" level="INFO"/>
-    <logger name="bench" level="info"/>
-    <logger name="solver" level="info"/>
-    <logger name="explainer" level="info"/>
-    <root level="error">
+    <logger name="solver" level="off"/>
+    <root level="off">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

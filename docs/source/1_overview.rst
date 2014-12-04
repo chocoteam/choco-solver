@@ -85,7 +85,7 @@ A reference to this manual, or more globally to Choco |version|, is made like th
       author        = {Charles Prud'homme, Jean-Guillaume Fages, Xavier Lorca},
       title         = {Choco3 Documentation},
       year          = {2014},
-      organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241},
+      organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241, COSLING S.A.S.},
       timestamp     = {Thu, 02 Oct 2014},
       url           = {http://www.choco-solver.org },
     }
@@ -93,17 +93,17 @@ A reference to this manual, or more globally to Choco |version|, is made like th
 Who contribute to Choco ?
 =========================
 
-+------------------------------------+-----------------------------------------------------------------------------+
-|**Core developers**                 |  Charles Prud'homme and Jean-Guillaume Fages.                               |
-+------------------------------------+-----------------------------------------------------------------------------+
-+------------------------------------+-----------------------------------------------------------------------------+
-|**Main contributors**               |  Xavier Lorca, Narendra Jussien, Fabien Hermenier, Jimmy Liang.             |
-+------------------------------------+-----------------------------------------------------------------------------+
-+------------------------------------+-----------------------------------------------------------------------------+
-|**Previous versions contributors**  |  François Laburthe, Hadrien Cambazard, Guillaume Rochart, Arnaud Malapert,  |
-|                                    |  Sophie Demassey, Nicolas Beldiceanu, Julien Menana, Guillaume Richaud,     |
-|                                    |  Thierry Petit, Julien Vion, Stéphane Zampelli.                             |
-+------------------------------------+-----------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
+|**Core developers**                 |  Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241) and Jean-Guillaume Fages (COSLING S.A.S.).   |
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
+|**Main contributors**               |  Xavier Lorca, Narendra Jussien, Fabien Hermenier, Jimmy Liang.                                           |
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
+|**Previous versions contributors**  |  François Laburthe, Hadrien Cambazard, Guillaume Rochart, Arnaud Malapert,                                |
+|                                    |  Sophie Demassey, Nicolas Beldiceanu, Julien Menana, Guillaume Richaud,                                   |
+|                                    |  Thierry Petit, Julien Vion, Stéphane Zampelli.                                                           |
++------------------------------------+-----------------------------------------------------------------------------------------------------------+
 
 If you want to contribute, let us know.
 
@@ -123,17 +123,29 @@ Which jar to select ?
 
 We provide a zip file which contains the following files:
 
-- choco-solver-|release|.jar
-An ready-to-use jar file ; it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc. In a few words, it enables modeling and solving CP problems.
+choco-solver-|release|-with-dependencies.jar
+    An ready-to-use jar file including dependencies;
+    it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc.
+    In a few words, it enables modeling and solving CP problems.
 
-- choco-solver-|release|-sources.jar
-The source of the core library.
+choco-solver-|release|.jar
+    A jar file excluding all dependencies and configuration file;
+    Enable using choco-solver as a dependency of an application.
+    Otherwise, it provides the same code as the jar with dependencies.
 
-- choco-samples-|release|-sources.jar
-The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
+choco-solver-|release|-sources.jar
+    The source of the core library.
 
-- apidocs-|release|.zip
-Javadoc of Choco-|release|
+choco-samples-|release|-sources.jar
+    The source of the artifact `choco-samples` made of problems modeled with Choco. It is a good start point to see what it is possible to do with Choco.
+
+apidocs-|release|.zip
+    Javadoc of Choco-|release|
+
+logback.xml
+    The logback configuration file; may be needed when choco-solver is used as a library.
+
+Please, refer to `README.md` for more details.
 
 Extensions
 ^^^^^^^^^^
@@ -153,16 +165,11 @@ Update the classpath
 
 Simply add the jar file to the classpath of your project (in a terminal or in your favorite IDE).
 
-.. parsed-literal::
-
-   java -cp .:choco-solver-|release|.jar my.project.Main
-
-
 As a Maven Dependency
 ---------------------
 
 Choco is build and managed using `Maven3 <http://maven.apache.org/download.cgi>`_.
-To declare Choco as a dependency of your project, simply update the ``pom.xml`` of your project by adding the following instruction:
+Choco is available on Maven Central Repository, to declare Choco as a dependency of your project, simply update the ``pom.xml`` of your project by adding the following instruction:
 
 .. code-block:: xml
 
@@ -173,16 +180,8 @@ To declare Choco as a dependency of your project, simply update the ``pom.xml`` 
    </dependency>
 
 where ``X.Y.Z`` is replaced by |release|.
-
-You need to add a new repository to the list of declared ones in the ``pom.xml`` of your project:
-
-.. code-block:: xml
-
- <repository>
-   <id>choco.repos</id>
-   <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
- </repository>
-
+Note that the artifact does not include any dependencies or `logback.xml`.
+Please, refer to `README.md` for the list of required dependencies.
 
 Compiling sources
 -----------------
@@ -209,12 +208,16 @@ Eclipse
 
    mvn eclipse:eclipse
 
+.. _1_log:
 
 Note about logging
 ------------------
 
-Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
-In order to avoid imposing a logging framework on end-user, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
+In Choco, we distinguish *user trace* and *developer trace*.
+*User trace* is mainly dedicated to printing resolution statistics and solutions (and other useful services).
+The ``Chatterbox`` class is devoted to such aim, it centralises (almost) all messaging services.
+*Developer trace* is for debugging purpose.
+In order to avoid imposing a logging framework on end-user [#flog]_, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
 
     "SLF4J is a simple facade for logging systems allowing the end-user to plug-in the desired logging system at deployment time."
     -- http://www.slf4j.org/faq.html
@@ -234,6 +237,8 @@ but other framework are available such as `log4j <http://logging.apache.org/log4
 (a exhaustive list is given on `SL4J <http://www.slf4j.org/manual.html>`_).
 Declaring a logging framework is as simple as adding jar files to the classpath of your application:
 
+.. [#flog] Indeed, Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
+
 
 Command-line
 ^^^^^^^^^^^^
@@ -243,7 +248,9 @@ For logback:
     .. parsed-literal::
 
         java \\
-        -cp .:choco-solver-|release|.jar:logback-core-1.0.13.jar:logback-classic-1.0.13.jar \\
+        -cp .:choco-solver-|release|.jar\\
+        :logback-core-1.0.13.jar\\
+        :logback-classic-1.0.13.jar \\
         my.project.Main
 
 .. note::
@@ -256,7 +263,9 @@ For log4j:
 
     .. parsed-literal::
 
-        java -cp .:choco-solver-|release|.jar:slf4j-log4j12-1.7.7.jar my.project.Main
+        java -cp .:choco-solver-|release|.jar\\
+        :slf4j-log4j12-1.7.7.jar \\
+        my.project.Main
 
 
 Maven
@@ -315,14 +324,17 @@ To facilitate the modeling, Choco |version| provides factories for almost every 
 | ``SetStrategyFactory``       | SSF          |                                           |
 +------------------------------+--------------+-------------------------------------------+
 +------------------------------+--------------+-------------------------------------------+
-| ``SearchMonitorFactory``     | SMF          | log, resolution limits, restarts etc.     |
+| ``Chatterbox``               |              | Output messages and statistics.           |
++------------------------------+--------------+-------------------------------------------+
++------------------------------+--------------+-------------------------------------------+
+| ``SearchMonitorFactory``     | SMF          | resolution limits, restarts etc.          |
 +------------------------------+--------------+-------------------------------------------+
 
 Note that, in order to have a concise and readable model, factories have shortcut names. Furthermore, they can be imported in a static way:
 
 .. code-block:: java
 
-   import static solver.search.strategy.ISF.*;
+   import static org.chocosolver.solver.search.strategy.ISF.*;
 
 Let say we want to model and solve the following equation: :math:`x + y < 5`, where the :math:`x \in [\![0,5]\!]` and :math:`y \in [\![0,5]\!]`.
 Here is a short example which illustrates the main steps of a CSP modeling and resolution with Choco |version| to treat this equation.
@@ -331,8 +343,7 @@ Here is a short example which illustrates the main steps of a CSP modeling and r
 
 .. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
       :language: java
-      :lines: 44-54
-      :emphasize-lines: 44,45
+      :lines: 45-57
       :linenos:
 
 
@@ -418,9 +429,8 @@ Logging
 -------
 
 Logging the search is possible.
-There are variants but the main way to do it is made through the ``SMF.log(Solver, boolean, boolean)``.
-The first boolean indicates whether or not logging solutions, the second indicates whether or not logging search decisions.
-It also print, by default, main statistics of the search (time, nodes, fails, etc.)
+There are variants but the main way to do it is made through the ``Chatterbox.printStatistics(solver)``.
+It prints the main statistics of the search (time, nodes, fails, etc.)
 
 
 Solving
@@ -444,3 +454,26 @@ Explanations
 Choco natively supports explained constraints to reduce the search space and to give feedback to the user.
 Explanations are disabled by default.
 
+
+Choco |version| : changes
+=========================
+
+
+3.3.0
+-----
+
+- Addition:
+    - :ref:`512_constraint_things_to_know`
+    - :ref:`512_automaton`
+    - :ref:`542_complex_clauses`
+    - :ref:`41_settings_label`
+    - :ref:`31_searchbinder`
+    - :ref:`34_chatternbox_label`
+
+- New constraints:
+    - :ref:`51_icstr_mdd`
+    - :ref:`51_scstr_nme`
+
+-  Major modification:
+    - :ref:`44_multithreading_label`
+    - :ref:`45_define_search_label`

@@ -7,6 +7,35 @@ NEXT MILESTONE
 -------------------
 
 
+3.3.0 - 04 Dec 2014
+-------------------
+
+- Preparation to MCR (#248)
+- Update User Guide (#226, #243, #245)
+- Add modifiable settings (#250)
+- Simplify search binder (#229)
+- All propagators of constraint factory allow duplication (#217)
+- Update license and header (#241)
+- Rollback to old release process (#246)
+
+Bug fixes: #215, #252, #253, #255, #256, #258
+
+3.2.2 - 17 Nov 2014
+-------------------
+
+- Fix #240: add notmember(IntVar, SetVar) constraint (more efficient than not(member))
+- Fix #225: fix PropCostRegular, wrt to S.Demassey instructions.
+- Fix #229: create MasterSolver and SlaveSolver classes to deal with multi-thread resolution
+            + add external configuration of the search strategy through a binder
+- Fix #227: deal with initial propagation
+- fix #230: update release script
+- fix #231: correct addTrue in SatFactory
+- fix #234: improve reification (presolve and less overheads). As a side effect, reification constraints are automatically posted and cannot be reified directly.
+- fix #233: remove java8 compliant code (temporary)
+- Add a MDD-based propagator (ICF.mddc).
+- fix #235: refactor logging fmwk. Add Chatterbox class as a unique entry point for messaging. Logging still relies on SLF4J.
+- fix #236: bug in SatSolver
+
 3.2.1 - 13 Oct 2014
 -------------------
 

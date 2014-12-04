@@ -26,7 +26,7 @@ It ensures that `VAR1` = \| `VAR2` \| .
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 100-103,105
           :emphasize-lines: 103
@@ -62,9 +62,9 @@ A signature offers the possibility to specify the filtering algorithm to use:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 231-235,237
+          :lines: 231-236,238
           :emphasize-lines: 235
           :linenos:
 
@@ -95,7 +95,7 @@ One can force the `AC` algorithm to be used by calling the second signature.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 243-251,253
           :emphasize-lines: 251
@@ -127,7 +127,7 @@ It ensures that all variables from `VAR` take a distinct value or 0, that is, al
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 258-260,262
           :emphasize-lines: 260
@@ -163,7 +163,7 @@ It holds that `NVAR` is the number of variables of the collection `VARIABLES` th
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 267-270,272
           :emphasize-lines: 270
@@ -196,7 +196,7 @@ The constraint `arithm` involves either:
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 54-56,58
           :emphasize-lines: 56
@@ -209,7 +209,7 @@ The constraint `arithm` involves either:
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 110-113,115
           :emphasize-lines: 113
@@ -250,7 +250,7 @@ The boolean `AC` set to true enforces arc-consistency.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 278-281,283
           :emphasize-lines: 281
@@ -291,7 +291,7 @@ It automatically detects disequalities and `alldifferent` constraints. Presumabl
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 288-291,293
           :emphasize-lines: 291
@@ -318,10 +318,10 @@ The `bin_packing` constraint involves:
  - an array of integer variables `BIN_LOAD` and
  - an integer `OFFSET`.
 
-It holds the Bin Packing Problem rules: a set of items with various to pack into bins with respect to the capacity of each bin.
+It holds the Bin Packing Problem rules: a set of items with various SIZES to pack into bins with respect to the capacity of each bin.
 
-- `ITEM_BIN` represents the bin of each item, that is, `ITEM_BIN[i] = j` states that the i :math:`^{th}` is put in the j :math:`^{th}` bin.
-- `ITEM_SIZE` represents the size of each size.
+- `ITEM_BIN` represents the bin of each item, that is, `ITEM_BIN[i] = j` states that the i :math:`^{th}` ITEM is put in the j :math:`^{th}` bin.
+- `ITEM_SIZE` represents the size of each item.
 - `BIN_LOAD` represents the load of each bin, that is, the sum of size of the items in it.
 
 This constraint is not a built-in constraint and is based on various propagators.
@@ -334,7 +334,7 @@ This constraint is not a built-in constraint and is based on various propagators
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 298-302,304
           :emphasize-lines: 302
@@ -367,7 +367,7 @@ The upper bound of `VAR` is given by :math:`2^{|BITS|+1}`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 617-620,622
           :emphasize-lines: 620
@@ -401,7 +401,7 @@ The `OFFSET` is typically set to 0.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 309-312,314
           :emphasize-lines: 312
@@ -453,7 +453,7 @@ The `CONF` is a defined by an ``enum``:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 319-321,323
           :emphasize-lines: 321
@@ -499,7 +499,7 @@ The `CAUOTMATON` can be defined using the ``solver.constraints.nary.automata.FA.
 
 .. admonition:: Example
 
-     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
            :language: java
            :lines: 328-350,352
            :emphasize-lines: 350
@@ -539,7 +539,7 @@ An alternate signature enables `VALUE` to be an integer variable.
 
 .. admonition:: Example
 
-     .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
            :language: java
            :lines: 357-361,363
            :emphasize-lines: 361
@@ -580,7 +580,7 @@ The first API relies on the second, and set `INCREMENTAL` to ``TASKS.length > 50
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 368-381,383
           :emphasize-lines: 381
@@ -616,7 +616,7 @@ The option `USE_CUMUL`, recommended, indicates whether or not redundant `cumulat
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 388-397,399
           :emphasize-lines: 397
@@ -649,7 +649,7 @@ The ``distance`` constraint involves either:
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 120-123,125
           :emphasize-lines: 123
@@ -664,7 +664,7 @@ The ``distance`` constraint involves either:
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 165-169,171
           :emphasize-lines: 169
@@ -716,7 +716,7 @@ The `element` constraint ensures that `VALUE` = `TABLE` [`INDEX` - `OFFSET`]. `O
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 130-133,135
           :emphasize-lines: 133
@@ -744,7 +744,7 @@ The API is : ::
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 176-180,182
           :emphasize-lines: 180
@@ -791,7 +791,7 @@ The boolean `CLOSED` set to `true` restricts the domain of `VARS` to the values 
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 404-408,410
           :emphasize-lines: 408
@@ -826,7 +826,7 @@ It also automatically imposes one `alldifferent` constraints on each array of va
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 415-418,420
           :emphasize-lines: 418
@@ -856,8 +856,8 @@ The `knapsack` constraint involves:
 
 It formulates the Knapsack Problem: to determine the count of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
 
-- `OCCURRENCES[i]` :math:`\times` `WEIGHT[i]` :math:`\leq` `TOTAL_WEIGHT` and
-- `OCCURRENCES[i]` :math:`\times` `ENERGY[i]` = `TOTAL_ENERGY`.
+- :math:`\sum` `OCCURRENCES[i]` :math:`\times` `WEIGHT[i]` :math:`\leq` `TOTAL_WEIGHT` and
+- :math:`\sum` `OCCURRENCES[i]` :math:`\times` `ENERGY[i]` = `TOTAL_ENERGY`.
 
 **API**:  ::
 
@@ -867,7 +867,7 @@ It formulates the Knapsack Problem: to determine the count of each item to inclu
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 425-434,436
           :emphasize-lines: 434
@@ -899,7 +899,7 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 441-445,447
           :emphasize-lines: 445
@@ -931,7 +931,7 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 452-456,458
           :emphasize-lines: 456
@@ -962,7 +962,7 @@ It ensures that `VARS1` is lexicographically strictly less than `VARS2`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 463-466,468
           :emphasize-lines: 466
@@ -993,7 +993,7 @@ It ensures that `VARS1` is lexicographically strictly less or equal than `VARS2`
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 473-476,478
           :emphasize-lines: 476
@@ -1020,13 +1020,14 @@ The `maximum` constraints involves a set of integer variables and a third party 
 **See also**: `maximum <http://sofdem.github.io/gccat/gccat/Cmaximum.html>`_ in the Global Constraint Catalog.
 
 **API**:  ::
+
     Constraint maximum(IntVar MAX, IntVar VAR1, IntVar VAR2)
     Constraint maximum(IntVar MAX, IntVar[] VARS)
     Constraint maximum(BoolVar MAX, BoolVar[] VARS)
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 187-191,193
           :emphasize-lines: 191
@@ -1040,6 +1041,33 @@ The `maximum` constraints involves a set of integer variables and a third party 
         - `MAX = 3, Y = -1, Z = 3`
         - `MAX = 3, Y = 0, Z = 3`
         - `MAX = 3, Y = 1, Z = 3`
+
+.. _51_icstr_mdd:
+
+mddc
+====
+
+A constraint which restricts the values a variable can be assigned to the solutions encoded with a multi-valued decision diagram.
+
+**Implementation based on**: :cite:`ChengY08`.
+
+**API**:  ::
+
+    Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
+          :language: java
+          :lines: 49-55,57
+          :emphasize-lines: 59
+          :linenos:
+
+    The solutions of the problem are :
+
+        - `X[0] = 0, X[1] = -1`
+        - `X[0] = 0, X[1] = 1`,
+        - `X[0] = 1, X[1] = -1`
 
 
 .. _51_icstr_mem:
@@ -1059,7 +1087,7 @@ A constraint which restricts the values a variable can be assigned to with respe
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 63-65,67
           :emphasize-lines: 65
@@ -1072,7 +1100,7 @@ A constraint which restricts the values a variable can be assigned to with respe
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 72-74,76
           :emphasize-lines: 74
@@ -1104,7 +1132,7 @@ The `minimum` constraints involves a set of integer variables and a third party 
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 198-202,204
           :emphasize-lines: 202
@@ -1134,7 +1162,7 @@ The API is : ::
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 209-213,215
           :emphasize-lines: 213
@@ -1204,7 +1232,7 @@ The constraint
 
 .. admonition:: Example 1
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 81-83,85
           :emphasize-lines: 83
@@ -1217,7 +1245,7 @@ The constraint
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 91-93,95
           :emphasize-lines: 93
@@ -1252,7 +1280,7 @@ This constraint is not a built-in constraint and is based on various propagators
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 512-515,517
           :emphasize-lines: 515
@@ -1291,7 +1319,7 @@ The constraint relies on the `circuit` propagators.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 522-526,528
           :emphasize-lines: 526
@@ -1329,7 +1357,7 @@ There are various ways to declare the automaton:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 533-536,538
           :emphasize-lines: 535-536
@@ -1372,7 +1400,7 @@ and enables, under certain conditions, to reformulate the constraint with a `tab
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 543-547,549
           :emphasize-lines: 547
@@ -1404,7 +1432,7 @@ Moreover, the variable of `SORTEDVARS` are sorted in increasing order.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 554-557,559
           :emphasize-lines: 557
@@ -1431,7 +1459,7 @@ It ensures that `VAR1` = `VAR2`:math:`^2`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 140-143,145
           :emphasize-lines: 143
@@ -1468,7 +1496,7 @@ It also ensures that \| `{VARS[i]` :math:`\neq` `OFFSET+i}` \| = `SUBCIRCUIT_SIZ
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 564-567,569
           :emphasize-lines: 567
@@ -1510,7 +1538,7 @@ Moreover, `VARS[END-OFFSET]` = \| `VARS` \| +`OFFSET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 574-579,581
           :emphasize-lines: 579
@@ -1553,7 +1581,7 @@ For performance reasons, a specialization for boolean variables is provided.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 586-589,591
           :emphasize-lines: 589
@@ -1606,7 +1634,7 @@ When more than two variables are involved, the available algorithms are:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 150-158,160
           :emphasize-lines: 158
@@ -1637,7 +1665,7 @@ The API are : ::
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 220-224,226
           :emphasize-lines: 224
@@ -1674,7 +1702,7 @@ It partitions the `SUCCS` variables into `NBTREES` (anti) arborescences:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 596-599,601
           :emphasize-lines: 599
@@ -1721,7 +1749,7 @@ This constraint is not a built-in constraint and is based on various propagators
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/IntConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
           :lines: 606-610,612
           :emphasize-lines: 610
@@ -1970,6 +1998,22 @@ The `member` constraint involves:
         Constraint member(SetVar[] SETS, SetVar SET)
         Constraint member(IntVar INTEGER, SetVar SET)
 
+.. _51_scstr_nme:
+
+not_member
+==========
+
+The `not_member` constraint involves:
+
+    + an integer variable `INTEGER` and
+    + a set variable `SET`.
+
+    It ensures that `INTEGER` is not included in `SET`.
+
+**API**:  ::
+
+        Constraint not_member(IntVar INTEGER, SetVar SET)
+
 .. _51_scstr_min:
 
 min
@@ -2158,7 +2202,7 @@ A complete list is available in the documentation of IBEX.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/RealConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/RealConstraintExamples.java
           :language: java
           :lines: 48-57,59
           :emphasize-lines: 57
@@ -2172,36 +2216,57 @@ A complete list is available in the documentation of IBEX.
 Logical constraints
 *******************
 
-.. _51_lcstr_and:
-
-and
-===
-
-.. _51_lcstr_it:
-
-ifThen
-======
-
-.. _51_lcstr_ite:
-
-ifThenElse
-==========
+The ``LogicalConstraintFactory`` (or ``LCF``) provides various interesting constraints to manipulate other constraints.
+These constraints are based on the concept of reification.
+We say a constraint ``C`` is reified with a boolean variable ``b`` when we maintain
+the equivalence betwen ``b`` being equal to true and ``C`` being satisfied.
+This means the ``C`` constraint may be not satisfied, hence it should not be posted to the solver.
 
 .. _51_lcstr_not:
 
 not
 ===
 
-.. _51_lcstr_or:
+Creates the opposite constraint of the input constraint.
 
-or
-==
+While this works for any kind of constraint (including globals), it might be a bit naive and slow.
+
+.. _51_lcstr_it:
+
+ifThen
+======
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThen_reifiable`` (whose implementation differ)
+
+.. _51_lcstr_ite:
+
+ifThenElse
+==========
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well. Otherwise, the ELSE statement must be true.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThenElse_reifiable`` (whose implementation differ)
 
 .. _51_lcstr_rei:
 
 reification
 ===========
 
+Creates and automatically post a constraint maintaining the equivalent between
+a binary variable being equal to 1 and a constraint being satisfied.
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``reification_reifiable`` (whose implementation differ)
 
 .. _51_satsolver:
 
@@ -2224,7 +2289,7 @@ Add a clause to the SAT constraint whic states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 48-50,52
           :emphasize-lines: 50
@@ -2253,7 +2318,7 @@ Add a clause to the SAT constraint whic states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 57-59,61
           :emphasize-lines: 59
@@ -2281,7 +2346,7 @@ Add a clause to the SAT constraint whic states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 66-68,70
           :emphasize-lines: 68
@@ -2309,7 +2374,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 179-182,184
           :emphasize-lines: 182
@@ -2336,7 +2401,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 84-88,90
           :emphasize-lines: 88
@@ -2362,7 +2427,7 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 95-98,100
           :emphasize-lines: 98
@@ -2387,7 +2452,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 105-109,111
           :emphasize-lines: 109
@@ -2416,7 +2481,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 116-120,122
           :emphasize-lines: 120
@@ -2443,7 +2508,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 127-131,133
           :emphasize-lines: 131
@@ -2470,7 +2535,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 138-142,144
           :emphasize-lines: 142
@@ -2497,7 +2562,7 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 149-152,154
           :emphasize-lines: 152
@@ -2522,7 +2587,7 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 159-162,164
           :emphasize-lines: 162
@@ -2545,7 +2610,7 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 149-152,154
           :emphasize-lines: 152
@@ -2570,7 +2635,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 75-77,79
           :emphasize-lines: 77
@@ -2598,7 +2663,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 189-192,194
           :emphasize-lines: 192
@@ -2626,7 +2691,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 199-203,205
           :emphasize-lines: 203
@@ -2653,7 +2718,7 @@ Add a clause to the SAT constraint which states that:
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 210-214,216
           :emphasize-lines: 214
@@ -2695,7 +2760,7 @@ the second array declares negative boolean variables, those who should not be sa
 
 .. admonition:: Example 1
 
-            .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+            .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
                   :language: java
                   :lines: 221-228,230
                   :emphasize-lines: 226-228
@@ -2710,7 +2775,7 @@ the second array declares negative boolean variables, those who should not be sa
 
 .. admonition:: Example 2
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 235-240,242
           :emphasize-lines: 240
@@ -2736,7 +2801,7 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 247-249,251
           :emphasize-lines: 249
@@ -2761,7 +2826,7 @@ maximum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 256-259,261
           :emphasize-lines: 259
@@ -2790,7 +2855,7 @@ sum(`BOOLVARS`:math:`_i`) :math:`\geq` `TARGET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 266-269,271
           :emphasize-lines: 269
@@ -2818,7 +2883,7 @@ sum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 276-279,281
           :emphasize-lines: 279
@@ -2844,7 +2909,7 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
 .. admonition:: Example
 
-    .. literalinclude:: /../../choco-samples/src/test/java/docs/SatConstraintExamples.java
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
           :lines: 286-288,290
           :emphasize-lines: 288

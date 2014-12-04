@@ -2,12 +2,18 @@ language: java
 jdk:
 - oraclejdk8
 before_script:
-  - "export MAVEN_OPTS='-Xmx4096m -Xms1024 -Xss64m -server'"
-script: travis_wait ./src/scripts/build.sh
+  - export MAVEN_OPTS="-Xmx4096m -Xms128m -Xss64m -server"
+env:
+  - GROUP=1s
+  - GROUP=10s
+  - GROUP=1m
+  - GROUP="correctness.*"
+  - GROUP="consistency.*"
+script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
     - develop
-    - release
+    - /^feature.*$/
 notifications:
   recipients:
     - choco@emn.fr

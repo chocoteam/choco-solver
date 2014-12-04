@@ -41,8 +41,7 @@ A call to ``solver.findSolution()`` launches a resolution which stops on the fir
 
 .. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
    :language: java
-   :lines: 44-54
-   :emphasize-lines: 54
+   :lines: 45-57
    :linenos:
 
 If a solution has been found, the resolution process stops on that solution,
@@ -441,7 +440,8 @@ Available strategies
 Default search strategies
 -------------------------
 
-If no search strategy is specified in the model, Choco |version| will generate a default one. In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
+If no search strategy is specified in the model, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
+In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
 The default search strategy distincts variables per types and defines a specific search strategy per each type:
 
 #. integer variables (but boolean variables: ``IntStrategyFactory.minDom_LB(ivars)``
@@ -452,6 +452,27 @@ The default search strategy distincts variables per types and defines a specific
 Constants are excluded from search strategies' variable scope.
 
 ``IntStrategyFactory``, ``SetStrategyFactory`` and ``GraphStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
+
+
+.. _31_searchbinder:
+
+Search binder
+^^^^^^^^^^^^^
+
+It is possible to override the default search strategy by implementing an ``ISearchBinder``.
+By default, a ``Solver`` is created with a ``DefaultSearchBinder`` declared in its settings.
+
+
+An ``ISearchBinder`` has the following API:
+
+``void configureSearch(Solver solver)``
+    Configure the search strategy, and even more, of the given solver.
+    The method is called from the search loop, after the initial propagation, if no search strategy is defined.
+    Otherwise, it should be called before running the resolution.
+
+The search binder to use must be declared in the ``Setting`` attached to a ``Solver`` (see :ref:`41_settings_label`).
+
+
 
 Composition of strategies
 -------------------------
@@ -560,28 +581,37 @@ will return false if the second option is used.
 
     :ref:`Large Neighborhood Search <41_LNS_label>`, :ref:`Explanations <43_explanations_label>`.
 
-Logging
-=======
+.. _34_chatternbox_label:
 
-Choco |version| has a simple logger which can be used by calling ::
+Resolution statistics
+=====================
 
- SearchMonitorFactory.log(Solver solver, boolean solution, boolean choices);
+Choco |version| distinguishes *developer trace* and *user trace*.
+*Developer trace* is only dedicated to developers for debugging purpose (Choco depends on SLF4J, as described in :ref:`Note about logging <1_log>`).
+*User trace* is dedicated to users (and developers) to print information relative to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
 
-The first argument is the solver.
-The second indicates whether or not each solution (and associated resolution statistics) should be printed.
-The third argument indicates whether or not each branching decision should be printed. This may be useful for debugging.
+Resolution data are available thanks to the ``Chatterbox`` class, which outputs to ``System.out``.
+It centralises widely used methods to have comprehensive feedbacks about the resolution process.
+There two main types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
 
-In general, in order to have a reasonable amount of information, we set the first boolean to true and the second to false.
+For instance, one can indicate to print the solutions all resolution long: ::
 
-If the two booleans are set to false, the trace would start with a welcome message:
+    Chatterbox.showSolutions(solver);
+    solver.findAllSolutions();
 
+Or to print the search statistics once the search ends: ::
+
+    solver.findSolution();
+    Chatterbox.printStatistics(solver);
+
+
+On a call to ``Chatterbox.printVersion()``, the following message will be printed:
 
 .. code-block:: none
 
-    ** Choco 3.2.0 (2014-05) : Constraint Programming Solver, Copyleft (c) 2010-2014
-    ** Solve : myProblem
+    ** Choco 3.3.0 (2014-12) : Constraint Programming Solver, Copyleft (c) 2010-2014
 
-Then, when the resolution process ends, a complementary message is printed, based on the measures recorded.
+On a call to ``Chatterbox.printVersion()``, the following message will be printed:
 
 .. code-block:: none
 
@@ -635,9 +665,9 @@ If the resolution process reached a limit before ending *naturally*, the title o
     - Incomplete search - Limit reached.
 
 The body of the message remains the same.
-The message is formated thanks to the ``IMeasureRecorder`` which is a :ref:`search monitor <44_monitors_label>`.
+The message is formatted thanks to the ``IMeasureRecorder`` which is a :ref:`search monitor <44_monitors_label>`.
 
-When the first boolean of ``SearchMonitorFactory.log(Solver, boolean, boolean);`` is set to true, on each solution the following message will be printed:
+On a call to ``Chatterbox.showSolutions(solver)``, on each solution the following message will be printed:
 
 .. code-block:: none
 
@@ -646,11 +676,16 @@ When the first boolean of ``SearchMonitorFactory.log(Solver, boolean, boolean);`
 
 followed by one line exposing the value of each decision variables (those involved in the search strategy).
 
-When the second boolean of ``SearchMonitorFactory.log(Solver, boolean, boolean);`` is set to true, on each node a message will be printed indicating which decision is applied.
+On a call to ``Chatterbox.showDecisions(solver)``, on each node of the search tree a message will be printed indicating which decision is applied.
 The message is prefixed by as many "." as nodes in the current branch of the search tree.
 A decision is prefixed with ``[R]`` and a refutation is prefixed by ``[L]``.
 
+.. code-block:: none
+
+    ..[L]x  ==  1 (0) //X = [0,5] Y = [0,6] ...
+
 .. warning::
 
-    Printing the choices slows down the search process.
+    ``Chatterbox.printDecisions(Solver solver)`` prints the tree search during the resolution.
+    Printing the decisions slows down the search process.
 

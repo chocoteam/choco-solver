@@ -2,28 +2,56 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>choco</groupId>
+    <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>3.2.1</version>
+    <version>3.3.0</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
-    <url>http://www.emn.fr/z-info/choco-solver/</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
+    <url>http://choco-solver.org/</url>
+    <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
+        It aims at describing real combinatorial problems in the form of Constraint Satisfaction Problems
+        and to solve them with Constraint Programming techniques.
+    </description>
+    <licenses>
+        <license>
+            <name>The BSD 3-Clause License</name>
+            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Charles Prud'homme</name>
+            <email>charles.prudhomme@mines-nantes.fr</email>
+            <organization>TASC, INRIA Rennes, LINA CNRS UMR 6241</organization>
+            <organizationUrl>http://www.emn.fr/z-info/ppc/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Jean-Guillaume Fages</name>
+            <email>jg.fages@cosling.com</email>
+            <organization>COSLING S.A.S.</organization>
+            <organizationUrl>http://www.cosling.com</organizationUrl>
+        </developer>
+    </developers>
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco3.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco3</url>
         <developerConnection>scm:git:git@github.com:chocoteam/choco3.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+    <prerequisites>
+        <maven>3.2.3</maven>
+    </prerequisites>
+
 
     <modules>
         <module>choco-solver</module>
         <module>choco-samples</module>
     </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
@@ -48,103 +76,65 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <distributionManagement>
         <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>choco-releases</id>
-            <name>Private Maven Repository</name>
-            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
-            <layout>default</layout>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
         <snapshotRepository>
             <uniqueVersion>true</uniqueVersion>
-            <id>choco-releases</id>
-            <name>Private Maven Repository</name>
-            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>
-    <repositories>
-        <repository>
-            <id>central.repos</id>
-            <url>http://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>download.java.net.repos</id>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
-        <repository>
-            <id>choco.repo</id>
-            <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
 
-    </pluginRepositories>
     <build>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <arguments>-DskipTests</arguments>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                    <!-- release.sh will perform the pushes -->
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
-                <version>1.9.0</version>
+                <version>1.10.b1</version>
                 <configuration>
                     <header>src/etc/header.txt</header>
                     <failIfMissing>false</failIfMissing>
                     <aggregate>true</aggregate>
                     <properties>
-                        <owner>Ecole des Mines de Nantes</owner>
+                        <owner1>Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241)</owner1>
+                        <owner2>Jean-Guillaume Fages (COSLING S.A.S.)</owner2>
+                        <email>choco@mines-nantes.fr</email>
                         <year>2014</year>
                     </properties>
-                    <strictCheck>true</strictCheck>
                     <includes>
                         <include>**/*.java</include>
                     </includes>
-                    <excludes>
-                        <exclude>**/site/**</exclude>
-                        <exclude>**/target/**</exclude>
-                    </excludes>
                     <headerDefinitions>
                         <headerDefinition>src/etc/old.xml</headerDefinition>
                     </headerDefinitions>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
-                <version>2.0.6</version>
+                <version>3.1.0-beta1</version>
                 <executions>
                     <execution>
                         <id>process</id>
@@ -163,12 +153,59 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
+                <version>2.18</version>
                 <configuration>
                     <!--<groups>1s,10s,1m,10m,30m</groups>-->
                     <parallel>methods</parallel>
                     <threadCount>4</threadCount>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <configuration>
+                    <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
+                    <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
+                    <!--<quiet />-->
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

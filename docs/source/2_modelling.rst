@@ -83,6 +83,10 @@ Other
 | ``AbstractStrategy getStrategy()``            | Return a reference to the declared search strategy.                                               |
 +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
++-----------------------------------------------+---------------------------------------------------------------------------------------------------+
+| ``Settings getSettings()``                    | Return the current ``Settings`` used in the solver.                                               |
++-----------------------------------------------+---------------------------------------------------------------------------------------------------+
++-----------------------------------------------+---------------------------------------------------------------------------------------------------+
 | ``ISolutionRecorder getSolutionRecorder()``   | Return the solution recorder.                                                                     |
 +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
@@ -107,6 +111,9 @@ Setters
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | **Method**                                    | **Definition**                                                                                                                                            |
 +===============================================+===========================================================================================================================================================+
+| ``set(Settings settings)``                    | Set the settings to use while modelling and solving.                                                                                                      |
++-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``set(AbstractStrategy... strategies)``       | Set a strategy to explore the search space. In case many strategies are given, they will be called in sequence.                                           |
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -116,7 +123,7 @@ Setters
 | ``set(ISearchLoop searchLoop)``               | Set the search loop to use during resolution. The default one is a binary search loop.                                                                    |
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``set(IPropagationEngine propagationEngine)`` | Set the propagation engine to use during resolution. The default one is ``TwoBucketPropagationEngine``.                                                   |
+| ``set(IPropagationEngine propagationEngine)`` | Set the propagation engine to use during resolution. The default one is ``SevenQueuesPropagatorEngine``.                                                  |
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``set(ExplanationEngine explainer)``          | Set the explanation engine to use during resolution. The default one is ``ExplanationEngine`` which does nothing.                                         |
@@ -124,7 +131,6 @@ Setters
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``set(ObjectiveManager om)``                  | Set the objective manager to use during the resolution. *For advanced usage only*.                                                                        |
 +-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
-
 
 Others
 ------
@@ -163,6 +169,18 @@ Integer variable
 An integer variable is based on domain made with integer values.
 There exists under three different forms: **bounded**, **enumerated** or **boolean**.
 An alternative is to declare variable-based views.
+
+.. important::
+
+    It is highly advisable not to define domain like ``[Integer.MIN_VALUE, Integer.MAX_VALUE]``.
+    Indeed, such domain definition may lead to :
+
+    - incorrect domain size (``Integer.MAX_VALUE - Integer.MIN_VALUE +1 = 0``)
+    - and to numeric overflow/underflow operations during propagation.
+
+    If *undefined* domain is really required, the following range should be considered:
+    ``[VariableFactory.MIN_INT_BOUND, VariableFactory.MAX_INT_BOUND]``.
+    Such an interval defines `42949673` values, from `-21474836` to `21474836`.
 
 Bounded variable
 ^^^^^^^^^^^^^^^^
@@ -425,7 +443,8 @@ Available constraints
     On an undefined number of integer variables
 :ref:`51_icstr_elm`,
 :ref:`51_icstr_sor`,
-:ref:`51_icstr_tab`.
+:ref:`51_icstr_tab`,
+:ref:`51_icstr_mdd`.
 
 
 :ref:`51_icstr_alld`,
@@ -500,11 +519,44 @@ Available constraints
 :ref:`51_scstr_icha`,
 :ref:`51_scstr_max`,
 :ref:`51_scstr_mem`,
+:ref:`51_scstr_nme`,
 :ref:`51_scstr_min`,
 :ref:`51_scstr_sum`.
 
     On real variables
 :ref:`51_rcstr_main`.
+
+
+.. _512_constraint_things_to_know:
+
+Things to know about constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _512_automaton:
+
+Automaton-based Constraints
+"""""""""""""""""""""""""""
+
+:ref:`51_icstr_creg`, :ref:`51_icstr_mcreg` and :ref:`51_icstr_reg` rely on an automaton, declared implicitly or explicitly.
+There are two kinds of ``IAutomaton`` : ``FiniteAutomaton``, needed for :ref:`51_icstr_creg`, and `CostAutomaton`, required for :ref:`51_icstr_mcreg` and :ref:`51_icstr_reg`.
+A ``CostAutomaton`` is an extension of ``FiniteAutomaton`` where costs can be declared per transition.
+
+``FiniteAutomaton`` embeds an ``Automaton`` object provided by the ``dk.brics.automaton`` library.
+Such an automaton accepts fixed-size words made of multiple ``char`` s, but the regular constraints rely on ``IntVar`` s.
+So,  mapping between ``char`` (needed by the underlying library) and ``int`` (declared in ``IntVar``) is made.
+The mapping enables declaring regular expressions where a symbol is not only a digit between `0` and `9` but any positive number.
+Then to distinct, in the word `101`, the symbols `0`, `1`, `10` and `101`, two additional ``char`` are allowed in a regexp: `<` and `>` which delimits numbers.
+
+In summary, a valid regexp for the :ref:`51_icstr_creg`, :ref:`51_icstr_mcreg` and :ref:`51_icstr_reg` constraints
+is a combination of **digits** and Java Regexp special characters.
+
+.. admonition:: Examples of allowed RegExp
+
+        ``"0*11111110+10+10+11111110*"``, ``"11(0|1|2)*00"``, ``"(0|<10> |<20>)*(0|<10>)"``.
+
+.. admonition:: Example of forbidden RegExp
+
+        ``"abc(a|b|c)*"``.
 
 
 Posting constraints
@@ -616,4 +668,41 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 :ref:`51_lcstr_maxboolarraylesseqvar`,
 :ref:`51_lcstr_sumboolarraygreatereqvar`,
 :ref:`51_lcstr_sumboolarraylesseqvar`.
+
+.. _542_complex_clauses:
+
+Declaring complex clauses
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is a convenient way to declare complex clauses by calling :ref:`51_lcstr_clauses`.
+The method takes a ``LogOp`` and an instance of ``Solver`` as input, extracts the underlying clauses and add them to the ``SatFactory``.
+
+
+A ``LogOp`` is an implementation of ``ILogical``, just like ``BoolVar``, and provides the following API:
+
+  ``LogOp and(ILogical... operands)`` : create a conjunction, results in `true` if all of its operands are `true`.
+
+  ``LogOp ifOnlyIf(ILogical a, ILogical b)``:  create a biconditional, results in `true` if and only if both operands are false or both operands are `true`.
+
+  ``LogOp ifThenElse(ILogical a, ILogical b, ILogical c)`` : create an implication, results in `true` if ``a`` is `true` and ``b`` is `true` or ``a`` is ``false` and ``c`` is `true.
+
+  ``LogOp implies(ILogical a, ILogical b)`` : create an implication, results in `true` if ``a`` is `false` or ``b`` is `true`.
+
+  ``LogOp reified(BoolVar b, ILogical tree)`` : create a logical connection between ``b`` and ``tree``.
+
+  ``LogOp or(ILogical... operands)`` : create a disjunction, results in `true` whenever one or more of its operands are `true`.
+
+  ``LogOp nand(ILogical... operands)`` : create an alternative denial, results in if at least one of its operands is `false`.
+
+  ``LogOp nor(ILogical... operands)`` : create a joint denial, results in `true` if all of its operands are `false`.
+
+  ``LogOp xor(ILogical a, ILogical b)`` : create an exclusive disjunction, results in `true` whenever both operands differ.
+
+  ``ILogical negate(ILogical l)`` : return the logical complement of `l`.
+
+The resulting logical operation can be very verbose, but certainly more easy to declare: ::
+
+    SatFactory.addClauses(LogOp.and(LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d)), e));
+    SatFactory.addClauses(LogOp.nor(LogOp.or(LogOp.nand(a, b), c), d));
+    SatFactory.addClauses(LogOp.and(LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d)), e));
 
