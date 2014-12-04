@@ -17,8 +17,6 @@ function sedInPlace() {
 	fi
 }
 
-REPO_URL="http://www.emn.fr/z-info/choco-repo/mvn/repository/choco"
-
 if [ $1 == "--next" ]; then
     VERSION=$(guess $2)
     NEXTMIL="no"
@@ -40,13 +38,12 @@ then
     # Update of the version number for maven usage
 
     sedInPlace "s%Current stable version is .*.%Current stable version is $VERSION ($d).%"  README.md
-    sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/%" README.md
     sedInPlace "s%The name of the jar file terms the packaging: .*%The name of the jar file terms the packaging: \`choco\-solver\-$VERSION\-with\-dependencies\.jar\` or \`choco\-solver\-$VERSION.jar\`.%" README.md
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
     sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD licence \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
 
     ## The configuration file
-    sedInPlace 's%.*Constraint Programming Solver, Copyleft.*%        return "** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR";%'  choco-solver/src/main/java/org/chocosolver/solver/Settings.java
+    sedInPlace "s%.*Constraint Programming Solver, Copyleft.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR\";%"  choco-solver/src/main/java/org/chocosolver/solver/Settings.java
 
     ## The doc
     sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  docs/source/3_solving.rst
