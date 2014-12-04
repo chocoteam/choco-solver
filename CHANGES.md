@@ -6,6 +6,10 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+
+3.3.0 - 04 Dec 2014
+-------------------
+
 - Preparation to MCR (#248)
 - Update User Guide (#226, #243, #245)
 - Add modifiable settings (#250)
