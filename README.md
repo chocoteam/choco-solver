@@ -75,7 +75,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 
 ```xml
 <dependency>
-   <groupId>choco</groupId>
+   <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
    <version>3.3.0</version>
 </dependency>

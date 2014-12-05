@@ -174,7 +174,7 @@ Choco is available on Maven Central Repository, to declare Choco as a dependency
 .. code-block:: xml
 
    <dependency>
-    <groupId>choco</groupId>
+    <groupId>org.choco-solver</groupId>
     <artifactId>choco-solver</artifactId>
     <version>X.Y.Z</version>
    </dependency>
