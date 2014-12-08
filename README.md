@@ -13,7 +13,7 @@ There are two ways to parse and solve a fzn file with Choco3:
 
 * ###### Java front-end
 
-  ```java -cp .:choco-solver-X.Y.Z.jar:choco-parsers-X.Y.Z.jar parser.flatzinc.ChocoFZN [<options>] [<file>]```
+  ```java -cp .:choco-solver-X.Y.Z.jar:choco-parsers-X.Y.Z.jar ChocoFZN [<options>] [<file>]```
   
   
 * ###### In a terminal (shell for Linux based OS)

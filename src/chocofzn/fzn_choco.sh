@@ -5,7 +5,7 @@ FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
 JAVA_ARGS="-server"
-CHOCO_JAR=/Users/kyzrsoze/.m2/repository/choco/choco-solver/3.2.1-SNAPSHOT/choco-solver-3.2.1-SNAPSHOT-jar-with-dependencies.jar:/Users/kyzrsoze/.m2/repository/choco/choco-parsers/3.2.1-SNAPSHOT/choco-parsers-3.2.1-SNAPSHOT.jar
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/3.3.0/choco-parsers-3.3.0-with-dependencies.jar
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
@@ -119,8 +119,8 @@ then
     ARGS=$ARGS" -lf"
 fi
 
-CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}"
+CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN ${ARGS}"
 
-echo $CMD
+echo "% $CMD"
 exec $CMD
 
