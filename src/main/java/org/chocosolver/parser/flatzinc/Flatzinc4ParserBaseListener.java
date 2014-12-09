@@ -28,6 +28,16 @@ package org.chocosolver.parser.flatzinc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.chocosolver.parser.flatzinc.ast.*;
+import org.chocosolver.parser.flatzinc.ast.declaration.*;
+import org.chocosolver.parser.flatzinc.ast.expression.*;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
