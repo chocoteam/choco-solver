@@ -34,7 +34,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -43,7 +45,7 @@ import org.chocosolver.util.ESat;
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
- * <p/>
+ * <p>
  *
  * @author Charles Prud'homme
  * @since 18/03/11
@@ -298,6 +300,73 @@ public class PropScalarEq extends Propagator<IntVar> {
         } else {
             super.explain(xengine, d, e);
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        // 1. find the pos of var in vars
+        boolean ispos;
+        if (pos < (l / 2)) {
+            int i;
+            i = 0;
+            while (i < pos && vars[i].getId() != var.getId()) {
+                i++;
+            }
+            ispos = i < pos;
+        } else {
+            int i;
+            i = pos;
+            while (i < l && vars[i].getId() != var.getId()) {
+                i++;
+            }
+            ispos = i == l;
+        }
+
+        if (IntEventType.isInclow(evt.getMask())) { // explain LB
+            int i = 0;
+            for (; i < pos; i++) { // first the positive coefficients
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    }
+                }
+            }
+            for (; i < l; i++) { // then the negative ones
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    }
+                }
+            }
+        } else if (IntEventType.isDecupp(evt.getMask())) { // explain UB
+            int i = 0;
+            for (; i < pos; i++) { // first the positive coefficients
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    }
+                }
+            }
+            for (; i < l; i++) { // then the negative ones
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    }
+                }
+            }
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
     }
 
     @Override

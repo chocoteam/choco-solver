@@ -175,7 +175,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
+                    solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
@@ -190,13 +190,13 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                 }
                 mValue = value;
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                    solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                    solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;

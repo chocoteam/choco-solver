@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,141 @@
  */
 package org.chocosolver.solver.explanations.arlil.strategies;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
+import org.chocosolver.solver.explanations.arlil.Reason;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
+
 /**
+ * A conflict-based Back-jumping strategy that relies on ARLIL explanation engine.
+ * Basically, it acts exactly like {@link org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping}.
+ * <p>
  * Created by cprudhom on 11/12/14.
  * Project: choco.
  */
-public class CBJ4ARLIL {
+public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CBJ4ARLIL.class);
+
+    // The ARLIL explanation engine
+    private final ARLILExplanationEngine mArlile;
+    private final Solver mSolver;
+
+    // The last reason computed, for user only
+    private Reason lastReason;
+
+    public CBJ4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver) {
+        this.mArlile = mArlile;
+        this.mSolver = mSolver;
+    }
+
+    @Override
+    public void onContradiction(ContradictionException cex) {
+        assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
+        lastReason = mArlile.explain(cex);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("CBJ4ARLIL>> Reason of " + cex.toString() + " is " + lastReason);
+        }
+
+        int upto = compute(mSolver.getEnvironment().getWorldIndex());
+        mSolver.getSearchLoop().overridePreviousWorld(upto);
+
+        identifyRefutedDecision(upto);
+    }
+
+    @Override
+    public void onSolution() {
+        // we need to prepare a "false" backtrack on this decision
+        Decision dec = mSolver.getSearchLoop().getLastDecision();
+        while ((dec != ROOT) && (!dec.hasNext())) {
+            dec = dec.getPrevious();
+        }
+        if (dec != ROOT) {
+            Reason reason = new Reason();
+            // 1. skip the current one which is refuted...
+            Decision d = dec.getPrevious();
+            while ((d != ROOT)) {
+                if (d.hasNext()) {
+                    reason.addDecicion(d);
+                }
+                d = d.getPrevious();
+            }
+            mArlile.storeDecisionRefutation(dec, reason);
+        }
+        mSolver.getSearchLoop().overridePreviousWorld(1);
+    }
+
+//    /**
+//     * Compute the jump naturally made by standard backtrack algorithm
+//     * @param currentWorldIndex current world index
+//     */
+//    int easyNegDec(int currentWorldIndex) {
+//        Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
+//        int dworld = dec.getWorldIndex() + 1;
+//        while (dec != ROOT && !dec.hasNext()) {
+//            dec = dec.getPrevious();
+//            dworld = dec.getWorldIndex() + 1;
+//        }
+//        return 1 + (currentWorldIndex - dworld);
+//    }
+
+    /**
+     * Identify the decision to reconsider, and explain its refutation in the explanation data base
+     *
+     * @param nworld index of the world to backtrack to
+     */
+    void identifyRefutedDecision(int nworld) {
+        Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
+        while (dec != ROOT && nworld > 1) {
+            dec = dec.getPrevious();
+            nworld--;
+        }
+        if (dec != ROOT) {
+            if (!dec.hasNext()) {
+                throw new UnsupportedOperationException("CBJ4ARLIL.identifyRefutedDecision should get to a LEFT decision:" + dec);
+            }
+            Reason why = lastReason.duplicate();
+            why.remove(dec);
+
+            mArlile.storeDecisionRefutation(dec, why);
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("CBJ4ARLIL>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+        }
+    }
+
+
+    /**
+     * Compute the world to backtrack to
+     *
+     * @param currentWorldIndex current world index
+     * @return the number of world to backtrack to.
+     */
+    int compute(int currentWorldIndex) {
+        int dworld = 0;
+        for (Decision d : lastReason.getDecisions()) {
+            int world = d.getWorldIndex() + 1;
+            if (world > dworld) {
+                dworld = world;
+            }
+        }
+        return 1 + (currentWorldIndex - dworld);
+    }
+
+    /**
+     * Return the Reason of the last conflict
+     *
+     * @return a Reason
+     */
+    public Reason getLastReason() {
+        return lastReason;
+    }
 }

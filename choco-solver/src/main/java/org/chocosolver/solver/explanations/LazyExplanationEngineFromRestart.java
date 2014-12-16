@@ -131,7 +131,7 @@ public class LazyExplanationEngineFromRestart extends RecorderExplanationEngine 
 
     @Override
     public void activePropagator(BoolVar var, Propagator propagator) {
-        estore.pushEvent(var, propagator, PropagatorEventType.FULL_PROPAGATION, 0, 0, 0);
+        estore.pushEvent(var, propagator, PropagatorEventType.FULL_PROPAGATION, propagator.getId(), 0, 0);
     }
 
     @Override

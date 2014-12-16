@@ -41,6 +41,7 @@ import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.EventObserver;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
@@ -79,9 +80,12 @@ public class Solver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Settings settings = new Settings(){};
+    private Settings settings = new Settings() {
+    };
 
     private ExplanationEngine explainer;
+
+    private EventObserver evtObserver;
 
     /**
      * Variables of the solver
@@ -164,6 +168,7 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
         this.search = new SearchLoop(this);
         this.explainer = new ExplanationEngine(this);
+        this.evtObserver = explainer;
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
@@ -376,6 +381,25 @@ public class Solver implements Serializable {
         return solutionRecorder;
     }
 
+    /**
+     * Return the current settings for the solver
+     *
+     * @return a {@link org.chocosolver.solver.Settings}
+     */
+    public Settings getSettings() {
+        return this.settings;
+    }
+
+
+    /**
+     * Return the current event observer
+     *
+     * @return an {@link org.chocosolver.solver.explanations.EventObserver}
+     */
+    public EventObserver getEventObserver() {
+        return this.evtObserver;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,6 +450,7 @@ public class Solver implements Serializable {
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
+        this.evtObserver = explainer;
     }
 
     /**
@@ -453,21 +478,23 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Return the current settings for the solver
-     *
-     * @return a {@link org.chocosolver.solver.Settings}
-     */
-    public Settings getSettings() {
-        return this.settings;
-    }
-
-    /**
      * Override the default {@link org.chocosolver.solver.Settings} object.
      *
      * @param defaults new settings
      */
     public void set(Settings defaults) {
         this.settings = defaults;
+    }
+
+    /**
+     * Define an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
+     * <p>
+     * Erase the current event observer if any.
+     *
+     * @param eventObserver an event observer
+     */
+    public void set(EventObserver eventObserver) {
+        this.evtObserver = eventObserver;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

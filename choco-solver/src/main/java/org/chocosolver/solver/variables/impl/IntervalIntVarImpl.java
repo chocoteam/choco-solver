@@ -110,7 +110,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int sup = getUB();
         if (value == inf && value == sup) {
             if (_plugexpl) {
-                solver.getExplainer().removeValue(this, value, cause);
+                solver.getEventObserver().removeValue(this, value, cause);
             }
             this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
@@ -137,12 +137,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 if (_plugexpl) {
-                    solver.getExplainer().removeValue(this, value, cause);
+                    solver.getEventObserver().removeValue(this, value, cause);
                 }
                 this.contradiction(cause, IntEventType.REMOVE, MSG_EMPTY);
             }
             if (_plugexpl) {
-                solver.getExplainer().removeValue(this, value, cause);
+                solver.getEventObserver().removeValue(this, value, cause);
             }
             return true;
         }
@@ -185,7 +185,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
+                    solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
@@ -209,13 +209,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             this.SIZE.set(1);
 
             if (_plugexpl) {
-                solver.getExplainer().instantiateTo(this, value, cause, lb, ub);
+                solver.getEventObserver().instantiateTo(this, value, cause, lb, ub);
             }
             this.notifyPropagators(e, cause);
             return true;
         } else {
             if (_plugexpl) {
-                solver.getExplainer().instantiateTo(this, value, cause, LB.get(), UB.get());
+                solver.getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
             this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
@@ -247,7 +247,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
+                    solver.getEventObserver().updateLowerBound(this, old, oub + 1, cause);
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
@@ -264,7 +264,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
 
                 if (_plugexpl) {
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                    solver.getEventObserver().updateLowerBound(this, old, value, cause);
                 }
                 return true;
 
@@ -298,7 +298,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int olb = this.getLB();
             if (olb > value) {
                 if (_plugexpl) {
-                    solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
+                    solver.getEventObserver().updateUpperBound(this, old, olb - 1, cause);
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
@@ -315,7 +315,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getExplainer().updateUpperBound(this, old, value, cause);
+                    solver.getEventObserver().updateUpperBound(this, old, value, cause);
                 }
                 return true;
             }

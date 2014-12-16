@@ -65,12 +65,11 @@ public class ExplanationTest {
 
     @Test(groups = "10s")
     public void testNosol0() {
-        long pn = 0;
-        for (int n = 4; n < 9; n++) {
-            for (int e = 0; e < engines.length - 1; e++) {
+        for (int n = 500; n < 4501; n += 500) {
+            for (int e = 1; e < engines.length-1; e++) {
                 for (int flat = 0; flat < 2; flat++) {
                     final Solver solver = new Solver();
-                    IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
+                    IntVar[] vars = VF.boundedArray("p", n, 0, n - 2, solver);
                     solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
                     solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
                     solver.set(ISF.lexico_LB(vars));
@@ -78,10 +77,8 @@ public class ExplanationTest {
                     Assert.assertFalse(solver.findSolution());
                     LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
-                    if (e == 0) {
-                        pn = solver.getMeasures().getNodeCount();
-                    } else {
-                        Assert.assertTrue(solver.getMeasures().getNodeCount() <= pn);
+                    if (e > 0) {
+                        Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
                     }
                 }
             }
@@ -154,8 +151,8 @@ public class ExplanationTest {
                     solver.post(ICF.alldifferent(pigeons, "NEQS"));
                     solver.set(ISF.random_value(pigeons, seed));
                     engines[e].plugin(solver, false);
-//                    SMF.shortlog(solver);
                     Assert.assertFalse(solver.findSolution());
+                    Chatterbox.printShortStatistics(solver);
                 }
             }
         }

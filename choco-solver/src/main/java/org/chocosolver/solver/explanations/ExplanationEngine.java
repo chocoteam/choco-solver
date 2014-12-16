@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ import java.io.Serializable;
  * <p/>
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine implements Serializable {
+public class ExplanationEngine implements Serializable, EventObserver {
     static Logger LOGGER = LoggerFactory.getLogger(ExplanationEngine.class);
     Solver solver;
 
@@ -65,64 +64,6 @@ public class ExplanationEngine implements Serializable {
 
     public boolean isActive() {
         return false;
-    }
-
-
-    /**
-     * Explain the activation of a propagator involved in a reified constraint
-     *
-     * @param var        the reified variable
-     * @param propagator the propagator to awake.
-     */
-    public void activePropagator(BoolVar var, Propagator propagator) {
-    }
-
-    /**
-     * Explain the removal of the <code>val</code> from <code>var</code>, due to <code>cause</code>.
-     *
-     * @param var   an integer variable
-     * @param val   a value
-     * @param cause a cause
-     */
-    public void removeValue(IntVar var, int val, ICause cause) {
-    }
-
-    /**
-     * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
-     * <p/>
-     * Prerequisite: <code>value</code> should belong to <code>var</code>
-     *
-     * @param intVar an integer variable
-     * @param old    the previous lower bound
-     * @param value  the current lower bound
-     * @param cause  the cause
-     */
-    public void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
-    }
-
-    /**
-     * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
-     * <p/>
-     * Prerequisite: <code>value</code> should belong to <code>var</code>
-     *
-     * @param var   an integer variable
-     * @param old   the previous upper bound
-     * @param value the current upper bound
-     * @param cause the cause
-     */
-    public void updateUpperBound(IntVar var, int old, int value, ICause cause) {
-    }
-
-    /**
-     * Explain the assignment to <code>val</code> of <code>var</code> due to <code>cause</code>.
-     *
-     * @param var   an integer variable
-     * @param val   the assignment value
-     * @param cause the cause
-     * @param oldLB the previous LB
-     * @param oldUB the previous UB
-     */
-    public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
     }
 
     public AntiDomain getRemovedValues(IntVar v) {
@@ -212,8 +153,8 @@ public class ExplanationEngine implements Serializable {
     /**
      * Provides an explanation of the activation of a propagator.
      * Only valuated for reified propagators.
-     * @param propagator
-     * @return
+     * @param propagator the activated propagator
+     * @return a deduction
      */
     public PropagatorActivation getPropagatorActivation(Propagator propagator) {
         return null;

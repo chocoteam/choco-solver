@@ -133,7 +133,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (index != -1) {
             if (SIZE.get() == 1) {
                 if (_plugexpl) {
-                    solver.getExplainer().removeValue(this, value, cause);
+                    solver.getEventObserver().removeValue(this, value, cause);
                 }
                 //            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
@@ -157,7 +157,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             this.notifyPropagators(e, cause);
             if (_plugexpl) {
-                solver.getExplainer().removeValue(this, value, cause);
+                solver.getEventObserver().removeValue(this, value, cause);
             }
             return true;
         } else {
@@ -208,7 +208,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
+                    solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
@@ -246,13 +246,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                     this.contradiction(cause, IntEventType.INSTANTIATE, MSG_EMPTY);
                 }
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, oldLB, oldUB);
+                    solver.getEventObserver().instantiateTo(this, value, cause, oldLB, oldUB);
                 }
                 this.notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             } else {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
+                    solver.getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
@@ -285,7 +285,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    solver.getExplainer().updateLowerBound(this, old, oub + 1, cause);
+                    solver.getEventObserver().updateLowerBound(this, old, oub + 1, cause);
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
@@ -311,7 +311,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                    solver.getEventObserver().updateLowerBound(this, old, value, cause);
                 }
                 return true;
             }
@@ -344,7 +344,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int olb = this.getLB();
             if (olb > value) {
                 if (_plugexpl) {
-                    solver.getExplainer().updateUpperBound(this, old, olb - 1, cause);
+                    solver.getEventObserver().updateUpperBound(this, old, olb - 1, cause);
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
@@ -370,7 +370,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getExplainer().updateUpperBound(this, old, value, cause);
+                    solver.getEventObserver().updateUpperBound(this, old, value, cause);
                 }
                 return true;
             }

@@ -34,8 +34,10 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.IntProcedure;
@@ -43,7 +45,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * X = Y
- * <p/>
+ * <p>
  * Ensures Arc-Consistency
  * <br/>
  *
@@ -184,6 +186,45 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
         } else {
             super.explain(xengine, d, e);
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(x)) {
+            IntEventType ievt = (IntEventType) evt;
+            switch (ievt) {
+                case REMOVE:
+                    newrules |= ruleStore.addRemovalRule(y, value);
+                case DECUPP:
+                    newrules |= ruleStore.addUpperBoundRule(y);
+                    break;
+                case INCLOW:
+                    newrules |= ruleStore.addLowerBoundRule(y);
+                    break;
+                case INSTANTIATE:
+                    newrules |= ruleStore.addFullDomainRule(y);
+                    break;
+            }
+        } else if (var.equals(y)) {
+            IntEventType ievt = (IntEventType) evt;
+            switch (ievt) {
+                case REMOVE:
+                    newrules |= ruleStore.addRemovalRule(x, value);
+                case DECUPP:
+                    newrules |= ruleStore.addUpperBoundRule(x);
+                    break;
+                case INCLOW:
+                    newrules |= ruleStore.addLowerBoundRule(x);
+                    break;
+                case INSTANTIATE:
+                    newrules |= ruleStore.addFullDomainRule(x);
+                    break;
+            }
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
     }
 
     @Override

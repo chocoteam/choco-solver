@@ -58,6 +58,11 @@ public class FastDecision extends Decision<IntVar> {
     }
 
     @Override
+    public DecisionOperator<IntVar> getDecisionOperator() {
+        return assignment;
+    }
+
+    @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
             assignment.apply(var, value, this);

@@ -34,8 +34,10 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
@@ -223,6 +225,20 @@ public class PropAbsolute extends Propagator<IntVar> {
         } else {
             super.explain(xengine, d, e);
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(vars[0])) {
+            newrules |= ruleStore.addRemovalRule(vars[1], value);
+            newrules |= ruleStore.addRemovalRule(vars[1], -value);
+        } else if (var.equals(vars[1])) {
+            newrules |= ruleStore.addRemovalRule(vars[0], Math.abs(value));
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
     }
 
     @Override

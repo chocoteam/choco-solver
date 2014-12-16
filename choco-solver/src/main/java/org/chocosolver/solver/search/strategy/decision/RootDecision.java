@@ -34,6 +34,7 @@ import org.chocosolver.solver.explanations.BranchingDecision;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -60,6 +61,11 @@ public class RootDecision extends Decision {
 
     @Override
     public Object getDecisionValue() {
+        return null;
+    }
+
+    @Override
+    public DecisionOperator getDecisionOperator() {
         return null;
     }
 

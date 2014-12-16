@@ -40,13 +40,16 @@ import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 
 /**
  * Implication propagator
- * <p/>
+ * <p>
  * <br/>
  *
  * @author Jean-Guillaume Fages
@@ -159,6 +162,19 @@ public class PropReif extends Propagator<Variable> {
         } else {
             throw new UnsupportedOperationException();
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(bVar)) {
+            for (int i = 0; i < vars.length; i++) {
+                newrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
+            }
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
     }
 
     @Override

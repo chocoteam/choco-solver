@@ -28,12 +28,9 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -50,7 +47,7 @@ import java.util.HashMap;
  * @author Charles Prud'homme
  * @since 05/06/2013
  */
-public class Solution implements ICause {
+public class Solution {
 
     HashMap<IntVar, Integer> intmap = new HashMap<>();
     HashMap<RealVar, double[]> realmap = new HashMap<>();
@@ -106,20 +103,15 @@ public class Solution implements ICause {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
         for (IntVar i : intmap.keySet()) {
-            i.instantiateTo(intmap.get(i), this);
+            i.instantiateTo(intmap.get(i), Cause.Null);
         }
         for (SetVar s : setmap.keySet()) {
-            s.instantiateTo(setmap.get(s), this);
+            s.instantiateTo(setmap.get(s), Cause.Null);
         }
         for (RealVar r : realmap.keySet()) {
             double[] bounds = realmap.get(r);
-            r.updateBounds(bounds[0], bounds[1], this);
+            r.updateBounds(bounds[0], bounds[1], Cause.Null);
         }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(Explanation.SYSTEM.get());
     }
 
     @Override

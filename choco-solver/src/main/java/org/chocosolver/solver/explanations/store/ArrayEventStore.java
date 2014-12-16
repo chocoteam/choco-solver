@@ -74,7 +74,7 @@ public class ArrayEventStore implements IEventStore {
 
     public void pushEvent(IntVar var, ICause cause, IEventType mask, int one, int two, int three) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("WRITE {} {} {} {} {}", var, cause, mask, one, two, three);
+            LOGGER.debug("WRITE < {} / {} / {} / {} / {} >", var, cause, mask, one, two, three);
         }
         assert cause != Cause.Null : "cause null";
         int idx = size.get();

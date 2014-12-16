@@ -39,9 +39,11 @@ import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -213,6 +215,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         e.add(xengine.getPropagatorActivation(this));
         Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
         reason.explain(xengine, VariableState.DOM, e);
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        return ruleStore.addPropagatorActivationRule(this)
+                | ruleStore.addFullDomainRule((var == vars[0]) ? vars[1] : vars[0]);
     }
 
 

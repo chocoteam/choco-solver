@@ -62,7 +62,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * Propagator methods are assumed to be idempotent, ie :
  * Let f be a propagator method, such that f : D -> D' include D, where D the union of variable domains involved in f.
  * Then, f(D)=f(D').
- * <p/>
+ * <p>
  * <br/>
  * A <code>Propagator</code> declares a filtering algorithm to apply to the <code>Variables</code> objects
  * in scope in order to reduce their <code>Domain</code> objects.
@@ -79,7 +79,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * <br/>
  * <code>this</code> can be deactivated using the <code>setPassive</code>method.
  * It automatically informs <code>Constraint</code> observers of this new "state".
- * <p/>
+ * <p>
  * The developer of a propagator must respect some rules to create a efficient propagator:
  * <br/>- internal references to variables must be achieved referencing the <code>this.vars</code> after the call to super,
  * this prevents from wrong references when a variable occurs more than once in the scope (See {@link org.chocosolver.solver.constraints.nary.count.PropCount_AC} for instance).
@@ -125,7 +125,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Creates a new propagator to filter the domains of vars.
-     * <p/>
+     * <p>
      * <br/>
      * To limit memory consumption, the array of variables is <b>referenced directly</b> (no clone).
      * This is the responsibility of the propagator's developer to take care of that point.
@@ -264,7 +264,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable
      * of index idxVarInProp has changed. This method calls a CUSTOM_PROPAGATION (coarse-grained) by default.
-     * <p/>
+     * <p>
      * This method should be overridden if the argument <code>reactToFineEvt</code> is set to <code>true</code> in the constructor.
      * Otherwise, it executes <code>propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
      *
@@ -286,7 +286,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Schedules a coarse propagation to filter all variables at once.
-     * <p/>
+     * <p>
      * Add the coarse event recorder into the engine
      *
      * @param evt event type
@@ -355,10 +355,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * returns a explanation for the decision mentioned in parameters
      *
-     *
      * @param xengine an explanation engine
-     * @param d : a <code>Deduction</code> to explain
-     * @param e : the explanation to feed
+     * @param d       : a <code>Deduction</code> to explain
+     * @param e       : the explanation to feed
      */
     @Override
     public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {

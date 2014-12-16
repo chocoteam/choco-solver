@@ -37,8 +37,10 @@ import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -119,6 +121,19 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
         } else {
             super.explain(xengine, d, e);
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules =ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(x)) {
+            newrules |=ruleStore.addUpperBoundRule(y);
+        } else if (var.equals(y)) {
+            newrules |=ruleStore.addUpperBoundRule(x);
+        } else {
+            newrules |=super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
     }
 
     @Override

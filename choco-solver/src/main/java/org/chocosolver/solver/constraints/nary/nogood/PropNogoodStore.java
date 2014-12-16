@@ -35,7 +35,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.queues.CircularQueue;
@@ -45,7 +47,7 @@ import java.util.List;
 
 /**
  * A propagator for the specific Nogood store designed to store ONLY positive decisions.
- * <p/>
+ * <p>
  * Related to "Nogood Recording from Restarts", C. Lecoutre et al.
  * <br/>
  *
@@ -151,6 +153,25 @@ public class PropNogoodStore extends Propagator<IntVar> {
         } else {
             super.explain(xengine, d, e);
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        TIntList nogoods = vars2nogood.get(var.getId());
+        TIntList indices = vars2idxinng.get(var.getId());
+        for (int i = 0; i < nogoods.size(); i++) {
+            INogood ng = allnogoods.get(nogoods.get(i));
+            int idx = indices.get(i);
+            if (value == ng.getVal(idx)) {
+                for (int j = 0; j < ng.size(); j++) {
+                    if (ng.getVar(j) != var) {
+                        newrules |= ruleStore.addFullDomainRule(ng.getVar(j));
+                    }
+                }
+            }
+        }
+        return newrules;
     }
 
     ///*****************************************************************************************************************

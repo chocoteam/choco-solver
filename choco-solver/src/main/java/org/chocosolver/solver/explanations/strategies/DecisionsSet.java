@@ -34,6 +34,7 @@ import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -80,6 +81,11 @@ public class DecisionsSet extends Decision<IntVar> implements Serializable {
 
     @Override
     public Integer getDecisionValue() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public DecisionOperator<IntVar> getDecisionOperator() {
         throw new UnsupportedOperationException();
     }
 

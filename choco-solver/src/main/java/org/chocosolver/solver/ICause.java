@@ -29,9 +29,13 @@
 package org.chocosolver.solver;
 
 
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 
 import java.io.Serializable;
 
@@ -40,22 +44,34 @@ import java.io.Serializable;
  * As an example, propagator is a cause because it filters values from variable domain.
  * So do decision, objective manager, etc.
  * It has an impact on domain variables and so it can fails.
- * <p/>
+ * <p>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 26 oct. 2010
  */
-public interface ICause extends Serializable {
+public interface ICause extends Serializable{
 
     /**
      * Feeds an explanation based on <code>this</code>.
      *
      * @param xengine explanation engine
-     * @param d the deduction
-     * @param e explanation to feed
+     * @param d       the deduction
+     * @param e       explanation to feed
      */
     void explain(ExplanationEngine xengine, Deduction d, Explanation e);
 
+    /**
+     * Add new rules to the rule store
+     *
+     * @param ruleStore the rule store
+     * @param var       the modified variable
+     * @param evt       the undergoing event
+     * @param value     the value (for REMOVE only)
+     * @return true if at least one rule has been added to the rule store
+     */
+    default boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        throw new SolverException("Undefined why(...) method for " + this);
+    }
 
 }

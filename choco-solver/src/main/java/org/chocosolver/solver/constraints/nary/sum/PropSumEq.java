@@ -34,7 +34,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -167,6 +169,57 @@ public class PropSumEq extends Propagator<IntVar> {
             super.explain(xengine, d, e);
         }
     }
+
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        // 1. find the pos of var in vars
+        boolean ispos = vars[n].getId() != var.getId();
+        if (IntEventType.isInclow(evt.getMask())) {
+            for (int i = 0; i < n; i++) { // first the positive coefficients
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    }
+                }
+            }
+            // then the negative one
+            if (vars[n] != var) {
+                if (vars[n] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addLowerBoundRule(vars[n]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[n]);
+                    }
+                }
+            }
+        } else if (IntEventType.isDecupp(evt.getMask())) {
+            for (int i = 0; i < n; i++) { // first the positive coefficients
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    }
+                }
+            }
+            // then the negative one
+            if (vars[n] != var) {
+                if (ispos) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[n]);
+                } else {
+                    newrules |= ruleStore.addLowerBoundRule(vars[n]);
+                }
+            }
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
+    }
+
 
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {

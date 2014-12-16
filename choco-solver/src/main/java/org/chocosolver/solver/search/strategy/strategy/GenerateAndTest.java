@@ -36,6 +36,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -201,6 +202,11 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
         @Override
         public Object getDecisionValue() {
             return ivalues;
+        }
+
+        @Override
+        public DecisionOperator<IntVar> getDecisionOperator() {
+            return DecisionOperator.int_eq;
         }
 
         @Override

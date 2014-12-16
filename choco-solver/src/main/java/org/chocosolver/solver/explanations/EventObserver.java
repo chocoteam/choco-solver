@@ -26,9 +26,74 @@
  */
 package org.chocosolver.solver.explanations;
 
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+
 /**
+ * Observer of events generated during resolution.
+ * Defined initially for explanation engine.
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
 public interface EventObserver {
+
+    /**
+     * Explain the activation of a propagator involved in a reified constraint
+     *
+     * @param var        the reified variable
+     * @param propagator the propagator to awake.
+     */
+    default void activePropagator(BoolVar var, Propagator propagator) {
+    }
+
+    /**
+     * Explain the removal of the <code>val</code> from <code>var</code>, due to <code>cause</code>.
+     *
+     * @param var   an integer variable
+     * @param val   a value
+     * @param cause a cause
+     */
+    default void removeValue(IntVar var, int val, ICause cause) {
+    }
+
+    /**
+     * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
+     * <p/>
+     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     *
+     * @param intVar an integer variable
+     * @param old    the previous lower bound
+     * @param value  the current lower bound
+     * @param cause  the cause
+     */
+    default void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
+    }
+
+    /**
+     * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
+     * <p/>
+     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     *
+     * @param var   an integer variable
+     * @param old   the previous upper bound
+     * @param value the current upper bound
+     * @param cause the cause
+     */
+    default void updateUpperBound(IntVar var, int old, int value, ICause cause) {
+    }
+
+    /**
+     * Explain the assignment to <code>val</code> of <code>var</code> due to <code>cause</code>.
+     *
+     * @param var   an integer variable
+     * @param val   the assignment value
+     * @param cause the cause
+     * @param oldLB the previous LB
+     * @param oldUB the previous UB
+     */
+    default void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
+    }
+
 }

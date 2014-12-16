@@ -35,6 +35,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -155,6 +156,8 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
      * @return a value object
      */
     public abstract Object getDecisionValue();
+
+    public abstract DecisionOperator<V> getDecisionOperator();
 
     /**
      * Free the decision, ie, it can be reused
