@@ -50,7 +50,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 26 oct. 2010
  */
-public interface ICause extends Serializable{
+public interface ICause extends Serializable {
 
     /**
      * Feeds an explanation based on <code>this</code>.
@@ -73,5 +73,4 @@ public interface ICause extends Serializable{
     default boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         throw new SolverException("Undefined why(...) method for " + this);
     }
-
 }

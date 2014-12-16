@@ -30,7 +30,6 @@ package org.chocosolver.solver.explanations.store;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -76,7 +75,7 @@ public class ArrayEventStore implements IEventStore {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("WRITE < {} / {} / {} / {} / {} >", var, cause, mask, one, two, three);
         }
-        assert cause != Cause.Null : "cause null";
+//        assert cause != Cause.Null : "cause null";
         int idx = size.get();
         if (idx >= varChunks.length) {
             increase();

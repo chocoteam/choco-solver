@@ -40,8 +40,15 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -67,7 +74,7 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
      * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
      *
      * @param variables the boolean variables to sum
-     * @param sum the resulting integer variable
+     * @param sum       the resulting integer variable
      */
     public PropBoolSumCoarse(BoolVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
@@ -160,5 +167,28 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
             IntVar S = (IntVar) identitymap.get(this.vars[size]);
             identitymap.put(this, new PropBoolSumCoarse(aVars, S));
         }
+    }
+
+
+    @Override
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
+        Variable var = d != null ? d.getVar() : null;
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i] != var) {
+                vars[i].explain(xengine, VariableState.DOM, e);
+            }
+        }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i] != var) {
+                newrules |= ruleStore.addFullDomainRule(vars[i]);
+            }
+        }
+        return newrules;
     }
 }

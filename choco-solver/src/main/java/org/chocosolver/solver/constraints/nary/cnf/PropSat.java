@@ -36,9 +36,18 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Deduction;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import java.util.ArrayList;
 
 /**
  * <br/>
@@ -56,9 +65,9 @@ public class PropSat extends Propagator<BoolVar> {
     TIntList early_deductions_;
 
     public PropSat(Solver solver) {
-		// this propagator initially has no variable
+        // this propagator initially has no variable
         super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
-		this.vars = new BoolVar[0];	// erase solver.ONE from the variable scope
+        this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
 
         this.indices_ = new TObjectIntHashMap<>();
         sat_ = new SatSolver();
@@ -73,13 +82,13 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		sat_.initPropagator();
-		applyEarlyDeductions();
-		for (int i = 0; i < vars.length; ++i) {
-			BoolVar var = vars[i];
-			if (var.isInstantiated()) {
-				VariableBound(i);
-			}
+        sat_.initPropagator();
+        applyEarlyDeductions();
+        for (int i = 0; i < vars.length; ++i) {
+            BoolVar var = vars[i];
+            if (var.isInstantiated()) {
+                VariableBound(i);
+            }
         }
     }
 
@@ -137,7 +146,7 @@ public class PropSat extends Propagator<BoolVar> {
         boolean new_value = vars[index].getValue() != 0;
         int lit = SatSolver.makeLiteral(var, new_value);
         if (!sat_.propagateOneLiteral(lit)) {
-            this.contradiction(null, "clause unsat");
+            this.contradiction(vars[index], "clause unsat");
         } else {
             sat_trail_.set(sat_.trailMarker());
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
@@ -213,4 +222,38 @@ public class PropSat extends Propagator<BoolVar> {
         sat.Literal(var);
     }
 
+    @Override
+    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+        e.add(xengine.getPropagatorActivation(this));
+        int idx = indices_.get(d.getVar());
+        int nidx = SatSolver.negated(idx);
+        TIntList implies = sat_.implies_.get(nidx);
+        for (int l : implies.toArray()) {
+            vars[l].explain(xengine, VariableState.DOM, e);
+        }
+        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(nidx);
+        for (SatSolver.Watcher w : watchers) {
+            for (int l = 0; l < w.clause.size(); l++) {
+                vars[l].explain(xengine, VariableState.DOM, e);
+            }
+        }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        int idx = indices_.get(var);
+        int nidx = SatSolver.negated(idx);
+        TIntList implies = sat_.implies_.get(nidx);
+        for (int k : implies.toArray()) {
+            newrules |= ruleStore.addFullDomainRule(vars[k]);
+        }
+        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(nidx);
+        for (SatSolver.Watcher w : watchers) {
+            for (int l = 0; l < w.clause.size(); l++) {
+                newrules |= ruleStore.addFullDomainRule(vars[w.clause._g(l)]);
+            }
+        }
+        return newrules;
+    }
 }

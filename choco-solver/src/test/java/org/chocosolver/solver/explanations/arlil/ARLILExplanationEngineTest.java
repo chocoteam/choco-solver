@@ -26,6 +26,7 @@
  */
 package org.chocosolver.solver.explanations.arlil;
 
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
@@ -415,11 +416,36 @@ public class ARLILExplanationEngineTest {
         Assert.assertFalse(solver.findSolution());
     }
 
-    @Test(groups = "10m")
+
+    private void configure(Solver solver, int conf) {
+        switch (conf) {
+            case 0:
+                System.out.printf("noexp; ");
+                break;
+            case 1:
+                System.out.printf("flatt; ");
+                ExplanationFactory.plugExpl(solver, true, false);
+                new ConflictBasedBackjumping(solver.getExplainer());
+                break;
+            case 2:
+                System.out.printf("unfla; ");
+                ExplanationFactory.plugExpl(solver, false, false);
+                new ConflictBasedBackjumping(solver.getExplainer());
+                break;
+            case 3:
+                System.out.printf("arlil; ");
+                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+                CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+                solver.plugMonitor(cbj);
+                break;
+        }
+    }
+
+    @Test(groups = "30m")
     public void testLS() {
-        for (int m = 15; m < 19; m++) {
+        for (int m = 2; m < 24; m++) {
             System.out.printf("LS(%d)\n", m);
-            for (int a = 0; a < 4; a+=3) {
+            for (int a = 0; a < 4; a++) {
                 Solver solver = new Solver();
                 IntVar[] vars = VariableFactory.enumeratedArray("c", m * m, 0, m - 1, solver);
                 // Constraints
@@ -430,47 +456,28 @@ public class ARLILExplanationEngineTest {
                         row[x] = vars[i * m + x];
                         col[x] = vars[x * m + i];
                     }
-                    solver.post(IntConstraintFactory.alldifferent(col, "NEQS"));
-                    solver.post(IntConstraintFactory.alldifferent(row, "NEQS"));
+                    solver.post(IntConstraintFactory.alldifferent(col, "FC"));
+                    solver.post(IntConstraintFactory.alldifferent(row, "FC"));
                 }
                 solver.set(IntStrategyFactory.lexico_LB(vars));
 
-                switch (a) {
-                    case 0:
-                        System.out.printf("noexp; ");
-                        break;
-                    case 1:
-                        System.out.printf("flatt; ");
-                        ExplanationFactory.plugExpl(solver, true, false);
-                        new ConflictBasedBackjumping(solver.getExplainer());
-                        break;
-                    case 2:
-                        System.out.printf("unfla; ");
-                        ExplanationFactory.plugExpl(solver, false, false);
-                        new ConflictBasedBackjumping(solver.getExplainer());
-                        break;
-                    case 3:
-                        System.out.printf("arlil; ");
-                        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
-                        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
-                        solver.plugMonitor(cbj);
-                        break;
-                }
+                configure(solver, a);
                 Chatterbox.showShortStatistics(solver);
                 SMF.limitTime(solver, "5m");
-                solver.findSolution();
+                Assert.assertTrue(solver.findSolution());
+//                Chatterbox.printSolutions(solver);
             }
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "30m")
     public void testCA() {
-        for (int n = 6; n < 12; n++) {
+        for (int n = 6; n < 16; n++) {
             System.out.printf("CA(%d):\n", n);
-            for (int a = 3; a < 4; a++) {
+            for (int a = 0; a < 4; a++) {
                 Solver solver = new Solver();
-                IntVar[] vars = VariableFactory.enumeratedArray("c", n * n, 0, n - 1, solver);
-                IntVar[] vectors = new IntVar[(n*(n-1))/2];
+                IntVar[] vars = VariableFactory.enumeratedArray("c", n, 0, n - 1, solver);
+                IntVar[] vectors = new IntVar[(n * (n - 1)) / 2];
                 IntVar[][] diff = new IntVar[n][n];
                 int idx = 0;
                 for (int i = 0; i < n; i++) {
@@ -483,44 +490,222 @@ public class ARLILExplanationEngineTest {
                         idx++;
                     }
                 }
-                solver.post(IntConstraintFactory.alldifferent(vars, "NEQS"));
-                solver.post(IntConstraintFactory.alldifferent(vectors, "NEQS"));
+                solver.post(IntConstraintFactory.alldifferent(vars, "FC"));
+                solver.post(IntConstraintFactory.alldifferent(vectors, "FC"));
 
                 // symmetry-breaking
                 solver.post(ICF.arithm(vars[0], "<", vars[n - 1]));
 
                 solver.set(IntStrategyFactory.lexico_LB(vars));
 
-                switch (a) {
-                    case 0:
-                        System.out.printf("noexp: ");
-                        break;
-                    case 1:
-                        System.out.printf("flatt: ");
-                        ExplanationFactory.plugExpl(solver, true, false);
-                        new ConflictBasedBackjumping(solver.getExplainer());
-                        break;
-                    case 2:
-                        System.out.printf("unfla: ");
-                        ExplanationFactory.plugExpl(solver, false, false);
-                        new ConflictBasedBackjumping(solver.getExplainer());
-                        break;
-                    case 3:
-                        System.out.printf("arlil: ");
-                        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
-                        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
-                        solver.plugMonitor(cbj);
-                        break;
-                }
+                configure(solver, a);
                 Chatterbox.showShortStatistics(solver);
-//                Chatterbox.showDecisions(solver, () -> solver.getMeasures().toOneShortLineString());
-//                SMF.limitNode(solver, 44);
-                solver.findSolution();
-//                if(a < 2){
-//                    nc = solver.getMeasures().getFailCount();
-//                }else{
-//                    Assert.assertEquals(solver.getMeasures().getFailCount(), nc);
-//                }
+                SMF.limitTime(solver, "5m");
+                Assert.assertTrue(solver.findSolution());
+            }
+        }
+    }
+
+    @Test(groups = "30m")
+    public void testGR() {
+        for (int m = 6; m < 12; m++) {
+            System.out.printf("GR(%d):\n", m);
+            for (int a = 0; a < 4; a++) {
+                Solver solver = new Solver();
+                IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+
+                solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
+
+                for (int i = 0; i < m - 1; i++) {
+                    solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
+                }
+
+                IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+                IntVar[][] m_diffs = new IntVar[m][m];
+                for (int k = 0, i = 0; i < m - 1; i++) {
+                    for (int j = i + 1; j < m; j++, k++) {
+                        // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
+                        solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
+                        solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                        solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                        solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                        m_diffs[i][j] = diffs[k];
+                    }
+                }
+                solver.post(IntConstraintFactory.alldifferent(diffs, "FC"));
+
+                // break symetries
+                if (m > 2) {
+                    solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+                }
+
+                solver.set(IntStrategyFactory.lexico_LB(ticks));
+
+                configure(solver, a);
+                Chatterbox.showShortStatistics(solver);
+                SMF.limitTime(solver, "5m");
+                solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, ticks[m - 1]);
+                Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
+            }
+        }
+    }
+
+    @Test(groups = "30m")
+    public void testLN() {
+        int[][] params = new int[][]{{2, 3}, {2, 4}, {3, 9}, {3, 17}};
+
+
+        for (int m = 0; m < params.length; m++) {
+            int k = params[m][0];
+            int n = params[m][1];
+            System.out.printf("LN(%d,%d):\n", k, n);
+            for (int a = 0; a < 4; a++) {
+                Solver solver = new Solver();
+                IntVar[] position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
+                for (int i = 0; i < n; i++) {
+                    for (int j = 0; j < k - 1; j++) {
+                        solver.post(IntConstraintFactory.arithm(VariableFactory.offset(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]));
+                    }
+                }
+                solver.post(IntConstraintFactory.alldifferent(position, "FC"));
+
+                solver.set(IntStrategyFactory.minDom_UB(position));
+
+                configure(solver, a);
+                Chatterbox.showShortStatistics(solver);
+                SMF.limitTime(solver, "5m");
+                Assert.assertTrue(solver.findSolution());
+            }
+        }
+    }
+
+    @Test(groups = "30m")
+    public void testMS() {
+        for (int n = 5; n < 12; n++) {
+            System.out.printf("MS(%d):\n", n);
+            for (int a = 0; a < 4; a++) {
+                Solver solver = new Solver();
+                int ms = n * (n * n + 1) / 2;
+
+                IntVar[][] matrix = new IntVar[n][n];
+                IntVar[][] invMatrix = new IntVar[n][n];
+                IntVar[] vars = new IntVar[n * n];
+
+                int k = 0;
+                for (int i = 0; i < n; i++) {
+                    for (int j = 0; j < n; j++, k++) {
+                        matrix[i][j] = VariableFactory.enumerated("square" + i + "," + j, 1, n * n, solver);
+                        vars[k] = matrix[i][j];
+                        invMatrix[j][i] = matrix[i][j];
+                    }
+                }
+
+                IntVar[] diag1 = new IntVar[n];
+                IntVar[] diag2 = new IntVar[n];
+                for (int i = 0; i < n; i++) {
+                    diag1[i] = matrix[i][i];
+                    diag2[i] = matrix[(n - 1) - i][i];
+                }
+
+                solver.post(IntConstraintFactory.alldifferent(vars, "FC"));
+
+                int[] coeffs = new int[n];
+                Arrays.fill(coeffs, 1);
+                IntVar msv = VariableFactory.fixed(ms, solver);
+                for (int i = 0; i < n; i++) {
+                    solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, msv));
+                    solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, msv));
+                }
+                solver.post(IntConstraintFactory.scalar(diag1, coeffs, msv));
+                solver.post(IntConstraintFactory.scalar(diag2, coeffs, msv));
+
+                // Symetries breaking
+                solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
+                solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
+                solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
+
+                solver.set(IntStrategyFactory.minDom_MidValue(vars));
+
+                configure(solver, a);
+                Chatterbox.showShortStatistics(solver);
+                SMF.limitTime(solver, "5m");
+                Assert.assertTrue(solver.findSolution()||solver.hasReachedLimit());
+            }
+        }
+    }
+
+    @Test(groups = "30m")
+    public void testPa() {
+        for (int N = 64; N < 257; N += 4) {
+            System.out.printf("Pa(%d)\n", N);
+            for (int a = 0; a < 4; a++) {
+                Solver solver = new Solver();
+
+                int size = N / 2;
+                IntVar[] x, y;
+                x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
+                y = VariableFactory.enumeratedArray("y", size, 1, 2 * size, solver);
+
+                // break symmetries
+                for (int i = 0; i < size - 1; i++) {
+                    solver.post(IntConstraintFactory.arithm(x[i], "<", x[i + 1]));
+                    solver.post(IntConstraintFactory.arithm(y[i], "<", y[i + 1]));
+                }
+                solver.post(IntConstraintFactory.arithm(x[0], "<", y[0]));
+                solver.post(IntConstraintFactory.arithm(x[0], "=", 1));
+
+                IntVar[] xy = new IntVar[2 * size];
+                for (int i = size - 1; i >= 0; i--) {
+                    xy[i] = x[i];
+                    xy[size + i] = y[i];
+                }
+
+                IntVar[] Ovars = new IntVar[2 * size];
+                for (int i = 0; i < size; i++) {
+                    Ovars[i * 2] = x[i];
+                    Ovars[i * 2 + 1] = y[i];
+                }
+
+                int[] coeffs = new int[2 * size];
+                for (int i = size - 1; i >= 0; i--) {
+                    coeffs[i] = 1;
+                    coeffs[size + i] = -1;
+                }
+                solver.post(IntConstraintFactory.scalar(xy, coeffs, VariableFactory.fixed(0, solver)));
+
+                IntVar[] sxy, sx, sy;
+                sxy = new IntVar[2 * size];
+                sx = new IntVar[size];
+                sy = new IntVar[size];
+                for (int i = size - 1; i >= 0; i--) {
+                    sx[i] = VF.bounded("x^", 0, x[i].getUB() * x[i].getUB(), solver);
+                    sxy[i] = sx[i];
+                    sy[i] = VF.bounded("y^", 0, y[i].getUB() * y[i].getUB(), solver);
+                    sxy[size + i] = sy[i];
+                    solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
+                    solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));
+                    solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
+                    solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
+                }
+                solver.post(IntConstraintFactory.scalar(sxy, coeffs, VariableFactory.fixed(0, solver)));
+
+                coeffs = new int[size];
+                Arrays.fill(coeffs, 1);
+                solver.post(IntConstraintFactory.scalar(x, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4, solver)));
+                solver.post(IntConstraintFactory.scalar(y, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4, solver)));
+                solver.post(IntConstraintFactory.scalar(sx, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver)));
+                solver.post(IntConstraintFactory.scalar(sy, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver)));
+
+                solver.post(IntConstraintFactory.alldifferent(xy, "FC"));
+
+
+                solver.set(IntStrategyFactory.minDom_LB(Ovars));
+
+                configure(solver, a);
+                Chatterbox.showShortStatistics(solver);
+                SMF.limitTime(solver, "5m");
+                Assert.assertTrue(solver.findSolution());
+//                Chatterbox.printSolutions(solver);
             }
         }
     }

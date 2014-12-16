@@ -35,10 +35,12 @@ import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 
 /**
  * Class to monitor the objective function and avoid exploring "worse" solutions
@@ -48,263 +50,272 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class ObjectiveManager<V extends Variable, N extends Number> implements ICause {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	final protected ResolutionPolicy policy;
-	final protected boolean strict;
-	final protected V objective;
+    final protected ResolutionPolicy policy;
+    final protected boolean strict;
+    final protected V objective;
 
-	final private boolean intOrReal;
-	final private double precision;
+    final private boolean intOrReal;
+    final private double precision;
 
-	protected N bestProvedLB, bestProvedUB; // best bounds found so far
+    protected N bestProvedLB, bestProvedUB; // best bounds found so far
 
-	// creates an objective manager for satisfaction problems
-	public static ObjectiveManager SAT(){
-		return new ObjectiveManager(null,ResolutionPolicy.SATISFACTION,false);
-	}
+    // creates an objective manager for satisfaction problems
+    public static ObjectiveManager SAT() {
+        return new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, false);
+    }
 
-	//***********************************************************************************
-	// CONSTRUCTOR
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
-	private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean strict, boolean intOrReal) {
-		this.policy = policy;
-		this.strict = strict;
-		this.objective = objective;
-		this.precision = precision;
-		this.intOrReal = intOrReal;
-		if (isOptimization()) {
-			this.bestProvedLB = getObjLB();
-			this.bestProvedUB = getObjUB();
-		}
-	}
+    private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean strict, boolean intOrReal) {
+        this.policy = policy;
+        this.strict = strict;
+        this.objective = objective;
+        this.precision = precision;
+        this.intOrReal = intOrReal;
+        if (isOptimization()) {
+            this.bestProvedLB = getObjLB();
+            this.bestProvedUB = getObjUB();
+        }
+    }
 
-	/**
-	 * Creates an optimization manager for an integer objective function (represented by an IntVar)
-	 * Enables to cut "worse" solutions
-	 *
-	 * @param objective variable (represent the value of a solution)
-	 * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
-	 * @param strict    Forces to compute strictly better solutions.
-	 *                  Enables to enumerate better or equal solutions when set to false.
-	 */
-	@SuppressWarnings("unchecked")
-	public ObjectiveManager(IntVar objective, ResolutionPolicy policy, boolean strict){
-		this((V)objective,policy,0,strict,true);
-	}
+    /**
+     * Creates an optimization manager for an integer objective function (represented by an IntVar)
+     * Enables to cut "worse" solutions
+     *
+     * @param objective variable (represent the value of a solution)
+     * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
+     * @param strict    Forces to compute strictly better solutions.
+     *                  Enables to enumerate better or equal solutions when set to false.
+     */
+    @SuppressWarnings("unchecked")
+    public ObjectiveManager(IntVar objective, ResolutionPolicy policy, boolean strict) {
+        this((V) objective, policy, 0, strict, true);
+    }
 
-	/**
-	 * Creates an optimization manager for a continuous objective function (represented by a RealVar)
-	 * Enables to cut "worse" solutions
-	 *
-	 * @param objective variable (represent the value of a solution)
-	 * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
-	 * @param precision precision parameter defining the minimum objective improvement between two solutions
-	 *                  (avoids wasting time enumerating a huge set of equivalent solutions)
-	 * @param strict    Forces to compute strictly better solutions.
-	 *                  Enables to enumerate better or equal solutions when set to false.
-	 */
-	@SuppressWarnings("unchecked")
-	public ObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision, boolean strict) {
-		this((V)objective,policy,precision,strict,false);
-	}
+    /**
+     * Creates an optimization manager for a continuous objective function (represented by a RealVar)
+     * Enables to cut "worse" solutions
+     *
+     * @param objective variable (represent the value of a solution)
+     * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
+     * @param precision precision parameter defining the minimum objective improvement between two solutions
+     *                  (avoids wasting time enumerating a huge set of equivalent solutions)
+     * @param strict    Forces to compute strictly better solutions.
+     *                  Enables to enumerate better or equal solutions when set to false.
+     */
+    @SuppressWarnings("unchecked")
+    public ObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision, boolean strict) {
+        this((V) objective, policy, precision, strict, false);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	/**
-	 * @return true iff the problem is an optimization problem
-	 */
-	public boolean isOptimization() {
-		return policy != ResolutionPolicy.SATISFACTION;
-	}
+    /**
+     * @return true iff the problem is an optimization problem
+     */
+    public boolean isOptimization() {
+        return policy != ResolutionPolicy.SATISFACTION;
+    }
 
-	/**
-	 * Updates the lower (or upper) bound of the objective variable, considering its best know value.
-	 *
-	 * @param decision decision to apply
-	 * @throws org.chocosolver.solver.exception.ContradictionException if this application leads to a contradiction  @param decision
-	 */
-	public void apply(Decision decision) throws ContradictionException {
-		decision.apply();
-	}
+    /**
+     * Updates the lower (or upper) bound of the objective variable, considering its best know value.
+     *
+     * @param decision decision to apply
+     * @throws org.chocosolver.solver.exception.ContradictionException if this application leads to a contradiction  @param decision
+     */
+    public void apply(Decision decision) throws ContradictionException {
+        decision.apply();
+    }
 
-	@Override
-	public void explain(ExplanationEngine xengine, Deduction val, Explanation e) {
-		if (isOptimization()) {
-			objective.explain(xengine, VariableState.DOM, e);
-		}
-	}
+    @Override
+    public void explain(ExplanationEngine xengine, Deduction val, Explanation e) {
+        if (isOptimization()) {
+            objective.explain(xengine, VariableState.DOM, e);
+        }
+    }
 
-	@Override
-	public String toString() {
-		String st;
-		switch (policy) {
-			case SATISFACTION:
-				return "SAT";
-			case MINIMIZE: st = "Minimize"; break;
-			case MAXIMIZE: st = "Maximize"; break;
-			default:
-				throw new UnsupportedOperationException("no objective manager");
-		}
-		if(intOrReal){
-			return String.format(st+" %s = %d", this.objective.getName(), getBestSolutionValue());
-		}else{
-			return String.format(st+" %s = %."+getNbDecimals()+"f", this.objective.getName(), getBestSolutionValue());
-		}
-	}
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        return isOptimization() && ruleStore.addFullDomainRule((IntVar) objective);
+    }
 
-	protected int getNbDecimals(){
-		int dec = 0;
-		double p = precision;
-		while((int)p<=0 && dec<=12){
-			dec++;
-			p*=10;
-		}
-		return dec;
-	}
+    @Override
+    public String toString() {
+        String st;
+        switch (policy) {
+            case SATISFACTION:
+                return "SAT";
+            case MINIMIZE:
+                st = "Minimize";
+                break;
+            case MAXIMIZE:
+                st = "Maximize";
+                break;
+            default:
+                throw new UnsupportedOperationException("no objective manager");
+        }
+        if (intOrReal) {
+            return String.format(st + " %s = %d", this.objective.getName(), getBestSolutionValue());
+        } else {
+            return String.format(st + " %s = %." + getNbDecimals() + "f", this.objective.getName(), getBestSolutionValue());
+        }
+    }
 
-	/**
-	 * Informs the manager that a new solution has been found
-	 */
-	public void update() {
-		if(isOptimization()){
-			assert objective.isInstantiated();
-			if (policy == ResolutionPolicy.MINIMIZE) {
-				this.bestProvedUB = getObjUB();
-			} else {
-				this.bestProvedLB = getObjLB();
-			}
-		}
-	}
+    protected int getNbDecimals() {
+        int dec = 0;
+        double p = precision;
+        while ((int) p <= 0 && dec <= 12) {
+            dec++;
+            p *= 10;
+        }
+        return dec;
+    }
 
-	/**
-	 * Prevent the solver from computing worse quality solutions
-	 *
-	 * @throws org.chocosolver.solver.exception.ContradictionException
-	 */
-	public void postDynamicCut() throws ContradictionException {
-		if(isOptimization()){
-			if(intOrReal){
-				int offset = 0;
-				if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
-					offset = 1;
-				}
-				IntVar io = (IntVar) objective;
-				if (policy == ResolutionPolicy.MINIMIZE) {
-					io.updateUpperBound(bestProvedUB.intValue() - offset, this);
-					io.updateLowerBound(bestProvedLB.intValue(), this);
-				} else {
-					io.updateUpperBound(bestProvedUB.intValue(), this);
-					io.updateLowerBound(bestProvedLB.intValue() + offset, this);
-				}
-			} else {
-				double offset = 0;
-				if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
-					offset = precision;
-				}
-				RealVar io = (RealVar) objective;
-				if (policy == ResolutionPolicy.MINIMIZE) {
-					io.updateUpperBound(bestProvedUB.doubleValue() - offset, this);
-					io.updateLowerBound(bestProvedLB.doubleValue(), this);
-				} else {
-					io.updateUpperBound(bestProvedUB.doubleValue(), this);
-					io.updateLowerBound(bestProvedLB.doubleValue() + offset, this);
-				}
-			}
-		}
-	}
+    /**
+     * Informs the manager that a new solution has been found
+     */
+    public void update() {
+        if (isOptimization()) {
+            assert objective.isInstantiated();
+            if (policy == ResolutionPolicy.MINIMIZE) {
+                this.bestProvedUB = getObjUB();
+            } else {
+                this.bestProvedLB = getObjLB();
+            }
+        }
+    }
 
-	/**
-	 * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
-	 */
-	public N getBestSolutionValue() {
-		if (policy == ResolutionPolicy.MINIMIZE) {
-			return bestProvedUB;
-		}
-		if (policy == ResolutionPolicy.MAXIMIZE) {
-			return bestProvedLB;
-		}
-		throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
-	}
+    /**
+     * Prevent the solver from computing worse quality solutions
+     *
+     * @throws org.chocosolver.solver.exception.ContradictionException
+     */
+    public void postDynamicCut() throws ContradictionException {
+        if (isOptimization()) {
+            if (intOrReal) {
+                int offset = 0;
+                if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
+                    offset = 1;
+                }
+                IntVar io = (IntVar) objective;
+                if (policy == ResolutionPolicy.MINIMIZE) {
+                    io.updateUpperBound(bestProvedUB.intValue() - offset, this);
+                    io.updateLowerBound(bestProvedLB.intValue(), this);
+                } else {
+                    io.updateUpperBound(bestProvedUB.intValue(), this);
+                    io.updateLowerBound(bestProvedLB.intValue() + offset, this);
+                }
+            } else {
+                double offset = 0;
+                if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
+                    offset = precision;
+                }
+                RealVar io = (RealVar) objective;
+                if (policy == ResolutionPolicy.MINIMIZE) {
+                    io.updateUpperBound(bestProvedUB.doubleValue() - offset, this);
+                    io.updateLowerBound(bestProvedLB.doubleValue(), this);
+                } else {
+                    io.updateUpperBound(bestProvedUB.doubleValue(), this);
+                    io.updateLowerBound(bestProvedLB.doubleValue() + offset, this);
+                }
+            }
+        }
+    }
 
-	/**
-	 * States that lb is a global lower bound on the problem
-	 *
-	 * @param lb lower bound
-	 */
-	public void updateBestLB(N lb) {
-		assert isOptimization();
-		if(lb.doubleValue()> bestProvedLB.doubleValue()){
-			bestProvedLB = lb;
-		}
-	}
+    /**
+     * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
+     */
+    public N getBestSolutionValue() {
+        if (policy == ResolutionPolicy.MINIMIZE) {
+            return bestProvedUB;
+        }
+        if (policy == ResolutionPolicy.MAXIMIZE) {
+            return bestProvedLB;
+        }
+        throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
+    }
 
-	/**
-	 * States that ub is a global upper bound on the problem
-	 *
-	 * @param ub upper bound
-	 */
-	public void updateBestUB(N ub) {
-		assert isOptimization();
-		if(ub.doubleValue()< bestProvedUB.doubleValue()){
-			bestProvedUB = ub;
-		}
-	}
+    /**
+     * States that lb is a global lower bound on the problem
+     *
+     * @param lb lower bound
+     */
+    public void updateBestLB(N lb) {
+        assert isOptimization();
+        if (lb.doubleValue() > bestProvedLB.doubleValue()) {
+            bestProvedLB = lb;
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	private N getObjLB(){
-		assert isOptimization();
-		if(intOrReal){
-			return (N) new Integer(((IntVar)objective).getLB());
-		}else{
-			return (N) new Double(((RealVar)objective).getLB());
-		}
-	}
+    /**
+     * States that ub is a global upper bound on the problem
+     *
+     * @param ub upper bound
+     */
+    public void updateBestUB(N ub) {
+        assert isOptimization();
+        if (ub.doubleValue() < bestProvedUB.doubleValue()) {
+            bestProvedUB = ub;
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	private N getObjUB(){
-		assert isOptimization();
-		if(intOrReal){
-			return (N) new Integer(((IntVar)objective).getUB());
-		}else{
-			return (N) new Double(((RealVar)objective).getUB());
-		}
-	}
+    @SuppressWarnings("unchecked")
+    private N getObjLB() {
+        assert isOptimization();
+        if (intOrReal) {
+            return (N) new Integer(((IntVar) objective).getLB());
+        } else {
+            return (N) new Double(((RealVar) objective).getLB());
+        }
+    }
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+    @SuppressWarnings("unchecked")
+    private N getObjUB() {
+        assert isOptimization();
+        if (intOrReal) {
+            return (N) new Integer(((IntVar) objective).getUB());
+        } else {
+            return (N) new Double(((RealVar) objective).getUB());
+        }
+    }
 
-	/**
-	 * @return the ResolutionPolicy of the problem
-	 */
-	public ResolutionPolicy getPolicy() {
-		return policy;
-	}
+    //***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
 
-	/**
-	 * @return the objective variable
-	 */
-	public V getObjective() {
-		return objective;
-	}
+    /**
+     * @return the ResolutionPolicy of the problem
+     */
+    public ResolutionPolicy getPolicy() {
+        return policy;
+    }
 
-	/**
-	 * @return the best lower bound computed so far
-	 */
-	public N getBestLB() {
-		return bestProvedLB;
-	}
+    /**
+     * @return the objective variable
+     */
+    public V getObjective() {
+        return objective;
+    }
 
-	/**
-	 * @return the best upper bound computed so far
-	 */
-	public N getBestUB() {
-		return bestProvedUB;
-	}
+    /**
+     * @return the best lower bound computed so far
+     */
+    public N getBestLB() {
+        return bestProvedLB;
+    }
+
+    /**
+     * @return the best upper bound computed so far
+     */
+    public N getBestUB() {
+        return bestProvedUB;
+    }
 }

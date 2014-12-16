@@ -29,7 +29,11 @@
 package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.*;
+import org.chocosolver.solver.search.solution.ISolutionRecorder;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.Variable;
 
 import static org.chocosolver.util.tools.StringUtils.pad;
@@ -45,10 +49,12 @@ import static org.chocosolver.util.tools.StringUtils.pad;
  * @since 12/11/14
  */
 public class Chatterbox {
-    private Chatterbox() {}
+    private Chatterbox() {
+    }
 
     /**
      * Print the version message.
+     *
      * @param solver the solver
      */
     public static void printVersion(Solver solver) {
@@ -58,9 +64,9 @@ public class Chatterbox {
 
     /**
      * Print the resolution statistics.
-     * <p/>
+     * <p>
      * Recommended usage: to be called after the resolution step.
-     * <p/>
+     * <p>
      * Equivalent to:
      * <pre>
      *     System.out.println(solver.getMeasures().toString());
@@ -74,9 +80,9 @@ public class Chatterbox {
 
     /**
      * Output the resolution statistics in a single line.
-     * <p/>
+     * <p>
      * Recommended usage: to be called after the resolution step.
-     * <p/>
+     * <p>
      * Equivalent to:
      * <pre>
      *     System.out.println(solver.getMeasures().toOneLineString());
@@ -94,7 +100,7 @@ public class Chatterbox {
      * <pre>
      *     solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
      * </pre>
-     * <p/>
+     * <p>
      * Equivalent to:
      * <pre>
      *     System.out.println(solver.getMeasures().toCSV());
@@ -106,10 +112,43 @@ public class Chatterbox {
         System.out.println(solver.getMeasures().toCSV());
     }
 
+
+    /**
+     * Print a posteriori the solutions found (beware, a solution recorder must has been defined).
+     * <p>
+     * Recommended usage: to be called after the resolution step.
+     *
+     * @param solver  the solver to print solutions from
+     * @param message the message to print per solution
+     */
+    public static void printSolutions(Solver solver, IMessage message) {
+        ISolutionRecorder solrec = solver.getSolutionRecorder();
+        for (Solution sol : solrec.getSolutions()) {
+            try {
+                sol.restore();
+                System.out.println(message.print());
+            } catch (ContradictionException e) {
+                throw new SolverException("Unable to restore a found solution");
+            }
+        }
+    }
+
+    /**
+     * Print a posteriori the solutions found (beware, a solution recorder must has been defined).
+     * <p>
+     * Recommended usage: to be called after the resolution step.
+     *
+     * @param solver the solver to print solutions from
+     * @see Chatterbox.DefaultSolutionMessage
+     */
+    public static void printSolutions(Solver solver) {
+        printSolutions(solver, new DefaultSolutionMessage(solver));
+    }
+
     /**
      * Plug a search monitor which calls {@link #printVersion(org.chocosolver.solver.Solver)}
      * and {@link #printStatistics(Solver)} before closing the search.
-     * <p/>
+     * <p>
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
@@ -141,7 +180,7 @@ public class Chatterbox {
 
     /**
      * Plug a search monitor which calls {@link #printShortStatistics(Solver)} before closing the search.
-     * <p/>
+     * <p>
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
@@ -161,7 +200,7 @@ public class Chatterbox {
 
     /**
      * Plug a search monitor which outputs <code>message</code> on each solution.
-     * <p/>
+     * <p>
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver  the solver to evaluate
@@ -173,7 +212,7 @@ public class Chatterbox {
 
     /**
      * Plug a search monitor which outputs a message on each solution.
-     * <p/>
+     * <p>
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate
@@ -185,7 +224,7 @@ public class Chatterbox {
 
     /**
      * Plug a search monitor which outputs <code>message</code> on each decision.
-     * <p/>
+     * <p>
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver  the solver to evaluate
@@ -221,7 +260,7 @@ public class Chatterbox {
 
     /**
      * Plug a search monitor which outputs a message on each decision.
-     * <p/>
+     * <p>
      * Recommended usage: to be called before the resolution step.
      *
      * @param solver the solver to evaluate

@@ -46,7 +46,7 @@ import org.chocosolver.util.ESat;
  *
  * @author Hadrien Cambazard, Charles Prud'homme, Jean-Guillaume fages
  * @since 07/02/11
- * <p/>
+ * <p>
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
