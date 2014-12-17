@@ -310,14 +310,14 @@ public class PropScalarEq extends Propagator<IntVar> {
         if (pos < (l / 2)) {
             int i;
             i = 0;
-            while (i < pos && vars[i].getId() != var.getId()) {
+            while (i < pos && vars[i] != var) {
                 i++;
             }
             ispos = i < pos;
         } else {
             int i;
             i = pos;
-            while (i < l && vars[i].getId() != var.getId()) {
+            while (i < l && vars[i] != var) {
                 i++;
             }
             ispos = i == l;

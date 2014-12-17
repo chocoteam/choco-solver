@@ -49,6 +49,8 @@ import org.chocosolver.util.ESat;
 
 import java.util.ArrayList;
 
+import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
+
 /**
  * <br/>
  *
@@ -104,8 +106,8 @@ public class PropSat extends Propagator<BoolVar> {
                 int cnt = 0;
                 for (int i = 0; i < c.size(); i++) {
                     int lit = c._g(i);
-                    boolean sign = SatSolver.sign(lit);
-                    int var = SatSolver.var(lit);
+                    boolean sign = sign(lit);
+                    int var = var(lit);
                     int val = vars[var].getValue();
                     if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
                     else break;
@@ -127,13 +129,13 @@ public class PropSat extends Propagator<BoolVar> {
 
     public int Literal(BoolVar expr) {
         if (indices_.containsKey(expr)) {
-            return SatSolver.makeLiteral(indices_.get(expr), true);
+            return makeLiteral(indices_.get(expr), true);
         } else {
             int var = sat_.newVariable();
             assert (vars.length == var);
             addVariable(expr);
             indices_.put(expr, var);
-            return SatSolver.makeLiteral(var, true);
+            return makeLiteral(var, true);
         }
     }
 
@@ -144,15 +146,16 @@ public class PropSat extends Propagator<BoolVar> {
         }
         int var = index;
         boolean new_value = vars[index].getValue() != 0;
-        int lit = SatSolver.makeLiteral(var, new_value);
+        int lit = makeLiteral(var, new_value);
         if (!sat_.propagateOneLiteral(lit)) {
-            this.contradiction(vars[index], "clause unsat");
+            // force failure by removing the last value, required for explanations
+            vars[index].instantiateTo(1 - vars[index].getValue(), this);
         } else {
             sat_trail_.set(sat_.trailMarker());
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
                 lit = sat_.touched_variables_.get(i);
-                var = SatSolver.var(lit);
-                boolean assigned_bool = SatSolver.sign(lit);
+                var = var(lit);
+                boolean assigned_bool = sign(lit);
 //                demons_[var.value()].inhibit(solver());
                 vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
             }
@@ -205,8 +208,8 @@ public class PropSat extends Propagator<BoolVar> {
     void applyEarlyDeductions() throws ContradictionException {
         for (int i = 0; i < early_deductions_.size(); ++i) {
             int lit = early_deductions_.get(i);
-            int var = SatSolver.var(lit);
-            boolean assigned_bool = SatSolver.sign(lit);
+            int var = var(lit);
+            boolean assigned_bool = sign(lit);
 //            demons_[var.value()].inhibit(solver());
             vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
         }
@@ -226,15 +229,30 @@ public class PropSat extends Propagator<BoolVar> {
     public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
         e.add(xengine.getPropagatorActivation(this));
         int idx = indices_.get(d.getVar());
-        int nidx = SatSolver.negated(idx);
-        TIntList implies = sat_.implies_.get(nidx);
-        for (int l : implies.toArray()) {
-            vars[l].explain(xengine, VariableState.DOM, e);
+        boolean new_value = ((BoolVar) (d.getVar())).getValue() != 0;
+        int lit = makeLiteral(idx, new_value);
+        TIntList implies = sat_.implies_.get(lit);
+        if (implies != null) {
+            for (int i = 0; i < implies.size(); ++i) {
+                int l = implies.get(i);
+                if (sat_.valueLit(l) != SatSolver.Boolean.kUndefined) {
+                    vars[var(l)].explain(xengine, VariableState.DOM, e);
+                }
+            }
         }
-        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(nidx);
-        for (SatSolver.Watcher w : watchers) {
-            for (int l = 0; l < w.clause.size(); l++) {
-                vars[l].explain(xengine, VariableState.DOM, e);
+        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(lit);
+        if (watchers != null) {
+            for (SatSolver.Watcher w : watchers) {
+                int c = 0;
+                // look for all complete causes, incomplete are not interesting
+                while (c < w.clause.size() && sat_.valueLit(c) != SatSolver.Boolean.kUndefined) {
+                    c++;
+                }
+                if (c == w.clause.size()) {
+                    for (int l = 0; l < w.clause.size(); l++) {
+                        vars[var(l)].explain(xengine, VariableState.DOM, e);
+                    }
+                }
             }
         }
     }
@@ -243,15 +261,30 @@ public class PropSat extends Propagator<BoolVar> {
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         int idx = indices_.get(var);
-        int nidx = SatSolver.negated(idx);
-        TIntList implies = sat_.implies_.get(nidx);
-        for (int k : implies.toArray()) {
-            newrules |= ruleStore.addFullDomainRule(vars[k]);
+        boolean new_value = var.getValue() != 0;
+        int lit = makeLiteral(idx, new_value);
+        TIntList implies = sat_.implies_.get(lit);
+        if (implies != null) {
+            for (int i = 0; i < implies.size(); ++i) {
+                int l = implies.get(i);
+                if (sat_.valueLit(l) != SatSolver.Boolean.kUndefined) {
+                    newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
+                }
+            }
         }
-        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(nidx);
-        for (SatSolver.Watcher w : watchers) {
-            for (int l = 0; l < w.clause.size(); l++) {
-                newrules |= ruleStore.addFullDomainRule(vars[w.clause._g(l)]);
+        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(lit);
+        if (watchers != null) {
+            for (SatSolver.Watcher w : watchers) {
+                int c = 0;
+                // look for all complete causes, incomplete are not interesting
+                while (c < w.clause.size() && sat_.valueLit(c) != SatSolver.Boolean.kUndefined) {
+                    c++;
+                }
+                if (c == w.clause.size()) {
+                    for (int l = 0; l < w.clause.size(); l++) {
+                        newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
+                    }
+                }
             }
         }
         return newrules;

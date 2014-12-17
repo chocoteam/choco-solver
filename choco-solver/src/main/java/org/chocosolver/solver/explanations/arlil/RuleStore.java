@@ -31,6 +31,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
@@ -43,9 +44,9 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.chocosolver.solver.variables.events.IntEventType.REMOVE;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 
 /**
@@ -238,15 +239,6 @@ public class RuleStore {
                 // then add new rules to the rule store to explain the cause application
                 lastCause.why(this, lastVar, lastEvt, lastValue);
             }
-            // If the event is REMOVE, then the value removed can be cleared from the structure, it is now explained.
-            if (lastEvt.equals(REMOVE)) {
-                if (lastVar.hasEnumeratedDomain() && lastMask != DM) {
-                    TIntSet removed = vmRemval.get(lastVid);
-                    if (removed != null) {
-                        vmRemval.get(lastVid).remove(lastValue);
-                    }
-                }
-            }
         } else {
             // the event was a propagator activation
             // 1. add a new rule: reason of the variable instantiation
@@ -319,16 +311,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addFullDomainRule(IntVar var) {
-        int vid = var.getId();
-        if (putMask(vid, DM)) {
-            // then clean up everything
-            TIntSet remvals = vmRemval.get(vid);
-            if (remvals != null) {
-                remvals.clear();
-            }
-            return true;
-        }
-        return false;
+        return putMask(var.getId(), DM);
     }
 
     /**
@@ -434,5 +417,25 @@ public class RuleStore {
         if (LOGGER.isWarnEnabled()) {
             LOGGER.warn("Skip method does not do anything, {} will not be skipped", cause);
         }
+    }
+
+    /**
+     * Print the retained rules
+     * @param solver a solver to get the variables
+     */
+    public void printRules(Solver solver) {
+        StringBuilder st = new StringBuilder();
+        for (Variable v : solver.getVars()) {
+            int m = vmRules.get(v.getId());
+            if (m != NO_ENTRY) {
+                st.append(v.getName()).append(":").append(m);
+                if (vmRemval.contains(v.getId()) && vmRemval.get(v.getId()).size() > 0) {
+                    TIntSet values = vmRemval.get(v.getId());
+                    st.append("\n\t").append(Arrays.toString(values.toArray()));
+                }
+                st.append("\n");
+            }
+        }
+        System.out.printf("%s\n", st.toString());
     }
 }

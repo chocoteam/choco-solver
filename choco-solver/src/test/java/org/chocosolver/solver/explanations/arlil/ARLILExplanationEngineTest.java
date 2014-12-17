@@ -31,6 +31,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
@@ -629,7 +630,7 @@ public class ARLILExplanationEngineTest {
                 configure(solver, a);
                 Chatterbox.showShortStatistics(solver);
                 SMF.limitTime(solver, "5m");
-                Assert.assertTrue(solver.findSolution()||solver.hasReachedLimit());
+                Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
             }
         }
     }
@@ -708,6 +709,56 @@ public class ARLILExplanationEngineTest {
 //                Chatterbox.printSolutions(solver);
             }
         }
+    }
+
+    @Test(groups = "1s")
+    public void testClauses() {
+        int n = 4;
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("B", n, solver);
+        for (int i = 1; i < n; i++) {
+            SatFactory.addBoolEq(bs[0], bs[i]);
+        }
+        SatFactory.addBoolNot(bs[0], bs[n - 1]);
+
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        Reason r = null;
+        try {
+            solver.propagate();
+            IntStrategy is = ISF.lexico_LB(bs);
+            Decision d = is.getDecision();
+            d.buildNext();
+            d.apply();
+            solver.propagate();
+        } catch (ContradictionException c) {
+            r = ee.explain(c);
+        }
+        Assert.assertNotNull(r);
+    }
+
+    @Test(groups = "1s")
+    public void testClauses2() {
+        int n = 3;
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("B", n, solver);
+        SatFactory.addBoolOrArrayEqualTrue(bs); // useless
+        SatFactory.addBoolIsLeVar(bs[0], bs[1], bs[2]);
+        SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
+        SatFactory.addBoolNot(bs[0], bs[1]);
+
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        Reason r = null;
+        try {
+            solver.propagate();
+            IntStrategy is = ISF.lexico_LB(bs);
+            Decision d = is.getDecision();
+            d.buildNext();
+            d.apply();
+            solver.propagate();
+        } catch (ContradictionException c) {
+            r = ee.explain(c);
+        }
+        Assert.assertNotNull(r);
     }
 
 }
