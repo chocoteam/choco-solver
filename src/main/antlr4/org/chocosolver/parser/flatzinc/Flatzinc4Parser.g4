@@ -66,7 +66,7 @@ flatzinc_model [Solver aSolver, Datas datas, boolean allSolutions, boolean freeS
     this.allSolutions = allSolutions;
     this.freeSearch = freeSearch;
     }
-       (pred_decl)* (param_decl)* (var_decl)* (constraint)* solve_goal
+       (pred_decl)* (param_decl | var_decl)* (constraint)* solve_goal
 	;
 
 

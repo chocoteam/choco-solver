@@ -105,9 +105,8 @@ do
     shift
 done
 
-#CHOCO_JAR=$1
-
-ARGS="$1 -tl $TIME_LIMIT -p $NB_NODES"
+FILE="$1"
+ARGS=" -tl $TIME_LIMIT -p $NB_NODES"
 
 if test "${STOP_AT_FIRST}" = "no"
 then
@@ -119,8 +118,8 @@ then
     ARGS=$ARGS" -lf"
 fi
 
-CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN ${ARGS}"
+CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
 
 echo "% $CMD"
-exec $CMD
+eval ${CMD}
 
