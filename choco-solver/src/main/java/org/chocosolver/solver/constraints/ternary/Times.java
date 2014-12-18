@@ -29,7 +29,6 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -59,8 +58,8 @@ public class Times extends Constraint {
 
     public Times(IntVar v1, IntVar v2, IntVar result) {
         super("Times",new PropTimesNaive(v1,v2,result));
-        if (!inIntBounds(v1, v2)) {
-            throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
-        }
+//        if (!inIntBounds(v1, v2)) {
+//            throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
+//        }
     }
 }

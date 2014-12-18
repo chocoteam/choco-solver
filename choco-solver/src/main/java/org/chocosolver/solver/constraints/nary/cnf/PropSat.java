@@ -47,8 +47,6 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
-import java.util.ArrayList;
-
 import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
 
 /**
@@ -235,23 +233,21 @@ public class PropSat extends Propagator<BoolVar> {
         if (implies != null) {
             for (int i = 0; i < implies.size(); ++i) {
                 int l = implies.get(i);
-                if (sat_.valueLit(l) != SatSolver.Boolean.kUndefined) {
+                if (sat_.valueVar(l) != SatSolver.Boolean.kUndefined) {
                     vars[var(l)].explain(xengine, VariableState.DOM, e);
                 }
             }
         }
-        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(lit);
-        if (watchers != null) {
-            for (SatSolver.Watcher w : watchers) {
+        for (SatSolver.Clause cl : sat_.clauses) {
                 int c = 0;
-                // look for all complete causes, incomplete are not interesting
-                while (c < w.clause.size() && sat_.valueLit(c) != SatSolver.Boolean.kUndefined) {
+            boolean found = false;
+            while (c < cl.size() && sat_.valueVar(c) != SatSolver.Boolean.kUndefined) {
+                found |= var(c) == lit;
                     c++;
                 }
-                if (c == w.clause.size()) {
-                    for (int l = 0; l < w.clause.size(); l++) {
+            if (found && c == cl.size()) {
+                for (int l = 0; l < cl.size(); l++) {
                         vars[var(l)].explain(xengine, VariableState.DOM, e);
-                    }
                 }
             }
         }
@@ -267,23 +263,21 @@ public class PropSat extends Propagator<BoolVar> {
         if (implies != null) {
             for (int i = 0; i < implies.size(); ++i) {
                 int l = implies.get(i);
-                if (sat_.valueLit(l) != SatSolver.Boolean.kUndefined) {
+                if (sat_.valueVar(l) != SatSolver.Boolean.kUndefined) {
                     newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
                 }
             }
         }
-        ArrayList<SatSolver.Watcher> watchers = sat_.watches_.get(lit);
-        if (watchers != null) {
-            for (SatSolver.Watcher w : watchers) {
-                int c = 0;
-                // look for all complete causes, incomplete are not interesting
-                while (c < w.clause.size() && sat_.valueLit(c) != SatSolver.Boolean.kUndefined) {
-                    c++;
-                }
-                if (c == w.clause.size()) {
-                    for (int l = 0; l < w.clause.size(); l++) {
-                        newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                    }
+        for (SatSolver.Clause cl : sat_.clauses) {
+            int c = 0;
+            boolean found = false;
+            while (c < cl.size() && sat_.valueVar(c) != SatSolver.Boolean.kUndefined) {
+                found |= var(c) == lit;
+                c++;
+            }
+            if (found && c == cl.size()) {
+                for (int l = 0; l < cl.size(); l++) {
+                    newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
                 }
             }
         }

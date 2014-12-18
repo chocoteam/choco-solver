@@ -738,7 +738,7 @@ public class ARLILExplanationEngineTest {
 
     @Test(groups = "1s")
     public void testClauses2() {
-        int n = 3;
+        int n = 5;
         Solver solver = new Solver();
         BoolVar[] bs = VF.boolArray("B", n, solver);
         SatFactory.addBoolOrArrayEqualTrue(bs); // useless

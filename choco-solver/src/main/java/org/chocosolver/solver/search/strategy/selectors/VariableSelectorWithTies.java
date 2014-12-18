@@ -63,8 +63,8 @@ public class VariableSelectorWithTies<V extends Variable> implements VariableSel
         if (newv.size() == 0) return null;
 
         // Then apply each heuristic one by one
-        double minValue = Double.MAX_VALUE - 1;
         for (VariableEvaluator<V> h : heuristics) {
+            double minValue = Double.MAX_VALUE - 1;
             oldv.clear();
             oldv.addAll(newv);
             newv.clear();
