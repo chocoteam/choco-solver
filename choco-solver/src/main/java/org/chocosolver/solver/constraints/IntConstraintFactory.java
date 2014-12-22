@@ -1365,6 +1365,10 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
+		assert VARS.length>0;
+		if(VARS.length==1){
+			return arithm(VARS[0],"=",SUM);
+		}
         if (VARS.length > 10) {
             return new Constraint("SumOfBool", new PropBoolSumIncremental(VARS, SUM));
         } else {
