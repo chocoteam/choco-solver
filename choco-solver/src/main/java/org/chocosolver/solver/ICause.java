@@ -45,6 +45,9 @@ import java.io.Serializable;
  * So do decision, objective manager, etc.
  * It has an impact on domain variables and so it can fails.
  * <p>
+ *     Important: when the {@link ICause#why(org.chocosolver.solver.explanations.arlil.RuleStore, org.chocosolver.solver.variables.IntVar, org.chocosolver.solver.variables.events.IEventType, int)} method
+ *     needs to evaluate the incoming event, one may be aware that in some cases (for instance, BoolVar), the original event can promoted.
+ *     Hence, if a cause can only explain bound modifications, it should also either consider the INSTANTIATION or the strengthen mask.
  * <br/>
  *
  * @author Charles Prud'homme

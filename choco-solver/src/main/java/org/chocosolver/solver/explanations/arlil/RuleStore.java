@@ -99,13 +99,13 @@ public class RuleStore {
                     eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
         }
 
+        lastVar = eventStore.getVariable(idx);
         lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
         lastEvt = eventStore.getEventType(idx);
+
         if (lastEvt != FULL_PROPAGATION) {
             // the event is a variable modification
-            lastVar = eventStore.getVariable(idx);
             lastVid = lastVar.getId();
-
             lastMask = vmRules.get(lastVid);
 
             if (lastMask == DM) { // only to speed up the entire process
@@ -212,9 +212,9 @@ public class RuleStore {
             LOGGER.debug("UPDATE < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
                     eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
         }
+        assert lastVar == eventStore.getVariable(idx) : "Wrong variable loaded";
+        assert lastEvt == eventStore.getEventType(idx) : "Wrong event loaded";
         if (!lastEvt.equals(FULL_PROPAGATION)) {
-            assert lastVar == eventStore.getVariable(idx) : "Wrong variable loaded";
-            assert lastEvt == eventStore.getEventType(idx) : "Wrong event loaded";
 
             // Get the cause
             ICause lastCause = eventStore.getCause(idx);
@@ -345,8 +345,10 @@ public class RuleStore {
         int cmask = vmRules.get(vid);
         if (cmask == NO_ENTRY) {
             return vmRules.put(vid, mask) == NO_ENTRY;
-        } else
-            return cmask != mask && vmRules.adjustValue(vid, (cmask | mask) - cmask);
+        } else {
+            int amount = (cmask | mask) - cmask;
+            return amount > 0 && vmRules.adjustValue(vid, amount);
+        }
     }
 
     /**
@@ -421,6 +423,7 @@ public class RuleStore {
 
     /**
      * Print the retained rules
+     *
      * @param solver a solver to get the variables
      */
     public void printRules(Solver solver) {

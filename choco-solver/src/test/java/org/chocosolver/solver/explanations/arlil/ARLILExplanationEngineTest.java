@@ -761,4 +761,35 @@ public class ARLILExplanationEngineTest {
         Assert.assertNotNull(r);
     }
 
+    @Test(groups = "1s")
+    public void testClauses3() {
+        int n = 12;
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("B", n, solver);
+        SatFactory.addClauses(new BoolVar[]{bs[0], bs[1], bs[2]}, new BoolVar[]{});
+        SatFactory.addClauses(new BoolVar[]{bs[0], bs[1]}, new BoolVar[]{bs[2]});
+        // pollution
+        SatFactory.addClauses(new BoolVar[]{bs[3], bs[4], bs[5]}, new BoolVar[]{bs[1]});
+        SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
+        SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
+
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        Reason r = null;
+        try {
+            solver.propagate();
+            IntStrategy is = ISF.lexico_LB(bs);
+            Decision d = is.getDecision();
+            d.buildNext();
+            d.apply();
+            solver.propagate();
+            d = is.getDecision();
+            d.buildNext();
+            d.apply();
+            solver.propagate();
+        } catch (ContradictionException c) {
+            r = ee.explain(c);
+        }
+        Assert.assertNotNull(r);
+    }
+
 }

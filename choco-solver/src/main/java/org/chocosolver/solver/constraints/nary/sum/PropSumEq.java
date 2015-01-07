@@ -176,6 +176,11 @@ public class PropSumEq extends Propagator<IntVar> {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // 1. find the pos of var in vars
         boolean ispos = vars[n].getId() != var.getId();
+        // to deal with BoolVar: any event is automatically promoted to INSTANTIATE
+        if (IntEventType.isInstantiate(evt.getMask())) {
+            assert var.isBool() : "BoolVar excepted";
+            evt = (var.getValue() == 0 ? IntEventType.DECUPP : IntEventType.INCLOW);
+        }
         if (IntEventType.isInclow(evt.getMask())) {
             for (int i = 0; i < n; i++) { // first the positive coefficients
                 if (vars[i] != var) {
@@ -215,7 +220,9 @@ public class PropSumEq extends Propagator<IntVar> {
                 }
             }
         } else {
-            newrules |= super.why(ruleStore, var, evt, value);
+            for (int i = 0; i < vars.length; i++) {
+                newrules |= ruleStore.addFullDomainRule(vars[i]);
+            }
         }
         return newrules;
     }

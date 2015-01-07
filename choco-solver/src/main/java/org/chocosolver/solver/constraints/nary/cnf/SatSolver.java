@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 /**
  * A MiniSat solver.
- * <p/>
+ * <p>
  * (or-tools, booleans.cc, ty L. Perron).
  * <br/>
  *
@@ -83,6 +83,7 @@ public class SatSolver {
 
 
     public SatSolver() {
+        System.out.printf("PropSat");
         this.ok_ = true;
         this.qhead_ = 0;
         num_vars_ = 0;
@@ -144,10 +145,10 @@ public class SatSolver {
 
         switch (ps.size()) {
             case 0:
-            return (ok_ = false);
+                return (ok_ = false);
             case 1:
-            uncheckedEnqueue(ps.get(0));
-            return (ok_ = propagate());
+                uncheckedEnqueue(ps.get(0));
+                return (ok_ = propagate());
             case 2:
                 int l0 = ps.get(0);
                 int l1 = ps.get(1);
@@ -166,9 +167,9 @@ public class SatSolver {
                 i1.add(l0);
                 break;
             default:
-            Clause cr = new Clause(ps.toArray());
-            clauses.add(cr);
-            attachClause(cr);
+                Clause cr = new Clause(ps.toArray());
+                clauses.add(cr);
+                attachClause(cr);
                 break;
 
         }
@@ -477,6 +478,14 @@ public class SatSolver {
 
         int _s(int pos, int l) {
             return literals_[pos] = l;
+        }
+
+        int pos(int l) {
+            int i = literals_.length - 1;
+            while (i >= 0 && literals_[i] != l) {
+                i--;
+            }
+            return i;
         }
     }
 

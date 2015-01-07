@@ -30,7 +30,9 @@ package org.chocosolver.util;
 
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 /**
@@ -79,5 +81,16 @@ public enum VariableUtilities {
         } else {
             return true;
         }
+    }
+
+    public static IntVar[] extractIntVar(Variable[] vars, boolean bool2) {
+        ArrayList<IntVar> to = new ArrayList<IntVar>();
+        for (int i = 0; i < vars.length; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.INT) != 0
+                    || (bool2 && (vars[i].getTypeAndKind() & Variable.BOOL) != 0)) {
+                to.add((IntVar) vars[i]);
+            }
+        }
+        return to.toArray(new IntVar[to.size()]);
     }
 }

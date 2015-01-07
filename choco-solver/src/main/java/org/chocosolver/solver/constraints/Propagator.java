@@ -39,10 +39,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.slf4j.Logger;
@@ -369,18 +366,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (Variable v : this.vars) {
             v.explain(xengine, DOM, e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        for (int i = 0; i < vars.length; i++) {
-            newrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
-        }
-        return newrules;
     }
 
     /**

@@ -291,12 +291,42 @@ public class AllDifferentTest {
         IntVar[] ts = new IntVar[3];
         ts[0] = VariableFactory.enumerated("t0", 2, 2, solver);
         ts[1] = VariableFactory.enumerated("t1", 1, 3, solver);
-        ts[2] = VariableFactory.enumerated("t2", 1,3, solver);
+        ts[2] = VariableFactory.enumerated("t2", 1, 3, solver);
 
         solver.post(ICF.alldifferent(ts, "BC"));
 
         solver.propagate();
-        Assert.assertEquals(ts[1].getDomainSize(),2);
-        Assert.assertEquals(ts[2].getDomainSize(),2);
+        Assert.assertEquals(ts[1].getDomainSize(), 2);
+        Assert.assertEquals(ts[2].getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testB() {
+        Solver solver = new Solver();
+        IntVar[] ts = new IntVar[3];
+        ts[0] = VariableFactory.bounded("t0", 2, 4, solver);
+        ts[1] = VariableFactory.bounded("t1", 1, 3, solver);
+        ts[2] = VariableFactory.bounded("t2", 1, 3, solver);
+
+        solver.post(ICF.alldifferent(ts, "FC"));
+
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+    }
+
+    @Test(groups = "1s")
+    public void testE() {
+        Solver solver = new Solver();
+        IntVar[] ts = new IntVar[3];
+        ts[0] = VariableFactory.enumerated("t0", 2, 4, solver);
+        ts[1] = VariableFactory.enumerated("t1", 1, 3, solver);
+        ts[2] = VariableFactory.enumerated("t2", 1, 3, solver);
+
+        solver.post(ICF.alldifferent(ts, "FC"));
+
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
     }
 }

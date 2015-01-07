@@ -71,6 +71,7 @@ public class ARLILExplanationEngine implements EventObserver {
         if (cex.v != null) {
             ruleStore.addFullDomainRule((IntVar) cex.v);
         } else {
+            reason.addCause(cex.c); // otherwise, we could miss it ;)
             cex.c.why(ruleStore, null, IntEventType.VOID, 0);
         }
         int i = eventStore.getSize() - 1;

@@ -147,6 +147,7 @@ public class PropSat extends Propagator<BoolVar> {
         int lit = makeLiteral(var, new_value);
         if (!sat_.propagateOneLiteral(lit)) {
             // force failure by removing the last value, required for explanations
+            // TODO: inutile dans le cas des implications, peut être remplacé par contradiction(vars[index], "");
             vars[index].instantiateTo(1 - vars[index].getValue(), this);
         } else {
             sat_trail_.set(sat_.trailMarker());
@@ -224,63 +225,103 @@ public class PropSat extends Propagator<BoolVar> {
     }
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
+    public void explain(ExplanationEngine xengine, Deduction ded, Explanation e) {
         e.add(xengine.getPropagatorActivation(this));
-        int idx = indices_.get(d.getVar());
-        boolean new_value = ((BoolVar) (d.getVar())).getValue() != 0;
-        int lit = makeLiteral(idx, new_value);
+        BoolVar bvar = (BoolVar)ded.getVar();
+        int var = indices_.get(bvar);
+        boolean new_value = bvar.getValue() != 0;
+        int lit = makeLiteral(var, new_value);
+
+        // A. implications:
+        // simply iterate over implies_ and add the instantiated variables
         TIntList implies = sat_.implies_.get(lit);
         if (implies != null) {
-            for (int i = 0; i < implies.size(); ++i) {
+            for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);
-                if (sat_.valueVar(l) != SatSolver.Boolean.kUndefined) {
+                // if the other variable is instantiated ...
+                if (vars[var(l)].isInstantiated()) {
+                    // could be : if(sat_.valueLit(l) != SatSolver.Boolean.kUndefined)
+                    // but as far as the variable is instantiated, that's enough, and we skip conflict cases
                     vars[var(l)].explain(xengine, VariableState.DOM, e);
                 }
             }
         }
-        for (SatSolver.Clause cl : sat_.clauses) {
-                int c = 0;
-            boolean found = false;
-            while (c < cl.size() && sat_.valueVar(c) != SatSolver.Boolean.kUndefined) {
-                found |= var(c) == lit;
-                    c++;
-                }
-            if (found && c == cl.size()) {
-                for (int l = 0; l < cl.size(); l++) {
-                        vars[var(l)].explain(xengine, VariableState.DOM, e);
+
+        // B. clauses:
+        // We need to find the fully instantiated clauses where bvar appears
+        // we cannot rely on watches_ because is not backtrackable
+        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
+        int neg = negated(lit);
+        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.clauses.get(k);
+            // if the watched literals are instantiated
+            if (cl._g(0) == neg || cl._g(1) == neg
+                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+                // then, look for the lit
+                int p = cl.pos(neg);
+                if (p > -1) { // we found a clause where neg is in
+                    for (int d = cl.size() - 1; d >= 0; d--) {
+                        int l = cl._g(d);
+                        if (vars[var(l)].isInstantiated()) {
+                            vars[var(l)].explain(xengine, VariableState.DOM, e);
+                        }
+                    }
                 }
             }
         }
     }
 
     @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+    public boolean why(RuleStore ruleStore, IntVar bvar, IEventType evt, int bvalue) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        int idx = indices_.get(var);
-        boolean new_value = var.getValue() != 0;
-        int lit = makeLiteral(idx, new_value);
+        // When we got here, there are multiple cases:
+        // 1. the propagator fails, at least one clause or implication cannot be satisfied
+        // 2. the propagator is the cause of an instantiation
+        // but the clauses and implications may be lost (cf. propagate)
+
+        // get the index of the variable in the sat solver
+        int var = indices_.get(bvar);
+        boolean new_value = bvar.getValue() != 0;
+        int lit = makeLiteral(var, new_value);
+
+        // A. implications:
+        // simply iterate over implies_ and add the instantiated variables
         TIntList implies = sat_.implies_.get(lit);
         if (implies != null) {
-            for (int i = 0; i < implies.size(); ++i) {
+            for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);
-                if (sat_.valueVar(l) != SatSolver.Boolean.kUndefined) {
+                // if the other variable is instantiated ...
+                if (vars[var(l)].isInstantiated()) {
+                    // could be : if(sat_.valueLit(l) != SatSolver.Boolean.kUndefined)
+                    // but as far as the variable is instantiated, that's enough, and we skip conflict cases
                     newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
                 }
             }
         }
-        for (SatSolver.Clause cl : sat_.clauses) {
-            int c = 0;
-            boolean found = false;
-            while (c < cl.size() && sat_.valueVar(c) != SatSolver.Boolean.kUndefined) {
-                found |= var(c) == lit;
-                c++;
-            }
-            if (found && c == cl.size()) {
-                for (int l = 0; l < cl.size(); l++) {
-                    newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
+
+        // B. clauses:
+        // We need to find the fully instantiated clauses where bvar appears
+        // we cannot rely on watches_ because is not backtrackable
+        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
+        int neg = negated(lit);
+        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.clauses.get(k);
+            // if the watched literals are instantiated
+            if (cl._g(0) == neg || cl._g(1) == neg
+                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+                // then, look for the lit
+                int p = cl.pos(neg);
+                if (p > -1) { // we found a clause where neg is in
+                    for (int d = cl.size() - 1; d >= 0; d--) {
+                        int l = cl._g(d);
+                        if (vars[var(l)].isInstantiated()) {
+                            newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
+                        }
+                    }
                 }
             }
         }
         return newrules;
     }
+
 }

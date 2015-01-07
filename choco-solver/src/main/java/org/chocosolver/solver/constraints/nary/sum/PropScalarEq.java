@@ -322,7 +322,11 @@ public class PropScalarEq extends Propagator<IntVar> {
             }
             ispos = i == l;
         }
-
+        // to deal with BoolVar: any event is automatically promoted to INSTANTIATE
+        if (IntEventType.isInstantiate(evt.getMask())) {
+            assert var.isBool() : "BoolVar excepted";
+            evt = (var.getValue() == 0 ? IntEventType.DECUPP : IntEventType.INCLOW);
+        }
         if (IntEventType.isInclow(evt.getMask())) { // explain LB
             int i = 0;
             for (; i < pos; i++) { // first the positive coefficients
@@ -364,7 +368,9 @@ public class PropScalarEq extends Propagator<IntVar> {
                 }
             }
         } else {
-            newrules |= super.why(ruleStore, var, evt, value);
+            for (int i = 0; i < vars.length; i++) {
+                newrules |= ruleStore.addFullDomainRule(vars[i]);
+            }
         }
         return newrules;
     }

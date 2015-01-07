@@ -168,7 +168,7 @@ public class PropReif extends Propagator<Variable> {
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         if (var.equals(bVar)) {
-            for (int i = 0; i < vars.length; i++) {
+            for (int i = 1; i < vars.length; i++) { // vars[0] is bVar
                 newrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
             }
         } else {
