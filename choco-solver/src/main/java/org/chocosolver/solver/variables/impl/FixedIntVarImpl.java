@@ -126,11 +126,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        removeValue(constante, cause);
-    }
-
-    @Override
     public boolean contains(int value) {
         return constante == value;
     }

@@ -144,13 +144,6 @@ public interface IntVar extends Variable {
     boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
 
     /**
-     * Force <code>this</code> to fail
-     * @param cause cause of the wipe out
-     * @throws ContradictionException
-     */
-    void wipeOut(ICause cause) throws ContradictionException;
-
-    /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
      *
      * @param value int

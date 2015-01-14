@@ -61,7 +61,7 @@ import org.chocosolver.util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BoolVarImpl extends AbstractVariable implements BoolVar {
+public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -248,12 +248,6 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         return value < 1 && instantiateTo(value, cause);
-    }
-
-    @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        assert cause != null;
-        removeInterval(0, 1, cause);
     }
 
     @Override

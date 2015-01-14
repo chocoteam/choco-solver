@@ -379,12 +379,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     }
 
     @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        assert cause != null;
-        removeInterval(this.getLB(), this.getUB(), cause);
-    }
-
-    @Override
     public boolean isInstantiated() {
         return SIZE.get() == 1;
     }

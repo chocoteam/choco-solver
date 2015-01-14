@@ -390,12 +390,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        assert cause != null;
-        removeInterval(this.getLB(), this.getUB(), cause);
-    }
-
-    @Override
     public boolean isInstantiated() {
         return SIZE.get() == 1;
     }

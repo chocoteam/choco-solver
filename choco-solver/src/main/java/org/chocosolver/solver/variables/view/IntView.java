@@ -185,9 +185,4 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         return _riterator;
     }
 
-    @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        assert cause != null;
-        var.wipeOut(cause);
-    }
 }

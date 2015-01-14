@@ -7,6 +7,7 @@ NEXT MILESTONE
 -------------------
 
 - Add clause_channeling constraint
+- Remove IntVar.wipeOut(...)
 
 3.3.0 - 04 Dec 2014
 -------------------
