@@ -32,6 +32,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
@@ -55,6 +56,17 @@ public class IntConstraintExamples2 {
         tuples.add(1, -1);
         tuples.add(0, 1);
         solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
+    }
+
+    @Test
+    public void clause_channeling() {
+        Solver solver = new Solver();
+        IntVar iv = VF.enumerated("iv", 1, 3, solver);
+        BoolVar[] eqs = VF.boolArray("eq", 3, solver);
+        BoolVar[] lqs = VF.boolArray("lq", 3, solver);
+        solver.post(ICF.clause_channeling(iv, eqs, lqs));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }

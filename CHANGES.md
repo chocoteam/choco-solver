@@ -6,6 +6,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+- Add clause_channeling constraint
 
 3.3.0 - 04 Dec 2014
 -------------------

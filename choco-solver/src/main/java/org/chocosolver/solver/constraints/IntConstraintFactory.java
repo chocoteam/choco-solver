@@ -52,10 +52,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
-import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
-import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
+import org.chocosolver.solver.constraints.nary.channeling.*;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
@@ -100,9 +97,9 @@ import java.util.Arrays;
  * <br/>
  * As much as possible, the API names of global constraints must match
  * those define in the <a href="http://www.emn.fr/z-info/sdemasse/gccat/index.html">Global Constraint Catalog</a>.
- * <p/>
+ * <p>
  * Note that, for the sack of readability, the Java naming convention is not respected for methods arguments.
- * <p/>
+ * <p>
  * Constraints are ordered as the following:
  * 1) Unary	constraints
  * 2) Binary constraints
@@ -479,25 +476,25 @@ public class IntConstraintFactory {
     /**
      * Ensures that all variables from VARS take a different value.
      * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
-     * <p/>
+     * <p>
      * <b>BC</b>:
      * <br/>
      * Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
      * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
-     * <p/>
+     * <p>
      * <b>AC</b>:
      * <br/>
      * Uses Regin algorithm
      * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      * per arc removed from the support.
-     * <p/>
+     * <p>
      * <b>DEFAULT</b>:
      * <br/>
      * Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      *
      * @param VARS        list of variables
      * @param CONSISTENCY consistency level, among {"BC", "AC"}
-     *                    <p/>
+     *                    <p>
      *                    <b>BC</b>:
      *                    Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
      *                    A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
@@ -506,7 +503,7 @@ public class IntConstraintFactory {
      *                    Uses Regin algorithm
      *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      *                    per arc removed from the support.
-     *                    <p/>
+     *                    <p>
      *                    <b>DEFAULT</b>:
      *                    <br/>
      *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
@@ -573,7 +570,7 @@ public class IntConstraintFactory {
     /**
      * Let N be the number of distinct values assigned to the variables of the VARS collection.
      * Enforce condition N >= NVALUES to hold.
-     * <p/>
+     * <p>
      * This embeds a light propagator by default.
      * Additional filtering algorithms can be added.
      *
@@ -593,7 +590,7 @@ public class IntConstraintFactory {
     /**
      * Let N be the number of distinct values assigned to the variables of the VARS collection.
      * Enforce condition N <= NVALUES to hold.
-     * <p/>
+     * <p>
      * This embeds a light propagator by default.
      * Additional filtering algorithms can be added.
      *
@@ -687,10 +684,25 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Link each value from the domain of VAR to two boolean variable:
+     * one reifies the equality to the i^th value of the variable domain,
+     * the other reifies the less-or-equality to the i^th value of the variable domain.
+     * Contract: EVARS.lenght == LVARS.length == VAR.getUB() - VAR.getLB() + 1
+     * Contract: VAR is not a boolean variable
+     *
+     * @param VAR   an Integer variable
+     * @param EVARS array of EQ boolean variables
+     * @param LVARS array of LQ boolean variables
+     */
+    public static Constraint clause_channeling(IntVar VAR, BoolVar[] EVARS, BoolVar[] LVARS) {
+        return new Constraint("clause_channeling", new PropClauseChanneling(VAR, EVARS, LVARS));
+    }
+
+    /**
      * Creates a circuit constraint which ensures that
      * <p/> the elements of vars define a covering circuit
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
-     * <p/>
+     * <p>
      * Filtering algorithms:
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
@@ -722,7 +734,7 @@ public class IntConstraintFactory {
      * Creates a circuit constraint which ensures that
      * <p/> the elements of vars define a covering circuit
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
-     * <p/>
+     * <p>
      * Filtering algorithms:
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
@@ -756,7 +768,7 @@ public class IntConstraintFactory {
     /**
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
-     * <p/>
+     * <p>
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
@@ -769,7 +781,7 @@ public class IntConstraintFactory {
     /**
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
-     * <p/>
+     * <p>
      *
      * @param VALUE a variable
      * @param VARS  a vector of variables
@@ -973,7 +985,7 @@ public class IntConstraintFactory {
      * Performs AC if domains are enumerated.
      * If not, then it works on bounds without guaranteeing BC
      * (enumerated domains are strongly recommended)
-     * <p/>
+     * <p>
      * Beware you should have |VARS1| = |VARS2|
      *
      * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
@@ -1004,8 +1016,8 @@ public class IntConstraintFactory {
      * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; TOTAL_WEIGHT
      * <br/>- OCCURRENCES[i] * ENERGY[i] = TOTAL_ENERGY
      * <br/>and maximizing the value of TOTAL_ENERGY.
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * A knapsack constraint
      * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
      * "Given a set of items, each with a weight and an energy value,
@@ -1152,10 +1164,10 @@ public class IntConstraintFactory {
     /**
      * Let N be the number of distinct values assigned to the variables of the VARS collection.
      * Enforce condition N = NVALUES to hold.
-     * <p/>
+     * <p>
      * This embeds a light propagator by default.
      * Additional filtering algorithms can be added.
-     * <p/>
+     * <p>
      * see atleast_nvalue and atmost_nvalue
      *
      * @param VARS    collection of variables
@@ -1172,7 +1184,7 @@ public class IntConstraintFactory {
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> Moreover, VARS[END-OFFSET] = |VARS|+OFFSET
      * <p/> Requires : |VARS|>0
-     * <p/>
+     * <p>
      * Filtering algorithms: see circuit constraint
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|]
@@ -1246,8 +1258,8 @@ public class IntConstraintFactory {
     /**
      * Creates a sort constraint which ensures that the variables of SORTEDVARS correspond to the variables
      * of VARS according to a permutation. The variables of SORTEDVARS are also sorted in increasing order.
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * For example:<br/>
      * - X= (4,2,1,3)<br/>
      * - Y= (1,2,3,4)
@@ -1267,7 +1279,7 @@ public class IntConstraintFactory {
      * <p/> VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> and VARS[i] = OFFSET+i means that i is not part of the circuit
      * <p/> the constraint ensures that |{VARS[i] =/= OFFSET+i}| = SUBCIRCUIT_SIZE
-     * <p/>
+     * <p>
      * <p/> Filtering algorithms:
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
@@ -1303,7 +1315,7 @@ public class IntConstraintFactory {
      * <p/> where VARS[i] = OFFSET+i means that vertex i is excluded from the path.
      * <p/> Moreover, VARS[END-OFFSET] = |VARS|+OFFSET
      * <p/> Requires : |VARS|>0
-     * <p/>
+     * <p>
      * Filtering algorithms: see subcircuit constraint
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|]
@@ -1396,7 +1408,7 @@ public class IntConstraintFactory {
 
     /**
      * Create a table constraint, with the specified algorithm defined ALGORITHM
-     * <p/>
+     * <p>
      * - <b>GAC2001</b>: Arc Consistency version 2001 for tuples,
      * <br/>
      * - <b>GAC2001+</b>: Arc Consistency version 2001 for allowed tuples,
@@ -1462,7 +1474,7 @@ public class IntConstraintFactory {
      * Partition SUCCS variables into NBTREES (anti) arborescences
      * <p/> SUCCS[i] = OFFSET+j means that j is the successor of i.
      * <p/> and SUCCS[i] = OFFSET+i means that i is a root
-     * <p/>
+     * <p>
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      * <p/> However, the filtering over NBTREES is quite light here
      *

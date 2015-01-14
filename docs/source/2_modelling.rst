@@ -459,6 +459,7 @@ Available constraints
 :ref:`51_icstr_nva`,
 
 :ref:`51_icstr_booc`,
+:ref:`51_icstr_clauc`,
 :ref:`51_icstr_ich`.
 
 :ref:`51_icstr_cum`,

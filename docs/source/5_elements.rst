@@ -416,6 +416,38 @@ The `OFFSET` is typically set to 0.
      - `VAR = 5, BVARS[0] = 0, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 0, BVARS[4] = 1`
 
 
+.. _51_icstr_clauc:
+
+clause_channeling
+=================
+
+The `clause_channeling` constraint involves:
+
+ - an integer variable `VAR` and
+ - two arrays of boolean variables `EVARS` and `LVARS`.
+
+It ensures that: `VAR` = `i` :math:`\Leftrightarrow` `EVARS` [ `i` - OFFSET ] = `1` and
+ `VAR` :math:`\leq` `i` :math:`\Leftrightarrow` `LVARS` [ `i` - OFFSET ] = `1`
+ where  OFFSET is the initial lower bound of VAR.
+**API**:  ::
+
+    Constraint clause_channeling(IntVar VAR, BoolVar[] EVARS, BoolVar[] LVARS)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
+:language: java
+          :lines: 65-69,71
+              :emphasize-lines: 69
+              :linenos:
+
+     The solutions of the problem are :
+
+     - `VAR = 1, EVARS[0] = 1, EVARS[1] = 0, EVARS[2] = 0, LVARS[0] = 1, LVARS[1] = 1, LVARS[2] = 1`
+     - `VAR = 2, EVARS[0] = 0, EVARS[1] = 1, EVARS[2] = 0, LVARS[0] = 0, LVARS[1] = 1, LVARS[2] = 1 `
+     - `VAR = 3, EVARS[0] = 0, EVARS[1] = 0, EVARS[2] = 1, LVARS[0] = 0, LVARS[1] = 0, LVARS[2] = 1`
+
+
 .. _51_icstr_cir:
 
 circuit
@@ -1059,7 +1091,7 @@ A constraint which restricts the values a variable can be assigned to the soluti
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
           :language: java
-          :lines: 49-55,57
+          :lines: 52-58,60
           :emphasize-lines: 59
           :linenos:
 
@@ -2194,8 +2226,8 @@ The available constructors are: ::
 - ``name`` enables to set a name to the constraint.
 - ``functions`` is a ``String`` which defines the list of functions to hold, separated with semi-colon ";".
 A function is a declared using the following format:
-	 + the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables ``rvars``,
-	 + one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+    + the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables ``rvars``,
+    + one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
 A complete list is available in the documentation of IBEX.
 - ``rvars`` is the list of involved real variables.
 - ``option`` is enable to state the propagation option (default is ``Ibex.COMPO``).

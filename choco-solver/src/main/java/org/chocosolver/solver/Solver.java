@@ -602,7 +602,7 @@ public class Solver implements Serializable {
         // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
             if (dynAdd) {
-                engine.dynamicAddition(cs[i], permanent);
+                engine.dynamicAddition(permanent, cs[i].getPropagators());
             }
             if (cs[i].isReified()) {
                 try {
@@ -632,7 +632,7 @@ public class Solver implements Serializable {
             cstrs[cIdx] = null;
             // 3. check if the resolution already started -> if true, dynamic deletion
             if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
-                engine.dynamicDeletion(c);
+                engine.dynamicDeletion(c.getPropagators());
             }
             // 4. remove the propagators of the constraint from its variables
             for (Propagator prop : c.getPropagators()) {
