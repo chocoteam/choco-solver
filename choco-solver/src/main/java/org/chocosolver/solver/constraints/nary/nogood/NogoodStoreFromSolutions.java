@@ -82,13 +82,16 @@ public class NogoodStoreFromSolutions extends Constraint implements IMonitorSolu
 	@Override
 	public void afterRestart() {
 		// initial propagation (would not be triggered otherwise)
-		try {
-			png.addNogood(solutionNoGood);
-			png.unitPropagation();
-			// forces to reach the fix-point of constraints
-			png.getSolver().getEngine().propagate();
-		} catch (ContradictionException e) {
-			png.getSolver().getSearchLoop().interrupt(MSG_NGOOD);
+		if(solutionNoGood!=null) {
+			try {
+				png.addNogood(solutionNoGood);
+				png.unitPropagation();
+				// forces to reach the fix-point of constraints
+				png.getSolver().getEngine().propagate();
+				solutionNoGood = null;
+			} catch (ContradictionException e) {
+				png.getSolver().getSearchLoop().interrupt(MSG_NGOOD);
+			}
 		}
 	}
 

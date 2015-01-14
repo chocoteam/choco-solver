@@ -108,3 +108,5 @@ installed in your local maven repository and available in the `target` sub-folde
 
 ===================
 The Choco3 dev team.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/5206b49e3dad062b919d632d75825479 "githalytics.com")](http://githalytics.com/chocoteam/choco3)
