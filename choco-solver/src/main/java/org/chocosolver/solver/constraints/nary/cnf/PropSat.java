@@ -112,6 +112,18 @@ public class PropSat extends Propagator<BoolVar> {
                 }
                 if (cnt == c.size()) return ESat.FALSE;
             }
+            for (SatSolver.Clause c : sat_.learnts) {
+                int cnt = 0;
+                for (int i = 0; i < c.size(); i++) {
+                    int lit = c._g(i);
+                    boolean sign = sign(lit);
+                    int var = var(lit);
+                    int val = vars[var].getValue();
+                    if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
+                    else break;
+                }
+                if (cnt == c.size()) return ESat.FALSE;
+            }
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
@@ -195,6 +207,12 @@ public class PropSat extends Propagator<BoolVar> {
         return result;
     }
 
+    // Add a learnt clause
+    public boolean addLearnt(int... lits){
+        boolean result = sat_.learnClause(lits);
+        storeEarlyDeductions();
+        return result;
+    }
 
     private void storeEarlyDeductions() {
         for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
@@ -227,7 +245,7 @@ public class PropSat extends Propagator<BoolVar> {
     @Override
     public void explain(ExplanationEngine xengine, Deduction ded, Explanation e) {
         e.add(xengine.getPropagatorActivation(this));
-        BoolVar bvar = (BoolVar)ded.getVar();
+        BoolVar bvar = (BoolVar) ded.getVar();
         int var = indices_.get(bvar);
         boolean new_value = bvar.getValue() != 0;
         int lit = makeLiteral(var, new_value);
@@ -254,6 +272,23 @@ public class PropSat extends Propagator<BoolVar> {
         int neg = negated(lit);
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
             SatSolver.Clause cl = sat_.clauses.get(k);
+            // if the watched literals are instantiated
+            if (cl._g(0) == neg || cl._g(1) == neg
+                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+                // then, look for the lit
+                int p = cl.pos(neg);
+                if (p > -1) { // we found a clause where neg is in
+                    for (int d = cl.size() - 1; d >= 0; d--) {
+                        int l = cl._g(d);
+                        if (vars[var(l)].isInstantiated()) {
+                            vars[var(l)].explain(xengine, VariableState.DOM, e);
+                        }
+                    }
+                }
+            }
+        }
+        for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.learnts.get(k);
             // if the watched literals are instantiated
             if (cl._g(0) == neg || cl._g(1) == neg
                     || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
@@ -306,6 +341,27 @@ public class PropSat extends Propagator<BoolVar> {
         int neg = negated(lit);
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
             SatSolver.Clause cl = sat_.clauses.get(k);
+            // if the watched literals are instantiated
+            if (cl._g(0) == neg || cl._g(1) == neg
+                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+                // then, look for the lit
+                int p = cl.pos(neg);
+                if (p > -1) { // we found a clause where neg is in
+                    for (int d = cl.size() - 1; d >= 0; d--) {
+                        int l = cl._g(d);
+                        if (vars[var(l)].isInstantiated()) {
+                            newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
+                        }
+                    }
+                }
+            }
+        }
+        // C. learnt clauses:
+        // We need to find the fully instantiated clauses where bvar appears
+        // we cannot rely on watches_ because is not backtrackable
+        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
+        for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.learnts.get(k);
             // if the watched literals are instantiated
             if (cl._g(0) == neg || cl._g(1) == neg
                     || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {

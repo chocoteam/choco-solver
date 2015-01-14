@@ -28,14 +28,18 @@
  */
 package org.chocosolver.choco;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.constraints.nary.cnf.PropSat;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -58,27 +62,27 @@ public class ClauseTest {
             for (int i = 0; i <= n; i++) {
                 Solver s = new Solver();
 
-				final BoolVar[] bsource = new BoolVar[n];
-				final BoolVar[] bs = new BoolVar[n];
+                final BoolVar[] bsource = new BoolVar[n];
+                final BoolVar[] bs = new BoolVar[n];
 
-				for (int j = 0; j < n; j++) {
-					bsource[j] = VariableFactory.bool("b" + j, s);
-				}
+                for (int j = 0; j < n; j++) {
+                    bsource[j] = VariableFactory.bool("b" + j, s);
+                }
 
-				for (int j = 0; j < n; j++) {
-					if (j >= i) {
-						bs[j] = bsource[j].not();
-					}else{
-						bs[j] = bsource[j];
-					}
-				}
+                for (int j = 0; j < n; j++) {
+                    if (j >= i) {
+                        bs[j] = bsource[j].not();
+                    } else {
+                        bs[j] = bsource[j];
+                    }
+                }
 
                 LogOp or = LogOp.or(bs);
                 LoggerFactory.getLogger("test").info(or.toString());
                 SatFactory.addClauses(or, s);
                 s.set(IntStrategyFactory.lexico_LB(bs));
 
-				s.findAllSolutions();
+                s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 Assert.assertEquals(sol, nSol);
             }
@@ -284,5 +288,31 @@ public class ClauseTest {
 
     }
 
+    @Test(groups = "1s")
+    public void test6() throws ContradictionException {
+        int n = 10;
+        Solver s = new Solver();
+        IEnvironment e = s.getEnvironment();
+        BoolVar[] bs = new BoolVar[n];
+        bs[0] = VF.bool("b0", s);
+        SatFactory.addFalse(bs[0]);
+        PropSat sat = s.getMinisat().getPropSat();
+
+        e.worldPush();
+        s.propagate();
+        for (int i = 1; i < n; i++) {
+            e.worldPush();
+            bs[i] = VF.bool("b" + i, s);
+            sat.addLearnt(sat.Literal(bs[i]));
+            s.propagate();
+            Assert.assertTrue(bs[i].isInstantiatedTo(1));
+        }
+        for (int i = n - 1; i > 0; i--) {
+            e.worldPop();
+            Assert.assertFalse(bs[i].isInstantiated());
+            s.propagate();
+            Assert.assertTrue(bs[i].isInstantiatedTo(1));
+        }
+    }
 
 }

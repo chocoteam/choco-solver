@@ -61,6 +61,8 @@ public class SatSolver {
     boolean ok_;
     // List of problem addClauses.
     ArrayList<Clause> clauses;
+    // List of learnt addClauses.
+    ArrayList<Clause> learnts;
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
     TIntObjectHashMap<ArrayList<Watcher>> watches_;
@@ -88,6 +90,7 @@ public class SatSolver {
         this.qhead_ = 0;
         num_vars_ = 0;
         this.clauses = new ArrayList<>();
+        this.learnts = new ArrayList<>();
         this.watches_ = new TIntObjectHashMap<>();
         this.implies_ = new TIntObjectHashMap<>();
         this.assignment_ = new TIntObjectHashMap<>();
@@ -246,6 +249,11 @@ public class SatSolver {
         return clauses.size();
     }
 
+    // The current number of original clauses.
+    int nLearnt() {
+        return learnts.size();
+    }
+
     // Propagates one literal, returns true if successful, false in case
     // of failure.
     boolean propagateOneLiteral(int lit) {
@@ -314,6 +322,40 @@ public class SatSolver {
         }
         l0.add(new Watcher(cr, cr._g(1)));
         l1.add(new Watcher(cr, cr._g(0)));
+    }
+
+    public boolean learnClause(int... ps) {
+        temporary_add_vector_.clear();
+        temporary_add_vector_.add(ps);
+
+        temporary_add_vector_.sort();
+        int lit = kUndefinedLiteral;
+        int j = 0;
+        for (int i = 0; i < temporary_add_vector_.size(); i++) {
+            if (valueLit(temporary_add_vector_.get(i)) == Boolean.kTrue || temporary_add_vector_.get(i) == negated(lit)) {
+                return true;
+            } else if (valueLit(temporary_add_vector_.get(i)) != Boolean.kFalse && temporary_add_vector_.get(i) != lit) {
+                lit = temporary_add_vector_.get(i);
+                temporary_add_vector_.set(j++, lit);
+            }
+        }
+        if (j < temporary_add_vector_.size()) {
+            temporary_add_vector_.remove(j, temporary_add_vector_.size() - j);
+        }
+        switch (temporary_add_vector_.size()) {
+            case 0:
+                return (ok_ = false);
+            case 1:
+                uncheckedEnqueue(temporary_add_vector_.get(0));
+                break;
+            default:
+                Clause cr = new Clause(temporary_add_vector_.toArray());
+                learnts.add(cr);
+                attachClause(cr);
+                uncheckedEnqueue(temporary_add_vector_.get(0));
+                break;
+        }
+        return (ok_ = propagate());
     }
 
     // Perform unit propagation. returns true upon success.
