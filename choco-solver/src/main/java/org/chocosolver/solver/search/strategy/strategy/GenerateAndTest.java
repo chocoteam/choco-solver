@@ -316,12 +316,17 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
         }
 
         @Override
-        public void dynamicAddition(Constraint c, boolean permanent) {
+        public void dynamicAddition(boolean permanent, Propagator... ps) {
             throw new SolverException("GenerateAndTest does not support propagator dynamic addition");
         }
 
         @Override
-        public void dynamicDeletion(Constraint c) {
+        public void updateInvolvedVariables(Propagator p) {
+            throw new SolverException("GenerateAndTest does not support propagator dynamic updating");
+        }
+
+        @Override
+        public void dynamicDeletion(Propagator... ps) {
             throw new SolverException("GenerateAndTest does not support propagator dynamic deletion");
         }
     }

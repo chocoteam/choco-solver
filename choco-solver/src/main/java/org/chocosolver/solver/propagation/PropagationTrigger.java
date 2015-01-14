@@ -82,11 +82,26 @@ public class PropagationTrigger implements Serializable {
     public void dynAdd(Propagator propagator, boolean permanent) {
         if (permanent) {
             assert perm_propagators.size() == perm_world.size();
-            perm_propagators.add(propagator);
-            perm_world.add(Integer.MAX_VALUE);
-            size++;
+            int pos = find(propagator);
+            if (pos == -1) {
+                perm_propagators.add(propagator);
+                perm_world.add(Integer.MAX_VALUE);
+                size++;
+            } else {
+                perm_world.setQuick(pos, Integer.MAX_VALUE);
+            }
         }
     }
+
+    private int find(Propagator p) {
+        int i = 0;
+        while (i < perm_propagators.size() && perm_propagators.get(i) != p) {
+            i++;
+        }
+        if (i == perm_propagators.size()) return -1;
+        else return i;
+    }
+
 
     public void remove(Propagator propagator) {
         // Remove a pending propagator, ie, not yet propagated
@@ -166,6 +181,9 @@ public class PropagationTrigger implements Serializable {
         }
         if (toPropagate.isStateLess()) {
             toPropagate.setActive();
+            toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());
+            engine.onPropagatorExecution(toPropagate);
+        } else if (toPropagate.isActive()) { // deal with updated propagator
             toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());
             engine.onPropagatorExecution(toPropagate);
         }

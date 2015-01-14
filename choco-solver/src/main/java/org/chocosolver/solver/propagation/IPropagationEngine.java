@@ -29,7 +29,6 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
@@ -122,7 +121,22 @@ public interface IPropagationEngine extends Serializable {
      */
     void desactivatePropagator(Propagator propagator);
 
-    void dynamicAddition(Constraint c, boolean permanent);
+    /**
+     * Add a constraint to the propagation engine
+     * @param permanent does the constraint is permanently added
+     * @param ps propagators to add
+     */
+    void dynamicAddition(boolean permanent, Propagator... ps);
 
-    void dynamicDeletion(Constraint c);
+    /**
+     * Update the scope of variable of a propagator (addition or deletion are allowed -- p.vars are scanned)
+     * @param p a propagator
+     */
+    void updateInvolvedVariables(Propagator p);
+
+    /**
+     * Delete the list of propagators in input from the engine
+     * @param ps a list of propagators
+     */
+    void dynamicDeletion(Propagator... ps);
 }

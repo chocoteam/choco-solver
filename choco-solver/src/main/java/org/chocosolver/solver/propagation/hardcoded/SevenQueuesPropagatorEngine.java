@@ -320,14 +320,14 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean permanent) {
+    public void dynamicAddition(boolean permanent, Propagator... ps) {
         int osize = propagators.length;
-        int nbp = c.getPropagators().length;
+        int nbp = ps.length;
         int nsize = osize + nbp;
         Propagator[] _propagators = propagators;
         propagators = new Propagator[nsize];
         System.arraycopy(_propagators, 0, propagators, 0, osize);
-        System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
+        System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             p2i.set(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
@@ -355,8 +355,20 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicDeletion(Constraint c) {
-        for (Propagator toDelete : c.getPropagators()) {
+    public void updateInvolvedVariables(Propagator p) {
+        if (p.reactToFineEvent()) {
+            int i = p2i.get(p.getId());
+            assert scheduled[i] == 0 : "Try to update variable scope during propagation";
+            int nbv = p.getNbVars();
+            eventsets[i] = new IntCircularQueue(nbv);
+            eventmasks[i] = new int[nbv];
+        }
+        trigger.dynAdd(p, true); // TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
+    }
+
+    @Override
+    public void dynamicDeletion(Propagator... ps) {
+        for (Propagator toDelete : ps) {
             int nsize = propagators.length - 1;
             Propagator toMove = propagators[nsize];
             int idtd = p2i.get(toDelete.getId());

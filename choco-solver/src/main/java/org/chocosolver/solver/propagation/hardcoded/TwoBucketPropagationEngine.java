@@ -393,14 +393,14 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(Constraint c, boolean permanent) {
+    public void dynamicAddition(boolean permanent, Propagator... ps) {
         int osize = propagators.length;
-        int nbp = c.getPropagators().length;
+        int nbp = ps.length;
         int nsize = osize + nbp;
         Propagator[] _propagators = propagators;
         propagators = new Propagator[nsize];
         System.arraycopy(_propagators, 0, propagators, 0, osize);
-        System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
+        System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             p2i.set(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
@@ -415,18 +415,14 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         System.arraycopy(_schedule_c, 0, schedule_c, 0, osize);
 
 
-        IntCircularQueue[] _event_f = event_f;
-        event_f = new IntCircularQueue[nsize];
-        System.arraycopy(_event_f, 0, event_f, 0, osize);
-        for (int i = osize; i < nsize; i++) {
-            if (propagators[i].reactToFineEvent()) {
-                event_f[i] = new IntCircularQueue(propagators[i].getNbVars());
-            }
-        }
         PropagatorEventType[] _event_c = event_c;
         event_c = new PropagatorEventType[nsize];
         System.arraycopy(_event_c, 0, event_c, 0, osize);
         Arrays.fill(event_c, osize, nsize, PropagatorEventType.VOID);
+
+        IntCircularQueue[] _event_f = event_f;
+        event_f = new IntCircularQueue[nsize];
+        System.arraycopy(_event_f, 0, event_f, 0, osize);
 
         int[][] _eventmasks = eventmasks;
         eventmasks = new int[nsize][];
@@ -434,13 +430,26 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         for (int i = osize; i < nsize; i++) {
             if (propagators[i].reactToFineEvent()) {
                 eventmasks[i] = new int[propagators[i].getNbVars()];
+                event_f[i] = new IntCircularQueue(propagators[i].getNbVars());
             }
         }
     }
 
     @Override
-    public void dynamicDeletion(Constraint c) {
-        for (Propagator toDelete : c.getPropagators()) {
+    public void updateInvolvedVariables(Propagator p) {
+        if (p.reactToFineEvent()) {
+            int i = p2i.get(p.getId());
+            assert !schedule_f[i] && schedule_c[i] : "Try to update variable scope during propagation";
+            int nbv = p.getNbVars();
+            eventmasks[i] = new int[nbv];
+            event_f[i] = new IntCircularQueue(nbv);
+        }
+        trigger.dynAdd(p, true); // TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
+    }
+
+    @Override
+    public void dynamicDeletion(Propagator... ps) {
+        for (Propagator toDelete : ps) {
             int nsize = propagators.length - 1;
             Propagator toMove = propagators[nsize];
             int idtd = p2i.get(toDelete.getId());

@@ -39,6 +39,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Deduction;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
@@ -205,6 +206,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         arraycopy(itmp, 0, vindices, 0, itmp.length);
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
+        }
+        if (solver.getEngine() != NoPropagationEngine.SINGLETON && solver.getEngine().isInitialized()) {
+            solver.getEngine().updateInvolvedVariables(this);
+        }
+        if (isActive()) {
+            for (int v = tmp.length; v < vars.length; v++) {
+                vars[v].recordMask(getPropagationConditions(v));
+            }
         }
     }
 
