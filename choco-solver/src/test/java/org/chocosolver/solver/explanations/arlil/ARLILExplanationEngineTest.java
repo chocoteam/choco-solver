@@ -98,7 +98,7 @@ public class ARLILExplanationEngineTest {
 
             t = -System.currentTimeMillis();
             {
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil);
+                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
                 Reason r = null;
                 try {
                     arlil.propagate();
@@ -148,7 +148,7 @@ public class ARLILExplanationEngineTest {
 
             t = -System.currentTimeMillis();
             {
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil);
+                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
                 Reason r = null;
                 try {
                     arlil.propagate();
@@ -207,7 +207,7 @@ public class ARLILExplanationEngineTest {
             t = -System.currentTimeMillis();
             {
                 IntStrategy is = ISF.lexico_LB(arlil.retrieveIntVars());
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil);
+                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
                 Reason r = null;
                 try {
                     arlil.propagate();
@@ -243,7 +243,7 @@ public class ARLILExplanationEngineTest {
         solver.post(new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)));
 
         IntStrategy is = ISF.lexico_LB(vs);
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
         Reason r = null;
         try {
             solver.propagate();
@@ -269,7 +269,7 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
             CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
@@ -289,7 +289,7 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
             CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
@@ -309,7 +309,7 @@ public class ARLILExplanationEngineTest {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
             CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
@@ -330,7 +330,7 @@ public class ARLILExplanationEngineTest {
             }
             solver.set(ISF.lexico_LB(vars));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
             CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
@@ -357,7 +357,7 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
             solver.set(ISF.random_value(p, seed));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
             CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
             solver.plugMonitor(cbj);
 
@@ -381,7 +381,7 @@ public class ARLILExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
         CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
         solver.plugMonitor(cbj);
 
@@ -407,7 +407,7 @@ public class ARLILExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
         CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
         solver.plugMonitor(cbj);
 
@@ -435,7 +435,7 @@ public class ARLILExplanationEngineTest {
                 break;
             case 3:
                 System.out.printf("arlil; ");
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
                 CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
                 solver.plugMonitor(cbj);
                 break;
@@ -721,7 +721,7 @@ public class ARLILExplanationEngineTest {
         }
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
         Reason r = null;
         try {
             solver.propagate();
@@ -746,7 +746,7 @@ public class ARLILExplanationEngineTest {
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
         SatFactory.addBoolNot(bs[0], bs[1]);
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
         Reason r = null;
         try {
             solver.propagate();
@@ -773,7 +773,7 @@ public class ARLILExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver);
+        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
         Reason r = null;
         try {
             solver.propagate();

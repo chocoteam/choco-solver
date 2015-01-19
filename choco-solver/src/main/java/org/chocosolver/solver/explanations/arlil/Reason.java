@@ -30,6 +30,7 @@ import gnu.trove.set.hash.THashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Set;
 
@@ -41,12 +42,14 @@ import java.util.Set;
  */
 public class Reason {
 
+    private final boolean saveCauses;
     private final THashSet<ICause> causes;
-    private final THashSet<Decision> decisions;
+    private final BitSet decisions;
 
-    public Reason() {
-        causes = new THashSet<>();
-        decisions = new THashSet<>();
+    public Reason(boolean saveCauses) {
+        this.causes = new THashSet<>();
+        this.decisions = new BitSet();
+        this.saveCauses = saveCauses;
     }
 
     /**
@@ -56,17 +59,16 @@ public class Reason {
      * @return true if this was an unknown cause
      */
     public boolean addCause(ICause cause) {
-        return causes.add(cause);
+        return saveCauses && causes.add(cause);
     }
 
     /**
      * Add a decision, which explains, partially, the situation
      *
      * @param decision a decision
-     * @return true if this was an unknown decision
      */
-    public boolean addDecicion(Decision decision) {
-        return decisions.add(decision);
+    public void addDecicion(Decision decision) {
+        decisions.set(decision.getWorldIndex());
     }
 
 
@@ -85,21 +87,21 @@ public class Reason {
      * @return an int
      */
     public int nbDecisions() {
-        return decisions.size();
+        return decisions.cardinality();
     }
-
-    public static long count = 0;
 
     /**
      * Merge all causes and decisions from <code>reason</code> in this.
      *
      * @param reason a given reason
-     * @return true if the reason changed
      */
-    public boolean addAll(Reason reason) {
-        boolean b1 = reason.nbCauses() > 0 && this.causes.addAll(reason.causes);
-        boolean b2 = reason.nbDecisions() > 0 && this.decisions.addAll(reason.decisions);
-        return b1 | b2;
+    public void addAll(Reason reason) {
+        if (reason.nbCauses() > 0) {
+            this.causes.addAll(reason.causes);
+        }
+        if (reason.nbDecisions() > 0) {
+            this.decisions.or(reason.decisions);
+        }
     }
 
     /**
@@ -116,18 +118,17 @@ public class Reason {
      * Remove one decision from the set of decisions explaining the situation
      *
      * @param decision a decision to remove
-     * @return true if the reason changed
      */
-    public boolean remove(Decision decision) {
-        return decisions.remove(decision);
+    public void remove(Decision decision) {
+        decisions.clear(decision.getWorldIndex());
     }
 
 
     /**
      * Return a unmodifiable copy of the set of decisions
      */
-    public Set<Decision> getDecisions() {
-        return Collections.unmodifiableSet(decisions);
+    public BitSet getDecisions() {
+        return decisions;
     }
 
     /**
@@ -143,7 +144,7 @@ public class Reason {
      * @return a new reason
      */
     public Reason duplicate() {
-        Reason reason = new Reason();
+        Reason reason = new Reason(this.saveCauses);
         reason.addAll(this);
         return reason;
     }
@@ -151,7 +152,7 @@ public class Reason {
     /**
      * Clear the Reason, to enable reusing it.
      */
-    public void clear(){
+    public void clear() {
         causes.clear();
         decisions.clear();
     }

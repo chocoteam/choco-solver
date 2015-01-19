@@ -52,6 +52,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
     // The ARLIL explanation engine
     private final ARLILExplanationEngine mArlile;
     private final Solver mSolver;
+    private final boolean saveCauses;
 
     // The last reason computed, for user only
     private Reason lastReason;
@@ -59,6 +60,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
     public CBJ4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver) {
         this.mArlile = mArlile;
         this.mSolver = mSolver;
+        this.saveCauses = mArlile.isSaveCauses();
     }
 
     @Override
@@ -84,7 +86,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
             dec = dec.getPrevious();
         }
         if (dec != ROOT) {
-            Reason reason = new Reason();
+            Reason reason = new Reason(saveCauses);
             // 1. skip the current one which is refuted...
             Decision d = dec.getPrevious();
             while ((d != ROOT)) {
@@ -145,14 +147,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
      * @return the number of world to backtrack to.
      */
     int compute(int currentWorldIndex) {
-        int dworld = 0;
-        for (Decision d : lastReason.getDecisions()) {
-            int world = d.getWorldIndex() + 1;
-            if (world > dworld) {
-                dworld = world;
-            }
-        }
-        return 1 + (currentWorldIndex - dworld);
+        return currentWorldIndex - lastReason.getDecisions().previousSetBit(lastReason.getDecisions().length());
     }
 
     /**

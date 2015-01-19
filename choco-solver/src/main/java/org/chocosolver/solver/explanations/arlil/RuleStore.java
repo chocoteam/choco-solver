@@ -26,16 +26,14 @@
  */
 package org.chocosolver.solver.explanations.arlil;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -45,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.BitSet;
 
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 
@@ -69,21 +67,40 @@ public class RuleStore {
     static final int RM = 1;
 
 
-    private final TIntHashSet paRules; // rules for propagator activation
-    private final TIntIntHashMap vmRules;    // rules for variable modification
-    private final TIntObjectHashMap<TIntSet> vmRemval;    // store value removal when necessary
-    private final TIntObjectHashMap<TIntObjectHashMap<HashMap<DecisionOperator, Reason>>> decRefut; // store refuted decisions
+    private final BitSet paRules; // rules for propagator activation
+    private final int[] vmRules;    // rules for variable modification
+    private final TIntSet[] vmRemval;    // store value removal when necessary
+    private Reason[] decRefut; // store refuted decisions
 
 
     private IntVar lastVar;
     private IEventType lastEvt;
-    private int lastVid, lastValue, lastMask;
+    private int lastValue;
 
-    public RuleStore() {
-        paRules = new TIntHashSet(16, 0.5f, NO_ENTRY);
-        vmRules = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
-        vmRemval = new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
-        decRefut = new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
+    public RuleStore(Solver solver) {
+        int _p = -1;
+        for (Constraint c : solver.getCstrs()) {
+            for (Propagator p : c.getPropagators()) {
+                if (_p < p.getId()) {
+                    _p = p.getId();
+                }
+            }
+        }
+        _p++;
+        paRules = new BitSet(_p);
+        int _v = -1;
+        for (Variable v : solver.getVars()) {
+            if (_v < v.getId()) {
+                _v = v.getId();
+            }
+        }
+        _v++;
+
+
+        vmRules = new int[_v];
+        Arrays.fill(vmRules, NO_ENTRY);
+        vmRemval = new TIntSet[_v];
+        decRefut = new Reason[16];
     }
 
     /**
@@ -105,8 +122,8 @@ public class RuleStore {
 
         if (lastEvt != FULL_PROPAGATION) {
             // the event is a variable modification
-            lastVid = lastVar.getId();
-            lastMask = vmRules.get(lastVid);
+            int lastVid = lastVar.getId();
+            int lastMask = vmRules[lastVid];
 
             if (lastMask == DM) { // only to speed up the entire process
                 return true;
@@ -117,7 +134,7 @@ public class RuleStore {
             return false;
         } else {
             // Does it match a propagator activation known rule?
-            return paRules.contains(lastValue);
+            return paRules.get(lastValue);
         }
     }
 
@@ -172,13 +189,13 @@ public class RuleStore {
                 if (ivar.hasEnumeratedDomain()) {
                     switch (evt) {
                         case INSTANTIATE:
-                            return intersect(i2, i3, vmRemval.get(vid));
+                            return intersect(i2, i3, vmRemval[vid]);
                         case DECUPP:
-                            return intersect(i1, i2, vmRemval.get(vid));
+                            return intersect(i1, i2, vmRemval[vid]);
                         case INCLOW:
-                            return intersect(i2, i1, vmRemval.get(vid));
+                            return intersect(i2, i1, vmRemval[vid]);
                         case REMOVE:
-                            return vmRemval.get(vid).contains(i1);
+                            return vmRemval[vid].contains(i1);
                     }
                 }
         }
@@ -244,7 +261,7 @@ public class RuleStore {
             // 1. add a new rule: reason of the variable instantiation
             addFullDomainRule(lastVar);
             // 2. remove the propagator activation rule, now we know it depends on the variable
-            paRules.remove(lastValue);
+            paRules.clear(lastValue);
         }
     }
 
@@ -254,22 +271,12 @@ public class RuleStore {
      */
     public void clear() {
         paRules.clear();
-        vmRules.clear();
-        for (int k : vmRemval.keys()) {
-            vmRemval.get(k).clear();
+        Arrays.fill(vmRules, NO_ENTRY);
+        for (int k = vmRemval.length - 1; k >= 0; k--) {
+            if (vmRemval[k] != null) vmRemval[k].clear();
         }
 //        //TODO: clear decRefute...
     }
-
-    /**
-     * Check whether the rule store is empty
-     *
-     * @return true if the rule store is empty
-     */
-    public boolean isEmpty() {
-        return paRules.isEmpty() && vmRules.isEmpty();
-    }
-
 
     /**
      * Add a value removal rule, that is, the event which remove the value needs to be retained.
@@ -283,10 +290,10 @@ public class RuleStore {
         if (var.hasEnumeratedDomain()) {
             int vid = var.getId();
             putMask(vid, RM);
-            TIntSet remvals = vmRemval.get(vid);
+            TIntSet remvals = vmRemval[vid];
             if (remvals == null) {
                 remvals = new TIntHashSet(16, .5f, NO_ENTRY);
-                vmRemval.put(vid, remvals);
+                vmRemval[vid] = remvals;
             }
             return remvals.add(value);
         } else {
@@ -342,12 +349,14 @@ public class RuleStore {
      * @return true if the mask has been updated (false = already existing mask)
      */
     private boolean putMask(int vid, int mask) {
-        int cmask = vmRules.get(vid);
+        int cmask = vmRules[vid];
         if (cmask == NO_ENTRY) {
-            return vmRules.put(vid, mask) == NO_ENTRY;
+            vmRules[vid] = mask;
+            return true;
         } else {
             int amount = (cmask | mask) - cmask;
-            return amount > 0 && vmRules.adjustValue(vid, amount);
+            vmRules[vid] += amount;
+            return amount > 0;
         }
     }
 
@@ -358,7 +367,7 @@ public class RuleStore {
      * @return the current mask or NO_ENTRY
      */
     public int getMask(Variable var) {
-        return vmRules.get(var.getId());
+        return vmRules[var.getId()];
     }
 
     /**
@@ -368,7 +377,7 @@ public class RuleStore {
      * @return true if a new rule has been adde
      */
     public boolean addPropagatorActivationRule(Propagator propagator) {
-        paRules.add(propagator.getId());
+        paRules.set(propagator.getId());
         return false;
     }
 
@@ -380,17 +389,13 @@ public class RuleStore {
      * @param reason   the reason of the refutation
      */
     public void storeDecisionRefutation(Decision decision, Reason reason) {
-        TIntObjectHashMap<HashMap<DecisionOperator, Reason>> mk1 = decRefut.get(decision.getDecisionVariable().getId());
-        if (mk1 == null) {
-            mk1 = new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
-            decRefut.put(decision.getDecisionVariable().getId(), mk1);
+        int w = decision.getWorldIndex();
+        if (w >= decRefut.length) {
+            Reason[] tmp = decRefut;
+            decRefut = new Reason[w + 10];
+            System.arraycopy(tmp, 0, decRefut, 0, tmp.length);
         }
-        HashMap<DecisionOperator, Reason> mk2 = mk1.get((Integer) decision.getDecisionValue());
-        if (mk2 == null) {
-            mk2 = new HashMap<>(16, .5f);
-            mk1.put((Integer) decision.getDecisionValue(), mk2);
-        }
-        mk2.put(decision.getDecisionOperator(), reason);
+        decRefut[w] = reason;
     }
 
     /**
@@ -403,10 +408,7 @@ public class RuleStore {
         if (decision.hasNext()) {
             throw new SolverException(decision.toString() + "is not explained yet");
         }
-        return decRefut
-                .get(decision.getDecisionVariable().getId())
-                .get((Integer) decision.getDecisionValue())
-                .get(decision.getDecisionOperator());
+        return decRefut[decision.getWorldIndex()];
     }
 
 
@@ -429,11 +431,11 @@ public class RuleStore {
     public void printRules(Solver solver) {
         StringBuilder st = new StringBuilder();
         for (Variable v : solver.getVars()) {
-            int m = vmRules.get(v.getId());
+            int m = vmRules[v.getId()];
             if (m != NO_ENTRY) {
                 st.append(v.getName()).append(":").append(m);
-                if (vmRemval.contains(v.getId()) && vmRemval.get(v.getId()).size() > 0) {
-                    TIntSet values = vmRemval.get(v.getId());
+                if (vmRemval[v.getId()] != null && vmRemval[v.getId()].size() > 0) {
+                    TIntSet values = vmRemval[v.getId()];
                     st.append("\n\t").append(Arrays.toString(values.toArray()));
                 }
                 st.append("\n");

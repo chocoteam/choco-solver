@@ -50,12 +50,28 @@ public class ARLILExplanationEngine implements EventObserver {
 
     private final IEventStore eventStore; // set of generated events
     private final RuleStore ruleStore; // set of active rules
+    private final boolean saveCauses; // save the clauses in Reason
 
 
-    public ARLILExplanationEngine(Solver solver) {
+    /**
+     * Create an explanation engine based on a rule store
+     * @param solver a solver
+     * @param userFeedback user feedback on: propagators in conflict are available for consultation
+     */
+    public ARLILExplanationEngine(Solver solver, boolean userFeedback) {
         eventStore = new ArrayEventStore(solver.getEnvironment());
-        ruleStore = new RuleStore();
+        ruleStore = new RuleStore(solver);
         solver.set(this);
+        this.saveCauses = userFeedback;
+    }
+
+    /**
+     * Indicate whether or not the clauses are saved in Reason
+     *
+     * @return if clauses are saved
+     */
+    public boolean isSaveCauses() {
+        return saveCauses;
     }
 
     /**
@@ -65,7 +81,7 @@ public class ARLILExplanationEngine implements EventObserver {
      * @return a Reason (set of decisions and propagators).
      */
     public Reason explain(ContradictionException cex) {
-        Reason reason = new Reason();
+        Reason reason = new Reason(saveCauses);
         ruleStore.clear();
 
         if (cex.v != null) {

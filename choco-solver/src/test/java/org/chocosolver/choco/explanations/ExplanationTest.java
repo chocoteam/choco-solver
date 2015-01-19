@@ -28,7 +28,6 @@
  */
 package org.chocosolver.choco.explanations;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -115,12 +114,6 @@ public class ExplanationTest {
     public void testUserExpl() {
         int n = 7;
         final Solver solver = new Solver();
-        solver.set(new Settings() {
-            @Override
-            public boolean enablePropagatorInExplanation() {
-                return true;
-            }
-        });
         IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
         solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
         solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));

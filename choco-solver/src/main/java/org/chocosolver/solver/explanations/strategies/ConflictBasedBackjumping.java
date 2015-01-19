@@ -81,9 +81,6 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
      * @param active true or false
      */
     public void activeUserExplanation(boolean active) {
-        if (!mSolver.getSettings().enablePropagatorInExplanation()) {
-            throw new SolverException("Solver's settings should be modified to allow storing propagators in explanations.");
-        }
         userE = active;
     }
 
