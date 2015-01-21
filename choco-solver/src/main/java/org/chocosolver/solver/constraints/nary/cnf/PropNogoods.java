@@ -1,24 +1,22 @@
-/**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+/*
+ * Copyright (c) 1999-2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -30,76 +28,102 @@ package org.chocosolver.solver.constraints.nary.cnf;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import java.util.Arrays;
+import java.util.BitSet;
 
 import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
 
+
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 12/07/13
+ * Created by cprudhom on 20/01/15.
+ * Project: choco.
  */
-public class PropSat extends Propagator<BoolVar> {
+public class PropNogoods extends Propagator<IntVar> {
+
+    private static final int NO_ENTRY = Integer.MAX_VALUE;
 
     SatSolver sat_;
-    TObjectIntHashMap<BoolVar> indices_;
+
+    TIntIntHashMap[] vv2lit; // maintain uniqueness of pair VAR-VAL
+
+    int[] var2pos, lit2pos, lit2val;
 
     IStateInt sat_trail_;
 
     TIntList early_deductions_;
 
-    public PropSat(Solver solver) {
-        // this propagator initially has no variable
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
-        this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
+    BitSet test_eq;
 
-        this.indices_ = new TObjectIntHashMap<>();
+
+    public PropNogoods(Solver solver) {
+        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);
+        this.vars = new IntVar[0];// erase solver.ONE from the variable scope
+
+        int k = 16;
+        this.vv2lit = new TIntIntHashMap[k];//new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
+        this.lit2val = new int[k];//new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+        Arrays.fill(lit2val, NO_ENTRY);
+        this.lit2pos = new int[k];//new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+        Arrays.fill(lit2pos, NO_ENTRY);
+        this.var2pos = new int[k];//new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+        Arrays.fill(var2pos, NO_ENTRY);
+        //TODO: one satsolver per solver...
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = solver.getEnvironment().makeInt();
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return IntEventType.instantiation();
+        test_eq = new BitSet();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        sat_.cancelUntil(0);
+        sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
         sat_.initPropagator();
         applyEarlyDeductions();
+        TIntIntHashMap map;
         for (int i = 0; i < vars.length; ++i) {
-            BoolVar var = vars[i];
-            if (var.isInstantiated()) {
-                VariableBound(i);
+            IntVar var = vars[i];
+            for (int k : (map = vv2lit[var.getId()]).keys()) {
+                if (var.contains(k)) {
+                    if (var.isInstantiated()) {
+                        VariableBound(map.get(k), true);
+                    }
+                } else {
+                    VariableBound(map.get(k), false);
+                }
             }
         }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        VariableBound(idxVarInProp);
+        IntVar var = vars[idxVarInProp];
+        TIntIntHashMap map;
+        for (int k : (map = vv2lit[var.getId()]).keys()) {
+            if (var.contains(k)) {
+                if (var.isInstantiated()) {
+                    VariableBound(map.get(k), true);
+                }
+            } else {
+                VariableBound(map.get(k), false);
+            }
+        }
     }
 
     @Override
     public ESat isEntailed() {
+        if (vars.length == 0) return ESat.TRUE;
         if (isCompletelyInstantiated()) {
             for (SatSolver.Clause c : sat_.clauses) {
                 int cnt = 0;
@@ -107,9 +131,11 @@ public class PropSat extends Propagator<BoolVar> {
                     int lit = c._g(i);
                     boolean sign = sign(lit);
                     int var = var(lit);
-                    int val = vars[var].getValue();
-                    if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
-                    else break;
+                    IntVar ivar = vars[lit2pos[var]];
+                    int value = lit2val[var];
+                    if (sign != ivar.contains(value)) {
+                        cnt++;
+                    } else break;
                 }
                 if (cnt == c.size()) return ESat.FALSE;
             }
@@ -119,9 +145,11 @@ public class PropSat extends Propagator<BoolVar> {
                     int lit = c._g(i);
                     boolean sign = sign(lit);
                     int var = var(lit);
-                    int val = vars[var].getValue();
-                    if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
-                    else break;
+                    IntVar ivar = vars[lit2pos[var]];
+                    int value = lit2val[var];
+                    if (sign != ivar.contains(value)) {
+                        cnt++;
+                    } else break;
                 }
                 if (cnt == c.size()) return ESat.FALSE;
             }
@@ -130,80 +158,106 @@ public class PropSat extends Propagator<BoolVar> {
         return ESat.UNDEFINED;
     }
 
-    public SatSolver getSatSolver() {
-        return sat_;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public int Literal(BoolVar expr) {
-        if (indices_.containsKey(expr)) {
-            return makeLiteral(indices_.get(expr), true);
-        } else {
-            int var = sat_.newVariable();
-            assert (vars.length == var);
-            addVariable(expr);
-            indices_.put(expr, var);
-            return makeLiteral(var, true);
+    public int Literal(IntVar ivar, int value) {
+        // TODO: deal with BoolVar
+        int vid = ivar.getId();
+        int var;
+        TIntIntHashMap map;
+        if (vid >= vv2lit.length) {
+            TIntIntHashMap[] tmp = vv2lit;
+            vv2lit = new TIntIntHashMap[vid + 1];
+            System.arraycopy(tmp, 0, vv2lit, 0, tmp.length);
+
+            int[] tmpi = var2pos;
+            var2pos = new int[vid + 1];
+            System.arraycopy(tmpi, 0, var2pos, 0, tmpi.length);
+            Arrays.fill(var2pos, tmpi.length, vid+1, NO_ENTRY);
         }
+        if ((map = vv2lit[vid]) == null) {
+            map = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+            vv2lit[vid] = map;
+        }
+
+        int pos;
+        if ((pos = var2pos[vid]) == NO_ENTRY) {
+            addVariable(ivar);
+            pos = vars.length - 1;
+            var2pos[vid] = pos;
+        }
+
+        if ((var = map.get(value)) == NO_ENTRY) {
+            var = sat_.newVariable();
+            map.put(value, var);
+            if (var >= lit2pos.length) {
+                int[] tmp = lit2pos;
+                lit2pos = new int[var + 1];
+                System.arraycopy(tmp, 0, lit2pos, 0, tmp.length);
+                Arrays.fill(lit2pos, tmp.length, var+1, NO_ENTRY);
+
+                tmp = lit2val;
+                lit2val = new int[var + 1];
+                System.arraycopy(tmp, 0, lit2val, 0, tmp.length);
+                Arrays.fill(lit2val, tmp.length, var+1, NO_ENTRY);
+            }
+
+
+            lit2pos[var] = pos;
+            lit2val[var] = value;
+        }
+        return SatSolver.makeLiteral(var, true);
     }
 
-    void VariableBound(int index) throws ContradictionException {
+    /**
+     * var points a clause variable whom value is now to be val.
+     *
+     * @param var       a clause var
+     * @param new_value its value
+     * @throws ContradictionException
+     */
+    void VariableBound(int var, boolean new_value) throws ContradictionException {
         if (sat_trail_.get() < sat_.trailMarker()) {
             sat_.cancelUntil(sat_trail_.get());
             assert (sat_trail_.get() == sat_.trailMarker());
         }
-        int var = index;
-        boolean new_value = vars[index].getValue() != 0;
         int lit = makeLiteral(var, new_value);
         if (!sat_.propagateOneLiteral(lit)) {
             // force failure by removing the last value, required for explanations
-            // TODO: inutile dans le cas des implications, peut être remplacé par contradiction(vars[index], "");
-            vars[index].instantiateTo(1 - vars[index].getValue(), this);
+            IntVar iv = vars[lit2pos[var]];
+            if (sign(lit)) {
+                iv.removeValue(lit2val[var], this);
+            } else {
+                iv.instantiateTo(lit2val[var], this);
+            }
+
         } else {
             sat_trail_.set(sat_.trailMarker());
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
                 lit = sat_.touched_variables_.get(i);
                 var = var(lit);
-                boolean assigned_bool = sign(lit);
-//                demons_[var.value()].inhibit(solver());
-                vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
+                if (sign(lit)) {
+                    vars[lit2pos[var]].instantiateTo(lit2val[var], this);
+                } else {
+                    vars[lit2pos[var]].removeValue(lit2val[var], this);
+                }
             }
         }
     }
 
-
-    // Add a clause to the solver, clears the vector.
-    public boolean addClause(TIntList lits) {
-        boolean result = sat_.addClause(lits);
-        storeEarlyDeductions();
-        return result;
-    }
-
-    // Add the empty clause, making the solver contradictory.
-    public boolean addEmptyClause() {
-        return sat_.addEmptyClause();
-    }
-
     // Add a unit clause to the solver.
-    public boolean addClause(int p) {
+    public boolean addNogood(int p) {
         boolean result = sat_.addClause(p);
         storeEarlyDeductions();
         return result;
     }
 
-    // Add a binary clause to the solver.
-    public boolean addClause(int p, int q) {
-        boolean result = sat_.addClause(p, q);
-        storeEarlyDeductions();
-        return result;
-    }
-
-    // Add a ternary clause to the solver.
-    public boolean addClause(int p, int q, int r) {
-        boolean result = sat_.addClause(p, q, r);
+    // Add a nogood to the solver, clears the vector.
+    public boolean addNogood(TIntList lits) {
+        boolean result = sat_.addClause(lits);
         storeEarlyDeductions();
         return result;
     }
@@ -212,7 +266,27 @@ public class PropSat extends Propagator<BoolVar> {
     public void addLearnt(int... lits) {
         sat_.learnClause(lits);
         storeEarlyDeductions();
+
+        // compare the current clauses with the previous stored one,
+        // just in case the current one dominates the previous none
+        if (sat_.nLearnt() > 1) {
+            SatSolver.Clause last = sat_.learnts.get(sat_.learnts.size() - 1);
+            SatSolver.Clause prev = sat_.learnts.get(sat_.learnts.size() - 2);
+            if (last.size() > 1 && last.size() < prev.size()) {
+                test_eq.clear();
+                for (int i = last.size() - 1; i >= 0; i--) {
+                    test_eq.set(last._g(i));
+                }
+                for (int i = prev.size() - 1; i >= 0; i--) {
+                    test_eq.clear(prev._g(i));
+                }
+                if (test_eq.cardinality() == 0) { // then last dominates prev
+                    sat_.detachLearnt(sat_.learnts.size() - 2);
+                }
+            }
+        }
     }
+
 
     private void storeEarlyDeductions() {
         for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
@@ -226,88 +300,20 @@ public class PropSat extends Propagator<BoolVar> {
         for (int i = 0; i < early_deductions_.size(); ++i) {
             int lit = early_deductions_.get(i);
             int var = var(lit);
-            boolean assigned_bool = sign(lit);
-//            demons_[var.value()].inhibit(solver());
-            vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
+            if (sign(lit)) {
+                vars[lit2pos[var]].instantiateTo(lit2val[var], this);
+            } else {
+                vars[lit2pos[var]].removeValue(lit2val[var], this);
+            }
         }
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static void declareVariable(PropSat sat, BoolVar var) {
-        //CHECK(sat.Check(var));
-        sat.Literal(var);
-    }
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction ded, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        BoolVar bvar = (BoolVar) ded.getVar();
-        int var = indices_.get(bvar);
-        boolean new_value = bvar.getValue() != 0;
-        int lit = makeLiteral(var, new_value);
-
-        // A. implications:
-        // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(lit);
-        if (implies != null) {
-            for (int i = implies.size() - 1; i >= 0; i--) {
-                int l = implies.get(i);
-                // if the other variable is instantiated ...
-                if (vars[var(l)].isInstantiated()) {
-                    // could be : if(sat_.valueLit(l) != SatSolver.Boolean.kUndefined)
-                    // but as far as the variable is instantiated, that's enough, and we skip conflict cases
-                    vars[var(l)].explain(xengine, VariableState.DOM, e);
-                }
-            }
-        }
-
-        // B. clauses:
-        // We need to find the fully instantiated clauses where bvar appears
-        // we cannot rely on watches_ because is not backtrackable
-        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        int neg = negated(lit);
-        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.clauses.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            vars[var(l)].explain(xengine, VariableState.DOM, e);
-                        }
-                    }
-                }
-            }
-        }
-        for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.learnts.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            vars[var(l)].explain(xengine, VariableState.DOM, e);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar bvar, IEventType evt, int bvalue) {
+    public boolean why(RuleStore ruleStore, IntVar ivar, IEventType evt, int ivalue) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // When we got here, there are multiple cases:
         // 1. the propagator fails, at least one clause or implication cannot be satisfied
@@ -315,8 +321,11 @@ public class PropSat extends Propagator<BoolVar> {
         // but the clauses and implications may be lost (cf. propagate)
 
         // get the index of the variable in the sat solver
-        int var = indices_.get(bvar);
-        boolean new_value = bvar.getValue() != 0;
+        int var = vv2lit[ivar.getId()].get(ivalue);
+        boolean new_value = true;
+        if (!ivar.contains(ivalue)) {
+            new_value = false;
+        }
         int lit = makeLiteral(var, new_value);
 
         // A. implications:
@@ -325,12 +334,7 @@ public class PropSat extends Propagator<BoolVar> {
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);
-                // if the other variable is instantiated ...
-                if (vars[var(l)].isInstantiated()) {
-                    // could be : if(sat_.valueLit(l) != SatSolver.Boolean.kUndefined)
-                    // but as far as the variable is instantiated, that's enough, and we skip conflict cases
-                    newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                }
+                newrules |= ruleIt(l, ruleStore);
             }
         }
 
@@ -343,15 +347,13 @@ public class PropSat extends Propagator<BoolVar> {
             SatSolver.Clause cl = sat_.clauses.get(k);
             // if the watched literals are instantiated
             if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+                    || (litIsKnown(cl._g(0))) && litIsKnown(cl._g(1))) {
                 // then, look for the lit
                 int p = cl.pos(neg);
                 if (p > -1) { // we found a clause where neg is in
                     for (int d = cl.size() - 1; d >= 0; d--) {
                         int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                        }
+                        newrules |= ruleIt(l, ruleStore);
                     }
                 }
             }
@@ -364,15 +366,13 @@ public class PropSat extends Propagator<BoolVar> {
             SatSolver.Clause cl = sat_.learnts.get(k);
             // if the watched literals are instantiated
             if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+                    || (litIsKnown(cl._g(0))) && litIsKnown(cl._g(1))) {
                 // then, look for the lit
                 int p = cl.pos(neg);
                 if (p > -1) { // we found a clause where neg is in
                     for (int d = cl.size() - 1; d >= 0; d--) {
                         int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                        }
+                        newrules |= ruleIt(l, ruleStore);
                     }
                 }
             }
@@ -380,4 +380,25 @@ public class PropSat extends Propagator<BoolVar> {
         return newrules;
     }
 
+    private boolean ruleIt(int l, RuleStore ruleStore) {
+        int _var = var(l);
+        IntVar avar = vars[lit2pos[_var]];
+        int aval = lit2val[_var];
+        if (avar.contains(aval)) {
+            if (avar.isInstantiated()) {
+                return ruleStore.addFullDomainRule(avar);
+            }
+        } else {
+            return ruleStore.addRemovalRule(avar, aval);
+        }
+        return false;
+    }
+
+
+    private boolean litIsKnown(int l) {
+        int _var = var(l);
+        IntVar avar = vars[lit2pos[_var]];
+        int aval = lit2val[_var];
+        return !avar.contains(aval) || avar.isInstantiated();
+    }
 }

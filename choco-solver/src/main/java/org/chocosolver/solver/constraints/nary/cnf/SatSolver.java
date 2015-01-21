@@ -33,6 +33,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A MiniSat solver.
@@ -50,11 +51,6 @@ public class SatSolver {
      * static const Literal kUndefinedLiteral = Literal(-2);
      */
     static final int kUndefinedLiteral = -2;
-
-    /**
-     * static const Literal kErrorLiteral = Literal(-1);
-     */
-    static final int kErrorLiteral = -1;
 
     // If false, the constraints are already unsatisfiable. No part of
     // the solver state may be used!
@@ -85,7 +81,6 @@ public class SatSolver {
 
 
     public SatSolver() {
-        System.out.printf("PropSat");
         this.ok_ = true;
         this.qhead_ = 0;
         num_vars_ = 0;
@@ -175,6 +170,23 @@ public class SatSolver {
                 attachClause(cr);
                 break;
 
+        }
+        return true;
+    }
+
+    public boolean learnClause(int... ps) {
+        Arrays.sort(ps);
+        switch (ps.length) {
+            case 0:
+                return (ok_ = false);
+            case 1:
+                dynUncheckedEnqueue(ps[0]);
+                return (ok_ = propagate());
+            default:
+                Clause cr = new Clause(ps);
+                learnts.add(cr);
+                attachClause(cr);
+                break;
         }
         return true;
     }
@@ -297,6 +309,11 @@ public class SatSolver {
         trail_.add(l);
     }
 
+    void dynUncheckedEnqueue(int l) {
+        touched_variables_.add(l);
+    }
+
+
     // Test if fact 'p' contradicts current state, Enqueue otherwise.
     boolean enqueue(int l) {
         if (valueLit(l) != Boolean.kUndefined) {
@@ -324,38 +341,24 @@ public class SatSolver {
         l1.add(new Watcher(cr, cr._g(0)));
     }
 
-    public boolean learnClause(int... ps) {
-        temporary_add_vector_.clear();
-        temporary_add_vector_.add(ps);
+    public void detachLearnt(int ci) {
+        Clause cr = learnts.get(ci);
+        learnts.remove(ci);
 
-        temporary_add_vector_.sort();
-        int lit = kUndefinedLiteral;
-        int j = 0;
-        for (int i = 0; i < temporary_add_vector_.size(); i++) {
-            if (valueLit(temporary_add_vector_.get(i)) == Boolean.kTrue || temporary_add_vector_.get(i) == negated(lit)) {
-                return true;
-            } else if (valueLit(temporary_add_vector_.get(i)) != Boolean.kFalse && temporary_add_vector_.get(i) != lit) {
-                lit = temporary_add_vector_.get(i);
-                temporary_add_vector_.set(j++, lit);
-            }
+        ArrayList<Watcher> ws = watches_.get(negated(cr._g(0)));
+        int i = ws.size() - 1;
+        while (i >= 0 && ws.get(i).clause != cr) {
+            i--;
         }
-        if (j < temporary_add_vector_.size()) {
-            temporary_add_vector_.remove(j, temporary_add_vector_.size() - j);
+        assert i > -1;
+        ws.remove(i);
+        ws = watches_.get(negated(cr._g(1)));
+        i = ws.size() - 1;
+        while (i >= 0 && ws.get(i).clause != cr) {
+            i--;
         }
-        switch (temporary_add_vector_.size()) {
-            case 0:
-                return (ok_ = false);
-            case 1:
-                uncheckedEnqueue(temporary_add_vector_.get(0));
-                break;
-            default:
-                Clause cr = new Clause(temporary_add_vector_.toArray());
-                learnts.add(cr);
-                attachClause(cr);
-                uncheckedEnqueue(temporary_add_vector_.get(0));
-                break;
-        }
-        return (ok_ = propagate());
+        assert i > -1;
+        ws.remove(i);
     }
 
     // Perform unit propagation. returns true upon success.
@@ -543,10 +546,6 @@ public class SatSolver {
 
         Clause clause;
         int blocker;
-
-        public Watcher() {
-            blocker = kUndefinedLiteral;
-        }
 
         public Watcher(final Clause cr, int l) {
             this.clause = cr;

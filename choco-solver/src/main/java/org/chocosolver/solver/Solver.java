@@ -38,6 +38,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -149,6 +150,7 @@ public class Solver implements Serializable {
 
 
     protected SatConstraint minisat;
+    protected NogoodConstraint nogoods;
     private Ibex ibex;
 
     /**
@@ -645,7 +647,7 @@ public class Solver implements Serializable {
 
     /**
      * Return a constraint embedding a minisat solver.
-     * It is highly recommanded that there is only once instance of this constraint in a solver.
+     * It is highly recommended that there is only once instance of this constraint in a solver.
      * So a call to this method will create and post the constraint if it does not exist.
      *
      * @return the minisat constraint
@@ -656,6 +658,21 @@ public class Solver implements Serializable {
             this.post(minisat);
         }
         return minisat;
+    }
+
+    /**
+     * Return a constraint embedding a nogood store (based on a sat solver).
+     * It is highly recommended that there is only once instance of this constraint in a solver.
+     * So a call to this method will create and post the constraint if it does not exist.
+     *
+     * @return the minisat constraint
+     */
+    public NogoodConstraint getNogoodStore() {
+        if (nogoods == null) {
+            nogoods = new NogoodConstraint(this);
+            this.post(nogoods);
+        }
+        return nogoods;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

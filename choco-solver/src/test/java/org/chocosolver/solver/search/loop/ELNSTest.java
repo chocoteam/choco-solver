@@ -31,12 +31,12 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodStoreFromRestarts;
 import org.chocosolver.solver.explanations.strategies.ExplainingCut;
 import org.chocosolver.solver.explanations.strategies.ExplainingObjective;
 import org.chocosolver.solver.explanations.strategies.RandomNeighborhood4Explanation;
 import org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch;
 import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -59,14 +59,13 @@ public class ELNSTest {
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));
         solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
 
-        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
+        SMF.nogoodRecordingFromRestarts(solver);
         solver.getSearchLoop().plugSearchMonitor(
                 new LargeNeighborhoodSearch(solver,
                         new SequenceNeighborhood(
                                 new ExplainingObjective(solver, 200, 123456L),
                                 new ExplainingCut(solver, 200, 123456L),
                                 new RandomNeighborhood4Explanation(solver, vars, 200, 123456L)), true));
-        solver.post(ngs);
         solver.set(IntStrategyFactory.random_bound(vars, seed));
 
 

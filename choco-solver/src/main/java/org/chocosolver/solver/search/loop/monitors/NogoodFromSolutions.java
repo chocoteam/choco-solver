@@ -26,42 +26,56 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.chocosolver.solver.search.loop.monitors;
+
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
+import org.chocosolver.solver.variables.IntVar;
+
 /**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 08/02/13
- * Time: 20:30
+ * Avoid exploring same solutions (useful with restart on solution)
+ * Beware :
+ * - Must be plugged as a monitor
+ * - Only works for integer variables
+ * <p>
+ * This can be used to remove similar/symmetric solutions
+ *
+ * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @since 20/06/13
  */
+public class NogoodFromSolutions implements IMonitorSolution {
 
-package org.chocosolver.solver.propagation;
+    final PropNogoods png;
+    final protected IntVar[] decisionVars;
+    final protected TIntList ps;
 
-import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.Variable;
-
-public enum NoPropagationEngine implements IPropagationEngine {
-
-    SINGLETON {
-        //***********************************************************************************
-        // METHODS
-        //***********************************************************************************
-
-        private final ContradictionException e = new ContradictionException();
-
-        @Override
-        public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-            /*throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
-                    "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
-                  "before starting resolution.");*/
-            throw e.set(cause, variable, message);
-        }
-
-        @Override
-        public ContradictionException getContradictionException() {
-            return e;
-            /*throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
-                    "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
-                  "before starting resolution.");*/
-        }
+    /**
+     * Avoid exploring same solutions (useful with restart on solution)
+     * Beware :
+     * - Must be posted as a constraint AND plugged as a monitor as well
+     * - Cannot be reified
+     * - Only works for integer variables
+     * <p>
+     * This can be used to remove similar/symmetric solutions
+     *
+     * @param vars all decision variables which define a solution (can be a subset of variables)
+     */
+    public NogoodFromSolutions(IntVar[] vars) {
+        decisionVars = vars;
+        png = vars[0].getSolver().getNogoodStore().getPropNogoods();
+        ps = new TIntArrayList();
     }
+
+    @Override
+    public void onSolution() {
+        int n = decisionVars.length;
+        ps.clear();
+        for (int i = 0; i < n; i++) {
+            ps.add(SatSolver.negated(png.Literal(decisionVars[i], decisionVars[i].getValue())));
+        }
+        png.addLearnt(ps.toArray());
+    }
+
 }

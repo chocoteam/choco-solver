@@ -29,7 +29,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodStoreFromRestarts;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -50,8 +49,7 @@ public class NogoodTest {
     public void test1() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
-        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
-        solver.post(ngs);
+        SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(30);
         sc.setAction(() -> {
@@ -59,8 +57,8 @@ public class NogoodTest {
             sc.reset();
         });
         solver.getSearchLoop().plugSearchMonitor(sc);
-        solver.getSearchLoop().plugSearchMonitor(ngs);
         SMF.limitTime(solver, 200000);
+//        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 29);
         Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 53);
@@ -70,8 +68,7 @@ public class NogoodTest {
     public void test2() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);
-        NogoodStoreFromRestarts ngs = new NogoodStoreFromRestarts(vars);
-        solver.post(ngs);
+        SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(32);
         sc.setAction(() -> {
@@ -79,7 +76,6 @@ public class NogoodTest {
             sc.reset();
         });
         solver.getSearchLoop().plugSearchMonitor(sc);
-        solver.getSearchLoop().plugSearchMonitor(ngs);
         SMF.limitTime(solver, 2000);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 75);

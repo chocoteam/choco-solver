@@ -33,6 +33,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -133,7 +134,7 @@ public class SearchMonitorFactory {
      * <br/>
      * <br/>
      * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(String)}, that runs the limit in a separated thread.</b>
-     * <p/>
+     * <p>
      * Based on {@code SearchMonitorFactory.convertInMilliseconds(String duration)}
      *
      * @param duration a String which states the duration like "WWd XXh YYm ZZs".
@@ -179,7 +180,7 @@ public class SearchMonitorFactory {
     /**
      * Convert a string which represents a duration. It can be composed of days, hours, minutes and seconds.
      * Examples:
-     * <p/>
+     * <p>
      * - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
      * - "2h30m": two hours and 30 minutes<p/>
      * - "30.5s": 30 seconds and 500 ms<p/>
@@ -248,4 +249,26 @@ public class SearchMonitorFactory {
     public static void restartAfterEachSolution(final Solver solver) {
         solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
     }
+
+    /**
+     * Record nogoods from solution, that is, anytime a solution is found, a nogood is produced to prevent from
+     * founding the same solution later during the search.
+     * <code>vars</code> are the decision variables (to reduce ng size).
+     *
+     * @param vars array of decision variables
+     */
+    public static void nogoodRecordingOnSolution(IntVar[] vars) {
+        vars[0].getSolver().plugMonitor(new NogoodFromSolutions(vars));
+    }
+
+    /**
+     * * Record nogoods from restart, that is, anytime the search restarts, a nogood is produced, based on the decision path, to prevent from
+     * scanning the same sub-search tree.
+     *
+     * @param solver the solver to observe
+     */
+    public static void nogoodRecordingFromRestarts(final Solver solver) {
+        solver.plugMonitor(new NogoodFromRestarts(solver));
+    }
+
 }

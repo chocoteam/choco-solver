@@ -270,7 +270,7 @@ public class ARLILExplanationEngineTest {
             solver.set(ISF.lexico_LB(vars));
 
             ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -290,7 +290,7 @@ public class ARLILExplanationEngineTest {
             solver.set(ISF.lexico_LB(vars));
 
             ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -310,7 +310,7 @@ public class ARLILExplanationEngineTest {
             }
 
             ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -331,7 +331,7 @@ public class ARLILExplanationEngineTest {
             solver.set(ISF.lexico_LB(vars));
 
             ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -358,7 +358,7 @@ public class ARLILExplanationEngineTest {
             solver.set(ISF.random_value(p, seed));
 
             ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
             solver.plugMonitor(cbj);
 
             Chatterbox.showShortStatistics(solver);
@@ -382,7 +382,7 @@ public class ARLILExplanationEngineTest {
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
         ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
         solver.plugMonitor(cbj);
 
         Chatterbox.showStatistics(solver);
@@ -408,7 +408,7 @@ public class ARLILExplanationEngineTest {
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
         ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
         solver.plugMonitor(cbj);
 
         Chatterbox.showStatistics(solver);
@@ -433,12 +433,21 @@ public class ARLILExplanationEngineTest {
                 ExplanationFactory.plugExpl(solver, false, false);
                 new ConflictBasedBackjumping(solver.getExplainer());
                 break;
-            case 3:
-                System.out.printf("arlil; ");
+            case 3: {
+                System.out.printf("arlil1; ");
                 ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-                CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver);
+                CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
                 solver.plugMonitor(cbj);
-                break;
+            }
+            break;
+            case 4: {
+                System.out.printf("arlil2; ");
+                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
+                CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, true);
+                solver.plugMonitor(cbj);
+            }
+            break;
+
         }
     }
 
@@ -446,7 +455,7 @@ public class ARLILExplanationEngineTest {
     public void testLS() {
         for (int m = 2; m < 24; m++) {
             System.out.printf("LS(%d)\n", m);
-            for (int a = 0; a < 4; a++) {
+            for (int a = 0; a < 5; a++) {
                 Solver solver = new Solver();
                 IntVar[] vars = VariableFactory.enumeratedArray("c", m * m, 0, m - 1, solver);
                 // Constraints
@@ -464,9 +473,8 @@ public class ARLILExplanationEngineTest {
 
                 configure(solver, a);
                 Chatterbox.showShortStatistics(solver);
-                SMF.limitTime(solver, "5m");
-                Assert.assertTrue(solver.findSolution());
-//                Chatterbox.printSolutions(solver);
+                SMF.limitTime(solver, "200s");
+                Assert.assertTrue(solver.findSolution()||solver.hasReachedLimit());
             }
         }
     }

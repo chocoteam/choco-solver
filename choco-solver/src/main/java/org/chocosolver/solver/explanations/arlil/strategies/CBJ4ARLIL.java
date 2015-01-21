@@ -26,13 +26,19 @@
  */
 package org.chocosolver.solver.explanations.arlil.strategies;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
 import org.chocosolver.solver.explanations.arlil.Reason;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.IntVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,15 +58,20 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
     // The ARLIL explanation engine
     private final ARLILExplanationEngine mArlile;
     private final Solver mSolver;
-    private final boolean saveCauses;
+    private final boolean saveCauses, nogoodFromConflict;
+    private final PropNogoods ngstore;
+    private TIntList ps;
 
     // The last reason computed, for user only
     private Reason lastReason;
 
-    public CBJ4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver) {
+    public CBJ4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver, boolean nogoodFromConflict) {
         this.mArlile = mArlile;
         this.mSolver = mSolver;
         this.saveCauses = mArlile.isSaveCauses();
+        this.nogoodFromConflict = nogoodFromConflict;
+        this.ngstore = mSolver.getNogoodStore().getPropNogoods();
+        this.ps = new TIntArrayList();
     }
 
     @Override
@@ -76,6 +87,10 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
         mSolver.getSearchLoop().overridePreviousWorld(upto);
 
         identifyRefutedDecision(upto);
+        if (this.nogoodFromConflict) {
+            extractNogoodFromReason(lastReason);
+        }
+
     }
 
     @Override
@@ -157,5 +172,18 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
      */
     public Reason getLastReason() {
         return lastReason;
+    }
+
+    private void extractNogoodFromReason(Reason reason) {
+        Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
+        ps.clear();
+        while (decision != RootDecision.ROOT) {
+            if (reason.getDecisions().get(decision.getWorldIndex())) {
+                assert decision.hasNext();
+                ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
+            }
+            decision = decision.getPrevious();
+        }
+        this.ngstore.addLearnt(ps.toArray());
     }
 }
