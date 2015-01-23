@@ -547,4 +547,9 @@ public class SearchLoop implements ISearchLoop {
     public SearchMonitorList getSMList() {
         return smList;
     }
+
+    @Override
+    public int getSearchWorldIndex(){
+        return searchWorldIndex;
+    }
 }

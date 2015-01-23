@@ -59,6 +59,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
 public class RuleStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleStore.class);
+    private static final boolean ENABLE_EARLY_STOP = false;
     private static final int NO_ENTRY = Integer.MIN_VALUE;
     static final int DM = 15;
     static final int BD = 7;
@@ -71,13 +72,19 @@ public class RuleStore {
     private final int[] vmRules;    // rules for variable modification
     private final TIntSet[] vmRemval;    // store value removal when necessary
     private Reason[] decRefut; // store refuted decisions
+    private boolean earlystop_;
+    private final boolean userfeedback;
+    private int swi; // search world index
+    private final Solver mSolver;
 
 
     private IntVar lastVar;
     private IEventType lastEvt;
     private int lastValue;
 
-    public RuleStore(Solver solver) {
+    public RuleStore(Solver solver, boolean userfeedback) {
+        this.mSolver = solver;
+        this.userfeedback = userfeedback;
         int _p = -1;
         for (Constraint c : solver.getCstrs()) {
             for (Propagator p : c.getPropagators()) {
@@ -96,7 +103,6 @@ public class RuleStore {
         }
         _v++;
 
-
         vmRules = new int[_v];
         Arrays.fill(vmRules, NO_ENTRY);
         vmRemval = new TIntSet[_v];
@@ -111,31 +117,34 @@ public class RuleStore {
      * @throws org.chocosolver.solver.exception.SolverException when the type of the variable is neither {@link Variable#BOOL} or {@link Variable#INT}.
      */
     public boolean match(final int idx, final IEventStore eventStore) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MATCH? < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
-                    eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
-        }
-
-        lastVar = eventStore.getVariable(idx);
-        lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
-        lastEvt = eventStore.getEventType(idx);
-
-        if (lastEvt != FULL_PROPAGATION) {
-            // the event is a variable modification
-            int lastVid = lastVar.getId();
-            int lastMask = vmRules[lastVid];
-
-            if (lastMask == DM) { // only to speed up the entire process
-                return true;
-            } else if (lastMask != NO_ENTRY) {
-                IntEventType ievt = (IntEventType) lastEvt;
-                return matchDomain(lastMask, lastVar, ievt, lastValue, eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
+        if (!earlystop_) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("MATCH? < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
+                        eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
             }
-            return false;
-        } else {
-            // Does it match a propagator activation known rule?
-            return paRules.get(lastValue);
+
+            lastVar = eventStore.getVariable(idx);
+            lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
+            lastEvt = eventStore.getEventType(idx);
+
+            if (lastEvt != FULL_PROPAGATION) {
+                // the event is a variable modification
+                int lastVid = lastVar.getId();
+                int lastMask = vmRules[lastVid];
+
+                if (lastMask == DM) { // only to speed up the entire process
+                    return true;
+                } else if (lastMask != NO_ENTRY) {
+                    IntEventType ievt = (IntEventType) lastEvt;
+                    return matchDomain(lastMask, lastVar, ievt, lastValue, eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
+                }
+                return false;
+            } else {
+                // Does it match a propagator activation known rule?
+                return paRules.get(lastValue);
+            }
         }
+        return false;
     }
 
     /**
@@ -247,6 +256,9 @@ public class RuleStore {
                     assert drr != null : "No reason for decision refutation :" + decision.toString();
                     reason.addAll(drr);
                 }
+                if (ENABLE_EARLY_STOP && !userfeedback) {
+                    earlystop_ = reason.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
+                }
             } else {
                 assert lastValue == eventStore.getFirstValue(idx) : "Wrong value loaded";
 
@@ -275,6 +287,9 @@ public class RuleStore {
         for (int k = vmRemval.length - 1; k >= 0; k--) {
             if (vmRemval[k] != null) vmRemval[k].clear();
         }
+        earlystop_ = false;
+        swi = mSolver.getSearchLoop().getSearchWorldIndex();
+
 //        //TODO: clear decRefute...
     }
 
@@ -388,14 +403,23 @@ public class RuleStore {
      * @param decision refuted decision
      * @param reason   the reason of the refutation
      */
-    public void storeDecisionRefutation(Decision decision, Reason reason) {
+    void storeDecisionRefutation(Decision decision, Reason reason) {
         int w = decision.getWorldIndex();
         if (w >= decRefut.length) {
             Reason[] tmp = decRefut;
             decRefut = new Reason[w + 10];
             System.arraycopy(tmp, 0, decRefut, 0, tmp.length);
         }
+        assert w >= reason.getDecisions().length();
         decRefut[w] = reason;
+    }
+
+    void moveDecisionRefutation(Decision decision, int to) {
+        assert to <= decision.getWorldIndex();
+        if (to < decision.getWorldIndex()) {
+            decRefut[to] = decRefut[decision.getWorldIndex()];
+            decRefut[decision.getWorldIndex()] = null;
+        }
     }
 
     /**
@@ -410,7 +434,6 @@ public class RuleStore {
         }
         return decRefut[decision.getWorldIndex()];
     }
-
 
     /**
      * Inform the rule store that the propagator cannot provide more rules in the future

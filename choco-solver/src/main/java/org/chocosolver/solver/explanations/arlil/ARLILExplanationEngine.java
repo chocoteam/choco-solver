@@ -55,12 +55,13 @@ public class ARLILExplanationEngine implements EventObserver {
 
     /**
      * Create an explanation engine based on a rule store
-     * @param solver a solver
+     *
+     * @param solver       a solver
      * @param userFeedback user feedback on: propagators in conflict are available for consultation
      */
     public ARLILExplanationEngine(Solver solver, boolean userFeedback) {
         eventStore = new ArrayEventStore(solver.getEnvironment());
-        ruleStore = new RuleStore(solver);
+        ruleStore = new RuleStore(solver, userFeedback);
         solver.set(this);
         this.saveCauses = userFeedback;
     }
@@ -101,15 +102,35 @@ public class ARLILExplanationEngine implements EventObserver {
     }
 
     /**
+     * Get the reason of a decision refutation
+     *
+     * @param decision a refuted decision
+     * @return the reason
+     */
+    Reason getDecisionRefutationReason(Decision decision) {
+        return ruleStore.getDecisionRefutationReason(decision);
+    }
+
+    /**
      * Store a decision refutation, for future reasoning.
      *
      * @param decision refuted decision
      * @param reason   the reason of the refutation
      */
-    public void storeDecisionRefutation(Decision decision, Reason reason) {
+    void storeDecisionRefutation(Decision decision, Reason reason) {
         ruleStore.storeDecisionRefutation(decision, reason);
     }
 
+    /**
+     * Move a decision reason from the old index to the new one.
+     * Required for DBT only and should be called with care!
+     *
+     * @param decision a decision
+     * @param to       the new index
+     */
+    void moveDecisionRefutation(Decision decision, int to) {
+        ruleStore.moveDecisionRefutation(decision, to);
+    }
 
     /**
      * This is the main reason why we create this class.

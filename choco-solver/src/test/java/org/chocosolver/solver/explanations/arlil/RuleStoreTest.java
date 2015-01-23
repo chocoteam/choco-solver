@@ -61,7 +61,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumFullDom() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(E);
 
@@ -80,7 +80,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumLow() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(E);
 
@@ -107,7 +107,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumUpp() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addUpperBoundRule(E);
 
@@ -134,7 +134,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumBound() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(E);
         rs.addUpperBoundRule(E);
@@ -163,7 +163,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumRem() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addRemovalRule(E, 8);
         rs.addRemovalRule(E, -2);
@@ -200,7 +200,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundFullDom() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(I);
 
@@ -220,7 +220,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundLow() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(I);
         int rmask = rs.getMask(I);
@@ -246,7 +246,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundUpp() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addUpperBoundRule(I);
         int rmask = rs.getMask(I);
@@ -273,7 +273,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundBound() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(I);
         rs.addUpperBoundRule(I);
@@ -301,7 +301,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundRem() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
         rs.addRemovalRule(I, 8);
         rs.addRemovalRule(I, -2);
 
@@ -325,13 +325,13 @@ public class RuleStoreTest {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testBoundRem2() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
         rs.matchDomain(RuleStore.RM, I, IntEventType.REMOVE, 7, -1, -1);
     }
 
     @Test(groups = "1s")
     public void testBoolFullDom() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(B);
         // simulates the test of an instantiation event
@@ -343,7 +343,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testDecRefutation() {
-        RuleStore rs = new RuleStore(solver);
+        RuleStore rs = new RuleStore(solver, true);
 
         IntStrategy is = ISF.lexico_LB(E, I, B);
         Decision d1 = null, d2 = null, d3 = null;
