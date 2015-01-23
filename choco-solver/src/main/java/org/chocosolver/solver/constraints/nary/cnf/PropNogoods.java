@@ -176,7 +176,7 @@ public class PropNogoods extends Propagator<IntVar> {
             int[] tmpi = var2pos;
             var2pos = new int[vid + 1];
             System.arraycopy(tmpi, 0, var2pos, 0, tmpi.length);
-            Arrays.fill(var2pos, tmpi.length, vid+1, NO_ENTRY);
+            Arrays.fill(var2pos, tmpi.length, vid + 1, NO_ENTRY);
         }
         if ((map = vv2lit[vid]) == null) {
             map = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
@@ -197,12 +197,12 @@ public class PropNogoods extends Propagator<IntVar> {
                 int[] tmp = lit2pos;
                 lit2pos = new int[var + 1];
                 System.arraycopy(tmp, 0, lit2pos, 0, tmp.length);
-                Arrays.fill(lit2pos, tmp.length, var+1, NO_ENTRY);
+                Arrays.fill(lit2pos, tmp.length, var + 1, NO_ENTRY);
 
                 tmp = lit2val;
                 lit2val = new int[var + 1];
                 System.arraycopy(tmp, 0, lit2val, 0, tmp.length);
-                Arrays.fill(lit2val, tmp.length, var+1, NO_ENTRY);
+                Arrays.fill(lit2val, tmp.length, var + 1, NO_ENTRY);
             }
 
 
@@ -271,17 +271,20 @@ public class PropNogoods extends Propagator<IntVar> {
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {
             SatSolver.Clause last = sat_.learnts.get(sat_.learnts.size() - 1);
-            SatSolver.Clause prev = sat_.learnts.get(sat_.learnts.size() - 2);
-            if (last.size() > 1 && last.size() < prev.size()) {
-                test_eq.clear();
-                for (int i = last.size() - 1; i >= 0; i--) {
-                    test_eq.set(last._g(i));
-                }
-                for (int i = prev.size() - 1; i >= 0; i--) {
-                    test_eq.clear(prev._g(i));
-                }
-                if (test_eq.cardinality() == 0) { // then last dominates prev
-                    sat_.detachLearnt(sat_.learnts.size() - 2);
+            test_eq.clear();
+            for (int i = last.size() - 1; i >= 0; i--) {
+                test_eq.set(last._g(i));
+            }
+            for (int c = sat_.learnts.size() - 2; c >= 0; c--) {
+                int s = test_eq.cardinality();
+                SatSolver.Clause prev = sat_.learnts.get(c);
+                if (last.size() > 1 && last.size() < prev.size()) {
+                    for (int i = prev.size() - 1; i >= 0; i--) {
+                        s -= test_eq.get(prev._g(i)) ? 1 : 0;
+                    }
+                    if (s == 0) { // then last dominates prev
+                        sat_.detachLearnt(c);
+                    }
                 }
             }
         }
