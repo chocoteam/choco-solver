@@ -150,7 +150,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
         e.add(xengine.getPropagatorActivation(this));
         if (d.getmType() == Deduction.Type.ValRem) {
             int i = 0;
-            while (i < vars.length && !vars[i].isInstantiatedTo(((ValueRemoval) d).getVal())) {
+            while (i < vars.length && (vars[i] == d.getVar() || !vars[i].isInstantiatedTo(((ValueRemoval) d).getVal()))) {
                 i++;
             }
             vars[i].explain(xengine, VariableState.DOM, e);
@@ -168,14 +168,18 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             value = 1 - var.getValue();
         }
         if (evt == IntEventType.REMOVE) {
-            int i = 0;
-            while (i < vars.length && !vars[i].isInstantiatedTo(value)) {
-                i++;
+            for (int i = 0, j = vars.length - 1; i <= j; i++, j--) {
+                if (vars[i] != var && vars[i].isInstantiatedTo(value)) {
+                    newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    return newrules;
+                }
+                if (vars[j] != var && vars[j].isInstantiatedTo(value)) {
+                    newrules |= ruleStore.addFullDomainRule(vars[j]);
+                    return newrules;
+                }
             }
-            newrules |= ruleStore.addFullDomainRule(vars[i]);
         } else {
             newrules |= super.why(ruleStore, var, evt, value);
-
         }
         return newrules;
     }
