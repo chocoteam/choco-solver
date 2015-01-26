@@ -65,9 +65,9 @@ public class ExpTest {
         s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
         // explanations
         if (expMode == 2) {
-            ExplanationFactory.CBJ.plugin(s, true);
+            ExplanationFactory.CBJ.plugin(s, false, false);
         } else if (expMode == 3) {
-            ExplanationFactory.DBT.plugin(s, true);
+            ExplanationFactory.DBT.plugin(s, false, false);
         }
         // logging and solution
         Chatterbox.showStatistics(s);

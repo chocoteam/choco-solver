@@ -37,7 +37,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.explanations.RecorderExplanationEngine;
-import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -424,42 +423,24 @@ public class ARLILExplanationEngineTest {
                 break;
             case 1: {
                 System.out.printf("arlil1; ");
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-                CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
-                solver.plugMonitor(cbj);
+                ExplanationFactory.CBJ.plugin(solver, false, false);
             }
             break;
             case 2: {
                 System.out.printf("arlil2; ");
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-                CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, true);
-                solver.plugMonitor(cbj);
+                ExplanationFactory.CBJ.plugin(solver, true, false);
             }
             break;
             case 3: {
                 System.out.printf("arlil3; ");
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-                DBT4ARLIL dbt = new DBT4ARLIL(ee, solver, false);
-                solver.plugMonitor(dbt);
+                ExplanationFactory.DBT.plugin(solver, false, false);
             }
             break;
             case 4: {
                 System.out.printf("arlil4; ");
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-                DBT4ARLIL dbt = new DBT4ARLIL(ee, solver, true);
-                solver.plugMonitor(dbt);
+                ExplanationFactory.DBT.plugin(solver, true, false);
             }
             break;
-            case 5:
-                System.out.printf("flatt; ");
-                ExplanationFactory.plugExpl(solver, true, false);
-                new ConflictBasedBackjumping(solver.getExplainer());
-                break;
-            case 6:
-                System.out.printf("unfla; ");
-                ExplanationFactory.plugExpl(solver, false, false);
-                new ConflictBasedBackjumping(solver.getExplainer());
-                break;
         }
     }
 

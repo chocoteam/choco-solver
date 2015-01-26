@@ -29,15 +29,9 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.store.BufferedEventStore;
-import org.chocosolver.solver.explanations.store.EventConsumer;
-import org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping;
-import org.chocosolver.solver.explanations.strategies.DynamicBacktracking;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
+import org.chocosolver.solver.explanations.arlil.CBJ4ARLIL;
+import org.chocosolver.solver.explanations.arlil.DBT4ARLIL;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -49,40 +43,23 @@ import java.util.concurrent.Executors;
  */
 public enum ExplanationFactory {
 
-    NONE {
+
+    NONE{
         @Override
-        public void plugin(Solver solver, boolean flattened) {
-            solver.set(new ExplanationEngine(solver));
+        public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
+            //DO NOTHING
         }
     },
-    /*
-     * Active explanations, but do not interact with search.
-     */
-    /*
-    SILENT {
-        @Override
-        public void plugin(Solver solver, boolean flattened) {
-            plugExpl(solver, flattened);
-        }
-    },*/
-/*
-    BEWARE: not accessible anymore since it needs to be called just after a restart, otherwise, explanations are wrong.
-
-    LAZY {
-        @Override
-        public void plugin(Solver solver, boolean flattened) {
-            solver.set(new LazyExplanationEngine(solver));
-        }
-    },*/
     /**
      * add a Conflict-based jumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
      */
     CBJ {
         @Override
-        public void plugin(Solver solver, boolean flattened) {
-            plugExpl(solver, flattened, false);
-            new ConflictBasedBackjumping(solver.getExplainer());
+        public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, userFeedbackOn);
+            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, nogoodsOn);
+            solver.plugMonitor(cbj);
         }
     },
     /**
@@ -91,90 +68,20 @@ public enum ExplanationFactory {
      */
     DBT {
         @Override
-        public void plugin(Solver solver, boolean flattened) {
-            plugExpl(solver, flattened, false);
-            new DynamicBacktracking(solver.getExplainer());
+        public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, userFeedbackOn);
+            DBT4ARLIL dbt = new DBT4ARLIL(ee, solver, nogoodsOn);
+            solver.plugMonitor(dbt);
         }
     };
 
     /**
      * Plug explanations into coe<code>solver</code>.
-     *  @param solver    the solver to observe
-     * @param flattened should explanations be flattened?
+     *
+     * @param solver         the solver to observe
+     * @param nogoodsOn      extract nogoods from conflict
+     * @param userFeedbackOn user feedback on: propagators in conflict are available for consultation
      */
-    public abstract void plugin(Solver solver, boolean flattened);
+    public abstract void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn);
 
-
-    /**
-     * Plug an explanation engine to the solver
-     * @param solver solver to explain
-     * @param flattened whether or not the explanation engine should flatten explanation during computation
-     * @param thread (unsafe) should explanations be computed in a thread
-     */
-    public static void plugExpl(Solver solver, boolean flattened, boolean thread) {
-        assert solver.getExplainer() == null || !solver.getExplainer().isActive() : "Explanations are already turn on!";
-        ExplanationEngine e;
-        if (flattened) {
-            e = new FlattenedRecorderExplanationEngine(solver);
-        } else {
-            e = new RecorderExplanationEngine(solver);
-        }
-        if (thread) {
-            final BufferedEventStore eventStore = new BufferedEventStore(e);
-            e = new ThreadExplanationEngine(solver, eventStore);
-            final EventConsumer[] eventCons = new EventConsumer[1];
-            final ExecutorService executor = Executors.newSingleThreadExecutor();
-            solver.plugMonitor(new IMonitorInitialize() {
-                @Override
-                public void beforeInitialize() {
-                    eventCons[0] = new EventConsumer(eventStore);
-                    executor.submit(eventCons[0]);
-                }
-
-                @Override
-                public void afterInitialize() {
-
-                }
-            });
-            solver.plugMonitor(new IMonitorClose() {
-                @Override
-                public void beforeClose() {
-                    eventCons[0].kill();
-                    executor.shutdownNow();
-                }
-
-                @Override
-                public void afterClose() {
-
-                }
-            });
-
-        }
-        solver.set(e);
-    }
-
-//    /**
-//     * add a path-repair policy on contradiction to an explained solver.
-//     * It backtracks up to a random decision involved in the explanation.
-//     *
-//     * @param solver    solver which is explained
-//     * @param flattened should explanations be flattened?
-//     */
-//    public static void path_repair(Solver solver, long seed, boolean flattened) {
-//        plugExpl(solver, flattened);
-//        new DynamicBacktracking(solver.getExplainer(), new RandomDecisionJumper(seed));
-//    }
-//
-//    /**
-//     * add a path-repair policy on contradiction to an explained solver.
-//     * It backtracks up to a decision involved in the explanation, using <code>decisionJumper</code>.
-//     *
-//     * @param solver         solver which is explained
-//     * @param decisionJumper a specific algorithm to decide which decision to jump to.
-//     * @param flattened      should explanations be flattened?
-//     */
-//    public static void path_repair(Solver solver, IDecisionJumper decisionJumper, boolean flattened) {
-//        plugExpl(solver, flattened);
-//        new DynamicBacktracking(solver.getExplainer(), decisionJumper);
-//    }
 }

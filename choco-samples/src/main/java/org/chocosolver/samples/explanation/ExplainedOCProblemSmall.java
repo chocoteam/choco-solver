@@ -71,7 +71,7 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
 
     @Override
     public void solve() {
-        ExplanationFactory.CBJ.plugin(solver, false);
+        ExplanationFactory.CBJ.plugin(solver, false, false);
 
         if (solver.findSolution()) {
             do {
