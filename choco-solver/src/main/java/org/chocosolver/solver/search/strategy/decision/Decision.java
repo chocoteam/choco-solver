@@ -113,14 +113,23 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
     }
 
     /**
+     * Return the number of branches left to try
+     * @return number of tries left
+     */
+    public int triesLeft() {
+        return 2 - branch;
+    }
+
+    /**
      * Should this decision be a one-shot decision, non refutable.
+     *
      * @param once a boolean
      */
     public void once(boolean once) {
         this.once = once;
     }
 
-    protected void set(V var){
+    protected void set(V var) {
         this.var = var;
         branch = 0;
         this.once = false;
@@ -183,7 +192,7 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
         } else if (branch == 2) {
             e.add(xengine.explain(getNegativeDeduction(xengine)));
         } else {
-            throw new SolverException("Cannot explain a decision which has not been applied or refuted: "+ this);
+            throw new SolverException("Cannot explain a decision which has not been applied or refuted: " + this);
         }
     }
 

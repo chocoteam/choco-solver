@@ -59,7 +59,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
 public class RuleStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleStore.class);
-    private static final boolean ENABLE_EARLY_STOP = false;
+    private static final boolean ENABLE_EARLY_STOP = true;
     private static final int NO_ENTRY = Integer.MIN_VALUE;
     static final int DM = 15;
     static final int BD = 7;
@@ -429,9 +429,7 @@ public class RuleStore {
      * @return a reason
      */
     Reason getDecisionRefutationReason(Decision decision) {
-        if (decision.hasNext()) {
-            throw new SolverException(decision.toString() + "is not explained yet");
-        }
+        assert decision.triesLeft() < 2 : decision.toString() + "is not explained yet";
         return decRefut[decision.getWorldIndex()];
     }
 

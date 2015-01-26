@@ -24,16 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil.strategies;
+package org.chocosolver.solver.explanations.arlil;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
-import org.chocosolver.solver.explanations.arlil.Reason;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -56,14 +55,14 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
     private static final Logger LOGGER = LoggerFactory.getLogger(CBJ4ARLIL.class);
 
     // The ARLIL explanation engine
-    private final ARLILExplanationEngine mArlile;
-    private final Solver mSolver;
+    final ARLILExplanationEngine mArlile;
+    final Solver mSolver;
     private final boolean saveCauses, nogoodFromConflict;
     private final PropNogoods ngstore;
     private TIntList ps;
 
     // The last reason computed, for user only
-    private Reason lastReason;
+    Reason lastReason;
 
     public CBJ4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver, boolean nogoodFromConflict) {
         this.mArlile = mArlile;
@@ -82,15 +81,15 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("CBJ4ARLIL>> Reason of " + cex.toString() + " is " + lastReason);
         }
-
-        int upto = compute(mSolver.getEnvironment().getWorldIndex());
-        mSolver.getSearchLoop().overridePreviousWorld(upto);
-
-        identifyRefutedDecision(upto);
         if (this.nogoodFromConflict) {
             extractNogoodFromReason(lastReason);
         }
 
+        int upto = compute(mSolver.getEnvironment().getWorldIndex());
+        assert upto > 0;
+        mSolver.getSearchLoop().overridePreviousWorld(upto);
+
+        identifyRefutedDecision(upto, cex.c);
     }
 
     @Override
@@ -134,7 +133,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
      *
      * @param nworld index of the world to backtrack to
      */
-    void identifyRefutedDecision(int nworld) {
+    void identifyRefutedDecision(int nworld, ICause cause) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
             dec = dec.getPrevious();
@@ -162,6 +161,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
      * @return the number of world to backtrack to.
      */
     int compute(int currentWorldIndex) {
+        assert currentWorldIndex >= lastReason.getDecisions().length();
         return currentWorldIndex - lastReason.getDecisions().previousSetBit(lastReason.getDecisions().length());
     }
 
@@ -180,6 +180,7 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
         while (decision != RootDecision.ROOT) {
             if (reason.getDecisions().get(decision.getWorldIndex())) {
                 assert decision.hasNext();
+//                System.out.printf("%s = %d,", decision.getDecisionVariable(), (Integer) decision.getDecisionValue());
                 ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
             }
             decision = decision.getPrevious();
