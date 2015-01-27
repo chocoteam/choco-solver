@@ -14,7 +14,7 @@ NEXT MILESTONE
 - add DBT for explanations
 - Improve explanation engine
 
-Bug fixes: #265
+Bug fixes: #265, #247, #264, #254
 
 3.3.0 - 04 Dec 2014
 -------------------

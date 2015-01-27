@@ -322,10 +322,11 @@ public class SearchLoop implements ISearchLoop {
         try {
             solver.getEngine().propagate();
         } catch (ContradictionException e) {
-            this.env.worldPop();
-            solver.setFeasible(FALSE);
             solver.getEngine().flush();
+            solver.setFeasible(FALSE);
             interrupt(MSG_INIT);
+            smList.onContradiction(e);
+            this.env.worldPop();
             return;
         }
         this.env.worldPush(); // push another wolrd to recover the state after initial propagation

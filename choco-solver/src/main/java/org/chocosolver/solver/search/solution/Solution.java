@@ -28,13 +28,17 @@
  */
 package org.chocosolver.solver.search.solution;
 
+import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,9 +53,12 @@ import java.util.HashMap;
  */
 public class Solution {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Solution.class);
+
     HashMap<IntVar, Integer> intmap = new HashMap<>();
     HashMap<RealVar, double[]> realmap = new HashMap<>();
     HashMap<SetVar, int[]> setmap = new HashMap<>();
+    TIntHashSet dvars = new TIntHashSet(16, .5f, -1);
     boolean empty = true;
 
     public Solution() {
@@ -64,30 +71,46 @@ public class Solution {
      * @param solver a solver
      */
     public void record(Solver solver) {
-        empty = false;
+        if (empty) {
+            Variable[] _dvars = solver.getStrategy().getVariables();
+            for (int i = 0; i < _dvars.length; i++) {
+                dvars.add(_dvars[i].getId());
+            }
+            empty = false;
+        }
+        boolean warn = false;
         intmap.clear();
         realmap.clear();
         setmap.clear();
         Variable[] vars = solver.getVars();
         for (int i = 0; i < vars.length; i++) {
             int kind = vars[i].getTypeAndKind() & Variable.KIND;
-            assert (vars[i].isInstantiated()) :
-                    vars[i] + " is not instantiated when recording a solution.";
-            switch (kind) {
-                case Variable.INT:
-                case Variable.BOOL:
-                    IntVar v = (IntVar) vars[i];
-                    intmap.put(v, v.getValue());
-                    break;
-                case Variable.REAL:
-                    RealVar r = (RealVar) vars[i];
-                    realmap.put(r, new double[]{r.getLB(), r.getUB()});
-                    break;
-                case Variable.SET:
-                    SetVar s = (SetVar) vars[i];
-                    setmap.put(s, s.getValues());
-                    break;
+            if (!vars[i].isInstantiated()) {
+                if (dvars.contains(vars[i].getId())) {
+                    throw new SolverException(vars[i] + " is not instantiated when recording a solution.");
+                } else {
+                    warn = true;
+                }
+            } else {
+                switch (kind) {
+                    case Variable.INT:
+                    case Variable.BOOL:
+                        IntVar v = (IntVar) vars[i];
+                        intmap.put(v, v.getValue());
+                        break;
+                    case Variable.REAL:
+                        RealVar r = (RealVar) vars[i];
+                        realmap.put(r, new double[]{r.getLB(), r.getUB()});
+                        break;
+                    case Variable.SET:
+                        SetVar s = (SetVar) vars[i];
+                        setmap.put(s, s.getValues());
+                        break;
+                }
             }
+        }
+        if (warn && LOGGER.isWarnEnabled()) {
+            LOGGER.warn("Some non decision variables are not instantiated in the current solution.");
         }
     }
 
@@ -95,7 +118,7 @@ public class Solution {
      * Set all variables to their respective value in the solution
      * Throws an exception is this empties a domain (i.e. this domain does not contain
      * the solution value)
-     * <p/>
+     * <p>
      * BEWARE: A restart might be required so that domains contain the solution values
      */
     public void restore() throws ContradictionException {
@@ -135,39 +158,48 @@ public class Solution {
      * Get the value of variable v in this solution
      *
      * @param v IntVar (or BoolVar)
-     * @return the value of variable v in this solution
+     * @return the value of variable v in this solution, or null if the variable is not instantiated in the solution
      */
-    public int getIntVal(IntVar v) {
+    public Integer getIntVal(IntVar v) {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        return intmap.get(v);
+        if (intmap.containsKey(v)) {
+            return intmap.get(v);
+        } else {
+            return null;
+        }
     }
 
     /**
      * Get the value of variable s in this solution
      *
      * @param s SetVar
-     * @return the value of variable s in this solution
+     * @return the value of variable s in this solution, or null if the variable is not instantiated in the solution
      */
     public int[] getSetVal(SetVar s) {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        return setmap.get(s);
+        if (setmap.containsKey(s)) {
+            return setmap.get(s);
+        } else
+            return null;
     }
 
     /**
      * Get the bounds of r in this solution
      *
      * @param r RealVar
-     * @return the bounds of r in this solution
+     * @return the bounds of r in this solution, or null if the variable is not instantiated in the solution
      */
     public double[] getRealBounds(RealVar r) {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        return realmap.get(r);
+        if (realmap.containsKey(r)) {
+            return realmap.get(r);
+        } else return null;
     }
 
     /**

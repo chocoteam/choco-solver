@@ -38,8 +38,7 @@ import org.chocosolver.solver.search.restart.IRestartStrategy;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public final class RestartManager implements IMonitorInitialize, IMonitorOpenNode,
-        IMonitorSolution, IMonitorRestart {
+public final class RestartManager implements IMonitorInitialize, IMonitorOpenNode, IMonitorRestart {
 
     final IRestartStrategy restartStrategy; // restart strategy -- how restarts are applied
 
@@ -87,14 +86,6 @@ public final class RestartManager implements IMonitorInitialize, IMonitorOpenNod
     public void afterOpenNode() {
     }
 
-    @Override
-    public void onSolution() {
-        //reset the restart limit to allow diversification
-//		//I notice that solutions appear sometimes in cluster, at least for shop-scheduling.
-//		//should it be optional ?
-        restartStrategyLimit.overrideLimit(restartStrategyLimit.getLimitValue() + restartCutoff);
-    }
-
 
     @Override
     public void beforeRestart() {
@@ -103,8 +94,6 @@ public final class RestartManager implements IMonitorInitialize, IMonitorOpenNod
     @Override
     public void afterRestart() {
         if (restartFromStrategyCount >= restartLimit) {
-            //LOGGER.debug("- Limit reached: stop restarting");
-            //searchLoop.setRestartAfterEachSolution(false);
             restartStrategyLimit.overrideLimit(Long.MAX_VALUE);
         }
     }

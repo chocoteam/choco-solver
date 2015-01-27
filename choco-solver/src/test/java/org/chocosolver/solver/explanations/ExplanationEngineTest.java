@@ -770,11 +770,11 @@ public class ExplanationEngineTest {
     public void test01() {
         int n = 6;
         int m = 10;
-        Solver s1 = test(n,m,1);
-        Solver s2 = test(n,m,2);
-        Solver s3 = test(n,m,3);
-        Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
-        Assert.assertEquals(s1.getMeasures().getSolutionCount(),s3.getMeasures().getSolutionCount());
+        Solver s1 = test(n, m, 1);
+        Solver s2 = test(n, m, 2);
+        Solver s3 = test(n, m, 3);
+        Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
+        Assert.assertEquals(s1.getMeasures().getSolutionCount(), s3.getMeasures().getSolutionCount());
         Assert.assertTrue(s1.getMeasures().getNodeCount() >= s2.getMeasures().getNodeCount());
         Assert.assertTrue(s2.getMeasures().getNodeCount() >= s3.getMeasures().getNodeCount());
     }
@@ -796,6 +796,44 @@ public class ExplanationEngineTest {
         Chatterbox.showSolutions(s);
         s.findAllSolutions();
         return s;
+    }
+
+    @Test(groups = "1s")
+    public void aTest() {
+
+        Solver s = new Solver();
+
+        IntVar one = VF.fixed(1, s);
+        IntVar three = VF.fixed(3, s);
+        IntVar four = VF.fixed(4, s);
+        IntVar six = VF.fixed(6, s);
+        IntVar seven = VF.fixed(7, s);
+
+        IntVar x = VF.integer("x", 1, 10, s);
+        IntVar y = VF.integer("y", 1, 10, s);
+
+        Constraint xGE3 = ICF.arithm(x, ">=", three);
+        Constraint xLE4 = ICF.arithm(x, "<=", four);
+
+        Constraint yGE6 = ICF.arithm(y, ">=", six);
+        Constraint yLE7 = ICF.arithm(y, "<=", seven);
+
+        s.post(xGE3);
+        s.post(xLE4);
+        s.post(yGE6);
+        s.post(yLE7);
+
+        Constraint xE1 = ICF.arithm(x, "=", one);
+        s.post(xE1);
+
+        ExplanationEngine ee = new ExplanationEngine(s, true);
+        ConflictBackJumping cbj = new ConflictBackJumping(ee, s, false);
+        s.plugMonitor(cbj);
+        Chatterbox.showDecisions(s);
+        Assert.assertFalse(s.findSolution());
+        // If the problem has no solution, the end-user explanation can be retrieved
+        System.out.println(cbj.getLastExplanation());
+        Assert.assertEquals(cbj.getLastExplanation().nbCauses(), 3);
     }
 
 }

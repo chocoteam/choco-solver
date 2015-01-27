@@ -198,9 +198,11 @@ to ensure there is no pending events.
 Recording solutions
 ===================
 
-Choco |version| requires each solution to be fully instantiated, i.e. every variable must be fixed.
-Otherwise, an exception will be thrown if assertions are turned on (when ``-ea`` is added to the JVM parameters).
-Choco |version| includes several ways to record solutions.
+Choco |version| requires that each decision variable (that is, which is declared in the search strategy) is instantiated in a solution.
+Otherwise, an exception will be thrown.
+Non decision variables can be uninstantiated in a solution, however, if WARN logging is enable, a trace is shown to inform the user.
+Choco |version| includes several ways to record solutions, the recommended way is to plug a `ISolutionMonitor` in.
+See :ref:`44_monitors_label` for more details.
 
 Solution storage
 ----------------

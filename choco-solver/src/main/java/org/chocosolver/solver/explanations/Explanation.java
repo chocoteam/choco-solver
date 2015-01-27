@@ -30,6 +30,7 @@ import gnu.trove.set.hash.THashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Set;
@@ -155,5 +156,14 @@ public class Explanation {
     public void clear() {
         causes.clear();
         decisions.clear();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder("Explanation");
+        if(saveCauses){
+            st.append(Arrays.toString(causes.toArray()));
+        }
+        return st.toString();
     }
 }
