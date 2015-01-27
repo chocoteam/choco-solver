@@ -26,54 +26,93 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-
-import java.util.Set;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.IntCircularQueue;
 
 /**
- * A toolbox dedicated to explained neighbors
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 03/07/13
+ * @since 16/07/13
  */
-enum ExplanationToolbox {
-    ;
+public class PGN4Explanation extends PropagationGuidedNeighborhood implements IMonitorUpBranch {
 
-    /**
-     * Extract decision from the explanation
-     *
-     * @param explanation the explanation
-     * @param decisions   a set of decisions
-     */
-    protected static void extractDecision(Explanation explanation, Set<Deduction> decisions) {
-        decisions.clear();
-        if (explanation.nbDeductions() > 0) {
-            for (int d = 0; d < explanation.nbDeductions(); d++) {
-                Deduction dec = explanation.getDeduction(d);
-                if (dec.getmType() == Deduction.Type.DecLeft) {
-                    decisions.add(dec);
-                }
-            }
+    IntCircularQueue queue;
+    private Decision duplicator;
+    private Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
+
+
+    public PGN4Explanation(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
+        super(solver, vars, seed, fgmtSize, listSize);
+        queue = new IntCircularQueue(vars.length);
+    }
+
+    @Override
+    public void recordSolution() {
+        super.recordSolution();
+        if (duplicator == null) {
+            duplicator = mSolver.getSearchLoop().getLastDecision().duplicate();
+        }
+    }
+
+    @Override
+    public void restrictLess() {
+        last = null;
+        super.restrictLess();
+    }
+
+    @Override
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
+        queue.clear();
+        mSolver.getEnvironment().worldPush();
+        super.fixSomeVariables(cause);
+        mSolver.getEnvironment().worldPop();
+        while (!queue.isEmpty()) {
+            int id = queue.pollFirst();
+            FastDecision d = (FastDecision) duplicator.duplicate();
+            d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
+            last = d;
+            imposeDecisionPath(mSolver, d);
+        }
+    }
+
+    @Override
+    protected void impose(int id, ICause cause) throws ContradictionException {
+        super.impose(id, cause);
+        queue.addLast(id);
+    }
+
+    @Override
+    public void beforeUpBranch() {
+    }
+
+    @Override
+    public void afterUpBranch() {
+        // we need to catch up that case when the sub tree is closed and this imposes a fragment
+        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
+            mSolver.getSearchLoop().restart();
         }
     }
 
     /**
-     * Simutate a decision path, with backup
+     * Simulate a decision path, with backup
      *
      * @param aSolver  the concerned solver
      * @param decision the decision to apply
      * @throws ContradictionException
      */
-    protected static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
         IEnvironment environment = aSolver.getEnvironment();
         ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
         // 1. simulates open node
@@ -87,14 +126,5 @@ enum ExplanationToolbox {
         objectiveManager.apply(decision);
         objectiveManager.postDynamicCut();
 //        aSolver.getEngine().propagate();
-    }
-
-    protected static Decision mimic(Decision dec) {
-        Decision clone = dec.duplicate();
-        boolean forceNext = !dec.hasNext();
-        if (forceNext) {
-            clone.buildNext();
-        }
-        return clone;
     }
 }

@@ -34,10 +34,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -314,12 +310,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     @Override
     public void onUpdate(IntVar var, IEventType evt) {
         affected.set(v2i.get(var.getId()));
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        throw new SolverException("Activity does not modify variables on IVariableMonitor.onUpdate.\n" +
-                "So it cannot explain value removals.");
     }
 
 

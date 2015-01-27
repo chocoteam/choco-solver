@@ -26,17 +26,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.lns.neighbors.ANeighbor;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
@@ -44,14 +48,16 @@ import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.StatisticUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Random;
 
 /**
  * a specific neighborhood for LNS based on the explanation of the objective variable.
- * <p/>
+ * <p>
  * This neightborhood is specific in the sense that it needs to compute explanation on a solution.
  * Furthermore, the fixSomeVariables method creates and applies decision, so that the explanation recorder can infer.
  * <br/>
@@ -62,7 +68,8 @@ import java.util.*;
 public class ExplainingObjective extends ANeighbor implements IMonitorInitPropagation, IMonitorUpBranch {
 
     protected ExplanationEngine mExplanationEngine;
-    private ObjectiveManager<IntVar,Integer> om;
+    protected RuleStore mRuleStore;
+    private ObjectiveManager<IntVar, Integer> om;
     private IntVar objective;
     private int LB, UB;
     protected final Random random;
@@ -86,9 +93,9 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
     private Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
 
     // TEMPORARY DATA STRUCTURES
-    private final ArrayList<Deduction> tmpDeductions;
+    private final TIntArrayList tmpDeductions;
 
-    private final Set<Deduction> tmpValueDeductions;
+    private final TIntSet tmpValueDeductions;
 
     // FOR RANDOM
     private double nbFixedVariables = 0d; // number of decision to fix in the set of decisions explaining the cut
@@ -101,10 +108,8 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         this.random = new Random(seed);
         this.level = level;
 
-        if (!(aSolver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
-            aSolver.set(new LazyExplanationEngineFromRestart(aSolver));
-        }
         this.mExplanationEngine = aSolver.getExplainer();
+        assert mExplanationEngine != null;
 
         path = new ArrayList<>(16);
         valueDecisions = new ArrayList<>(16);
@@ -115,11 +120,9 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         refuted = new BitSet(16);
 
         // TEMPORARY DATA STRUCTURES
-        tmpDeductions = new ArrayList<>(16);
-        tmpValueDeductions = new HashSet<>(16);
+        tmpDeductions = new TIntArrayList();
+        tmpValueDeductions = new TIntHashSet(16);
 
-
-		aSolver.plugMonitor(this);
         notFrozen = new BitSet(16);
         geo4cluster = new GeometricalRestartStrategy(1, 1.2);
         mSolver.plugMonitor(this);
@@ -137,15 +140,15 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         unrelated.clear();
 
         // 2. get anti domain of the objective variable
-        readAntiDomain();
+        readRemovedValues();
 
         // 3. re-build the clusters if required
         buildCluster();
 
-        // 4. store the decisions related to the objective variable
         for (int i = 0; i < tmpDeductions.size(); i++) {
-            valueDecisions.add(((BranchingDecision) tmpDeductions.get(i)).getDecision());
+            valueDecisions.add(null);
         }
+
 
         // 5. compute the first fragment to apply
         clonePath();
@@ -185,7 +188,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
         // add the first refuted decisions
         int first = notFrozen.nextSetBit(0);
-        for (int i = (first>-1?refuted.nextSetBit(first):first); i > -1; i = refuted.nextSetBit(i + 1)) {
+        for (int i = (first > -1 ? refuted.nextSetBit(first) : first); i > -1; i = refuted.nextSetBit(i + 1)) {
             notFrozen.clear(i);
         }
         // add unrelated decisions
@@ -198,7 +201,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
             if (path.get(id).hasNext()) {
                 last = path.get(id).duplicate();
                 if (refuted.get(id)) last.buildNext();
-                ExplanationToolbox.imposeDecisionPath(mSolver, last);
+                imposeDecisionPath(mSolver, last);
             }
         }
     }
@@ -222,12 +225,16 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         // nothing to do
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void afterInitialPropagation() {
         om = mExplanationEngine.getSolver().getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
+        if (!objective.hasEnumeratedDomain()) {
+            mRuleStore = new RuleStore(mSolver, false);
+        }
     }
 
     @Override
@@ -263,66 +270,146 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
     /**
      * Iterate over removed values to explain the objective variable state
      */
-    private void readAntiDomain() {
-        AntiDomain adObj = mExplanationEngine.getRemovedValues(objective);
-        DisposableValueIterator it = adObj.getValueIterator();
+    private void readRemovedValues() {
         clusters.add(0);
+        if (objective.hasEnumeratedDomain()) {
+            readRemovedValuesE();
+        } else {
+            readRemovedValuesB();
+        }
+    }
+
+    /**
+     * Iterate over removed values to explain the objective variable state
+     */
+    private void readRemovedValuesE() {
         // 2'. compute bounds to avoid explaining the whole domain
         boolean ismax = om.getPolicy() == ResolutionPolicy.MAXIMIZE;
         int far, near;
         if (ismax) {
             far = UB;
             near = objective.getValue() + 1;
-            if (far == objective.getValue()) {
-                return;
+            if (far != objective.getValue()) {
+                // explain why obj cannot take a smaller value: from far to near
+                while (far >= near) {
+                    explainValueE(far);
+                    far--;
+                }
             }
         } else {
             far = LB;
             near = objective.getValue() - 1;
-            if (far == objective.getValue()) {
-                return;
+            if (far != objective.getValue()) {
+                // explain why obj cannot take a smaller value: from far to near
+                while (far <= near) {
+                    explainValueE(far);
+                    far++;
+                }
             }
         }
-
-
-        int value;
-        if (ismax) {
-            // explain why obj cannot take a smaller value: from far to near
-            if (it.hasNext()) {
-                do {
-                    value = it.next();
-                } while (it.hasNext() && (value < near || value > far)); // skip {LBs} and {UBs before init propag}
-                do {
-                    explainValue(value);
-                } while (it.hasNext() && (value = it.next()) >= near);
-            }
-        } else {
-            // explain why obj cannot take a smaller value: from far to near
-            if (it.hasNext()) {
-                do {
-                    value = it.next();
-                } while (it.hasNext() && value < far);// skip {LBs before init propag}
-                do {
-                    explainValue(value);
-                } while (it.hasNext() && (value = it.next()) <= near);
-            }
-        }
-        it.dispose();
     }
-
 
     /**
      * Explain the removal of value from the objective variable
      *
      * @param value value to explain
      */
-    private void explainValue(int value) {
-        tmpValueDeductions.clear();
+    private void explainValueE(int value) {
 
-        Explanation explanation = new Explanation();
-        objective.explain(mExplanationEngine, VariableState.REM, value, explanation);
-        explanation = mExplanationEngine.flatten(explanation);
-        ExplanationToolbox.extractDecision(explanation, tmpValueDeductions);
+        // mimic explanation computation
+        RuleStore rs = mExplanationEngine.getRuleStore();
+        rs.clear();
+        Explanation explanation = new Explanation(false);
+        rs.addRemovalRule(objective, value);
+        IEventStore es = mExplanationEngine.getEventStore();
+        int i = es.getSize() - 1;
+
+        while (i > -1) {
+            if (rs.match(i, es)) {
+                rs.update(i, es, explanation);
+            }
+            i--;
+        }
+        for (int b = explanation.getDecisions().nextSetBit(0); b >= 0; b = explanation.getDecisions().nextSetBit(b + 1)) {
+            tmpValueDeductions.add(b);
+        }
+
+        assert tmpValueDeductions.size() > 0 : "E(" + value + ") is EMPTY";
+        tmpValueDeductions.removeAll(tmpDeductions);
+        //        assert tmpDeductions.size() == 0 || correct : "E(" + value + ") not INCLUDED in previous ones";
+        if (tmpDeductions.addAll(tmpValueDeductions)) {
+            clusters.add(tmpDeductions.size());
+        }
+    }
+
+
+    /**
+     * Iterate over removed values to explain the objective variable state
+     */
+    private void readRemovedValuesB() {
+        clusters.add(0);
+        // 2'. compute bounds to avoid explaining the whole domain
+        boolean ismax = om.getPolicy() == ResolutionPolicy.MAXIMIZE;
+        mRuleStore.clear();
+        IEventStore es = mExplanationEngine.getEventStore();
+        int i = 0;
+        int far, near;
+        if (ismax) {
+            far = UB;
+            near = objective.getValue() + 1;
+            if (far != objective.getValue()) {
+                mRuleStore.addUpperBoundRule(objective);
+                while (i < es.getSize()) {
+                    if (mRuleStore.match(i, es)) {
+                        int val = es.getFirstValue(i);
+                        int old = es.getSecondValue(i);
+                        while (far <= near && far > val && far <= old) {
+                            explainValueB(far--, es, i);
+                        }
+                        if (far == near) return;
+                    }
+                    i++;
+                }
+            }
+
+        } else {
+            far = LB;
+            near = objective.getValue() - 1;
+            if (far != objective.getValue()) {
+                mRuleStore.addLowerBoundRule(objective);
+                while (i < es.getSize()) {
+                    if (mRuleStore.match(i, es)) {
+                        int val = es.getFirstValue(i);
+                        int old = es.getSecondValue(i);
+                        while (far <= near && far < val && far >= old) {
+                            explainValueB(far++, es, i);
+                        }
+                        if (far == near) return;
+                    }
+                    i++;
+                }
+            }
+        }
+    }
+
+
+    private void explainValueB(int value, IEventStore es, int i) {
+
+        // mimic explanation computation
+        RuleStore rs = mExplanationEngine.getRuleStore();
+        rs.clear();
+        Explanation explanation = new Explanation(false);
+        rs.addRemovalRule(objective, value);
+
+        while (i > -1) {
+            if (rs.match(i, es)) {
+                rs.update(i, es, explanation);
+            }
+            i--;
+        }
+        for (int b = explanation.getDecisions().nextSetBit(0); b >= 0; b = explanation.getDecisions().nextSetBit(b + 1)) {
+            tmpValueDeductions.add(b);
+        }
 
         assert tmpValueDeductions.size() > 0 : "E(" + value + ") is EMPTY";
         tmpValueDeductions.removeAll(tmpDeductions);
@@ -347,9 +434,6 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
             if (clusters.get(clusters.size() - 1) != tmpDeductions.size() - 1) {
                 clusters.add(tmpDeductions.size() - 1);
             }
-            //            for (int i = one + 1; i < tmpDeductions.size(); i++) {
-            //                clusters.add(i);
-            //            }
         }
     }
 
@@ -390,7 +474,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         path.add(clone);
         int pos = path.size() - 1;
         if (dec.hasNext()) {
-            int idx = valueDecisions.indexOf(dec);
+            int idx = tmpDeductions.indexOf(dec.getWorldIndex());
             if (idx > -1) {
                 valueDecisions.set(idx, clone);
                 related2dom.set(pos);
@@ -400,5 +484,28 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         } else {
             refuted.set(pos);
         }
+    }
+
+    /**
+     * Simulate a decision path, with backup
+     *
+     * @param aSolver  the concerned solver
+     * @param decision the decision to apply
+     * @throws ContradictionException
+     */
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+        IEnvironment environment = aSolver.getEnvironment();
+        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
+        // 1. simulates open node
+        Decision current = aSolver.getSearchLoop().getLastDecision();
+        decision.setPrevious(current);
+        aSolver.getSearchLoop().setLastDecision(decision);
+        // 2. simulates down branch
+        environment.worldPush();
+        decision.setWorldIndex(environment.getWorldIndex());
+        decision.buildNext();
+        objectiveManager.apply(decision);
+        objectiveManager.postDynamicCut();
+//        aSolver.getEngine().propagate();
     }
 }

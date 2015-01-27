@@ -189,7 +189,7 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                System.out.println(solver.getMeasures().toOneLineString());
+                System.out.println(solver.getMeasures().toOneShortLineString());
             }
 
             @Override

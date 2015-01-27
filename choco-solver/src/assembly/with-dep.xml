@@ -24,13 +24,14 @@
         </dependencySet>
     </dependencySets>
     <fileSets>
-        <fileSet>
-            <directory>${project.basedir}</directory>
-            <useDefaultExcludes>true</useDefaultExcludes>
-            <includes>
-                <include>src/main/resources/logback.xml</include>
-            </includes>
-        </fileSet>
-    </fileSets>
+    <fileSet>
+        <directory>src/main/resources/</directory>
+        <outputDirectory>/</outputDirectory>
+        <useDefaultExcludes>true</useDefaultExcludes>
+        <includes>
+            <include>logback.xml</include>
+        </includes>
+    </fileSet>
+</fileSets>
 
 </assembly>

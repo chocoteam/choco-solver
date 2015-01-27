@@ -54,7 +54,7 @@ public class ExplanationExamples {
         solver.post(ICF.arithm(bvars[2], "=", bvars[3]));
         solver.post(ICF.arithm(bvars[2], "!=", bvars[3]));
         solver.set(ISF.lexico_LB(bvars));
-        ExplanationFactory.CBJ.plugin(solver, true);
+        ExplanationFactory.CBJ.plugin(solver, false, false);
         Chatterbox.showStatistics(solver);
         solver.findAllSolutions();
     }
@@ -69,7 +69,7 @@ public class ExplanationExamples {
             }
         }
         solver.set(ISF.lexico_LB(pigeon));
-        ExplanationFactory.CBJ.plugin(solver, true);
+        ExplanationFactory.CBJ.plugin(solver, false, false);
         Chatterbox.showStatistics(solver);
         solver.findAllSolutions();
     }

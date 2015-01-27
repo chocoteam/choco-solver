@@ -9,6 +9,12 @@ NEXT MILESTONE
 - Add clause_channeling constraint
 - Remove IntVar.wipeOut(...)
 - Enable hot variable addition to propagator
+- Revamp nogood recording
+- Move nogood recording from solution and restart from constraint pkg to monitor +(revamp) + SMF API
+- add DBT for explanations
+- Improve explanation engine
+
+Bug fixes: #265
 
 3.3.0 - 04 Dec 2014
 -------------------

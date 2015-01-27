@@ -50,63 +50,14 @@ class FakeEngine implements IPropagationEngine {
     private static FakeEngine singleton = new FakeEngine();
 
     @Override
-    public boolean isInitialized() {
-        return false;
-    }
-
-    @Override
-    public void propagate() throws ContradictionException {
-    }
-
-    @Override
-    public void flush() {
-    }
-
-    @Override
     public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
         throw new SolverException("The Propagator " + cause + " is not idempotent!\n" +
                 "See stack trace for more details -- it can be due to a view!");
     }
 
     @Override
-    public ContradictionException getContradictionException() {
-        return null;
-    }
-
-    @Override
-    public void clear() {
-    }
-
-    @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
         throw new SolverException("The Propagator " + cause + " is not idempotent!");
-    }
-
-    @Override
-    public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-
-    }
-
-    @Override
-    public void onPropagatorExecution(Propagator propagator) {
-    }
-
-    @Override
-    public void desactivatePropagator(Propagator propagator) {
-    }
-
-    @Override
-    public void dynamicAddition(boolean permanent, Propagator... ps) {
-    }
-
-    @Override
-    public void updateInvolvedVariables(Propagator p) {
-
-    }
-
-    @Override
-    public void dynamicDeletion(Propagator... ps) {
-
     }
 
     public static void checkIdempotency(Propagator lastProp) throws ContradictionException {

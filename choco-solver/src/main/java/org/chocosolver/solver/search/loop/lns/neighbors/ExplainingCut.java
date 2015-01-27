@@ -26,30 +26,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
-import org.chocosolver.solver.search.loop.lns.neighbors.ANeighbor;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.util.tools.StatisticUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Random;
 
 /**
  * a specific neighborhood for LNS based on the explanation of the cut imposed by a new solution.
- * <p/>
+ * <p>
  * This neighborhood is specific in the sense that it needs to compute explanation after a new solution has been found.
  * Furthermore, the fixSomeVariables method creates and applies decisions, so that the explanation recorder can infer.
  * <br/>
  * It works as follow:
  * - on a solution: force the application of the cut together with the decision path which leads to the solution, explain the failure
  * - then, on a call to fixSomeVariables, it selects randomly K decisions explaining the cut, and relax them from the decision path.
- * <p/>
+ * <p>
  * Unrelated decisions are never relaxed, the idea here is to work only on the decisions which lead to a failure.
  *
  * @author Charles Prud'homme
@@ -75,17 +80,13 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
     private Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
 
-    // TEMPORARY DATA STRUCTURES
-    private final ArrayList<Deduction> tmpDeductions;
-    private final Set<Deduction> tmpValueDeductions;
 
 
     public ExplainingCut(Solver aSolver, int level, long seed) {
         super(aSolver);
-        if (!(aSolver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
-            aSolver.set(new LazyExplanationEngineFromRestart(aSolver));
-        }
         this.mExplanationEngine = aSolver.getExplainer();
+        assert mExplanationEngine != null;
+
         this.level = level;
         this.random = new Random(seed);
 
@@ -94,9 +95,6 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
         refuted = new BitSet(16);
-        // TEMPORARY DATA STRUCTURES
-        tmpDeductions = new ArrayList<>(16);
-        tmpValueDeductions = new HashSet<>(16);
         mSolver.getSearchLoop().plugSearchMonitor(this);
     }
 
@@ -129,7 +127,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
         // add the first refuted decisions
         int first = notFrozen.nextSetBit(0);
-        for (int i = (first>-1?refuted.nextSetBit(first):first); i > -1; i = refuted.nextSetBit(i + 1)) {
+        for (int i = (first > -1 ? refuted.nextSetBit(first) : first); i > -1; i = refuted.nextSetBit(i + 1)) {
             notFrozen.clear(i);
         }
 
@@ -144,7 +142,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             if (path.get(id).hasNext()) {
                 last = path.get(id).duplicate();
                 if (refuted.get(id)) last.buildNext();
-                ExplanationToolbox.imposeDecisionPath(mSolver, last);
+                imposeDecisionPath(mSolver, last);
             }
         }
     }
@@ -220,6 +218,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
      */
     private void addToPath(Decision dec) {
         Decision clone = dec.duplicate();
+        clone.setWorldIndex(dec.getWorldIndex());
         path.add(clone);
         int pos = path.size() - 1;
         if (!dec.hasNext()) {
@@ -260,34 +259,16 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             assert false : "SHOULD FAIL!";
         } catch (ContradictionException cex) {
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-                tmpDeductions.clear();
-                tmpValueDeductions.clear();
                 related2cut.clear();
                 unrelated.clear();
 
                 // 3. explain the failure
-                Explanation expl = new Explanation();
-                if (cex.v != null) {
-                    cex.v.explain(mExplanationEngine, VariableState.DOM, expl);
-                } else {
-                    cex.c.explain(mExplanationEngine, null, expl);
-                }
-                Explanation complete = mExplanationEngine.flatten(expl);
-                ExplanationToolbox.extractDecision(complete, tmpValueDeductions);
-                tmpDeductions.addAll(tmpValueDeductions);
-
-                if (tmpDeductions.isEmpty()) {
-//                    if (LOGGER.isErrorEnabled()) {
-//                        LOGGER.error("2 cases: (a) optimality proven or (b) bug in explanation");
-//                    }
-//                    throw new SolverException("2 cases: (a) optimality proven or (b) bug in explanation");
+                Explanation explanation = mExplanationEngine.explain(cex);
+                if (explanation.getDecisions().isEmpty()) {
                     isTerminated = true;
                 }
 
-                for (int i = 0; i < tmpDeductions.size(); i++) {
-                    int idx = path.indexOf(((BranchingDecision) tmpDeductions.get(i)).getDecision());
-                    related2cut.set(idx);
-                }
+                related2cut.or(explanation.getDecisions());
 
                 // 4. need to replace the duplicated decision with the correct one
                 for (int i = 0; i < path.size(); i++) {
@@ -306,6 +287,29 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         mSolver.getEngine().flush();
         unrelated.andNot(related2cut);
         unrelated.andNot(refuted);
+    }
+
+    /**
+     * Simulate a decision path, with backup
+     *
+     * @param aSolver  the concerned solver
+     * @param decision the decision to apply
+     * @throws ContradictionException
+     */
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+        IEnvironment environment = aSolver.getEnvironment();
+        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
+        // 1. simulates open node
+        Decision current = aSolver.getSearchLoop().getLastDecision();
+        decision.setPrevious(current);
+        aSolver.getSearchLoop().setLastDecision(decision);
+        // 2. simulates down branch
+        environment.worldPush();
+        decision.setWorldIndex(environment.getWorldIndex());
+        decision.buildNext();
+        objectiveManager.apply(decision);
+        objectiveManager.postDynamicCut();
+//        aSolver.getEngine().propagate();
     }
 
 }

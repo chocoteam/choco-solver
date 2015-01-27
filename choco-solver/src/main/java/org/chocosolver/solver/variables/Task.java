@@ -36,10 +36,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 
@@ -93,11 +89,6 @@ public class Task {
                     }
                 }
 
-                @Override
-                public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-                    throw new SolverException("A task cannot explain itself yet.");
-                }
-
             };
         } else {
             update = new IVariableMonitor() {
@@ -112,11 +103,6 @@ public class Task {
                     // duration
                     duration.updateLowerBound(end.getLB() - start.getUB(), this);
                     duration.updateUpperBound(end.getUB() - start.getLB(), this);
-                }
-
-                @Override
-                public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-                    throw new SolverException("A task cannot explain itself yet.");
                 }
 
             };

@@ -36,9 +36,6 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -51,7 +48,6 @@ import java.io.Serializable;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
-import static org.chocosolver.solver.explanations.VariableState.DOM;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
 
@@ -360,22 +356,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return ESat.TRUE if entailed, ESat.FALSE if not entailed, ESat.UNDEFINED if unknown
      */
     public abstract ESat isEntailed();
-
-    /**
-     * returns a explanation for the decision mentioned in parameters
-     *
-     * @param xengine an explanation engine
-     * @param d       : a <code>Deduction</code> to explain
-     * @param e       : the explanation to feed
-     */
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        // the current deduction is due to the current domain of the involved variables
-        for (Variable v : this.vars) {
-            v.explain(xengine, DOM, e);
-        }
-    }
 
     /**
      * @return true iff all this propagator's variables are instantiated

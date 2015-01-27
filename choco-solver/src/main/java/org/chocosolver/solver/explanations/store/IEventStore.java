@@ -42,10 +42,6 @@ public interface IEventStore {
 
     public void popEvent();
 
-    public boolean isUptodate();
-
-    public void setUptodate(boolean b);
-
     public int getSize();
 
     public IntVar getVariable(int evt);

@@ -94,7 +94,7 @@ public class AllTest {
         });
         prob.buildModel();
         prob.configureSearch();
-        efact.plugin(prob.solver, true);
+        efact.plugin(prob.solver, false, false);
         prob.solver.findAllSolutions();
 
         Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");

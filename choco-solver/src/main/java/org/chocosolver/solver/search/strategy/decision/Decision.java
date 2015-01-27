@@ -31,9 +31,6 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
@@ -113,14 +110,23 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
     }
 
     /**
+     * Return the number of branches left to try
+     * @return number of tries left
+     */
+    public int triesLeft() {
+        return 2 - branch;
+    }
+
+    /**
      * Should this decision be a one-shot decision, non refutable.
+     *
      * @param once a boolean
      */
     public void once(boolean once) {
         this.once = once;
     }
 
-    protected void set(V var){
+    protected void set(V var) {
         this.var = var;
         branch = 0;
         this.once = false;
@@ -173,26 +179,6 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
 
     public Decision<V> duplicate() {
         throw new UnsupportedOperationException();
-    }
-
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        if (branch == 1) {
-            e.add(xengine.explain(getPositiveDeduction(xengine)));
-        } else if (branch == 2) {
-            e.add(xengine.explain(getNegativeDeduction(xengine)));
-        } else {
-            throw new SolverException("Cannot explain a decision which has not been applied or refuted: "+ this);
-        }
-    }
-
-    public Deduction getNegativeDeduction(ExplanationEngine xengine) {
-        return xengine.getDecision(this, false);
-    }
-
-    public Deduction getPositiveDeduction(ExplanationEngine xengine) {
-        return xengine.getDecision(this, true);
     }
 
     @Override

@@ -396,13 +396,14 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Building time : %.3fs, Initialisation : %.3fs, Initial propagation : %.3fs, " +
-                "Total %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d + %d Propagations",
+        st.append(String.format("Building time : %,.3fs, Initialisation : %,.3fs, Initial propagation : %,.3fs, " +
+                "Total %,.3fs, %d Nodes (%,.1f n/s), %,d Backtracks, %,d Fails, %,d Restarts, %,d + %,d Propagations",
                 getReadingTimeCount(),
                 getInitialisationTimeCount(),
                 getInitialPropagationTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
+                getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getFailCount(),
                 getRestartCount(),
@@ -418,9 +419,10 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Resolution %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts",
+        st.append(String.format("Resolution %.3fs, %,d Nodes (%,.1f n/s), %,d Backtracks, %,d Fails, %,d Restarts",
                 getTimeCount(),
                 getNodeCount(),
+                getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getFailCount(),
                 getRestartCount()));
@@ -445,13 +447,14 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
             st.append("\t").append(solver.getObjectiveManager()).append(",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fs\n\tInitialisation : %,.3fs\n\tInitial propagation : %,.3fs" +
-                "\n\tResolution : %,.3fs\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                "\n\tResolution : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
                 "Restarts: %,d\n\tMax depth: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d",
                 getReadingTimeCount(),
                 getInitialisationTimeCount(),
                 getInitialPropagationTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
+                getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getFailCount(),
                 getRestartCount(),

@@ -38,9 +38,6 @@ package org.chocosolver.solver.search.loop.lns;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInterruption;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
@@ -120,6 +117,4 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
         }
     }
 
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {}
 }

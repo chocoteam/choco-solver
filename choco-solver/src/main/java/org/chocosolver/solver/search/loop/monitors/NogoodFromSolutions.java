@@ -26,53 +26,56 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.chocosolver.solver.search.loop.monitors;
+
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
- * @author Jean-Guillaume Fages
- * @since 07/10/14
- * Created by IntelliJ IDEA.
+ * Avoid exploring same solutions (useful with restart on solution)
+ * Beware :
+ * - Must be plugged as a monitor
+ * - Only works for integer variables
+ * <p>
+ * This can be used to remove similar/symmetric solutions
+ *
+ * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @since 20/06/13
  */
-package org.chocosolver.solver.explanations;
+public class NogoodFromSolutions implements IMonitorSolution {
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.trace.Chatterbox;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+    final PropNogoods png;
+    final protected IntVar[] decisionVars;
+    final protected TIntList ps;
 
-public class ExpTest {
-
-	@Test(groups = "1s")
-	public void test01() {
-		int n = 6;
-		int m = 10;
-		Solver s1 = test(n,m,1);
-		Solver s2 = test(n,m,2);
-		Solver s3 = test(n,m,3);
-		Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
-		Assert.assertEquals(s1.getMeasures().getSolutionCount(),s3.getMeasures().getSolutionCount());
-		Assert.assertTrue(s1.getMeasures().getNodeCount() >= s2.getMeasures().getNodeCount());
-		Assert.assertTrue(s2.getMeasures().getNodeCount() >= s3.getMeasures().getNodeCount());
-	}
-
-	private Solver test(int n, int m, int expMode) {
-        // infeasible problem
-        Solver s = new Solver();
-        IntVar[] x = VF.boundedArray("x", n, 0, m, s);
-        s.post(ICF.alldifferent(x, "NEQS"));
-        s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
-        // explanations
-        if (expMode == 2) {
-            ExplanationFactory.CBJ.plugin(s, true);
-        } else if (expMode == 3) {
-            ExplanationFactory.DBT.plugin(s, true);
-        }
-        // logging and solution
-        Chatterbox.showStatistics(s);
-        Chatterbox.showSolutions(s);
-        s.findAllSolutions();
-        return s;
+    /**
+     * Avoid exploring same solutions (useful with restart on solution)
+     * Beware :
+     * - Must be posted as a constraint AND plugged as a monitor as well
+     * - Cannot be reified
+     * - Only works for integer variables
+     * <p>
+     * This can be used to remove similar/symmetric solutions
+     *
+     * @param vars all decision variables which define a solution (can be a subset of variables)
+     */
+    public NogoodFromSolutions(IntVar[] vars) {
+        decisionVars = vars;
+        png = vars[0].getSolver().getNogoodStore().getPropNogoods();
+        ps = new TIntArrayList();
     }
+
+    @Override
+    public void onSolution() {
+        int n = decisionVars.length;
+        ps.clear();
+        for (int i = 0; i < n; i++) {
+            ps.add(SatSolver.negated(png.Literal(decisionVars[i], decisionVars[i].getValue())));
+        }
+        png.addLearnt(ps.toArray());
+    }
+
 }

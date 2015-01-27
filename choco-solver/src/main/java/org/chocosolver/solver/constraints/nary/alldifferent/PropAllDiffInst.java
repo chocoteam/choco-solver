@@ -34,8 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -146,20 +145,6 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d.getmType() == Deduction.Type.ValRem) {
-            int i = 0;
-            while (i < vars.length && !vars[i].isInstantiatedTo(((ValueRemoval) d).getVal())) {
-                i++;
-            }
-            vars[i].explain(xengine, VariableState.DOM, e);
-        } else {
-            super.explain(xengine, d, e);
-        }
-    }
-
-    @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // to deal with BoolVar: any event is automatically promoted to INSTANTIATE
@@ -168,14 +153,18 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             value = 1 - var.getValue();
         }
         if (evt == IntEventType.REMOVE) {
-            int i = 0;
-            while (i < vars.length && !vars[i].isInstantiatedTo(value)) {
-                i++;
+            for (int i = 0, j = vars.length - 1; i <= j; i++, j--) {
+                if (vars[i] != var && vars[i].isInstantiatedTo(value)) {
+                    newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    return newrules;
+                }
+                if (vars[j] != var && vars[j].isInstantiatedTo(value)) {
+                    newrules |= ruleStore.addFullDomainRule(vars[j]);
+                    return newrules;
+                }
             }
-            newrules |= ruleStore.addFullDomainRule(vars[i]);
         } else {
             newrules |= super.why(ruleStore, var, evt, value);
-
         }
         return newrules;
     }

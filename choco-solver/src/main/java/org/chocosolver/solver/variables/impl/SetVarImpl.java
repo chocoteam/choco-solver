@@ -32,9 +32,6 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
@@ -266,16 +263,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     //***********************************************************************************
     // VARIABLE STUFF
     //***********************************************************************************
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
-    }
 
     @Override
     public SetDelta getDelta() {

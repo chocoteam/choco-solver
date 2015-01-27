@@ -444,7 +444,12 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             eventmasks[i] = new int[nbv];
             event_f[i] = new IntCircularQueue(nbv);
         }
-        trigger.dynAdd(p, true); // TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
+        propagateOnBacktrack(p);// TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
+    }
+
+    @Override
+    public void propagateOnBacktrack(Propagator p) {
+        trigger.dynAdd(p, true);
     }
 
     @Override

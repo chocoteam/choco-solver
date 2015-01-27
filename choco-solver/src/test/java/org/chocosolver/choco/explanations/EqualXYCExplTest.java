@@ -72,7 +72,7 @@ public class EqualXYCExplTest {
         ref.set(nset);
         sol.set(nset);
 
-        ExplanationFactory.CBJ.plugin(sol, true);
+        ExplanationFactory.CBJ.plugin(sol, false, false);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];

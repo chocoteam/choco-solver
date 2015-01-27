@@ -33,8 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -204,28 +203,6 @@ public class PropAbsolute extends Propagator<IntVar> {
     //***********************************************************************************
     // EXPLANATIONS
     //***********************************************************************************
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        if (d.getVar() == vars[0]) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                vars[1].explain(xengine, VariableState.REM, ((ValueRemoval) d).getVal(), e);
-                vars[1].explain(xengine, VariableState.REM, -((ValueRemoval) d).getVal(), e);
-            } else {
-                throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
-            }
-        } else if (d.getVar() == vars[1]) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                vars[0].explain(xengine, VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);
-            } else {
-                throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
-            }
-        } else {
-            super.explain(xengine, d, e);
-        }
-    }
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {

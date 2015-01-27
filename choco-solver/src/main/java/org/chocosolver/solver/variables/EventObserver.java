@@ -24,12 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations;
+package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Observer of events generated during resolution.

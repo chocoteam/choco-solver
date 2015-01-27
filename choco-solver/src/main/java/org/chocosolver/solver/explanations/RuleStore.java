@@ -24,18 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -45,13 +43,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.BitSet;
 
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 
 /**
- * A RuleStore is a central object in ARLIL explanation engine.
- * It stores a set of rules which enables to compute the reason of a <i>situation</i> (for instance a conflict) by
+ * A RuleStore is a central object in the Asynchronous, Reverse, Low-Intrusive and Lazy explanation engine.
+ * It stores a set of rules which enables to compute the explanation of a <i>situation</i> (for instance a conflict) by
  * scanning the events generated on the current branch.
  * The set of rules is dynamically maintained.
  * <p>
@@ -61,6 +59,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
 public class RuleStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleStore.class);
+    private static final boolean ENABLE_EARLY_STOP = true;
     private static final int NO_ENTRY = Integer.MIN_VALUE;
     static final int DM = 15;
     static final int BD = 7;
@@ -69,21 +68,45 @@ public class RuleStore {
     static final int RM = 1;
 
 
-    private final TIntHashSet paRules; // rules for propagator activation
-    private final TIntIntHashMap vmRules;    // rules for variable modification
-    private final TIntObjectHashMap<TIntSet> vmRemval;    // store value removal when necessary
-    private final TIntObjectHashMap<TIntObjectHashMap<HashMap<DecisionOperator, Reason>>> decRefut; // store refuted decisions
+    private final BitSet paRules; // rules for propagator activation
+    private final int[] vmRules;    // rules for variable modification
+    private final TIntSet[] vmRemval;    // store value removal when necessary
+    private Explanation[] decRefut; // store refuted decisions
+    private boolean earlystop_;
+    private final boolean userfeedback;
+    private int swi; // search world index
+    private final Solver mSolver;
 
 
     private IntVar lastVar;
     private IEventType lastEvt;
-    private int lastVid, lastValue, lastMask;
+    private int lastValue;
 
-    public RuleStore() {
-        paRules = new TIntHashSet(16, 0.5f, NO_ENTRY);
-        vmRules = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
-        vmRemval = new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
-        decRefut = new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
+    public RuleStore(Solver solver, boolean userfeedback) {
+        this.mSolver = solver;
+        this.userfeedback = userfeedback;
+        int _p = -1;
+        for (Constraint c : solver.getCstrs()) {
+            for (Propagator p : c.getPropagators()) {
+                if (_p < p.getId()) {
+                    _p = p.getId();
+                }
+            }
+        }
+        _p++;
+        paRules = new BitSet(_p);
+        int _v = -1;
+        for (Variable v : solver.getVars()) {
+            if (_v < v.getId()) {
+                _v = v.getId();
+            }
+        }
+        _v++;
+
+        vmRules = new int[_v];
+        Arrays.fill(vmRules, NO_ENTRY);
+        vmRemval = new TIntSet[_v];
+        decRefut = new Explanation[16];
     }
 
     /**
@@ -94,31 +117,34 @@ public class RuleStore {
      * @throws org.chocosolver.solver.exception.SolverException when the type of the variable is neither {@link Variable#BOOL} or {@link Variable#INT}.
      */
     public boolean match(final int idx, final IEventStore eventStore) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MATCH? < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
-                    eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
-        }
-
-        lastVar = eventStore.getVariable(idx);
-        lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
-        lastEvt = eventStore.getEventType(idx);
-
-        if (lastEvt != FULL_PROPAGATION) {
-            // the event is a variable modification
-            lastVid = lastVar.getId();
-            lastMask = vmRules.get(lastVid);
-
-            if (lastMask == DM) { // only to speed up the entire process
-                return true;
-            } else if (lastMask != NO_ENTRY) {
-                IntEventType ievt = (IntEventType) lastEvt;
-                return matchDomain(lastMask, lastVar, ievt, lastValue, eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
+        if (!earlystop_) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("MATCH? < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
+                        eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
             }
-            return false;
-        } else {
-            // Does it match a propagator activation known rule?
-            return paRules.contains(lastValue);
+
+            lastVar = eventStore.getVariable(idx);
+            lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
+            lastEvt = eventStore.getEventType(idx);
+
+            if (lastEvt != FULL_PROPAGATION) {
+                // the event is a variable modification
+                int lastVid = lastVar.getId();
+                int lastMask = vmRules[lastVid];
+
+                if (lastMask == DM) { // only to speed up the entire process
+                    return true;
+                } else if (lastMask != NO_ENTRY) {
+                    IntEventType ievt = (IntEventType) lastEvt;
+                    return matchDomain(lastMask, lastVar, ievt, lastValue, eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
+                }
+                return false;
+            } else {
+                // Does it match a propagator activation known rule?
+                return paRules.get(lastValue);
+            }
         }
+        return false;
     }
 
     /**
@@ -172,13 +198,13 @@ public class RuleStore {
                 if (ivar.hasEnumeratedDomain()) {
                     switch (evt) {
                         case INSTANTIATE:
-                            return intersect(i2, i3, vmRemval.get(vid));
+                            return intersect(i2, i3, vmRemval[vid]);
                         case DECUPP:
-                            return intersect(i1, i2, vmRemval.get(vid));
+                            return intersect(i1, i2, vmRemval[vid]);
                         case INCLOW:
-                            return intersect(i2, i1, vmRemval.get(vid));
+                            return intersect(i2, i1, vmRemval[vid]);
                         case REMOVE:
-                            return vmRemval.get(vid).contains(i1);
+                            return vmRemval[vid].contains(i1);
                     }
                 }
         }
@@ -201,13 +227,14 @@ public class RuleStore {
 
 
     /**
-     * Update the rule store, and the reason, wrt a given event
+     * Update the rule store, and the explanation, wrt a given event
      *
      * @param idx        index of the event
      * @param eventStore the event store
-     * @param reason     the reason to compute
+     * @param explanation     the explanation to compute
      */
-    public void update(final int idx, final IEventStore eventStore, Reason reason) {
+    @SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
+    public void update(final int idx, final IEventStore eventStore, Explanation explanation) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("UPDATE < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
                     eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
@@ -223,28 +250,31 @@ public class RuleStore {
                 Decision decision = (Decision) lastCause;
                 // If it is a LEFT decision, simply add it
                 if (decision.hasNext()) {
-                    reason.addDecicion(decision);
+                    explanation.addDecicion(decision);
                 } else {
-                    // Otherwise, get the reason of the refutation
-                    Reason drr = getDecisionRefutationReason(decision);
-                    assert drr != null : "No reason for decision refutation :" + decision.toString();
-                    reason.addAll(drr);
+                    // Otherwise, get the explanation of the refutation
+                    Explanation drr = getDecisionRefutation(decision);
+                    assert drr != null : "No explanation for decision refutation :" + decision.toString();
+                    explanation.addAll(drr);
+                }
+                if (ENABLE_EARLY_STOP && !userfeedback) {
+                    earlystop_ = explanation.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
                 }
             } else {
                 assert lastValue == eventStore.getFirstValue(idx) : "Wrong value loaded";
 
                 // The cause is not a decision, that is, certainly a propagator
-                // add the cause to the reason
-                reason.addCause(lastCause);
+                // add the cause to the explanation
+                explanation.addCause(lastCause);
                 // then add new rules to the rule store to explain the cause application
                 lastCause.why(this, lastVar, lastEvt, lastValue);
             }
         } else {
             // the event was a propagator activation
-            // 1. add a new rule: reason of the variable instantiation
+            // 1. add a new rule: explanation of the variable instantiation
             addFullDomainRule(lastVar);
             // 2. remove the propagator activation rule, now we know it depends on the variable
-            paRules.remove(lastValue);
+            paRules.clear(lastValue);
         }
     }
 
@@ -254,22 +284,15 @@ public class RuleStore {
      */
     public void clear() {
         paRules.clear();
-        vmRules.clear();
-        for (int k : vmRemval.keys()) {
-            vmRemval.get(k).clear();
+        Arrays.fill(vmRules, NO_ENTRY);
+        for (int k = vmRemval.length - 1; k >= 0; k--) {
+            if (vmRemval[k] != null) vmRemval[k].clear();
         }
+        earlystop_ = false;
+        swi = mSolver.getSearchLoop().getSearchWorldIndex();
+
 //        //TODO: clear decRefute...
     }
-
-    /**
-     * Check whether the rule store is empty
-     *
-     * @return true if the rule store is empty
-     */
-    public boolean isEmpty() {
-        return paRules.isEmpty() && vmRules.isEmpty();
-    }
-
 
     /**
      * Add a value removal rule, that is, the event which remove the value needs to be retained.
@@ -283,10 +306,10 @@ public class RuleStore {
         if (var.hasEnumeratedDomain()) {
             int vid = var.getId();
             putMask(vid, RM);
-            TIntSet remvals = vmRemval.get(vid);
+            TIntSet remvals = vmRemval[vid];
             if (remvals == null) {
                 remvals = new TIntHashSet(16, .5f, NO_ENTRY);
-                vmRemval.put(vid, remvals);
+                vmRemval[vid] = remvals;
             }
             return remvals.add(value);
         } else {
@@ -342,12 +365,14 @@ public class RuleStore {
      * @return true if the mask has been updated (false = already existing mask)
      */
     private boolean putMask(int vid, int mask) {
-        int cmask = vmRules.get(vid);
+        int cmask = vmRules[vid];
         if (cmask == NO_ENTRY) {
-            return vmRules.put(vid, mask) == NO_ENTRY;
+            vmRules[vid] = mask;
+            return true;
         } else {
             int amount = (cmask | mask) - cmask;
-            return amount > 0 && vmRules.adjustValue(vid, amount);
+            vmRules[vid] += amount;
+            return amount > 0;
         }
     }
 
@@ -358,7 +383,7 @@ public class RuleStore {
      * @return the current mask or NO_ENTRY
      */
     public int getMask(Variable var) {
-        return vmRules.get(var.getId());
+        return vmRules[var.getId()];
     }
 
     /**
@@ -368,7 +393,7 @@ public class RuleStore {
      * @return true if a new rule has been adde
      */
     public boolean addPropagatorActivationRule(Propagator propagator) {
-        paRules.add(propagator.getId());
+        paRules.set(propagator.getId());
         return false;
     }
 
@@ -377,68 +402,35 @@ public class RuleStore {
      * Store a decision refutation, for future reasoning.
      *
      * @param decision refuted decision
-     * @param reason   the reason of the refutation
+     * @param explanation   the explanation of the refutation
      */
-    public void storeDecisionRefutation(Decision decision, Reason reason) {
-        TIntObjectHashMap<HashMap<DecisionOperator, Reason>> mk1 = decRefut.get(decision.getDecisionVariable().getId());
-        if (mk1 == null) {
-            mk1 = new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
-            decRefut.put(decision.getDecisionVariable().getId(), mk1);
+    void storeDecisionRefutation(Decision decision, Explanation explanation) {
+        int w = decision.getWorldIndex();
+        if (w >= decRefut.length) {
+            Explanation[] tmp = decRefut;
+            decRefut = new Explanation[w + 10];
+            System.arraycopy(tmp, 0, decRefut, 0, tmp.length);
         }
-        HashMap<DecisionOperator, Reason> mk2 = mk1.get((Integer) decision.getDecisionValue());
-        if (mk2 == null) {
-            mk2 = new HashMap<>(16, .5f);
-            mk1.put((Integer) decision.getDecisionValue(), mk2);
+        assert w >= explanation.getDecisions().length();
+        decRefut[w] = explanation;
+    }
+
+    void moveDecisionRefutation(Decision decision, int to) {
+        assert to <= decision.getWorldIndex();
+        if (to < decision.getWorldIndex()) {
+            decRefut[to] = decRefut[decision.getWorldIndex()];
+            decRefut[decision.getWorldIndex()] = null;
         }
-        mk2.put(decision.getDecisionOperator(), reason);
     }
 
     /**
-     * Get the reason associated to a decision refutation
+     * Get the explanation associated with a decision refutation
      *
      * @param decision a RIGHT branch decision
-     * @return a reason
+     * @return an explanation
      */
-    Reason getDecisionRefutationReason(Decision decision) {
-        if (decision.hasNext()) {
-            throw new SolverException(decision.toString() + "is not explained yet");
-        }
-        return decRefut
-                .get(decision.getDecisionVariable().getId())
-                .get((Integer) decision.getDecisionValue())
-                .get(decision.getDecisionOperator());
-    }
-
-
-    /**
-     * Inform the rule store that the propagator cannot provide more rules in the future
-     *
-     * @param cause a cause
-     */
-    public void skip(ICause cause) {
-        if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Skip method does not do anything, {} will not be skipped", cause);
-        }
-    }
-
-    /**
-     * Print the retained rules
-     *
-     * @param solver a solver to get the variables
-     */
-    public void printRules(Solver solver) {
-        StringBuilder st = new StringBuilder();
-        for (Variable v : solver.getVars()) {
-            int m = vmRules.get(v.getId());
-            if (m != NO_ENTRY) {
-                st.append(v.getName()).append(":").append(m);
-                if (vmRemval.contains(v.getId()) && vmRemval.get(v.getId()).size() > 0) {
-                    TIntSet values = vmRemval.get(v.getId());
-                    st.append("\n\t").append(Arrays.toString(values.toArray()));
-                }
-                st.append("\n");
-            }
-        }
-        System.out.printf("%s\n", st.toString());
+    Explanation getDecisionRefutation(Decision decision) {
+        assert decision.triesLeft() < 2 : decision.toString() + "is not explained yet";
+        return decRefut[decision.getWorldIndex()];
     }
 }
