@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations.strategies;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -33,6 +33,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -44,30 +46,29 @@ import org.slf4j.LoggerFactory;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
 /**
- * A conflict-based Back-jumping strategy that relies on ARLIL explanation engine.
- * Basically, it acts exactly like {@link org.chocosolver.solver.explanations.strategies.ConflictBasedBackjumping}.
+ * A conflict-based Back-jumping strategy that relies on an explanation engine.
  * <p>
  * Created by cprudhom on 11/12/14.
  * Project: choco.
  */
-public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
+public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolution {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CBJ4ARLIL.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConflictBackJumping.class);
 
-    // The ARLIL explanation engine
-    final ARLILExplanationEngine mArlile;
+    // The explanation engine
+    final ExplanationEngine mExplainer;
     final Solver mSolver;
     private final boolean saveCauses, nogoodFromConflict;
     private final PropNogoods ngstore;
     private TIntList ps;
 
-    // The last reason computed, for user only
-    Reason lastReason;
+    // The last explanation computed, for user only
+    Explanation lastExplanation;
 
-    public CBJ4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver, boolean nogoodFromConflict) {
-        this.mArlile = mArlile;
+    public ConflictBackJumping(ExplanationEngine mExplainer, Solver mSolver, boolean nogoodFromConflict) {
+        this.mExplainer = mExplainer;
         this.mSolver = mSolver;
-        this.saveCauses = mArlile.isSaveCauses();
+        this.saveCauses = mExplainer.isSaveCauses();
         this.nogoodFromConflict = nogoodFromConflict;
         this.ngstore = mSolver.getNogoodStore().getPropNogoods();
         this.ps = new TIntArrayList();
@@ -76,13 +77,13 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
     @Override
     public void onContradiction(ContradictionException cex) {
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
-        lastReason = mArlile.explain(cex);
+        lastExplanation = mExplainer.explain(cex);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("CBJ4ARLIL>> Reason of " + cex.toString() + " is " + lastReason);
+            LOGGER.debug("ConflictBackJumping>> explanation of " + cex.toString() + " is " + lastExplanation);
         }
         if (this.nogoodFromConflict) {
-            extractNogoodFromReason(lastReason);
+            extractNogoodFromExplanation(lastExplanation);
         }
 
         int upto = compute(mSolver.getEnvironment().getWorldIndex());
@@ -100,16 +101,16 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
             dec = dec.getPrevious();
         }
         if (dec != ROOT) {
-            Reason reason = new Reason(saveCauses);
+            Explanation explanation = new Explanation(saveCauses);
             // 1. skip the current one which is refuted...
             Decision d = dec.getPrevious();
             while ((d != ROOT)) {
                 if (d.hasNext()) {
-                    reason.addDecicion(d);
+                    explanation.addDecicion(d);
                 }
                 d = d.getPrevious();
             }
-            mArlile.storeDecisionRefutation(dec, reason);
+            mExplainer.storeDecisionExplanation(dec, explanation);
         }
         mSolver.getSearchLoop().overridePreviousWorld(1);
     }
@@ -141,15 +142,15 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
         }
         if (dec != ROOT) {
             if (!dec.hasNext()) {
-                throw new UnsupportedOperationException("CBJ4ARLIL.identifyRefutedDecision should get to a LEFT decision:" + dec);
+                throw new UnsupportedOperationException("ConflictBackJumping.identifyRefutedDecision should get to a LEFT decision:" + dec);
             }
-            Reason why = lastReason.duplicate();
+            Explanation why = lastExplanation.duplicate();
             why.remove(dec);
 
-            mArlile.storeDecisionRefutation(dec, why);
+            mExplainer.storeDecisionExplanation(dec, why);
         }
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("CBJ4ARLIL>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+            LOGGER.debug("ConflictBackJumping>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
 
@@ -161,24 +162,25 @@ public class CBJ4ARLIL implements IMonitorContradiction, IMonitorSolution {
      * @return the number of world to backtrack to.
      */
     int compute(int currentWorldIndex) {
-        assert currentWorldIndex >= lastReason.getDecisions().length();
-        return currentWorldIndex - lastReason.getDecisions().previousSetBit(lastReason.getDecisions().length());
+        assert currentWorldIndex >= lastExplanation.getDecisions().length();
+        return currentWorldIndex - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
     }
 
     /**
-     * Return the Reason of the last conflict
+     * Return the explanation of the last conflict
      *
-     * @return a Reason
+     * @return an explanation
      */
-    public Reason getLastReason() {
-        return lastReason;
+    public Explanation getLastExplanation() {
+        return lastExplanation;
     }
 
-    private void extractNogoodFromReason(Reason reason) {
+    @SuppressWarnings("unchecked")
+    private void extractNogoodFromExplanation(Explanation explanation) {
         Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
         ps.clear();
         while (decision != RootDecision.ROOT) {
-            if (reason.getDecisions().get(decision.getWorldIndex())) {
+            if (explanation.getDecisions().get(decision.getWorldIndex())) {
                 assert decision.hasNext();
 //                System.out.printf("%s = %d,", decision.getDecisionVariable(), (Integer) decision.getDecisionValue());
                 ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));

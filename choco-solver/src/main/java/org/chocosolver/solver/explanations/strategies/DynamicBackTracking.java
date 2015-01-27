@@ -24,11 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations.strategies;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -41,20 +43,19 @@ import java.util.BitSet;
 
 /**
  * A dynamic backtracking algorithm.
- * Basically, it acts exactly like {@link org.chocosolver.solver.explanations.strategies.DynamicBacktracking}.
  * <p>
  * Created by cprudhom on 11/12/14.
  * Project: choco.
  */
-public class DBT4ARLIL extends CBJ4ARLIL {
+public class DynamicBackTracking extends ConflictBackJumping {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DBT4ARLIL.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicBackTracking.class);
 
     final DBTstrategy dbTstrategy;
 
-    public DBT4ARLIL(ARLILExplanationEngine mArlile, Solver mSolver, boolean nogoodFromConflict) {
-        super(mArlile, mSolver, nogoodFromConflict);
-        dbTstrategy = new DBTstrategy(mSolver, mArlile);
+    public DynamicBackTracking(ExplanationEngine mExplainer, Solver mSolver, boolean nogoodFromConflict) {
+        super(mExplainer, mSolver, nogoodFromConflict);
+        dbTstrategy = new DBTstrategy(mSolver, mExplainer);
         mSolver.set(dbTstrategy);
     }
 
@@ -63,6 +64,7 @@ public class DBT4ARLIL extends CBJ4ARLIL {
      *
      * @param nworld index of the world to backtrack to
      */
+    @SuppressWarnings("unchecked")
     void identifyRefutedDecision(int nworld, ICause cause) {
         dbTstrategy.clear();
         if (nworld == 1 || cause == mSolver.getObjectiveManager()) {
@@ -93,7 +95,7 @@ public class DBT4ARLIL extends CBJ4ARLIL {
                 dbTstrategy.add(dup);
             } else {
                 // on a right branch, necessarily have an explanation (it is a refutation)
-                Reason r = mArlile.getDecisionRefutationReason(dec);
+                Explanation r = mExplainer.getDecisionRefutationExplanation(dec);
                 if (!r.getDecisions().get(jmpBck.getWorldIndex())) {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
@@ -114,15 +116,15 @@ public class DBT4ARLIL extends CBJ4ARLIL {
         }
         if (dec != RootDecision.ROOT) {
             if (!dec.hasNext()) {
-                throw new UnsupportedOperationException("DBT4ARLIL.identifyRefutedDecision should get to a POSITIVE decision "+ dec);
+                throw new UnsupportedOperationException("DynamicBackTracking.identifyRefutedDecision should get to a POSITIVE decision "+ dec);
             }
-            Reason why = lastReason.duplicate();
+            Explanation why = lastExplanation.duplicate();
             why.remove(dec);
 
-            mArlile.storeDecisionRefutation(dec, why);
+            mExplainer.storeDecisionExplanation(dec, why);
         }
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("DBT4ARLIL>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+            LOGGER.debug("DynamicBackTracking>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
 
@@ -130,19 +132,20 @@ public class DBT4ARLIL extends CBJ4ARLIL {
     //                          Decision<IntVar> services                                                             //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("unchecked")
     private static class DBTstrategy extends AbstractStrategy {
 
         private final ArrayDeque<Decision<IntVar>> decision_path;
         private final Solver mSolver;
-        private final ARLILExplanationEngine mArlil;
+        private final ExplanationEngine mExplainer;
         private AbstractStrategy mainStrategy;
 
-        protected DBTstrategy(Solver solver, ARLILExplanationEngine mArlil) {
+        protected DBTstrategy(Solver solver, ExplanationEngine explainer) {
             super(solver.getStrategy().getVariables());
             this.decision_path = new ArrayDeque<>();
             this.mSolver = solver;
             this.mainStrategy = mSolver.getStrategy();
-            this.mArlil = mArlil;
+            this.mExplainer = explainer;
         }
 
         protected void clear() {
@@ -167,12 +170,12 @@ public class DBT4ARLIL extends CBJ4ARLIL {
 //                System.out.printf("MOVE %s (%d -> %d)\n", d, old, wi);
                 if (old != wi) {
                     if (d.triesLeft() == 1) { // previously explained refuted decision needs to be kept
-                        mArlil.moveDecisionRefutation(d, wi);
+                        mExplainer.moveDecisionRefutation(d, wi);
                     }
-                    // then iterate over future and kept refuted decisions in the decision path and update the reason
+                    // then iterate over future and kept refuted decisions in the decision path and update the explanation
                     for (Decision n : decision_path) {
                         if (n.triesLeft() == 1) {
-                            BitSet bt = mArlil.getDecisionRefutationReason(n).getDecisions();
+                            BitSet bt = mExplainer.getDecisionRefutationExplanation(n).getDecisions();
                             if (bt.get(old)) {
 //                                System.out.printf("UPDATE %s (%d -> %d)\n", n, old, wi);
                                 bt.clear(old);

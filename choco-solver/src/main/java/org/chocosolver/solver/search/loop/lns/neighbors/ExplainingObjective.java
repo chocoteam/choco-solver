@@ -26,21 +26,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
-import org.chocosolver.solver.explanations.arlil.Reason;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.lns.neighbors.ANeighbor;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
@@ -67,7 +67,7 @@ import java.util.Random;
  */
 public class ExplainingObjective extends ANeighbor implements IMonitorInitPropagation, IMonitorUpBranch {
 
-    protected ARLILExplanationEngine mExplanationEngine;
+    protected ExplanationEngine mExplanationEngine;
     protected RuleStore mRuleStore;
     private ObjectiveManager<IntVar, Integer> om;
     private IntVar objective;
@@ -108,7 +108,8 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         this.random = new Random(seed);
         this.level = level;
 
-        this.mExplanationEngine = (ARLILExplanationEngine) aSolver.getExplainer();
+        this.mExplanationEngine = aSolver.getExplainer();
+        assert mExplanationEngine != null;
 
         path = new ArrayList<>(16);
         valueDecisions = new ArrayList<>(16);
@@ -200,7 +201,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
             if (path.get(id).hasNext()) {
                 last = path.get(id).duplicate();
                 if (refuted.get(id)) last.buildNext();
-                ExplanationToolbox.imposeDecisionPath(mSolver, last);
+                imposeDecisionPath(mSolver, last);
             }
         }
     }
@@ -224,6 +225,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         // nothing to do
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void afterInitialPropagation() {
         om = mExplanationEngine.getSolver().getObjectiveManager();
@@ -317,18 +319,18 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         // mimic explanation computation
         RuleStore rs = mExplanationEngine.getRuleStore();
         rs.clear();
-        Reason reason = new Reason(false);
+        Explanation explanation = new Explanation(false);
         rs.addRemovalRule(objective, value);
         IEventStore es = mExplanationEngine.getEventStore();
         int i = es.getSize() - 1;
 
         while (i > -1) {
             if (rs.match(i, es)) {
-                rs.update(i, es, reason);
+                rs.update(i, es, explanation);
             }
             i--;
         }
-        for (int b = reason.getDecisions().nextSetBit(0); b >= 0; b = reason.getDecisions().nextSetBit(b + 1)) {
+        for (int b = explanation.getDecisions().nextSetBit(0); b >= 0; b = explanation.getDecisions().nextSetBit(b + 1)) {
             tmpValueDeductions.add(b);
         }
 
@@ -364,7 +366,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
                         while (far <= near && far > val && far <= old) {
                             explainValueB(far--, es, i);
                         }
-                        if(far == near)return;
+                        if (far == near) return;
                     }
                     i++;
                 }
@@ -382,7 +384,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
                         while (far <= near && far < val && far >= old) {
                             explainValueB(far++, es, i);
                         }
-                        if(far == near)return;
+                        if (far == near) return;
                     }
                     i++;
                 }
@@ -396,16 +398,16 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         // mimic explanation computation
         RuleStore rs = mExplanationEngine.getRuleStore();
         rs.clear();
-        Reason reason = new Reason(false);
+        Explanation explanation = new Explanation(false);
         rs.addRemovalRule(objective, value);
 
         while (i > -1) {
             if (rs.match(i, es)) {
-                rs.update(i, es, reason);
+                rs.update(i, es, explanation);
             }
             i--;
         }
-        for (int b = reason.getDecisions().nextSetBit(0); b >= 0; b = reason.getDecisions().nextSetBit(b + 1)) {
+        for (int b = explanation.getDecisions().nextSetBit(0); b >= 0; b = explanation.getDecisions().nextSetBit(b + 1)) {
             tmpValueDeductions.add(b);
         }
 
@@ -482,5 +484,28 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
         } else {
             refuted.set(pos);
         }
+    }
+
+    /**
+     * Simulate a decision path, with backup
+     *
+     * @param aSolver  the concerned solver
+     * @param decision the decision to apply
+     * @throws ContradictionException
+     */
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+        IEnvironment environment = aSolver.getEnvironment();
+        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
+        // 1. simulates open node
+        Decision current = aSolver.getSearchLoop().getLastDecision();
+        decision.setPrevious(current);
+        aSolver.getSearchLoop().setLastDecision(decision);
+        // 2. simulates down branch
+        environment.worldPush();
+        decision.setWorldIndex(environment.getWorldIndex());
+        decision.buildNext();
+        objectiveManager.apply(decision);
+        objectiveManager.postDynamicCut();
+//        aSolver.getEngine().propagate();
     }
 }

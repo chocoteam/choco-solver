@@ -26,32 +26,85 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
- * A toolbox dedicated to explained neighbors
+ * This class extends {@link org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood}, but, instead of instantiating variables
+ * to values, it builds a fake decision path, this enables plugging explanation in.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 03/07/13
  */
-enum ExplanationToolbox {
-    ;
+public class RandomNeighborhood4Explanation extends RandomNeighborhood implements IMonitorUpBranch {
+
+    private Decision duplicator;
+    private Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
+
+    public RandomNeighborhood4Explanation(Solver aSolver, IntVar[] vars, int level, long seed) {
+        super(aSolver, vars, level, seed);
+        mSolver.plugMonitor(this);
+    }
+
+    @Override
+    public void recordSolution() {
+        super.recordSolution();
+        if (duplicator == null) {
+            duplicator = mSolver.getSearchLoop().getLastDecision().duplicate();
+        }
+    }
+
+    @Override
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
+        last = null;
+        super.fixSomeVariables(cause);
+    }
+
+    @Override
+    protected void impose(int id, ICause cause) throws ContradictionException {
+        FastDecision d = (FastDecision) duplicator.duplicate();
+        d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
+        last = d;
+        imposeDecisionPath(mSolver, d);
+    }
+
+    @Override
+    public void restrictLess() {
+        last = null;
+        super.restrictLess();
+    }
+
+    @Override
+    public void beforeUpBranch() {
+    }
+
+    @Override
+    public void afterUpBranch() {
+        // we need to catch up that case when the sub tree is closed and this imposes a fragment
+        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
+            mSolver.getSearchLoop().restart();
+        }
+    }
 
     /**
-     * Simutate a decision path, with backup
+     * Simulate a decision path, with backup
      *
      * @param aSolver  the concerned solver
      * @param decision the decision to apply
      * @throws ContradictionException
      */
-    protected static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
         IEnvironment environment = aSolver.getEnvironment();
         ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
         // 1. simulates open node
@@ -65,14 +118,5 @@ enum ExplanationToolbox {
         objectiveManager.apply(decision);
         objectiveManager.postDynamicCut();
 //        aSolver.getEngine().propagate();
-    }
-
-    protected static Decision mimic(Decision dec) {
-        Decision clone = dec.duplicate();
-        boolean forceNext = !dec.hasNext();
-        if (forceNext) {
-            clone.buildNext();
-        }
-        return clone;
     }
 }

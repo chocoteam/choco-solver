@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -363,19 +363,19 @@ public class RuleStoreTest {
             Assert.fail();
         }
 
-        Reason r = new Reason(false);
+        Explanation r = new Explanation(false);
         r.addDecicion(d1);
         r.addDecicion(d2);
 
         rs.storeDecisionRefutation(d3, r);
 
         try {
-            rs.getDecisionRefutationReason(d3);
+            rs.getDecisionRefutation(d3);
             Assert.fail();
         } catch (SolverException ignored) {
         }
         d3.buildNext();
-        Reason rr = rs.getDecisionRefutationReason(d3);
+        Explanation rr = rs.getDecisionRefutation(d3);
         Assert.assertNotNull(rr);
         Assert.assertEquals(rr.nbDecisions(), 2);
 

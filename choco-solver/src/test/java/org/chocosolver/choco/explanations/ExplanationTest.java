@@ -31,10 +31,10 @@ package org.chocosolver.choco.explanations;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
-import org.chocosolver.solver.explanations.arlil.CBJ4ARLIL;
-import org.chocosolver.solver.explanations.arlil.Reason;
+import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
@@ -89,11 +89,11 @@ public class ExplanationTest {
         solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
         solver.set(ISF.lexico_LB(vars));
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, true);
-        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, true);
+        ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
         solver.plugMonitor(cbj);
         Assert.assertFalse(solver.findSolution());
-        Reason exp = cbj.getLastReason();
+        Explanation exp = cbj.getLastExplanation();
         Assert.assertEquals(2, exp.nbCauses());
     }
 

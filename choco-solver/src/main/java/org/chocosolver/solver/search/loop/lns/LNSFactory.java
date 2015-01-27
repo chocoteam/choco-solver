@@ -29,7 +29,6 @@
 package org.chocosolver.solver.search.loop.lns;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.strategies.*;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;

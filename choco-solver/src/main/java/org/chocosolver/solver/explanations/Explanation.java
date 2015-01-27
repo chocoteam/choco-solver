@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.hash.THashSet;
 import org.chocosolver.solver.ICause;
@@ -35,18 +35,18 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A reason is simply a set of causes and decisions explaining a <i>situation</i>, for instance a conflict.
- * It is related to ARLIL explanation engine, in substitution of {@link org.chocosolver.solver.explanations.Explanation}.
+ * An explanation is simply a set of causes and decisions explaining a <i>situation</i>, for instance a conflict.
+ * It is related to the explanation engine (replacement of Explanation)
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public class Reason {
+public class Explanation {
 
     private final boolean saveCauses;
     private final THashSet<ICause> causes;
     private final BitSet decisions;
 
-    public Reason(boolean saveCauses) {
+    public Explanation(boolean saveCauses) {
         this.causes = new THashSet<>();
         this.decisions = new BitSet();
         this.saveCauses = saveCauses;
@@ -91,16 +91,16 @@ public class Reason {
     }
 
     /**
-     * Merge all causes and decisions from <code>reason</code> in this.
+     * Merge all causes and decisions from <code>explanation</code> in this.
      *
-     * @param reason a given reason
+     * @param explanation a given explanation
      */
-    public void addAll(Reason reason) {
-        if (reason.nbCauses() > 0) {
-            this.causes.addAll(reason.causes);
+    public void addAll(Explanation explanation) {
+        if (explanation.nbCauses() > 0) {
+            this.causes.addAll(explanation.causes);
         }
-        if (reason.nbDecisions() > 0) {
-            this.decisions.or(reason.decisions);
+        if (explanation.nbDecisions() > 0) {
+            this.decisions.or(explanation.decisions);
         }
     }
 
@@ -108,7 +108,7 @@ public class Reason {
      * Remove one cause from the set of causes explaining the situation
      *
      * @param cause a cause to remove
-     * @return true if the reason changed
+     * @return true if the explanation changed
      */
     public boolean remove(ICause cause) {
         return causes.remove(cause);
@@ -139,18 +139,18 @@ public class Reason {
     }
 
     /**
-     * Duplicate the current reason
+     * Duplicate the current explanation
      *
-     * @return a new reason
+     * @return a new explanation
      */
-    public Reason duplicate() {
-        Reason reason = new Reason(this.saveCauses);
-        reason.addAll(this);
-        return reason;
+    public Explanation duplicate() {
+        Explanation explanation = new Explanation(this.saveCauses);
+        explanation.addAll(this);
+        return explanation;
     }
 
     /**
-     * Clear the Reason, to enable reusing it.
+     * Clear the explanation, to enable reusing it.
      */
     public void clear() {
         causes.clear();

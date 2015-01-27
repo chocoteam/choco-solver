@@ -458,6 +458,15 @@ Explanations are disabled by default.
 Choco |version| : changes
 =========================
 
+3.3.1
+-----
+
+- Addition:
+    - :ref:`51_smf`
+
+- Major modification:
+    - :ref:`43_explanations_label`
+    - :ref:`44_monitors_label`
 
 3.3.0
 -----

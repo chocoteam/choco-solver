@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -48,8 +48,8 @@ import java.util.BitSet;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 
 /**
- * A RuleStore is a central object in ARLIL explanation engine.
- * It stores a set of rules which enables to compute the reason of a <i>situation</i> (for instance a conflict) by
+ * A RuleStore is a central object in the Asynchronous, Reverse, Low-Intrusive and Lazy explanation engine.
+ * It stores a set of rules which enables to compute the explanation of a <i>situation</i> (for instance a conflict) by
  * scanning the events generated on the current branch.
  * The set of rules is dynamically maintained.
  * <p>
@@ -71,7 +71,7 @@ public class RuleStore {
     private final BitSet paRules; // rules for propagator activation
     private final int[] vmRules;    // rules for variable modification
     private final TIntSet[] vmRemval;    // store value removal when necessary
-    private Reason[] decRefut; // store refuted decisions
+    private Explanation[] decRefut; // store refuted decisions
     private boolean earlystop_;
     private final boolean userfeedback;
     private int swi; // search world index
@@ -106,7 +106,7 @@ public class RuleStore {
         vmRules = new int[_v];
         Arrays.fill(vmRules, NO_ENTRY);
         vmRemval = new TIntSet[_v];
-        decRefut = new Reason[16];
+        decRefut = new Explanation[16];
     }
 
     /**
@@ -227,13 +227,14 @@ public class RuleStore {
 
 
     /**
-     * Update the rule store, and the reason, wrt a given event
+     * Update the rule store, and the explanation, wrt a given event
      *
      * @param idx        index of the event
      * @param eventStore the event store
-     * @param reason     the reason to compute
+     * @param explanation     the explanation to compute
      */
-    public void update(final int idx, final IEventStore eventStore, Reason reason) {
+    @SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
+    public void update(final int idx, final IEventStore eventStore, Explanation explanation) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("UPDATE < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
                     eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
@@ -249,28 +250,28 @@ public class RuleStore {
                 Decision decision = (Decision) lastCause;
                 // If it is a LEFT decision, simply add it
                 if (decision.hasNext()) {
-                    reason.addDecicion(decision);
+                    explanation.addDecicion(decision);
                 } else {
-                    // Otherwise, get the reason of the refutation
-                    Reason drr = getDecisionRefutationReason(decision);
-                    assert drr != null : "No reason for decision refutation :" + decision.toString();
-                    reason.addAll(drr);
+                    // Otherwise, get the explanation of the refutation
+                    Explanation drr = getDecisionRefutation(decision);
+                    assert drr != null : "No explanation for decision refutation :" + decision.toString();
+                    explanation.addAll(drr);
                 }
                 if (ENABLE_EARLY_STOP && !userfeedback) {
-                    earlystop_ = reason.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
+                    earlystop_ = explanation.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
                 }
             } else {
                 assert lastValue == eventStore.getFirstValue(idx) : "Wrong value loaded";
 
                 // The cause is not a decision, that is, certainly a propagator
-                // add the cause to the reason
-                reason.addCause(lastCause);
+                // add the cause to the explanation
+                explanation.addCause(lastCause);
                 // then add new rules to the rule store to explain the cause application
                 lastCause.why(this, lastVar, lastEvt, lastValue);
             }
         } else {
             // the event was a propagator activation
-            // 1. add a new rule: reason of the variable instantiation
+            // 1. add a new rule: explanation of the variable instantiation
             addFullDomainRule(lastVar);
             // 2. remove the propagator activation rule, now we know it depends on the variable
             paRules.clear(lastValue);
@@ -401,17 +402,17 @@ public class RuleStore {
      * Store a decision refutation, for future reasoning.
      *
      * @param decision refuted decision
-     * @param reason   the reason of the refutation
+     * @param explanation   the explanation of the refutation
      */
-    void storeDecisionRefutation(Decision decision, Reason reason) {
+    void storeDecisionRefutation(Decision decision, Explanation explanation) {
         int w = decision.getWorldIndex();
         if (w >= decRefut.length) {
-            Reason[] tmp = decRefut;
-            decRefut = new Reason[w + 10];
+            Explanation[] tmp = decRefut;
+            decRefut = new Explanation[w + 10];
             System.arraycopy(tmp, 0, decRefut, 0, tmp.length);
         }
-        assert w >= reason.getDecisions().length();
-        decRefut[w] = reason;
+        assert w >= explanation.getDecisions().length();
+        decRefut[w] = explanation;
     }
 
     void moveDecisionRefutation(Decision decision, int to) {
@@ -423,45 +424,13 @@ public class RuleStore {
     }
 
     /**
-     * Get the reason associated to a decision refutation
+     * Get the explanation associated with a decision refutation
      *
      * @param decision a RIGHT branch decision
-     * @return a reason
+     * @return an explanation
      */
-    Reason getDecisionRefutationReason(Decision decision) {
+    Explanation getDecisionRefutation(Decision decision) {
         assert decision.triesLeft() < 2 : decision.toString() + "is not explained yet";
         return decRefut[decision.getWorldIndex()];
-    }
-
-    /**
-     * Inform the rule store that the propagator cannot provide more rules in the future
-     *
-     * @param cause a cause
-     */
-    public void skip(ICause cause) {
-        if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Skip method does not do anything, {} will not be skipped", cause);
-        }
-    }
-
-    /**
-     * Print the retained rules
-     *
-     * @param solver a solver to get the variables
-     */
-    public void printRules(Solver solver) {
-        StringBuilder st = new StringBuilder();
-        for (Variable v : solver.getVars()) {
-            int m = vmRules[v.getId()];
-            if (m != NO_ENTRY) {
-                st.append(v.getName()).append(":").append(m);
-                if (vmRemval[v.getId()] != null && vmRemval[v.getId()].size() > 0) {
-                    TIntSet values = vmRemval[v.getId()];
-                    st.append("\n\t").append(Arrays.toString(values.toArray()));
-                }
-                st.append("\n");
-            }
-        }
-        System.out.printf("%s\n", st.toString());
     }
 }

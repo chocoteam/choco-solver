@@ -29,9 +29,8 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.arlil.ARLILExplanationEngine;
-import org.chocosolver.solver.explanations.arlil.CBJ4ARLIL;
-import org.chocosolver.solver.explanations.arlil.DBT4ARLIL;
+import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
+import org.chocosolver.solver.explanations.strategies.DynamicBackTracking;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -57,8 +56,8 @@ public enum ExplanationFactory {
     CBJ {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, userFeedbackOn);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, nogoodsOn);
+            ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
+            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, nogoodsOn);
             solver.plugMonitor(cbj);
         }
     },
@@ -69,8 +68,8 @@ public enum ExplanationFactory {
     DBT {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, userFeedbackOn);
-            DBT4ARLIL dbt = new DBT4ARLIL(ee, solver, nogoodsOn);
+            ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
+            DynamicBackTracking dbt = new DynamicBackTracking(ee, solver, nogoodsOn);
             solver.plugMonitor(dbt);
         }
     };

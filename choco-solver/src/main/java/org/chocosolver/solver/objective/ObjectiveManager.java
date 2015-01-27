@@ -31,7 +31,7 @@ package org.chocosolver.solver.objective;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;

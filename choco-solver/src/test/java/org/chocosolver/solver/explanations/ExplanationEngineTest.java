@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.arlil;
+package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
@@ -34,7 +34,7 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -56,7 +56,7 @@ import java.util.Arrays;
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public class ARLILExplanationEngineTest {
+public class ExplanationEngineTest {
 
 
     /**
@@ -72,12 +72,12 @@ public class ARLILExplanationEngineTest {
             for (int i = 0; i < n - 1; i++) {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
             }
-            Solver arlil = solver.duplicateModel();
+            Solver expl = solver.duplicateModel();
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
-            Reason r = null;
+            ExplanationEngine ee = new ExplanationEngine(expl, false);
+            Explanation r = null;
             try {
-                arlil.propagate();
+                expl.propagate();
                 Assert.fail();
             } catch (ContradictionException e) {
                 r = ee.explain(e);
@@ -99,13 +99,13 @@ public class ARLILExplanationEngineTest {
             solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
             solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
 
-            Solver arlil = solver.duplicateModel();
+            Solver expl = solver.duplicateModel();
 
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
-            Reason r = null;
+            ExplanationEngine ee = new ExplanationEngine(expl, false);
+            Explanation r = null;
             try {
-                arlil.propagate();
+                expl.propagate();
                 Assert.fail();
             } catch (ContradictionException e) {
                 r = ee.explain(e);
@@ -127,18 +127,18 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
             solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
 
-            Solver arlil = solver.duplicateModel();
+            Solver expl = solver.duplicateModel();
 
-            IntStrategy is = ISF.lexico_LB(arlil.retrieveIntVars());
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
-            Reason r = null;
+            IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
+            ExplanationEngine ee = new ExplanationEngine(expl, false);
+            Explanation r = null;
             try {
-                arlil.propagate();
+                expl.propagate();
                 for (int i = 0; i < n; i++) {
                     Decision d = is.getDecision();
                     d.buildNext();
                     d.apply();
-                    arlil.propagate();
+                    expl.propagate();
                 }
                 Assert.fail();
             } catch (ContradictionException e) {
@@ -163,8 +163,8 @@ public class ARLILExplanationEngineTest {
         solver.post(new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)));
 
         IntStrategy is = ISF.lexico_LB(vs);
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        Reason r = null;
+        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        Explanation r = null;
         try {
             solver.propagate();
             for (int i = 0; i < n; i++) {
@@ -189,8 +189,8 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -209,8 +209,8 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -229,8 +229,8 @@ public class ARLILExplanationEngineTest {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -250,8 +250,8 @@ public class ARLILExplanationEngineTest {
             }
             solver.set(ISF.lexico_LB(vars));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
             solver.plugMonitor(cbj);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -277,8 +277,8 @@ public class ARLILExplanationEngineTest {
             solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
             solver.set(ISF.random_value(p, seed));
 
-            ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-            CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
             solver.plugMonitor(cbj);
 
             Chatterbox.showShortStatistics(solver);
@@ -301,8 +301,8 @@ public class ARLILExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
         solver.plugMonitor(cbj);
 
         Chatterbox.showStatistics(solver);
@@ -327,8 +327,8 @@ public class ARLILExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        CBJ4ARLIL cbj = new CBJ4ARLIL(ee, solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
         solver.plugMonitor(cbj);
 
         Chatterbox.showStatistics(solver);
@@ -344,22 +344,22 @@ public class ARLILExplanationEngineTest {
                 System.out.printf("noexp; ");
                 break;
             case 1: {
-                System.out.printf("arlil1; ");
+                System.out.printf("cbj; ");
                 ExplanationFactory.CBJ.plugin(solver, false, false);
             }
             break;
             case 2: {
-                System.out.printf("arlil2; ");
+                System.out.printf("cbj+ng; ");
                 ExplanationFactory.CBJ.plugin(solver, true, false);
             }
             break;
             case 3: {
-                System.out.printf("arlil3; ");
+                System.out.printf("dbt; ");
                 ExplanationFactory.DBT.plugin(solver, false, false);
             }
             break;
             case 4: {
-                System.out.printf("arlil4; ");
+                System.out.printf("dbt+ng; ");
                 ExplanationFactory.DBT.plugin(solver, true, false);
             }
             break;
@@ -695,8 +695,8 @@ public class ARLILExplanationEngineTest {
         }
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        Reason r = null;
+        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        Explanation r = null;
         try {
             solver.propagate();
             IntStrategy is = ISF.lexico_LB(bs);
@@ -720,8 +720,8 @@ public class ARLILExplanationEngineTest {
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
         SatFactory.addBoolNot(bs[0], bs[1]);
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        Reason r = null;
+        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        Explanation r = null;
         try {
             solver.propagate();
             IntStrategy is = ISF.lexico_LB(bs);
@@ -747,8 +747,8 @@ public class ARLILExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
-        ARLILExplanationEngine ee = new ARLILExplanationEngine(solver, false);
-        Reason r = null;
+        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        Explanation r = null;
         try {
             solver.propagate();
             IntStrategy is = ISF.lexico_LB(bs);
@@ -764,6 +764,38 @@ public class ARLILExplanationEngineTest {
             r = ee.explain(c);
         }
         Assert.assertNotNull(r);
+    }
+
+    @Test(groups = "1s")
+    public void test01() {
+        int n = 6;
+        int m = 10;
+        Solver s1 = test(n,m,1);
+        Solver s2 = test(n,m,2);
+        Solver s3 = test(n,m,3);
+        Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
+        Assert.assertEquals(s1.getMeasures().getSolutionCount(),s3.getMeasures().getSolutionCount());
+        Assert.assertTrue(s1.getMeasures().getNodeCount() >= s2.getMeasures().getNodeCount());
+        Assert.assertTrue(s2.getMeasures().getNodeCount() >= s3.getMeasures().getNodeCount());
+    }
+
+    private Solver test(int n, int m, int expMode) {
+        // infeasible problem
+        Solver s = new Solver();
+        IntVar[] x = VF.boundedArray("x", n, 0, m, s);
+        s.post(ICF.alldifferent(x, "NEQS"));
+        s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
+        // explanations
+        if (expMode == 2) {
+            ExplanationFactory.CBJ.plugin(s, false, false);
+        } else if (expMode == 3) {
+            ExplanationFactory.DBT.plugin(s, false, false);
+        }
+        // logging and solution
+        Chatterbox.showStatistics(s);
+        Chatterbox.showSolutions(s);
+        s.findAllSolutions();
+        return s;
     }
 
 }

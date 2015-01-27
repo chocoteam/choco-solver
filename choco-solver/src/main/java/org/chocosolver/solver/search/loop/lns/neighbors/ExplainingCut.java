@@ -26,18 +26,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.arlil.Reason;
-import org.chocosolver.solver.search.loop.lns.neighbors.ANeighbor;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.util.tools.StatisticUtils;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -84,6 +85,8 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     public ExplainingCut(Solver aSolver, int level, long seed) {
         super(aSolver);
         this.mExplanationEngine = aSolver.getExplainer();
+        assert mExplanationEngine != null;
+
         this.level = level;
         this.random = new Random(seed);
 
@@ -139,7 +142,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             if (path.get(id).hasNext()) {
                 last = path.get(id).duplicate();
                 if (refuted.get(id)) last.buildNext();
-                ExplanationToolbox.imposeDecisionPath(mSolver, last);
+                imposeDecisionPath(mSolver, last);
             }
         }
     }
@@ -260,12 +263,12 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
                 unrelated.clear();
 
                 // 3. explain the failure
-                Reason reason = mExplanationEngine.explain(cex);
-                if (reason.getDecisions().isEmpty()) {
+                Explanation explanation = mExplanationEngine.explain(cex);
+                if (explanation.getDecisions().isEmpty()) {
                     isTerminated = true;
                 }
 
-                related2cut.or(reason.getDecisions());
+                related2cut.or(explanation.getDecisions());
 
                 // 4. need to replace the duplicated decision with the correct one
                 for (int i = 0; i < path.size(); i++) {
@@ -284,6 +287,29 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         mSolver.getEngine().flush();
         unrelated.andNot(related2cut);
         unrelated.andNot(refuted);
+    }
+
+    /**
+     * Simulate a decision path, with backup
+     *
+     * @param aSolver  the concerned solver
+     * @param decision the decision to apply
+     * @throws ContradictionException
+     */
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+        IEnvironment environment = aSolver.getEnvironment();
+        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
+        // 1. simulates open node
+        Decision current = aSolver.getSearchLoop().getLastDecision();
+        decision.setPrevious(current);
+        aSolver.getSearchLoop().setLastDecision(decision);
+        // 2. simulates down branch
+        environment.worldPush();
+        decision.setWorldIndex(environment.getWorldIndex());
+        decision.buildNext();
+        objectiveManager.apply(decision);
+        objectiveManager.postDynamicCut();
+//        aSolver.getEngine().propagate();
     }
 
 }

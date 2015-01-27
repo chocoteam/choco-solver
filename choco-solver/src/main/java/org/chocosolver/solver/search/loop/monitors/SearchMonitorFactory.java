@@ -171,10 +171,10 @@ public class SearchMonitorFactory {
         limitThreadTime(solver, convertInMilliseconds(duration));
     }
 
-    public static Pattern Dp = Pattern.compile("(\\d+)d");
-    public static Pattern Hp = Pattern.compile("(\\d+)h");
-    public static Pattern Mp = Pattern.compile("(\\d+)m");
-    public static Pattern Sp = Pattern.compile("(\\d+(\\.\\d+)?)s");
+    private static Pattern Dp = Pattern.compile("(\\d+)d");
+    private static Pattern Hp = Pattern.compile("(\\d+)h");
+    private static Pattern Mp = Pattern.compile("(\\d+)m");
+    private static Pattern Sp = Pattern.compile("(\\d+(\\.\\d+)?)s");
 
 
     /**
@@ -252,7 +252,7 @@ public class SearchMonitorFactory {
 
     /**
      * Record nogoods from solution, that is, anytime a solution is found, a nogood is produced to prevent from
-     * founding the same solution later during the search.
+     * finding the same solution later during the search.
      * <code>vars</code> are the decision variables (to reduce ng size).
      *
      * @param vars array of decision variables
