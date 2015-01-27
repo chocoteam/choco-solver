@@ -13,6 +13,8 @@ NEXT MILESTONE
 - Move nogood recording from solution and restart from constraint pkg to monitor +(revamp) + SMF API
 - add DBT for explanations
 
+Bug fixes: #265
+
 3.3.0 - 04 Dec 2014
 -------------------
 
