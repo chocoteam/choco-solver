@@ -33,13 +33,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -121,21 +116,6 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     @Override
     public String toString() {
         return "prop(" + vars[0].getName() + ".NEQ." + vars[1].getName() + ")";
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        Variable var = d.getVar();
-
-        if (var.equals(x)) {
-            // a deduction has been made on x ; this is related to y only
-            y.explain(xengine, VariableState.DOM, e);
-        } else if (var.equals(y)) {
-            x.explain(xengine, VariableState.DOM, e);
-        }else{
-            super.explain(xengine, d, e);
-        }
     }
 
     @Override

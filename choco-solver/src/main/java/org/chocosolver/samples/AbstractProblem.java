@@ -111,7 +111,7 @@ public abstract class AbstractProblem {
     }
 
     protected void overrideExplanation() {
-        if (!solver.getExplainer().isActive()) {
+        if (solver.getExplainer() == null) {
             expeng.plugin(solver, ng, false);
         }
     }

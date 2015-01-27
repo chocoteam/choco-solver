@@ -42,7 +42,6 @@ import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.EventObserver;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
@@ -58,6 +57,7 @@ import org.chocosolver.solver.search.solution.*;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.observers.EventObserverList;
 import org.chocosolver.util.ESat;
 
 import java.io.*;
@@ -86,7 +86,7 @@ public class Solver implements Serializable {
 
     private ExplanationEngine explainer;
 
-    private EventObserver evtObserver;
+    private EventObserverList eoList;
 
     /**
      * Variables of the solver
@@ -169,8 +169,7 @@ public class Solver implements Serializable {
         this.environment = environment;
         this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
         this.search = new SearchLoop(this);
-        this.explainer = new ExplanationEngine(this);
-        this.evtObserver = explainer;
+        this.eoList = new EventObserverList();
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
@@ -394,12 +393,10 @@ public class Solver implements Serializable {
 
 
     /**
-     * Return the current event observer
-     *
-     * @return an {@link org.chocosolver.solver.explanations.EventObserver}
+     * Return the current event observer list
      */
     public EventObserver getEventObserver() {
-        return this.evtObserver;
+        return this.eoList;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -452,7 +449,7 @@ public class Solver implements Serializable {
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
-        this.evtObserver = explainer;
+        add(explainer);
     }
 
     /**
@@ -489,14 +486,14 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Define an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
+     * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
      * <p>
      * Erase the current event observer if any.
      *
      * @param eventObserver an event observer
      */
-    public void set(EventObserver eventObserver) {
-        this.evtObserver = eventObserver;
+    public void add(EventObserver eventObserver) {
+        this.eoList.add(eventObserver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

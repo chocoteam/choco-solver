@@ -30,9 +30,6 @@ package org.chocosolver.solver;
 
 
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -55,14 +52,6 @@ import java.io.Serializable;
  */
 public interface ICause extends Serializable {
 
-    /**
-     * Feeds an explanation based on <code>this</code>.
-     *
-     * @param xengine explanation engine
-     * @param d       the deduction
-     * @param e       explanation to feed
-     */
-    void explain(ExplanationEngine xengine, Deduction d, Explanation e);
 
     /**
      * Add new rules to the rule store

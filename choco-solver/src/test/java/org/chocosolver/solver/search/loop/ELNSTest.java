@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.explanations.strategies.ExplainingCut;
 import org.chocosolver.solver.explanations.strategies.ExplainingObjective;
 import org.chocosolver.solver.explanations.strategies.RandomNeighborhood4Explanation;
@@ -58,6 +59,8 @@ public class ELNSTest {
         solver.post(ICF.sum(vars, obj));
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));
         solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
+
+        ExplanationFactory.CBJ.plugin(solver, false, false);
 
         SMF.nogoodRecordingFromRestarts(solver);
         solver.getSearchLoop().plugSearchMonitor(

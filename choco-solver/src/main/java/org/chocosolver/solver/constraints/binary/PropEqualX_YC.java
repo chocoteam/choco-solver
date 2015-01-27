@@ -33,7 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -160,28 +159,6 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             if (y.contains(lb - cste)) return true;
         }
         return false;
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        //     return super.explain(d);
-        if (d.getVar() == x) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                y.explain(xengine, VariableState.REM, ((ValueRemoval) d).getVal() - cste, e);
-            } else {
-                throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
-            }
-        } else if (d.getVar() == y) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                x.explain(xengine, VariableState.REM, ((ValueRemoval) d).getVal() + cste, e);
-            } else {
-                throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
-            }
-        } else {
-            super.explain(xengine, d, e);
-        }
     }
 
     @Override

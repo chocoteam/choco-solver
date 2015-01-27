@@ -31,10 +31,6 @@ package org.chocosolver.solver.objective;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
@@ -133,13 +129,6 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      */
     public void apply(Decision decision) throws ContradictionException {
         decision.apply();
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction val, Explanation e) {
-        if (isOptimization()) {
-            objective.explain(xengine, VariableState.DOM, e);
-        }
     }
 
     @Override

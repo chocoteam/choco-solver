@@ -29,7 +29,6 @@
 package org.chocosolver.solver.search.loop.lns;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.LazyExplanationEngineFromRestart;
 import org.chocosolver.solver.explanations.strategies.*;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
@@ -153,9 +152,6 @@ public class LNSFactory {
      */
     public static LargeNeighborhoodSearch elns(Solver solver, IntVar[] vars, int level, long seed,
                                                ACounter fr4exp, ACounter fr4rnd) {
-        if (!(solver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
-            solver.set(new LazyExplanationEngineFromRestart(solver));
-        }
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
         neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new ExplainingCut(solver, level, seed);
@@ -185,9 +181,6 @@ public class LNSFactory {
     public static LargeNeighborhoodSearch pgelns(Solver solver, IntVar[] vars, int level, long seed,
                                                  int fgmtSize, int listSize,
                                                  ACounter fr4exp, ACounter fr4rnd) {
-        if (!(solver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
-            solver.set(new LazyExplanationEngineFromRestart(solver));
-        }
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
         neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
@@ -221,9 +214,6 @@ public class LNSFactory {
     public static LargeNeighborhoodSearch apgelns(Solver solver, IntVar[] vars, int level, long seed,
                                                   int fgmtSize, int listSize,
                                                   ACounter fr4exp, ACounter fr4rnd) {
-        if (!(solver.getExplainer() instanceof LazyExplanationEngineFromRestart)) {
-            solver.set(new LazyExplanationEngineFromRestart(solver));
-        }
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
         neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);

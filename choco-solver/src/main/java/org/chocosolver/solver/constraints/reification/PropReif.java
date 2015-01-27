@@ -36,10 +36,6 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.ReificationConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -149,19 +145,6 @@ public class PropReif extends Propagator<Variable> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d.getVar() == bVar) {
-            // the current deduction is due to the current domain of the involved variables
-            for (Variable v : vars) {
-                v.explain(xengine, VariableState.DOM, e);
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
     }
 
     @Override

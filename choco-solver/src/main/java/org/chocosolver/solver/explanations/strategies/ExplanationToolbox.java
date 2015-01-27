@@ -31,12 +31,8 @@ package org.chocosolver.solver.explanations.strategies;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-
-import java.util.Set;
 
 /**
  * A toolbox dedicated to explained neighbors
@@ -47,24 +43,6 @@ import java.util.Set;
  */
 enum ExplanationToolbox {
     ;
-
-    /**
-     * Extract decision from the explanation
-     *
-     * @param explanation the explanation
-     * @param decisions   a set of decisions
-     */
-    protected static void extractDecision(Explanation explanation, Set<Deduction> decisions) {
-        decisions.clear();
-        if (explanation.nbDeductions() > 0) {
-            for (int d = 0; d < explanation.nbDeductions(); d++) {
-                Deduction dec = explanation.getDeduction(d);
-                if (dec.getmType() == Deduction.Type.DecLeft) {
-                    decisions.add(dec);
-                }
-            }
-        }
-    }
 
     /**
      * Simutate a decision path, with backup

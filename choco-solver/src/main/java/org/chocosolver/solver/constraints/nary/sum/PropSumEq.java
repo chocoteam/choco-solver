@@ -33,7 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -131,43 +130,6 @@ public class PropSumEq extends Propagator<IntVar> {
         linComb.append(" = ");
         linComb.append(vars[n].getName());
         return linComb.toString();
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d != null && d.getmType() == Deduction.Type.ValRem) {
-            ValueRemoval vr = (ValueRemoval) d;
-            IntVar var = (IntVar) vr.getVar();
-            int val = vr.getVal();
-            // 1. find the pos of var in vars
-            boolean ispos = vars[n].getId() != var.getId();
-            if (val < var.getLB()) { // explain LB
-                for (int i = 0; i < n; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
-                    }
-                }
-                // then the negative one
-                if (vars[n] != var) {
-                    vars[n].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
-                }
-            } else if (val > var.getUB()) { // explain UB
-                for (int i = 0; i < n; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
-                    }
-                }
-                // then the negative one
-                if (vars[n] != var) {
-                    vars[n].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
-                }
-            } else {
-                super.explain(xengine, d, e);
-            }
-        } else {
-            super.explain(xengine, d, e);
-        }
     }
 
 

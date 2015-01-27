@@ -30,7 +30,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.EventObserver;
+import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.store.ArrayEventStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -46,11 +46,12 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public class ARLILExplanationEngine implements EventObserver {
+public class ARLILExplanationEngine implements ExplanationEngine {
 
-    private final IEventStore eventStore; // set of generated events
+    protected final IEventStore eventStore; // set of generated events
     private final RuleStore ruleStore; // set of active rules
     private final boolean saveCauses; // save the clauses in Reason
+    private final Solver mSolver;
 
 
     /**
@@ -64,6 +65,7 @@ public class ARLILExplanationEngine implements EventObserver {
         ruleStore = new RuleStore(solver, userFeedback);
         solver.set(this);
         this.saveCauses = userFeedback;
+        this.mSolver = solver;
     }
 
     /**
@@ -99,6 +101,19 @@ public class ARLILExplanationEngine implements EventObserver {
             i--;
         }
         return reason;
+    }
+
+    public RuleStore getRuleStore() {
+        return ruleStore;
+    }
+
+    public IEventStore getEventStore() {
+        return eventStore;
+    }
+
+    @Override
+    public Solver getSolver() {
+        return mSolver;
     }
 
     /**

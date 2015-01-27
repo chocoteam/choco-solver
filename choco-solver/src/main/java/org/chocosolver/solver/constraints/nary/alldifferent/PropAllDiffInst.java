@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -142,20 +141,6 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             }
 
             identitymap.put(this, new PropAllDiffInst(aVars));
-        }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d.getmType() == Deduction.Type.ValRem) {
-            int i = 0;
-            while (i < vars.length && (vars[i] == d.getVar() || !vars[i].isInstantiatedTo(((ValueRemoval) d).getVal()))) {
-                i++;
-            }
-            vars[i].explain(xengine, VariableState.DOM, e);
-        } else {
-            super.explain(xengine, d, e);
         }
     }
 

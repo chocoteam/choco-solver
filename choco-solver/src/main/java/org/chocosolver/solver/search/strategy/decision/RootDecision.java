@@ -30,10 +30,6 @@ package org.chocosolver.solver.search.strategy.decision;
 
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.BranchingDecision;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
 
@@ -45,9 +41,6 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
-
-    // Required for explanation store
-    private static BranchingDecision BROOT = new BranchingDecision(ROOT, true);
 
     // FOR SERIALIZATION
     private Object readResolve() {
@@ -104,20 +97,6 @@ public class RootDecision extends Decision {
     @Override
     public void reverse() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-    }
-
-    @Override
-    public Deduction getNegativeDeduction(ExplanationEngine xengine) {
-        return BROOT;
-    }
-
-    @Override
-    public Deduction getPositiveDeduction(ExplanationEngine xengine) {
-        return BROOT;
     }
 
     @Override

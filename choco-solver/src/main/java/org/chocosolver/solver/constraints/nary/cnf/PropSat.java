@@ -36,10 +36,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.explanations.arlil.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -240,70 +236,6 @@ public class PropSat extends Propagator<BoolVar> {
     public static void declareVariable(PropSat sat, BoolVar var) {
         //CHECK(sat.Check(var));
         sat.Literal(var);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction ded, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        BoolVar bvar = (BoolVar) ded.getVar();
-        int var = indices_.get(bvar);
-        boolean new_value = bvar.getValue() != 0;
-        int lit = makeLiteral(var, new_value);
-
-        // A. implications:
-        // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(lit);
-        if (implies != null) {
-            for (int i = implies.size() - 1; i >= 0; i--) {
-                int l = implies.get(i);
-                // if the other variable is instantiated ...
-                if (vars[var(l)].isInstantiated()) {
-                    // could be : if(sat_.valueLit(l) != SatSolver.Boolean.kUndefined)
-                    // but as far as the variable is instantiated, that's enough, and we skip conflict cases
-                    vars[var(l)].explain(xengine, VariableState.DOM, e);
-                }
-            }
-        }
-
-        // B. clauses:
-        // We need to find the fully instantiated clauses where bvar appears
-        // we cannot rely on watches_ because is not backtrackable
-        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        int neg = negated(lit);
-        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.clauses.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            vars[var(l)].explain(xengine, VariableState.DOM, e);
-                        }
-                    }
-                }
-            }
-        }
-        for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.learnts.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            vars[var(l)].explain(xengine, VariableState.DOM, e);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Override

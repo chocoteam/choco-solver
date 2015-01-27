@@ -34,9 +34,7 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.explanations.RecorderExplanationEngine;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -76,39 +74,16 @@ public class ARLILExplanationEngineTest {
             }
             Solver arlil = solver.duplicateModel();
 
-            long t = -System.currentTimeMillis();
-            {
-                RecorderExplanationEngine expler = new RecorderExplanationEngine(solver);
-                solver.set(expler);
-                expler.beforeInitialPropagation();
-                Explanation ex = null;
-                try {
-                    solver.propagate();
-                    Assert.fail();
-                } catch (ContradictionException e) {
-                    ex = expler.flatten(e.explain(expler));
-                }
-                Assert.assertNotNull(ex);
-                Assert.assertEquals(ex.nbDeductions(), n - 1);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
+            Reason r = null;
+            try {
+                arlil.propagate();
+                Assert.fail();
+            } catch (ContradictionException e) {
+                r = ee.explain(e);
             }
-            t += System.currentTimeMillis();
-            System.out.printf("%.3fs vs. ", t / 1000d);
-
-            t = -System.currentTimeMillis();
-            {
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
-                Reason r = null;
-                try {
-                    arlil.propagate();
-                    Assert.fail();
-                } catch (ContradictionException e) {
-                    r = ee.explain(e);
-                }
-                Assert.assertNotNull(r);
-                Assert.assertEquals(r.nbCauses(), n - 1);
-            }
-            t += System.currentTimeMillis();
-            System.out.printf("%.3fs \n", t / 1000d);
+            Assert.assertNotNull(r);
+            Assert.assertEquals(r.nbCauses(), n - 1);
         }
     }
 
@@ -126,39 +101,17 @@ public class ARLILExplanationEngineTest {
 
             Solver arlil = solver.duplicateModel();
 
-            long t = -System.currentTimeMillis();
-            {
-                RecorderExplanationEngine expler = new RecorderExplanationEngine(solver);
-                solver.set(expler);
-                expler.beforeInitialPropagation();
-                Explanation ex = null;
-                try {
-                    solver.propagate();
-                    Assert.fail();
-                } catch (ContradictionException e) {
-                    ex = expler.flatten(e.explain(expler));
-                }
-                Assert.assertNotNull(ex);
-                Assert.assertEquals(ex.nbDeductions(), 2);
-            }
-            t += System.currentTimeMillis();
-            System.out.printf("%.3fs vs. ", t / 1000d);
 
-            t = -System.currentTimeMillis();
-            {
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
-                Reason r = null;
-                try {
-                    arlil.propagate();
-                    Assert.fail();
-                } catch (ContradictionException e) {
-                    r = ee.explain(e);
-                }
-                Assert.assertNotNull(r);
-                Assert.assertEquals(r.nbCauses(), 2);
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
+            Reason r = null;
+            try {
+                arlil.propagate();
+                Assert.fail();
+            } catch (ContradictionException e) {
+                r = ee.explain(e);
             }
-            t += System.currentTimeMillis();
-            System.out.printf("%.3fs \n", t / 1000d);
+            Assert.assertNotNull(r);
+            Assert.assertEquals(r.nbCauses(), 2);
         }
     }
 
@@ -176,55 +129,24 @@ public class ARLILExplanationEngineTest {
 
             Solver arlil = solver.duplicateModel();
 
-            long t = -System.currentTimeMillis();
-            {
-                IntStrategy is = ISF.lexico_LB(solver.retrieveIntVars());
-
-                RecorderExplanationEngine expler = new RecorderExplanationEngine(solver);
-                solver.set(expler);
-                expler.beforeInitialPropagation();
-                Explanation ex = null;
-                try {
-                    solver.propagate();
-                    for (int i = 0; i < n; i++) {
-                        Decision d = is.getDecision();
-                        d.buildNext();
-                        d.apply();
-                        solver.propagate();
-                    }
-                    Assert.fail();
-                } catch (ContradictionException e) {
-                    ex = expler.flatten(e.explain(expler));
-                }
-                Assert.assertNotNull(ex);
-                Assert.assertEquals(ex.nbDeductions(), 3);
-            }
-            t += System.currentTimeMillis();
-            System.out.printf("%.3fs vs. ", t / 1000d);
-
-            t = -System.currentTimeMillis();
-            {
-                IntStrategy is = ISF.lexico_LB(arlil.retrieveIntVars());
-                ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
-                Reason r = null;
-                try {
+            IntStrategy is = ISF.lexico_LB(arlil.retrieveIntVars());
+            ARLILExplanationEngine ee = new ARLILExplanationEngine(arlil, false);
+            Reason r = null;
+            try {
+                arlil.propagate();
+                for (int i = 0; i < n; i++) {
+                    Decision d = is.getDecision();
+                    d.buildNext();
+                    d.apply();
                     arlil.propagate();
-                    for (int i = 0; i < n; i++) {
-                        Decision d = is.getDecision();
-                        d.buildNext();
-                        d.apply();
-                        arlil.propagate();
-                    }
-                    Assert.fail();
-                } catch (ContradictionException e) {
-                    r = ee.explain(e);
                 }
-                Assert.assertNotNull(r);
-                Assert.assertEquals(r.nbCauses(), 2);
-                Assert.assertEquals(r.nbDecisions(), 1);
+                Assert.fail();
+            } catch (ContradictionException e) {
+                r = ee.explain(e);
             }
-            t += System.currentTimeMillis();
-            System.out.printf("%.3fs \n", t / 1000d);
+            Assert.assertNotNull(r);
+            Assert.assertEquals(r.nbCauses(), 2);
+            Assert.assertEquals(r.nbDecisions(), 1);
         }
     }
 

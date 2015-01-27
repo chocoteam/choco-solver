@@ -33,11 +33,6 @@ import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -190,25 +185,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override//void (a constant receives no event)
     public void addMonitor(IVariableMonitor monitor) {
-    }
-
-    @Override
-    public AntiDomain antiDomain() {
-        return new AntiDomBitset(this);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        if (empty.get()) {
-            to.add(xengine.explain(this, constante));
-        }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        if (empty.get()) {
-            to.add(xengine.explain(this, constante));
-        }
     }
 
     @Override//void (a constant receives no event)

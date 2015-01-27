@@ -1,24 +1,22 @@
-/**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+/*
+ * Copyright (c) 1999-2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,185 +26,29 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
+import org.chocosolver.solver.explanations.arlil.Reason;
+import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.variables.EventObserver;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 26 oct. 2010
- * Time: 12:34:02
- * <p/>
- * A class to manage explanations. The default behavior is to do nothing !
+ * Created by cprudhom on 26/01/15.
+ * Project: choco.
  */
-public class ExplanationEngine implements Serializable, EventObserver {
-    static Logger LOGGER = LoggerFactory.getLogger(ExplanationEngine.class);
-    Solver solver;
+public interface ExplanationEngine extends EventObserver {
 
     /**
-     * Builds an ExplanationEngine
+     * Compute the explanation of the last event from the event store (naturally, the one that leads to a conflict),
+     * and return the reason of the failure, that is, the (sub-)set of decisions and propagators explaining the conflict.
      *
-     * @param slv associated solver's environment
+     * @return a Reason (set of decisions and propagators).
      */
-    public ExplanationEngine(Solver slv) {
-        this.solver = slv;
-    }
-
-    public boolean isActive() {
-        return false;
-    }
-
-    public AntiDomain getRemovedValues(IntVar v) {
-        return null;
-    }
+    Reason explain(ContradictionException cex);
 
     /**
-     * Get the deduction associated with the value removed from the variable
-     * @param var a variable
-     * @param val a value
-     * @return a deduction
+     * Return the explained solver
      */
-    public ValueRemoval getValueRemoval(IntVar var, int val){
-        return null;
-    }
+    Solver getSolver();
 
-    /**
-     * Provides an explanation for the removal of value <code>val</code> from variable
-     * <code>var</code> ; the implementation is recording policy dependent
-     * for a flattened policy, the database is checked (automatically flattening explanations)
-     * for a non flattened policy, only the value removal is returned
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return a deduction
-     */
-    public Deduction explain(IntVar var, int val) {
-        return null;
-    }
-
-    /**
-     * Provides an explanation for the deduction <code>deduction</code> ; the implementation is recording policy dependent
-     * for a flattened policy, the database is checked (automatically flattening explanations)
-     * for a non flattened policy, the deduction is returned unmodified
-     *
-     * @param deduction a Deduction
-     * @return a deduction
-     */
-    public Deduction explain(Deduction deduction) {
-        return null;
-    }
-
-    /**
-     * Provides a FLATTENED explanation for the removal of value <code>val</code> from variable
-     * <code>var</code>
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return an explanation
-     */
-    public Explanation flatten(IntVar var, int val) {
-        return null;
-    }
-
-    public Explanation flatten(Explanation expl) {
-        return null;
-    }
-
-    public Explanation flatten(Deduction deduction) {
-        return null;
-    }
-
-    /**
-     * Provides the recorded explanation in database for the removal of value <code>val</code>
-     * from variable <code>var</code>
-     * The result will depend upon the recording policy of the engine
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return an explanation
-     */
-    public Explanation retrieve(IntVar var, int val) {
-        return null;
-    }
-
-    /**
-     * provides a BranchingDecision associated to a decision
-     *
-     * @param decision an integer variable
-     * @param isLeft   is left branch decision
-     * @return the associated right BranchingDecision
-     */
-    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
-        return null;
-    }
-
-    /**
-     * Provides an explanation of the activation of a propagator.
-     * Only valuated for reified propagators.
-     * @param propagator the activated propagator
-     * @return a deduction
-     */
-    public PropagatorActivation getPropagatorActivation(Propagator propagator) {
-        return null;
-    }
-
-    /**
-     * Store the <code>explanation</code> of the <code>deduction</code>
-     *
-     * @param deduction   deduction to explain
-     * @param explanation explanation of the deduction
-     */
-    public void store(Deduction deduction, Explanation explanation) {
-
-    }
-
-    /**
-     * Remove the <code>decision</code> from the set of left decisions over <code>var</code>
-     *
-     * @param decision a left decision over <code>var</code>
-     * @param var      a variable
-     */
-    public void removeLeftDecisionFrom(Decision decision, Variable var) {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
-        LOGGER.debug("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-    }
-
-    public void onActivatePropagator(Propagator propagator, Explanation explanation) {
-        LOGGER.debug("::EXPL:: ACTIV. " + propagator + " BECAUSE OF " + flatten(explanation));
-    }
-
-    public void onContradiction(ContradictionException cex, Explanation explanation) {
-        if (cex.v != null) {
-            LOGGER.debug("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
-        } else if (cex.c != null) {
-            LOGGER.debug("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    public Solver getSolver() {
-        return solver;
-    }
-
-    public void request() {
-        // only usefull for multi-thread
-    }
 }
