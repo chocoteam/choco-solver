@@ -513,7 +513,7 @@ It ensures that the assignment of a sequence of variables `VARS` is recognized b
 and that the sum of the costs associated to each assignment is bounded by the cost variable.
 This version allows to specify different costs according to the automaton state at which the assignment occurs (i.e. the transition starts).
 
-The `CAUOTMATON` can be defined using the ``solver.constraints.nary.automata.FA.CostAutomaton` either:
+The `CAUOTMATON` can be defined using the ``org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton` either:
 
 - by creating a ``CostAutomaton``: once created, states should be added, then initial and final states are defined and finally, transitions are declared.
 - or by first creating a ``FiniteAutomaton`` and then creating a matrix of costs and finally calling one of the following API from ``CostAutomaton``:
@@ -1223,7 +1223,7 @@ It ensures that the assignment of a sequence of variables `VARS` is recognized b
 and that the sum of the cost array associated to each assignment is bounded by the `CVARS`.
 This version allows to specify different costs according to the automaton state at which the assignment occurs (i.e. the transition starts).
 
-The `CAUOTMATON` can be defined using the ``solver.constraints.nary.automata.FA.CostAutomaton` either:
+The `CAUOTMATON` can be defined using the ``org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton` either:
 
 - by creating a ``CostAutomaton``: once created, states should be added, then initial and final states are defined and finally, transitions are declared.
 - or by first creating a ``FiniteAutomaton`` and then creating a matrix of costs and finally calling one of the following API from ``CostAutomaton``:
@@ -2971,7 +2971,7 @@ A built-in variable selector which chooses the first non-instantiated integer va
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -2986,7 +2986,7 @@ A built-in variable selector which randomly chooses an integer variable, among n
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3001,7 +3001,7 @@ A built-in variable selector which chooses the non-instantiated integer variable
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3016,7 +3016,7 @@ A built-in variable selector which chooses the non-instantiated integer variable
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3032,7 +3032,7 @@ A built-in variable selector which chooses the non-instantiated integer variable
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3053,7 +3053,7 @@ A built-in value selector which selects the variable lower bound.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3076,7 +3076,7 @@ Rounding policy is floor. It could be override by creating a new instance of ``I
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3091,7 +3091,7 @@ A built-in value selector which selects the variable upper bound.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3106,7 +3106,7 @@ A built-in value selector which randomly selects either the lower bound or the u
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3126,7 +3126,7 @@ Selects randomly a value in the variable domain.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3149,7 +3149,7 @@ Its negation is `remove`.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3166,7 +3166,7 @@ Its negation is `assign`.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3183,7 +3183,7 @@ Its negation is `reverse_split` on `value + 1`.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3200,7 +3200,7 @@ Its negation is `split` on `value - 1`.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3224,7 +3224,7 @@ A strategy is based on a variable selector, a value selector and an optional dec
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3249,7 +3249,7 @@ A built-in strategy which chooses the first non-instantiated variable, regarding
 
 **Scope**: ``SetVar``
 
-**Factory**: ``solver.search.strategy.SetStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.SetStrategyFactory``
 
 **API**: ::
 
@@ -3264,7 +3264,7 @@ A built-in strategy which chooses the first non-instantiated variable of maximum
 
 **Scope**: ``SetVar``
 
-**Factory**: ``solver.search.strategy.SetStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.SetStrategyFactory``
 
 **API**: ::
 
@@ -3279,7 +3279,7 @@ A built-in strategy which chooses the first non-instantiated variable of minimum
 
 **Scope**: ``SetVar``
 
-**Factory**: ``solver.search.strategy.SetStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.SetStrategyFactory``
 
 **API**: ::
 
@@ -3294,7 +3294,7 @@ A built-in strategy which chooses the first non-instantiated variable, regarding
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3309,7 +3309,7 @@ A built-in strategy which chooses the first non-instantiated variable, regarding
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3324,7 +3324,7 @@ A built-in strategy which chooses the first non-instantiated variable, regarding
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3339,7 +3339,7 @@ A built-in strategy which chooses the first non-instantiated variable, regarding
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3354,7 +3354,7 @@ A built-in strategy which chooses the first non-instantiated variable with the s
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3369,7 +3369,7 @@ A built-in strategy which chooses the first non-instantiated variable with the s
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3384,7 +3384,7 @@ A built-in strategy which chooses the first non-instantiated variable with large
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3399,7 +3399,7 @@ A built-in strategy which chooses the first non-instantiated variable with the s
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3414,7 +3414,7 @@ A built-in strategy which chooses the first non-instantiated variable with the l
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3429,7 +3429,7 @@ A built-in strategy which randomly chooses a non-instantiated variable, and assi
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3445,7 +3445,7 @@ A built-in strategy which randomly chooses a non-instantiated variable, and assi
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3461,7 +3461,7 @@ A built-in strategy which chooses the first unfixed variable and removes its sma
 
 **Scope**: ``SetVar``
 
-**Factory**: ``solver.search.strategy.SetStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.SetStrategyFactory``
 
 **API**: ::
 
@@ -3476,7 +3476,7 @@ A meta strategy which applies sequentially the strategies in its scope.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3496,7 +3496,7 @@ The weight of a constraint is initialized to `1` and increased by one each time 
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3518,7 +3518,7 @@ Then, the value with the least activity is selected from the domain of the varia
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3542,7 +3542,7 @@ An approximation of the impacts is preprocessed.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3563,7 +3563,7 @@ After each conflict, the last assigned variable is selected in priority, so long
 
 **Scope**: ``Variable``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
@@ -3585,11 +3585,187 @@ Such strategy can be triggered when the search space reached a given limit.
 
 **Scope**: ``IntVar``
 
-**Factory**: ``solver.search.strategy.IntStrategyFactory``
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
 **API**: ::
 
     AbstractStrategy<IntVar> generateAndTest(Solver SOLVER)
     AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy,
                                              int searchSpaceLimit)
+
+
+
+.. _55_smf:
+
+***************
+Search Monitors
+***************
+
+
+
+
+geometrical
+===========
+
+Plug a geometrical restart strategy to the solver.
+It performs a search with restarts controlled by the resolution event [#f1]_ ``counter`` which counts events occurring during the search.
+Parameter ``base`` indicates the maximal number of events allowed in the first search tree.
+Once this limit is reached, a restart occurs and the search continues until ``base``*``grow`` events are done, and so on.
+After each restart, the limit number of events is increased by the geometric factor ``grow``.
+``limit`` states the maximum number of restarts.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void geometrical(Solver solver, int base, double grow, ICounter counter, int limit)
+
+
+luby
+====
+
+Branch a luby restart strategy to the solver.
+It is an alternative to the geometric restart policy.
+It performs a search with restarts controlled by the number of resolution events [#f1]_ counted by ``counter``.
+The maximum number of events allowed at a given restart iteration is given by base multiplied by the Las Vegas coefficient at this iteration.
+The sequence of these coefficients is defined recursively on its prefix subsequences:
+starting from the first prefix :math:`1`, the :math:`(k+1)^th` prefix is the :math:`k^th` prefix repeated ``grow`` times and
+immediately followed by coefficient ``grow``:math:`^k`.
+
+- the first coefficients for ``grow`` =2: [1,1,2,1,1,2,4,1,1,2,1,1,2,4,8,1,...]
+- the first coefficients for ``grow`` =3 : [1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,...]
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    luby(Solver solver, int base, int grow, ICounter counter, int limit)
+
+limitNode
+=========
+
+Defines a limit over the number of nodes allowed during the resolution.
+When the limit is reached, the resolution is stopped.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void limitNode(Solver solver, long limit)
+
+limitSolution
+=============
+
+Defines a limit over the number of solutions allowed during the resolution.
+When the limit is reached, the resolution is stopped.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void limitSolution(Solver solver, long limit)
+
+limitTime
+=========
+
+Defines a limit over the run time.
+When the limit is reached, the resolution is stopped.
+The limit can be either defined in millisecond or using a String which states the duration like "WWd XXh YYm ZZs" for example:
+ - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
+ - "2h30m": two hours and 30 minutes<p/>
+ - "30.5s": 30 seconds and 500 ms<p/>
+ - "180s": three minutes
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void limitTime(Solver solver, long limit)
+
+    void limitTime(Solver solver, String duration)
+
+
+
+limitThreadTime
+===============
+
+Defines a limit over the run time, defined in a separated thread.
+When the limit is reached, the resolution is stopped.
+The limit can be either defined in millisecond or using a String which states the duration like "WWd XXh YYm ZZs" for example:
+ - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
+ - "2h30m": two hours and 30 minutes<p/>
+ - "30.5s": 30 seconds and 500 ms<p/>
+ - "180s": three minutes
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void limitThreadTime(Solver solver, long limit)
+
+    void limitThreadTime(Solver solver, String duration)
+
+convertInMilliseconds
+
+limitFail
+=========
+
+Defines a limit over the number of fails allowed during the resolution.
+When the limit is reached, the resolution is stopped.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void limitFail(Solver solver, long limit)
+
+limitBacktrack
+==============
+
+Defines a limit over the number of backtracks allowed during the resolution.
+When the limit is reached, the resolution is stopped.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void limitBacktrack(Solver solver, long limit)
+
+
+restartAfterEachSolution
+========================
+
+Force the resolution to restart at root node after each solution.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void restartAfterEachSolution(Solver solver)
+
+
+nogoodRecordingOnSolution
+=========================
+
+Record nogoods from solution, that is, anytime a solution is found, a nogood is produced to prevent from finding the same solution later during the search.
+An array of variables, presumably decision ones, is given as input to reduce the size of the generated nogoods.
+
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void nogoodRecordingOnSolution(IntVar[] vars)
+
+
+nogoodRecordingFromRestarts
+===========================
+
+Record nogoods from restarts, that is, anytime the search restarts, one or more nogoods are produced, based on the decision path, to prevent from scanning the same sub-search tree.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void nogoodRecordingFromRestarts(Solver solver)
 

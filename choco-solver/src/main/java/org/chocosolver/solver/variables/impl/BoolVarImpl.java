@@ -33,11 +33,6 @@ import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.antidom.AntiDomBool;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -182,7 +177,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             return false;
         } else {
             if (value == 0 || value == 1) {
-				IntEventType e = IntEventType.INSTANTIATE;
+                IntEventType e = IntEventType.INSTANTIATE;
                 assert notInstanciated.contains(offset);
                 notInstanciated.swap(offset);
                 if (reactOnRemoval) {
@@ -390,31 +385,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
-    }
-
-    @Override
-    public AntiDomain antiDomain() {
-        return new AntiDomBool(this);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        AntiDomain invdom = xengine.getRemovedValues(this);
-        DisposableValueIterator it = invdom.getValueIterator();
-        while (it.hasNext()) {
-            int val = it.next();
-            if ((what == VariableState.LB && val < this.getLB())
-                    || (what == VariableState.UB && val > this.getUB())
-                    || (what == VariableState.DOM)) {
-                to.add(xengine.explain(this, val));
-            }
-        }
-        it.dispose();
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        to.add(xengine.explain(this, val));
     }
 
     @Override

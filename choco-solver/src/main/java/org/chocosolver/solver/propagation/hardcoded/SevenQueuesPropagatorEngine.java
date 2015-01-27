@@ -363,7 +363,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             eventsets[i] = new IntCircularQueue(nbv);
             eventmasks[i] = new int[nbv];
         }
-        trigger.dynAdd(p, true); // TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
+        propagateOnBacktrack(p); // TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
+    }
+
+    @Override
+    public void propagateOnBacktrack(Propagator p) {
+        trigger.dynAdd(p, true);
     }
 
     @Override

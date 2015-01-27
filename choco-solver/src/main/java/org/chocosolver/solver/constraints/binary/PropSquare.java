@@ -33,8 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -259,31 +258,6 @@ public class PropSquare extends Propagator<IntVar> {
     protected void updateHoleinY(int remVal) throws ContradictionException {
         vars[1].removeValue(floor_sqrt(remVal), aCause);
         vars[1].removeValue(-ceil_sqrt(remVal), aCause);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        //        return super.explain(d);
-        if (d.getVar() == vars[0]) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d instanceof ValueRemoval) {
-                int val = (int) Math.sqrt(((ValueRemoval) d).getVal());
-                vars[1].explain(xengine, VariableState.REM, val, e);
-                vars[1].explain(xengine, VariableState.REM, -val, e);
-            } else {
-                throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
-            }
-        } else if (d.getVar() == vars[1]) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d instanceof ValueRemoval) {
-                int val = ((ValueRemoval) d).getVal() ^ 2;
-                vars[0].explain(xengine, VariableState.REM, val, e);
-            } else {
-                throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
-            }
-        } else {
-            super.explain(xengine, d, e);
-        }
     }
 
     @Override

@@ -26,12 +26,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
+import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -82,7 +83,7 @@ public class RPGN4Explanation extends ReversePropagationGuidedNeighborhood imple
             FastDecision d = (FastDecision) duplicator.duplicate();
             d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
             last = d;
-            ExplanationToolbox.imposeDecisionPath(mSolver, d);
+            imposeDecisionPath(mSolver, d);
         }
     }
 
@@ -102,5 +103,28 @@ public class RPGN4Explanation extends ReversePropagationGuidedNeighborhood imple
         if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
             mSolver.getSearchLoop().restart();
         }
+    }
+
+    /**
+     * Simulate a decision path, with backup
+     *
+     * @param aSolver  the concerned solver
+     * @param decision the decision to apply
+     * @throws ContradictionException
+     */
+    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
+        IEnvironment environment = aSolver.getEnvironment();
+        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
+        // 1. simulates open node
+        Decision current = aSolver.getSearchLoop().getLastDecision();
+        decision.setPrevious(current);
+        aSolver.getSearchLoop().setLastDecision(decision);
+        // 2. simulates down branch
+        environment.worldPush();
+        decision.setWorldIndex(environment.getWorldIndex());
+        decision.buildNext();
+        objectiveManager.apply(decision);
+        objectiveManager.postDynamicCut();
+//        aSolver.getEngine().propagate();
     }
 }

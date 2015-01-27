@@ -33,10 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
@@ -88,11 +85,6 @@ public class PropNotMemberBound extends Propagator<IntVar> {
     @Override
     public String toString() {
         return vars[0].getName() + " outside [" + lb + "," + ub + "]";
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
     }
 
     @Override

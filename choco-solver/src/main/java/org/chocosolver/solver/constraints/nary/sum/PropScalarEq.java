@@ -33,8 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -242,64 +241,6 @@ public class PropScalarEq extends Propagator<IntVar> {
         linComb.append(" = ");
         linComb.append(b);
         return linComb.toString();
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d != null && d.getmType() == Deduction.Type.ValRem) {
-            ValueRemoval vr = (ValueRemoval) d;
-            IntVar var = (IntVar) vr.getVar();
-            int val = vr.getVal();
-            // 1. find the pos of var in vars
-            boolean ispos;
-            if (pos < (l / 2)) {
-                int i;
-                i = 0;
-                while (i < pos && vars[i].getId() != var.getId()) {
-                    i++;
-                }
-                ispos = i < pos;
-            } else {
-                int i;
-                i = pos;
-                while (i < l && vars[i].getId() != var.getId()) {
-                    i++;
-                }
-                ispos = i == l;
-            }
-
-            if (val < var.getLB()) { // explain LB
-                int i = 0;
-                for (; i < pos; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
-                    }
-                }
-                for (; i < l; i++) { // then the negative ones
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
-                    }
-                }
-            } else if (val > var.getUB()) { // explain UB
-                int i = 0;
-                for (; i < pos; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
-                    }
-                }
-                for (; i < l; i++) { // then the negative ones
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
-                    }
-                }
-            } else {
-                super.explain(xengine, d, e);
-            }
-
-        } else {
-            super.explain(xengine, d, e);
-        }
     }
 
     @Override

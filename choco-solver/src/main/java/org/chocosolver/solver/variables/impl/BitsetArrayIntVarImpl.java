@@ -35,11 +35,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.EnumDelta;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
@@ -138,7 +133,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 //            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
             }
-			IntEventType e = IntEventType.REMOVE;
+            IntEventType e = IntEventType.REMOVE;
             this.indexes.clear(index);
             this.SIZE.add(-1);
             if (reactOnRemoval) {
@@ -289,7 +284,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-				IntEventType e = IntEventType.INCLOW;
+                IntEventType e = IntEventType.INCLOW;
                 int index;
                 index = indexes.nextSetBit(LB.get());
                 while (index >= 0 && values[index] < value) {
@@ -348,7 +343,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-				IntEventType e = IntEventType.DECUPP;
+                IntEventType e = IntEventType.DECUPP;
                 int index;
                 index = indexes.prevSetBit(UB.get());
                 while (index >= 0 && values[index] > value) {
@@ -523,34 +518,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-    @Override
-    public AntiDomain antiDomain() {
-        // TODO
-        return new AntiDomBitset(this);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        AntiDomain invdom = xengine.getRemovedValues(this);
-        DisposableValueIterator it = invdom.getValueIterator();
-        while (it.hasNext()) {
-            int val = it.next();
-            if ((what == VariableState.LB && val < this.getLB())
-                    || (what == VariableState.UB && val > this.getUB())
-                    || (what == VariableState.DOM)) {
-//                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
-                to.add(xengine.explain(this, val));
-            }
-        }
-        it.dispose();
-//        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        to.add(xengine.explain(this, val));
-    }
 
     @Override
     public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {

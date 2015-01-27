@@ -33,7 +33,6 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodStoreFromSolutions;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
@@ -235,9 +234,7 @@ public class ObjectiveTest {
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
 				ISF.minDom_LB(a));
 		SMF.restartAfterEachSolution(solver);
-		NogoodStoreFromSolutions ng = new NogoodStoreFromSolutions(new IntVar[]{a});
-		solver.post(ng);
-		solver.plugMonitor(ng);
+		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
 		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);
 		Assert.assertEquals(solver.hasReachedLimit(),false);

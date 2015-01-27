@@ -106,13 +106,6 @@ public interface Settings extends Serializable {
     }
 
     /**
-     * Set to true to add propagators in explanations
-     */
-    default public boolean enablePropagatorInExplanation() {
-        return false;
-    }
-
-    /**
      * Define the rounding precision for {@link org.chocosolver.solver.constraints.IntConstraintFactory#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
      * MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
      */

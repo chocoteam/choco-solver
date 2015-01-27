@@ -71,8 +71,8 @@ public abstract class AbstractProblem {
     @Option(name = "-ee", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
     ExplanationFactory expeng = ExplanationFactory.NONE;
 
-    @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory. NONE in if undefined).", required = false)
-    protected boolean fexp = false;
+    @Option(name = "-ng", aliases = "--nogoods", usage = "Extract nogoods from explanations (required \"-ee\").", required = false)
+    protected boolean ng = false;
 
     protected Solver solver;
 
@@ -111,8 +111,8 @@ public abstract class AbstractProblem {
     }
 
     protected void overrideExplanation() {
-        if (!solver.getExplainer().isActive()) {
-            expeng.plugin(solver, fexp);
+        if (solver.getExplainer() == null) {
+            expeng.plugin(solver, ng, false);
         }
     }
 

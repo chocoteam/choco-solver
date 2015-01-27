@@ -120,7 +120,7 @@ public class ElementTest {
                 return true;
             }
         });
-        ExplanationFactory.CBJ.plugin(s, false);
+        ExplanationFactory.CBJ.plugin(s, false, false);
 
         Random r = new Random(125);
         int[] values = new int[10];

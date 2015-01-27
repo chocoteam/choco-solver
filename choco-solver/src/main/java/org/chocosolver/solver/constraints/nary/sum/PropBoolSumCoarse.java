@@ -40,14 +40,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.arlil.RuleStore;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -169,17 +164,6 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
         }
     }
 
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        Variable var = d != null ? d.getVar() : null;
-        for (int i = 0; i < vars.length; i++) {
-            if (vars[i] != var) {
-                vars[i].explain(xengine, VariableState.DOM, e);
-            }
-        }
-    }
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {

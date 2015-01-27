@@ -34,10 +34,6 @@ import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
@@ -47,7 +43,6 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
@@ -461,14 +456,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        // the current deduction is due to the current domain of the involved variables
-        for (Variable v : this.vars) {
-            v.explain(xengine, VariableState.DOM, e);
-        }
-    }
 
     @Override
     public void beforeRestart() {

@@ -40,8 +40,6 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -280,11 +278,7 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
             }
         }
 
-        @Override
-        public void flush() {
-        }
-
-        @Override
+         @Override
         public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
             throw e.set(cause, variable, message);
         }
@@ -292,27 +286,6 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
         @Override
         public ContradictionException getContradictionException() {
             return e;
-        }
-
-        @Override
-        public void clear() {
-        }
-
-        @Override
-        public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        }
-
-        @Override
-        public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-
-        }
-
-        @Override
-        public void onPropagatorExecution(Propagator propagator) {
-        }
-
-        @Override
-        public void desactivatePropagator(Propagator propagator) {
         }
 
         @Override
