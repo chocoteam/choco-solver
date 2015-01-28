@@ -51,7 +51,7 @@ import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
  * Created by cprudhom on 11/12/14.
  * Project: choco.
  */
-public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolution {
+public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolution, ConflictStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConflictBackJumping.class);
 
@@ -72,6 +72,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         this.nogoodFromConflict = nogoodFromConflict;
         this.ngstore = mSolver.getNogoodStore().getPropNogoods();
         this.ps = new TIntArrayList();
+        this.mExplainer.setCstrat(this);
     }
 
     @Override

@@ -29,13 +29,15 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 
+import java.io.Serializable;
+
 /**
  * Observer of events generated during resolution.
  * Defined initially for explanation engine.
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public interface EventObserver {
+public interface EventObserver extends Serializable {
 
     /**
      * Explain the activation of a propagator involved in a reified constraint

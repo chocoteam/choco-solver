@@ -349,14 +349,17 @@ public class RuleStoreTest {
         Decision d1 = null, d2 = null, d3 = null;
         try {
             d1 = is.getDecision();
+            d1.setWorldIndex(1);
             d1.buildNext();
             d1.apply();
 
             d2 = is.getDecision();
+            d2.setWorldIndex(2);
             d2.buildNext();
             d2.apply();
 
             d3 = is.getDecision();
+            d3.setWorldIndex(3);
             d3.buildNext();
             d3.apply();
         } catch (ContradictionException cex) {
@@ -369,11 +372,7 @@ public class RuleStoreTest {
 
         rs.storeDecisionRefutation(d3, r);
 
-        try {
-            rs.getDecisionRefutation(d3);
-            Assert.fail();
-        } catch (SolverException ignored) {
-        }
+        rs.getDecisionRefutation(d3);
         d3.buildNext();
         Explanation rr = rs.getDecisionRefutation(d3);
         Assert.assertNotNull(rr);

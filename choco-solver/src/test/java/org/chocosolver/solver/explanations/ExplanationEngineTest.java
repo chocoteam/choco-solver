@@ -74,7 +74,7 @@ public class ExplanationEngineTest {
             }
             Solver expl = solver.duplicateModel();
 
-            ExplanationEngine ee = new ExplanationEngine(expl, false);
+            ExplanationEngine ee = new ExplanationEngine(expl, true);
             Explanation r = null;
             try {
                 expl.propagate();
@@ -102,7 +102,7 @@ public class ExplanationEngineTest {
             Solver expl = solver.duplicateModel();
 
 
-            ExplanationEngine ee = new ExplanationEngine(expl, false);
+            ExplanationEngine ee = new ExplanationEngine(expl, true);
             Explanation r = null;
             try {
                 expl.propagate();
@@ -130,7 +130,7 @@ public class ExplanationEngineTest {
             Solver expl = solver.duplicateModel();
 
             IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
-            ExplanationEngine ee = new ExplanationEngine(expl, false);
+            ExplanationEngine ee = new ExplanationEngine(expl, true);
             Explanation r = null;
             try {
                 expl.propagate();
@@ -163,7 +163,7 @@ public class ExplanationEngineTest {
         solver.post(new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)));
 
         IntStrategy is = ISF.lexico_LB(vs);
-        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, true);
         Explanation r = null;
         try {
             solver.propagate();
@@ -787,9 +787,9 @@ public class ExplanationEngineTest {
         s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
         // explanations
         if (expMode == 2) {
-            ExplanationFactory.CBJ.plugin(s, false, false);
+            ExplanationFactory.CBJ.plugin(s, false, true);
         } else if (expMode == 3) {
-            ExplanationFactory.DBT.plugin(s, false, false);
+            ExplanationFactory.DBT.plugin(s, false, true);
         }
         // logging and solution
         Chatterbox.showStatistics(s);

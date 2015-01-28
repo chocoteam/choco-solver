@@ -32,6 +32,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.store.ArrayEventStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
+import org.chocosolver.solver.explanations.strategies.ConflictStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.EventObserver;
@@ -52,6 +53,7 @@ public class ExplanationEngine implements EventObserver {
     private final RuleStore ruleStore; // set of active rules
     private final boolean saveCauses; // save the clauses in Explanation
     private final Solver mSolver;
+    private ConflictStrategy cstrat;
 
 
     /**
@@ -66,6 +68,20 @@ public class ExplanationEngine implements EventObserver {
         solver.set(this);
         this.saveCauses = userFeedback;
         this.mSolver = solver;
+    }
+
+    /**
+     * Return the conflict strategy declared
+     */
+    public ConflictStrategy getCstrat() {
+        return cstrat;
+    }
+
+    /**
+     * Set the conflict strategy to use
+     */
+    public void setCstrat(ConflictStrategy cstrat) {
+        this.cstrat = cstrat;
     }
 
     /**

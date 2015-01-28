@@ -31,10 +31,12 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,6 @@ public class DynamicBackTracking extends ConflictBackJumping {
     public DynamicBackTracking(ExplanationEngine mExplainer, Solver mSolver, boolean nogoodFromConflict) {
         super(mExplainer, mSolver, nogoodFromConflict);
         dbTstrategy = new DBTstrategy(mSolver, mExplainer);
-        mSolver.set(dbTstrategy);
     }
 
     /**
@@ -133,19 +134,19 @@ public class DynamicBackTracking extends ConflictBackJumping {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("unchecked")
-    private static class DBTstrategy extends AbstractStrategy {
+    private static class DBTstrategy extends AbstractStrategy implements IMonitorInitPropagation {
 
         private final ArrayDeque<Decision<IntVar>> decision_path;
         private final Solver mSolver;
-        private final ExplanationEngine mArlil;
+        private final ExplanationEngine mExplainer;
         private AbstractStrategy mainStrategy;
 
-        protected DBTstrategy(Solver solver, ExplanationEngine mArlil) {
-            super(solver.getStrategy().getVariables());
+        protected DBTstrategy(Solver solver, ExplanationEngine mExplainer) {
+            super(new Variable[0]);
             this.decision_path = new ArrayDeque<>();
             this.mSolver = solver;
-            this.mainStrategy = mSolver.getStrategy();
-            this.mArlil = mArlil;
+            this.mExplainer = mExplainer;
+            this.mSolver.plugMonitor(this);
         }
 
         protected void clear() {
@@ -170,12 +171,12 @@ public class DynamicBackTracking extends ConflictBackJumping {
 //                System.out.printf("MOVE %s (%d -> %d)\n", d, old, wi);
                 if (old != wi) {
                     if (d.triesLeft() == 1) { // previously explained refuted decision needs to be kept
-                        mArlil.moveDecisionRefutation(d, wi);
+                        mExplainer.moveDecisionRefutation(d, wi);
                     }
                     // then iterate over future and kept refuted decisions in the decision path and update the reason
                     for (Decision n : decision_path) {
                         if (n.triesLeft() == 1) {
-                            BitSet bt = mArlil.getDecisionRefutationExplanation(n).getDecisions();
+                            BitSet bt = mExplainer.getDecisionRefutationExplanation(n).getDecisions();
                             if (bt.get(old)) {
 //                                System.out.printf("UPDATE %s (%d -> %d)\n", n, old, wi);
                                 bt.clear(old);
@@ -196,6 +197,17 @@ public class DynamicBackTracking extends ConflictBackJumping {
             if (decision_path.size() > 0) str.append(decision_path.toString());
             str.append(mainStrategy.toString());
             return str.toString();
+        }
+
+        @Override
+        public void beforeInitialPropagation() {
+
+        }
+
+        @Override
+        public void afterInitialPropagation() {
+            this.mainStrategy = mSolver.getStrategy();
+            mSolver.set(this);
         }
     }
 }

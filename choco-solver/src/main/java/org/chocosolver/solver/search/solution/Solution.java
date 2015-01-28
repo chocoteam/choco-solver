@@ -40,6 +40,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -51,7 +52,7 @@ import java.util.HashMap;
  * @author Charles Prud'homme
  * @since 05/06/2013
  */
-public class Solution {
+public class Solution implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Solution.class);
 
