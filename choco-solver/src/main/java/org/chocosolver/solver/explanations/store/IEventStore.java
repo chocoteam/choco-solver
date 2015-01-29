@@ -40,8 +40,6 @@ public interface IEventStore {
 
     public void pushEvent(IntVar var, ICause cause, IEventType mask, int one, int two, int three);
 
-    public void popEvent();
-
     public int getSize();
 
     public IntVar getVariable(int evt);
@@ -55,7 +53,5 @@ public interface IEventStore {
     public int getSecondValue(int evt);
 
     public int getThirdValue(int evt);
-
-    public void clear();
 
 }

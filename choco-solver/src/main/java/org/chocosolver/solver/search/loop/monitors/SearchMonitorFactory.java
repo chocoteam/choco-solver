@@ -29,7 +29,6 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
@@ -212,7 +211,9 @@ public class SearchMonitorFactory {
             double seconds = Double.parseDouble(matcher.group(1));
             milliseconds += (int) (seconds * 1000);
         }
-        if (milliseconds == 0) throw new SolverException("Duration cannot be parsed or must be positive" + duration);
+        if (milliseconds == 0) {
+            milliseconds = Long.parseLong(duration);
+        }
         return milliseconds;
     }
 

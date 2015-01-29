@@ -13,6 +13,7 @@ NEXT MILESTONE
 - Move nogood recording from solution and restart from constraint pkg to monitor +(revamp) + SMF API
 - add DBT for explanations
 - Improve explanation engine
+- Add an additional "worldPush" instruction after initial propagation to be coherent with restarts (#55)
 
 Bug fixes: #265, #247, #264, #254
 

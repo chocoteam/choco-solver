@@ -341,25 +341,25 @@ public class ExplanationEngineTest {
     private void configure(Solver solver, int conf) {
         switch (conf) {
             case 0:
-                System.out.printf("noexp; ");
+                System.out.printf("noexp  :");
                 break;
             case 1: {
-                System.out.printf("cbj; ");
+                System.out.printf("cbj    :");
                 ExplanationFactory.CBJ.plugin(solver, false, false);
             }
             break;
             case 2: {
-                System.out.printf("cbj+ng; ");
+                System.out.printf("cbj+ng :");
                 ExplanationFactory.CBJ.plugin(solver, true, false);
             }
             break;
             case 3: {
-                System.out.printf("dbt; ");
+                System.out.printf("dbt    :");
                 ExplanationFactory.DBT.plugin(solver, false, false);
             }
             break;
             case 4: {
-                System.out.printf("dbt+ng; ");
+                System.out.printf("dbt+ng :");
                 ExplanationFactory.DBT.plugin(solver, true, false);
             }
             break;
@@ -381,6 +381,12 @@ public class ExplanationEngineTest {
             solver.post(IntConstraintFactory.alldifferent(row, "FC"));
         }
         solver.set(IntStrategyFactory.lexico_LB(vars));
+//        solver.set(IntStrategyFactory.custom(
+//                ISF.lexico_var_selector(),
+//                ISF.min_value_selector(),
+//                ISF.remove(),
+//                vars));
+
 
         configure(solver, a);
         Chatterbox.showShortStatistics(solver);

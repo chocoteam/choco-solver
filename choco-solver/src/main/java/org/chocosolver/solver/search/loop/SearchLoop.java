@@ -318,7 +318,7 @@ public class SearchLoop implements ISearchLoop {
      * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
      */
     private void initialPropagation() {
-        this.env.worldPush();
+        this.env.worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             solver.getEngine().propagate();
         } catch (ContradictionException e) {
@@ -329,8 +329,9 @@ public class SearchLoop implements ISearchLoop {
             this.env.worldPop();
             return;
         }
-        this.env.worldPush(); // push another wolrd to recover the state after initial propagation
-        this.searchWorldIndex = env.getWorldIndex();
+        this.env.worldPush(); // store state after initial propagation; w = 1 -> 2
+        this.searchWorldIndex = env.getWorldIndex(); // w = 2
+        this.env.worldPush(); // store another time for restart purpose: w = 2 -> 3
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
             ISearchBinder binder = solver.getSettings().getSearchBinder();

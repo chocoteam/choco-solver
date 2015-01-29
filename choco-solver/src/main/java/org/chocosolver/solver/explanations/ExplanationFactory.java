@@ -43,7 +43,7 @@ import org.chocosolver.solver.explanations.strategies.DynamicBackTracking;
 public enum ExplanationFactory {
 
 
-    NONE{
+    NONE {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
             //DO NOTHING
@@ -56,9 +56,14 @@ public enum ExplanationFactory {
     CBJ {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
-            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, nogoodsOn);
-            solver.plugMonitor(cbj);
+            if (solver.getExplainer() == null) {
+                solver.set(new ExplanationEngine(solver, userFeedbackOn));
+            }
+            if (solver.getExplainer().getCstrat() == null
+                    || !(solver.getExplainer().getCstrat() instanceof ConflictBackJumping)) {
+                ConflictBackJumping cbj = new ConflictBackJumping(solver.getExplainer(), solver, nogoodsOn);
+                solver.plugMonitor(cbj);
+            }
         }
     },
     /**
@@ -68,9 +73,14 @@ public enum ExplanationFactory {
     DBT {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
-            DynamicBackTracking dbt = new DynamicBackTracking(ee, solver, nogoodsOn);
-            solver.plugMonitor(dbt);
+            if (solver.getExplainer() == null) {
+                solver.set(new ExplanationEngine(solver, userFeedbackOn));
+            }
+            if (solver.getExplainer().getCstrat() == null
+                    || !(solver.getExplainer().getCstrat() instanceof DynamicBackTracking)) {
+                DynamicBackTracking dbt = new DynamicBackTracking(solver.getExplainer(), solver, nogoodsOn);
+                solver.plugMonitor(dbt);
+            }
         }
     };
 

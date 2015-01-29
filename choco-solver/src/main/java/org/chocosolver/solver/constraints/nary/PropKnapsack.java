@@ -184,7 +184,7 @@ public class PropKnapsack extends Propagator<IntVar> {
         } else if (IntEventType.isDecupp(evt.getMask())) {
             for (int i = 0; i < n; i++) {
                 newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                newrules |= ruleStore.addUpperBoundRule(vars[i]);
             }
             newrules |= ruleStore.addUpperBoundRule(vars[n]);
         } else {

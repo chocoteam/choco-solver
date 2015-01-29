@@ -76,12 +76,12 @@ public class LNSTest {
             case 1:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new RandomNeighborhood(solver, objects, 200, 123456L), true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
             case 2:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10), true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
             case 3:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
@@ -89,7 +89,7 @@ public class LNSTest {
                                 new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10)
                         ), true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
             case 4:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
@@ -98,17 +98,17 @@ public class LNSTest {
                                 new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new RandomNeighborhood(solver, objects, 200, 123456L)
                         ), true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
             case 5:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new ExplainingCut(solver, 200, 123456L), true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
             case 6:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new ExplainingObjective(solver, 200, 123456L), true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
             case 7:
                 SequenceNeighborhood ngb = new SequenceNeighborhood(
@@ -116,17 +116,18 @@ public class LNSTest {
                         new ExplainingCut(solver, 200, 123456L),
                         new RandomNeighborhood4Explanation(solver, objects, 200, 123456L));
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver, ngb, true));
-                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
         }
-
+//        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
-        Chatterbox.printShortStatistics(solver);
+        Chatterbox.printSolutions(solver);
     }
 
 
-    @Test(groups = "10s")
-    public void test1() {
+    @Test(groups = "1m")
+    public void
+    test1() {
         // opt: 8372
         knapsack20(0);
         knapsack20(1);

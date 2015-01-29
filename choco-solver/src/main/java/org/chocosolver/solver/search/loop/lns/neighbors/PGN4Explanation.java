@@ -118,10 +118,15 @@ public class PGN4Explanation extends PropagationGuidedNeighborhood implements IM
         // 1. simulates open node
         Decision current = aSolver.getSearchLoop().getLastDecision();
         decision.setPrevious(current);
+        decision.setWorldIndex(environment.getWorldIndex());
         aSolver.getSearchLoop().setLastDecision(decision);
+        if (decision.triesLeft() == 2) {
+            aSolver.getSearchLoop().getSMList().beforeDownLeftBranch();
+        } else {
+            aSolver.getSearchLoop().getSMList().beforeDownRightBranch();
+        }
         // 2. simulates down branch
         environment.worldPush();
-        decision.setWorldIndex(environment.getWorldIndex());
         decision.buildNext();
         objectiveManager.apply(decision);
         objectiveManager.postDynamicCut();

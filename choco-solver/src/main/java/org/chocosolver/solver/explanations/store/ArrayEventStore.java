@@ -57,10 +57,9 @@ public class ArrayEventStore implements IEventStore {
 
     IStateInt size;
 
-    boolean up2date;  // to indicate if the database is up-to-date
-
     public ArrayEventStore(IEnvironment env) {
         size = env.makeInt(0);
+        size._set(0, 0); // to force history manually -- required when created during the search
 
         varChunks = new IntVar[SIZE];
         cauChunks = new ICause[SIZE];
@@ -68,18 +67,18 @@ public class ArrayEventStore implements IEventStore {
         val1Chunks = new int[SIZE];
         val2Chunks = new int[SIZE];
         val3Chunks = new int[SIZE];
-        up2date = false;
     }
 
     public void pushEvent(IntVar var, ICause cause, IEventType mask, int one, int two, int three) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("WRITE < {} / {} / {} / {} / {} >", var, cause, mask, one, two, three);
-        }
-//        assert cause != Cause.Null : "cause null";
+        //        assert cause != Cause.Null : "cause null";
         int idx = size.get();
         if (idx >= varChunks.length) {
             increase();
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("WRITE in {} ({}): < {} / {} / {} / {} / {} >", idx, size.getEnvironment().getWorldIndex(), var, cause, mask, one, two, three);
+        }
+
         varChunks[idx] = var;
         cauChunks[idx] = cause;
         masChunks[idx] = mask;
@@ -87,12 +86,6 @@ public class ArrayEventStore implements IEventStore {
         val2Chunks[idx] = two;
         val3Chunks[idx] = three;
         size.add(1);
-        up2date = false;
-    }
-
-    @Override
-    public void popEvent() {
-
     }
 
     private void increase() {
@@ -122,14 +115,6 @@ public class ArrayEventStore implements IEventStore {
         val3Chunks = valBigger;
     }
 
-    public boolean isUptodate() {
-        return up2date;
-    }
-
-    public void setUptodate(boolean b) {
-        this.up2date = b;
-    }
-
     public int getSize() {
         return size.get();
     }
@@ -156,11 +141,6 @@ public class ArrayEventStore implements IEventStore {
 
     public int getThirdValue(int evt) {
         return val3Chunks[evt];
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
     }
 
 }

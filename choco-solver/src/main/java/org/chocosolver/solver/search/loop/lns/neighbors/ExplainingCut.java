@@ -34,6 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -62,44 +63,47 @@ import java.util.Random;
  */
 public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
-    protected final ExplanationEngine mExplanationEngine; // the explanation engine -- it works faster when it's a lazy one
+    protected ExplanationEngine mExplanationEngine; // the explanation engine -- it works faster when it's a lazy one
     protected final Random random;
 
-    private ArrayList<Decision> path; // decision path that leads to a solution
+    ArrayList<Decision> path; // decision path that leads to a solution
 
-    private BitSet related2cut; // a bitset indicating which decisions of the path are related to the cut
-    private BitSet notFrozen;
-    private BitSet refuted;
-    private BitSet unrelated;
-    private boolean forceCft; // does the cut has already been explained?
-    private boolean isTerminated; // if explanations do not contain decisions, then the optimality has been proven
+    BitSet related; // a bitset indicating which decisions of the path are related to the cut
+    BitSet unrelated; // a bitset to indicate which decisions of the path are NOT related to the cut
+    BitSet notFrozen;
+    boolean forceCft; // does the cut has already been explained?
+    boolean isTerminated; // if explanations do not contain decisions, then the optimality has been proven
 
-    private double nbFixedVariables = 0d; // number of decision to fix in the set of decisions explaining the cut
-    private int nbCall, limit;
-    private final int level; // relaxing factor
+    double nbFixedVariables = 0d; // number of decision to fix in the set of decisions explaining the cut
+    int nbCall, limit;
+    final int level; // relaxing factor
 
-    private Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
-
+    Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
 
 
     public ExplainingCut(Solver aSolver, int level, long seed) {
         super(aSolver);
-        this.mExplanationEngine = aSolver.getExplainer();
-        assert mExplanationEngine != null;
-
         this.level = level;
         this.random = new Random(seed);
-
         path = new ArrayList<>(16);
-        related2cut = new BitSet(16);
+        related = new BitSet(16);
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
-        refuted = new BitSet(16);
         mSolver.getSearchLoop().plugSearchMonitor(this);
     }
 
     @Override
     public void recordSolution() {
+        if (mExplanationEngine == null) {
+            if (mSolver.getExplainer() == null) {
+                mSolver.set(new ExplanationEngine(mSolver, false));
+            }
+            this.mExplanationEngine = mSolver.getExplainer();
+        }
+        if (mExplanationEngine.getCstrat() == null) {
+            ConflictBackJumping cbj = new ConflictBackJumping(mExplanationEngine, mSolver, false);
+            mSolver.plugMonitor(cbj);
+        }
         clonePath();
         forceCft = true;
     }
@@ -109,48 +113,41 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         // this is called after restart
         // if required, force the cut and explain the cut
         if (forceCft) {
-            explainCut();
-            nbFixedVariables = related2cut.cardinality();
-            nbCall = 0;
-            increaseLimit();
+            explain();
         }
         // then fix variables
+        _fixVar();
+        assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
+        // add unrelated
+        notFrozen.or(unrelated);
+        // then build the fake decision path
+        last = null;
+        int wi = path.get(0).getWorldIndex();
+//        LOGGER.debug("relax cut {}", notFrozen.cardinality());
+        for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
+//            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
+            assert path.get(id - wi).hasNext();
+            last = path.get(id - wi).duplicate();
+            imposeDecisionPath(mSolver, last);
+        }
+    }
+
+    protected void _fixVar() {
         // this part is specific: a fake decision path has to be created
         nbCall++;
         restrictLess();
         notFrozen.clear();
-        notFrozen.or(related2cut);
+        notFrozen.or(related);
         for (; !notFrozen.isEmpty() && notFrozen.cardinality() > nbFixedVariables; ) {
             int idx = selectVariable();
             notFrozen.clear(idx);
-        }
-        assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
-        // add the first refuted decisions
-        int first = notFrozen.nextSetBit(0);
-        for (int i = (first > -1 ? refuted.nextSetBit(first) : first); i > -1; i = refuted.nextSetBit(i + 1)) {
-            notFrozen.clear(i);
-        }
-
-        // add unrelated
-        notFrozen.or(unrelated);
-
-        // then build the fake decision path
-        last = null;
-//        LOGGER.debug("relax cut {}", notFrozen.cardinality());
-        for (int id = notFrozen.nextSetBit(0); id >= 0 && id < path.size(); id = notFrozen.nextSetBit(id + 1)) {
-//            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
-            if (path.get(id).hasNext()) {
-                last = path.get(id).duplicate();
-                if (refuted.get(id)) last.buildNext();
-                imposeDecisionPath(mSolver, last);
-            }
         }
     }
 
     @Override
     public void restrictLess() {
         if (nbCall > limit) {
-            nbFixedVariables = random.nextDouble() * related2cut.cardinality();
+            nbFixedVariables = random.nextDouble() * related.cardinality();
             increaseLimit();
         }
         last = null;
@@ -176,8 +173,8 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    private void increaseLimit() {
-        long ank = (long) (1.2 * StatisticUtils.binomialCoefficients(related2cut.cardinality(), (int) nbFixedVariables - 1));
+    void increaseLimit() {
+        long ank = (long) (1.2 * StatisticUtils.binomialCoefficients(related.cardinality(), (int) nbFixedVariables - 1));
         int step = (int) Math.min(ank, level);
         limit = nbCall + step;
     }
@@ -195,19 +192,13 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     /**
      * Compute the initial fragment, ie set of decisions to keep.
      */
-    private void clonePath() {
+    void clonePath() {
         Decision dec = mSolver.getSearchLoop().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();
         }
         Collections.reverse(path);
-        int size = path.size();
-        for (int i = 0, mid = size >> 1, j = size - 1; i < mid; i++, j--) {
-            boolean bi = refuted.get(i);
-            refuted.set(i, refuted.get(j));
-            refuted.set(j, bi);
-        }
     }
 
 
@@ -220,37 +211,31 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         Decision clone = dec.duplicate();
         clone.setWorldIndex(dec.getWorldIndex());
         path.add(clone);
-        int pos = path.size() - 1;
         if (!dec.hasNext()) {
-            refuted.set(pos);
+            clone.reverse();
         }
-        /*boolean forceNext = !dec.hasNext();
-        if (forceNext) {
-            clone.buildNext(); // force to set up the decision in the very state it was
-            clone.buildNext(); // that's why we call it twice
-        }*/
     }
 
     /**
      * Force the failure, apply decisions to the last solution + cut => failure!
      */
-    private void explainCut() {
+    protected void explain() {
         // Goal: force the failure to get the set of decisions related to the cut
         forceCft = false;
         // 1. make a backup
         mSolver.getEnvironment().worldPush();
         Decision d;
+        int i = 0;
         try {
 
             Decision previous = mSolver.getSearchLoop().getLastDecision();
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
             mExplanationEngine.getSolver().getObjectiveManager().postDynamicCut();
-            for (int i = 0; i < path.size(); i++) {
+            for (i = 0; i < path.size(); i++) {
                 d = path.get(i);
                 d.setPrevious(previous);
                 d.buildNext();
-                if (refuted.get(i)) d.buildNext();
                 d.apply();
                 mSolver.propagate();
                 previous = d;
@@ -259,24 +244,35 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             assert false : "SHOULD FAIL!";
         } catch (ContradictionException cex) {
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-                related2cut.clear();
-                unrelated.clear();
 
                 // 3. explain the failure
                 Explanation explanation = mExplanationEngine.explain(cex);
                 if (explanation.getDecisions().isEmpty()) {
                     isTerminated = true;
+                    mSolver.getEnvironment().worldPop();
+                    mSolver.getEngine().flush();
+                    return;
                 }
 
-                related2cut.or(explanation.getDecisions());
+                related.clear();
+                related.or(explanation.getDecisions());
 
-                // 4. need to replace the duplicated decision with the correct one
-                for (int i = 0; i < path.size(); i++) {
-                    Decision dec = path.get(i);
-                    boolean forceNext = !dec.hasNext();
-                    dec.rewind();
-                    if (forceNext) dec.buildNext();
+                unrelated.clear();
+                unrelated.or(related);
+                unrelated.flip(path.get(0).getWorldIndex(), unrelated.length());
+
+                // 4. remove all decisions above i in path
+                int j = path.size() - 1;
+                while (j > i) {
+                    path.remove(j);
+                    j--;
+                }
+                // 5. rewind all other decisions
+                while (j >= 0) {
+                    Decision dec = path.get(j);
                     dec.setPrevious(null); // useless .. but ... you know
+                    dec.rewind();
+                    j--;
                 }
 
             } else {
@@ -285,8 +281,11 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         }
         mSolver.getEnvironment().worldPop();
         mSolver.getEngine().flush();
-        unrelated.andNot(related2cut);
-        unrelated.andNot(refuted);
+
+        nbFixedVariables = related.cardinality() - 1;
+        nbCall = 0;
+        increaseLimit();
+
     }
 
     /**
@@ -302,10 +301,15 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         // 1. simulates open node
         Decision current = aSolver.getSearchLoop().getLastDecision();
         decision.setPrevious(current);
+        decision.setWorldIndex(environment.getWorldIndex());
         aSolver.getSearchLoop().setLastDecision(decision);
+        if (decision.triesLeft() == 2) {
+            aSolver.getSearchLoop().getSMList().beforeDownLeftBranch();
+        } else {
+            aSolver.getSearchLoop().getSMList().beforeDownRightBranch();
+        }
         // 2. simulates down branch
         environment.worldPush();
-        decision.setWorldIndex(environment.getWorldIndex());
         decision.buildNext();
         objectiveManager.apply(decision);
         objectiveManager.postDynamicCut();
