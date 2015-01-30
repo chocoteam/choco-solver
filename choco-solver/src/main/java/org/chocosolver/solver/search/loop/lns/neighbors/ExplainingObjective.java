@@ -148,8 +148,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
             this.mExplanationEngine = mSolver.getExplainer();
         }
         if (mExplanationEngine.getCstrat() == null) {
-            ConflictBackJumping cbj = new ConflictBackJumping(mExplanationEngine, mSolver, false);
-            mSolver.plugMonitor(cbj);
+            new ConflictBackJumping(mExplanationEngine, mSolver, false);
         }
     }
 

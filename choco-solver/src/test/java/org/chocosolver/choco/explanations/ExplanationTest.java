@@ -91,7 +91,6 @@ public class ExplanationTest {
 
         ExplanationEngine ee = new ExplanationEngine(solver, true);
         ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-        solver.plugMonitor(cbj);
         Assert.assertFalse(solver.findSolution());
         Explanation exp = cbj.getLastExplanation();
         Assert.assertEquals(2, exp.nbCauses());

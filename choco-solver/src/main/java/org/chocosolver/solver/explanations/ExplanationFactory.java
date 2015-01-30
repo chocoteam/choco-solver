@@ -61,8 +61,7 @@ public enum ExplanationFactory {
             }
             if (solver.getExplainer().getCstrat() == null
                     || !(solver.getExplainer().getCstrat() instanceof ConflictBackJumping)) {
-                ConflictBackJumping cbj = new ConflictBackJumping(solver.getExplainer(), solver, nogoodsOn);
-                solver.plugMonitor(cbj);
+                new ConflictBackJumping(solver.getExplainer(), solver, nogoodsOn);
             }
         }
     },
@@ -78,8 +77,7 @@ public enum ExplanationFactory {
             }
             if (solver.getExplainer().getCstrat() == null
                     || !(solver.getExplainer().getCstrat() instanceof DynamicBackTracking)) {
-                DynamicBackTracking dbt = new DynamicBackTracking(solver.getExplainer(), solver, nogoodsOn);
-                solver.plugMonitor(dbt);
+                new DynamicBackTracking(solver.getExplainer(), solver, nogoodsOn);
             }
         }
     };

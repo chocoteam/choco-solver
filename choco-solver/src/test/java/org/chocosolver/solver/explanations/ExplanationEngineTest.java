@@ -190,8 +190,7 @@ public class ExplanationEngineTest {
             solver.set(ISF.lexico_LB(vars));
 
             ExplanationEngine ee = new ExplanationEngine(solver, false);
-            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-            solver.plugMonitor(cbj);
+            new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
@@ -210,8 +209,7 @@ public class ExplanationEngineTest {
             solver.set(ISF.lexico_LB(vars));
 
             ExplanationEngine ee = new ExplanationEngine(solver, false);
-            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-            solver.plugMonitor(cbj);
+            new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
@@ -230,8 +228,7 @@ public class ExplanationEngineTest {
             }
 
             ExplanationEngine ee = new ExplanationEngine(solver, false);
-            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-            solver.plugMonitor(cbj);
+            new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
@@ -251,8 +248,7 @@ public class ExplanationEngineTest {
             solver.set(ISF.lexico_LB(vars));
 
             ExplanationEngine ee = new ExplanationEngine(solver, false);
-            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-            solver.plugMonitor(cbj);
+            new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
@@ -278,8 +274,7 @@ public class ExplanationEngineTest {
             solver.set(ISF.random_value(p, seed));
 
             ExplanationEngine ee = new ExplanationEngine(solver, false);
-            ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-            solver.plugMonitor(cbj);
+            new ConflictBackJumping(ee, solver, false);
 
             Chatterbox.showShortStatistics(solver);
             Assert.assertFalse(solver.findSolution());
@@ -302,8 +297,7 @@ public class ExplanationEngineTest {
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
         ExplanationEngine ee = new ExplanationEngine(solver, false);
-        ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-        solver.plugMonitor(cbj);
+        new ConflictBackJumping(ee, solver, false);
 
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -328,8 +322,7 @@ public class ExplanationEngineTest {
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
         ExplanationEngine ee = new ExplanationEngine(solver, false);
-        ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
-        solver.plugMonitor(cbj);
+        new ConflictBackJumping(ee, solver, false);
 
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -834,7 +827,6 @@ public class ExplanationEngineTest {
 
         ExplanationEngine ee = new ExplanationEngine(s, true);
         ConflictBackJumping cbj = new ConflictBackJumping(ee, s, false);
-        s.plugMonitor(cbj);
         Chatterbox.showDecisions(s);
         Assert.assertFalse(s.findSolution());
         // If the problem has no solution, the end-user explanation can be retrieved

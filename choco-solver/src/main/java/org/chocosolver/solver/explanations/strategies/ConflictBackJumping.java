@@ -73,6 +73,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         this.ngstore = mSolver.getNogoodStore().getPropNogoods();
         this.ps = new TIntArrayList();
         this.mExplainer.setCstrat(this);
+        this.mSolver.plugMonitor(this);
     }
 
     @Override
