@@ -233,7 +233,7 @@ public class ExplanationEngineTest {
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
-            Assert.assertEquals(solver.getMeasures().getFailCount(), 0);
+            Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
         }
     }
 
@@ -252,8 +252,8 @@ public class ExplanationEngineTest {
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
-            Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
+            Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
+            Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
         }
     }
 

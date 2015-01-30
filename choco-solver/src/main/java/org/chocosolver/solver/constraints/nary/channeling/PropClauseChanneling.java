@@ -73,9 +73,6 @@ public class PropClauseChanneling extends Propagator<IntVar> {
         if (eb.length != LENGTH || lb.length != LENGTH) {
             throw new SolverException("BoolVar[] wrong dimension");
         }
-        if(iv instanceof BoolVar){
-            throw new SolverException("Observed variable cannot be a boolean variable");
-        }
     }
 
     @Override
