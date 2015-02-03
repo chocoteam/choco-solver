@@ -99,7 +99,7 @@ public class NoGoodOnSolutionTest {
     public void testNQ() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
-        int n = 4;
+        int n = 8;
         IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -115,6 +115,30 @@ public class NoGoodOnSolutionTest {
         solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
         solver.findAllSolutions();
         System.out.println(solver.getMeasures());
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 2);
+        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
+    }
+
+    @Test(groups = "1s")
+    public void testNQ2() {
+        // restarts on solutions and on fails with restarts on solutions (ok)
+        Solver solver = new Solver();
+        int n = 8;
+        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                solver.post(neq);
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
+        SMF.nogoodRecordingFromRestarts(solver);
+        solver.set(ISF.random_value(vars, 0));
+        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+        solver.findAllSolutions();
+        System.out.println(solver.getMeasures());
+        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
     }
 }

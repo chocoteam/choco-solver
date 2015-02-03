@@ -114,7 +114,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public String toString() {
-        return name;
+        return name + " = " + String.valueOf(constante);
     }
 
     @Override

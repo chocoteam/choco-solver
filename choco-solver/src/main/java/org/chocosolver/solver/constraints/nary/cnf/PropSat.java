@@ -97,13 +97,30 @@ public class PropSat extends Propagator<BoolVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
+            int lit, var, val;
+            boolean sign;
+
+            for (int k : sat_.implies_.keys()) {
+                sign = sign(negated(k));
+                var = var(k);
+                val = vars[var].getValue();
+                if (val == (sign ? 0 : 1)) {
+                    TIntList lits = sat_.implies_.get(k);
+                    for (int l : lits.toArray()) {
+                        sign = sign(l);
+                        var = var(l);
+                        val = vars[var].getValue();
+                        if (val == (sign ? 0 : 1)) return ESat.FALSE;
+                    }
+                }
+            }
             for (SatSolver.Clause c : sat_.clauses) {
                 int cnt = 0;
                 for (int i = 0; i < c.size(); i++) {
-                    int lit = c._g(i);
-                    boolean sign = sign(lit);
-                    int var = var(lit);
-                    int val = vars[var].getValue();
+                    lit = c._g(i);
+                    sign = sign(lit);
+                    var = var(lit);
+                    val = vars[var].getValue();
                     if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
                     else break;
                 }
@@ -112,10 +129,10 @@ public class PropSat extends Propagator<BoolVar> {
             for (SatSolver.Clause c : sat_.learnts) {
                 int cnt = 0;
                 for (int i = 0; i < c.size(); i++) {
-                    int lit = c._g(i);
-                    boolean sign = sign(lit);
-                    int var = var(lit);
-                    int val = vars[var].getValue();
+                    lit = c._g(i);
+                    sign = sign(lit);
+                    var = var(lit);
+                    val = vars[var].getValue();
                     if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
                     else break;
                 }

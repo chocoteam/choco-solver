@@ -29,6 +29,8 @@ package org.chocosolver.solver.constraints.nary.cnf;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
@@ -66,6 +68,7 @@ public class PropNogoods extends Propagator<IntVar> {
 
     BitSet test_eq;
 
+    TIntStack fp;  // lit instantiated -> fix point
 
     public PropNogoods(Solver solver) {
         super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);
@@ -84,10 +87,12 @@ public class PropNogoods extends Propagator<IntVar> {
         early_deductions_ = new TIntArrayList();
         sat_trail_ = solver.getEnvironment().makeInt();
         test_eq = new BitSet();
+        fp = new TIntArrayStack();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
         sat_.initPropagator();
         applyEarlyDeductions();
@@ -104,10 +109,14 @@ public class PropNogoods extends Propagator<IntVar> {
                 }
             }
         }
+        while (fp.size() > 0) {
+            VariableBound(fp.pop(), true);
+        }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        fp.clear();
         IntVar var = vars[idxVarInProp];
         TIntIntHashMap map;
         for (int k : (map = vv2lit[var.getId()]).keys()) {
@@ -119,21 +128,42 @@ public class PropNogoods extends Propagator<IntVar> {
                 VariableBound(map.get(k), false);
             }
         }
+        while (fp.size() > 0) {
+            VariableBound(fp.pop(), true);
+        }
     }
 
     @Override
     public ESat isEntailed() {
         if (vars.length == 0) return ESat.TRUE;
         if (isCompletelyInstantiated()) {
+            int lit, var, val;
+            boolean sign;
+            for (int k : sat_.implies_.keys()) {
+                sign = sign(negated(k));
+                var = var(k);
+                IntVar ivar = vars[lit2pos[var]];
+                val = lit2val[var];
+                if (sign != ivar.contains(val)) {
+                    TIntList lits = sat_.implies_.get(k);
+                    for (int l : lits.toArray()) {
+                        sign = sign(l);
+                        var = var(l);
+                        ivar = vars[lit2pos[var]];
+                        val = lit2val[var];
+                        if (sign != ivar.contains(val)) return ESat.FALSE;
+                    }
+                }
+            }
             for (SatSolver.Clause c : sat_.clauses) {
                 int cnt = 0;
                 for (int i = 0; i < c.size(); i++) {
-                    int lit = c._g(i);
-                    boolean sign = sign(lit);
-                    int var = var(lit);
+                    lit = c._g(i);
+                    sign = sign(lit);
+                    var = var(lit);
                     IntVar ivar = vars[lit2pos[var]];
-                    int value = lit2val[var];
-                    if (sign != ivar.contains(value)) {
+                    val = lit2val[var];
+                    if (sign != ivar.contains(val)) {
                         cnt++;
                     } else break;
                 }
@@ -142,12 +172,12 @@ public class PropNogoods extends Propagator<IntVar> {
             for (SatSolver.Clause c : sat_.learnts) {
                 int cnt = 0;
                 for (int i = 0; i < c.size(); i++) {
-                    int lit = c._g(i);
-                    boolean sign = sign(lit);
-                    int var = var(lit);
+                    lit = c._g(i);
+                    sign = sign(lit);
+                    var = var(lit);
                     IntVar ivar = vars[lit2pos[var]];
-                    int value = lit2val[var];
-                    if (sign != ivar.contains(value)) {
+                    val = lit2val[var];
+                    if (sign != ivar.contains(val)) {
                         cnt++;
                     } else break;
                 }
@@ -243,6 +273,14 @@ public class PropNogoods extends Propagator<IntVar> {
                     vars[lit2pos[var]].instantiateTo(lit2val[var], this);
                 } else {
                     vars[lit2pos[var]].removeValue(lit2val[var], this);
+                    if (vars[lit2pos[var]].isInstantiated()) {
+                        IntVar tvar = vars[lit2pos[var]];
+                        int value = tvar.getValue();
+                        int alit = vv2lit[tvar.getId()].get(value);
+                        if (alit != NO_ENTRY) {
+                            fp.push(alit);
+                        }
+                    }
                 }
             }
         }
