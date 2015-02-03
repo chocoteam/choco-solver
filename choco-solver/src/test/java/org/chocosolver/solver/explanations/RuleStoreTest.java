@@ -37,7 +37,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -51,7 +50,6 @@ public class RuleStoreTest {
     IntVar I; // interval
     BoolVar B; // boolean
 
-    @BeforeClass
     public void setUp() {
         solver = new Solver();
         E = VF.enumerated("E", 0, 6, solver);
@@ -61,6 +59,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumFullDom() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(E);
@@ -80,6 +79,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumLow() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(E);
@@ -107,6 +107,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumUpp() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addUpperBoundRule(E);
@@ -134,6 +135,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumBound() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(E);
@@ -163,6 +165,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testEnumRem() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addRemovalRule(E, 8);
@@ -200,6 +203,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundFullDom() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(I);
@@ -220,6 +224,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundLow() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(I);
@@ -246,6 +251,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundUpp() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addUpperBoundRule(I);
@@ -273,6 +279,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundBound() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         rs.addLowerBoundRule(I);
@@ -301,6 +308,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testBoundRem() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
         rs.addRemovalRule(I, 8);
         rs.addRemovalRule(I, -2);
@@ -325,12 +333,14 @@ public class RuleStoreTest {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testBoundRem2() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
         rs.matchDomain(RuleStore.RM, I, IntEventType.REMOVE, 7, -1, -1);
     }
 
     @Test(groups = "1s")
     public void testBoolFullDom() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(B);
@@ -343,6 +353,7 @@ public class RuleStoreTest {
 
     @Test(groups = "1s")
     public void testDecRefutation() {
+        setUp();
         RuleStore rs = new RuleStore(solver, true);
 
         IntStrategy is = ISF.lexico_LB(E, I, B);
