@@ -461,6 +461,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         if (!identitymap.containsKey(this)) {
             IntervalIntVarImpl clone = new IntervalIntVarImpl(this.name, this.LB.get(), this.UB.get(), solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

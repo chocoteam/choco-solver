@@ -212,6 +212,9 @@ public final class BoolNotView extends IntView implements BoolVar {
             this.var.duplicate(solver, identitymap);
             BoolNotView clone = new BoolNotView((BoolVar) identitymap.get(this.var), solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

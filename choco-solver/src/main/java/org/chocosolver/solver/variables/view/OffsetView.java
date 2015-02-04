@@ -225,6 +225,9 @@ public final class OffsetView extends IntView {
             this.var.duplicate(solver, identitymap);
             OffsetView clone = new OffsetView((IntVar) identitymap.get(this.var), this.cste, solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

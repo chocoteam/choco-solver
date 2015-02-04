@@ -35,6 +35,8 @@
 
 package org.chocosolver.solver.variables;
 
+import gnu.trove.map.hash.THashMap;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -72,44 +74,10 @@ public class Task {
         duration = d;
         end = e;
         if (s.hasEnumeratedDomain() || d.hasEnumeratedDomain() || e.hasEnumeratedDomain()) {
-            update = new IVariableMonitor() {
-                @Override
-                public void onUpdate(Variable var, IEventType evt) throws ContradictionException {
-                    boolean fixpoint = true;
-                    while (fixpoint) {
-                        // start
-                        fixpoint = start.updateLowerBound(end.getLB() - duration.getUB(), this);
-                        fixpoint |= start.updateUpperBound(end.getUB() - duration.getLB(), this);
-                        // end
-                        fixpoint |= end.updateLowerBound(start.getLB() + duration.getLB(), this);
-                        fixpoint |= end.updateUpperBound(start.getUB() + duration.getUB(), this);
-                        // duration
-                        fixpoint |= duration.updateLowerBound(end.getLB() - start.getUB(), this);
-                        fixpoint |= duration.updateUpperBound(end.getUB() - start.getLB(), this);
-                    }
-                }
-
-            };
+            update = new TaskMonitorEnum(s, d, e);
         } else {
-            update = new IVariableMonitor() {
-                @Override
-                public void onUpdate(Variable var, IEventType evt) throws ContradictionException {
-                    // start
-                    start.updateLowerBound(end.getLB() - duration.getUB(), this);
-                    start.updateUpperBound(end.getUB() - duration.getLB(), this);
-                    // end
-                    end.updateLowerBound(start.getLB() + duration.getLB(), this);
-                    end.updateUpperBound(start.getUB() + duration.getUB(), this);
-                    // duration
-                    duration.updateLowerBound(end.getLB() - start.getUB(), this);
-                    duration.updateUpperBound(end.getUB() - start.getLB(), this);
-                }
-
-            };
+            update = new TaskMonitorBound(s, d, e);
         }
-        start.addMonitor(update);
-        duration.addMonitor(update);
-        end.addMonitor(update);
     }
 
     //***********************************************************************************
@@ -151,5 +119,90 @@ public class Task {
 
     public void setEnd(IntVar end) {
         this.end = end;
+    }
+
+
+    private class TaskMonitorEnum implements IVariableMonitor<IntVar> {
+
+        IntVar S, D, E;
+
+        public TaskMonitorEnum(IntVar S, IntVar D, IntVar E) {
+            this.S = S;
+            this.D = D;
+            this.E = E;
+            S.addMonitor(this);
+            D.addMonitor(this);
+            E.addMonitor(this);
+        }
+
+        @Override
+        public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
+            boolean fixpoint = true;
+            while (fixpoint) {
+                // start
+                fixpoint = S.updateLowerBound(E.getLB() - D.getUB(), this);
+                fixpoint |= S.updateUpperBound(E.getUB() - D.getLB(), this);
+                // end
+                fixpoint |= E.updateLowerBound(S.getLB() + D.getLB(), this);
+                fixpoint |= E.updateUpperBound(S.getUB() + D.getUB(), this);
+                // duration
+                fixpoint |= D.updateLowerBound(E.getLB() - S.getUB(), this);
+                fixpoint |= D.updateUpperBound(E.getUB() - S.getLB(), this);
+            }
+        }
+
+        @Override
+        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+            if (!identitymap.containsKey(this)) {
+                S.duplicate(solver, identitymap);
+                IntVar s = (IntVar) identitymap.get(this.S);
+                D.duplicate(solver, identitymap);
+                IntVar d = (IntVar) identitymap.get(this.D);
+                E.duplicate(solver, identitymap);
+                IntVar e = (IntVar) identitymap.get(this.E);
+                identitymap.put(this, new TaskMonitorEnum(s, d, e));
+            }
+        }
+    }
+
+    private class TaskMonitorBound implements IVariableMonitor<IntVar> {
+
+        IntVar S, D, E;
+
+        public TaskMonitorBound(IntVar S, IntVar D, IntVar E) {
+            this.S = S;
+            this.D = D;
+            this.E = E;
+
+            S.addMonitor(this);
+            D.addMonitor(this);
+            E.addMonitor(this);
+        }
+
+        @Override
+        public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
+            // start
+            S.updateLowerBound(E.getLB() - D.getUB(), this);
+            S.updateUpperBound(E.getUB() - D.getLB(), this);
+            // end
+            E.updateLowerBound(S.getLB() + D.getLB(), this);
+            E.updateUpperBound(S.getUB() + D.getUB(), this);
+            // duration
+            D.updateLowerBound(E.getLB() - S.getUB(), this);
+            D.updateUpperBound(E.getUB() - S.getLB(), this);
+        }
+
+        @Override
+        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+            if (!identitymap.containsKey(this)) {
+                S.duplicate(solver, identitymap);
+                IntVar s = (IntVar) identitymap.get(this.S);
+                D.duplicate(solver, identitymap);
+                IntVar d = (IntVar) identitymap.get(this.D);
+                E.duplicate(solver, identitymap);
+                IntVar e = (IntVar) identitymap.get(this.E);
+                identitymap.put(this, new TaskMonitorEnum(s, d, e));
+            }
+        }
     }
 }
