@@ -215,6 +215,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
         if (!identitymap.containsKey(this)) {
             FixedSetVarImpl clone = new FixedSetVarImpl(this.name, this.values, solver);
             identitymap.put(this, clone);
+            assert monitors.length == 0;
         }
     }
 }

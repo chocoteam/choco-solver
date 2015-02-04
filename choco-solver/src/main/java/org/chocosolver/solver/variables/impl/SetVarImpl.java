@@ -304,6 +304,9 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
             }
             SetVarImpl clone = new SetVarImpl(this.name, env, envelope.getSetType(), ker, kernel.getSetType(), solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

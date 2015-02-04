@@ -190,6 +190,9 @@ public class RealView extends AbstractVariable implements IView, RealVar {
             this.var.duplicate(solver, identitymap);
             RealView clone = new RealView((IntVar) identitymap.get(this.var), this.precision);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

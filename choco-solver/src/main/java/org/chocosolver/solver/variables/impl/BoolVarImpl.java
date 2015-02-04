@@ -414,6 +414,9 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 clone._setNot((BoolVar) identitymap.get(this.not));
                 clone.not._setNot(clone);
             }
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

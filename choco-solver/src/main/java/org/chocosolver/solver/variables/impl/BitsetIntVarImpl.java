@@ -538,6 +538,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (!identitymap.containsKey(this)) {
             BitsetIntVarImpl clone = new BitsetIntVarImpl(this.name, this.OFFSET, this.VALUES.copyToBitSet(), solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

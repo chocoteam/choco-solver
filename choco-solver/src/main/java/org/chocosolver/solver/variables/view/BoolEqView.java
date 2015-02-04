@@ -79,6 +79,9 @@ public final class BoolEqView extends EqView implements BoolVar {
             this.var.duplicate(solver, identitymap);
             BoolEqView clone = new BoolEqView((BoolVar) identitymap.get(this.var), solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

@@ -228,6 +228,9 @@ public final class ScaleView extends IntView {
             this.var.duplicate(solver, identitymap);
             ScaleView clone = new ScaleView((IntVar) identitymap.get(this.var), this.cste, solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

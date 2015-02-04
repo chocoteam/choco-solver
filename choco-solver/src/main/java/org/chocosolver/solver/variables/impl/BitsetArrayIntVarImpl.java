@@ -541,6 +541,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (!identitymap.containsKey(this)) {
             BitsetArrayIntVarImpl clone = new BitsetArrayIntVarImpl(this.name, this.values, solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
     }
 

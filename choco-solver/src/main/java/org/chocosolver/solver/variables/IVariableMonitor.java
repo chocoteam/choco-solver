@@ -28,7 +28,9 @@
  */
 package org.chocosolver.solver.variables;
 
+import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.IEventType;
 
@@ -59,4 +61,13 @@ public interface IVariableMonitor<V extends Variable> extends Serializable, ICau
 	 */
     void onUpdate(V var, IEventType evt) throws ContradictionException;
 
+    /**
+     * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
+     * IMonitor should be duplicated only if it is about modeling and not solving (ie: search).
+     * @param solver target solver
+     * @param identitymap a map to guarantee uniqueness of objects
+     */
+    default void duplicate(Solver solver, THashMap<Object, Object> identitymap){
+        // nothing to do
+    }
 }
