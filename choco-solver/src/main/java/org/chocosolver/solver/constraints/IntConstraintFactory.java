@@ -74,6 +74,7 @@ import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R1;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
+import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sort.PropSort;
 import org.chocosolver.solver.constraints.nary.sum.PropBoolSumCoarse;
 import org.chocosolver.solver.constraints.nary.sum.PropBoolSumIncremental;
@@ -109,6 +110,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 21/01/13
  */
+@SuppressWarnings("UnusedDeclaration")
 public class IntConstraintFactory {
     IntConstraintFactory() {
     }
@@ -1042,6 +1044,24 @@ public class IntConstraintFactory {
     }
 
     /**
+     * @param VARS       a tuple of array of variables
+     * @param PERMVARS   array of permutation variables, domains should be [1,VARS.length]  -- Can be null
+     * @param SORTEDVARS a tuple of array of variables sorted in increasing order
+     * @param K          key perfixes size (0 &le; k &le; m, where m is the size of the array of variable)
+     * @return a keysorting constraint
+     */
+    public static Constraint keysorting(IntVar[][] VARS, IntVar[] PERMVARS, IntVar[][] SORTEDVARS, int K) {
+        if (PERMVARS == null) {
+            int n = VARS.length;
+            PERMVARS = new IntVar[n];
+            for (int p = 0; p < n; p++) {
+                PERMVARS[p] = VF.bounded("p_" + (p + 1), 1, n, VARS[0][0].getSolver());
+            }
+        }
+        return new Constraint("keysorting", new PropKeysorting(VARS, SORTEDVARS, PERMVARS, K));
+    }
+
+    /**
      * For each pair of consecutive vectors VARS<sub>i</sub> and VARS<sub>i+1</sub> of the VARS collection
      * VARS<sub>i</sub> is lexicographically strictly less than than VARS<sub>i+1</sub>
      *
@@ -1377,10 +1397,10 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-		assert VARS.length>0;
-		if(VARS.length==1){
-			return arithm(VARS[0],"=",SUM);
-		}
+        assert VARS.length > 0;
+        if (VARS.length == 1) {
+            return arithm(VARS[0], "=", SUM);
+        }
         if (VARS.length > 10) {
             return new Constraint("SumOfBool", new PropBoolSumIncremental(VARS, SUM));
         } else {

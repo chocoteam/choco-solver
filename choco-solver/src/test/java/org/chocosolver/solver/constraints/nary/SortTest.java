@@ -65,7 +65,7 @@ public class SortTest {
         Y[4] = VF.bounded("Y5", 14, 18, solver);
 
         solver.post(new Constraint("sort", new PropSort(X, Y)));
-        /*if (solver.findSolution()) {
+        if (solver.findSolution()) {
             do {
                 System.out.printf("Solution:\n");
                 for (IntVar x : X) {
@@ -77,7 +77,7 @@ public class SortTest {
                 }
                 System.out.printf("\n\n");
             } while (solver.nextSolution());
-        }*/
+        }
         Assert.assertEquals(solver.findAllSolutions(), 182);
 
     }
