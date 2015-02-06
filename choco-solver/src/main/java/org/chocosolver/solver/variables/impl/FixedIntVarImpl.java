@@ -241,7 +241,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             identitymap.put(this, VF.fixed(this.name, this.constante, solver));
-            assert monitors.length == 0;
+            assert mIdx == 0;
         }
     }
 
