@@ -78,6 +78,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        if(!sat_.ok_)contradiction(null, "inconsistent");
         sat_.cancelUntil(0);
         sat_.initPropagator();
         applyEarlyDeductions();
