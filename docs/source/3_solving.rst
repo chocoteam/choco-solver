@@ -39,7 +39,7 @@ Finding a solution
 
 A call to ``solver.findSolution()`` launches a resolution which stops on the first solution found, if any.
 
-.. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
+.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/Overview.java
    :language: java
    :lines: 45-57
    :linenos:
@@ -176,7 +176,7 @@ The method ends by restoring the last solution found so far, if any.
 
 Here is a simple illustration:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/Pareto.java
+.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/integer/Pareto.java
    :language: java
    :lines: 71,72,73,75,83,88-92
    :linenos:
@@ -240,7 +240,7 @@ Custom recorder
 You can build you own way of manipulating and recording solutions by either implementing your own ``ISolutionRecorder`` object
 or by simply using an ``ISolutionMonitor``, as follows:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/SMPTSP.java
+.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/integer/SMPTSP.java
    :language: java
    :lines: 118-124
    :linenos:

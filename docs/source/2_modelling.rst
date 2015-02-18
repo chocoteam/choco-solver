@@ -391,7 +391,7 @@ A list of constraints available through factories is given in :ref:`List of avai
 
 If we want an integer variable ``sum`` to be equal to the sum of values of variables in the set ``atLeast``, we can use the ``IntConstraintFactory.sum`` constraint:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/CarSequencing.java
+.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/samples/integer/CarSequencing.java
    :language: java
    :lines: 104
 
