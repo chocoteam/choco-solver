@@ -103,30 +103,23 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         last = solver.getEnvironment().makeInt(listuples.length - 1);
 
         int[][] tt = this.relation.getTupleTable();
-        boolean fastValidCheckAllowed = true;
         boolean fastBooleanValidCheckAllowed = true;
         // check if all tuples are within the range
         // of the domain and if so set up a faster validity checker
         // that avoids checking original bounds first
+        loop:
         for (int i = 0; i < tt.length; i++) {
             for (int j = 0; j < tt[i].length; j++) {
                 int lb = vs[j].getLB();
                 int ub = vs[j].getUB();
-                if (lb > tt[i][j] ||
-                        ub < tt[i][j]) {
-                    fastValidCheckAllowed = false;
-                }
                 if (lb < 0 || ub > 1) {
                     fastBooleanValidCheckAllowed = false;
+                    break loop;
                 }
             }
-            if (!fastBooleanValidCheckAllowed &&
-                    !fastValidCheckAllowed) break;
         }
         if (fastBooleanValidCheckAllowed) {
             valcheck = new FastBooleanValidityChecker(arity, vars);
-        } else if (fastValidCheckAllowed) {
-            valcheck = new FastValidityChecker(arity, vars);
         } else valcheck = new ValidityChecker(arity, vars);
     }
 

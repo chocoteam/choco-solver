@@ -423,4 +423,19 @@ public class TableTest {
         Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
+    @Test(groups = "1s")
+    public void testPDav() {
+        for (String a : ALGOS) {
+            Solver solver = new Solver();
+            IntVar x, y, z;
+            x = VF.enumerated("x", 1, 3, solver);
+            y = VF.enumerated("y", 0, 3, solver);
+            z = VF.enumerated("z", 0, 1, solver);
+            Tuples ts = TuplesFactory.scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
+            solver.post(ICF.table(new IntVar[]{x, z, z, y}, ts, a));
+            solver.findAllSolutions();
+            Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
+        }
+    }
+
 }

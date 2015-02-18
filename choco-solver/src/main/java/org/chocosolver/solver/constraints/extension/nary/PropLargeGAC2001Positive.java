@@ -85,31 +85,27 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         this.tab = relation.getTableLists();
 
         int[][] tt = relation.getTupleTable();
-        boolean fastValidCheckAllowed = true;
         boolean fastBooleanValidCheckAllowed = true;
 
         // check if all tuples are within the range
         // of the domain and if so set up a faster validity checker
         // that avoids checking original bounds first
+        loop:
         for (int i = 0; i < tt.length; i++) {
             for (int j = 0; j < tt[i].length; j++) {
                 int lb = vs[j].getLB();
                 int ub = vs[j].getUB();
                 if (lb > tt[i][j] ||
                         ub < tt[i][j]) {
-                    fastValidCheckAllowed = false;
                 }
                 if (lb < 0 || ub > 1) {
                     fastBooleanValidCheckAllowed = false;
+                    break loop;
                 }
             }
-            if (!fastBooleanValidCheckAllowed &&
-                    !fastValidCheckAllowed) break;
         }
         if (fastBooleanValidCheckAllowed) {
             valcheck = new FastBooleanValidityChecker(arity, vars);
-        } else if (fastValidCheckAllowed) {
-            valcheck = new FastValidityChecker(arity, vars);
         } else valcheck = new ValidityChecker(arity, vars);
     }
 
@@ -209,7 +205,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         //sort variables regarding domain sizes to speedup the check !
         valcheck.sortvars();
         for (int i = 0; i < arity; i++)
-            if (idx != valcheck.position[i]) reviseVar(valcheck.position[i]);
+            if (idx != valcheck.getPosition(i)) reviseVar(valcheck.getPosition(i));
     }
 
 
