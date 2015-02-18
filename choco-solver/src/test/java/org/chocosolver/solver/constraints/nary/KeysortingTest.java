@@ -190,6 +190,36 @@ public class KeysortingTest {
     }
 
     @Test(groups = "1s")
+    public void test04() {
+        Solver solver = new Solver();
+        IntVar[][] X, Y;
+        X = new IntVar[3][2];
+        Y = new IntVar[3][2];
+        X[0][0] = VF.fixed("X11", 15, solver);
+        X[0][1] = VF.fixed("X12", 0, solver);
+        X[1][0] = VF.fixed("X21", 15, solver);
+        X[1][1] = VF.fixed("X22", 8, solver);
+        X[2][0] = VF.fixed("X31", 15, solver);
+        X[2][1] = VF.fixed("X32", 19, solver);
+
+        Y[0][0] = VF.bounded("Y11", 14, 16, solver);
+        Y[0][1] = VF.bounded("Y12", 0, 19, solver);
+        Y[1][0] = VF.bounded("Y21", 14, 16, solver);
+        Y[1][1] = VF.bounded("Y22", 0, 19, solver);
+        Y[2][0] = VF.bounded("Y31", 14, 16, solver);
+        Y[2][1] = VF.bounded("Y32", 0, 19, solver);
+
+        solver.post(ICF.keysorting(X, null, Y, 2));
+        solver.findSolution();
+        Assert.assertEquals(Y[0][0].getValue(), 15);
+        Assert.assertEquals(Y[0][1].getValue(), 0);
+        Assert.assertEquals(Y[1][0].getValue(), 15);
+        Assert.assertEquals(Y[1][1].getValue(), 8);
+        Assert.assertEquals(Y[2][0].getValue(), 15);
+        Assert.assertEquals(Y[2][1].getValue(), 19);
+    }
+
+    @Test(groups = "1s")
     public void test1() {
         Solver solver = new Solver();
         IntVar[][] X, Y;

@@ -56,6 +56,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
     private IntVar[][] X, Y; // ref to X and Y, instead of vars
     private int[][] XLB, XUB, YLB, YUB;
     private int[] CHUNK, SORTMIN, SORTMAX, XMATE, YMATE, NODE, ROOT, RIGHTMOST, MAXX, SCC, SORTY, ARRAY, CUR;
+    boolean prune;
 
     protected final ArraySort sorter;
     private final IntComparator sortmincomp1 = (i, j) -> {
@@ -222,6 +223,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
      */
     private void filter() throws ContradictionException {
         do {
+            prune = false;
             init();
             normalizeY();
             normalizeX();
@@ -229,7 +231,8 @@ public final class PropKeysorting extends Propagator<IntVar> {
             matchDown();
             findSCC();
             narrow();
-        } while (prune());
+            prune();
+        } while (prune);
     }
 
     /**
@@ -498,8 +501,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
     /**
      * Make all tuple fields bounds-consistent
      */
-    private boolean prune() throws ContradictionException {
-        boolean mod = false;
+    private void prune() throws ContradictionException {
         for (int i = 0; i < n; i++) {
             if (
                     !DvarLexFixMin(X[i], XLB[i])
@@ -507,7 +509,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
                             || !DvarLexFixMin(Y[i], YLB[i])
                             || !DvarLexFixMax(Y[i], YUB[i])
                     ) {
-                return false;
+                this.contradiction(null, "");
             }
         }
         for (int d = 0; d <= m; d++) {
@@ -529,15 +531,13 @@ public final class PropKeysorting extends Propagator<IntVar> {
                     y = SORTY[j++];
                     x = YMATE[y];
 
-                    mod |= X[x][d].updateLowerBound(ylb, this);
-                    mod |= X[x][d].updateUpperBound(yub, this);
-                    mod |= Y[y][d].updateLowerBound(xlb, this);
-                    mod |= Y[y][d].updateUpperBound(xub, this);
+                    prune |= X[x][d].updateLowerBound(ylb, this);
+                    prune |= X[x][d].updateUpperBound(yub, this);
+                    prune |= Y[y][d].updateLowerBound(xlb, this);
+                    prune |= Y[y][d].updateUpperBound(xub, this);
                 }
             }
         }
-
-        return mod;
     }
 
     /**
@@ -603,15 +603,15 @@ public final class PropKeysorting extends Propagator<IntVar> {
             if (V[i].getLB() > T[i]) {
                 return true;
             } else if (V[i].getUB() > T[i]) {
-                V[q].updateLowerBound(T[q], this);
+                prune |= V[q].updateLowerBound(T[q], this);
                 break;
             } else {
-                V[q].instantiateTo(T[q], this);
+                prune |= V[q].instantiateTo(T[q], this);
             }
         }
         for (i++; i <= k; i++) {
             if (V[i].getUB() < T[i]) {
-                V[q].updateLowerBound(T[q] + 1, this);
+                prune |= V[q].updateLowerBound(T[q] + 1, this);
                 return true;
             } else if (V[i].getUB() > T[i]) {
                 return true;
@@ -630,15 +630,15 @@ public final class PropKeysorting extends Propagator<IntVar> {
             if (V[i].getUB() < T[i]) {
                 return true;
             } else if (V[i].getLB() < T[i]) {
-                V[q].updateUpperBound(T[q], this);
+                prune |= V[q].updateUpperBound(T[q], this);
                 break;
             } else {
-                V[q].instantiateTo(T[q], this);
+                prune |= V[q].instantiateTo(T[q], this);
             }
         }
         for (i++; i <= k; i++) {
             if (V[i].getLB() > T[i]) {
-                V[q].updateUpperBound(T[q] - 1, this);
+                prune |= V[q].updateUpperBound(T[q] - 1, this);
             } else if (V[i].getLB() < T[i]) {
                 return true;
             }
