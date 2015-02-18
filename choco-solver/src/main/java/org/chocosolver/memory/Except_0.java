@@ -39,12 +39,12 @@ package org.chocosolver.memory;
  */
 public class Except_0 implements ICondition {
 
-    final IEnvironment environment;
+    IEnvironment environment;
 
-    public Except_0(IEnvironment environment) {
+    @Override
+    public void set(IEnvironment environment) {
         this.environment = environment;
     }
-
 
     @Override
     public boolean satisfied() {

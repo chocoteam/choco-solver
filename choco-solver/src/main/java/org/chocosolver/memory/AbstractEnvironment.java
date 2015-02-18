@@ -116,5 +116,6 @@ public abstract class AbstractEnvironment implements IEnvironment {
     @Override
     public void buildFakeHistoryOn(ICondition condition) {
         this.condition = condition;
+        this.condition.set(this);
     }
 }

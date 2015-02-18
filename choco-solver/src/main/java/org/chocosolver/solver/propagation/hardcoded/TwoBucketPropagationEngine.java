@@ -87,7 +87,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
-    protected final Variable[] variables;
     protected Propagator[] propagators;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
 
@@ -114,7 +113,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         this.trigger = new PropagationTrigger(this, solver);
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
 
-        variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;

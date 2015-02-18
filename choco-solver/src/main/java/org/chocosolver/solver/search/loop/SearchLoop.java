@@ -312,6 +312,7 @@ public class SearchLoop implements ISearchLoop {
     private void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         this.nextState = INITIAL_PROPAGATION;
+        this.env.buildFakeHistoryOn(solver.getSettings().getEnvironmentHistorySimulationCondition());
     }
 
     /**
@@ -551,7 +552,7 @@ public class SearchLoop implements ISearchLoop {
     }
 
     @Override
-    public int getSearchWorldIndex(){
+    public int getSearchWorldIndex() {
         return searchWorldIndex;
     }
 }

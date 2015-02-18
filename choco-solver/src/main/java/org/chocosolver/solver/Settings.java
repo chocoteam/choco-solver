@@ -28,6 +28,8 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.Except_0;
+import org.chocosolver.memory.ICondition;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 
@@ -141,5 +143,15 @@ public interface Settings extends Serializable {
      */
     default public ISearchBinder getSearchBinder() {
         return new DefaultSearchBinder();
+    }
+
+    /**
+     * Return the condition to satisfy when rebuilding history of backtrackable objects is needed.
+     * Building "fake" history is needed when a backtrackable object is created during the search, in order to restore a correct state upon backtrack.
+     * The default condition is "at least one env.worldPush() has been called since the creation of the bck object".
+     * The condition can be set to {@link org.chocosolver.memory.ICondition#FALSE} if no backtrackable object is created during the search.
+     */
+    default public ICondition getEnvironmentHistorySimulationCondition(){
+        return new Except_0();
     }
 }

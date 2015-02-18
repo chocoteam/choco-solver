@@ -68,7 +68,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
-    protected final Variable[] variables;
     protected Propagator[] propagators;
 
     protected final CircularQueue<Propagator>[] pro_queue;
@@ -91,7 +90,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         this.trigger = new PropagationTrigger(this, solver);
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
 
-        variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;

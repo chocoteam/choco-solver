@@ -68,7 +68,7 @@ public class DynamicAdditionTest {
     @Test(groups = "1s")
     public void test1() {
         IEnvironment environment = new EnvironmentTrailing();
-        environment.buildFakeHistoryOn(new Except_0(environment));
+        environment.buildFakeHistoryOn(new Except_0());
         IStateInt a = environment.makeInt(10);
         a.set(11);
         environment.worldPush();

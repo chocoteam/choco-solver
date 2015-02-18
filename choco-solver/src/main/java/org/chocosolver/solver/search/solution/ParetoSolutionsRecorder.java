@@ -29,14 +29,15 @@
 package org.chocosolver.solver.search.solution;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.nary.cnf.PropSat;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 
 /**
  * Class to store the pareto front (multi-objective optimization).
@@ -46,45 +47,53 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
 
-	ResolutionPolicy policy;
-	IntVar[] objectives;
-	int n;
+    ResolutionPolicy policy;
+    IntVar[] objectives;
+    int n;
+    int[] vals, lits;
+    PropSat psat;
+    BoolVar[] bvars;
 
-	public ParetoSolutionsRecorder(final ResolutionPolicy policy, final IntVar[] objectives){
-		super(objectives[0].getSolver());
-		this.objectives = objectives;
-		this.n = objectives.length;
-		this.policy = policy;
-		solver.plugMonitor(new IMonitorClose() {
-			@Override
-			public void beforeClose() {
-				Solution last = getLastSolution();
-				if(last!=null){
-					try{
-						solver.getSearchLoop().restoreRootNode();
-						solver.getEnvironment().worldPush();
-						last.restore();
-					}catch (ContradictionException e){
-						throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-					}
-					solver.getEngine().flush();
-				}
-			}
-			@Override
-			public void afterClose() {}
-		});
-	}
+    public ParetoSolutionsRecorder(final ResolutionPolicy policy, final IntVar[] objectives) {
+        super(objectives[0].getSolver());
+        this.objectives = objectives;
+        this.n = objectives.length;
+        this.policy = policy;
+        this.psat = solver.getMinisat().getPropSat();
+        vals = new int[n];
+        lits = new int[n];
+        bvars = new BoolVar[n];
+        solver.plugMonitor(new IMonitorClose() {
+            @Override
+            public void beforeClose() {
+                Solution last = getLastSolution();
+                if (last != null) {
+                    try {
+                        solver.getSearchLoop().restoreRootNode();
+                        solver.getEnvironment().worldPush();
+                        last.restore();
+                    } catch (ContradictionException e) {
+                        throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+                    }
+                    solver.getEngine().flush();
+                }
+            }
 
-	@Override
-	protected IMonitorSolution createRecMonitor() {
-		return () -> {
-            int[] vals = new int[n];
-            for(int i=0;i<n;i++){
+            @Override
+            public void afterClose() {
+            }
+        });
+    }
+
+    @Override
+    protected IMonitorSolution createRecMonitor() {
+        return () -> {
+            for (int i = 0; i < n; i++) {
                 vals[i] = objectives[i].getValue();
             }
             // update solution set
-            for(int i=solutions.size()-1;i>=0;i--){
-                if(dominatedSolution(solutions.get(i),vals)){
+            for (int i = solutions.size() - 1; i >= 0; i--) {
+                if (dominatedSolution(solutions.get(i), vals)) {
                     solutions.remove(i);
                 }
             }
@@ -93,25 +102,26 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
             solution.record(solver);
             solutions.add(solution);
             // aim at better solutions
-            Constraint[] better = new Constraint[n];
             Operator symbol = Operator.GT;
-            if(policy==ResolutionPolicy.MINIMIZE){
-symbol = Operator.LT;
+            if (policy == ResolutionPolicy.MINIMIZE) {
+                symbol = Operator.LT;
             }
-            for(int i=0;i<n;i++){
-                better[i] = ICF.arithm(objectives[i],symbol.toString(),vals[i]);
+            for (int i = 0; i < n; i++) {
+                bvars[i] = VF.bool("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")", solver);
+                ICF.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
+                lits[i] = psat.Literal(bvars[i]);
             }
-            solver.post(LCF.or(better));
+            psat.addLearnt(lits);
         };
-	}
+    }
 
-	private boolean dominatedSolution(Solution solution, int[] vals) {
-		for(int i=0;i<n;i++){
-			int delta = solution.getIntVal(objectives[i])-vals[i];
-			if((delta>0 && policy==ResolutionPolicy.MAXIMIZE)||(delta<0 && policy==ResolutionPolicy.MINIMIZE)){
-				return false;
-			}
-		}
-		return true;
-	}
+    private boolean dominatedSolution(Solution solution, int[] vals) {
+        for (int i = 0; i < n; i++) {
+            int delta = solution.getIntVal(objectives[i]) - vals[i];
+            if ((delta > 0 && policy == ResolutionPolicy.MAXIMIZE) || (delta < 0 && policy == ResolutionPolicy.MINIMIZE)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
