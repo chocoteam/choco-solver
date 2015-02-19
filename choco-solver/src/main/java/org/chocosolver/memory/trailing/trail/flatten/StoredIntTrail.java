@@ -2,29 +2,29 @@
  * Copyright (c) 2014,
  *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
  *       Jean-Guillaume Fages (COSLING S.A.S.).
- * All rights reserved.
+ *  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
  *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.chocosolver.memory.trailing.trail.flatten;
 
@@ -160,7 +160,7 @@ public class StoredIntTrail implements IStoredIntTrail {
         variableStack[currentLevel] = v;
         stampStack[currentLevel] = oldStamp;
         currentLevel++;
-        if (currentLevel == valueStack.length) {
+        if (currentLevel == variableStack.length) {
             resizeUpdateCapacity();
         }
     }
@@ -169,39 +169,27 @@ public class StoredIntTrail implements IStoredIntTrail {
     public void buildFakeHistory(StoredInt v, int initValue, int olderStamp) {
         // from world 0 to fromStamp (excluded), create a fake history based on initValue
         // kind a copy of the current elements
-        // 1. make a copy of variableStack
-        StoredInt[] _variableStack = variableStack;
-        int[] _valueStack = valueStack;
-        int[] _stampStack = stampStack;
-        int[] _worldStartLevels = worldStartLevels;
-        int _maxUpdates = variableStack.length + olderStamp;
-        int _currentLevel = currentLevel;
-
-        variableStack = new StoredInt[_maxUpdates];
-        valueStack = new int[_maxUpdates];
-        stampStack = new int[_maxUpdates];
-        worldStartLevels = new int[worldStartLevels.length];
-        currentLevel = 0;
-
-        // then replay the history
-        for (int w = 1; w < olderStamp; w++) {
-            // copy the true history
-            rebuild(_worldStartLevels[w], _worldStartLevels[w + 1], _variableStack, _valueStack, _stampStack);
-            // add the fake one
-            savePreviousState(v, initValue, w - 1);
-            worldPush(w + 1);
-        }
-        // copy the true history
-        rebuild(_worldStartLevels[olderStamp], _currentLevel, _variableStack, _valueStack, _stampStack);
-
+        // first save the current state on the top of the stack
         savePreviousState(v, initValue, olderStamp - 1);
-    }
-
-    private void rebuild(int f, int t, StoredInt[] _variableStack, int[] _valueStack, int[] _stampStack) {
-        System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
-        System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
-        System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
-        currentLevel += (t - f);
+        // second: ensures capacities
+        while (currentLevel + olderStamp > variableStack.length) {
+            resizeUpdateCapacity();
+        }
+        int i1, f, s = currentLevel;
+        for (int w = olderStamp; w > 1; w--) {
+            f = worldStartLevels[w];
+            i1 = f + w - 1;
+            s -= f;
+            System.arraycopy(variableStack, f, variableStack, i1, s);
+            System.arraycopy(valueStack, f, valueStack, i1, s);
+            System.arraycopy(stampStack, f, stampStack, i1, s);
+            variableStack[i1 - 1] = v;
+            valueStack[i1 - 1] = initValue;
+            stampStack[i1 - 1] = w - 2;
+            worldStartLevels[w] += w - 1;
+            currentLevel++;
+            s = f;
+        }
     }
 
 

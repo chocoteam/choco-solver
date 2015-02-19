@@ -129,4 +129,32 @@ public class DynamicAdditionTest {
 
     }
 
+    @Test(groups = "1s")
+    public void test2() {
+        IEnvironment environment = new EnvironmentTrailing();
+        environment.buildFakeHistoryOn(new Except_0());
+        int n = 40000;
+        int m = 4000;
+        int k = 100;
+        IStateInt[] si = new IStateInt[n];
+        for (int i = 0; i < n; i++) {
+            si[i] = environment.makeInt(i);
+        }
+        for (int w = 0; w < k; w++) {
+            environment.worldPush();
+            for (int i = 0; i < n; i++) {
+                si[i].add(1);
+            }
+        }
+        IStateInt[] si2 = new IStateInt[m];
+        for (int i = 0; i < m; i++) {
+            si2[i] = environment.makeInt(-i);
+        }
+        for (int w = 0; w < k; w++) {
+            environment.worldPop();
+        }
+        for (int i = 0; i < m; i++) {
+            Assert.assertEquals(si2[i].get(), -i);
+        }
+    }
 }

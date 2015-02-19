@@ -2,29 +2,29 @@
  * Copyright (c) 2014,
  *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
  *       Jean-Guillaume Fages (COSLING S.A.S.).
- * All rights reserved.
+ *  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
  *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.chocosolver.memory.trailing.trail.flatten;
 
@@ -65,12 +65,14 @@ public class StoredLongTrail implements IStoredLongTrail {
      */
     private int[] worldStartLevels;
 
+
     /**
      * Constructs a trail with predefined size.
      *
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
      */
+
     public StoredLongTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
         variableStack = new StoredLong[nUpdates];
@@ -85,6 +87,7 @@ public class StoredLongTrail implements IStoredLongTrail {
      *
      * @param worldIndex current world index
      */
+
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
     }
@@ -95,6 +98,7 @@ public class StoredLongTrail implements IStoredLongTrail {
      *
      * @param worldIndex current world index
      */
+
     public void worldPop(int worldIndex) {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
@@ -108,14 +112,16 @@ public class StoredLongTrail implements IStoredLongTrail {
     /**
      * Returns the current size of the stack.
      */
+
     public int getSize() {
         return currentLevel;
     }
 
 
     /**
-     * Commits a world: merging it with the previous one.
+     * Comits a world: merging it with the previous one.
      */
+
     public void worldCommit(int worldIndex) {
         // principle:
         //   currentLevel decreases to end of previous world
@@ -148,12 +154,13 @@ public class StoredLongTrail implements IStoredLongTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
+
     public void savePreviousState(StoredLong v, long oldValue, int oldStamp) {
         valueStack[currentLevel] = oldValue;
         variableStack[currentLevel] = v;
         stampStack[currentLevel] = oldStamp;
         currentLevel++;
-        if (currentLevel == valueStack.length) {
+        if (currentLevel == variableStack.length) {
             resizeUpdateCapacity();
         }
     }
@@ -162,44 +169,32 @@ public class StoredLongTrail implements IStoredLongTrail {
     public void buildFakeHistory(StoredLong v, long initValue, int olderStamp) {
         // from world 0 to fromStamp (excluded), create a fake history based on initValue
         // kind a copy of the current elements
-        // 1. make a copy of variableStack
-        StoredLong[] _variableStack = variableStack;
-        long[] _valueStack = valueStack;
-        int[] _stampStack = stampStack;
-        int[] _worldStartLevels = worldStartLevels;
-        int _maxUpdates = variableStack.length + olderStamp;
-        int _currentLevel = currentLevel;
-
-        variableStack = new StoredLong[_maxUpdates];
-        valueStack = new long[_maxUpdates];
-        stampStack = new int[_maxUpdates];
-        worldStartLevels = new int[worldStartLevels.length];
-        currentLevel = 0;
-
-        // then replay the history
-        for (int w = 1; w < olderStamp; w++) {
-            // copy the true history
-            rebuild(_worldStartLevels[w], _worldStartLevels[w + 1], _variableStack, _valueStack, _stampStack);
-            // add the fake one
-            savePreviousState(v, initValue, w - 1);
-            worldPush(w + 1);
-        }
-        // copy the true history
-        rebuild(_worldStartLevels[olderStamp], _currentLevel, _variableStack, _valueStack, _stampStack);
-
+        // first save the current state on the top of the stack
         savePreviousState(v, initValue, olderStamp - 1);
+        // second: ensures capacities
+        while (currentLevel + olderStamp > variableStack.length) {
+            resizeUpdateCapacity();
+        }
+        int i1, f, s = currentLevel;
+        for (int w = olderStamp; w > 1; w--) {
+            f = worldStartLevels[w];
+            i1 = f + w - 1;
+            s -= f;
+            System.arraycopy(variableStack, f, variableStack, i1, s);
+            System.arraycopy(valueStack, f, valueStack, i1, s);
+            System.arraycopy(stampStack, f, stampStack, i1, s);
+            variableStack[i1 - 1] = v;
+            valueStack[i1 - 1] = initValue;
+            stampStack[i1 - 1] = w - 2;
+            worldStartLevels[w] += w - 1;
+            currentLevel++;
+            s = f;
+        }
     }
 
-    private void rebuild(int f, int t, StoredLong[] _variableStack, long[] _valueStack, int[] _stampStack) {
-        System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
-        System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
-        System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
-        currentLevel += (t - f);
-    }
 
     private void resizeUpdateCapacity() {
         final int newCapacity = ((variableStack.length * 3) / 2);
-		assert newCapacity>=variableStack.length;
         // first, copy the stack of variables
         final StoredLong[] tmp1 = new StoredLong[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
@@ -219,4 +214,5 @@ public class StoredLongTrail implements IStoredLongTrail {
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;
     }
+
 }

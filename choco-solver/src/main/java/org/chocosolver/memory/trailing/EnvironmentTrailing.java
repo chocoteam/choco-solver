@@ -225,7 +225,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     intTrail = new StoredIntChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    intTrail = new UnsafeIntTrail(maxWorld);
+                    intTrail = new UnsafeIntTrail(MaxHist, maxWorld);
                     break;
             }
             increaseTrail();
@@ -244,7 +244,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     longTrail = new StoredLongChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    longTrail = new UnsafeLongTrail(maxWorld);
+                    longTrail = new UnsafeLongTrail(MaxHist, maxWorld);
                     break;
             }
 
@@ -264,7 +264,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     boolTrail = new StoredBoolChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    boolTrail = new UnsafeBoolTrail(maxWorld);
+                    boolTrail = new UnsafeBoolTrail(MaxHist, maxWorld);
                     break;
             }
 
@@ -284,7 +284,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     doubleTrail = new StoredDoubleChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    doubleTrail = new UnsafeDoubleTrail(maxWorld);
+                    doubleTrail = new UnsafeDoubleTrail(MaxHist, maxWorld);
                     break;
             }
             increaseTrail();
