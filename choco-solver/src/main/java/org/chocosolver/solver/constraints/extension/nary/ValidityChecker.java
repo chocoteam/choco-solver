@@ -66,6 +66,9 @@ public class ValidityChecker implements IntComparator, Serializable {
      * Sort the variable to speedup the check
      */
     public void sortvars() {
+        for (int i = 0; i < arity; i++) {
+            sortedidx[i] = i;
+        }
         sorter.sort(sortedidx, arity, this);
     }
 
