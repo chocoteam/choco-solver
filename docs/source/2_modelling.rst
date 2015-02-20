@@ -366,7 +366,7 @@ A solution of a problem is an assignment of all its variables simultaneously ver
 
 Constraint can be declared in *extension*, by defining the valid/invalid tuples, or in *intension*, by defining a relation between the variables.
 Choco |version| provides various factories to declare constraints (see :ref:`Overview <12_overview_label>` to have a list of available factories).
-A list of constraints available through factories is given in :ref:`List of available constraints <61_constraints_label>`.
+A list of constraints available through factories is given in :ref:`List of available constraints <23_constraints_label>`.
 
 .. admonition:: **Modelling**: Selecting the right constraints
 
@@ -391,7 +391,7 @@ A list of constraints available through factories is given in :ref:`List of avai
 
 If we want an integer variable ``sum`` to be equal to the sum of values of variables in the set ``atLeast``, we can use the ``IntConstraintFactory.sum`` constraint:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/samples/integer/CarSequencing.java
+.. literalinclude:: /../../choco-samples/src/main/java/org/chocosolver/samples/integer/CarSequencing.java
    :language: java
    :lines: 104
 
@@ -415,15 +415,17 @@ Choco |version| provides various types of constraints.
 Available constraints
 ^^^^^^^^^^^^^^^^^^^^^
 
-    :ref:`51_icstr_fal`, :ref:`51_icstr_tru`
+:ref:`51_icstr_fal`, :ref:`51_icstr_tru`
 
     On one integer variable
+
 :ref:`51_icstr_ari`,
 :ref:`51_icstr_mem`,
 :ref:`51_icstr_nmem`.
 
 
     On two integer variables
+
 :ref:`51_icstr_abs`,
 :ref:`51_icstr_ari`,
 :ref:`51_icstr_dist`,
@@ -432,6 +434,7 @@ Available constraints
 :ref:`51_icstr_tim`.
 
     On three integer variables
+
 :ref:`51_icstr_ari`,
 :ref:`51_icstr_dist`,
 :ref:`51_icstr_div`,
@@ -441,6 +444,7 @@ Available constraints
 :ref:`51_icstr_tim`.
 
     On an undefined number of integer variables
+
 :ref:`51_icstr_elm`,
 :ref:`51_icstr_sor`,
 :ref:`51_icstr_tab`,
@@ -493,13 +497,16 @@ Available constraints
 
 
     On one set variable
+
 :ref:`51_scstr_note`.    
 
     On two set variables
+
 :ref:`51_scstr_dis`,
 :ref:`51_scstr_off`.
 
     On an undefined number of set variables
+
 :ref:`51_scstr_alldif`,
 :ref:`51_scstr_alldis`,
 :ref:`51_scstr_alleq`,
@@ -515,6 +522,7 @@ Available constraints
     
 
     On integer and set variables
+
 :ref:`51_scstr_card`,
 :ref:`51_scstr_elm`,
 :ref:`51_scstr_icha`,
@@ -525,6 +533,7 @@ Available constraints
 :ref:`51_scstr_sum`.
 
     On real variables
+
 :ref:`51_rcstr_main`.
 
 
@@ -640,16 +649,19 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 
 
     On one boolean variable
+
 :ref:`51_lcstr_true`,
 :ref:`51_lcstr_false`.
 
     On two boolean variables
+
 :ref:`51_lcstr_booleq`,
 :ref:`51_lcstr_boolle`,
 :ref:`51_lcstr_boollt`,
 :ref:`51_lcstr_boolnot`.
 
     Reification on two boolean variables
+
 :ref:`51_lcstr_booliseqvar`,
 :ref:`51_lcstr_boolislevar`,
 :ref:`51_lcstr_boolisltvar`,
@@ -659,6 +671,7 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 :ref:`51_lcstr_andeqvar`.
 
     On undefined number of boolean variables
+
 :ref:`51_lcstr_orarrayqualtrue`,
 :ref:`51_lcstr_atmostnminusone`,
 :ref:`51_lcstr_atmostone`,
@@ -685,7 +698,7 @@ A ``LogOp`` is an implementation of ``ILogical``, just like ``BoolVar``, and pro
 
   ``LogOp ifOnlyIf(ILogical a, ILogical b)``:  create a biconditional, results in `true` if and only if both operands are false or both operands are `true`.
 
-  ``LogOp ifThenElse(ILogical a, ILogical b, ILogical c)`` : create an implication, results in `true` if ``a`` is `true` and ``b`` is `true` or ``a`` is ``false` and ``c`` is `true.
+  ``LogOp ifThenElse(ILogical a, ILogical b, ILogical c)`` : create an implication, results in `true` if ``a`` is `true` and ``b`` is `true` or ``a`` is ``false` and ``c`` is `true`.
 
   ``LogOp implies(ILogical a, ILogical b)`` : create an implication, results in `true` if ``a`` is `false` or ``b`` is `true`.
 

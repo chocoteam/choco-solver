@@ -114,7 +114,7 @@ Getting started
 Installing Choco |version|
 ==========================
 
-Choco |version| is a java library based on `Java 7 <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_.
+Choco |version| is a java library based on `Java 8 <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_.
 The main library is named ``choco-solver`` and can be seen as the core library.
 Some extensions are also provided, such as ``choco-parsers`` or ``choco-cpviz``, and rely on but not include ``choco-solver``.
 
@@ -462,7 +462,7 @@ Choco |version| : changes
 -----
 
 - Addition:
-    - :ref:`51_smf`
+    - :ref:`55_smf`
 
 - Major modification:
     - :ref:`43_explanations_label`

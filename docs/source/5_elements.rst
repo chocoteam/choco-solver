@@ -2,8 +2,6 @@
 Elements of Choco
 #################
 
-.. |gccat| replace::
-
 .. _51_icstr_main:
 
 **********************************
@@ -28,8 +26,8 @@ It ensures that `VAR1` = \| `VAR2` \| .
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 100-103,105
-          :emphasize-lines: 103
+          :lines: 101-104,106
+          :emphasize-lines: 104
           :linenos:
 
     The solutions of the problem are :
@@ -64,8 +62,8 @@ A signature offers the possibility to specify the filtering algorithm to use:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 231-236,238
-          :emphasize-lines: 235
+          :lines: 232-237,239
+          :emphasize-lines: 237
           :linenos:
 
     Some solutions of the problem are :
@@ -97,8 +95,8 @@ One can force the `AC` algorithm to be used by calling the second signature.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 243-251,253
-          :emphasize-lines: 251
+          :lines: 254-256,258
+          :emphasize-lines: 256
           :linenos:
 
     The condition in the example states that the values `1` and `3` can appear more than once, unlike other values.
@@ -129,8 +127,8 @@ It ensures that all variables from `VAR` take a distinct value or 0, that is, al
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 258-260,262
-          :emphasize-lines: 260
+          :lines: 254-256,258
+          :emphasize-lines: 256
           :linenos:
 
     Some solutions of the problem are :
@@ -165,8 +163,8 @@ It holds that `NVAR` is the number of variables of the collection `VARIABLES` th
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 267-270,272
-          :emphasize-lines: 270
+          :lines: 263-266,268
+          :emphasize-lines: 266
           :linenos:
 
     Some solutions of the problem are :
@@ -198,8 +196,8 @@ The constraint `arithm` involves either:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 54-56,58
-          :emphasize-lines: 56
+          :lines: 55-57,59
+          :emphasize-lines: 57
           :linenos:
 
     The solutions of the problem are :
@@ -211,8 +209,8 @@ The constraint `arithm` involves either:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 110-113,115
-          :emphasize-lines: 113
+          :lines: 111-114,116
+          :emphasize-lines: 114
           :linenos:
 
  The solutions of the problem are :
@@ -252,8 +250,8 @@ The boolean `AC` set to true enforces arc-consistency.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 278-281,283
-          :emphasize-lines: 281
+          :lines: 274-277,279
+          :emphasize-lines: 277
           :linenos:
 
  Some solutions of the problem are :
@@ -293,8 +291,8 @@ It automatically detects disequalities and `alldifferent` constraints. Presumabl
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 288-291,293
-          :emphasize-lines: 291
+          :lines: 284-287,289
+          :emphasize-lines: 287
           :linenos:
 
  Some solutions of the problem are :
@@ -336,8 +334,8 @@ This constraint is not a built-in constraint and is based on various propagators
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 298-302,304
-          :emphasize-lines: 302
+          :lines: 294-298,300
+          :emphasize-lines: 298
           :linenos:
 
  Some solutions of the problem are :
@@ -369,8 +367,8 @@ The upper bound of `VAR` is given by :math:`2^{|BITS|+1}`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 617-620,622
-          :emphasize-lines: 620
+          :lines: 613-616,618
+          :emphasize-lines: 616
           :linenos:
 
  The solutions of the problem are :
@@ -403,14 +401,14 @@ The `OFFSET` is typically set to 0.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 309-312,314
-          :emphasize-lines: 312
+          :lines: 305-308,310
+          :emphasize-lines: 308
           :linenos:
 
  The solutions of the problem are :
 
      - `VAR = 1, BVARS[0] = 1, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 0, BVARS[4] = 0`
-     - `VAR = 2, BVARS[0] = 0, BVARS[1] = 1, BVARS[2] = 0, BVARS[3] = 0, BVARS[4] = 0 `
+     - `VAR = 2, BVARS[0] = 0, BVARS[1] = 1, BVARS[2] = 0, BVARS[3] = 0, BVARS[4] = 0`
      - `VAR = 3, BVARS[0] = 0, BVARS[1] = 0, BVARS[2] = 1, BVARS[3] = 0, BVARS[4] = 0`
      - `VAR = 4, BVARS[0] = 0, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 1, BVARS[4] = 0`
      - `VAR = 5, BVARS[0] = 0, BVARS[1] = 0, BVARS[2] = 0, BVARS[3] = 0, BVARS[4] = 1`
@@ -429,6 +427,7 @@ The `clause_channeling` constraint involves:
 It ensures that: `VAR` = `i` :math:`\Leftrightarrow` `EVARS` [ `i` - OFFSET ] = `1` and
  `VAR` :math:`\leq` `i` :math:`\Leftrightarrow` `LVARS` [ `i` - OFFSET ] = `1`
  where  OFFSET is the initial lower bound of VAR.
+
 **API**:  ::
 
     Constraint clause_channeling(IntVar VAR, BoolVar[] EVARS, BoolVar[] LVARS)
@@ -436,15 +435,16 @@ It ensures that: `VAR` = `i` :math:`\Leftrightarrow` `EVARS` [ `i` - OFFSET ] = 
 .. admonition:: Example
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
-:language: java
+          :language: java
           :lines: 65-69,71
-              :emphasize-lines: 69
-              :linenos:
+          :emphasize-lines: 69
+          :linenos:
 
-     The solutions of the problem are :
+
+ The solutions of the problem are :
 
      - `VAR = 1, EVARS[0] = 1, EVARS[1] = 0, EVARS[2] = 0, LVARS[0] = 1, LVARS[1] = 1, LVARS[2] = 1`
-     - `VAR = 2, EVARS[0] = 0, EVARS[1] = 1, EVARS[2] = 0, LVARS[0] = 0, LVARS[1] = 1, LVARS[2] = 1 `
+     - `VAR = 2, EVARS[0] = 0, EVARS[1] = 1, EVARS[2] = 0, LVARS[0] = 0, LVARS[1] = 1, LVARS[2] = 1`
      - `VAR = 3, EVARS[0] = 0, EVARS[1] = 0, EVARS[2] = 1, LVARS[0] = 0, LVARS[1] = 0, LVARS[2] = 1`
 
 
@@ -487,8 +487,8 @@ The `CONF` is a defined by an ``enum``:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 319-321,323
-          :emphasize-lines: 321
+          :lines: 315-317,319
+          :emphasize-lines: 317
           :linenos:
 
  Some solutions of the problem are :
@@ -513,7 +513,7 @@ It ensures that the assignment of a sequence of variables `VARS` is recognized b
 and that the sum of the costs associated to each assignment is bounded by the cost variable.
 This version allows to specify different costs according to the automaton state at which the assignment occurs (i.e. the transition starts).
 
-The `CAUOTMATON` can be defined using the ``org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton` either:
+The `CAUOTMATON` can be defined using the `org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton` either:
 
 - by creating a ``CostAutomaton``: once created, states should be added, then initial and final states are defined and finally, transitions are declared.
 - or by first creating a ``FiniteAutomaton`` and then creating a matrix of costs and finally calling one of the following API from ``CostAutomaton``:
@@ -533,8 +533,8 @@ The `CAUOTMATON` can be defined using the ``org.chocosolver.solver.constraints.n
 
      .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
            :language: java
-           :lines: 328-350,352
-           :emphasize-lines: 350
+           :lines: 324-346,348
+           :emphasize-lines: 348
            :linenos:
 
   Some solutions of the problem are :
@@ -573,8 +573,8 @@ An alternate signature enables `VALUE` to be an integer variable.
 
      .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
            :language: java
-           :lines: 357-361,363
-           :emphasize-lines: 361
+           :lines: 353-357,359
+           :emphasize-lines: 357
            :linenos:
 
   Some solutions of the problem are :
@@ -614,8 +614,8 @@ The first API relies on the second, and set `INCREMENTAL` to ``TASKS.length > 50
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 368-381,383
-          :emphasize-lines: 381
+          :lines: 364-377,379
+          :emphasize-lines: 377
           :linenos:
 
  Some solutions of the problem are :
@@ -650,8 +650,8 @@ The option `USE_CUMUL`, recommended, indicates whether or not redundant `cumulat
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 388-397,399
-          :emphasize-lines: 397
+          :lines: 384-393,395
+          :emphasize-lines: 393
           :linenos:
 
  Some solutions of the problem are :
@@ -683,8 +683,8 @@ The ``distance`` constraint involves either:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 120-123,125
-          :emphasize-lines: 123
+          :lines: 121-124,126
+          :emphasize-lines: 124
           :linenos:
 
  The solutions of the problem are :
@@ -698,8 +698,8 @@ The ``distance`` constraint involves either:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 165-169,171
-          :emphasize-lines: 169
+          :lines: 166-170,172
+          :emphasize-lines: 170
           :linenos:
 
  The solutions of the problem are :
@@ -750,8 +750,8 @@ The `element` constraint ensures that `VALUE` = `TABLE` [`INDEX` - `OFFSET`]. `O
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 130-133,135
-          :emphasize-lines: 133
+          :lines: 131-134,136
+          :emphasize-lines: 134
           :linenos:
 
  The solutions of the problem are :
@@ -778,8 +778,8 @@ The API is : ::
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 176-180,182
-          :emphasize-lines: 180
+          :lines: 177-181,183
+          :emphasize-lines: 181
           :linenos:
 
  The solutions of the problem are :
@@ -825,8 +825,8 @@ The boolean `CLOSED` set to `true` restricts the domain of `VARS` to the values 
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 404-408,410
-          :emphasize-lines: 408
+          :lines: 400-404,406
+          :emphasize-lines: 404
           :linenos:
 
  The solutions of the problem are :
@@ -860,8 +860,8 @@ It also automatically imposes one `alldifferent` constraints on each array of va
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 415-418,420
-          :emphasize-lines: 418
+          :lines: 411-414,416
+          :emphasize-lines: 414
           :linenos:
 
    The solutions of the problems are:
@@ -901,8 +901,8 @@ It formulates the Knapsack Problem: to determine the count of each item to inclu
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 425-434,436
-          :emphasize-lines: 434
+          :lines: 421-430,432
+          :emphasize-lines: 430
           :linenos:
 
    Some solutions of the problems are:
@@ -933,8 +933,8 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 441-445,447
-          :emphasize-lines: 445
+          :lines: 437-441,443
+          :emphasize-lines: 441
           :linenos:
 
    Some solutions of the problems are:
@@ -965,8 +965,8 @@ It ensures that, for each pair of consecutive arrays `VARS[i]` and `VARS[i+1]`,
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 452-456,458
-          :emphasize-lines: 456
+          :lines: 448-452,454
+          :emphasize-lines: 452
           :linenos:
 
    Some solutions of the problems are:
@@ -996,8 +996,8 @@ It ensures that `VARS1` is lexicographically strictly less than `VARS2`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 463-466,468
-          :emphasize-lines: 466
+          :lines: 459-462,464
+          :emphasize-lines: 462
           :linenos:
 
    Some solutions of the problems are:
@@ -1027,8 +1027,8 @@ It ensures that `VARS1` is lexicographically strictly less or equal than `VARS2`
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 473-476,478
-          :emphasize-lines: 476
+          :lines: 469-472,474
+          :emphasize-lines: 472
           :linenos:
 
    Some solutions of the problems are:
@@ -1061,8 +1061,8 @@ The `maximum` constraints involves a set of integer variables and a third party 
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 187-191,193
-          :emphasize-lines: 191
+          :lines: 188-192,194
+          :emphasize-lines: 192
           :linenos:
 
     The solutions of the problem are :
@@ -1121,8 +1121,8 @@ A constraint which restricts the values a variable can be assigned to with respe
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 63-65,67
-          :emphasize-lines: 65
+          :lines: 64-66,68
+          :emphasize-lines: 66
           :linenos:
 
     The solutions of the problem are :
@@ -1134,8 +1134,8 @@ A constraint which restricts the values a variable can be assigned to with respe
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 72-74,76
-          :emphasize-lines: 74
+          :lines: 73-75,77
+          :emphasize-lines: 75
           :linenos:
 
  The solutions of the problem are :
@@ -1166,8 +1166,8 @@ The `minimum` constraints involves a set of integer variables and a third party 
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 198-202,204
-          :emphasize-lines: 202
+          :lines: 199-203,205
+          :emphasize-lines: 203
           :linenos:
 
     The solutions of the problem are :
@@ -1196,8 +1196,8 @@ The API is : ::
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 209-213,215
-          :emphasize-lines: 213
+          :lines: 210-214,216
+          :emphasize-lines: 214
           :linenos:
 
  The solutions of the problem are :
@@ -1223,7 +1223,7 @@ It ensures that the assignment of a sequence of variables `VARS` is recognized b
 and that the sum of the cost array associated to each assignment is bounded by the `CVARS`.
 This version allows to specify different costs according to the automaton state at which the assignment occurs (i.e. the transition starts).
 
-The `CAUOTMATON` can be defined using the ``org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton` either:
+The `CAUOTMATON` can be defined using the `org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton` either:
 
 - by creating a ``CostAutomaton``: once created, states should be added, then initial and final states are defined and finally, transitions are declared.
 - or by first creating a ``FiniteAutomaton`` and then creating a matrix of costs and finally calling one of the following API from ``CostAutomaton``:
@@ -1266,8 +1266,8 @@ The constraint
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 81-83,85
-          :emphasize-lines: 83
+          :lines: 82-84,86
+          :emphasize-lines: 84
           :linenos:
 
     The solutions of the problem are :
@@ -1279,8 +1279,8 @@ The constraint
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 91-93,95
-          :emphasize-lines: 93
+          :lines: 92-94,96
+          :emphasize-lines: 94
           :linenos:
 
     The solution of the problem is :
@@ -1314,8 +1314,8 @@ This constraint is not a built-in constraint and is based on various propagators
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 512-515,517
-          :emphasize-lines: 515
+          :lines: 508-511,513
+          :emphasize-lines: 511
           :linenos:
 
     Some solutions of the problem are :
@@ -1353,8 +1353,8 @@ The constraint relies on the `circuit` propagators.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 522-526,528
-          :emphasize-lines: 526
+          :lines: 518-522,524
+          :emphasize-lines: 522
           :linenos:
 
     Some solutions of the problem are :
@@ -1391,8 +1391,8 @@ There are various ways to declare the automaton:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 533-536,538
-          :emphasize-lines: 535-536
+          :lines: 529-532,534
+          :emphasize-lines: 531-532
           :linenos:
 
     The solutions of the problem are :
@@ -1434,8 +1434,8 @@ and enables, under certain conditions, to reformulate the constraint with a `tab
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 543-547,549
-          :emphasize-lines: 547
+          :lines: 539-543,545
+          :emphasize-lines: 543
           :linenos:
 
     Some solutions of the problem are :
@@ -1466,8 +1466,8 @@ Moreover, the variable of `SORTEDVARS` are sorted in increasing order.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 554-557,559
-          :emphasize-lines: 557
+          :lines: 550-553,555
+          :emphasize-lines: 553
           :linenos:
 
     Some solutions of the problem are :
@@ -1493,8 +1493,8 @@ It ensures that `VAR1` = `VAR2`:math:`^2`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 140-143,145
-          :emphasize-lines: 143
+          :lines: 141-144,146
+          :emphasize-lines: 144
           :linenos:
 
  The solutions of the problem are :
@@ -1530,8 +1530,8 @@ It also ensures that \| `{VARS[i]` :math:`\neq` `OFFSET+i}` \| = `SUBCIRCUIT_SIZ
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 564-567,569
-          :emphasize-lines: 567
+          :lines: 560-563,565
+          :emphasize-lines: 563
           :linenos:
 
  Some solutions of the problem are :
@@ -1558,6 +1558,7 @@ It ensures that the elements of `VARS` define a path of `SIZE` vertices, leading
 
 + `VARS[i] = OFFSET+j` means that `j` is the successor of `i`,
 + `VARS[i] = OFFSET+i` means that vertex `i` is excluded from the path.
+
 Moreover, `VARS[END-OFFSET]` = \| `VARS` \| +`OFFSET`.
 
 **See also**: `subpath <http://sofdem.github.io/gccat/gccat/Cpath_from_to.html>`_ in the Global Constraint Catalog.
@@ -1572,8 +1573,8 @@ Moreover, `VARS[END-OFFSET]` = \| `VARS` \| +`OFFSET`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 574-579,581
-          :emphasize-lines: 579
+          :lines: 570-575,577
+          :emphasize-lines: 575
           :linenos:
 
  Some solutions of the problem are :
@@ -1615,8 +1616,8 @@ For performance reasons, a specialization for boolean variables is provided.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 586-589,591
-          :emphasize-lines: 589
+          :lines: 582-585,587
+          :emphasize-lines: 585
           :linenos:
 
  Some solutions of the problem are :
@@ -1635,6 +1636,7 @@ The ``table`` constraint involves either:
 
 - two variables `VAR1` and `VAR2`, a list of pair of values, named `TUPLES` and an algorithm `ALGORITHM`.
 - or an array of variables `VARS`, a list of tuples of values, named `TUPLES` and an algorithm `ALGORITHM`.
+
 It is an extensional constraint enforcing, most of the time, arc-consistency.
 
 When only two variables are involved, the available algorithms are:
@@ -1668,8 +1670,8 @@ When more than two variables are involved, the available algorithms are:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 150-158,160
-          :emphasize-lines: 158
+          :lines: 151-159,161
+          :emphasize-lines: 159
           :linenos:
 
  The solutions of the problem are :
@@ -1699,8 +1701,8 @@ The API are : ::
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 220-224,226
-          :emphasize-lines: 224
+          :lines: 221-225,227
+          :emphasize-lines: 225
           :linenos:
 
  The solution of the problem is :
@@ -1736,8 +1738,8 @@ It partitions the `SUCCS` variables into `NBTREES` (anti) arborescences:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 596-599,601
-          :emphasize-lines: 599
+          :lines: 592-595,599
+          :emphasize-lines: 595
           :linenos:
 
  Some solutions of the problem are :
@@ -1783,8 +1785,8 @@ This constraint is not a built-in constraint and is based on various propagators
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 606-610,612
-          :emphasize-lines: 610
+          :lines: 602-606,608
+          :emphasize-lines: 606
           :linenos:
 
  The solutions of the problem are :
@@ -2225,9 +2227,11 @@ The available constructors are: ::
 
 - ``name`` enables to set a name to the constraint.
 - ``functions`` is a ``String`` which defines the list of functions to hold, separated with semi-colon ";".
+
 A function is a declared using the following format:
     + the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables ``rvars``,
     + one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+
 A complete list is available in the documentation of IBEX.
 - ``rvars`` is the list of involved real variables.
 - ``option`` is enable to state the propagation option (default is ``Ibex.COMPO``).
@@ -2775,13 +2779,8 @@ Adding a clause involved either:
 
 The two methods add a clause to the SAT constraint.
 
-- The first method adds one or more clauses defined by a ``LogOp``.
-``LopOp`` aims at simplifying the declaration of clauses by providing some static methods.
-However, it should be considered as a last resort, due to the verbosity it comes with.
-
-- The second API add one or more clauses defined by two arrays `POSLITS` and `NEGLITS`.
-The first array declares positive boolean variables, those who should be satisfied;
-the second array declares negative boolean variables, those who should not be satisfied.
+- The first method adds one or more clauses defined by a ``LogOp``. ``LopOp`` aims at simplifying the declaration of clauses by providing some static methods. However, it should be considered as a last resort, due to the verbosity it comes with.
+- The second API add one or more clauses defined by two arrays `POSLITS` and `NEGLITS`. The first array declares positive boolean variables, those who should be satisfied; the second array declares negative boolean variables, those who should not be satisfied.
 
 
 **API**: ::
@@ -3069,7 +3068,7 @@ It computes the middle value of the domain. Then checks if the mean is contained
 If not, the closest value to the middle is chosen.
 Rounding policy is floor. It could be override by creating a new instance of ``IntDomainMiddle`` with ``false`` as parameter.
 
-.. imoprtant::
+.. important::
 
     `mid_value_selector` should not be used with assignment decisions over bounded variables (because the decision negation would result in no inference).
 
@@ -3119,7 +3118,7 @@ random_value_selector
 
 Selects randomly a value in the variable domain.
 
-.. imoprtant::
+.. important::
 
     `random_value_selector` should not be used with assignment decisions over bounded variables (because the decision negation could result in no inference).
 
@@ -3608,7 +3607,7 @@ geometrical
 ===========
 
 Plug a geometrical restart strategy to the solver.
-It performs a search with restarts controlled by the resolution event [#f1]_ ``counter`` which counts events occurring during the search.
+It performs a search with restarts controlled by the resolution event ``counter`` which counts events occurring during the search.
 Parameter ``base`` indicates the maximal number of events allowed in the first search tree.
 Once this limit is reached, a restart occurs and the search continues until ``base``*``grow`` events are done, and so on.
 After each restart, the limit number of events is increased by the geometric factor ``grow``.
@@ -3626,7 +3625,7 @@ luby
 
 Branch a luby restart strategy to the solver.
 It is an alternative to the geometric restart policy.
-It performs a search with restarts controlled by the number of resolution events [#f1]_ counted by ``counter``.
+It performs a search with restarts controlled by the number of resolution events counted by ``counter``.
 The maximum number of events allowed at a given restart iteration is given by base multiplied by the Las Vegas coefficient at this iteration.
 The sequence of these coefficients is defined recursively on its prefix subsequences:
 starting from the first prefix :math:`1`, the :math:`(k+1)^th` prefix is the :math:`k^th` prefix repeated ``grow`` times and
@@ -3671,10 +3670,10 @@ limitTime
 Defines a limit over the run time.
 When the limit is reached, the resolution is stopped.
 The limit can be either defined in millisecond or using a String which states the duration like "WWd XXh YYm ZZs" for example:
- - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
- - "2h30m": two hours and 30 minutes<p/>
- - "30.5s": 30 seconds and 500 ms<p/>
- - "180s": three minutes
+- "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
+- "2h30m": two hours and 30 minutes<p/>
+- "30.5s": 30 seconds and 500 ms<p/>
+- "180s": three minutes
 
 **Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
 
@@ -3692,10 +3691,10 @@ limitThreadTime
 Defines a limit over the run time, defined in a separated thread.
 When the limit is reached, the resolution is stopped.
 The limit can be either defined in millisecond or using a String which states the duration like "WWd XXh YYm ZZs" for example:
- - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
- - "2h30m": two hours and 30 minutes<p/>
- - "30.5s": 30 seconds and 500 ms<p/>
- - "180s": three minutes
+- "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
+- "2h30m": two hours and 30 minutes<p/>
+- "30.5s": 30 seconds and 500 ms<p/>
+- "180s": three minutes
 
 **Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
 
