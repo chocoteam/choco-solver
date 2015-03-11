@@ -165,7 +165,6 @@ public class RuleStore {
             case BD:
                 switch (evt) {
                     case INSTANTIATE:
-                        return i2 < i1 || i1 < i3;
                     case DECUPP:
                     case INCLOW:
                         return true;
@@ -355,6 +354,16 @@ public class RuleStore {
      */
     public boolean addUpperBoundRule(IntVar var) {
         return putMask(var.getId(), UB);
+    }
+
+    /**
+     * Add an upper bound rule and a lower bound rule, that is, any event on the upper bound or the lower bound of the variable needs to be retained
+     *
+     * @param var the variable to add rule on
+     * @return true if a new rule has been added (false = already existing rule)
+     */
+    public boolean addBoundsRule(IntVar var) {
+        return putMask(var.getId(), BD);
     }
 
     /**

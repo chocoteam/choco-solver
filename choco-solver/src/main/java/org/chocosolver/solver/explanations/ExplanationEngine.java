@@ -185,7 +185,7 @@ public class ExplanationEngine implements EventObserver {
      * @value old previous LB
      */
     @Override
-    public void updateLowerBound(IntVar var, int old, int value, ICause cause) {
+    public void updateLowerBound(IntVar var, int value, int old, ICause cause) {
         eventStore.pushEvent(var, cause, IntEventType.INCLOW, value, old, -1);
     }
 
@@ -199,7 +199,7 @@ public class ExplanationEngine implements EventObserver {
      * @value old previous LB
      */
     @Override
-    public void updateUpperBound(IntVar var, int old, int value, ICause cause) {
+    public void updateUpperBound(IntVar var, int value, int old, ICause cause) {
         eventStore.pushEvent(var, cause, IntEventType.DECUPP, value, old, -1);
     }
 

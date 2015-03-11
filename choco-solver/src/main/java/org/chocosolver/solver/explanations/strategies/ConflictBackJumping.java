@@ -184,7 +184,9 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         while (decision != RootDecision.ROOT) {
             if (explanation.getDecisions().get(decision.getWorldIndex())) {
                 assert decision.hasNext();
-//                System.out.printf("%s = %d,", decision.getDecisionVariable(), (Integer) decision.getDecisionValue());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("{} = {}", decision.getDecisionVariable(), decision.getDecisionValue());
+                }
                 ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
             }
             decision = decision.getPrevious();

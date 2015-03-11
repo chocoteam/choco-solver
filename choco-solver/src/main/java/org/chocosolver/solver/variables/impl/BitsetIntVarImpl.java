@@ -299,7 +299,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    solver.getEventObserver().updateLowerBound(this, old, oub + 1, cause);
+                    solver.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
@@ -321,7 +321,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getEventObserver().updateLowerBound(this, old, value, cause);
+                    solver.getEventObserver().updateLowerBound(this, value, old, cause);
                 }
                 return true;
 
@@ -350,12 +350,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        int old = this.getUB();
-        if (old > value) {
+        int oub = this.getUB();
+        if (oub > value) {
             int olb = this.getLB();
             if (olb > value) {
                 if (_plugexpl) {
-                    solver.getEventObserver().updateUpperBound(this, old, olb - 1, cause);
+                    solver.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
@@ -363,11 +363,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = old - OFFSET; i > aValue; i = VALUES.prevSetBit(i - 1)) {
+                    for (int i = oub - OFFSET; i > aValue; i = VALUES.prevSetBit(i - 1)) {
                         delta.add(i + OFFSET, cause);
                     }
                 }
-                VALUES.clear(aValue + 1, old - OFFSET + 1);
+                VALUES.clear(aValue + 1, oub - OFFSET + 1);
                 UB.set(VALUES.prevSetBit(aValue));
                 assert SIZE.get() > VALUES.cardinality();
                 SIZE.set(VALUES.cardinality());
@@ -376,7 +376,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getEventObserver().updateUpperBound(this, old, value, cause);
+                    solver.getEventObserver().updateUpperBound(this, value, oub, cause);
                 }
                 return true;
             }
