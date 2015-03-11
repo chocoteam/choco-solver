@@ -36,8 +36,11 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.slf4j.Logger;
@@ -595,5 +598,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        for (int i = 0; i < vars.length; i++) {
+            if(vars[i]!= var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
+        }
+        return nrules;
     }
 }

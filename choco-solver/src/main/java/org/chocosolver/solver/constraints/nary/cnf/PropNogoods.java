@@ -304,7 +304,8 @@ public class PropNogoods extends Propagator<IntVar> {
     // Add a learnt clause
     public void addLearnt(int... lits) {
         sat_.learnClause(lits);
-        storeEarlyDeductions();
+        // early deductions of learnt clause may lead to incorrect behavior on backtrack
+        // since early deduction is not backtrackable.
 
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
@@ -369,10 +370,10 @@ public class PropNogoods extends Propagator<IntVar> {
             new_value = false;
         }
         int lit = makeLiteral(var, new_value);
-
+        int neg = negated(lit);
         // A. implications:
         // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(lit);
+        TIntList implies = sat_.implies_.get(neg);
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);
@@ -384,7 +385,6 @@ public class PropNogoods extends Propagator<IntVar> {
         // We need to find the fully instantiated clauses where bvar appears
         // we cannot rely on watches_ because is not backtrackable
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        int neg = negated(lit);
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
             SatSolver.Clause cl = sat_.clauses.get(k);
             // if the watched literals are instantiated

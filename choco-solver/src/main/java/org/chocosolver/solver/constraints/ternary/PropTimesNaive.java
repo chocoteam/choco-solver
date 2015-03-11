@@ -150,8 +150,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         for (int i = 0; i < 3; i++) {
             if (var != vars[i]) {
-                newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                newrules |= ruleStore.addBoundsRule(vars[i]);
             }
         }
         return newrules;

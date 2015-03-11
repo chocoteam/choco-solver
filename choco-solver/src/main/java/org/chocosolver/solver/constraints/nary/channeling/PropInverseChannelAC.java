@@ -33,8 +33,11 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -43,7 +46,7 @@ import java.util.Arrays;
 
 /**
  * X[i] = j+Ox <=> Y[j] = i+Oy
- * <p/>
+ * <p>
  * AC propagator for enumerated domain variables
  *
  * @author Jean-Guillaume Fages
@@ -180,5 +183,26 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
             }
             identitymap.put(this, new PropInverseChannelAC(X, Y, this.minX, this.minY));
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        int idx = 0;
+        while (idx < 2 * n && vars[idx] != var) {
+            idx++;
+        }
+        if (!IntEventType.isBound(evt.getMask())) {
+            assert evt == IntEventType.REMOVE;
+            if (idx < n) {
+                nrules |= ruleStore.addRemovalRule(Y[value - minX], idx + minY);
+            } else {
+                idx -= n;
+                nrules |= ruleStore.addRemovalRule(X[value - minY], idx + minX);
+            }
+        } /*else {
+            // initial propagation: nothing can be explained
+        }*/
+        return nrules;
     }
 }

@@ -169,6 +169,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             switch (ievt) {
                 case REMOVE:
                     newrules |=ruleStore.addRemovalRule(y, value - cste);
+                    break;
                 case DECUPP:
                     newrules |=ruleStore.addUpperBoundRule(y);
                     break;
@@ -184,6 +185,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             switch (ievt) {
                 case REMOVE:
                     newrules |=ruleStore.addRemovalRule(x, value + cste);
+                    break;
                 case DECUPP:
                     newrules |=ruleStore.addUpperBoundRule(x);
                     break;
