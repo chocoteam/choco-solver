@@ -410,14 +410,11 @@ public class IntConstraintFactory {
         int xu = Math.abs(X.getUB());
         int b = Math.max(xl, xu);
         Solver solver = X.getSolver();
-        IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
-        IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
-        Constraint div = IntConstraintFactory.eucl_div(X, Y, t1);
-        Constraint tim = IntConstraintFactory.times(t1, Y, t2);
-        Constraint sum = IntConstraintFactory.sum(new IntVar[]{Z, t2}, X);
-        return new Constraint("Mod",
-                ArrayUtils.append(div.getPropagators(), tim.getPropagators(), sum.getPropagators())
-        );
+        IntVar t1 = VF.bounded(StringUtils.randomName(), -b, b, solver);
+        IntVar t2 = VF.bounded(StringUtils.randomName(), -b, b, solver);
+		solver.post(eucl_div(X, Y, t1));
+		solver.post(times(t1, Y, t2));
+        return sum(new IntVar[]{Z, t2}, X);
     }
 
     /**

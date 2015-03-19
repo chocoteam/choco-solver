@@ -30,9 +30,12 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,27 +48,37 @@ import org.testng.annotations.Test;
  */
 public class ModTest extends AbstractTernaryTest {
 
-    @Override
-    protected int validTuple(int vx, int vy, int vz) {
-        return (vy != 0 && vz == vx - vy * (vx / vy)) ? 1 : 0;
-    }
+	@Override
+	protected int validTuple(int vx, int vy, int vz) {
+		return (vy != 0 && vz == vx - vy * (vx / vy)) ? 1 : 0;
+	}
 
-    @Override
-    protected Constraint make(IntVar[] vars, Solver s) {
-        return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
-    }
+	@Override
+	protected Constraint make(IntVar[] vars, Solver s) {
+		return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
+	}
 
-    @Test(groups = "1s")
-    public void test2() {
-        Solver solver = new Solver();
-        IntVar res = VariableFactory.bounded("r", 1, 2, solver);
-        solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
-        try {
-            solver.propagate();
-            Assert.assertTrue(res.isInstantiatedTo(1));
-        } catch (ContradictionException e) {
-            Assert.fail();
-        }
-    }
+	@Test(groups = "1s")
+	public void test2() {
+		Solver solver = new Solver();
+		IntVar res = VariableFactory.bounded("r", 1, 2, solver);
+		solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
+		try {
+			solver.propagate();
+			Assert.assertTrue(res.isInstantiatedTo(1));
+		} catch (ContradictionException e) {
+			Assert.fail();
+		}
+	}
 
+	@Test(groups = "1s")
+	public void testJL() {
+		Solver s = new Solver();
+		IntVar dividend = VF.enumerated("dividend", 2, 3, s);
+		IntVar divisor = VF.fixed(1, s);
+		IntVar remainder = VF.enumerated("remainder", 1, 2, s);
+		s.post(ICF.mod(dividend, divisor, remainder).getOpposite());
+		s.set(ISF.lexico_LB(dividend, divisor, remainder));
+		s.findSolution();
+	}
 }
