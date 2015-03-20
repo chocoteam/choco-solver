@@ -81,8 +81,8 @@ A reference to this manual, or more globally to Choco |version|, is made like th
 
 .. code-block:: none
 
-    @manual{
-      author        = {Charles Prud'homme, Jean-Guillaume Fages, Xavier Lorca},
+    @manual{choco3,
+      author        = {Charles Prud'homme and Jean-Guillaume Fages and Xavier Lorca},
       title         = {Choco3 Documentation},
       year          = {2014},
       organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241, COSLING S.A.S.},
