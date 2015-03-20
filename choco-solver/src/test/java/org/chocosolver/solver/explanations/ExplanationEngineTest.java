@@ -74,7 +74,7 @@ public class ExplanationEngineTest {
             }
             Solver expl = solver.duplicateModel();
 
-            ExplanationEngine ee = new ExplanationEngine(expl, true);
+            ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
                 expl.propagate();
@@ -102,7 +102,7 @@ public class ExplanationEngineTest {
             Solver expl = solver.duplicateModel();
 
 
-            ExplanationEngine ee = new ExplanationEngine(expl, true);
+            ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
                 expl.propagate();
@@ -130,7 +130,7 @@ public class ExplanationEngineTest {
             Solver expl = solver.duplicateModel();
 
             IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
-            ExplanationEngine ee = new ExplanationEngine(expl, true);
+            ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
                 expl.propagate();
@@ -163,7 +163,7 @@ public class ExplanationEngineTest {
         solver.post(new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)));
 
         IntStrategy is = ISF.lexico_LB(vs);
-        ExplanationEngine ee = new ExplanationEngine(solver, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, true);
         Explanation r = null;
         try {
             solver.propagate();
@@ -189,7 +189,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -208,7 +208,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -227,7 +227,7 @@ public class ExplanationEngineTest {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -247,7 +247,7 @@ public class ExplanationEngineTest {
             }
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
             LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
@@ -273,7 +273,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
             solver.set(ISF.random_value(p, seed));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false);
+            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
 
             Chatterbox.showShortStatistics(solver);
@@ -296,7 +296,7 @@ public class ExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
         new ConflictBackJumping(ee, solver, false);
 
         Chatterbox.showStatistics(solver);
@@ -321,7 +321,7 @@ public class ExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
         new ConflictBackJumping(ee, solver, false);
 
         Chatterbox.showStatistics(solver);
@@ -391,7 +391,7 @@ public class ExplanationEngineTest {
     public void testLSsmall() {
         for (int m = 4; m < 18; m++) {
             System.out.printf("LS(%d)\n", m);
-            for (int a = 0; a < 5; a++) {
+            for (int a = 1; a < 3; a++) {
                 testLS(m, a);
             }
         }
@@ -660,7 +660,9 @@ public class ExplanationEngineTest {
 
         configure(solver, a);
         Chatterbox.showShortStatistics(solver);
+//        Chatterbox.showDecisions(solver);
         SMF.limitTime(solver, "5m");
+//        SMF.limitNode(solver, 26);
         Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
@@ -694,7 +696,7 @@ public class ExplanationEngineTest {
         }
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
         Explanation r = null;
         try {
             solver.propagate();
@@ -719,7 +721,7 @@ public class ExplanationEngineTest {
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
         SatFactory.addBoolNot(bs[0], bs[1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
         Explanation r = null;
         try {
             solver.propagate();
@@ -746,7 +748,7 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false);
+        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
         Explanation r = null;
         try {
             solver.propagate();
@@ -825,7 +827,7 @@ public class ExplanationEngineTest {
         Constraint xE1 = ICF.arithm(x, "=", one);
         s.post(xE1);
 
-        ExplanationEngine ee = new ExplanationEngine(s, true);
+        ExplanationEngine ee = new ExplanationEngine(s, true, true);
         ConflictBackJumping cbj = new ConflictBackJumping(ee, s, false);
         Chatterbox.showDecisions(s);
         Assert.assertFalse(s.findSolution());

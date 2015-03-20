@@ -89,7 +89,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
         while (dec != RootDecision.ROOT && nworld > 1) {
 
             if (dec.hasNext()) {
-                // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a willful decision
+                // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a unrelated decision
                 dup = dec.duplicate();
                 dup.setWorldIndex(dec.getWorldIndex()); // BEWARE we need to keep the wi for to maintain explanations
                 dup.rewind();
@@ -119,10 +119,9 @@ public class DynamicBackTracking extends ConflictBackJumping {
             if (!dec.hasNext()) {
                 throw new UnsupportedOperationException("DynamicBackTracking.identifyRefutedDecision should get to a POSITIVE decision " + dec);
             }
-            Explanation why = lastExplanation.duplicate();
-            why.remove(dec);
+            lastExplanation.remove(dec);
 
-            mExplainer.storeDecisionExplanation(dec, why);
+            mExplainer.storeDecisionExplanation(dec, lastExplanation);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("DynamicBackTracking>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);

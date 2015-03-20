@@ -59,15 +59,16 @@ public class ExplanationEngine implements EventObserver {
     /**
      * Create an explanation engine based on a rule store
      *
-     * @param solver       a solver
-     * @param userFeedback user feedback on: propagators in conflict are available for consultation
+     * @param solver                   a solver
+     * @param userFeedback             does user require feedback, ie, keep trace of the constraints in conflict ?
+     * @param enablePartialExplanation do explanations need to be complete (for DBT or nogood extraction) ?
      */
-    public ExplanationEngine(Solver solver, boolean userFeedback) {
-        eventStore = new ArrayEventStore(solver.getEnvironment());
-        ruleStore = new RuleStore(solver, userFeedback);
-        solver.set(this);
-        this.saveCauses = userFeedback;
+    public ExplanationEngine(Solver solver, boolean userFeedback, boolean enablePartialExplanation) {
         this.mSolver = solver;
+        this.saveCauses = userFeedback;
+        eventStore = new ArrayEventStore(solver.getEnvironment());
+        ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
+        solver.set(this);
     }
 
     /**
@@ -101,7 +102,7 @@ public class ExplanationEngine implements EventObserver {
      */
     public Explanation explain(ContradictionException cex) {
         Explanation explanation = new Explanation(saveCauses);
-        ruleStore.clear();
+        ruleStore.init();
 
         if (cex.v != null) {
             ruleStore.addFullDomainRule((IntVar) cex.v);
@@ -110,7 +111,7 @@ public class ExplanationEngine implements EventObserver {
             cex.c.why(ruleStore, null, IntEventType.VOID, 0);
         }
         int i = eventStore.getSize() - 1;
-        while (i > -1 /*&& !isEmpty()*/) {
+        while (i > -1 && !ruleStore.isPreemptedStop()) {
             if (ruleStore.match(i, eventStore)) {
                 ruleStore.update(i, eventStore, explanation);
             }
@@ -144,8 +145,8 @@ public class ExplanationEngine implements EventObserver {
     /**
      * Store a decision refutation, for future reasoning.
      *
-     * @param decision refuted decision
-     * @param explanation   the explanation of the refutation
+     * @param decision    refuted decision
+     * @param explanation the explanation of the refutation
      */
     public void storeDecisionExplanation(Decision decision, Explanation explanation) {
         ruleStore.storeDecisionRefutation(decision, explanation);
