@@ -660,17 +660,17 @@ public class ExplanationEngineTest {
 
         configure(solver, a);
         Chatterbox.showShortStatistics(solver);
-//        Chatterbox.showDecisions(solver);
-        SMF.limitTime(solver, "5m");
-//        SMF.limitNode(solver, 26);
+        Chatterbox.showDecisions(solver, ()->""+solver.getMeasures().getFailCount());
+//        SMF.limitTime(solver, "5m");
+        SMF.limitFail(solver, 1100);
         Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
     @Test(groups = "1m")
     public void testPAsmall() {
-        for (int N = 40; N < 57; N += 4) {
+        for (int N = 40; N < 41; N += 4) {
             System.out.printf("Pa(%d)\n", N);
-            for (int a = 0; a < 5; a++) {
+            for (int a = 3; a < 4; a++) {
                 testPA(N, a);
             }
         }

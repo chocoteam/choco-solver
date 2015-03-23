@@ -175,7 +175,7 @@ public class Explanation {
      */
     public void copyRules(Rules rules, int i) {
         addRules(rules);
-        this.evtstrIdx = i;
+        setEvtstrIdx(i);
     }
 
     /**
@@ -185,6 +185,15 @@ public class Explanation {
      */
     public int getEvtstrIdx() {
         return evtstrIdx;
+    }
+
+    /**
+     * Set the event store idx, where the last analysis ends
+     *
+     * @param evtstrIdx an event store index
+     */
+    public void setEvtstrIdx(int evtstrIdx) {
+        this.evtstrIdx = evtstrIdx;
     }
 
     /**

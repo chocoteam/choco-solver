@@ -62,7 +62,7 @@ public class RuleStore {
     static final int LB = 3;
     static final int RM = 1;
 
-    private final Rules mRules;
+    private Rules mRules;
     private Explanation[] decRefut; // store refuted decisions
     private final boolean saveCauses; // does user require feedback, ie, keep trace of the constraints in conflict ?
     private final boolean enablePartialExplanation; //do explanations need to be complete (for DBT or nogood extraction) ?
@@ -284,12 +284,29 @@ public class RuleStore {
 
     /**
      * Update the current rules with the one in 'rules'
+     *
      * @param someRules some rules
      */
     public void addRules(Rules someRules) {
         mRules.or(someRules);
     }
 
+    /**
+     * Return the current rules, for copy only.
+     *
+     * @return a set of rules
+     */
+    public Rules getRules() {
+        return mRules;
+    }
+
+    /**
+     * Replace the rules by a new one.
+     * This should be done carefully since the set of rules are cleared on each contradiction.
+     */
+    public void setRules(Rules someRules) {
+        this.mRules = someRules;
+    }
 
     /**
      * Add a value removal rule, that is, the event which remove the value needs to be retained.
