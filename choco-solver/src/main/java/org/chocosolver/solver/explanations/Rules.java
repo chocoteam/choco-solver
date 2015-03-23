@@ -45,14 +45,11 @@ public class Rules {
     private final int[] vmRules;    // rules for variable modification
     private final TIntSet[] vmRemval;    // store value removal when necessary
 
-    public static int nb = 0;
-
     public Rules(int maxPid, int maxVid) {
         this.paRules = new BitSet(maxPid);
         this.vmRules = new int[maxVid];
         Arrays.fill(vmRules, NO_ENTRY);
         this.vmRemval = new TIntSet[maxVid];
-        nb++;
     }
 
     /**

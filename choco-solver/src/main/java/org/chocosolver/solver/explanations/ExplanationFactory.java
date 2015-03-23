@@ -73,7 +73,7 @@ public enum ExplanationFactory {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
             if (solver.getExplainer() == null) {
-                solver.set(new ExplanationEngine(solver, userFeedbackOn, false));
+                solver.set(new ExplanationEngine(solver, userFeedbackOn, !nogoodsOn));
             }
             if (solver.getExplainer().getCstrat() == null
                     || !(solver.getExplainer().getCstrat() instanceof DynamicBackTracking)) {

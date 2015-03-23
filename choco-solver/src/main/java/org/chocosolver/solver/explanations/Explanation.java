@@ -53,14 +53,12 @@ public class Explanation {
     private Rules rules; // null when explanation is complete
     private final THashSet<ICause> causes;
     private final BitSet decisions;
-
-    public static int nb = 0;
+    private int evtstrIdx;  // event store index of the last analysis
 
     public Explanation(boolean saveCauses) {
         this.causes = new THashSet<>();
         this.decisions = new BitSet();
         this.saveCauses = saveCauses;
-        nb++;
     }
 
     /**
@@ -118,7 +116,7 @@ public class Explanation {
     /**
      * Merge 'someRules' into this rules
      *
-     * @param someRules
+     * @param someRules the rules to add
      */
     public void addRules(Rules someRules) {
         if (rules != null && someRules != null) {
@@ -170,20 +168,31 @@ public class Explanation {
     }
 
     /**
-     * Copy the rules (no duplication).
+     * Copy the rules
      * The rules define which events should be filtered from the event store.
      *
      * @param rules set of rules (when not complete)
      */
-    public void copyRules(Rules rules) {
-        this.rules = rules.duplicate();
+    public void copyRules(Rules rules, int i) {
+        addRules(rules);
+        this.evtstrIdx = i;
+    }
+
+    /**
+     * Get the event store idx at which the last analysis ends
+     *
+     * @return an event store index
+     */
+    public int getEvtstrIdx() {
+        return evtstrIdx;
     }
 
     /**
      * Return the rules, may be null
+     *
      * @return the rules or null
      */
-    public Rules getRules(){
+    public Rules getRules() {
         return rules;
     }
 
@@ -223,6 +232,7 @@ public class Explanation {
         return st.toString();
     }
 
+    @SuppressWarnings("unchecked")
     public void postNogood(PropNogoods ngstore, TIntList ps) {
         if (rules == null) {
             Solver mSolver = ngstore.getSolver();

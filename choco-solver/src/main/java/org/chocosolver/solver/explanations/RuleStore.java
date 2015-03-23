@@ -108,8 +108,6 @@ public class RuleStore {
 
     /**
      * Initialize the rulestore for a new explanation
-     *
-     * @return explanation new explanation (empty)
      */
     public void init() {
         mRules.clear();
@@ -119,8 +117,6 @@ public class RuleStore {
 
     /**
      * when conditions are favorable, a preempted stop can be considered: not all events have to be analyzed.
-     *
-     * @return
      */
     public boolean isPreemptedStop() {
         return preemptedStop;
@@ -251,22 +247,21 @@ public class RuleStore {
                 if (decision.hasNext()) {
                     explanation.addDecicion(decision);
                     // if partial explanation is enabled, finding the first decision in conflict is enough
-                    if (preemptedStop = enablePartialExplanation) { // and the rules have to be stored
-                        explanation.copyRules(mRules);
-                        return;
+                    if (preemptedStop |= enablePartialExplanation) { // and the rules have to be stored
+                        explanation.copyRules(mRules, idx);
                     }
                 } else {
                     // Otherwise, get the explanation of the refutation
                     Explanation drr = getDecisionRefutation(decision);
                     assert drr != null : "No explanation for decision refutation :" + decision.toString();
                     explanation.addCausesAndDecisions(drr); //update decisions and causes into the current explanation
-                    mRules.or(drr.getRules()); // update the current rules with the one in 'drr'
+                    addRules(drr.getRules());
                 }
                 // if no user feedback is required, ie, no conflict constraints are needed, then..
                 if (!saveCauses) {
                     // if all decisions, from the current refuted one to ROOT, explained the conflict,
                     // we can stop prematurely the algorithm
-                    preemptedStop = explanation.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
+                    preemptedStop |= explanation.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
                     // we do not need to copy the rules, since the explanation is complete, in term of decisions.
                 }
             } else {
@@ -285,6 +280,14 @@ public class RuleStore {
             // 2. remove the propagator activation rule, now we know it depends on the variable
             mRules.paRulesClear(lastValue);
         }
+    }
+
+    /**
+     * Update the current rules with the one in 'rules'
+     * @param someRules some rules
+     */
+    public void addRules(Rules someRules) {
+        mRules.or(someRules);
     }
 
 
