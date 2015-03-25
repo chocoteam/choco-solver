@@ -174,7 +174,9 @@ public class Explanation {
      * @param rules set of rules (when not complete)
      */
     public void copyRules(Rules rules, int i) {
-        addRules(rules);
+        if (rules != this.rules) { // small improvement
+            addRules(rules);
+        }
         setEvtstrIdx(i);
     }
 

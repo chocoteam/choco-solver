@@ -119,9 +119,10 @@ public class DynamicBackTracking extends ConflictBackJumping {
                     dup.buildNext();
                     // add it to the decisions to force
                     dbTstrategy.add(dup);
+                } else {
+                    // else  we need to forget everything and start from scratch on this decision
+                    mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
                 }
-                // else  we need to forget everything and start from scratch on this decision
-                // so nothing to be done
             }
             // get the previous
             dec = dec.getPrevious();
@@ -132,28 +133,12 @@ public class DynamicBackTracking extends ConflictBackJumping {
                 throw new UnsupportedOperationException("DynamicBackTracking.identifyRefutedDecision should get to a POSITIVE decision " + dec);
             }
             lastExplanation.remove(dec);
-
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("DynamicBackTracking>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
-
-//    private void keepUp(Explanation anExplanation, int decIdx) {
-//        int i = anExplanation.getEvtstrIdx();
-//        if (decIdx < i) {
-//            mRuleStore.init();
-//            mRuleStore.addRules(anExplanation.getRules());
-
-//                if (mRuleStore.match(i, mEventStore)) {
-//                    mRuleStore.update(i, mEventStore, anExplanation);
-//                }
-//                i--;
-//            }
-//            anExplanation.getRules().clear(); // now we're sure the explanation is complete
-//        }
-//    }
 
     /**
      * Keep up the calculation of the explanation, until it reaches 'decIdx' index of the decision to refute in the event store
@@ -172,7 +157,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
             }
             i--;
         }
-        anExplanation.setEvtstrIdx(i); // we store where the search ends, for future research
+        anExplanation.setEvtstrIdx(i + 1); // we store where the search ends, for future research
         if (i == 0) {
             anExplanation.getRules().clear(); // only if we're sure the explanation is complete
         }

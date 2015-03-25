@@ -412,7 +412,7 @@ public class RuleStore {
             decRefut = new Explanation[w + 10];
             System.arraycopy(tmp, 0, decRefut, 0, tmp.length);
         }
-        assert w >= explanation.getDecisions().length();
+        assert explanation == null || w >= explanation.getDecisions().length();
         decRefut[w] = explanation;
     }
 

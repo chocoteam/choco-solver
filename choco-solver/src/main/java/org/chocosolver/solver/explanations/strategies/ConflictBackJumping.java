@@ -136,6 +136,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
     void identifyRefutedDecision(int nworld, ICause cause) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
+            mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
             dec = dec.getPrevious();
             nworld--;
         }
@@ -144,7 +145,6 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
                 throw new UnsupportedOperationException("ConflictBackJumping.identifyRefutedDecision should get to a LEFT decision:" + dec);
             }
             lastExplanation.remove(dec);
-
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
         }
         if (LOGGER.isDebugEnabled()) {
