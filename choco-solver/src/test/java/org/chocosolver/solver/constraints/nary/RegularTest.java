@@ -29,11 +29,14 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -217,4 +220,23 @@ public class RegularTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 162);
     }
+
+	@Test(groups = "1s")
+	public void testNeg(){
+		Solver solver = new Solver();
+		IntVar[] CS = VF.enumeratedArray("CS", 4, -10, 10, solver);
+		solver.post(ICF.regular(CS, new FiniteAutomaton("<-9>1*")));
+		Chatterbox.showSolutions(solver);
+		solver.findAllSolutions();
+
+		final List<Solution> solutions = solver.getSolutionRecorder().getSolutions();
+
+		System.out.println(solutions);
+
+		Assert.assertEquals(1, solutions.size());
+		Assert.assertEquals(-9, (int)solutions.get(0).getIntVal(CS[0]));
+		Assert.assertEquals(1, (int)solutions.get(0).getIntVal(CS[1]));
+		Assert.assertEquals(1, (int)solutions.get(0).getIntVal(CS[2]));
+		Assert.assertEquals(-5,(int) solutions.get(0).getIntVal(CS[3]));
+	}
 }
