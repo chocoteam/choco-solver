@@ -171,6 +171,9 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
             Propagator[] props = var.getPropagators();
             for (int i = 0; i < props.length; i++) {
                 int pid = props[i].getId();
+				if (pid2ari.get(pid) == null) {
+					pid2ari.putIfAbsent(pid, var.getSolver().getEnvironment().makeInt(props[i].arity()));
+				}
                 pid2ari.get(pid).add(-1);
             }
         }

@@ -299,14 +299,14 @@ public class DynamicPostTest {
 		// symmetry-breaking
 		solver.post(ICF.arithm(vars[0],"<",vars[n-1]));
 		SMF.limitTime(solver, 20000);
-		solver.set(ISF.lexico_LB(vectors));
+		solver.set(ISF.domOverWDeg(vectors,0));
 
 		if(dynamic){
 			// should not change anything (the constraint is already posted)
 			solver.plugMonitor(new IMonitorSolution(){
 				@Override
 				public void onSolution() {
-					solver.post(ICF.alldifferent(vectors));
+					solver.post(ICF.alldifferent(vectors,"BC"));
 				}
 			});
 		}
