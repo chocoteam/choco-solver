@@ -16,11 +16,7 @@ NEXT MILESTONE
 - Improve explanation engine
 - Add an additional "worldPush" instruction after initial propagation to be coherent with restarts (#55)
 
-<<<<<<< HEAD
-Bug fixes: #265, #247, #264, #254, #281, #275, #282
-=======
-Bug fixes: #265, #247, #264, #254, #281, #275, #273
->>>>>>> fix_issues
+Bug fixes: #265, #247, #264, #254, #281, #275, #282, #273
 
 3.3.0 - 04 Dec 2014
 -------------------
