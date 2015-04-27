@@ -254,7 +254,7 @@ public class RegularTest {
     public void testregExp2(){
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("[^12]*")));
+        solver.post(ICF.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -263,22 +263,20 @@ public class RegularTest {
     public void testregExp3(){
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("3?3?")));
+        solver.post(ICF.regular(CS, new FiniteAutomaton("3?.3?", 0,3)));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 
     @Test(groups = "1s")
     public void testregExp4(){
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
-        solver.post(ICF.regular(CS, new FiniteAutomaton(".*")));
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton(".*", 0, 3)));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
     }
 
     @Test(groups = "1s")
