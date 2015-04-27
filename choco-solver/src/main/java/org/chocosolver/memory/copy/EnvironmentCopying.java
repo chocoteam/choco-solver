@@ -58,6 +58,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
      */
     @Override
     public void worldPush() {
+        timestamp++;
         final int wi = currentWorld + 1;
         for (int i = 0; i < copySize; i++) {
             copies[i].worldPush(wi);
@@ -70,6 +71,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
      */
     @Override
     public void worldPop() {
+        timestamp++;
         final int wi = currentWorld;
         for (int i = copySize - 1; i >= 0; i--) {
             copies[i].worldPop(wi);
@@ -79,6 +81,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
 
     @Override
     public void worldPopUntil(int w) {
+        timestamp++;
         for (int i = copySize - 1; i >= 0; i--) {
             copies[i].worldPop(w);
         }

@@ -28,6 +28,8 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.memory.IEnvironment;
+
 /**
  * Class for factorizing code of time stamped objects
  * <br/>
@@ -38,15 +40,15 @@ package org.chocosolver.solver.search.loop;
 public abstract class TimeStampedObject {
 
 	private int timestamp = -1;
-	private final ISearchLoop loop;
+	private final IEnvironment environment;
 
-	public TimeStampedObject(ISearchLoop loop) {
-		this.loop = loop;
+	public TimeStampedObject(IEnvironment environment) {
+		this.environment = environment;
 	}
 
-	/** @return the search loop */
-	public final ISearchLoop getSearchLoop() {
-		return loop;
+	/** @return the environment */
+	public final IEnvironment getEnvironment() {
+		return environment;
 	}
 
 	/** @return the current time stamp of the object */
@@ -54,13 +56,13 @@ public abstract class TimeStampedObject {
 		return timestamp;
 	}
 
-	/** @return true iff the current time stamp of the object is different from the time stamp of the search loop */
+	/** @return true iff the current time stamp of the object is different from the time stamp of the environment */
 	public final boolean needReset() {
-		return timestamp != loop.getTimeStamp();
+		return timestamp != environment.getTimeStamp();
 	}
 
-	/** sets the current time stamp of the object to the time stamp of the search loop */
+	/** sets the current time stamp of the object to the time stamp of the environment */
 	public final void resetStamp() {
-		timestamp = loop.getTimeStamp();
+		timestamp = environment.getTimeStamp();
 	}
 }

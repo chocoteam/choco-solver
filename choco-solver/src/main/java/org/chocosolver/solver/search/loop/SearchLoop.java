@@ -93,9 +93,6 @@ public class SearchLoop implements ISearchLoop {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(SearchLoop.class);
 
-    // keep an int, that's faster than a long, and the domain of definition is large enough
-    int timeStamp;
-
     /* Reference to the solver */
     final Solver solver;
 
@@ -162,7 +159,6 @@ public class SearchLoop implements ISearchLoop {
         // if a resolution has already been done
         if (rootWorldIndex > -1) {
             env.worldPopUntil(rootWorldIndex);
-            timeStamp++;
             Decision tmp;
             while (decision != ROOT) {
                 tmp = decision;
@@ -220,7 +216,6 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public void restoreRootNode() {
         env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
-        timeStamp++; // to force clear delta, on solution recording
         Decision tmp;
         while (decision != ROOT) {
             tmp = decision;
@@ -275,14 +270,12 @@ public class SearchLoop implements ISearchLoop {
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
                 case DOWN_LEFT_BRANCH:
-                    timeStamp++;
                     smList.beforeDownLeftBranch();
                     downLeftBranch();
                     smList.afterDownLeftBranch();
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
                 case DOWN_RIGHT_BRANCH:
-                    timeStamp++;
                     smList.beforeDownRightBranch();
                     downRightBranch();
                     smList.afterDownRightBranch();
@@ -538,7 +531,7 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public int getTimeStamp() {
-        return timeStamp;
+        return env.getTimeStamp();
     }
 
     @Override

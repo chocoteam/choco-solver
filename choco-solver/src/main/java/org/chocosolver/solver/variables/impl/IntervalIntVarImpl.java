@@ -420,7 +420,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new IntervalDelta(solver.getSearchLoop());
+            delta = new IntervalDelta(solver.getEnvironment());
             reactOnRemoval = true;
         }
     }

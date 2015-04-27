@@ -495,7 +495,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new EnumDelta(solver.getSearchLoop());
+            delta = new EnumDelta(solver.getEnvironment());
             reactOnRemoval = true;
         }
     }

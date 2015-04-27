@@ -28,8 +28,8 @@
  */
 package org.chocosolver.solver.variables.delta;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
 
 /**
@@ -48,11 +48,11 @@ public class SetDelta extends TimeStampedObject implements ISetDelta {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public SetDelta(ISearchLoop loop) {
-        super(loop);
+    public SetDelta(IEnvironment environment) {
+        super(environment);
         delta = new IEnumDelta[2];
-        delta[0] = new EnumDelta(loop);
-        delta[1] = new EnumDelta(loop);
+        delta[0] = new EnumDelta(environment);
+        delta[1] = new EnumDelta(environment);
     }
 
     //***********************************************************************************

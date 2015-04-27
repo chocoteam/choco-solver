@@ -28,9 +28,9 @@
  */
 package org.chocosolver.solver.variables.delta;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.loop.ISearchLoop;
 
 /**
  * <br/>
@@ -48,8 +48,8 @@ public enum NoDelta implements IEnumDelta, IIntervalDelta, ISetDelta {
     public void lazyClear() {}
 
     @Override
-    public ISearchLoop getSearchLoop() {
-        throw new SolverException("NoDelta#getSearchLoop(): forbidden call!");
+    public IEnvironment getEnvironment() {
+        throw new SolverException("NoDelta#getEnvironment(): forbidden call!");
     }
 
     @Override

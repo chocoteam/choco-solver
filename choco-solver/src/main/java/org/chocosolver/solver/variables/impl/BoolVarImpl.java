@@ -369,7 +369,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new OneValueDelta(solver.getSearchLoop());
+            delta = new OneValueDelta(solver.getEnvironment());
             reactOnRemoval = true;
         }
     }

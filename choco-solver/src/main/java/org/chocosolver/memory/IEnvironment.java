@@ -163,4 +163,10 @@ public interface IEnvironment extends Serializable {
 
     void save(Operation operation);
 
+    /**
+     * Return the current time stamp.
+     * It differs from world index since it never decrements.
+     * @return the timestamp
+     */
+    int getTimeStamp();
 }

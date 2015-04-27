@@ -49,7 +49,7 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
     protected ICause propagator;
 
     public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
-		super(delta.getSearchLoop());
+		super(delta.getEnvironment());
         this.delta = delta;
         this.first = new int[2];
         this.last = new int[2];
