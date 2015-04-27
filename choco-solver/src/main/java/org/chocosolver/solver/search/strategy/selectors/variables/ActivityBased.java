@@ -34,8 +34,10 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.monitors.*;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
@@ -122,7 +124,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     final double g, d; // g for aging, d for interval size estimation
     final int a; // forget parameter
-    final double r;
 
     public boolean sampling; // is this still in a sampling phase
 
@@ -140,7 +141,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
 	boolean restartAfterEachFail = true;
 
-    public ActivityBased(final Solver solver, IntVar[] vars, double g, double d, int a, double r, int samplingIterationForced, long seed) {
+    public ActivityBased(final Solver solver, IntVar[] vars, double g, double d, int a, int samplingIterationForced, long seed) {
         super(vars);
         this.solver = solver;
         this.vars = vars;
@@ -162,7 +163,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         this.d = d;
         assert a > 0;
         this.a = a;
-        this.r = r;
         sampling = true;
         random = new java.util.Random(seed);
         nb_probes = 0;
@@ -370,7 +370,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             while (idx < vars.length && checkInterval(idx)) {
                 idx++;
             }
-            //BEWARE: when it fails very soon (after 1 node), it worths forcing sampling
+            //BEWARE: when it fails very soon (after 1 node), it is worth forcing sampling
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
                 restartAfterEachFail = false;
@@ -379,10 +379,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 for (int i = 0; i < A.length; i++) {
                     vAct[i].transfer();
                 }
-//                solver.getSearchLoop().restartAfterEachSolution(false);
-                SearchMonitorFactory.geometrical(solver, 3 * vars.length, r,
-                        new FailCounter(3 * vars.length), Integer.MAX_VALUE);
-
             }
         }
     }
