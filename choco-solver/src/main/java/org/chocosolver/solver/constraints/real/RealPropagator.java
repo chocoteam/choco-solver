@@ -67,8 +67,8 @@ public class RealPropagator extends Propagator<RealVar> {
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
      * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
      * <br/> A complete list is available in the documentation of IBEX.
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * <blockquote><pre>
      * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, new String[]{""}, solver);
      * </pre>
@@ -80,7 +80,7 @@ public class RealPropagator extends Propagator<RealVar> {
      */
     public RealPropagator(String functions, RealVar[] vars, int options) {
         super(vars, PropagatorPriority.LINEAR, false);
-		this.ibex = solver.getIbex();
+        this.ibex = solver.getIbex();
         this.functions = functions;
         this.option = options;
         this.contractorIdx = ibex.add_contractor(vars.length, functions, option);
@@ -120,27 +120,31 @@ public class RealPropagator extends Propagator<RealVar> {
             case Ibex.NOT_SIGNIFICANT:
             default:
         }
-	}
+    }
 
     @Override
     public ESat isEntailed() {
-		double domains[] = new double[2 * vars.length];
-		for (int i = 0; i < vars.length; i++) {
-			domains[2 * i] = vars[i].getLB();
-			domains[2 * i + 1] = vars[i].getUB();
-		}
-		int result = ibex.contract(contractorIdx, domains);
-		if(result==Ibex.FAIL){
-			return ESat.FALSE;
-		}
-		if(result==Ibex.ENTAILED || isCompletelyInstantiated()){
-			for (int i = 0; i < vars.length; i++) {
-				if(vars[i].getLB()<domains[2*i] || vars[i].getUB()>domains[2*i+1]){
-					return ESat.UNDEFINED;
-				}
-			}
-			return ESat.TRUE;
-		}
+        double domains[] = new double[2 * vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            domains[2 * i] = vars[i].getLB();
+            domains[2 * i + 1] = vars[i].getUB();
+        }
+        int result = ibex.contract(contractorIdx, domains);
+        if (result == Ibex.FAIL) {
+            return ESat.FALSE;
+        }
+        if (result == Ibex.ENTAILED || isCompletelyInstantiated()) {
+            for (int i = 0; i < vars.length; i++) {
+                if (vars[i].getLB() < domains[2 * i] || vars[i].getUB() > domains[2 * i + 1]) {
+                    if (domains[2 * i + 1] - domains[2 * i] >= vars[i].getPrecision()) {
+                        return ESat.UNDEFINED;
+                    } else {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+            return ESat.TRUE;
+        }
         return ESat.UNDEFINED;
     }
 
