@@ -28,8 +28,8 @@
  */
 package org.chocosolver.solver.variables.delta;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
 
 /**
@@ -44,8 +44,8 @@ public final class OneValueDelta extends TimeStampedObject implements IEnumDelta
     ICause cause;
     boolean set;
 
-    public OneValueDelta(ISearchLoop loop) {
-        super(loop);
+    public OneValueDelta(IEnvironment environment) {
+        super(environment);
     }
 
 	@Override

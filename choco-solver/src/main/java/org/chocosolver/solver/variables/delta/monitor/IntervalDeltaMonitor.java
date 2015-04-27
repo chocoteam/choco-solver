@@ -50,7 +50,7 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     protected ICause propagator;
 
     public IntervalDeltaMonitor(IIntervalDelta delta, ICause propagator) {
-		super(delta.getSearchLoop());
+		super(delta.getEnvironment());
         this.delta = delta;
         this.first = 0;
         this.last = 0;

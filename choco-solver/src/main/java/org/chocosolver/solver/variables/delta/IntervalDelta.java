@@ -28,8 +28,8 @@
  */
 package org.chocosolver.solver.variables.delta;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
 
 /**
@@ -46,8 +46,8 @@ public final class IntervalDelta extends TimeStampedObject implements IIntervalD
     ICause[] causes;
     int last;
 
-    public IntervalDelta(ISearchLoop loop) {
-		super(loop);
+    public IntervalDelta(IEnvironment environment) {
+		super(environment);
         from = new int[SIZE];
         to = new int[SIZE];
         causes = new ICause[SIZE];

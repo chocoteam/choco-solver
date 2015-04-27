@@ -95,6 +95,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      */
     @Override
     public void worldPush() {
+        timestamp++;
         //code optim.: replace loop by enumeration
         final int wi = currentWorld + 1;
         for (int i = 0; i < trailSize; i++) {
@@ -112,6 +113,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      */
     @Override
     public void worldPop() {
+        timestamp++;
         //code optim.: replace loop by enumeration
         final int wi = currentWorld;
         for (int i = trailSize - 1; i >= 0; i--) {

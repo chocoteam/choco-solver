@@ -50,6 +50,8 @@ public abstract class AbstractEnvironment implements IEnvironment {
 
     private ICondition condition = ICondition.FALSE;
 
+    protected int timestamp;
+
     /**
      * Shared BitSet
      */
@@ -57,10 +59,16 @@ public abstract class AbstractEnvironment implements IEnvironment {
 
     protected AbstractEnvironment(Type type) {
         this.type = type;
+        this.timestamp = 0;
     }
 
     public final int getWorldIndex() {
         return currentWorld;
+    }
+
+    @Override
+    public final int getTimeStamp() {
+        return timestamp;
     }
 
     /**

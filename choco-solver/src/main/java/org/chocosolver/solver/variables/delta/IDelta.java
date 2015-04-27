@@ -28,7 +28,7 @@
  */
 package org.chocosolver.solver.variables.delta;
 
-import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.memory.IEnvironment;
 
 import java.io.Serializable;
 
@@ -46,9 +46,9 @@ public interface IDelta extends Serializable {
     void lazyClear();
 
     /**
-     * Return the associate search loop
+     * Return the associate environment
      *
-     * @return associate search loop
+     * @return associated environment
      */
-    ISearchLoop getSearchLoop();
+    IEnvironment getEnvironment();
 }

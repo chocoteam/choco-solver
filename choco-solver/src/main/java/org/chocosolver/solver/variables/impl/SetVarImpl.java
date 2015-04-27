@@ -340,7 +340,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     public void createDelta() {
         if (!reactOnModification) {
             reactOnModification = true;
-            delta = new SetDelta(solver.getSearchLoop());
+            delta = new SetDelta(solver.getEnvironment());
         }
     }
 
