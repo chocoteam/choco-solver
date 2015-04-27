@@ -426,9 +426,10 @@ public class IntStrategyFactory {
         return domOverWDeg(VARS, SEED, min_value_selector());
     }
 
+
     /**
      * Create an Activity based search strategy.
-     * <p/>
+     * <p>
      * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
      * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
      * <br/>
@@ -437,13 +438,36 @@ public class IntStrategyFactory {
      * @param GAMMA          aging parameters
      * @param DELTA          for interval domain size estimation
      * @param ALPHA          forget parameter
-     * @param RESTART        restart parameter
      * @param FORCE_SAMPLING minimal number of iteration for sampling phase
      * @param SEED           the seed for random
      */
     public static AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
+                                                    int FORCE_SAMPLING, long SEED) {
+        return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, FORCE_SAMPLING, SEED);
+    }
+
+    /**
+     * (Deprecated)
+     * Create an Activity based search strategy.
+     * <p>
+     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
+     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
+     * <br/>
+     *
+     * @param VARS           collection of variables
+     * @param GAMMA          aging parameters
+     * @param DELTA          for interval domain size estimation
+     * @param ALPHA          forget parameter
+     * @param RESTART        restart parameter -- not used
+     * @param FORCE_SAMPLING minimal number of iteration for sampling phase
+     * @param SEED           the seed for random
+     * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#activity(org.chocosolver.solver.variables.IntVar[], double, double, int, int, long)
+     * @deprecated
+     */
+    @Deprecated
+    public static AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
                                                     double RESTART, int FORCE_SAMPLING, long SEED) {
-        return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
+        return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, FORCE_SAMPLING, SEED);
     }
 
     /**
@@ -458,7 +482,7 @@ public class IntStrategyFactory {
      * @param SEED the seed for random
      */
     public static AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED) {
-        return activity(VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
+        return activity(VARS, 0.999d, 0.2d, 8, 1, SEED);
     }
 
     /**
