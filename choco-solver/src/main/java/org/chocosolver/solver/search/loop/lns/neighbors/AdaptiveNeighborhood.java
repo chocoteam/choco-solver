@@ -58,7 +58,7 @@ public class AdaptiveNeighborhood extends SequenceNeighborhood {
         int r = random.nextInt(sum);
         for (int i = 0; i < count; i++) {
             r -= (counters[i] + 1);
-            if (r <= 0) {
+            if (r < 0) {
                 who = i;
                 return;
             }
