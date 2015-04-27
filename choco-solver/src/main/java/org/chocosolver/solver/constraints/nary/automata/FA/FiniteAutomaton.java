@@ -34,6 +34,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.tools.StringUtils;
 
 import java.io.BufferedWriter;
@@ -51,8 +52,8 @@ import java.util.*;
 public class FiniteAutomaton implements IAutomaton {
 
 
-    protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap();
-    protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap();
+    protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap(16, .5f, -1, -1);
+    protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap(16, .5f, -1, -1);
 
     static {
         int delta = 0;
@@ -71,7 +72,13 @@ public class FiniteAutomaton implements IAutomaton {
     }
 
     public static char getCharFromInt(int i) {
-        return (char) charFromIntMap.get(i);
+        int c = charFromIntMap.get(i);
+        if (c > -1) {
+            return (char) charFromIntMap.get(i);
+        } else {
+            throw new SolverException("Unknwon value \"" + i + "\". Note that only integers in [" +
+                    (int)Character.MIN_VALUE + "," +(int)(Character.MAX_VALUE) + "] are allowed by FiniteAutomaton.");
+        }
     }
 
 
@@ -92,6 +99,14 @@ public class FiniteAutomaton implements IAutomaton {
 
     }
 
+    /**
+     * Create a finite automaton based on a regular expression.
+     * The regexp accepts digits  and numbers, in [0,65535].
+     * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
+     * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
+     *
+     * @param regexp
+     */
     public FiniteAutomaton(String regexp) {
         this();
         String correct = StringUtils.toCharExp(regexp);

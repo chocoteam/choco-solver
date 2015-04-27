@@ -32,6 +32,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -221,7 +222,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 162);
     }
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", expectedExceptions = SolverException.class)
 	public void testNeg(){
 		Solver solver = new Solver();
 		IntVar[] CS = VF.enumeratedArray("CS", 4, -10, 10, solver);
@@ -239,4 +240,66 @@ public class RegularTest {
 		Assert.assertEquals(1, (int)solutions.get(0).getIntVal(CS[2]));
 		Assert.assertEquals(-5,(int) solutions.get(0).getIntVal(CS[3]));
 	}
+
+    @Test(groups = "1s")
+    public void testregExp1(){
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("[12]*")));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testregExp2(){
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("[^12]*")));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testregExp3(){
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("3?3?")));
+        Chatterbox.showSolutions(solver);
+        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testregExp4(){
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton(".*")));
+        Chatterbox.showSolutions(solver);
+        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testregExp5(){
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("1{2}")));
+        Chatterbox.showSolutions(solver);
+        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void testregExp6(){
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 4, 0, 3, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("0{2,3}1*")));
+        Chatterbox.showSolutions(solver);
+        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+    }
 }
