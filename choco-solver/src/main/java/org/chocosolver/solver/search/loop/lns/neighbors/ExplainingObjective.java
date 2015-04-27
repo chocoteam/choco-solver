@@ -57,7 +57,6 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class ExplainingObjective extends ExplainingCut implements IMonitorInitPropagation, IMonitorUpBranch {
 
-    protected RuleStore mRuleStore;
     private ObjectiveManager<IntVar, Integer> om;
     private IntVar objective;
     private int LB, UB;
@@ -82,7 +81,6 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         tmpDeductions = new TIntArrayList();
         tmpValueDeductions = new TIntHashSet(16);
         geo4cluster = new GeometricalRestartStrategy(1, 1.2);
-        mRuleStore = new RuleStore(aSolver, false);
         //TODO: check plug monitor
     }
 
@@ -143,7 +141,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
 
         if (mExplanationEngine == null) {
             if (mSolver.getExplainer() == null) {
-                mSolver.set(new ExplanationEngine(mSolver, false));
+                mSolver.set(new ExplanationEngine(mSolver, false, false));
             }
             this.mExplanationEngine = mSolver.getExplainer();
         }
@@ -226,7 +224,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
 
         // mimic explanation computation
         RuleStore rs = mExplanationEngine.getRuleStore();
-        rs.clear();
+        rs.init();
         Explanation explanation = new Explanation(false);
         rs.addRemovalRule(objective, value);
         IEventStore es = mExplanationEngine.getEventStore();
@@ -258,16 +256,17 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         clusters.add(0);
         // 2'. compute bounds to avoid explaining the whole domain
         boolean ismax = om.getPolicy() == ResolutionPolicy.MAXIMIZE;
-        mRuleStore.clear();
+        RuleStore rs = mExplanationEngine.getRuleStore();
         IEventStore es = mExplanationEngine.getEventStore();
+        rs.init();
         int i = 0;
         int far, near;
         if (ismax) {
             far = UB;
             near = objective.getValue() + 1;
-            mRuleStore.addUpperBoundRule(objective);
+            rs.addUpperBoundRule(objective);
             while (i < es.getSize()) {
-                if (mRuleStore.match(i, es)) {
+                if (rs.match(i, es)) {
                     int val = es.getFirstValue(i);
                     int old = es.getSecondValue(i);
                     if (far >= near && far > val && far <= old) {
@@ -282,9 +281,9 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         } else {
             far = LB;
             near = objective.getValue() - 1;
-            mRuleStore.addLowerBoundRule(objective);
+            rs.addLowerBoundRule(objective);
             while (i < es.getSize()) {
-                if (mRuleStore.match(i, es)) {
+                if (rs.match(i, es)) {
                     int val = es.getFirstValue(i);
                     int old = es.getSecondValue(i);
                     if (far <= near && far < val && far >= old) {
@@ -303,7 +302,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
 
         // mimic explanation computation
         RuleStore rs = mExplanationEngine.getRuleStore();
-        rs.clear();
+        rs.init();
         Explanation explanation = new Explanation(false);
         rs.addRemovalRule(objective, value);
 

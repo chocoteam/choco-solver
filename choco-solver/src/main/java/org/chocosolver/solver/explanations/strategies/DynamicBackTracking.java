@@ -31,6 +31,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.explanations.Rules;
+import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
@@ -54,10 +57,14 @@ public class DynamicBackTracking extends ConflictBackJumping {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicBackTracking.class);
 
     final DBTstrategy dbTstrategy;
+    final RuleStore mRuleStore;  // required to continue the computation of the explanations
+    final IEventStore mEventStore; // required to continue the computation of the explanations
 
     public DynamicBackTracking(ExplanationEngine mExplainer, Solver mSolver, boolean nogoodFromConflict) {
         super(mExplainer, mSolver, nogoodFromConflict);
         dbTstrategy = new DBTstrategy(mSolver, mExplainer);
+        mRuleStore = mExplainer.getRuleStore();
+        mEventStore = mExplainer.getEventStore();
     }
 
     /**
@@ -86,18 +93,24 @@ public class DynamicBackTracking extends ConflictBackJumping {
 
         // now we can explicitly enforce the jump
         dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
+        int decIdx = lastExplanation.getEvtstrIdx(); // index of the decision to refute in the event store
         while (dec != RootDecision.ROOT && nworld > 1) {
 
             if (dec.hasNext()) {
-                // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a willful decision
+                // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a unrelated decision
                 dup = dec.duplicate();
                 dup.setWorldIndex(dec.getWorldIndex()); // BEWARE we need to keep the wi for to maintain explanations
                 dup.rewind();
                 dbTstrategy.add(dup);
             } else {
                 // on a right branch, necessarily have an explanation (it is a refutation)
-                Explanation r = mExplainer.getDecisionRefutationExplanation(dec);
-                if (!r.getDecisions().get(jmpBck.getWorldIndex())) {
+                Explanation anExplanation = mExplainer.getDecisionRefutationExplanation(dec);
+                // if the explication of the refutation
+                if (anExplanation.getRules() != null) {
+                    keepUp(anExplanation, decIdx);
+                }
+
+                if (!anExplanation.getDecisions().get(jmpBck.getWorldIndex())) {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
                     dup = dec.duplicate();
@@ -106,10 +119,10 @@ public class DynamicBackTracking extends ConflictBackJumping {
                     dup.buildNext();
                     // add it to the decisions to force
                     dbTstrategy.add(dup);
-//                    System.out.printf("ADD: %s (%d)\n", dup, dup.getWorldIndex());
+                } else {
+                    // else  we need to forget everything and start from scratch on this decision
+                    mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
                 }
-                // else  we need to forget everything and start from scratch on this decision
-                // so nothing to be done
             }
             // get the previous
             dec = dec.getPrevious();
@@ -119,14 +132,36 @@ public class DynamicBackTracking extends ConflictBackJumping {
             if (!dec.hasNext()) {
                 throw new UnsupportedOperationException("DynamicBackTracking.identifyRefutedDecision should get to a POSITIVE decision " + dec);
             }
-            Explanation why = lastExplanation.duplicate();
-            why.remove(dec);
-
-            mExplainer.storeDecisionExplanation(dec, why);
+            lastExplanation.remove(dec);
+            mExplainer.storeDecisionExplanation(dec, lastExplanation);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("DynamicBackTracking>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
+    }
+
+    /**
+     * Keep up the calculation of the explanation, until it reaches 'decIdx' index of the decision to refute in the event store
+     *
+     * @param anExplanation explanation to go on computing
+     * @param decIdx        index, in the event store, of the decision to refute
+     */
+    private void keepUp(Explanation anExplanation, int decIdx) {
+        Rules oRules = mRuleStore.getRules(); // temporary store the set of rules of the rule store
+        int i = anExplanation.getEvtstrIdx() - 1; // skip the last known one
+        mRuleStore.setRules(anExplanation.getRules()); // replace the rules by the one related to the explanation
+        // while (i > -1) { // force to compute entirely the explanation, but inefficient in practice
+        while (i >= decIdx) { // we continue while we did not reach at least 'decIdx'
+            if (mRuleStore.match(i, mEventStore)) {
+                mRuleStore.update(i, mEventStore, anExplanation);
+            }
+            i--;
+        }
+        anExplanation.setEvtstrIdx(i + 1); // we store where the search ends, for future research
+        if (i == 0) {
+            anExplanation.getRules().clear(); // only if we're sure the explanation is complete
+        }
+        mRuleStore.setRules(oRules); // store the set of rules of the rule store
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

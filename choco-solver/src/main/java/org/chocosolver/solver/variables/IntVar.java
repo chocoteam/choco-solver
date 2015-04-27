@@ -83,7 +83,9 @@ public interface IntVar extends Variable {
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException
      *          if the domain become empty due to this action
+     * @deprecated
      */
+    @Deprecated
     boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
 
     /**

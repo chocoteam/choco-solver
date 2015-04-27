@@ -33,7 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -47,11 +49,11 @@ import org.chocosolver.util.ESat;
  */
 public class PropMaxBC extends Propagator<IntVar> {
 
-    IntVar MAX, v1, v2;
+    IntVar BST, v1, v2;
 
     public PropMaxBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
-        this.MAX = vars[0];
+        this.BST = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];
     }
@@ -85,15 +87,15 @@ public class PropMaxBC extends Propagator<IntVar> {
                 break;
             case 5: //  X and Z are instantiated
             {
-                int max = vars[0].getValue();
+                int best = vars[0].getValue();
                 int val2 = vars[2].getValue();
-                if (max > val2) {
-                    vars[1].instantiateTo(max, aCause);
+                if (best > val2) {
+                    vars[1].instantiateTo(best, aCause);
                     setPassive();
-                } else if (max < val2) {
+                } else if (best < val2) {
                     contradiction(vars[2], "wrong max selected");
                 } else { // X = Z
-                    vars[1].updateUpperBound(max, aCause);
+                    vars[1].updateUpperBound(best, aCause);
                 }
             }
             break;
@@ -110,15 +112,15 @@ public class PropMaxBC extends Propagator<IntVar> {
             break;
             case 3://  X and Y are instantiated
             {
-                int max = vars[0].getValue();
+                int best = vars[0].getValue();
                 int val1 = vars[1].getValue();
-                if (max > val1) {
-                    vars[2].instantiateTo(max, aCause);
+                if (best > val1) {
+                    vars[2].instantiateTo(best, aCause);
                     setPassive();
-                } else if (max < val1) {
+                } else if (best < val1) {
                     contradiction(vars[1], "");
                 } else { // X = Y
-                    vars[2].updateUpperBound(max, aCause);
+                    vars[2].updateUpperBound(best, aCause);
                 }
             }
             break;
@@ -135,18 +137,18 @@ public class PropMaxBC extends Propagator<IntVar> {
             break;
             case 1: // X is instantiated
             {
-                int max = vars[0].getValue();
-                if (!vars[1].contains(max) && !vars[2].contains(max)) {
+                int best = vars[0].getValue();
+                if (!vars[1].contains(best) && !vars[2].contains(best)) {
                     contradiction(vars[0], null);
                 }
-                if (vars[1].getUB() < max) {
-                    vars[2].instantiateTo(max, aCause);
+                if (vars[1].getUB() < best) {
+                    vars[2].instantiateTo(best, aCause);
                     setPassive();
-                } else if (vars[2].getUB() < max) {
-                    vars[1].instantiateTo(max, aCause);
+                } else if (vars[2].getUB() < best) {
+                    vars[1].instantiateTo(best, aCause);
                     setPassive();
                 } else {
-                    if (vars[1].updateUpperBound(max, aCause) | vars[2].updateUpperBound(max, aCause)) {
+                    if (vars[1].updateUpperBound(best, aCause) | vars[2].updateUpperBound(best, aCause)) {
                         filter(); // to ensure idempotency for "free"
                     }
                 }
@@ -178,7 +180,7 @@ public class PropMaxBC extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            if (MAX.getValue() != Math.max(v1.getValue(), v2.getValue())) {
+            if (BST.getValue() != Math.max(v1.getValue(), v2.getValue())) {
                 return ESat.FALSE;
             } else {
                 return ESat.TRUE;
@@ -189,7 +191,7 @@ public class PropMaxBC extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return MAX.toString() + ".MAX(" + v1.toString() + "," + v2.toString() + ")";
+        return BST.toString() + ".MAX(" + v1.toString() + "," + v2.toString() + ")";
     }
 
     @Override
@@ -204,5 +206,40 @@ public class PropMaxBC extends Propagator<IntVar> {
 
             identitymap.put(this, new PropMaxBC(X, Y, Z));
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == vars[0]) {
+            if (IntEventType.isInstantiate(evt.getMask())) {
+                for (int i = 1; i < 3; i++) {
+                    if (vars[i].isInstantiatedTo(var.getValue())) {
+                        newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
+                }
+            } else {
+                if (IntEventType.isInclow(evt.getMask())) {
+                    newrules |= ruleStore.addLowerBoundRule(vars[1]);
+                    newrules |= ruleStore.addLowerBoundRule(vars[2]);
+                }
+                if (IntEventType.isDecupp(evt.getMask())) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[1]);
+                    newrules |= ruleStore.addUpperBoundRule(vars[2]);
+                }
+            }
+        } else {
+            if (IntEventType.isInstantiate(evt.getMask())) {
+                newrules |= ruleStore.addFullDomainRule(vars[0]);
+            } else {
+                if (IntEventType.isInclow(evt.getMask())) {
+                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                }
+                if (IntEventType.isDecupp(evt.getMask())) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[0]);
+                }
+            }
+        }
+        return newrules;
     }
 }

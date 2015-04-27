@@ -96,7 +96,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     public void recordSolution() {
         if (mExplanationEngine == null) {
             if (mSolver.getExplainer() == null) {
-                mSolver.set(new ExplanationEngine(mSolver, false));
+                mSolver.set(new ExplanationEngine(mSolver, false, false));
             }
             this.mExplanationEngine = mSolver.getExplainer();
         }

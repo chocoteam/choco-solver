@@ -419,7 +419,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Resolution %.3fs, %,d Nodes (%,.1f n/s), %,d Backtracks, %,d Fails, %,d Restarts",
+        st.append(String.format("Resolution %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),

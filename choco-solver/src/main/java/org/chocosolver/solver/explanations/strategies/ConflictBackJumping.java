@@ -31,15 +31,12 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
-import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
-import org.chocosolver.solver.variables.IntVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +82,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
             LOGGER.debug("ConflictBackJumping>> explanation of " + cex.toString() + " is " + lastExplanation);
         }
         if (this.nogoodFromConflict) {
-            extractNogoodFromExplanation(lastExplanation);
+            lastExplanation.postNogood(ngstore, ps);
         }
 
         int upto = compute(mSolver.getEnvironment().getWorldIndex());
@@ -139,6 +136,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
     void identifyRefutedDecision(int nworld, ICause cause) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
+            mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
             dec = dec.getPrevious();
             nworld--;
         }
@@ -146,10 +144,8 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
             if (!dec.hasNext()) {
                 throw new UnsupportedOperationException("ConflictBackJumping.identifyRefutedDecision should get to a LEFT decision:" + dec);
             }
-            Explanation why = lastExplanation.duplicate();
-            why.remove(dec);
-
-            mExplainer.storeDecisionExplanation(dec, why);
+            lastExplanation.remove(dec);
+            mExplainer.storeDecisionExplanation(dec, lastExplanation);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("ConflictBackJumping>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
@@ -177,18 +173,4 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         return lastExplanation;
     }
 
-    @SuppressWarnings("unchecked")
-    private void extractNogoodFromExplanation(Explanation explanation) {
-        Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
-        ps.clear();
-        while (decision != RootDecision.ROOT) {
-            if (explanation.getDecisions().get(decision.getWorldIndex())) {
-                assert decision.hasNext();
-//                System.out.printf("%s = %d,", decision.getDecisionVariable(), (Integer) decision.getDecisionValue());
-                ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
-            }
-            decision = decision.getPrevious();
-        }
-        this.ngstore.addLearnt(ps.toArray());
-    }
 }

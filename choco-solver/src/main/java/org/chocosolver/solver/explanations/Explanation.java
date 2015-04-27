@@ -26,9 +26,15 @@
  */
 package org.chocosolver.solver.explanations;
 
+import gnu.trove.list.TIntList;
 import gnu.trove.set.hash.THashSet;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -44,8 +50,10 @@ import java.util.Set;
 public class Explanation {
 
     private final boolean saveCauses;
+    private Rules rules; // null when explanation is complete
     private final THashSet<ICause> causes;
     private final BitSet decisions;
+    private int evtstrIdx;  // event store index of the last analysis
 
     public Explanation(boolean saveCauses) {
         this.causes = new THashSet<>();
@@ -96,12 +104,25 @@ public class Explanation {
      *
      * @param explanation a given explanation
      */
-    public void addAll(Explanation explanation) {
+    public void addCausesAndDecisions(Explanation explanation) {
         if (explanation.nbCauses() > 0) {
             this.causes.addAll(explanation.causes);
         }
         if (explanation.nbDecisions() > 0) {
             this.decisions.or(explanation.decisions);
+        }
+    }
+
+    /**
+     * Merge 'someRules' into this rules
+     *
+     * @param someRules the rules to add
+     */
+    public void addRules(Rules someRules) {
+        if (rules != null && someRules != null) {
+            rules.or(someRules);
+        } else if (rules == null && someRules != null) {
+            rules = someRules.duplicate();
         }
     }
 
@@ -140,13 +161,61 @@ public class Explanation {
     }
 
     /**
+     * Indicates whether or not the explanation is complete
+     */
+    public boolean isComplete() {
+        return rules == null;
+    }
+
+    /**
+     * Copy the rules
+     * The rules define which events should be filtered from the event store.
+     *
+     * @param rules set of rules (when not complete)
+     */
+    public void copyRules(Rules rules, int i) {
+        if (rules != this.rules) { // small improvement
+            addRules(rules);
+        }
+        setEvtstrIdx(i);
+    }
+
+    /**
+     * Get the event store idx at which the last analysis ends
+     *
+     * @return an event store index
+     */
+    public int getEvtstrIdx() {
+        return evtstrIdx;
+    }
+
+    /**
+     * Set the event store idx, where the last analysis ends
+     *
+     * @param evtstrIdx an event store index
+     */
+    public void setEvtstrIdx(int evtstrIdx) {
+        this.evtstrIdx = evtstrIdx;
+    }
+
+    /**
+     * Return the rules, may be null
+     *
+     * @return the rules or null
+     */
+    public Rules getRules() {
+        return rules;
+    }
+
+    /**
      * Duplicate the current explanation
      *
      * @return a new explanation
      */
     public Explanation duplicate() {
         Explanation explanation = new Explanation(this.saveCauses);
-        explanation.addAll(this);
+        explanation.addCausesAndDecisions(this);
+        explanation.addRules(this.rules);
         return explanation;
     }
 
@@ -156,14 +225,38 @@ public class Explanation {
     public void clear() {
         causes.clear();
         decisions.clear();
+        if (rules != null) {
+            rules.clear();
+        }
     }
 
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder("Explanation");
-        if(saveCauses){
+        StringBuilder st = new StringBuilder("Explanation ");
+        if (saveCauses) {
             st.append(Arrays.toString(causes.toArray()));
         }
+        st.append(decisions);
+        if (rules != null) {
+            st.append(rules.toString());
+        }
         return st.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void postNogood(PropNogoods ngstore, TIntList ps) {
+        if (rules == null) {
+            Solver mSolver = ngstore.getSolver();
+            Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
+            ps.clear();
+            while (decision != RootDecision.ROOT) {
+                if (decisions.get(decision.getWorldIndex())) {
+                    assert decision.hasNext();
+                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
+                }
+                decision = decision.getPrevious();
+            }
+            ngstore.addLearnt(ps.toArray());
+        }
     }
 }

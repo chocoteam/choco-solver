@@ -61,7 +61,7 @@ public class ExplanationTest {
     @Test(groups = "10s")
     public void testNosol0() {
         for (int n = 500; n < 4501; n += 500) {
-            for (int e = 1; e < engines.length - 1; e++) {
+            for (int e = 1; e < engines.length; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Solver solver = new Solver();
                     IntVar[] vars = VF.boundedArray("p", n, 0, n - 2, solver);
@@ -89,7 +89,7 @@ public class ExplanationTest {
         solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
         solver.set(ISF.lexico_LB(vars));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
         Assert.assertFalse(solver.findSolution());
         Explanation exp = cbj.getLastExplanation();

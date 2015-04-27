@@ -62,26 +62,24 @@ public interface EventObserver extends Serializable {
      * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
      * <p/>
      * Prerequisite: <code>value</code> should belong to <code>var</code>
-     *
-     * @param intVar an integer variable
-     * @param old    the previous lower bound
+     *  @param intVar an integer variable
      * @param value  the current lower bound
+     * @param old    the previous lower bound
      * @param cause  the cause
      */
-    default void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
+    default void updateLowerBound(IntVar intVar, int value, int old, ICause cause) {
     }
 
     /**
      * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
      * <p/>
      * Prerequisite: <code>value</code> should belong to <code>var</code>
-     *
-     * @param var   an integer variable
-     * @param old   the previous upper bound
+     *  @param var   an integer variable
      * @param value the current upper bound
+     * @param old   the previous upper bound
      * @param cause the cause
      */
-    default void updateUpperBound(IntVar var, int old, int value, ICause cause) {
+    default void updateUpperBound(IntVar var, int value, int old, ICause cause) {
     }
 
     /**

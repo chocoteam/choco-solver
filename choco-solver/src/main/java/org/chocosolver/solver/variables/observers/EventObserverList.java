@@ -57,16 +57,16 @@ public class EventObserverList implements EventObserver {
     }
 
     @Override
-    public void updateLowerBound(IntVar var, int old, int value, ICause cause) {
+    public void updateLowerBound(IntVar var, int value, int old, ICause cause) {
         for (int i = observers.size() - 1; i >= 0; i--) {
-            observers.get(i).updateLowerBound(var, old, value, cause);
+            observers.get(i).updateLowerBound(var, value, old, cause);
         }
     }
 
     @Override
-    public void updateUpperBound(IntVar var, int old, int value, ICause cause) {
+    public void updateUpperBound(IntVar var, int value, int old, ICause cause) {
         for (int i = observers.size() - 1; i >= 0; i--) {
-            observers.get(i).updateUpperBound(var, old, value, cause);
+            observers.get(i).updateUpperBound(var, value, old, cause);
         }
     }
 

@@ -242,7 +242,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    solver.getEventObserver().updateLowerBound(this, old, oub + 1, cause);
+                    solver.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
@@ -259,7 +259,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
 
                 if (_plugexpl) {
-                    solver.getEventObserver().updateLowerBound(this, old, value, cause);
+                    solver.getEventObserver().updateLowerBound(this, value, old, cause);
                 }
                 return true;
 
@@ -293,7 +293,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int olb = this.getLB();
             if (olb > value) {
                 if (_plugexpl) {
-                    solver.getEventObserver().updateUpperBound(this, old, olb - 1, cause);
+                    solver.getEventObserver().updateUpperBound(this, olb - 1, old, cause);
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
@@ -310,7 +310,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getEventObserver().updateUpperBound(this, old, value, cause);
+                    solver.getEventObserver().updateUpperBound(this, value, old, cause);
                 }
                 return true;
             }
