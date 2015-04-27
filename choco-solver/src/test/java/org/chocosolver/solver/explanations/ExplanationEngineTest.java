@@ -391,7 +391,7 @@ public class ExplanationEngineTest {
     public void testLSsmall() {
         for (int m = 4; m < 18; m++) {
             System.out.printf("LS(%d)\n", m);
-            for (int a = 1; a < 3; a++) {
+            for (int a = 0; a < 5; a++) {
                 testLS(m, a);
             }
         }

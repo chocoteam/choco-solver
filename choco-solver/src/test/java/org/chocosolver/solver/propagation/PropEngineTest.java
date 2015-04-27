@@ -29,9 +29,13 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -51,7 +55,19 @@ public class PropEngineTest {
         solver.post(IntConstraintFactory.arithm(x, "<=", 2));
 
         solver.findSolution();
+    }
 
-
+    @Test(groups = "1s")
+    public void test2() {
+        Solver solver = new Solver();
+        IntVar[] VARS = VF.enumeratedArray("X", 2, 0, 2, solver);
+        Constraint CSTR = ICF.arithm(VARS[0], "+", VARS[1], "=", 2);
+        solver.post(CSTR, CSTR);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+        solver.getSearchLoop().reset();
+        solver.unpost(CSTR);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
     }
 }
