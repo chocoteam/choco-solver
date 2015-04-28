@@ -248,7 +248,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 int mask = eventmasks[aid][v];
                 eventmasks[aid][v] = 0;
                 // run propagation on the specific event
-                lastProp.fineERcalls++;
                 lastProp.propagate(v, mask);
             }
         } else if (lastProp.isActive()) { // need to be checked due to views
@@ -276,7 +275,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         if (LOGGER.isDebugEnabled()) {
             Trace.printPropagation(null, lastProp);
         }
-        lastProp.coarseERcalls++;
         lastProp.propagate(evt.getStrengthenedMask());
     }
 

@@ -10,13 +10,18 @@ NEXT MILESTONE
 - Add clause_channeling constraint
 - Remove IntVar.wipeOut(...)
 - Enable hot variable addition to propagator
-- Revamp nogood recording
-- Move nogood recording from solution and restart from constraint pkg to monitor +(revamp) + SMF API
+- Move nogood recording from solution and restart from constraint pkg to monitor +(revamp) + SMF API (#261)
+- Explanations are enabled on initial propagation (#247)
+- Improvment of the solution object (#254)
 - add DBT for explanations
 - Improve explanation engine
 - Add an additional "worldPush" instruction after initial propagation to be coherent with restarts (#55)
+- Remove restarts from ABS (#282)
+- one-shot decision are not reinitialized (#283)
+- Remove Propagation count (#284)
 
-Bug fixes: #265, #247, #264, #254, #281, #275, #282, #273, #239, #262
+Bug fixes: #168, #221, #239, #262, #264, #265, #269, #273, #275, #281
+
 
 3.3.0 - 04 Dec 2014
 -------------------
@@ -29,7 +34,7 @@ Bug fixes: #265, #247, #264, #254, #281, #275, #282, #273, #239, #262
 - Update license and header (#241)
 - Rollback to old release process (#246)
 
-Bug fixes: #215, #252, #253, #255, #256, #258, #283
+Bug fixes: #215, #252, #253, #255, #256, #258
 
 3.2.2 - 17 Nov 2014
 -------------------
