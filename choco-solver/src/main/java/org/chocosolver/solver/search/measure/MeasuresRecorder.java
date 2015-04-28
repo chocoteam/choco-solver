@@ -391,6 +391,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toOneLineString() {
+        beforeClose();
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
@@ -414,6 +415,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toOneShortLineString() {
+        beforeClose();
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
@@ -431,14 +433,22 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toString() {
+        beforeClose();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
+
         if(solver.hasReachedLimit()){
             st.append("- Incomplete search - Limit reached.\n");
+        }else if(solver.getSearchLoop().hasEndedUnexpectedly()) {
+            st.append("- Incomplete search - Unexpected interruption.\n");
         }else{
             st.append("- Complete search - ");
-            if(solutionCount == 0){
+            if(solutionCount == 0) {
                 st.append("No solution.");
+            } else if(solutionCount == 1){
+                st.append("1 solution found.");
+            }else{
+                st.append(String.format("%,d solution(s) found.", solutionCount));
             }
             st.append('\n');
         }
@@ -470,6 +480,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toCSV() {
+        beforeClose();
         // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
         return String.format("%d;%.3f;%.3f;%.3f;%.3f;%e;%d;%d;%d;%d;%d;%d;",
                 getSolutionCount(),

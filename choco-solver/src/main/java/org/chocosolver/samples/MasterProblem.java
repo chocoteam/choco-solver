@@ -37,8 +37,6 @@ package org.chocosolver.samples;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.thread.AbstractParallelMaster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static java.lang.System.exit;
 import static java.lang.Thread.sleep;
@@ -52,7 +50,6 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
 
     //***********************************************************************************
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(MasterProblem.class);
     int bestVal;
     int nbSol;
     boolean closeWithSuccess;
@@ -90,19 +87,17 @@ public class MasterProblem extends AbstractParallelMaster<SlaveProblem> {
      * A slave has CLOSED ITS SEARCH TREE, every one should stop!
      */
     public synchronized void wishGranted() {
-        if (LOGGER.isInfoEnabled()) {
-            if (nbSol == 0) {
-                if (!closeWithSuccess) {
-                    LOGGER.info("=====UNKNOWN=====");
-                } else {
-                    LOGGER.info("=====UNSATISFIABLE=====");
-                }
+        if (nbSol == 0) {
+            if (!closeWithSuccess) {
+                System.out.println("=====UNKNOWN=====");
             } else {
-                if (!closeWithSuccess && (policy != null && policy != SATISFACTION)) {
-                    LOGGER.info("=====UNBOUNDED=====");
-                } else {
-                    LOGGER.info("==========");
-                }
+                System.out.println("=====UNSATISFIABLE=====");
+            }
+        } else {
+            if (!closeWithSuccess && (policy != null && policy != SATISFACTION)) {
+                System.out.println("=====UNBOUNDED=====");
+            } else {
+                System.out.println("==========");
             }
         }
         Number[] nbs = slaves[0].solver.getMeasures().toArray();
