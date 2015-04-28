@@ -37,7 +37,9 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -312,7 +314,7 @@ public class AllDifferentTest {
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
     }
 
     @Test(groups = "1s")
@@ -328,5 +330,48 @@ public class AllDifferentTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+    }
+
+    @Test(groups = "1s")
+    public void testBigB() {
+        Solver solver = new Solver();
+        IntVar[] ts = VariableFactory.boundedArray("t", 10, 0, 9, solver);
+
+        solver.post(ICF.alldifferent(ts, "FC"));
+
+        solver.findAllSolutions();
+        Chatterbox.showStatistics(solver);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3628800);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 7257599);
+    }
+
+    @Test(groups = "1s")
+    public void testBigE() {
+        Solver solver = new Solver();
+        IntVar[] ts = VariableFactory.enumeratedArray("t", 10, 0, 9, solver);
+
+        solver.post(ICF.alldifferent(ts, "FC"));
+
+        solver.findAllSolutions();
+        Chatterbox.showStatistics(solver);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3628800);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 7257599);
+    }
+
+    @Test(groups = "1m")
+    public void testBigB2() {
+        Solver solver = new Solver();
+        IntVar[] ts = new IntVar[10];
+        for (int i = 0; i < 10; i++) {
+            // build disjoint domains
+            ts[i] = VF.bounded("t" + i, 5 * i, 5 * (i + 1) - 1, solver);
+        }
+
+        solver.post(ICF.alldifferent(ts, "FC"));
+
+        solver.findAllSolutions();
+        Chatterbox.showStatistics(solver);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9765625);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19531249);
     }
 }

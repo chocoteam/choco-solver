@@ -64,7 +64,17 @@ public class AllDifferent extends Constraint {
 				}
 				return props;
 			}
-			case FC: return new Propagator[]{new PropAllDiffInst(VARS)};
+			case FC:
+				// adds a Probabilistic AC (only if at least some variables have an enumerated domain)
+				boolean boundDom = false;
+				for (int i = 0; i < VARS.length && !boundDom; i++) {
+					boundDom = ! VARS[i].hasEnumeratedDomain();
+				}
+				if (boundDom) {
+					return new Propagator[]{new PropAllDiffInst2(VARS)};
+				} else {
+					return new Propagator[]{new PropAllDiffInst(VARS)};
+				}
 			case BC: return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS)};
 			case AC: return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS)};
 			case DEFAULT:
