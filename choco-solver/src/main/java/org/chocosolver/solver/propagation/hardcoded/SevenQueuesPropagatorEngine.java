@@ -172,7 +172,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         eventmasks[aid][v] = 0;
                         lastProp.decNbPendingEvt();
                         // run propagation on the specific event
-                        lastProp.fineERcalls++;
                         lastProp.propagate(v, mask);
                     }
                 } else if (lastProp.isActive()) { // need to be checked due to views
@@ -283,7 +282,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             if (LOGGER.isDebugEnabled()) {
                 IPropagationEngine.Trace.printPropagation(null, propagator);
             }
-            propagator.coarseERcalls++;
             propagator.propagate(type.getStrengthenedMask());
         }
     }

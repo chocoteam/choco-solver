@@ -34,103 +34,171 @@ import java.io.Serializable;
 
 /**
  * Interface for providing resolution statistics
+ *
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
 public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
 
-	/**
-	 * Clones the IMeasure object (copy every measure)
-	 * @return a new instance of IMeasure
-	 */
-	IMeasures duplicate();
+    /**
+     * Clones the IMeasure object (copy every measure)
+     *
+     * @return a new instance of IMeasure
+     */
+    IMeasures duplicate();
 
-	/** Reset every measure to its default value (mostly 0) */
+    /**
+     * Reset every measure to its default value (mostly 0)
+     */
     void reset();
 
-	/** @return a summary of recorded statistics */
+    /**
+     * @return a summary of recorded statistics
+     */
     String toOneLineString();
 
-	/** @return a short summary of recorded statistics */
+    /**
+     * @return a short summary of recorded statistics
+     */
     String toOneShortLineString();
 
-	/** @return statistics */
+    /**
+     * @return statistics
+     */
     String toString();
 
-	/** @return statistics in a CSV format */
+    /**
+     * @return statistics in a CSV format
+     */
     String toCSV();
 
-	/** @return statistic values only */
+    /**
+     * @return statistic values only
+     */
     Number[] toArray();
 
-    /** @return the current world unique id */
+    /**
+     * @return the current world unique id
+     */
     long timestamp();
 
-    /** @return the time count (in sec), including initial propagation time count */
+    /**
+     * @return the time count (in sec), including initial propagation time count
+     */
     float getTimeCount();
 
-    /** @return the reading time count (in sec) */
+    /**
+     * @return the reading time count (in sec)
+     */
     float getReadingTimeCount();
 
-    /** @return the initialization time count (in sec) */
+    /**
+     * @return the initialization time count (in sec)
+     */
     float getInitialisationTimeCount();
 
-    /** @return the initial propagation time count (in sec)*/
+    /**
+     * @return the initial propagation time count (in sec)
+     */
     float getInitialPropagationTimeCount();
 
-	/** set the reading time count */
+    /**
+     * set the reading time count
+     */
     void setReadingTimeCount(long time);
 
-    /** Updates the time recorder */
+    /**
+     * Updates the time recorder
+     */
     void updateTimeCount();
 
-    /** @return the node count */
+    /**
+     * @return the node count
+     */
     long getNodeCount();
 
-    /** @return the backtrack count */
+    /**
+     * @return the backtrack count
+     */
     long getBackTrackCount();
 
-    /** @return the fail count */
+    /**
+     * @return the fail count
+     */
     long getFailCount();
 
-    /** @return the restart count */
+    /**
+     * @return the restart count
+     */
     long getRestartCount();
 
-	/** @return the maximum depth of the search tree */
+    /**
+     * @return the maximum depth of the search tree
+     */
     long getMaxDepth();
 
-	/** @return the current depth in the search tree */
+    /**
+     * @return the current depth in the search tree
+     */
     long getCurrentDepth();
 
-    /** @return the number of call to event recorder execution */
+    /**
+     * @return the number of call to event recorder execution
+     * @deprecated
+     */
+    @Deprecated
     long getPropagationsCount();
 
-	/** Updates the propagation recorder */
+    /**
+     * Updates the propagation recorder
+     * @deprecated
+     */
+    @Deprecated
     void updatePropagationCount();
 
-	/** @return the fine event count (incremental propagations) */
+    /**
+     * @return the fine event count (incremental propagations)
+     * @deprecated
+     */
+    @Deprecated
     long getEventsCount();
 
-    /** @return the used memory */
+    /**
+     * @return the used memory
+     */
     long getUsedMemory();
 
-	/** updates the memory usage count */
-	void updateMemoryUsed();
+    /**
+     * updates the memory usage count
+     */
+    void updateMemoryUsed();
 
-    /** @return the solution count of the measure */
+    /**
+     * @return the solution count of the measure
+     */
     long getSolutionCount();
 
-	/** indicates an objective variable */
+    /**
+     * indicates an objective variable
+     */
     void declareObjective();
 
-	/** @return true iff the problem has an objective variable (i.e. optimization problem) */
-	boolean hasObjective();
+    /**
+     * @return true iff the problem has an objective variable (i.e. optimization problem)
+     */
+    boolean hasObjective();
 
-	/** indicates whether or not the optimum has been found and proved */
-	void setObjectiveOptimal(boolean objectiveOptimal);
+    /**
+     * indicates whether or not the optimum has been found and proved
+     */
+    void setObjectiveOptimal(boolean objectiveOptimal);
 
-	/** @return true iff the optimum has been found and proved */
-	boolean isObjectiveOptimal();
+    /**
+     * @return true iff the optimum has been found and proved
+     */
+    boolean isObjectiveOptimal();
 
-	/** @return the objective value of the best solution found (can be Integer or Double) */
-	public Number getBestSolutionValue();
+    /**
+     * @return the objective value of the best solution found (can be Integer or Double)
+     */
+    public Number getBestSolutionValue();
 }

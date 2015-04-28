@@ -108,7 +108,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private short state;  // 0 : new -- 1 : active -- 2 : passive
     private Operation[] operations; // propagator state operations
     private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
-    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
     protected Propagator aCause; // cause of variable modifications. The default value is 'this"
     protected final PropagatorPriority priority;
     protected final boolean reactToFineEvt;
