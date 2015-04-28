@@ -122,7 +122,9 @@ public class SearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    boolean hasReachedLimit;
+    boolean hasReachedLimit = false;
+
+    boolean hasEndedUnexpectedly = true; // to capture external shut down
 
     public SearchMonitorList smList;
 
@@ -442,6 +444,7 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
+        hasEndedUnexpectedly = false;
         ESat sat = FALSE;
         if (measures.getSolutionCount() > 0) {
             sat = TRUE;
@@ -527,6 +530,11 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public boolean hasReachedLimit() {
         return hasReachedLimit;
+    }
+
+    @Override
+    public boolean hasEndedUnexpectedly() {
+        return hasEndedUnexpectedly;
     }
 
     @Override

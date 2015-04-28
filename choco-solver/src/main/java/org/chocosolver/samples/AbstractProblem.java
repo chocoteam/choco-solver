@@ -139,10 +139,7 @@ public abstract class AbstractProblem {
                 public void run() {
                     if (userInterruption()) {
                         if (level.getLevel() > SILENT.getLevel()) {
-                            System.out.println(String.format("[STATISTICS {%s]", solver.getMeasures().toOneLineString()));
-                        }
-                        if (level.getLevel() > SILENT.getLevel()) {
-                            System.out.println("Unexpected resolution interruption!");
+                            System.out.println(solver.getMeasures().toString());
                         }
                     }
 
