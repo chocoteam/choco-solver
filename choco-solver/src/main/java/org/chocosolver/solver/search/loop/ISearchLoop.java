@@ -133,6 +133,8 @@ public interface ISearchLoop extends Serializable {
 
     boolean hasReachedLimit();
 
+    boolean hasEndedUnexpectedly();
+
     @Deprecated
     int getTimeStamp();
 
