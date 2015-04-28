@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
 
@@ -129,7 +128,6 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
     protected void set(V var) {
         this.var = var;
         branch = 0;
-        this.once = false;
         this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 

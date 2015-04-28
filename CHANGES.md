@@ -29,7 +29,7 @@ Bug fixes: #265, #247, #264, #254, #281, #275, #282, #273
 - Update license and header (#241)
 - Rollback to old release process (#246)
 
-Bug fixes: #215, #252, #253, #255, #256, #258
+Bug fixes: #215, #252, #253, #255, #256, #258, #283
 
 3.2.2 - 17 Nov 2014
 -------------------
