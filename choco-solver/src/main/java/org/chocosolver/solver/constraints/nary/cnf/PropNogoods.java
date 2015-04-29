@@ -95,7 +95,7 @@ public class PropNogoods extends Propagator<IntVar> {
         if(!sat_.ok_)contradiction(null, "inconsistent");
         fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
-        sat_.initPropagator();
+        storeEarlyDeductions();
         applyEarlyDeductions();
         TIntIntHashMap map;
         for (int i = 0; i < vars.length; ++i) {

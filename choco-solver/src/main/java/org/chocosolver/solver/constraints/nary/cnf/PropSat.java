@@ -80,7 +80,7 @@ public class PropSat extends Propagator<BoolVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if(!sat_.ok_)contradiction(null, "inconsistent");
         sat_.cancelUntil(0);
-        sat_.initPropagator();
+        storeEarlyDeductions();
         applyEarlyDeductions();
         for (int i = 0; i < vars.length; ++i) {
             BoolVar var = vars[i];
