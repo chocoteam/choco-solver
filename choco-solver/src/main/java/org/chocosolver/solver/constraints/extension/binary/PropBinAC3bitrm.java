@@ -69,6 +69,11 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
     private PropBinAC3bitrm(IntVar x, IntVar y, CouplesBitSetTable table) {
         super(x, y, table);
+        offset0 = v0.getLB();
+        offset1 = v1.getLB();
+
+        initDomSize0 = v0.getUB() - offset0 + 1;
+        initDomSize1 = v1.getUB() - offset1 + 1;
     }
 
     @Override
@@ -131,7 +136,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
 
     private void fastInitNbSupports() {
-        int[] initS1 = new int[initDomSize0];
+        int[] initS1 = new int[initDomSize1];
         minS0 = Integer.MAX_VALUE;
         minS1 = Integer.MAX_VALUE;
         DisposableValueIterator itv0 = v0.getValueIterator(true);
