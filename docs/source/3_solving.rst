@@ -617,7 +617,8 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
 
 .. code-block:: none
 
-     - Search complete - [ No solution. ]
+     - [ Search complete - [ No solution | {0} solution(s) found ]
+       | Incomplete search - [ Limit reached | Unexpected interruption ] ].
         Solutions: {0}
      [  Maximize = {1}  ]
      [  Minimize = {2}  ]
@@ -630,14 +631,16 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
         Fails: {9}
         Restarts: {10}
         Max depth: {11}
-        Propagations: {12} + {13}
-        Memory: {14}mb
-        Variables: {15}
-        Constraints: {16}
+        Memory: {12}mb
+        Variables: {13}
+        Constraints: {14}
+
+Curly brackets *{instruction | }* indicate alternative instructions
 
 Brackets *[instruction]* indicate an optional instruction.
-If no solution has been found, the message "No solution." appears on the first line.
-``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ResolutionPolicy.MINIMIZE- policy.
+
+If the search terminates, the message "Search complete" appears on the first line, followed with either the the number of solutions found or the message "No solution".
+``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ``ResolutionPolicy.MINIMIZE``- policy.
 
 Curly braces *{value}* indicate search statistics:
 
@@ -653,11 +656,9 @@ Curly braces *{value}* indicate search statistics:
 9. number of failures that occurred
 10. number of restarts operated
 11. maximum depth reached in the binary tree search
-12. number of *fine* propagations
-13. number of *coarse* propagations
-14. estimation of the memory used
-15. number of variables in the model
-16. number of constraints in the model
+12. estimation of the memory used
+13. number of variables in the model
+14. number of constraints in the model
 
 
 If the resolution process reached a limit before ending *naturally*, the title of the message is set to :

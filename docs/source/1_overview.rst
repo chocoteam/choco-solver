@@ -463,6 +463,7 @@ Choco |version| : changes
 
 - Addition:
     - :ref:`55_smf`
+    - :ref:`46_define_constraint_label`
 
 - Major modification:
     - :ref:`43_explanations_label`

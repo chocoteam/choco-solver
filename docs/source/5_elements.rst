@@ -3522,8 +3522,8 @@ Then, the value with the least activity is selected from the domain of the varia
 **API**: ::
 
     AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
-                                                    double RESTART, int FORCE_SAMPLING, long SEED)
-    AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED) // default: 0.999d, 0.2d, 8, 1.1d, 1
+                                                    int FORCE_SAMPLING, long SEED)
+    AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED) // default: 0.999d, 0.2d, 8, 1
 
 .. _51_sstrat_imp:
 
