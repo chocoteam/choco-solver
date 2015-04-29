@@ -149,7 +149,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart2() {
         Solver solver = buildQ(8);
-        SearchMonitorFactory.geometrical(solver, 10, 1.2, new TimeCounter(solver, 0), 2);
+        SearchMonitorFactory.geometrical(solver, 10, 1.2, new TimeCounter(solver, 10), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);

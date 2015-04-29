@@ -398,7 +398,7 @@ public class ExplanationEngineTest {
     }
 
 
-    @Test(groups = "30m")
+    @Test(groups = "verylong")
     public void testLSbig() {
         for (int m = 18; m < 24; m++) {
             System.out.printf("LS(%d)\n", m);
