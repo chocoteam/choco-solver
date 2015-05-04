@@ -40,6 +40,7 @@ import org.chocosolver.solver.variables.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,11 +81,12 @@ public class DefaultSearchBinder implements ISearchBinder {
         for (int i = 0; i < n; i++) {
             Variable var = variables[i];
             int type = var.getTypeAndKind();
-            if ((type & Variable.CSTE) != 0) {
+            if ((type & Variable.CSTE) == 0) {
                 int kind = type & Variable.KIND;
                 switch (kind) {
                     case Variable.INT:
                         livars.add((IntVar) var);
+                        break;
                     case Variable.BOOL:
                         livars.add((BoolVar) var);
                         break;
@@ -168,8 +170,8 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            strats[0] = ISF.minDom_LB(solver.ONE);
+            strats[nb++] = ISF.minDom_LB(solver.ONE);
         }
-        return strats;
+        return Arrays.copyOf(strats, nb);
     }
 }

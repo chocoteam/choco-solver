@@ -29,16 +29,20 @@
 package org.chocosolver.solver.constraints.real;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
+ * -Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.1.12/__build__/src/
  * <br/>
  *
  * @author Charles Prud'homme
@@ -116,7 +120,7 @@ public class RealTest {
     @Test(groups = "ignored")
     public void test3() {
         Ibex ibex = new Ibex();
-        ibex.add_contractor(2, "{0}^2+{1}^2<=1",Ibex.COMPO);
+        ibex.add_contractor(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
 
         double[] domains;
 
@@ -152,10 +156,58 @@ public class RealTest {
         // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]
         // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
-        solver.post(new RealConstraint("RC","{0} * {1} = 8", vars));
+        solver.post(new RealConstraint("RC", "{0} * {1} = 8", vars));
         solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
         solver.findSolution();
         Assert.assertEquals(x.getValue(), 2);
         Assert.assertEquals(y.getValue(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testFreemajb1() {
+        Solver solver = new Solver();
+
+        // Declare variables
+        RealVar attr = VF.real("attr", 0.0, 20.0, 0.1, solver);
+
+        // Create and reify constraints to assign values to the real
+        RealConstraint attrEquals1 = new RealConstraint("attrEquals1", "{0}=4.0", Ibex.HC4, attr);
+        BoolVar attrEquals1Reification = attrEquals1.reif();
+        RealConstraint attrEquals2 = new RealConstraint("attrEquals2", "{0}=8.0", Ibex.HC4, attr);
+        BoolVar attrEquals2Reification = attrEquals2.reif();
+
+        // Walk and print the solutions
+        int numSolutions = 0;
+        boolean foundSolution = solver.findSolution();
+        while (foundSolution) {
+            numSolutions++;
+            System.out.println(String.format("Solution #%d:", numSolutions));
+            System.out.println("b1: " + attrEquals1Reification.getValue());
+            System.out.println("b2: " + attrEquals2Reification.getValue());
+            System.out.println("attr: [" + attr.getLB() + ", " + attr.getUB() + "]");
+            System.out.println();
+
+            foundSolution = solver.nextSolution();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testFreemajb2() {
+        Solver solver = new Solver();
+
+        RealVar x = VariableFactory.real("x", 0.0, 5.0, 0.001, solver);
+        System.out.println("Before solving:");
+
+        RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", Ibex.HC4, x);
+        solver.post(newRange);
+
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        System.out.printf("%s\n", solver.toString());
+        Chatterbox.printStatistics(solver);
+
     }
 }
