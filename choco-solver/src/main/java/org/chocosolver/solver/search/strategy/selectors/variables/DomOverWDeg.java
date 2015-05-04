@@ -122,15 +122,14 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         for (int idx = 0; idx < vars.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             if (dsize > 1) {
-                int degree = variables[idx].getNbProps();
                 int weight = weight(variables[idx]);
                 long c1 = dsize * _d2;
-                long c2 = _d1 * degree * weight;
+                long c2 = _d1 * weight;
                 if (c1 < c2) {
                     bests.clear();
                     bests.add(idx);
                     _d1 = dsize;
-                    _d2 = degree * weight;
+                    _d2 = weight;
                 } else if (c1 == c2) {
                     bests.add(idx);
                 }
