@@ -496,6 +496,17 @@ public class Solver implements Serializable {
         this.eoList.add(eventObserver);
     }
 
+    /**
+     * If {@code isComplete} is set to true, a complementary search strategy is added to the declared one in order to
+     * ensure that all variables are covered by a search strategy.
+     * Otherwise, the declared search strategy is used as is.
+     *
+     * @param isComplete completeness of the declared search strategy
+     */
+    public void makeCompleteSearch(boolean isComplete){
+        this.search.makeCompleteStrategy(isComplete);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

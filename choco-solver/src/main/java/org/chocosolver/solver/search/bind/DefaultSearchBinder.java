@@ -40,7 +40,6 @@ import org.chocosolver.solver.variables.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,6 +58,12 @@ public class DefaultSearchBinder implements ISearchBinder {
         LoggerFactory.getLogger(ISearchBinder.class).warn("No search strategies defined");
         LoggerFactory.getLogger(ISearchBinder.class).warn("Set to default ones");
 
+        solver.set(getDefault(solver));
+        // + last conflict
+        solver.set(ISF.lastConflict(solver));
+    }
+
+    public AbstractStrategy[] getDefault(Solver solver) {
         AbstractStrategy[] strats = new AbstractStrategy[4];
         int nb = 0;
 
@@ -101,13 +106,13 @@ public class DefaultSearchBinder implements ISearchBinder {
             switch (kind) {
                 case Variable.INT:
                 case Variable.BOOL:
-                    livars.remove((IntVar) objective);
+                    livars.remove(objective);
                     break;
                 case Variable.SET:
-                    lsvars.remove((SetVar) objective);
+                    lsvars.remove(objective);
                     break;
                 case Variable.REAL:
-                    lrvars.remove((RealVar) objective);
+                    lrvars.remove(objective);
                     break;
                 default:
                     throw new SolverException("Unknown variable type '" + kind + "' while defining the default search strategy.");
@@ -163,11 +168,8 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            solver.set(ISF.minDom_LB(solver.ONE));
-        } else {
-            solver.set(Arrays.copyOf(strats, nb));
+            strats[0] = ISF.minDom_LB(solver.ONE);
         }
-        // + last conflict
-        solver.set(ISF.lastConflict(solver));
+        return strats;
     }
 }

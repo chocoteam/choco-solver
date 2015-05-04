@@ -123,6 +123,13 @@ public interface ISearchLoop extends Serializable {
 
     void reachLimit();
 
+    /**
+     * Complete (or not) the declared search strategy with one over all variables
+     *
+     * @param isComplete set to true to complete the current search strategy
+     */
+    void makeCompleteStrategy(boolean isComplete);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,6 +148,20 @@ public interface ISearchLoop extends Serializable {
     Decision getLastDecision();
 
     int getCurrentDepth();
+
+    /**
+     * Indicate if the default search strategy is used
+     *
+     * @return false if a search strategy is used
+     */
+    boolean isDefaultSearchUsed();
+
+    /**
+     * Indicate if the search strategy is completed with one over all variables
+     *
+     * @return false if no strategy over all variables complete the declared one
+     */
+    boolean isSearchCompleted();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// TEMPORARY //////////////////////////////////////////////////////////////////
