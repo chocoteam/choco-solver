@@ -61,6 +61,23 @@ public class Chatterbox {
         System.out.println(solver.getSettings().getWelcomeMessage());
     }
 
+    /**
+     * Print (succint) features of the solver given in argument
+     *
+     * @param solver a solver
+     */
+    public static void printFeatures(Solver solver) {
+        Attribute.printSuccint(solver);
+    }
+
+    /**
+     * Print all features of the solver given in argument
+     *
+     * @param solver a solver
+     */
+    public static void printAllFeatures(Solver solver) {
+        Attribute.printAll(solver);
+    }
 
     /**
      * Print the resolution statistics.
@@ -159,6 +176,7 @@ public class Chatterbox {
             @Override
             public void beforeInitialize() {
                 printVersion(solver);
+                printFeatures(solver);
             }
 
             @Override

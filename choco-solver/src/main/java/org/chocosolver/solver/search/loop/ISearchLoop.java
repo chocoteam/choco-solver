@@ -150,7 +150,7 @@ public interface ISearchLoop extends Serializable {
     int getCurrentDepth();
 
     /**
-     * Indicate if the default search strategy is used
+     * Indicate if the default searcg strategy is used
      *
      * @return false if a search strategy is used
      */
