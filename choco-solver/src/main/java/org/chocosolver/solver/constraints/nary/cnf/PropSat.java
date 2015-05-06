@@ -78,7 +78,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if(!sat_.ok_)contradiction(null, "inconsistent");
+        if (!sat_.ok_) contradiction(null, "inconsistent");
         sat_.cancelUntil(0);
         storeEarlyDeductions();
         applyEarlyDeductions();
@@ -275,13 +275,7 @@ public class PropSat extends Propagator<BoolVar> {
         TIntList implies = sat_.implies_.get(neg);
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
-                int l = implies.get(i);
-                // if the other variable is instantiated ...
-                if (vars[var(l)].isInstantiated()) {
-                    // could be : if(sat_.valueLit(l) != SatSolver.Boolean.kUndefined)
-                    // but as far as the variable is instantiated, that's enough, and we skip conflict cases
-                    newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                }
+                newrules |= _why(implies.get(i), ruleStore);
             }
         }
 
@@ -290,44 +284,42 @@ public class PropSat extends Propagator<BoolVar> {
         // we cannot rely on watches_ because is not backtrackable
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.clauses.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                        }
-                    }
-                }
-            }
+            newrules |= _why(neg, lit, sat_.clauses.get(k), ruleStore);
         }
         // C. learnt clauses:
         // We need to find the fully instantiated clauses where bvar appears
         // we cannot rely on watches_ because is not backtrackable
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.learnts.get(k);
+            newrules |= _why(neg, lit, sat_.learnts.get(k), ruleStore);
+        }
+        return newrules;
+    }
+
+    private boolean _why(int neg, int lit, SatSolver.Clause cl, RuleStore ruleStore) {
+        boolean newrules = false;
+        // if the variable watches
+        if (cl._g(0) == neg || cl._g(0) == lit || cl._g(1) == neg || cl._g(1) == lit) {
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                newrules |= _why(cl._g(d), ruleStore);
+            }
+        } else
             // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated())) {
+            if (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated()) {
                 // then, look for the lit
                 int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
+                int q = cl.pos(lit);
+                if (p > -1 || q > -1) { // we found a clause where neg is in
                     for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        if (vars[var(l)].isInstantiated()) {
-                            newrules |= ruleStore.addFullDomainRule(vars[var(l)]);
-                        }
+                        newrules |= _why(cl._g(d), ruleStore);
                     }
                 }
             }
-        }
         return newrules;
+    }
+
+    private boolean _why(int l, RuleStore ruleStore) {
+        return vars[var(l)].isInstantiated() && ruleStore.addFullDomainRule(vars[var(l)]);
     }
 
 }

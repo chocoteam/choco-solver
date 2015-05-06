@@ -349,11 +349,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             v.instantiateTo(a, this);
             solver.getEngine().propagate();
             after = searchSpaceSize();
-            solver.getEnvironment().worldPop();
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
             solver.getEngine().flush();
             solver.getEnvironment().worldPop();
+            solver.getEnvironment().worldPush();
             // if the value leads to fail, then the value can be removed from the domain
             try {
                 v.removeValue(a, this);
@@ -364,6 +364,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 solver.getEngine().flush();
             }
             return 1.0d;
+        }finally {
+            solver.getEnvironment().worldPop();
         }
     }
 
