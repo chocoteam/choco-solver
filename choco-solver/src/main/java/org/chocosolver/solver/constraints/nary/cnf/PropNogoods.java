@@ -92,7 +92,7 @@ public class PropNogoods extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if(!sat_.ok_)contradiction(null, "inconsistent");
+        if (!sat_.ok_) contradiction(null, "inconsistent");
         fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
         storeEarlyDeductions();
@@ -377,7 +377,7 @@ public class PropNogoods extends Propagator<IntVar> {
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);
-                newrules |= ruleIt(l, ruleStore);
+                newrules |= _why(l, ruleStore);
             }
         }
 
@@ -386,43 +386,41 @@ public class PropNogoods extends Propagator<IntVar> {
         // we cannot rely on watches_ because is not backtrackable
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.clauses.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (litIsKnown(cl._g(0))) && litIsKnown(cl._g(1))) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        newrules |= ruleIt(l, ruleStore);
-                    }
-                }
-            }
+            newrules |= _why(neg, lit, sat_.clauses.get(k), ruleStore);
         }
         // C. learnt clauses:
         // We need to find the fully instantiated clauses where bvar appears
         // we cannot rely on watches_ because is not backtrackable
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.learnts.get(k);
-            // if the watched literals are instantiated
-            if (cl._g(0) == neg || cl._g(1) == neg
-                    || (litIsKnown(cl._g(0))) && litIsKnown(cl._g(1))) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                if (p > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        int l = cl._g(d);
-                        newrules |= ruleIt(l, ruleStore);
-                    }
-                }
-            }
+            newrules |= _why(neg, lit, sat_.learnts.get(k), ruleStore);
         }
         return newrules;
     }
 
-    private boolean ruleIt(int l, RuleStore ruleStore) {
+    private boolean _why(int neg, int lit, SatSolver.Clause cl, RuleStore ruleStore) {
+        boolean newrules = false;
+        // if the variable watches
+        if (cl._g(0) == neg || cl._g(0) == lit || cl._g(1) == neg || cl._g(1) == lit) {
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                newrules |= _why(cl._g(d), ruleStore);
+            }
+        } else
+            // if the watched literals are instantiated
+            if (litIsKnown(cl._g(0)) && litIsKnown(cl._g(1))) {
+                // then, look for the lit
+                int p = cl.pos(neg);
+                int q = cl.pos(lit);
+                if (p > -1 || q > -1) { // we found a clause where neg is in
+                    for (int d = cl.size() - 1; d >= 0; d--) {
+                        newrules |= _why(cl._g(d), ruleStore);
+                    }
+                }
+            }
+        return newrules;
+    }
+
+    private boolean _why(int l, RuleStore ruleStore) {
         int _var = var(l);
         IntVar avar = vars[lit2pos[_var]];
         int aval = lit2val[_var];

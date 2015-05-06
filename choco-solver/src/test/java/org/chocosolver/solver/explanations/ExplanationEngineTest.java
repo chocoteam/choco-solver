@@ -766,6 +766,33 @@ public class ExplanationEngineTest {
     }
 
     @Test(groups = "1s")
+    public void testClauses4() {
+        int n = 12;
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("B", n, solver);
+        SatFactory.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
+        SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
+
+        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        Explanation r = null;
+        try {
+            solver.propagate();
+            IntStrategy is = ISF.lexico_UB(bs);
+            Decision d = is.getDecision();
+            d.buildNext();
+            d.apply();
+            solver.propagate();
+            d = is.getDecision();
+            d.buildNext();
+            d.apply();
+            solver.propagate();
+        } catch (ContradictionException c) {
+            r = ee.explain(c);
+        }
+        Assert.assertNotNull(r);
+    }
+
+    @Test(groups = "1s")
     public void test01() {
         int n = 6;
         int m = 10;
