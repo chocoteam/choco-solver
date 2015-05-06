@@ -28,17 +28,20 @@
  */
 package org.chocosolver.solver.search.bind;
 
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.SetStrategyFactory;
-import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
-import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
+import org.chocosolver.solver.search.strategy.RSF;
+import org.chocosolver.solver.search.strategy.RealStrategyFactory;
+import org.chocosolver.solver.search.strategy.SSF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.*;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A search binder, which configures but not overrides, a search strategy if none is defined.
@@ -56,73 +59,119 @@ public class DefaultSearchBinder implements ISearchBinder {
         LoggerFactory.getLogger(ISearchBinder.class).warn("No search strategies defined");
         LoggerFactory.getLogger(ISearchBinder.class).warn("Set to default ones");
 
-        AbstractStrategy[] strats = new AbstractStrategy[5];
+        solver.set(getDefault(solver));
+        // + last conflict
+        solver.set(ISF.lastConflict(solver));
+    }
+
+    public AbstractStrategy[] getDefault(Solver solver) {
+        AbstractStrategy[] strats = new AbstractStrategy[4];
         int nb = 0;
 
-        // INTEGER VARIABLES DEFAULT SEARCH STRATEGY
-        IntVar[] ivars = excludeConstants(solver.retrieveIntVars());
-        if (ivars.length > 0) {
-            strats[nb++] = ISF.minDom_LB(ivars);
+        // 1. retrieve variables, keeping the declaration order, and put them in four groups:
+        // a. integer and boolean variables
+        List<IntVar> livars = new ArrayList<>();
+        // b. set variables
+        List<SetVar> lsvars = new ArrayList<>();
+        // c. real variables.
+        List<RealVar> lrvars = new ArrayList<>();
+        Variable[] variables = solver.getVars();
+        Variable objective = null;
+        int n = variables.length;
+        for (int i = 0; i < n; i++) {
+            Variable var = variables[i];
+            int type = var.getTypeAndKind();
+            if ((type & Variable.CSTE) == 0) {
+                int kind = type & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                        livars.add((IntVar) var);
+                        break;
+                    case Variable.BOOL:
+                        livars.add((BoolVar) var);
+                        break;
+                    case Variable.SET:
+                        lsvars.add((SetVar) var);
+                        break;
+                    case Variable.REAL:
+                        lrvars.add((RealVar) var);
+                        break;
+                    default:
+                        throw new SolverException("Unknown variable type '" + kind + "' while defining the default search strategy.");
+                }
+            }
+        }
+        // d. extract the objective variable if any
+        if (solver.getSearchLoop().getObjectiveManager().isOptimization()) {
+            objective = solver.getSearchLoop().getObjectiveManager().getObjective();
+            int kind = objective.getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                case Variable.BOOL:
+                    livars.remove(objective);
+                    break;
+                case Variable.SET:
+                    lsvars.remove(objective);
+                    break;
+                case Variable.REAL:
+                    lrvars.remove(objective);
+                    break;
+                default:
+                    throw new SolverException("Unknown variable type '" + kind + "' while defining the default search strategy.");
+            }
         }
 
-        // BOOLEAN VARIABLES DEFAULT SEARCH STRATEGY
-        BoolVar[] bvars = excludeConstants(solver.retrieveBoolVars());
-        if (bvars.length > 0) {
-            strats[nb++] = ISF.lexico_UB(bvars);
+        // 2. Apply
+        // INTEGER VARIABLES DEFAULT SEARCH STRATEGY
+        // a. Dom/Wdeg on integer/boolean variables
+        IntVar[] ivars = livars.toArray(new IntVar[livars.size()]);
+        if (ivars.length > 0) {
+            strats[nb++] = ISF.domOverWDeg(ivars, 0);
         }
 
         // SET VARIABLES DEFAULT SEARCH STRATEGY
-        SetVar[] svars = excludeConstants(solver.retrieveSetVars());
+        // b. MinDelta + min domain
+        SetVar[] svars = lsvars.toArray(new SetVar[lsvars.size()]);
         if (svars.length > 0) {
-            strats[nb++] = SetStrategyFactory.force_minDelta_first(svars);
+            strats[nb++] = SSF.force_minDelta_first(svars);
         }
 
         // REAL VARIABLES DEFAULT SEARCH STRATEGY
-        RealVar[] rvars = excludeConstants(solver.retrieveRealVars());
+        // c. cyclic + middle
+        RealVar[] rvars = lrvars.toArray(new RealVar[lrvars.size()]);
         if (rvars.length > 0) {
-            strats[nb] = new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle());
+            strats[nb++] = RealStrategyFactory.cyclic_middle(rvars);
+        }
+
+        // d. lexico LB/UB for the objective variable
+        if (objective != null) {
+            boolean max = solver.getSearchLoop().getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
+            int kind = objective.getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                case Variable.BOOL:
+                    if (max) {
+                        strats[nb] = ISF.minDom_UB((IntVar) objective);
+                    } else {
+                        strats[nb] = ISF.minDom_LB((IntVar) objective);
+                    }
+                    break;
+                case Variable.REAL:
+                    if (max) {
+                        strats[nb] = RSF.custom(RealStrategyFactory.cyclic(), RSF.max_value_selector(), (RealVar) objective);
+                    } else {
+                        strats[nb] = RSF.custom(RealStrategyFactory.cyclic(), RSF.min_value_selector(), (RealVar) objective);
+                    }
+                    break;
+                default:
+                    throw new SolverException("Unknown variable type '" + kind + "' while defining the default search strategy.");
+            }
         }
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            solver.set(ISF.minDom_LB(solver.ONE));
-        } else {
-            solver.set(Arrays.copyOf(strats, nb));
+            strats[nb++] = ISF.minDom_LB(solver.ONE);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <V extends Variable> V[] excludeConstants(V[] vars) {
-        int nb = 0;
-        for (V v : vars) {
-            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                nb++;
-            }
-        }
-        if (nb == vars.length) return vars;
-        V[] noCsts;
-        switch (vars[0].getTypeAndKind() & Variable.KIND) {
-            case Variable.BOOL:
-                noCsts = (V[]) new BoolVar[nb];
-                break;
-            case Variable.INT:
-                noCsts = (V[]) new IntVar[nb];
-                break;
-            case Variable.SET:
-                noCsts = (V[]) new SetVar[nb];
-                break;
-            case Variable.REAL:
-                noCsts = (V[]) new RealVar[nb];
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-        nb = 0;
-        for (V v : vars) {
-            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                noCsts[nb++] = v;
-            }
-        }
-        return noCsts;
+        return Arrays.copyOf(strats, nb);
     }
 }

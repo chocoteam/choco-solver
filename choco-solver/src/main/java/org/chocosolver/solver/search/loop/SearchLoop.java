@@ -33,6 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
@@ -41,6 +42,7 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,6 +138,10 @@ public class SearchLoop implements ISearchLoop {
     private boolean alive;
 
     public Decision decision = ROOT;
+
+    protected boolean defaultSearch = false;
+
+    protected boolean completeSearch = false;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -330,9 +336,17 @@ public class SearchLoop implements ISearchLoop {
         this.env.worldPush(); // store another time for restart purpose: w = 2 -> 3
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
+            defaultSearch = true;
             ISearchBinder binder = solver.getSettings().getSearchBinder();
             binder.configureSearch(solver);
         }
+        if (completeSearch && !defaultSearch) {
+            AbstractStrategy<Variable> declared = strategy;
+            DefaultSearchBinder dbinder = new DefaultSearchBinder();
+            AbstractStrategy[] complete = dbinder.getDefault(solver);
+            solver.set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
+        }
+
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
         } catch (ContradictionException cex) {
@@ -555,5 +569,20 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public int getSearchWorldIndex() {
         return searchWorldIndex;
+    }
+
+    @Override
+    public void makeCompleteStrategy(boolean isComplete) {
+        this.completeSearch = isComplete;
+    }
+
+    @Override
+    public boolean isDefaultSearchUsed() {
+        return defaultSearch;
+    }
+
+    @Override
+    public boolean isSearchCompleted() {
+        return completeSearch;
     }
 }

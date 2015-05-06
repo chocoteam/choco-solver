@@ -277,7 +277,7 @@ A search strategy performs a performs a `Depth First Search <http://en.wikipedia
 A decision involves a variables, a value and an operator, for instance :math:`x = 5`.
 Decisions are computed and applied until all the variables are instantiated, that is, a solution is found, or a failure has been detected.
 
- Choco|release| build a binary search tree: each decision can be refuted.
+ Choco |release| build a binary search tree: each decision can be refuted.
  When a decision has to be computed, the search strategy is called to provide one, for instance :math:`x = 5`.
  The decision is then applied, the variable, the domain of ``x`` is reduced to ``5``, and the decision is validated thanks to the propagation.
  If the application of the decision leads to a failure, the search backtracks and the decision is refuted (:math:`x \neq 5`) and validated through propagation.
@@ -355,7 +355,8 @@ Available variable selectors
 
     For set variables
 
-See ``solver.search.strategy.selectors.variables.MaxDelta``, ``solver.search.strategy.selectors.variables.MinDelta``.
+See ``solver.search.strategy.selectors.variables.MaxDelta``,
+    ``solver.search.strategy.selectors.variables.MinDelta``.
 
     For real variables
 
@@ -379,7 +380,9 @@ See ``solver.search.strategy.selectors.values.SetDomainMin``.
 
     For real variables
 
-See ``solver.search.strategy.selectors.values.RealDomainMiddle``.
+See ``solver.search.strategy.selectors.values.RealDomainMiddle``,
+    ``solver.search.strategy.selectors.values.RealDomainMin``
+    ``solver.search.strategy.selectors.values.RealDomainMax``.
 
 Available decision operators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -444,16 +447,17 @@ Default search strategies
 
 If no search strategy is specified in the model, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
 In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
-The default search strategy distincts variables per types and defines a specific search strategy per each type:
+The default search strategy distinguishes variables per types and defines a specific search strategy per each type, sequentially applied:
 
-#. integer variables (but boolean variables: ``IntStrategyFactory.minDom_LB(ivars)``
-#. boolean variables: :code:`IntStrategyFactory.lexico_UB(bvars)`
+#. integer variables and boolean variables : ``IntStrategyFactory.domOverWDeg(ivars, 0)``
 #. set variables: :code:`SetStrategyFactory.force_minDelta_first(svars)`
-#. real variables :code:`new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle())`
+#. real variables :code:`RealStrategyFactory.cyclic_middle(rvars)`
+#. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
 
-Constants are excluded from search strategies' variable scope.
+Note that `ISF.lastConflict(solver)` is also plugged-in.
+Constants are excluded from search strategies' variable scope and the creation order is maintained per types.
 
-``IntStrategyFactory``, ``SetStrategyFactory`` and ``GraphStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
+``IntStrategyFactory``, ``SetStrategyFactory`` and ``RealStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
 
 
 .. _31_searchbinder:
