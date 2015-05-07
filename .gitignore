@@ -11,5 +11,8 @@ out/*
 
 */mysql.properties
 */logback-test.xml
+*/database.ini
+*/__pycache__/*
+
 
 dependency-reduced-pom.xml
