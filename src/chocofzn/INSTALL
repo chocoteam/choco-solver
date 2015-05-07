@@ -1,0 +1,8 @@
+Evaluated on Python3.4.
+
+Required libraries:
+
+. PyMySQL (0.6.6): https://github.com/PyMySQL/PyMySQL`
+. cython (0.22): https://github.com/cython/cython
+. NumPy (1.9.2): https://github.com/numpy/numpy
+. PyLaTeX (0.6.1): https://github.com/JelteF/PyLaTeX
