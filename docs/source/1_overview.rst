@@ -32,52 +32,76 @@ while taking advantage of the benefits they offer in terms of efficiency.
 What is Choco ?
 ===============
 
-Choco is a Free and Open-Source Software [#f1]_ dedicated to Constraint Programming.
-It aims at describing real combinatorial problems in the form of Constraint Satisfaction Problems and to solve them with Constraint Programming techniques.
+Choco is a Free and Open-Source Software dedicated to Constraint Programming.
+It is written in Java, under `BSD <http://opensource.org/licenses/BSD-3-Clause>`_ license.
+It aims at describing real combinatorial problems in the form of Constraint Satisfaction Problems and
+solving them with Constraint Programming techniques.
 
 Choco is used for:
 
-- teaching (a user-oriented constraint solver with open-source code)
-- research (state-of-the-art algorithms and techniques, user-defined constraints, domains and variables)
-- real-life applications (an efficient, reliable and free software with a support team)
+- teaching : easy to use
+- research : easy to extend
+- real-life applications : easy to integrate
 
-Choco is easy to manipulate, that’s why it is widely used for teaching. And Choco is also efficient, and we are proud to count industrial users too.
+Choco is among the fastest CP solvers on the market.
+In 2013 and 2014, Choco has been awarded two silver medals and three bronze medals
+at the MiniZinc challenge that is the world-wide competition of constraint-programming solvers.
 
-Choco is developed with `Intellij IDEA <http://www.jetbrains.com/idea/features/code_analysis.html>`_ and `JProfiler <http://www.ej-technologies.com/products/jprofiler/overview.html>`_.
+In addition to these performance results, Choco benefits from academic contributors, who provide
+support and long term improvements, and the consulting company `COSLING <http://www.cosling.com>`_, which
+provides services ranging from training to the development and the integration of CP models into larger applications.
 
-.. [#f1] Choco is distributed under `BSD <http://opensource.org/licenses/BSD-3-Clause>`_ license (Copyright(c) 1999-2014, Ecole des Mines de Nantes).
+Choco official website is: `<http://www.choco-solver.org>`_
 
+Technical overview
+==================
 
-Choco is one of the few Java libraries for constraint programming.
-The first version dates from the early 2000s, Choco is one of the forerunners among the free solvers - Choco written under `BSD <http://opensource.org/licenses/BSD-3-Clause>`_ license.
-Maintenance and development tools are provided by the members of INRIA TASC team,
-especially by Charles Prud'homme and Jean-Guillaume Fages [#f2]_.
-The latest version is Choco |version|.
-
-Choco |version| is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
-The source code of choco-solver-|release| is hosted on **GitHub** (`<https://github.com/chocoteam/choco3>`_).
-Complementary information can be found on the webiste of Choco: `<http://www.choco-solver.org>`_.
-Choco |version| comes with:
+Choco |version| includes:
 
 - various type of variables (integer, boolean, set and real),
 - various state-of-the-art constraints (alldifferent, count, nvalues, etc.),
-- various search strategies, from basic ones (first_fail, smallest, etc.) to most complex (impact-based and activity-based search),
+- various search strategies, from basic ones to most complex (impact-based and activity-based search),
 - explanation-based engine, that enables conflict-based back jumping, dynamic backtracking and path repair,
 
-But also, a FlatZinc parser, facilities to interact with the search loop, factories to help modeling, many samples, Choco-Ibex interface, etc.
+But also facilities to interact with the search loop, factories to help modeling, many samples, an interface to Ibex, etc.
+The source code of choco-solver-|version| is hosted on `GitHub <https://github.com/chocoteam/choco3>`_.
 
-An overview of the features of Choco |version| can be found in the presentation made in the `"CP Solvers: Modeling, Applications, Integration, and Standardization" <http://www.choco-solver.org/sites/materials/cpsol2013_talk.pdf>`_ workshop of CP2013.
+Choco also has many `extensions <http://choco-solver.org/?q=extensions>`_,
+including a FlatZinc parser to solve minizinc instances
+and a graph variable module to better solve graph problems such as the TSP.
+
+An overview of the features of Choco |version| may also be found in the presentation made in the
+`"CP Solvers: Modeling, Applications, Integration, and Standardization" <http://www.choco-solver.org/sites/materials/cpsol2013_talk.pdf>`_ workshop of CP2013.
+
+History
+=======
+
+The first version of Choco dates from the early 2000s.
+A few years later, Choco 2 has encountered a great success in both the academic and the industrial world.
+For maintenance issue, Choco has been completely rewritten in 2011, leading to Choco 3.
+The first beta version of Choco 3 has been released in 2012.
+The latest version is Choco |release|.
+
+
+How to get support ?
+====================
 
 A `forum <http://www.choco-solver.org/?q=Forum>`_ is available on the website of Choco.
-A support mailing list is also available: choco3-support@mines-nantes.fr.
+It is dedicated to technical questions about the Choco solver and basic modeling helps.
+If you encounter any bug or would like some features to be added, please feel free to
+open a discussion on the forum.
+You can also use the following support mailing list: choco3-support@mines-nantes.fr.
+As can be seen on the Choco website, most support requests are answered very fast.
+However, this free service is provided with no guarantee.
 
-.. [#f2] A complete list of contributors can be found on the website of Choco, team page.
+If you want an expert to build a CP model for your application
+or if you need professional support, please contact `COSLING <http://www.cosling.com>`_.
 
 
 How to cite Choco ?
 ===================
 
-A reference to this manual, or more globally to Choco |version|, is made like this:
+A reference to this manual, or more generally to Choco |version|, is made like this:
 
 .. code-block:: none
 
@@ -86,12 +110,12 @@ A reference to this manual, or more globally to Choco |version|, is made like th
       title         = {Choco3 Documentation},
       year          = {2014},
       organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241, COSLING S.A.S.},
-      timestamp     = {Thu, 02 Oct 2014},
+      timestamp     = {Thu, 11 May 2015},
       url           = {http://www.choco-solver.org },
     }
 
-Who contribute to Choco ?
-=========================
+Who contributes to Choco ?
+==========================
 
 +------------------------------------+-----------------------------------------------------------------------------------------------------------+
 |**Core developers**                 |  Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241) and Jean-Guillaume Fages (COSLING S.A.S.).   |
@@ -107,6 +131,10 @@ Who contribute to Choco ?
 
 If you want to contribute, let us know.
 
+Choco is developed with `Intellij IDEA <http://www.jetbrains.com/idea/features/code_analysis.html>`_
+and `JProfiler <http://www.ej-technologies.com/products/jprofiler/overview.html>`_, that are kindly provided for free.
+
+
 ***************
 Getting started
 ***************
@@ -116,7 +144,7 @@ Installing Choco |version|
 
 Choco |version| is a java library based on `Java 8 <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_.
 The main library is named ``choco-solver`` and can be seen as the core library.
-Some extensions are also provided, such as ``choco-parsers`` or ``choco-cpviz``, and rely on but not include ``choco-solver``.
+Some extensions are also provided, such as ``choco-parsers`` or ``choco-cpviz``, and rely on but do not include ``choco-solver``.
 
 Which jar to select ?
 ---------------------
@@ -390,10 +418,14 @@ Fixed-value integer variables should be created with the specific ``VF.fixed(int
 Constraints
 -----------
 
-Several constraint factories ease the creation of constraints: ``LogicalConstraintFactory`` (``LCF``), ``IntConstraintFactory`` (``ICF``), ``SetConstraintsFactory`` (``SCF``) and ``GraphConstraintFactory`` (``GCF``).
+Several constraint factories ease the creation of constraints: ``LogicalConstraintFactory`` (``LCF``),
+``IntConstraintFactory`` (``ICF``) and ``SetConstraintsFactory`` (``SCF``).
+
 ``RealConstraint`` is created with a call to new and to ``addFunction`` method. It requires the `Ibex <http://www.ibex-lib.org/>`_ solver.
-Constraints hold once posted: ``solver.post(c);``.
-Reified constraints should not be posted.
+
+**Constraints hold once posted**: ``solver.post(c);``
+
+**Reified constraints should not be posted**.
 
 :ref:`[Constraints] <23_constraints_label>`
 
@@ -401,7 +433,7 @@ Search
 ------
 
 Defining a specific way to traverse the search space is made thanks to: ``solver.set(AbstractStrategy)``.
-Predefined strategies are available in ``IntStrategyFactory`` (``ISF``), ``SetStrategyFactory`` and ``GraphStrategyFactory``.
+Predefined strategies are available in ``IntStrategyFactory`` (``ISF``), ``SetStrategyFactory`` and ``RealStrategyFactory``.
 
 Large Neighborhood Search (LNS)
 -------------------------------
@@ -413,7 +445,7 @@ Monitors
 
 An ``ISearchMonitor`` is a callback which enables to react on some resolution events (failure, branching, restarts, solutions, etc.).
 ``SearchMonitorFactory`` (``SMF``) lists most useful monitors.
-User-defined monitors can be added with ``solver.plugSearchMonitor(...)``.
+User-defined monitors can be added with ``solver.plugMonitor(...)``.
 
 Limits
 ------

@@ -45,8 +45,9 @@ alldifferent
 The `alldifferent` constraints involves two or more integer variables `VARS` and holds that all variables from `VARS` take a different value.
 A signature offers the possibility to specify the filtering algorithm to use:
 
-- ``"BC"``: filters on bounds only, based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint", A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek.
-- ``"AC"``: filters on the entire domain of the variables. It uses Regin algorithm; it runs in `O(m.n)` worst case time for the initial propagation and then in `O(n+m)` time per arc removed from the support.
+- ``"BC"``: filters on bounds only, based on :cite:`Lopez-OrtizQTB03`.
+- ``"AC"``: filters on the entire domain of the variables, based on :cite:`Regin94`. It runs in `O(m.n)`
+worst case time for the initial propagation. The average runtime of further propagations is `O(n+m)`.
 - ``"DEFAULT"``: uses ``"BC"`` plus a probabilistic ``"AC"`` propagator to get a compromise between ``"BC"`` and ``"AC"``.
 
 **See also**: `alldifferent <http://sofdem.github.io/gccat/gccat/Calldifferent.html>`_ in the Global Constraint Catalog.
@@ -95,7 +96,7 @@ One can force the `AC` algorithm to be used by calling the second signature.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples.java
           :language: java
-          :lines: 254-256,258
+          :lines: 244-249,258
           :emphasize-lines: 256
           :linenos:
 
@@ -271,17 +272,18 @@ The `atmost_nvalues` constraint involves:
 
 - an array of integer variables `VARS`,
 - an integer variable `NVALUES` and
-- a boolean `GREEDY`.
+- a boolean `STRONG`.
 
 Let `N` be the number of distinct values assigned to the variables of the `VARS` collection.
 The constraint enforces the condition `N` :math:`\leq` `NVALUES` to hold.
-The boolean `GREEDY` set to true filters the conjunction of `atmost_nvalues` and disequalities (see Fages and Lapègue, CP'13 or Artificial Intelligence journal).
-It automatically detects disequalities and `alldifferent` constraints. Presumably useful when `NVALUES` must be minimized
 
+If the boolean `STRONG` is set to true, then the filtering algorithm of :cite:`FagesAIJ14` is added.
+It automatically detects disequalities and `alldifferent` constraints.
+This propagator is more powerful but more time consuming as well. this is presumably worthwhile when `NVALUES` must be minimized
 
 **See also**: `atmost_nvalues <http://sofdem.github.io/gccat/gccat/Catmost_nvalue.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: :cite:`FagesAIJ14`.
 
 **API**:  ::
 
@@ -460,23 +462,23 @@ The `circuit` constraint involves:
  - a configuration `CONF`.
 
 It ensures that the elements of `VARS` define a covering circuit where `VARS` [i] = `OFFSET` + `j` means that `j` is the successor of `i`.
-The filtering algorithms are:
 
-- subtour elimination,
-- `alldifferent`,
-- dominator-based,
-- and strongly connected components based filtering.
+The filtering algorithms are the subtour elimination of :cite:`CaseauL97` (constant-time per propagation) and the `alldifferent` GAC filtering of :cite:`Regin94`.
+In addition, depending on `CONF`, the dominator filtering of the tree (GAC) constraint :cite:`FagesL11`
+and the strongly connected components filtering of the path constraint :cite:`Cambazard04,FagesCoRR12` may be added through a dynamical circuit/path transformation.
 
 The `CONF` is a defined by an ``enum``:
 
-- ``CircuitConf.LIGHT``:
-- ``CircuitConf.FIRST``:
-- ``CircuitConf.RD``:
-- ``CircuitConf.ALL``:
+- ``CircuitConf.LIGHT``:  no circuit/path transformation
+- ``CircuitConf.FIRST``: circuit/path transformation by duplicating the first node
+- ``CircuitConf.RD``: circuit/path transformation by duplicating a random node
+- ``CircuitConf.ALL``: circuit/path transformation by duplicating every node
+
+This implementation is detailed in :cite:`FagesPhD`
 
 **See also**: `circuit <http://sofdem.github.io/gccat/gccat/Ccircuit.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: :cite:`Regin94,CaseauL97,Cambazard04,FagesCoRR12,FagesL11,FagesPhD`.
 
 **API**:  ::
 
@@ -562,8 +564,6 @@ An alternate signature enables `VALUE` to be an integer variable.
 
 **See also**: `count <http://sofdem.github.io/gccat/gccat/Ccount.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
-
 **API**:  ::
 
     Constraint count(int VALUE, IntVar[] VARS, IntVar LIMIT)
@@ -594,14 +594,13 @@ The `cumulative` constraints involves:
  - an array of task object `TASKS`,
  - an array of integer variable `HEIGHTS`,
  - an integer variable `CAPACITY` and
- - a boolean `INCREMENTAL`.
+ - a boolean `INCREMENTAL` (graph-based self-decomposition of :cite:`FagesECAI14`).
 
-It ensures that at each point of the time the cumulated height of the set of tasks that overlap that point does not exceed the given capacity.
-
+It ensures that at each point of the time the cumulative height of the set of tasks that overlap that point does not exceed the given capacity.
 
 **See also**: `cumulative <http://sofdem.github.io/gccat/gccat/Ccumulative.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: :cite:`FagesECAI14`.
 
 **API**:  ::
 
@@ -639,7 +638,7 @@ The option `USE_CUMUL`, recommended, indicates whether or not redundant `cumulat
 
 **See also**: `diffn <http://sofdem.github.io/gccat/gccat/Cdiffn.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: :cite:`FagesECAI14`.
 
 **API**:  ::
 
@@ -736,8 +735,6 @@ The `element` constraint ensures that `VALUE` = `TABLE` [`INDEX` - `OFFSET`]. `O
 
 **See also**: `element <http://sofdem.github.io/gccat/gccat/Celement.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
-
 **API**:  ::
 
     Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX)
@@ -810,11 +807,9 @@ The `global_cardinality` constraint involves:
 It ensures that each value `VALUES[i]` is taken by exactly `OCCURRENCES[i]` variables in `VARS`.
 The boolean `CLOSED` set to `true` restricts the domain of `VARS` to the values defined in `VALUES`.
 
-*The underlying propagator does not ensure a well-defined level of consistency, yet*.
+*The underlying propagator does not ensure any well-defined level of consistency*.
 
 **See also**: `global_cardinality <http://sofdem.github.io/gccat/gccat/Cglobal_cardinality.html>`_ in the Global Constraint Catalog.
-
-**Implementation based on**: :cite:`tbd`.
 
 **API**:  ::
 
@@ -1304,7 +1299,7 @@ This constraint is not a built-in constraint and is based on various propagators
 
 **See also**: `nvalues <http://sofdem.github.io/gccat/gccat/Cnvalues.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: `atleast_nvalues` and `atmost_nvalues`.
 
 **API**:  ::
 
@@ -1339,11 +1334,12 @@ The `path` constraint involves:
 It ensures that the elements of `VARS` define a covering path from `START` to `END`,
 where `VARS[i] = OFFSET + j` means that `j` is the successor of `i`.
 Moreover, `VARS[END-OFFSET]` = \|`VARS` \|+ `OFFSET`.
+
 The constraint relies on the `circuit` propagators.
 
 **See also**: `path <http://sofdem.github.io/gccat/gccat/Cpath.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: `circuit`.
 
 **API**:  ::
 
@@ -1381,8 +1377,10 @@ There are various ways to declare the automaton:
 - create a ``FiniteAutomaton`` and add states, initial and final ones and transitions (see ``FiniteAutomaton`` API for more details),
 - create a ``FiniteAutomaton`` with a regexp as argument.
 
+**Beware**: ``FiniteAutomaton`` only handles values between 0 and 65535, because it relies on ``java.Character``.
 
 **Implementation based on**: :cite:`Pesant04`.
+
 **API**:  ::
 
     Constraint regular(IntVar[] VARS, IAutomaton AUTOMATON)
@@ -1522,6 +1520,8 @@ It ensures that the elements of `VARS` define a single circuit of `SUBCIRCUIT_SI
 
 It also ensures that \| `{VARS[i]` :math:`\neq` `OFFSET+i}` \| = `SUBCIRCUIT_SIZE`.
 
+**Implementation based on**: `circuit`.
+
 **API**:  ::
 
     Constraint subcircuit(IntVar[] VARS, int OFFSET, IntVar SUBCIRCUIT_SIZE)
@@ -1563,7 +1563,7 @@ Moreover, `VARS[END-OFFSET]` = \| `VARS` \| +`OFFSET`.
 
 **See also**: `subpath <http://sofdem.github.io/gccat/gccat/Cpath_from_to.html>`_ in the Global Constraint Catalog.
 
-**Implementation based on**: :cite:`tbd`.
+**Implementation based on**: `path, circuit`.
 
 **API**:  ::
 
@@ -1774,6 +1774,9 @@ It formulates the Travelling Salesman Problem: the variables `SUCCS` form a hami
 Going from `i` to `j`, `SUCCS[i] = j`, costs `COST_MATRIX[i][j]`.
 
 This constraint is not a built-in constraint and is based on various propagators.
+
+The filtering power of this constraint remains limited. For stronger filtering, use the `choco-graph` extension
+(https://github.com/chocoteam/choco-graph/releases/tag/choco-graph-3.2.1) which includes powerful cost-based filtering.
 
 
 **API**:  ::

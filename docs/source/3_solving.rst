@@ -500,9 +500,11 @@ When an environment is given in parameter, the last active strategy is stored.
 
     IntStrategyFactory.sequencer(AbstractStrategy... strategies)
 
-    new StrategiesSequencer(AbstractStrategy... strategies)
-    new StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies)
+Note that a strategy sequencer is automatically generated when setting multiple strategies at the same time:
 
+``solver.set(strategy1,strategy2);`` is equivalent to
+
+``solver.set(ISF.sequencer(strategy1,strategy2));``
 
 Finally, one can create its own strategy, see :ref:`Defining its own search <45_define_search_label>` for more details.
 
@@ -594,7 +596,7 @@ Resolution statistics
 
 Choco |version| distinguishes *developer trace* and *user trace*.
 *Developer trace* is only dedicated to developers for debugging purpose (Choco depends on SLF4J, as described in :ref:`Note about logging <1_log>`).
-*User trace* is dedicated to users (and developers) to print information relative to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
+*User trace* is dedicated to users (and developers) to print information related to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
 
 Resolution data are available thanks to the ``Chatterbox`` class, which outputs to ``System.out``.
 It centralises widely used methods to have comprehensive feedbacks about the resolution process.

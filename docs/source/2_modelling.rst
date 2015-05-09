@@ -242,7 +242,7 @@ To create a matrix of 5x6 enumerated variables with same domains: ::
 .. admonition:: **Modelling**: Bounded or Enumerated?
 
     The choice of representation of the domain variables should not be done lightly.
-    Not only the memory consumption should be considered but also the type of constraints used.
+    Not only the memory consumption should be considered but also the used constraints.
     Indeed, some constraints only update bounds of integer variables, using them with bounded variables is enough.
     Others make holes in variables' domain, using them with enumerated variables takes advantage of the *power* of the filtering algorithm.
     Most of the time, variables are associated with propagators of various *power*.
@@ -618,10 +618,12 @@ The second API ``constraint.reifyWith(b)`` reify the constraint with the given v
 
     A constraint is reified with only one boolean variable. If multiple reification are required, equality constraints will be created.
 
-
-Reifying a constraint means that we allow the constraint not to be satisfied. Therefore, the constraint **should not** be posted.
-
 The ``LogicalConstraintFactory`` enables to manipulate constraints through their reification.
+
+Reifying a constraint means that we allow the constraint not to be satisfied. Therefore, the reified constraint **should not** be posted.
+Only the reifying constraint should be posted. Note also that, for performance reasons, some reifying constraints available
+in the ``LogicalConstraintFactory`` are **automatically posted** (the factory method returns void).
+
 For instance, we can represent the constraint "either ``x<0`` or ``y>42``" as the following: ::
 
  Constraint a = IntConstraintFactory.arithm(x,"<",0);
@@ -632,6 +634,15 @@ For instance, we can represent the constraint "either ``x<0`` or ``y>42``" as th
 This will actually reify both constraints ``a`` and ``b`` and say that at least one of the corresponding boolean variables must be true.
 Note that only the constraint ``c`` is posted.
 
+As a second reification example, let us consider "if ``x<0`` then ``y>42``": ::
+
+ Constraint a = IntConstraintFactory.arithm(x,"<",0);
+ Constraint b = IntConstraintFactory.arithm(y,">",42);
+ LogicalConstraintFactory.ifThen(a,b);
+
+This time the ``LogicalConstraintFactory.ifThen`` returns void, meaning that the constraint is automatically posted.
+If one really needs to access an ``ifThen`` ``Constraint`` object, then the ``LogicalConstraintFactory.ifThen_reifiable``
+method should be used instead.
 
 SAT constraints
 ---------------

@@ -473,21 +473,6 @@ public class IntConstraintFactory {
     /**
      * Ensures that all variables from VARS take a different value.
      * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
-     * <p>
-     * <b>BC</b>:
-     * <br/>
-     * Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
-     * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
-     * <p>
-     * <b>AC</b>:
-     * <br/>
-     * Uses Regin algorithm
-     * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
-     * per arc removed from the support.
-     * <p>
-     * <b>DEFAULT</b>:
-     * <br/>
-     * Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      *
      * @param VARS        list of variables
      * @param CONSISTENCY consistency level, among {"BC", "AC"}
@@ -498,8 +483,7 @@ public class IntConstraintFactory {
      *                    <br/>
      *                    <b>AC</b>:
      *                    Uses Regin algorithm
-     *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
-     *                    per arc removed from the support.
+     *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) on average.
      *                    <p>
      *                    <b>DEFAULT</b>:
      *                    <br/>
@@ -593,14 +577,14 @@ public class IntConstraintFactory {
      *
      * @param VARS    collection of variables
      * @param NVALUES limit variable
-     * @param GREEDY  "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
-     *                (see Fages and Lap&egrave;gue, CP'13 or Artificial Intelligence journal)
+     * @param STRONG  "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
+     *                (see Fages and Lap&egrave;gue Artificial Intelligence 2014)
      *                automatically detects disequalities and alldifferent constraints.
      *                Presumably useful when NVALUES must be minimized.
      */
-    public static Constraint atmost_nvalues(IntVar[] VARS, IntVar NVALUES, boolean GREEDY) {
+    public static Constraint atmost_nvalues(IntVar[] VARS, IntVar NVALUES, boolean STRONG) {
         TIntArrayList vals = getDomainUnion(VARS);
-        if (GREEDY) {
+        if (STRONG) {
             Gci gci = new Gci(VARS, new AutoDiffDetection(VARS));
             R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver())};
             return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES),
@@ -704,7 +688,8 @@ public class IntConstraintFactory {
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
-     * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+     * <p/> Strongly Connected Components based filtering (Cambazard & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+	 * <p/> See Fages PhD Thesis (2014) for more information
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
