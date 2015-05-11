@@ -375,7 +375,7 @@ Here is a short example which illustrates the main steps of a CSP modeling and r
 
 .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/Overview.java
       :language: java
-      :lines: 45-57
+      :lines: 47-59
       :linenos:
 
 

@@ -2243,8 +2243,7 @@ A complete list is available in the documentation of IBEX.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/RealConstraintExamples.java
           :language: java
-          :lines: 48-57,59
-          :emphasize-lines: 57
+          :lines: 50-59,61
           :linenos:
 
 
@@ -2330,8 +2329,8 @@ Add a clause to the SAT constraint whic states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 48-50,52
-          :emphasize-lines: 50
+          :lines: 50-52,54
+          :emphasize-lines: 52
           :linenos:
 
     Some solutions of the problem are :
@@ -2359,8 +2358,8 @@ Add a clause to the SAT constraint whic states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 57-59,61
-          :emphasize-lines: 59
+          :lines: 59-61,63
+          :emphasize-lines: 61
           :linenos:
 
     The solutions of the problem are :
@@ -2387,8 +2386,8 @@ Add a clause to the SAT constraint whic states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 66-68,70
-          :emphasize-lines: 68
+          :lines: 68-70,72
+          :emphasize-lines: 70
           :linenos:
 
     Some solutions of the problem are :
@@ -2415,8 +2414,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 179-182,184
-          :emphasize-lines: 182
+          :lines: 181-184,186
+          :emphasize-lines: 184
           :linenos:
 
     Some solutions of the problem are :
@@ -2442,8 +2441,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 84-88,90
-          :emphasize-lines: 88
+          :lines: 86-90,92
+          :emphasize-lines: 90
           :linenos:
 
     The solutions of the problem are :
@@ -2468,8 +2467,8 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 95-98,100
-          :emphasize-lines: 98
+          :lines: 97-100,102
+          :emphasize-lines: 100
           :linenos:
 
     The solutions of the problem are :
@@ -2493,8 +2492,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 105-109,111
-          :emphasize-lines: 109
+          :lines: 107-111,113
+          :emphasize-lines: 111
           :linenos:
 
     The solutions of the problem are :
@@ -2522,8 +2521,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 116-120,122
-          :emphasize-lines: 120
+          :lines: 118-122,124
+          :emphasize-lines: 122
           :linenos:
 
     The solutions of the problem are :
@@ -2549,8 +2548,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 127-131,133
-          :emphasize-lines: 131
+          :lines: 129-133,135
+          :emphasize-lines: 133
           :linenos:
 
     The solutions of the problem are :
@@ -2576,8 +2575,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 138-142,144
-          :emphasize-lines: 142
+          :lines: 140-144,146
+          :emphasize-lines: 144
           :linenos:
 
     The solutions of the problem are :
@@ -2603,8 +2602,8 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 149-152,154
-          :emphasize-lines: 152
+          :lines: 151-154,156
+          :emphasize-lines: 154
           :linenos:
 
     The solutions of the problem are :
@@ -2628,8 +2627,8 @@ Add a clause to the SAT constraint which states that the boolean variable `LEFT`
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 159-162,164
-          :emphasize-lines: 162
+          :lines: 161-163,166
+          :emphasize-lines: 164
           :linenos:
 
     The solutions of the problem are :
@@ -2651,8 +2650,8 @@ Add a clause to the SAT constraint which states that the two boolean variables `
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 149-152,154
-          :emphasize-lines: 152
+          :lines: 151-153,156
+          :emphasize-lines: 154
           :linenos:
 
     The solutions of the problem are :
@@ -2676,8 +2675,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 75-77,79
-          :emphasize-lines: 77
+          :lines: 77-79,81
+          :emphasize-lines: 79
           :linenos:
 
     Some solutions of the problem are :
@@ -2704,8 +2703,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 189-192,194
-          :emphasize-lines: 192
+          :lines: 191-194,196
+          :emphasize-lines: 194
           :linenos:
 
     Some solutions of the problem are :
@@ -2732,8 +2731,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 199-203,205
-          :emphasize-lines: 203
+          :lines: 201-205,207
+          :emphasize-lines: 205
           :linenos:
 
     The solutions of the problem are :
@@ -2759,8 +2758,8 @@ Add a clause to the SAT constraint which states that:
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 210-214,216
-          :emphasize-lines: 214
+          :lines: 212-216,218
+          :emphasize-lines: 216
           :linenos:
 
     The solutions of the problem are :
@@ -2796,8 +2795,8 @@ The two methods add a clause to the SAT constraint.
 
             .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
                   :language: java
-                  :lines: 221-228,230
-                  :emphasize-lines: 226-228
+                  :lines: 223-230,232
+                  :emphasize-lines: 228-230
                   :linenos:
 
             Some solutions of the problem are :
@@ -2811,8 +2810,8 @@ The two methods add a clause to the SAT constraint.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 235-240,242
-          :emphasize-lines: 240
+          :lines: 237-242,244
+          :emphasize-lines: 242
           :linenos:
 
     Some solutions of the problem are :
@@ -2837,8 +2836,8 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 247-249,251
-          :emphasize-lines: 249
+          :lines: 249-251,253
+          :emphasize-lines: 251
           :linenos:
 
     The solution of the problem is :
@@ -2862,8 +2861,8 @@ maximum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 256-259,261
-          :emphasize-lines: 259
+          :lines: 258-261,263
+          :emphasize-lines: 261
           :linenos:
 
     Some solutions of the problem are :
@@ -2891,8 +2890,8 @@ sum(`BOOLVARS`:math:`_i`) :math:`\geq` `TARGET`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 266-269,271
-          :emphasize-lines: 269
+          :lines: 268-271,273
+          :emphasize-lines: 271
           :linenos:
 
     Some solutions of the problem are :
@@ -2919,8 +2918,8 @@ sum(`BOOLVARS`:math:`_i`) :math:`\leq` `TARGET`.
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 276-279,281
-          :emphasize-lines: 279
+          :lines: 278-281,283
+          :emphasize-lines: 281
           :linenos:
 
     Some solutions of the problem are :
@@ -2945,8 +2944,8 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
     .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/SatConstraintExamples.java
           :language: java
-          :lines: 286-288,290
-          :emphasize-lines: 288
+          :lines: 288-290,292
+          :emphasize-lines: 290
           :linenos:
 
     The solution of the problem is :
