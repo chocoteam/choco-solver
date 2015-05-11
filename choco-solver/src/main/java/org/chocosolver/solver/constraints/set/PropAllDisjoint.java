@@ -74,10 +74,13 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> {
-            for (int i = 0; i < n; i++) {
-                if (i != currentSet) {
-                    vars[i].removeFromEnvelope(element, aCause);
+        elementForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < n; i++) {
+                    if (i != currentSet) {
+                        vars[i].removeFromEnvelope(element, aCause);
+                    }
                 }
             }
         };

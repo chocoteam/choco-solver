@@ -76,9 +76,12 @@ public class DivTest extends AbstractTernaryTest {
             s.post(ICF.eucl_div(a, b, c));
             s.set(ISF.random_value(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
-            s.plugMonitor((IMonitorSolution) () -> {
-                if (!ESat.TRUE.equals(s.isSatisfied())) {
-                    throw new Error(s.toString());
+            s.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+                @Override
+                public void onSolution() {
+                    if (!ESat.TRUE.equals(s.isSatisfied())) {
+                        throw new Error(s.toString());
+                    }
                 }
             });
             s.findAllSolutions();

@@ -82,7 +82,12 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
         this.set = (SetVar) vars[0];
         this.iv = (IntVar) vars[1];
         this.sdm = set.monitorDelta(this);
-        elemRem = i -> iv.removeValue(i, aCause);
+        elemRem = new IntProcedure() {
+            @Override
+            public void execute(int i) throws ContradictionException {
+                iv.removeValue(i, aCause);
+            }
+        };
     }
 
     //***********************************************************************************

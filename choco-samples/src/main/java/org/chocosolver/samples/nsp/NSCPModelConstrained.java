@@ -165,7 +165,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeEquity() {
         description += "equity ";
-        data.equityEmployeeGroups().forEach(this::makeEquityDirect);
+        for (int[] group : data.equityEmployeeGroups()) {
+            this.makeEquityDirect(group);
+        }
     }
 
     private void makeEquityDirect(int[] group) {

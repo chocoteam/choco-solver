@@ -174,11 +174,14 @@ public class PropGraphCumulative extends PropFullCumulative {
     private void sweepBasedGraphComputation() {
         Event[] events = new Event[2 * n];
         ArraySort<Event> sort = new ArraySort<>(events.length, true, false);
-        Comparator<Event> eventComparator = (e1, e2) -> {
-            if (e1.date == e2.date) {
-                return e1.type - e2.type;
+        Comparator<Event> eventComparator = new Comparator<Event>() {
+            @Override
+            public int compare(Event e1, Event e2) {
+                if (e1.date == e2.date) {
+                    return e1.type - e2.type;
+                }
+                return e1.date - e2.date;
             }
-            return e1.date - e2.date;
         };
         BitSet tprune = new BitSet(n);
         for (int i = 0; i < n; i++) {

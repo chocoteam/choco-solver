@@ -93,14 +93,17 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-		solver.plugMonitor((IMonitorSolution) () -> {
-            StringBuilder st = new StringBuilder();
-            st.append("\t");
-            for (int i = 0; i < vars.length; i++) {
-                st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
+		solver.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                StringBuilder st = new StringBuilder();
+                st.append("\t");
+                for (int i = 0; i < vars.length; i++) {
+                    st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
+                }
+                System.out.println("CycloHexan");
+                System.out.println(st.toString());
             }
-            System.out.println("CycloHexan");
-            System.out.println(st.toString());
         });
         solver.findAllSolutions();
 		solver.getIbex().release();

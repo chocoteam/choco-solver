@@ -151,7 +151,12 @@ public class ParetoTest {
     private void solve() {
         // --- Solves the problem
 
-        s.plugMonitor((IMonitorSolution) () -> bestProfit1 = Math.max(bestProfit1, totalProfit_1.getValue()));
+        s.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                bestProfit1 = Math.max(bestProfit1, totalProfit_1.getValue());
+            }
+        });
 //        Chatterbox.showSolutions(s);
         s.findParetoFront(ResolutionPolicy.MAXIMIZE, totalProfit_1, totalProfit_2);
     }

@@ -70,49 +70,63 @@ public class PropIntersection extends Propagator<SetVar> {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
         // PROCEDURES
-        intersectionForced = element -> {
-            for (int i = 0; i < k; i++) {
-                vars[i].addToKernel(element, aCause);
+        intersectionForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < k; i++) {
+                    vars[i].addToKernel(element, aCause);
+                }
             }
         };
-        intersectionRemoved = element -> {
-            int mate = -1;
-            for (int i = 0; i < k; i++)
-                if (vars[i].envelopeContains(element)) {
-                    if (!vars[i].kernelContains(element)) {
-                        if (mate == -1) {
-                            mate = i;
-                        } else {
-                            mate = -2;
-                            break;
+        intersectionRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                int mate = -1;
+                for (int i = 0; i < k; i++)
+                    if (vars[i].envelopeContains(element)) {
+                        if (!vars[i].kernelContains(element)) {
+                            if (mate == -1) {
+                                mate = i;
+                            } else {
+                                mate = -2;
+                                break;
+                            }
                         }
+                    } else {
+                        mate = -2;
+                        break;
                     }
-                } else {
-                    mate = -2;
-                    break;
-                }
-            if (mate == -1) {
-                contradiction(vars[k], "");
-            } else if (mate != -2) {
-                vars[mate].removeFromEnvelope(element, aCause);
-            }
-        };
-        setForced = element -> {
-            boolean allKer = true;
-            for (int i = 0; i < k; i++) {
-                if (!vars[i].envelopeContains(element)) {
-                    vars[k].removeFromEnvelope(element, aCause);
-                    allKer = false;
-                    break;
-                } else if (!vars[i].kernelContains(element)) {
-                    allKer = false;
+                if (mate == -1) {
+                    PropIntersection.this.contradiction(vars[k], "");
+                } else if (mate != -2) {
+                    vars[mate].removeFromEnvelope(element, aCause);
                 }
             }
-            if (allKer) {
-                vars[k].addToKernel(element, aCause);
+        };
+        setForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                boolean allKer = true;
+                for (int i = 0; i < k; i++) {
+                    if (!vars[i].envelopeContains(element)) {
+                        vars[k].removeFromEnvelope(element, aCause);
+                        allKer = false;
+                        break;
+                    } else if (!vars[i].kernelContains(element)) {
+                        allKer = false;
+                    }
+                }
+                if (allKer) {
+                    vars[k].addToKernel(element, aCause);
+                }
             }
         };
-        setRemoved = element -> vars[k].removeFromEnvelope(element, aCause);
+        setRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[k].removeFromEnvelope(element, aCause);
+            }
+        };
     }
 
     //***********************************************************************************

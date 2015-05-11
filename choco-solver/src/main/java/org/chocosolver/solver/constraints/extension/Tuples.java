@@ -30,10 +30,7 @@ package org.chocosolver.solver.constraints.extension;
 
 import org.chocosolver.solver.exception.SolverException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A unique interface to declare tuples for table constraints.
@@ -174,7 +171,7 @@ public class Tuples {
     }
 
     public void sort() {
-        tuples.sort(new TupleComparator());
+        Collections.sort(tuples, new TupleComparator());
     }
 
     private static class TupleComparator implements Comparator<int[]> {

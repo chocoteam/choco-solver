@@ -45,8 +45,7 @@ public interface FilteringMonitor extends Serializable {
      * @param var        the reified variable
      * @param propagator the propagator to awake.
      */
-    default void activePropagator(BoolVar var, Propagator propagator) {
-    }
+    void activePropagator(BoolVar var, Propagator propagator);
 
     /**
      * Explain the removal of the <code>val</code> from <code>var</code>, due to <code>cause</code>.
@@ -55,8 +54,7 @@ public interface FilteringMonitor extends Serializable {
      * @param val   a value
      * @param cause a cause
      */
-    default void removeValue(IntVar var, int val, ICause cause) {
-    }
+    void removeValue(IntVar var, int val, ICause cause);
 
     /**
      * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
@@ -67,8 +65,7 @@ public interface FilteringMonitor extends Serializable {
      * @param old    the previous lower bound
      * @param cause  the cause
      */
-    default void updateLowerBound(IntVar intVar, int value, int old, ICause cause) {
-    }
+    void updateLowerBound(IntVar intVar, int value, int old, ICause cause);
 
     /**
      * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
@@ -79,8 +76,7 @@ public interface FilteringMonitor extends Serializable {
      * @param old   the previous upper bound
      * @param cause the cause
      */
-    default void updateUpperBound(IntVar var, int value, int old, ICause cause) {
-    }
+    void updateUpperBound(IntVar var, int value, int old, ICause cause);
 
     /**
      * Explain the assignment to <code>val</code> of <code>var</code> due to <code>cause</code>.
@@ -91,7 +87,6 @@ public interface FilteringMonitor extends Serializable {
      * @param oldLB the previous LB
      * @param oldUB the previous UB
      */
-    default void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
-    }
+    void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB);
 
 }

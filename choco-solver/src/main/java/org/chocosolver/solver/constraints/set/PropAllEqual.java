@@ -79,14 +79,20 @@ public class PropAllEqual extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> {
-            for (int i = 0; i < n; i++) {
-                vars[i].addToKernel(element, aCause);
+        elementForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < n; i++) {
+                    vars[i].addToKernel(element, aCause);
+                }
             }
         };
-        elementRemoved = element -> {
-            for (int i = 0; i < n; i++) {
-                vars[i].removeFromEnvelope(element, aCause);
+        elementRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < n; i++) {
+                    vars[i].removeFromEnvelope(element, aCause);
+                }
             }
         };
     }

@@ -78,8 +78,18 @@ public class PropSymmetric extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> vars[element - offSet].addToKernel(currentSet + offSet, aCause);
-        elementRemoved = element -> vars[element - offSet].removeFromEnvelope(currentSet + offSet, aCause);
+        elementForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[element - offSet].addToKernel(currentSet + offSet, aCause);
+            }
+        };
+        elementRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[element - offSet].removeFromEnvelope(currentSet + offSet, aCause);
+            }
+        };
     }
 
     //***********************************************************************************

@@ -76,7 +76,7 @@ public interface IPropagationEngine extends Serializable {
      * If new constraints are added after having initializing the engine, dynamic addition is used.
      * A call to clear erase the internal structure, and allow new initialisation.
      */
-    default void initialize(){}
+    void initialize();
 
     /**
      * Is the engine initialized?
@@ -84,33 +84,24 @@ public interface IPropagationEngine extends Serializable {
      *
      * @return true if the engine has been initialized
      */
-    default boolean isInitialized() {
-        return false;
-    }
+    boolean isInitialized();
 
     /**
      * Launch the proapagation, ie, active propagators if necessary, then reach a fix point
      *
      * @throws ContradictionException if a contradiction occurrs
      */
-    default void propagate() throws ContradictionException {
-    }
-
+    void propagate() throws ContradictionException;
     /**
      * Flush <code>this</code>, ie. remove every pending events
      */
-    default void flush() {
-    }
+    void flush() ;
 
-    default void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-    }
+    void fails(ICause cause, Variable variable, String message) throws ContradictionException ;
 
-    default ContradictionException getContradictionException() {
-        throw new UnsupportedOperationException("no propagation engine has been defined");
-    }
+    ContradictionException getContradictionException() ;
 
-    default void clear() {
-    }
+    void clear();
 
     //********************************//
     //      SERVICES FOR UPDATING     //
@@ -123,22 +114,17 @@ public interface IPropagationEngine extends Serializable {
      * @param type     type of modification event
      * @throws ContradictionException
      */
-    default void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-    }
+    void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException ;
 
-    default void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-    }
+    void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException ;
 
-    default void onPropagatorExecution(Propagator propagator) {
-    }
-
+     void onPropagatorExecution(Propagator propagator) ;
     /**
      * Set the propagator as inactivated within the propagation engine
      *
      * @param propagator propagator to desactivate
      */
-    default void desactivatePropagator(Propagator propagator) {
-    }
+     void desactivatePropagator(Propagator propagator);
 
     /**
      * Add a constraint to the propagation engine
@@ -146,16 +132,14 @@ public interface IPropagationEngine extends Serializable {
      * @param permanent does the constraint is permanently added
      * @param ps        propagators to add
      */
-    default void dynamicAddition(boolean permanent, Propagator... ps) {
-    }
+    void dynamicAddition(boolean permanent, Propagator... ps) ;
 
     /**
      * Update the scope of variable of a propagator (addition or deletion are allowed -- p.vars are scanned)
      *
      * @param p a propagator
      */
-    default void updateInvolvedVariables(Propagator p) {
-    }
+     void updateInvolvedVariables(Propagator p) ;
 
 
     /**
@@ -164,14 +148,11 @@ public interface IPropagationEngine extends Serializable {
      *
      * @param p a propagator
      */
-    default void propagateOnBacktrack(Propagator p) {
-    }
-
+    void propagateOnBacktrack(Propagator p) ;
     /**
      * Delete the list of propagators in input from the engine
      *
      * @param ps a list of propagators
      */
-    default void dynamicDeletion(Propagator... ps) {
-    }
+    void dynamicDeletion(Propagator... ps) ;
 }

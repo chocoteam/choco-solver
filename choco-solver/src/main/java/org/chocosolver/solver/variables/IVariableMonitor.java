@@ -67,7 +67,5 @@ public interface IVariableMonitor<V extends Variable> extends Serializable, ICau
      * @param solver target solver
      * @param identitymap a map to guarantee uniqueness of objects
      */
-    default void duplicate(Solver solver, THashMap<Object, Object> identitymap){
-        // nothing to do
-    }
+    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
 }

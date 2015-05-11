@@ -32,6 +32,7 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -164,4 +165,8 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         return _riterator;
     }
 
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        throw new UnsupportedOperationException();
+    }
 }

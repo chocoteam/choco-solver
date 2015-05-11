@@ -150,8 +150,8 @@ public class PropClauseChanneling extends Propagator<IntVar> {
             if (IntEventType.isInstantiate(mask)) {
                 _inst(iv.getValue() - OFFSET);
             } else {
-                int lb = LB.get();
-                int ub = UB.get();
+                final int lb = LB.get();
+                final int ub = UB.get();
                 if (IntEventType.isInclow(mask)) {
                     _ulb(iv.getLB() - OFFSET, lb);
                 }
@@ -159,10 +159,13 @@ public class PropClauseChanneling extends Propagator<IntVar> {
                     _uub(iv.getUB() - OFFSET, ub);
                 }
                 // then deal with removed values
-                dm.forEachRemVal((IntProcedure) value -> {
-                    value -= OFFSET;
-                    if (value > lb && value < ub) {
-                        eqs[value].instantiateTo(0, this);
+                dm.forEachRemVal((IntProcedure) new IntProcedure() {
+                    @Override
+                    public void execute(int value) throws ContradictionException {
+                        value -= OFFSET;
+                        if (value > lb && value < ub) {
+                            eqs[value].instantiateTo(0, PropClauseChanneling.this);
+                        }
                     }
                 });
             }

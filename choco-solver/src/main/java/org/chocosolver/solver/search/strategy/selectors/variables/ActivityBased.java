@@ -31,9 +31,12 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
@@ -169,9 +172,12 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
 		SMF.restartAfterEachSolution(solver);
-		solver.plugMonitor((IMonitorContradiction) cex -> {
-            if(restartAfterEachFail){
-                solver.getSearchLoop().restart();
+		solver.plugMonitor((IMonitorContradiction) new IMonitorContradiction() {
+            @Override
+            public void onContradiction(ContradictionException cex) {
+                if (restartAfterEachFail) {
+                    solver.getSearchLoop().restart();
+                }
             }
         });
 
@@ -312,6 +318,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         affected.set(v2i.get(var.getId()));
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new UnsupportedOperationException();
+    }
+
 
     @Override
     public void beforeDownLeftBranch() {
@@ -397,6 +408,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             return (a / mA[idx]) < d;
         }
         return true;
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        throw new UnsupportedOperationException();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

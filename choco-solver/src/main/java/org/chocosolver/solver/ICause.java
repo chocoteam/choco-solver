@@ -29,7 +29,6 @@
 package org.chocosolver.solver;
 
 
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -62,7 +61,5 @@ public interface ICause extends Serializable {
      * @param value     the value (for REMOVE only)
      * @return true if at least one rule has been added to the rule store
      */
-    default boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        throw new SolverException("Undefined why(...) method for " + this);
-    }
+    boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value);
 }

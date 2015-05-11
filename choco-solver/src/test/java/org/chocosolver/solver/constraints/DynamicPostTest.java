@@ -161,9 +161,12 @@ public class DynamicPostTest {
         final Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
         solver.post(c1);
         solver.post(c2);
-        solver.plugMonitor((IMonitorSolution) () -> {
-            solver.unpost(c1);
-            solver.unpost(c2);
+        solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.unpost(c1);
+                solver.unpost(c2);
+            }
         });
         solver.set(engine.make(solver));
         solver.findAllSolutions();
@@ -172,7 +175,9 @@ public class DynamicPostTest {
     }
 
     private static void popAll(List<Constraint> stack, Solver solver) {
-        stack.forEach(solver::unpost);
+        for(Constraint cs: stack){
+            solver.post(cs);
+        }
     }
 
     private static void push(Constraint constraint, List<Constraint> stack, Solver solver) {
@@ -279,8 +284,8 @@ public class DynamicPostTest {
 	}
 
 	private Solver costasArray(int n, boolean dynamic){
-		Solver solver = new Solver("CostasArrays");
-		IntVar[] vars, vectors;
+		final Solver solver = new Solver("CostasArrays");
+		final IntVar[] vars, vectors;
 		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
 		vectors = new IntVar[(n*(n-1))/2];
 		IntVar[][] diff = new IntVar[n][n];
@@ -302,15 +307,13 @@ public class DynamicPostTest {
 		SMF.limitTime(solver, 20000);
 		solver.set(ISF.domOverWDeg(vectors,0));
 
-		if(dynamic){
-			// should not change anything (the constraint is already posted)
-			solver.plugMonitor(new IMonitorSolution(){
-				@Override
-				public void onSolution() {
-					solver.post(ICF.alldifferent(vectors,"BC"));
-				}
-			});
-		}
+        // should not change anything (the constraint is already posted)
+        if(dynamic) solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.post(ICF.alldifferent(vectors, "BC"));
+            }
+        });
 		return solver;
 	}
 }

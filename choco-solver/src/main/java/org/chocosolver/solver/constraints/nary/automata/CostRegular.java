@@ -88,7 +88,7 @@ public class CostRegular extends Constraint {
         graph = new DirectedMultigraph<>(new Arc.ArcFacroty());
         ArrayList<HashSet<Arc>> tmp = new ArrayList<>(totalSizes);
         for (int i = 0; i < totalSizes; i++)
-            tmp.add(new HashSet<>());
+            tmp.add(new HashSet<Arc>());
 
 
         int i, j, k;

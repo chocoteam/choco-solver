@@ -76,31 +76,9 @@ public class PropUnion extends Propagator<SetVar> {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
         // PROCEDURES
-        unionForced = element -> {
-            int mate = -1;
-            for (int i = 0; i < k && mate != -2; i++) {
-                if (vars[i].envelopeContains(element)) {
-                    if (mate == -1) {
-                        mate = i;
-                    } else {
-                        mate = -2;
-                    }
-                }
-            }
-            if (mate == -1) {
-                contradiction(vars[k], "");
-            } else if (mate != -2) {
-                vars[mate].addToKernel(element, aCause);
-            }
-        };
-        unionRemoved = element -> {
-            for (int i = 0; i < k; i++) {
-                vars[i].removeFromEnvelope(element, aCause);
-            }
-        };
-        setForced = element -> vars[k].addToKernel(element, aCause);
-        setRemoved = element -> {
-            if (vars[k].envelopeContains(element)) {
+        unionForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
                 int mate = -1;
                 for (int i = 0; i < k && mate != -2; i++) {
                     if (vars[i].envelopeContains(element)) {
@@ -112,9 +90,45 @@ public class PropUnion extends Propagator<SetVar> {
                     }
                 }
                 if (mate == -1) {
-                    vars[k].removeFromEnvelope(element, aCause);
-                } else if (mate != -2 && vars[k].kernelContains(element)) {
+                    PropUnion.this.contradiction(vars[k], "");
+                } else if (mate != -2) {
                     vars[mate].addToKernel(element, aCause);
+                }
+            }
+        };
+        unionRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < k; i++) {
+                    vars[i].removeFromEnvelope(element, aCause);
+                }
+            }
+        };
+        setForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[k].addToKernel(element, aCause);
+            }
+        };
+        setRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                if (vars[k].envelopeContains(element)) {
+                    int mate = -1;
+                    for (int i = 0; i < k && mate != -2; i++) {
+                        if (vars[i].envelopeContains(element)) {
+                            if (mate == -1) {
+                                mate = i;
+                            } else {
+                                mate = -2;
+                            }
+                        }
+                    }
+                    if (mate == -1) {
+                        vars[k].removeFromEnvelope(element, aCause);
+                    } else if (mate != -2 && vars[k].kernelContains(element)) {
+                        vars[mate].addToKernel(element, aCause);
+                    }
                 }
             }
         };

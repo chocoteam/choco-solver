@@ -55,19 +55,22 @@ public class NValueTest {
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         final BitSet values = new BitSet(3);
-        solver.plugMonitor((IMonitorSolution) () -> {
-            values.clear();
-            for (IntVar v : XS) {
-                if (!v.isInstantiated()) {
+        solver.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                values.clear();
+                for (IntVar v : XS) {
+                    if (!v.isInstantiated()) {
+                        throw new UnsupportedOperationException();
+                    }
+                    values.set(v.getValue());
+                }
+                if (!N.isInstantiated()) {
                     throw new UnsupportedOperationException();
                 }
-                values.set(v.getValue());
-            }
-            if (!N.isInstantiated()) {
-                throw new UnsupportedOperationException();
-            }
-            if (values.cardinality() < N.getValue()) {
-                throw new UnsupportedOperationException();
+                if (values.cardinality() < N.getValue()) {
+                    throw new UnsupportedOperationException();
+                }
             }
         });
         solver.findAllSolutions();
@@ -82,19 +85,22 @@ public class NValueTest {
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         final BitSet values = new BitSet(3);
-        solver.plugMonitor((IMonitorSolution) () -> {
-            values.clear();
-            for (IntVar v : XS) {
-                if (!v.isInstantiated()) {
+        solver.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                values.clear();
+                for (IntVar v : XS) {
+                    if (!v.isInstantiated()) {
+                        throw new UnsupportedOperationException();
+                    }
+                    values.set(v.getValue());
+                }
+                if (!N.isInstantiated()) {
                     throw new UnsupportedOperationException();
                 }
-                values.set(v.getValue());
-            }
-            if (!N.isInstantiated()) {
-                throw new UnsupportedOperationException();
-            }
-            if (values.cardinality() > N.getValue()) {
-                throw new UnsupportedOperationException();
+                if (values.cardinality() > N.getValue()) {
+                    throw new UnsupportedOperationException();
+                }
             }
         });
         solver.findAllSolutions();

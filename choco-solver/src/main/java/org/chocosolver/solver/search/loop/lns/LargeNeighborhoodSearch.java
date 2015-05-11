@@ -38,10 +38,13 @@ package org.chocosolver.solver.search.loop.lns;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInterruption;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 
 /**
  * How to branch a Large Neighborhood Search ?
@@ -64,9 +67,12 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public LargeNeighborhoodSearch(final Solver solver, INeighbor neighbor, final boolean restartAfterEachSolution) {
         this.solver = solver;
         this.neighbor = neighbor;
-		solver.plugMonitor((IMonitorSolution) () -> {
-            if(restartAfterEachSolution){
-                solver.getSearchLoop().restart();
+		solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                if (restartAfterEachSolution) {
+                    solver.getSearchLoop().restart();
+                }
             }
         });
     }
@@ -117,4 +123,8 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
         }
     }
 
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -44,5 +44,10 @@ public interface TupleValidator {
      */
     public boolean valid(int... values);
 
-	public static TupleValidator TRUE = values -> true;
+	public static TupleValidator TRUE = new TupleValidator(){
+		@Override
+		public boolean valid(int... values) {
+			return true;
+		}
+	};
 }

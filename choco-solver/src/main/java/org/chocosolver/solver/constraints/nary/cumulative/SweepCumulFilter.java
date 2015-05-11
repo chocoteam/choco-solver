@@ -88,12 +88,15 @@ public class SweepCumulFilter extends CumulFilter {
 		}
 		tasksToUSe = SetFactory.makeSwap(n, false);
 		sort = new ArraySort<>(events.length,true,false);
-		eventComparator = (e1, e2) -> {
-            if(e1.date == e2.date){
-                return e2.type-e1.type;
-            }
-            return e1.date - e2.date;
-        };
+		eventComparator = new Comparator<Event>() {
+			@Override
+			public int compare(Event e1, Event e2) {
+				if (e1.date == e2.date) {
+					return e2.type - e1.type;
+				}
+				return e1.date - e2.date;
+			}
+		};
 	}
 
 	//***********************************************************************************

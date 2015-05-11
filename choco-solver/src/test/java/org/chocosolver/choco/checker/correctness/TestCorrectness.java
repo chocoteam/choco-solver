@@ -422,7 +422,7 @@ public class TestCorrectness {
 
     @Test(groups = "correctness.1m")
     public void testMDDAC() {
-        Random rnd = new Random();
+        final Random rnd = new Random();
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             rnd.setSeed(seed);

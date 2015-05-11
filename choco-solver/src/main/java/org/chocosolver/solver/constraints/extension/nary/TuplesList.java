@@ -47,13 +47,16 @@ public class TuplesList extends LargeRelation {
     // each tuple (a int[]) has its own index
     protected final int[][] tuplesIndexes;
 
-    protected static final Comparator<int[]> TCOMP = (o1, o2) -> {
-        int n = o1.length;
-        int i = 0;
-        while (i < n && o1[i] == o2[i]) i++;
-        if (i == n) return 0;
-        if (o1[i] < o2[i]) return -1;
-        return 1;
+    protected static final Comparator<int[]> TCOMP = new Comparator<int[]>() {
+        @Override
+        public int compare(int[] o1, int[] o2) {
+            int n = o1.length;
+            int i = 0;
+            while (i < n && o1[i] == o2[i]) i++;
+            if (i == n) return 0;
+            if (o1[i] < o2[i]) return -1;
+            return 1;
+        }
     };
 
     // required for duplicate method, should not be called by default

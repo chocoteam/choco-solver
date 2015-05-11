@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
+import org.chocosolver.solver.search.limits.ICounterAction;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -55,9 +56,12 @@ public class NogoodTest {
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(30);
-        sc.setAction(() -> {
-            solver.getSearchLoop().restart();
-            sc.reset();
+        sc.setAction(new ICounterAction() {
+            @Override
+            public void onLimitReached() {
+                solver.getSearchLoop().restart();
+                sc.reset();
+            }
         });
         solver.getSearchLoop().plugSearchMonitor(sc);
         SMF.limitTime(solver, 200000);
@@ -74,9 +78,12 @@ public class NogoodTest {
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         final BacktrackCounter sc = new BacktrackCounter(32);
-        sc.setAction(() -> {
-            solver.getSearchLoop().restart();
-            sc.reset();
+        sc.setAction(new ICounterAction() {
+            @Override
+            public void onLimitReached() {
+                solver.getSearchLoop().restart();
+                sc.reset();
+            }
         });
         solver.getSearchLoop().plugSearchMonitor(sc);
         SMF.limitTime(solver, 2000);

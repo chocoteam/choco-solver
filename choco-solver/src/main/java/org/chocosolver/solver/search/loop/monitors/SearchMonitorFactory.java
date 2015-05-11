@@ -248,7 +248,12 @@ public class SearchMonitorFactory {
      * @param solver main solver
      */
     public static void restartAfterEachSolution(final Solver solver) {
-        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+        solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.getSearchLoop().restart();
+            }
+        });
     }
 
     /**

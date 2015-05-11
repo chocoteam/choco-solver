@@ -31,6 +31,7 @@ package org.chocosolver.docs;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
@@ -244,7 +245,12 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] XS = VF.enumeratedArray("XS", 5, 0, 3, solver);
         solver.post(ICF.alldifferent_conditionnal(XS,
-                x -> !x.contains(1) && !x.contains(3)));
+                new Condition() {
+                    @Override
+                    public boolean holdOnVar(IntVar x) {
+                        return !x.contains(1) && !x.contains(3);
+                    }
+                }));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }

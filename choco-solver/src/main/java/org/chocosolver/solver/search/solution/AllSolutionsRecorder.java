@@ -51,11 +51,14 @@ public class AllSolutionsRecorder implements ISolutionRecorder {
 	}
 
 	protected IMonitorSolution createRecMonitor() {
-		return () -> {
-            Solution solution = new Solution();
-            solution.record(solver);
-            solutions.addLast(solution);
-        };
+		return new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				Solution solution = new Solution();
+				solution.record(solver);
+				solutions.addLast(solution);
+			}
+		};
 	}
 
 	@Override

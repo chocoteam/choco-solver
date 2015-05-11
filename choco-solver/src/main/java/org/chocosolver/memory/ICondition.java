@@ -41,12 +41,20 @@ public interface ICondition extends Serializable {
 
     boolean satisfied();
 
-    default void set(IEnvironment environment) {
-
-    }
+    void set(IEnvironment environment);
 
     /**
      * False condition, never satisfied
      */
-    public final static ICondition FALSE = () -> false;
+    public final static ICondition FALSE = new ICondition() {
+        @Override
+        public boolean satisfied() {
+            return false;
+        }
+
+        @Override
+        public void set(IEnvironment environment) {
+
+        }
+    };
 }

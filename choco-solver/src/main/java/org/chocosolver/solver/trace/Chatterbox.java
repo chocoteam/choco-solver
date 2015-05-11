@@ -225,7 +225,12 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showSolutions(Solver solver, final IMessage message) {
-        solver.plugMonitor((IMonitorSolution) () -> System.out.println(message.print()));
+        solver.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                System.out.println(message.print());
+            }
+        });
     }
 
     /**
@@ -294,7 +299,12 @@ public class Chatterbox {
      * @param solver the solver to evaluate
      */
     public static void showContradiction(Solver solver) {
-        solver.plugMonitor((IMonitorContradiction) cex -> System.out.println(String.format("\t/!\\ %s", cex.toString())));
+        solver.plugMonitor((IMonitorContradiction) new IMonitorContradiction() {
+            @Override
+            public void onContradiction(ContradictionException cex) {
+                System.out.println(String.format("\t/!\\ %s", cex.toString()));
+            }
+        });
     }
 
     /**

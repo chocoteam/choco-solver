@@ -169,7 +169,12 @@ public class ObjectiveTest {
         Assert.assertEquals(iv.getValue(), 2);
 
         solver.getSearchLoop().reset();
-        solver.getSearchLoop().plugSearchMonitor((IMonitorSolution) () -> solver.post(ICF.arithm(iv, ">=", 6)));
+        solver.getSearchLoop().plugSearchMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.post(ICF.arithm(iv, ">=", 6));
+            }
+        });
         solver.findSolution();
         Assert.assertEquals(iv.getValue(), 2);
 

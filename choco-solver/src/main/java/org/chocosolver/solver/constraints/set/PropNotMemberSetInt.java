@@ -66,7 +66,12 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
         this.iv = intVar;
         this.sv = setVar;
         this.sdm = sv.monitorDelta(aCause);
-        this.elemRem = i -> iv.removeValue(i, aCause);
+        this.elemRem = new IntProcedure() {
+            @Override
+            public void execute(int i) throws ContradictionException {
+                iv.removeValue(i, aCause);
+            }
+        };
 	}
 
 	//***********************************************************************************

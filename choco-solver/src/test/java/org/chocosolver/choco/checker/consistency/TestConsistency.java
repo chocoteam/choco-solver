@@ -352,7 +352,7 @@ public class TestConsistency {
     @Test(groups = "consistency.1s")
     public void testMDD1() {
         long seed = System.currentTimeMillis();
-        Random rnd = new Random();
+        final Random rnd = new Random();
         for (int i = 0; i < 99; i++) {
             rnd.setSeed(seed + i);
             int[][] doms = new int[1][10];
@@ -377,7 +377,7 @@ public class TestConsistency {
     @Test(groups = "consistency.1s")
     public void testMDD2() {
         long seed = System.currentTimeMillis();
-        Random rnd = new Random();
+        final Random rnd = new Random();
         for (int i = 0; i < 99; i++) {
             rnd.setSeed(seed + i);
             int[][] doms = new int[2][2];
@@ -402,7 +402,7 @@ public class TestConsistency {
     @Test(groups = "consistency.10s")
     public void testMDD3() {
         long seed = System.currentTimeMillis();
-        Random rnd = new Random();
+        final Random rnd = new Random();
         for (int i = 0; i < 999; i++) {
             rnd.setSeed(seed + i);
             int[][] doms = new int[5][8];

@@ -5,7 +5,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>3.3.1</version>
+    <version>3.3.1-j7</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://choco-solver.org/</url>
     <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
@@ -150,8 +150,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>

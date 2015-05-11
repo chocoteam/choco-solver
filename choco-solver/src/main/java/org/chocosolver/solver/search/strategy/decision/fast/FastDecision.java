@@ -29,9 +29,11 @@
 package org.chocosolver.solver.search.strategy.decision.fast;
 
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.PoolManager;
 
 /**
@@ -113,5 +115,10 @@ public class FastDecision extends Decision<IntVar> {
             return 1;
         }
         return 1;
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        throw new UnsupportedOperationException();
     }
 }

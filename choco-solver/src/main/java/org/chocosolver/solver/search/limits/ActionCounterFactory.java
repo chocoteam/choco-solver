@@ -48,8 +48,11 @@ public class ActionCounterFactory {
         none = new ThreadLocal<ICounterAction>() {
             @Override
             protected ICounterAction initialValue() {
-                return () -> {
-                    // nothing
+                return new ICounterAction() {
+                    @Override
+                    public void onLimitReached() {
+                        // nothing
+                    }
                 };
             }
         };
@@ -61,10 +64,20 @@ public class ActionCounterFactory {
 
 
     public static ICounterAction interruptSearch(final ISearchLoop searchLoop) {
-        return searchLoop::reachLimit;
+        return new ICounterAction() {
+            @Override
+            public void onLimitReached() {
+                searchLoop.reachLimit();
+    }
+        };
     }
 
     public static ICounterAction restartSearch(final ISearchLoop searchLoop) {
-        return searchLoop::restart;
+        return new ICounterAction() {
+            @Override
+            public void onLimitReached() {
+                searchLoop.restart();
+            }
+        };
     }
 }

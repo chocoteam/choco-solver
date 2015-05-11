@@ -30,6 +30,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IEnvironment;
@@ -37,6 +38,7 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -178,4 +180,13 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         }
     }
 
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        throw new UnsupportedOperationException();
+    }
 }

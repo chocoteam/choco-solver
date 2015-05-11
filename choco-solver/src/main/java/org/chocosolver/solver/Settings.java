@@ -42,7 +42,7 @@ import java.io.Serializable;
  * Created by cprudhom on 25/11/14.
  * Project: choco.
  */
-public interface Settings extends Serializable {
+public abstract class Settings implements Serializable {
 
     public enum Idem {
         disabled, // does not anything
@@ -53,7 +53,7 @@ public interface Settings extends Serializable {
     /**
      * Return the welcome message
      */
-    default public String getWelcomeMessage() {
+    public String getWelcomeMessage() {
         return "** Choco 3.3.1 (2015-05) : Constraint Programming Solver, Copyleft (c) 2010-2015";
     }
 
@@ -65,7 +65,7 @@ public interface Settings extends Serializable {
      * <li>force : extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available</li>
      * </ul>
      */
-    default public Idem getIdempotencyStrategy() {
+    public Idem getIdempotencyStrategy() {
         return Idem.disabled;
     }
 
@@ -73,7 +73,7 @@ public interface Settings extends Serializable {
      * Set to 'true' to allow the creation of views in the {@link org.chocosolver.solver.variables.VariableFactory}.
      * Creates new variables with channeling constraints otherwise.
      */
-    default public boolean enableViews() {
+    public boolean enableViews() {
         return false;
     }
 
@@ -81,14 +81,14 @@ public interface Settings extends Serializable {
      * Define the maximum domain size threshold to force integer variable to be enumerated
      * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Solver)}.
      */
-    default public int getMaxDomSizeForEnumerated() {
+    public int getMaxDomSizeForEnumerated() {
         return 32768;
     }
 
     /**
      * Set to true to replace intension constraints by extension constraints
      */
-    default public boolean enableTableSubstitution() {
+    public boolean enableTableSubstitution() {
         return true;
     }
 
@@ -96,14 +96,14 @@ public interface Settings extends Serializable {
      * Define the maximum domain size threshold to replace intension constraints by extension constraints
      * Only checked when ENABLE_TABLE_SUBS is set to true
      */
-    default public int getMaxTupleSizeForSubstitution() {
+    public int getMaxTupleSizeForSubstitution() {
         return 10000;
     }
 
     /**
      * Set to true to plug explanation engine in.
      */
-    default public boolean plugExplanationIn() {
+    public boolean plugExplanationIn() {
         return true;
     }
 
@@ -111,14 +111,14 @@ public interface Settings extends Serializable {
      * Define the rounding precision for {@link org.chocosolver.solver.constraints.IntConstraintFactory#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
      * MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
      */
-    default public double getMCRPrecision() {
+    public double getMCRPrecision() {
         return 4;
     }
 
     /**
      * Defines the smallest used double for {@link org.chocosolver.solver.constraints.IntConstraintFactory#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
      */
-    default public double getMCRDecimalPrecision() {
+    public double getMCRDecimalPrecision() {
         return 0.0001d;
     }
 
@@ -126,7 +126,7 @@ public interface Settings extends Serializable {
      * Defines, for fine events, for each priority, the queue in which a propagator of such a priority should be scheduled in
      * /!\ for advanced usage only
      */
-    default public short[] getFineEventPriority() {
+    public short[] getFineEventPriority() {
         return new short[]{0, 0, 0, 1, 2, 2, 2};
     }
 
@@ -134,14 +134,14 @@ public interface Settings extends Serializable {
      * Defines, for coarse events, for each priority, the queue in which a propagator of such a priority should be scheduled in
      * /!\ for advanced usage only
      */
-    default public short[] getCoarseEventPriority() {
+    public short[] getCoarseEventPriority() {
         return new short[]{-1, -1, -1, 0, 1, 2, 3};
     }
 
     /**
      * Return the search binder
      */
-    default public ISearchBinder getSearchBinder() {
+    public ISearchBinder getSearchBinder() {
         return new DefaultSearchBinder();
     }
 
@@ -151,7 +151,7 @@ public interface Settings extends Serializable {
      * The default condition is "at least one env.worldPush() has been called since the creation of the bck object".
      * The condition can be set to {@link org.chocosolver.memory.ICondition#FALSE} if no backtrackable object is created during the search.
      */
-    default public ICondition getEnvironmentHistorySimulationCondition(){
+    public ICondition getEnvironmentHistorySimulationCondition(){
         return new Except_0();
     }
 }

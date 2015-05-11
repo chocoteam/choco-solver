@@ -102,9 +102,9 @@ public class DecomposedAllDifferent extends AbstractProblem {
         ArrayList<ArrayList<ArrayList<BoolVar>>> apmA = new ArrayList<>();
 
         for (int p = l; p <= u; p++) {
-            apmA.add(p - l, new ArrayList<>());
+            apmA.add(p - l, new ArrayList<ArrayList<BoolVar>>());
             for (int q = p; q <= u; q++) {
-                apmA.get(p - l).add(q - p, new ArrayList<>());
+                apmA.get(p - l).add(q - p, new ArrayList<BoolVar>());
                 for (int j = 0; j < i; j++) {
                     apmA.get(p - l).get(q - p).add(mA[j][p - l][q - p]);
                 }

@@ -39,6 +39,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.extension.TupleValidator;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.nary.LargeRelation;
@@ -267,7 +268,12 @@ public class TableTest {
                 Solver solver = new Solver();
                 IntVar[] vars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
                 rnd.setSeed(seed);
-                Tuples tuples = TuplesFactory.generateTuples(values -> rnd.nextBoolean(), true, vars);
+                Tuples tuples = TuplesFactory.generateTuples(new TupleValidator() {
+                    @Override
+                    public boolean valid(int... values) {
+                        return rnd.nextBoolean();
+                    }
+                }, true, vars);
                 solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
                 solver.set(ISF.random_value(vars));
                 long nbs = solver.findAllSolutions();

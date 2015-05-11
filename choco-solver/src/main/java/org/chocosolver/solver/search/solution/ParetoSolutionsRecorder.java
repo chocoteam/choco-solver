@@ -87,31 +87,34 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
 
     @Override
     protected IMonitorSolution createRecMonitor() {
-        return () -> {
-            for (int i = 0; i < n; i++) {
-                vals[i] = objectives[i].getValue();
-            }
-            // update solution set
-            for (int i = solutions.size() - 1; i >= 0; i--) {
-                if (dominatedSolution(solutions.get(i), vals)) {
-                    solutions.remove(i);
+        return new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                for (int i = 0; i < n; i++) {
+                    vals[i] = objectives[i].getValue();
                 }
+                // update solution set
+                for (int i = solutions.size() - 1; i >= 0; i--) {
+                    if (ParetoSolutionsRecorder.this.dominatedSolution(solutions.get(i), vals)) {
+                        solutions.remove(i);
+                    }
+                }
+                // store current solution
+                Solution solution = new Solution();
+                solution.record(solver);
+                solutions.add(solution);
+                // aim at better solutions
+                Operator symbol = Operator.GT;
+                if (policy == ResolutionPolicy.MINIMIZE) {
+                    symbol = Operator.LT;
+                }
+                for (int i = 0; i < n; i++) {
+                    bvars[i] = VF.bool("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")", solver);
+                    ICF.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
+                    lits[i] = psat.Literal(bvars[i]);
+                }
+                psat.addLearnt(lits);
             }
-            // store current solution
-            Solution solution = new Solution();
-            solution.record(solver);
-            solutions.add(solution);
-            // aim at better solutions
-            Operator symbol = Operator.GT;
-            if (policy == ResolutionPolicy.MINIMIZE) {
-                symbol = Operator.LT;
-            }
-            for (int i = 0; i < n; i++) {
-                bvars[i] = VF.bool("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")", solver);
-                ICF.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
-                lits[i] = psat.Literal(bvars[i]);
-            }
-            psat.addLearnt(lits);
         };
     }
 

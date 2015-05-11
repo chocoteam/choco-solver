@@ -89,8 +89,18 @@ public class PropBoolChannel extends Propagator<Variable> {
         this.sdm = this.set.monitorDelta(this);
         this.offSet = offSet;
         // PROCEDURES
-        setForced = element -> bools[element - offSet].setToTrue(aCause);
-        setRemoved = element -> bools[element - offSet].setToFalse(aCause);
+        setForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                bools[element - offSet].setToTrue(aCause);
+            }
+        };
+        setRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                bools[element - offSet].setToFalse(aCause);
+            }
+        };
     }
 
     //***********************************************************************************

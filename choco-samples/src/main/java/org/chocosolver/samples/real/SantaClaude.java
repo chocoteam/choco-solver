@@ -104,14 +104,17 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.plugMonitor((IMonitorSolution) () -> {
-            System.out.println("*******************");
-            for (int i = 0; i < n_kids; i++) {
-                System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
-                        i, kid_gift[i].getValue(), kid_price[i].getValue()));
+        solver.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                System.out.println("*******************");
+                for (int i = 0; i < n_kids; i++) {
+                    System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
+                            i, kid_gift[i].getValue(), kid_price[i].getValue()));
+                }
+                System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
+                System.out.println(String.format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
             }
-            System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
-            System.out.println(String.format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
         });
         solver.findAllSolutions();
     }

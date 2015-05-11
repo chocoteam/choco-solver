@@ -98,7 +98,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups = "1s")
     public void testNQ() {
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver solver = new Solver();
+        final Solver solver = new Solver();
         int n = 8;
         IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
         for (int i = 0; i < n - 1; i++) {
@@ -112,7 +112,12 @@ public class NoGoodOnSolutionTest {
         }
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
         solver.set(ISF.random_value(vars, 0));
-        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+        solver.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.getSearchLoop().restart();
+            }
+        });
         solver.findAllSolutions();
         System.out.println(solver.getMeasures());
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
@@ -121,7 +126,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups = "1s")
     public void testNQ2() {
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver solver = new Solver();
+        final Solver solver = new Solver();
         int n = 8;
         IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
         for (int i = 0; i < n - 1; i++) {
@@ -136,7 +141,12 @@ public class NoGoodOnSolutionTest {
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 0));
-        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+        solver.plugMonitor((IMonitorSolution) new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.getSearchLoop().restart();
+            }
+        });
         solver.findAllSolutions();
         System.out.println(solver.getMeasures());
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);

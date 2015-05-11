@@ -36,8 +36,11 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 
 public enum NoPropagationEngine implements IPropagationEngine {
 
@@ -47,6 +50,26 @@ public enum NoPropagationEngine implements IPropagationEngine {
         //***********************************************************************************
 
         private final ContradictionException e = new ContradictionException();
+
+        @Override
+        public void initialize() {
+
+        }
+
+        @Override
+        public boolean isInitialized() {
+            return false;
+        }
+
+        @Override
+        public void propagate() throws ContradictionException {
+
+        }
+
+        @Override
+        public void flush() {
+
+        }
 
         @Override
         public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
@@ -62,6 +85,51 @@ public enum NoPropagationEngine implements IPropagationEngine {
             /*throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
                     "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
                   "before starting resolution.");*/
+        }
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
+
+        }
+
+        @Override
+        public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
+
+        }
+
+        @Override
+        public void onPropagatorExecution(Propagator propagator) {
+
+        }
+
+        @Override
+        public void desactivatePropagator(Propagator propagator) {
+
+        }
+
+        @Override
+        public void dynamicAddition(boolean permanent, Propagator... ps) {
+
+        }
+
+        @Override
+        public void updateInvolvedVariables(Propagator p) {
+
+        }
+
+        @Override
+        public void propagateOnBacktrack(Propagator p) {
+
+        }
+
+        @Override
+        public void dynamicDeletion(Propagator... ps) {
+
         }
     }
 }

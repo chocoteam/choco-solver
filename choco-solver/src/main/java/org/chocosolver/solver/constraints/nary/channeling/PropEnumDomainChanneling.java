@@ -61,7 +61,12 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
         this.n = bvars.length;
         this.offSet = offSet;
         this.idm = this.vars[n].monitorDelta(this);
-        this.rem_proc = i -> vars[i - offSet].instantiateTo(0, aCause);
+        this.rem_proc = new IntProcedure() {
+            @Override
+            public void execute(int i) throws ContradictionException {
+                vars[i - offSet].instantiateTo(0, aCause);
+            }
+        };
     }
 
     @Override

@@ -62,11 +62,14 @@ public class NRJCumulFilter extends CumulFilter{
 		dlb = new int[n];
 		eub = new int[n];
 		hlb = new int[n];
-		comparator = (i1, i2) -> {
-            int coef1 = (100*dlb[i1]*hlb[i1])/(eub[i1]-slb[i1]);
-            int coef2 = (100*dlb[i2]*hlb[i2])/(eub[i2]-slb[i2]);
-            return coef2 - coef1;
-        };
+		comparator = new IntComparator() {
+			@Override
+			public int compare(int i1, int i2) {
+				int coef1 = (100 * dlb[i1] * hlb[i1]) / (eub[i1] - slb[i1]);
+				int coef2 = (100 * dlb[i2] * hlb[i2]) / (eub[i2] - slb[i2]);
+				return coef2 - coef1;
+			}
+		};
 	}
 
 	//***********************************************************************************
