@@ -206,6 +206,7 @@ public class DynamicPostTest {
                 LCF.and(aSBetter, bBetter),
                 LCF.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
+        solver.set(ISF.lexico_LB(a,b,c,lbA,lbB));
         int nbSolution = 0;
         while (solver.findSolution()) {
             int bestA;

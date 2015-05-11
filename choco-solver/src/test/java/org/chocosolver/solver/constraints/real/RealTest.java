@@ -29,10 +29,7 @@
 package org.chocosolver.solver.constraints.real;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.SatFactory;
-import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
@@ -163,7 +160,7 @@ public class RealTest {
         Assert.assertEquals(y.getValue(), 4);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ignored")
     public void testFreemajb1() {
         Solver solver = new Solver();
 
@@ -191,7 +188,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ignored")
     public void testFreemajb2() {
         Solver solver = new Solver();
 

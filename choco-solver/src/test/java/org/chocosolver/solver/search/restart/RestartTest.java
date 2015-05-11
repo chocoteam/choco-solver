@@ -69,6 +69,7 @@ public class RestartTest {
                 solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
+        solver.set(ISF.lexico_LB(vars));
         return solver;
     }
 
