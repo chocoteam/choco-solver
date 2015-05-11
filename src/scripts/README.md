@@ -17,6 +17,10 @@ And update README.md with the correct versions of dependencies
 
     $ mvn dependency:list | grep :compile
 
+And run license check:
+
+    $ mvn license:format
+
 3. Generate PDF documentation
 
     $ cd docs/

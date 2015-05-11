@@ -34,9 +34,6 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
@@ -59,10 +56,9 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     // KIND (exclusive)
     public static final int INT = 1 << 3;
     public static final int BOOL = INT | (1 << 4);
-    public static final int GRAPH = 1 << 5;
-    public static final int SET = 1 << 6;
-    public static final int REAL = 1 << 7;
-    public static final int KIND = (1 << 8) - 1 - TYPE;
+    public static final int SET = 1 << 5;
+    public static final int REAL = 1 << 6;
+    public static final int KIND = (1 << 7) - 1 - TYPE;
 
     /**
      * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
@@ -122,26 +118,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     void removeMonitor(IVariableMonitor monitor);
 
     void subscribeView(IView view);
-
-    /**
-     * returns an explanation of the current state of the Variable
-     *
-     * @param xengine explanation engine
-     * @param what specifies what we are interested in
-     * @param to   explanation to feed
-     */
-
-    void explain(ExplanationEngine xengine, VariableState what, Explanation to);
-
-    /**
-     * returns an explanation of the current state of the Variable
-     *
-     * @param xengine explanation engine
-     * @param what specifies what we are interested in
-     * @param val a value
-     * @param to   explanation to feed
-     */
-    void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to);
 
     /**
      * Return the delta domain of this

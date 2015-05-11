@@ -33,7 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -65,8 +67,8 @@ public class PropCountVar extends Propagator<IntVar> {
      * Propagator for Count Constraint for integer variables
      * Performs Arc Consistency
      *
-     * @param decvars an array of integer variables
-     * @param restrictedValue integer variable
+     * @param decvars          an array of integer variables
+     * @param restrictedValue  integer variable
      * @param valueCardinality integer variable
      */
     public PropCountVar(IntVar[] decvars, IntVar restrictedValue, IntVar valueCardinality) {
@@ -190,6 +192,45 @@ public class PropCountVar extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == val) { // deal with "val" variable
+            assert evt == IntEventType.REMOVE;
+            // "value" is the removed value:
+            // either not enough variable has "value" in their domain,
+            // or too much has not "value"
+            for (int i = 0; i < n; i++) {
+                if (vars[i].isInstantiatedTo(value)) {
+                    nrules |= ruleStore.addFullDomainRule(vars[i]);
+                } else {
+                    nrules |= ruleStore.addRemovalRule(vars[i], value);
+                }
+            }
+            nrules |= ruleStore.addBoundsRule(card);
+        } else if (var == card) { // deal with "card" variable
+            for (int i = 0; i < n; i++) {
+                nrules |= ruleStore.addFullDomainRule(vars[i]);
+            }
+            nrules |= ruleStore.addFullDomainRule(val);
+        } else {
+            assert evt == IntEventType.REMOVE || evt == IntEventType.INSTANTIATE;
+            for (int i = 0; i < n; i++) {
+                if (var != vars[i]) {
+                    if (vars[i].isInstantiatedTo(value)) {
+                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    } else {
+                        nrules |= ruleStore.addRemovalRule(vars[i], value);
+                    }
+                }
+            }
+            nrules |= ruleStore.addBoundsRule(card);
+            nrules |= ruleStore.addFullDomainRule(val);
+        }
+        return nrules;
     }
 
     @Override

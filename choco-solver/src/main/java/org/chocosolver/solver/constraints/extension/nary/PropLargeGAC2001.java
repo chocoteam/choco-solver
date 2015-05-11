@@ -88,7 +88,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
         if (allboolean)
             valcheck = new FastBooleanValidityChecker(size, vars);
         else
-            valcheck = new FastValidityChecker(size, vars);
+            valcheck = new ValidityChecker(size, vars);
 
     }
 
@@ -255,11 +255,11 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
         valcheck.sortvars();
         if (vars[idx].hasEnumeratedDomain()) {
             for (int i = 0; i < size; i++)
-                if (idx != valcheck.position[i])
-                    reviseVar(valcheck.position[i], false);
+                if (idx != valcheck.getPosition(i))
+                    reviseVar(valcheck.getPosition(i), false);
         } else {
             for (int i = 0; i < size; i++)
-                reviseVar(valcheck.position[i], false);
+                reviseVar(valcheck.getPosition(i), false);
         }
     }
 

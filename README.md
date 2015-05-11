@@ -40,7 +40,7 @@ Chatterbox.printStatistics(solver);
 ## Download and installation ##
 
 Requirements:
-* JDK 8+
+* JDK 8+ (JDK 7 compliant jars are also available)
 * maven 3+
 
 In the following, we distinguish two usages of Choco:
@@ -87,9 +87,9 @@ The required dependencies for compilation are:
 
     org.javabits.jgrapht:jgrapht-core:jar:0.9.3
     dk.brics.automaton:automaton:jar:1.11-8
-    args4j:args4j:jar:2.0.29
+    args4j:args4j:jar:2.32
     net.sf.trove4j:trove4j:jar:3.0.3
-    org.slf4j:slf4j-api:jar:1.7.7
+    org.slf4j:slf4j-api:jar:1.7.13
 
 They are available on Maven Repository (http://mvnrepository.com/).
 
@@ -108,3 +108,5 @@ installed in your local maven repository and available in the `target` sub-folde
 
 ===================
 The Choco3 dev team.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/5206b49e3dad062b919d632d75825479 "githalytics.com")](http://githalytics.com/chocoteam/choco3)

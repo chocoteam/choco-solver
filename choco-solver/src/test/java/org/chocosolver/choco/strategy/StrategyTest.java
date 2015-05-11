@@ -43,8 +43,8 @@ import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.LastConflict;
 import org.chocosolver.solver.search.strategy.strategy.Once;
-import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.VF;
@@ -189,7 +189,7 @@ public class StrategyTest {
         solver.post(SetConstraintsFactory.member(x[0], y));
         solver.findSolution();
         AbstractStrategy strat = solver.getStrategy();
-        Assert.assertTrue(strat instanceof StrategiesSequencer);
+        Assert.assertTrue(strat instanceof LastConflict);
     }
 
     @Test(groups = "1s")

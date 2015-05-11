@@ -33,11 +33,6 @@ import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -79,7 +74,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
             assert cause != null;
-            if (_plugexpl) solver.getExplainer().removeValue(this, constante, cause);
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
         }
         return false;
@@ -89,7 +84,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             assert cause != null;
-            if (_plugexpl) solver.getExplainer().removeValue(this, constante, cause);
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
         }
         return false;
@@ -99,7 +94,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
             assert cause != null;
-            if (_plugexpl) solver.getExplainer().removeValue(this, constante, cause);
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.INSTANTIATE, "outside domain instantitation");
         }
         return false;
@@ -109,7 +104,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
             assert cause != null;
-            if (_plugexpl) solver.getExplainer().removeValue(this, constante, cause);
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.INCLOW, "outside domain update bound");
         }
         return false;
@@ -119,15 +114,10 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
             assert cause != null;
-            if (_plugexpl) solver.getExplainer().removeValue(this, constante, cause);
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.DECUPP, "outside domain update bound");
         }
         return false;
-    }
-
-    @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        removeValue(constante, cause);
     }
 
     @Override
@@ -197,25 +187,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public void addMonitor(IVariableMonitor monitor) {
     }
 
-    @Override
-    public AntiDomain antiDomain() {
-        return new AntiDomBitset(this);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        if (empty.get()) {
-            to.add(xengine.explain(this, constante));
-        }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        if (empty.get()) {
-            to.add(xengine.explain(this, constante));
-        }
-    }
-
     @Override//void (a constant receives no event)
     public void subscribeView(IView view) {
     }
@@ -270,6 +241,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             identitymap.put(this, VF.fixed(this.name, this.constante, solver));
+            assert mIdx == 0;
         }
     }
 

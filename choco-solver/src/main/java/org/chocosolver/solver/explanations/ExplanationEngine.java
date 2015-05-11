@@ -1,24 +1,22 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -32,240 +30,197 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
+import org.chocosolver.solver.explanations.store.ArrayEventStore;
+import org.chocosolver.solver.explanations.store.IEventStore;
+import org.chocosolver.solver.explanations.strategies.ConflictStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.FilteringMonitor;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 26 oct. 2010
- * Time: 12:34:02
- * <p/>
- * A class to manage explanations. The default behavior is to do nothing !
+ * An Asynchronous, Reverse, Low-Intrusive and Lazy explanation engine
+ * Based on "A Lazy explanation engine for Choco3", C.Prud'homme.
+ * <p>
+ * Created by cprudhom on 09/12/14.
+ * Project: choco.
  */
-public class ExplanationEngine implements Serializable {
-    static Logger LOGGER = LoggerFactory.getLogger(ExplanationEngine.class);
-    Solver solver;
+public class ExplanationEngine implements FilteringMonitor {
+
+    protected final IEventStore eventStore; // set of generated events
+    private final RuleStore ruleStore; // set of active rules
+    private final boolean saveCauses; // save the clauses in Explanation
+    private final Solver mSolver;
+    private ConflictStrategy cstrat;
+
 
     /**
-     * Builds an ExplanationEngine
+     * Create an explanation engine based on a rule store
      *
-     * @param slv associated solver's environment
+     * @param solver                   a solver
+     * @param userFeedback             does user require feedback, ie, keep trace of the constraints in conflict ?
+     * @param enablePartialExplanation do explanations need to be complete (for DBT or nogood extraction) ?
      */
-    public ExplanationEngine(Solver slv) {
-        this.solver = slv;
+    public ExplanationEngine(Solver solver, boolean userFeedback, boolean enablePartialExplanation) {
+        this.mSolver = solver;
+        this.saveCauses = userFeedback;
+        eventStore = new ArrayEventStore(solver.getEnvironment());
+        ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
+        solver.set(this);
     }
-
-    public boolean isActive() {
-        return false;
-    }
-
 
     /**
-     * Explain the activation of a propagator involved in a reified constraint
+     * Return the conflict strategy declared
+     */
+    public ConflictStrategy getCstrat() {
+        return cstrat;
+    }
+
+    /**
+     * Set the conflict strategy to use
+     */
+    public void setCstrat(ConflictStrategy cstrat) {
+        this.cstrat = cstrat;
+    }
+
+    /**
+     * Indicate whether or not the clauses are saved in Explanation
      *
-     * @param var        the reified variable
-     * @param propagator the propagator to awake.
+     * @return if clauses are saved
      */
-    public void activePropagator(BoolVar var, Propagator propagator) {
+    public boolean isSaveCauses() {
+        return saveCauses;
     }
 
     /**
-     * Explain the removal of the <code>val</code> from <code>var</code>, due to <code>cause</code>.
+     * Compute the explanation of the last event from the event store (naturally, the one that leads to a conflict),
+     * and return the explanation of the failure, that is, the (sub-)set of decisions and propagators explaining the conflict.
+     *
+     * @return an explanation (set of decisions and propagators).
+     */
+    public Explanation explain(ContradictionException cex) {
+        Explanation explanation = new Explanation(saveCauses);
+        ruleStore.init();
+
+        if (cex.v != null) {
+            ruleStore.addFullDomainRule((IntVar) cex.v);
+        } else {
+            explanation.addCause(cex.c); // otherwise, we could miss it ;)
+            cex.c.why(ruleStore, null, IntEventType.VOID, 0);
+        }
+        int i = eventStore.getSize() - 1;
+        while (i > -1 && !ruleStore.isPreemptedStop()) {
+            if (ruleStore.match(i, eventStore)) {
+                ruleStore.update(i, eventStore, explanation);
+            }
+            i--;
+        }
+        return explanation;
+    }
+
+    public RuleStore getRuleStore() {
+        return ruleStore;
+    }
+
+    public IEventStore getEventStore() {
+        return eventStore;
+    }
+
+    public Solver getSolver() {
+        return mSolver;
+    }
+
+    /**
+     * Get the explanation of a decision refutation
+     *
+     * @param decision a refuted decision
+     * @return the explanation
+     */
+    public Explanation getDecisionRefutationExplanation(Decision decision) {
+        return ruleStore.getDecisionRefutation(decision);
+    }
+
+    /**
+     * Store a decision refutation, for future reasoning.
+     *
+     * @param decision    refuted decision
+     * @param explanation the explanation of the refutation
+     */
+    public void storeDecisionExplanation(Decision decision, Explanation explanation) {
+        ruleStore.storeDecisionRefutation(decision, explanation);
+    }
+
+    /**
+     * Move a decision explanation from the old index to the new one.
+     * Required for DBT only and should be called with care!
+     *
+     * @param decision a decision
+     * @param to       the new index
+     */
+    public void moveDecisionRefutation(Decision decision, int to) {
+        ruleStore.moveDecisionRefutation(decision, to);
+    }
+
+    /**
+     * This is the main explanation why we create this class.
+     * Record operations to execute for explicit call to explanation.
      *
      * @param var   an integer variable
      * @param val   a value
      * @param cause a cause
      */
+    @Override
     public void removeValue(IntVar var, int val, ICause cause) {
+        eventStore.pushEvent(var, cause, IntEventType.REMOVE, val, -1, -1);
     }
 
     /**
-     * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
-     * <p/>
-     * Prerequisite: <code>value</code> should belong to <code>var</code>
-     *
-     * @param intVar an integer variable
-     * @param old    the previous lower bound
-     * @param value  the current lower bound
-     * @param cause  the cause
-     */
-    public void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
-    }
-
-    /**
-     * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
-     * <p/>
-     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     * This is the main reason why we create this class.
+     * Record operations to execute for explicit call to explanation.
      *
      * @param var   an integer variable
-     * @param old   the previous upper bound
-     * @param value the current upper bound
-     * @param cause the cause
+     * @param value a value
+     * @param cause a cause
+     * @value old previous LB
      */
-    public void updateUpperBound(IntVar var, int old, int value, ICause cause) {
+    @Override
+    public void updateLowerBound(IntVar var, int value, int old, ICause cause) {
+        eventStore.pushEvent(var, cause, IntEventType.INCLOW, value, old, -1);
     }
 
     /**
-     * Explain the assignment to <code>val</code> of <code>var</code> due to <code>cause</code>.
+     * This is the main reason why we create this class.
+     * Record operations to execute for explicit call to explanation.
      *
      * @param var   an integer variable
-     * @param val   the assignment value
-     * @param cause the cause
-     * @param oldLB the previous LB
-     * @param oldUB the previous UB
+     * @param value a value
+     * @param cause a cause
+     * @value old previous LB
      */
+    @Override
+    public void updateUpperBound(IntVar var, int value, int old, ICause cause) {
+        eventStore.pushEvent(var, cause, IntEventType.DECUPP, value, old, -1);
+    }
+
+    /**
+     * This is the main reason why we create this class.
+     * Record operations to execute for explicit call to explanation.
+     *
+     * @param var   an integer variable
+     * @param val   a value
+     * @param cause a cause
+     * @param oldLB previous lb
+     * @param oldUB previous ub
+     */
+    @Override
     public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
+        eventStore.pushEvent(var, cause, IntEventType.INSTANTIATE, val, oldLB, oldUB);
     }
 
-    public AntiDomain getRemovedValues(IntVar v) {
-        return null;
-    }
-
-    /**
-     * Get the deduction associated with the value removed from the variable
-     * @param var a variable
-     * @param val a value
-     * @return a deduction
-     */
-    public ValueRemoval getValueRemoval(IntVar var, int val){
-        return null;
-    }
-
-    /**
-     * Provides an explanation for the removal of value <code>val</code> from variable
-     * <code>var</code> ; the implementation is recording policy dependent
-     * for a flattened policy, the database is checked (automatically flattening explanations)
-     * for a non flattened policy, only the value removal is returned
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return a deduction
-     */
-    public Deduction explain(IntVar var, int val) {
-        return null;
-    }
-
-    /**
-     * Provides an explanation for the deduction <code>deduction</code> ; the implementation is recording policy dependent
-     * for a flattened policy, the database is checked (automatically flattening explanations)
-     * for a non flattened policy, the deduction is returned unmodified
-     *
-     * @param deduction a Deduction
-     * @return a deduction
-     */
-    public Deduction explain(Deduction deduction) {
-        return null;
-    }
-
-    /**
-     * Provides a FLATTENED explanation for the removal of value <code>val</code> from variable
-     * <code>var</code>
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return an explanation
-     */
-    public Explanation flatten(IntVar var, int val) {
-        return null;
-    }
-
-    public Explanation flatten(Explanation expl) {
-        return null;
-    }
-
-    public Explanation flatten(Deduction deduction) {
-        return null;
-    }
-
-    /**
-     * Provides the recorded explanation in database for the removal of value <code>val</code>
-     * from variable <code>var</code>
-     * The result will depend upon the recording policy of the engine
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return an explanation
-     */
-    public Explanation retrieve(IntVar var, int val) {
-        return null;
-    }
-
-    /**
-     * provides a BranchingDecision associated to a decision
-     *
-     * @param decision an integer variable
-     * @param isLeft   is left branch decision
-     * @return the associated right BranchingDecision
-     */
-    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
-        return null;
-    }
-
-    /**
-     * Provides an explanation of the activation of a propagator.
-     * Only valuated for reified propagators.
-     * @param propagator
-     * @return
-     */
-    public PropagatorActivation getPropagatorActivation(Propagator propagator) {
-        return null;
-    }
-
-    /**
-     * Store the <code>explanation</code> of the <code>deduction</code>
-     *
-     * @param deduction   deduction to explain
-     * @param explanation explanation of the deduction
-     */
-    public void store(Deduction deduction, Explanation explanation) {
-
-    }
-
-    /**
-     * Remove the <code>decision</code> from the set of left decisions over <code>var</code>
-     *
-     * @param decision a left decision over <code>var</code>
-     * @param var      a variable
-     */
-    public void removeLeftDecisionFrom(Decision decision, Variable var) {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
-        LOGGER.debug("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-    }
-
-    public void onActivatePropagator(Propagator propagator, Explanation explanation) {
-        LOGGER.debug("::EXPL:: ACTIV. " + propagator + " BECAUSE OF " + flatten(explanation));
-    }
-
-    public void onContradiction(ContradictionException cex, Explanation explanation) {
-        if (cex.v != null) {
-            LOGGER.debug("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
-        } else if (cex.c != null) {
-            LOGGER.debug("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    public Solver getSolver() {
-        return solver;
-    }
-
-    public void request() {
-        // only usefull for multi-thread
+    @Override
+    public void activePropagator(BoolVar var, Propagator propagator) {
+        eventStore.pushEvent(var, propagator, PropagatorEventType.FULL_PROPAGATION, propagator.getId(), 0, 0);
     }
 }

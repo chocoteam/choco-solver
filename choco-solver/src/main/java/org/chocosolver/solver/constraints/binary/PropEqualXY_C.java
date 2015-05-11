@@ -33,16 +33,17 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * X + Y = C
- * <p/>
+ * <p>
  * <br/>
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
@@ -153,24 +154,44 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        if (d.getVar() == x) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                y.explain(xengine, VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
-            } else {
-                throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(x)) {
+            IntEventType ievt = (IntEventType) evt;
+            switch (ievt) {
+                case REMOVE:
+                    newrules |= ruleStore.addRemovalRule(y, cste - value);
+                    break;
+                case DECUPP:
+                    newrules |= ruleStore.addLowerBoundRule(y);
+                    break;
+                case INCLOW:
+                    newrules |= ruleStore.addUpperBoundRule(y);
+                    break;
+                case INSTANTIATE:
+                    newrules |= ruleStore.addFullDomainRule(y);
+                    break;
             }
-        } else if (d.getVar() == y) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                x.explain(xengine, VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
-            } else {
-                throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
+        } else if (var.equals(y)) {
+            IntEventType ievt = (IntEventType) evt;
+            switch (ievt) {
+                case REMOVE:
+                    newrules |= ruleStore.addRemovalRule(x, cste - value);
+                    break;
+                case DECUPP:
+                    newrules |= ruleStore.addLowerBoundRule(x);
+                    break;
+                case INCLOW:
+                    newrules |= ruleStore.addUpperBoundRule(x);
+                    break;
+                case INSTANTIATE:
+                    newrules |= ruleStore.addFullDomainRule(x);
+                    break;
             }
         } else {
-            super.explain(xengine, d, e);
+            newrules |= super.why(ruleStore, var, evt, value);
         }
+        return newrules;
     }
 
     @Override

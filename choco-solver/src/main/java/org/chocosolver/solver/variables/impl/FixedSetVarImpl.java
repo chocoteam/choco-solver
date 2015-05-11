@@ -34,9 +34,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
@@ -182,16 +179,6 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     public void subscribeView(IView view) {
     }
 
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        throw new UnsupportedOperationException("SetConstantView does not (yet) implement method explain(...)");
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        throw new UnsupportedOperationException("SetConstantView does not (yet) implement method explain(...)");
-    }
-
     @Override//void (a constant receives no event)
     public void recordMask(int mask) {
     }
@@ -228,6 +215,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
         if (!identitymap.containsKey(this)) {
             FixedSetVarImpl clone = new FixedSetVarImpl(this.name, this.values, solver);
             identitymap.put(this, clone);
+            assert mIdx == 0;
         }
     }
 }

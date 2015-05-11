@@ -211,7 +211,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "cste -- 0");
+        Assert.assertEquals(l.toString(), "cste -- 0 = 0");
     }
 
     @Test(groups = "1s")

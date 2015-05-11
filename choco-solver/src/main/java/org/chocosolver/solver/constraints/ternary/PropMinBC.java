@@ -33,7 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -45,13 +47,14 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class PropMinBC extends Propagator<IntVar> {
+public class
+        PropMinBC extends Propagator<IntVar> {
 
-    IntVar MIN, v1, v2;
+    IntVar BST, v1, v2;
 
     public PropMinBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
-        this.MIN = vars[0];
+        this.BST = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];
     }
@@ -85,15 +88,15 @@ public class PropMinBC extends Propagator<IntVar> {
                 break;
             case 5: //  X and Z are instantiated
             {
-                int min = vars[0].getValue();
+                int best = vars[0].getValue();
                 int val2 = vars[2].getValue();
-                if (min < val2) {
-                    vars[1].instantiateTo(min, aCause);
+                if (best < val2) {
+                    vars[1].instantiateTo(best, aCause);
                     setPassive();
-                } else if (min > val2) {
+                } else if (best > val2) {
                     contradiction(vars[2], "wrong min selected");
                 } else { // X = Z
-                    vars[1].updateLowerBound(min, aCause);
+                    vars[1].updateLowerBound(best, aCause);
                 }
             }
             break;
@@ -110,15 +113,15 @@ public class PropMinBC extends Propagator<IntVar> {
             break;
             case 3://  X and Y are instantiated
             {
-                int min = vars[0].getValue();
+                int best = vars[0].getValue();
                 int val1 = vars[1].getValue();
-                if (min < val1) {
-                    vars[2].instantiateTo(min, aCause);
+                if (best < val1) {
+                    vars[2].instantiateTo(best, aCause);
                     setPassive();
-                } else if (min > val1) {
+                } else if (best > val1) {
                     contradiction(vars[1], "");
                 } else { // X = Y
-                    vars[2].updateLowerBound(min, aCause);
+                    vars[2].updateLowerBound(best, aCause);
                 }
             }
             break;
@@ -135,18 +138,18 @@ public class PropMinBC extends Propagator<IntVar> {
             break;
             case 1: // X is instantiated
             {
-                int min = vars[0].getValue();
-                if (!vars[1].contains(min) && !vars[2].contains(min)) {
+                int best = vars[0].getValue();
+                if (!vars[1].contains(best) && !vars[2].contains(best)) {
                     contradiction(vars[0], null);
                 }
-                if (vars[1].getLB() > min) {
-                    vars[2].instantiateTo(min, aCause);
+                if (vars[1].getLB() > best) {
+                    vars[2].instantiateTo(best, aCause);
                     setPassive();
-                } else if (vars[2].getLB() > min) {
-                    vars[1].instantiateTo(min, aCause);
+                } else if (vars[2].getLB() > best) {
+                    vars[1].instantiateTo(best, aCause);
                     setPassive();
                 } else {
-                    if (vars[1].updateLowerBound(min, aCause) | vars[2].updateLowerBound(min, aCause)) {
+                    if (vars[1].updateLowerBound(best, aCause) | vars[2].updateLowerBound(best, aCause)) {
                         filter(); // to ensure idempotency for "free"
                     }
                 }
@@ -178,7 +181,7 @@ public class PropMinBC extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            if (MIN.getValue() != Math.min(v1.getValue(), v2.getValue())) {
+            if (BST.getValue() != Math.min(v1.getValue(), v2.getValue())) {
                 return ESat.FALSE;
             } else {
                 return ESat.TRUE;
@@ -189,7 +192,7 @@ public class PropMinBC extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return MIN.toString() + ".MIN(" + v1.toString() + "," + v2.toString() + ")";
+        return BST.toString() + ".MIN(" + v1.toString() + "," + v2.toString() + ")";
     }
 
     @Override
@@ -204,5 +207,40 @@ public class PropMinBC extends Propagator<IntVar> {
 
             identitymap.put(this, new PropMinBC(X, Y, Z));
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == vars[0]) {
+            if (IntEventType.isInstantiate(evt.getMask())) {
+                for (int i = 1; i < 3; i++) {
+                    if (vars[i].isInstantiatedTo(var.getValue())) {
+                        newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
+                }
+            } else {
+                if (IntEventType.isInclow(evt.getMask())) {
+                    newrules |= ruleStore.addLowerBoundRule(vars[1]);
+                    newrules |= ruleStore.addLowerBoundRule(vars[2]);
+                }
+                if (IntEventType.isDecupp(evt.getMask())) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[1]);
+                    newrules |= ruleStore.addUpperBoundRule(vars[2]);
+                }
+            }
+        } else {
+            if (IntEventType.isInstantiate(evt.getMask())) {
+                newrules |= ruleStore.addFullDomainRule(vars[0]);
+            } else {
+                if (IntEventType.isInclow(evt.getMask())) {
+                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                }
+                if (IntEventType.isDecupp(evt.getMask())) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[0]);
+                }
+            }
+        }
+        return newrules;
     }
 }

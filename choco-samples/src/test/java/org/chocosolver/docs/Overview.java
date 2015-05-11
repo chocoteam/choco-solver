@@ -52,7 +52,7 @@ public class Overview {
         // 3. Create and post constraints by using constraint factories
         solver.post(IntConstraintFactory.arithm(x, "+", y, "<", 5));
         // 4. Define the search strategy
-        solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
+        solver.set(IntStrategyFactory.lexico_LB(x, y));
         // 5. Launch the resolution process
         solver.findSolution();
         //6. Print search statistics

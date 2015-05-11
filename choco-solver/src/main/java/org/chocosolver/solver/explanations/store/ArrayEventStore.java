@@ -1,22 +1,24 @@
-/*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2014,
+ *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ *       Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,7 +30,6 @@ package org.chocosolver.solver.explanations.store;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -56,10 +57,9 @@ public class ArrayEventStore implements IEventStore {
 
     IStateInt size;
 
-    boolean up2date;  // to indicate if the database is up-to-date
-
     public ArrayEventStore(IEnvironment env) {
         size = env.makeInt(0);
+        size._set(0, 0); // to force history manually -- required when created during the search
 
         varChunks = new IntVar[SIZE];
         cauChunks = new ICause[SIZE];
@@ -67,18 +67,18 @@ public class ArrayEventStore implements IEventStore {
         val1Chunks = new int[SIZE];
         val2Chunks = new int[SIZE];
         val3Chunks = new int[SIZE];
-        up2date = false;
     }
 
     public void pushEvent(IntVar var, ICause cause, IEventType mask, int one, int two, int three) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("WRITE {} {} {} {} {}", var, cause, mask, one, two, three);
-        }
-        assert cause != Cause.Null : "cause null";
+        //        assert cause != Cause.Null : "cause null";
         int idx = size.get();
         if (idx >= varChunks.length) {
             increase();
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("WRITE in {} ({}): < {} / {} / {} / {} / {} >", idx, size.getEnvironment().getWorldIndex(), var, cause, mask, one, two, three);
+        }
+
         varChunks[idx] = var;
         cauChunks[idx] = cause;
         masChunks[idx] = mask;
@@ -86,12 +86,6 @@ public class ArrayEventStore implements IEventStore {
         val2Chunks[idx] = two;
         val3Chunks[idx] = three;
         size.add(1);
-        up2date = false;
-    }
-
-    @Override
-    public void popEvent() {
-
     }
 
     private void increase() {
@@ -121,14 +115,6 @@ public class ArrayEventStore implements IEventStore {
         val3Chunks = valBigger;
     }
 
-    public boolean isUptodate() {
-        return up2date;
-    }
-
-    public void setUptodate(boolean b) {
-        this.up2date = b;
-    }
-
     public int getSize() {
         return size.get();
     }
@@ -155,11 +141,6 @@ public class ArrayEventStore implements IEventStore {
 
     public int getThirdValue(int evt) {
         return val3Chunks[evt];
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
     }
 
 }

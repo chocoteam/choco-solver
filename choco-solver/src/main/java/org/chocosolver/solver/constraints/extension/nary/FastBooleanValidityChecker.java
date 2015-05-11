@@ -46,18 +46,14 @@ public final class FastBooleanValidityChecker extends ValidityChecker {
     // Is tuple valide ?
     public final boolean isValid(final int[] tuple) {
         for (int i = 0; i < arity; i++) {
-            if (sortedvs[i].isInstantiated()) {
-                if (sortedvs[i].getValue() != tuple[position[i]])
+            if (vars[sortedidx[i]].isInstantiated()) {
+                if (vars[sortedidx[i]].getValue() != tuple[sortedidx[i]])
                     return false;
             } else break;
             // variable are sorted by domain size so only non instantiated variables remain
             // and non instantiated variables do not need to be checked in boolean !
         }
         return true;
-    }
-
-    public boolean isValid(int[] tuple, int i) {
-        return sortedvs[i].contains(tuple[position[i]]);
     }
 
 }

@@ -33,9 +33,10 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
@@ -204,25 +205,17 @@ public class PropAbsolute extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        if (d.getVar() == vars[0]) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                vars[1].explain(xengine, VariableState.REM, ((ValueRemoval) d).getVal(), e);
-                vars[1].explain(xengine, VariableState.REM, -((ValueRemoval) d).getVal(), e);
-            } else {
-                throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
-            }
-        } else if (d.getVar() == vars[1]) {
-            e.add(xengine.getPropagatorActivation(this));
-            if (d.getmType() == Deduction.Type.ValRem) {
-                vars[0].explain(xengine, VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);
-            } else {
-                throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
-            }
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(vars[0])) {
+            newrules |= ruleStore.addRemovalRule(vars[1], value);
+            newrules |= ruleStore.addRemovalRule(vars[1], -value);
+        } else if (var.equals(vars[1])) {
+            newrules |= ruleStore.addRemovalRule(vars[0], Math.abs(value));
         } else {
-            super.explain(xengine, d, e);
+            newrules |= super.why(ruleStore, var, evt, value);
         }
+        return newrules;
     }
 
     @Override

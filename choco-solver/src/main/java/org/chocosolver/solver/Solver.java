@@ -38,6 +38,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -56,6 +57,7 @@ import org.chocosolver.solver.search.solution.*;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.observers.FilteringMonitorList;
 import org.chocosolver.util.ESat;
 
 import java.io.*;
@@ -79,9 +81,12 @@ public class Solver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Settings settings = new Settings(){};
+    private Settings settings = new Settings() {
+    };
 
     private ExplanationEngine explainer;
+
+    private FilteringMonitorList eoList;
 
     /**
      * Variables of the solver
@@ -145,6 +150,7 @@ public class Solver implements Serializable {
 
 
     protected SatConstraint minisat;
+    protected NogoodConstraint nogoods;
     private Ibex ibex;
 
     /**
@@ -163,7 +169,7 @@ public class Solver implements Serializable {
         this.environment = environment;
         this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
         this.search = new SearchLoop(this);
-        this.explainer = new ExplanationEngine(this);
+        this.eoList = new FilteringMonitorList();
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
@@ -376,6 +382,23 @@ public class Solver implements Serializable {
         return solutionRecorder;
     }
 
+    /**
+     * Return the current settings for the solver
+     *
+     * @return a {@link org.chocosolver.solver.Settings}
+     */
+    public Settings getSettings() {
+        return this.settings;
+    }
+
+
+    /**
+     * Return the current event observer list
+     */
+    public FilteringMonitor getEventObserver() {
+        return this.eoList;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,6 +449,7 @@ public class Solver implements Serializable {
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
+        plugMonitor(explainer);
     }
 
     /**
@@ -453,21 +477,34 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Return the current settings for the solver
-     *
-     * @return a {@link org.chocosolver.solver.Settings}
-     */
-    public Settings getSettings() {
-        return this.settings;
-    }
-
-    /**
      * Override the default {@link org.chocosolver.solver.Settings} object.
      *
      * @param defaults new settings
      */
     public void set(Settings defaults) {
         this.settings = defaults;
+    }
+
+    /**
+     * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
+     * <p>
+     * Erase the current event observer if any.
+     *
+     * @param filteringMonitor an event observer
+     */
+    public void plugMonitor(FilteringMonitor filteringMonitor) {
+        this.eoList.add(filteringMonitor);
+    }
+
+    /**
+     * If {@code isComplete} is set to true, a complementary search strategy is added to the declared one in order to
+     * ensure that all variables are covered by a search strategy.
+     * Otherwise, the declared search strategy is used as is.
+     *
+     * @param isComplete completeness of the declared search strategy
+     */
+    public void makeCompleteSearch(boolean isComplete){
+        this.search.makeCompleteStrategy(isComplete);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -575,7 +612,7 @@ public class Solver implements Serializable {
         // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
             if (dynAdd) {
-                engine.dynamicAddition(cs[i], permanent);
+                engine.dynamicAddition(permanent, cs[i].getPropagators());
             }
             if (cs[i].isReified()) {
                 try {
@@ -605,7 +642,7 @@ public class Solver implements Serializable {
             cstrs[cIdx] = null;
             // 3. check if the resolution already started -> if true, dynamic deletion
             if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
-                engine.dynamicDeletion(c);
+                engine.dynamicDeletion(c.getPropagators());
             }
             // 4. remove the propagators of the constraint from its variables
             for (Propagator prop : c.getPropagators()) {
@@ -618,7 +655,7 @@ public class Solver implements Serializable {
 
     /**
      * Return a constraint embedding a minisat solver.
-     * It is highly recommanded that there is only once instance of this constraint in a solver.
+     * It is highly recommended that there is only once instance of this constraint in a solver.
      * So a call to this method will create and post the constraint if it does not exist.
      *
      * @return the minisat constraint
@@ -629,6 +666,21 @@ public class Solver implements Serializable {
             this.post(minisat);
         }
         return minisat;
+    }
+
+    /**
+     * Return a constraint embedding a nogood store (based on a sat solver).
+     * It is highly recommended that there is only once instance of this constraint in a solver.
+     * So a call to this method will create and post the constraint if it does not exist.
+     *
+     * @return the minisat constraint
+     */
+    public NogoodConstraint getNogoodStore() {
+        if (nogoods == null) {
+            nogoods = new NogoodConstraint(this);
+            this.post(nogoods);
+        }
+        return nogoods;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -832,6 +884,9 @@ public class Solver implements Serializable {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
+        if(!engine.isInitialized()){
+            engine.initialize();
+        }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
     }
@@ -845,6 +900,9 @@ public class Solver implements Serializable {
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
+        }
+        if(!engine.isInitialized()){
+            engine.initialize();
         }
         engine.propagate();
     }

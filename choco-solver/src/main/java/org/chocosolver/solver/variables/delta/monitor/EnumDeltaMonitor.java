@@ -50,7 +50,7 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     protected ICause propagator;
 
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
-		super(delta.getSearchLoop());
+		super(delta.getEnvironment());
         this.delta = delta;
         this.first = 0;
         this.last = 0;

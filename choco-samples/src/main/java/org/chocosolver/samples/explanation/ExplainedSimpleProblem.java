@@ -69,7 +69,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void solve() {
-        ExplanationFactory.CBJ.plugin(solver, false);
+        ExplanationFactory.CBJ.plugin(solver, false, false);
         if (solver.findSolution()) {
             do {
                 this.prettyOut();
@@ -80,15 +80,6 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v.getName() + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
-                }
-            }
-        }
     }
 
     public static void main(String[] args) {

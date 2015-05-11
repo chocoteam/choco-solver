@@ -37,10 +37,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -126,15 +122,14 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         for (int idx = 0; idx < vars.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             if (dsize > 1) {
-                int degree = variables[idx].getNbProps();
                 int weight = weight(variables[idx]);
                 long c1 = dsize * _d2;
-                long c2 = _d1 * degree * weight;
+                long c2 = _d1 * weight;
                 if (c1 < c2) {
                     bests.clear();
                     bests.add(idx);
                     _d1 = dsize;
-                    _d2 = degree * weight;
+                    _d2 = weight;
                 } else if (c1 == c2) {
                     bests.add(idx);
                 }
@@ -175,15 +170,12 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
             Propagator[] props = var.getPropagators();
             for (int i = 0; i < props.length; i++) {
                 int pid = props[i].getId();
+				if (pid2ari.get(pid) == null) {
+					pid2ari.putIfAbsent(pid, var.getSolver().getEnvironment().makeInt(props[i].arity()));
+				}
                 pid2ari.get(pid).add(-1);
             }
         }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        throw new SolverException("DomOverWDeg does not modify variables on IVariableMonitor.onUpdate.\n" +
-                "So it cannot explain value removals.");
     }
 
 }

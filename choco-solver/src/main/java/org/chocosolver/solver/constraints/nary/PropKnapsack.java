@@ -40,7 +40,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
@@ -169,6 +171,25 @@ public class PropKnapsack extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        assert var == this.power;
+        if (IntEventType.isInclow(evt.getMask())) {
+            for (int i = 0; i < n; i++) {
+                newrules |= ruleStore.addLowerBoundRule(vars[i]);
+            }
+        } else if (IntEventType.isDecupp(evt.getMask())) {
+            for (int i = 0; i < n; i++) {
+                newrules |= ruleStore.addBoundsRule(vars[i]);
+            }
+            newrules |= ruleStore.addUpperBoundRule(vars[n]);
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
+        }
+        return newrules;
     }
 
     @Override

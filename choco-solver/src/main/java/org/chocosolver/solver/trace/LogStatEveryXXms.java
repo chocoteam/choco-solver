@@ -29,6 +29,7 @@
 package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 
 /**
@@ -38,9 +39,10 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
  * @author Charles Prud'homme
  * @since 18 aug. 2010
  */
-public class LogStatEveryXXms implements IMonitorInitPropagation {
+public class LogStatEveryXXms implements IMonitorInitPropagation, IMonitorClose {
 
     Thread printer;
+    boolean alive;
 
     public LogStatEveryXXms(final Solver solver, final long duration) {
 
@@ -48,6 +50,7 @@ public class LogStatEveryXXms implements IMonitorInitPropagation {
 
             @Override
             public void run() {
+                alive = true;
                 try {
                     sleep(duration);
                     //noinspection InfiniteLoopStatement
@@ -56,7 +59,7 @@ public class LogStatEveryXXms implements IMonitorInitPropagation {
                         solver.getMeasures().updatePropagationCount();
                         System.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
                         sleep(duration);
-                    } while (true);
+                    } while (alive);
                 } catch (InterruptedException ignored) {
                 }
             }
@@ -71,5 +74,15 @@ public class LogStatEveryXXms implements IMonitorInitPropagation {
     @Override
     public void afterInitialPropagation() {
         printer.start();
+    }
+
+    @Override
+    public void beforeClose() {
+
+    }
+
+    @Override
+    public void afterClose() {
+        alive = false;
     }
 }

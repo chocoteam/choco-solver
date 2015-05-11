@@ -50,7 +50,7 @@ public class DeltaTest {
     @Test(groups = "1s")
     public void testAdd() {
         Solver sol = new Solver();
-        EnumDelta d = new EnumDelta(sol.getSearchLoop());
+        EnumDelta d = new EnumDelta(sol.getEnvironment());
         for (int i = 1; i < 40; i++) {
             d.add(i, Cause.Null);
             Assert.assertEquals(d.size(), i);

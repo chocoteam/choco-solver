@@ -36,11 +36,10 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -204,6 +203,11 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
         }
 
         @Override
+        public DecisionOperator<IntVar> getDecisionOperator() {
+            return DecisionOperator.int_eq;
+        }
+
+        @Override
         public void free() {
             free = true;
         }
@@ -274,11 +278,7 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
             }
         }
 
-        @Override
-        public void flush() {
-        }
-
-        @Override
+         @Override
         public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
             throw e.set(cause, variable, message);
         }
@@ -289,33 +289,17 @@ public class GenerateAndTest extends AbstractStrategy<IntVar> {
         }
 
         @Override
-        public void clear() {
-        }
-
-        @Override
-        public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        }
-
-        @Override
-        public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-
-        }
-
-        @Override
-        public void onPropagatorExecution(Propagator propagator) {
-        }
-
-        @Override
-        public void desactivatePropagator(Propagator propagator) {
-        }
-
-        @Override
-        public void dynamicAddition(Constraint c, boolean permanent) {
+        public void dynamicAddition(boolean permanent, Propagator... ps) {
             throw new SolverException("GenerateAndTest does not support propagator dynamic addition");
         }
 
         @Override
-        public void dynamicDeletion(Constraint c) {
+        public void updateInvolvedVariables(Propagator p) {
+            throw new SolverException("GenerateAndTest does not support propagator dynamic updating");
+        }
+
+        @Override
+        public void dynamicDeletion(Propagator... ps) {
             throw new SolverException("GenerateAndTest does not support propagator dynamic deletion");
         }
     }

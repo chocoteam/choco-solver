@@ -33,6 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
@@ -41,6 +42,7 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,9 +95,6 @@ public class SearchLoop implements ISearchLoop {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(SearchLoop.class);
 
-    // keep an int, that's faster than a long, and the domain of definition is large enough
-    int timeStamp;
-
     /* Reference to the solver */
     final Solver solver;
 
@@ -125,7 +124,9 @@ public class SearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    boolean hasReachedLimit;
+    boolean hasReachedLimit = false;
+
+    boolean hasEndedUnexpectedly = true; // to capture external shut down
 
     public SearchMonitorList smList;
 
@@ -137,6 +138,10 @@ public class SearchLoop implements ISearchLoop {
     private boolean alive;
 
     public Decision decision = ROOT;
+
+    protected boolean defaultSearch = false;
+
+    protected boolean completeSearch = false;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -162,7 +167,6 @@ public class SearchLoop implements ISearchLoop {
         // if a resolution has already been done
         if (rootWorldIndex > -1) {
             env.worldPopUntil(rootWorldIndex);
-            timeStamp++;
             Decision tmp;
             while (decision != ROOT) {
                 tmp = decision;
@@ -220,7 +224,6 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public void restoreRootNode() {
         env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
-        timeStamp++; // to force clear delta, on solution recording
         Decision tmp;
         while (decision != ROOT) {
             tmp = decision;
@@ -275,14 +278,12 @@ public class SearchLoop implements ISearchLoop {
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
                 case DOWN_LEFT_BRANCH:
-                    timeStamp++;
                     smList.beforeDownLeftBranch();
                     downLeftBranch();
                     smList.afterDownLeftBranch();
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
                 case DOWN_RIGHT_BRANCH:
-                    timeStamp++;
                     smList.beforeDownRightBranch();
                     downRightBranch();
                     smList.afterDownRightBranch();
@@ -312,29 +313,40 @@ public class SearchLoop implements ISearchLoop {
     private void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         this.nextState = INITIAL_PROPAGATION;
+        this.env.buildFakeHistoryOn(solver.getSettings().getEnvironmentHistorySimulationCondition());
     }
 
     /**
      * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
      */
     private void initialPropagation() {
-        this.env.worldPush();
+        this.env.worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             solver.getEngine().propagate();
         } catch (ContradictionException e) {
-            this.env.worldPop();
-            solver.setFeasible(FALSE);
             solver.getEngine().flush();
+            solver.setFeasible(FALSE);
             interrupt(MSG_INIT);
+            smList.onContradiction(e);
+            this.env.worldPop();
             return;
         }
-        this.env.worldPush(); // push another wolrd to recover the state after initial propagation
-        this.searchWorldIndex = env.getWorldIndex();
+        this.env.worldPush(); // store state after initial propagation; w = 1 -> 2
+        this.searchWorldIndex = env.getWorldIndex(); // w = 2
+        this.env.worldPush(); // store another time for restart purpose: w = 2 -> 3
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
+            defaultSearch = true;
             ISearchBinder binder = solver.getSettings().getSearchBinder();
             binder.configureSearch(solver);
         }
+        if (completeSearch && !defaultSearch) {
+            AbstractStrategy<Variable> declared = strategy;
+            DefaultSearchBinder dbinder = new DefaultSearchBinder();
+            AbstractStrategy[] complete = dbinder.getDefault(solver);
+            solver.set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
+        }
+
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
         } catch (ContradictionException cex) {
@@ -446,6 +458,7 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
+        hasEndedUnexpectedly = false;
         ESat sat = FALSE;
         if (measures.getSolutionCount() > 0) {
             sat = TRUE;
@@ -534,8 +547,13 @@ public class SearchLoop implements ISearchLoop {
     }
 
     @Override
+    public boolean hasEndedUnexpectedly() {
+        return hasEndedUnexpectedly;
+    }
+
+    @Override
     public int getTimeStamp() {
-        return timeStamp;
+        return env.getTimeStamp();
     }
 
     @Override
@@ -546,5 +564,25 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public SearchMonitorList getSMList() {
         return smList;
+    }
+
+    @Override
+    public int getSearchWorldIndex() {
+        return searchWorldIndex;
+    }
+
+    @Override
+    public void makeCompleteStrategy(boolean isComplete) {
+        this.completeSearch = isComplete;
+    }
+
+    @Override
+    public boolean isDefaultSearchUsed() {
+        return defaultSearch;
+    }
+
+    @Override
+    public boolean isSearchCompleted() {
+        return completeSearch;
     }
 }

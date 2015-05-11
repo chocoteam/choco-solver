@@ -39,9 +39,9 @@ Finding a solution
 
 A call to ``solver.findSolution()`` launches a resolution which stops on the first solution found, if any.
 
-.. literalinclude:: /../../choco-samples/src/test/java/docs/Overview.java
+.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/Overview.java
    :language: java
-   :lines: 45-57
+   :lines: 47-59
    :linenos:
 
 If a solution has been found, the resolution process stops on that solution,
@@ -176,7 +176,7 @@ The method ends by restoring the last solution found so far, if any.
 
 Here is a simple illustration:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/Pareto.java
+.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/integer/Pareto.java
    :language: java
    :lines: 71,72,73,75,83,88-92
    :linenos:
@@ -198,9 +198,11 @@ to ensure there is no pending events.
 Recording solutions
 ===================
 
-Choco |version| requires each solution to be fully instantiated, i.e. every variable must be fixed.
-Otherwise, an exception will be thrown if assertions are turned on (when ``-ea`` is added to the JVM parameters).
-Choco |version| includes several ways to record solutions.
+Choco |version| requires that each decision variable (that is, which is declared in the search strategy) is instantiated in a solution.
+Otherwise, an exception will be thrown.
+Non decision variables can be uninstantiated in a solution, however, if WARN logging is enable, a trace is shown to inform the user.
+Choco |version| includes several ways to record solutions, the recommended way is to plug a `ISolutionMonitor` in.
+See :ref:`44_monitors_label` for more details.
 
 Solution storage
 ----------------
@@ -238,7 +240,7 @@ Custom recorder
 You can build you own way of manipulating and recording solutions by either implementing your own ``ISolutionRecorder`` object
 or by simply using an ``ISolutionMonitor``, as follows:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/SMPTSP.java
+.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/integer/SMPTSP.java
    :language: java
    :lines: 118-124
    :linenos:
@@ -275,7 +277,7 @@ A search strategy performs a performs a `Depth First Search <http://en.wikipedia
 A decision involves a variables, a value and an operator, for instance :math:`x = 5`.
 Decisions are computed and applied until all the variables are instantiated, that is, a solution is found, or a failure has been detected.
 
- Choco|release| build a binary search tree: each decision can be refuted.
+ Choco |release| build a binary search tree: each decision can be refuted.
  When a decision has to be computed, the search strategy is called to provide one, for instance :math:`x = 5`.
  The decision is then applied, the variable, the domain of ``x`` is reduced to ``5``, and the decision is validated thanks to the propagation.
  If the application of the decision leads to a failure, the search backtracks and the decision is refuted (:math:`x \neq 5`) and validated through propagation.
@@ -353,7 +355,8 @@ Available variable selectors
 
     For set variables
 
-See ``solver.search.strategy.selectors.variables.MaxDelta``, ``solver.search.strategy.selectors.variables.MinDelta``.
+See ``solver.search.strategy.selectors.variables.MaxDelta``,
+    ``solver.search.strategy.selectors.variables.MinDelta``.
 
     For real variables
 
@@ -377,7 +380,9 @@ See ``solver.search.strategy.selectors.values.SetDomainMin``.
 
     For real variables
 
-See ``solver.search.strategy.selectors.values.RealDomainMiddle``.
+See ``solver.search.strategy.selectors.values.RealDomainMiddle``,
+    ``solver.search.strategy.selectors.values.RealDomainMin``
+    ``solver.search.strategy.selectors.values.RealDomainMax``.
 
 Available decision operators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -442,16 +447,17 @@ Default search strategies
 
 If no search strategy is specified in the model, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
 In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
-The default search strategy distincts variables per types and defines a specific search strategy per each type:
+The default search strategy distinguishes variables per types and defines a specific search strategy per each type, sequentially applied:
 
-#. integer variables (but boolean variables: ``IntStrategyFactory.minDom_LB(ivars)``
-#. boolean variables: :code:`IntStrategyFactory.lexico_UB(bvars)`
+#. integer variables and boolean variables : ``IntStrategyFactory.domOverWDeg(ivars, 0)``
 #. set variables: :code:`SetStrategyFactory.force_minDelta_first(svars)`
-#. real variables :code:`new RealStrategy(rvars, new Cyclic(), new RealDomainMiddle())`
+#. real variables :code:`RealStrategyFactory.cyclic_middle(rvars)`
+#. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
 
-Constants are excluded from search strategies' variable scope.
+Note that `ISF.lastConflict(solver)` is also plugged-in.
+Constants are excluded from search strategies' variable scope and the creation order is maintained per types.
 
-``IntStrategyFactory``, ``SetStrategyFactory`` and ``GraphStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
+``IntStrategyFactory``, ``SetStrategyFactory`` and ``RealStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
 
 
 .. _31_searchbinder:
@@ -494,9 +500,11 @@ When an environment is given in parameter, the last active strategy is stored.
 
     IntStrategyFactory.sequencer(AbstractStrategy... strategies)
 
-    new StrategiesSequencer(AbstractStrategy... strategies)
-    new StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies)
+Note that a strategy sequencer is automatically generated when setting multiple strategies at the same time:
 
+``solver.set(strategy1,strategy2);`` is equivalent to
+
+``solver.set(ISF.sequencer(strategy1,strategy2));``
 
 Finally, one can create its own strategy, see :ref:`Defining its own search <45_define_search_label>` for more details.
 
@@ -588,7 +596,7 @@ Resolution statistics
 
 Choco |version| distinguishes *developer trace* and *user trace*.
 *Developer trace* is only dedicated to developers for debugging purpose (Choco depends on SLF4J, as described in :ref:`Note about logging <1_log>`).
-*User trace* is dedicated to users (and developers) to print information relative to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
+*User trace* is dedicated to users (and developers) to print information related to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
 
 Resolution data are available thanks to the ``Chatterbox`` class, which outputs to ``System.out``.
 It centralises widely used methods to have comprehensive feedbacks about the resolution process.
@@ -615,7 +623,8 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
 
 .. code-block:: none
 
-     - Search complete - [ No solution. ]
+     - [ Search complete - [ No solution | {0} solution(s) found ]
+       | Incomplete search - [ Limit reached | Unexpected interruption ] ].
         Solutions: {0}
      [  Maximize = {1}  ]
      [  Minimize = {2}  ]
@@ -628,14 +637,16 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
         Fails: {9}
         Restarts: {10}
         Max depth: {11}
-        Propagations: {12} + {13}
-        Memory: {14}mb
-        Variables: {15}
-        Constraints: {16}
+        Memory: {12}mb
+        Variables: {13}
+        Constraints: {14}
+
+Curly brackets *{instruction | }* indicate alternative instructions
 
 Brackets *[instruction]* indicate an optional instruction.
-If no solution has been found, the message "No solution." appears on the first line.
-``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ResolutionPolicy.MINIMIZE- policy.
+
+If the search terminates, the message "Search complete" appears on the first line, followed with either the the number of solutions found or the message "No solution".
+``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ``ResolutionPolicy.MINIMIZE``- policy.
 
 Curly braces *{value}* indicate search statistics:
 
@@ -651,11 +662,9 @@ Curly braces *{value}* indicate search statistics:
 9. number of failures that occurred
 10. number of restarts operated
 11. maximum depth reached in the binary tree search
-12. number of *fine* propagations
-13. number of *coarse* propagations
-14. estimation of the memory used
-15. number of variables in the model
-16. number of constraints in the model
+12. estimation of the memory used
+13. number of variables in the model
+14. number of constraints in the model
 
 
 If the resolution process reached a limit before ending *naturally*, the title of the message is set to :

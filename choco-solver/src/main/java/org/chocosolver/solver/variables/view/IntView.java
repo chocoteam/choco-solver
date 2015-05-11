@@ -32,12 +32,6 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.antidom.AntiDomBitset;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -138,21 +132,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        var.explain(xengine, what, to);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        var.explain(xengine, VariableState.DOM, e);
-    }
-
-    @Override
-    public AntiDomain antiDomain() {
-        return new AntiDomBitset(this);
-    }
-
-    @Override
     public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
@@ -185,9 +164,4 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         return _riterator;
     }
 
-    @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        assert cause != null;
-        var.wipeOut(cause);
-    }
 }

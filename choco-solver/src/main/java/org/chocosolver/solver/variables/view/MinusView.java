@@ -32,9 +32,6 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -215,27 +212,10 @@ public class MinusView extends IntView {
             this.var.duplicate(solver, identitymap);
             MinusView clone = new MinusView((IntVar) identitymap.get(this.var), solver);
             identitymap.put(this, clone);
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
+            }
         }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        switch (what) {
-            case UB:
-                var.explain(xengine, VariableState.LB, to);
-                break;
-            case LB:
-                var.explain(xengine, VariableState.UB, to);
-                break;
-            default:
-                var.explain(xengine, what, to);
-                break;
-        }
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        var.explain(xengine, what, -val, to);
     }
 
     @Override

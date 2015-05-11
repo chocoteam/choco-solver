@@ -33,12 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -122,16 +119,16 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        Variable var = d.getVar();
-
-        if (var.equals(x)) {
-            // a deduction has been made on x ; this is related to y only
-            y.explain(xengine, VariableState.DOM, e);
-        } else if (var != null) {
-            x.explain(xengine, VariableState.DOM, e);
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == x) {
+            newrules |= ruleStore.addFullDomainRule(y);
+        } else if (var == y) {
+            newrules |= ruleStore.addFullDomainRule(x);
+        } else {
+            newrules |= super.why(ruleStore, var, evt, value);
         }
+        return newrules;
     }
 
     @Override

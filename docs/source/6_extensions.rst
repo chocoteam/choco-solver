@@ -71,11 +71,11 @@ choco-exppar
 choco-exppar is a Choco |version| module which provides an expression parser. This enables to simplify the modeling step.
 You will find it at https://github.com/chocoteam/choco-exppar
 
-.. _61_ext_eps:
+.. .. _61_ext_eps:
 
-choco-eps
-=========
-
-Embarrassingly Parallel Search for Choco |version| enables to speed up search on multi-core systems.
-This extension is currently under development. You will find it at https://github.com/chocoteam/choco-eps
-
+.. choco-eps
+.. =========
+..
+.. Embarrassingly Parallel Search for Choco |version| enables to speed up search on multi-core systems.
+.. This extension is currently under development. You will find it at https://github.com/chocoteam/choco-eps
+..

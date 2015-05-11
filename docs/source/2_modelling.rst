@@ -44,7 +44,7 @@ Variables
 | ``Variable getVar(int i)``                    | Return the :math:`i^th` variable declared in the solver.                                                                                                                     |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``IntVar[] retrieveIntVars()``                | Extract from the solver variables those which are integer (ie whose *KIND* is set to *INT*, that is, including *fixed* integer variables and boolean variables).             |
+| ``IntVar[] retrieveIntVars()``                | Extract from the solver variables those which are integer (ie whose *KIND* is set to *INT*, that is, including *fixed* integer variables).                                   |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``retrieveBoolVars()``                        | Extract from the solver variables those which are boolean (ie whose *KIND* is set to *BOOL*, that is, including ``Solver.ZERO`` and ``Solver.ONE``).                         |
@@ -135,14 +135,17 @@ Setters
 Others
 ------
 
-+-------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-| **Method**                                | **Definition**                                                                                                                       |
-+===========================================+======================================================================================================================================+
-| ``void plugMonitor(ISearchMonitor sm)``   | Put a :ref:`search monitor <44_monitors_label>` to react on search events (solutions, decisions, fails, ...).                        |
-+-------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-| ``Solver duplicateModel()``               | Duplicate the model associates with a solver, ie only variables and constraints, and return a new solver.                            |
-+-------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| **Method**                                        | **Definition**                                                                                                                       |
++===================================================+======================================================================================================================================+
+| ``Solver duplicateModel()``                       | Duplicate the model associates with a solver, ie only variables and constraints, and return a new solver.                            |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void makeCompleteSearch(boolean isComplete)``   | Add a strategy to the declared one in order to ensure that all variables are covered by (at least) one strategy.                     |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void plugMonitor(ISearchMonitor sm)``           | Put a :ref:`search monitor <44_monitors_label>` to react on search events (solutions, decisions, fails, ...).                        |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void plugMonitor(FilteringMonitor fm)``         | Add an filtering monitor, that is an object that is kept informed of all (propagation) events generated during the resolution.       |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 
 
 .. _22_variables_label:
@@ -239,7 +242,7 @@ To create a matrix of 5x6 enumerated variables with same domains: ::
 .. admonition:: **Modelling**: Bounded or Enumerated?
 
     The choice of representation of the domain variables should not be done lightly.
-    Not only the memory consumption should be considered but also the type of constraints used.
+    Not only the memory consumption should be considered but also the used constraints.
     Indeed, some constraints only update bounds of integer variables, using them with bounded variables is enough.
     Others make holes in variables' domain, using them with enumerated variables takes advantage of the *power* of the filtering algorithm.
     Most of the time, variables are associated with propagators of various *power*.
@@ -366,7 +369,7 @@ A solution of a problem is an assignment of all its variables simultaneously ver
 
 Constraint can be declared in *extension*, by defining the valid/invalid tuples, or in *intension*, by defining a relation between the variables.
 Choco |version| provides various factories to declare constraints (see :ref:`Overview <12_overview_label>` to have a list of available factories).
-A list of constraints available through factories is given in :ref:`List of available constraints <61_constraints_label>`.
+A list of constraints available through factories is given in :ref:`List of available constraints <23_constraints_label>`.
 
 .. admonition:: **Modelling**: Selecting the right constraints
 
@@ -391,7 +394,7 @@ A list of constraints available through factories is given in :ref:`List of avai
 
 If we want an integer variable ``sum`` to be equal to the sum of values of variables in the set ``atLeast``, we can use the ``IntConstraintFactory.sum`` constraint:
 
-.. literalinclude:: /../../choco-samples/src/main/java/samples/integer/CarSequencing.java
+.. literalinclude:: /../../choco-samples/src/main/java/org/chocosolver/samples/integer/CarSequencing.java
    :language: java
    :lines: 104
 
@@ -415,15 +418,17 @@ Choco |version| provides various types of constraints.
 Available constraints
 ^^^^^^^^^^^^^^^^^^^^^
 
-    :ref:`51_icstr_fal`, :ref:`51_icstr_tru`
+:ref:`51_icstr_fal`, :ref:`51_icstr_tru`
 
     On one integer variable
+
 :ref:`51_icstr_ari`,
 :ref:`51_icstr_mem`,
 :ref:`51_icstr_nmem`.
 
 
     On two integer variables
+
 :ref:`51_icstr_abs`,
 :ref:`51_icstr_ari`,
 :ref:`51_icstr_dist`,
@@ -432,6 +437,7 @@ Available constraints
 :ref:`51_icstr_tim`.
 
     On three integer variables
+
 :ref:`51_icstr_ari`,
 :ref:`51_icstr_dist`,
 :ref:`51_icstr_div`,
@@ -441,6 +447,7 @@ Available constraints
 :ref:`51_icstr_tim`.
 
     On an undefined number of integer variables
+
 :ref:`51_icstr_elm`,
 :ref:`51_icstr_sor`,
 :ref:`51_icstr_tab`,
@@ -459,6 +466,7 @@ Available constraints
 :ref:`51_icstr_nva`,
 
 :ref:`51_icstr_booc`,
+:ref:`51_icstr_clauc`,
 :ref:`51_icstr_ich`.
 
 :ref:`51_icstr_cum`,
@@ -492,13 +500,16 @@ Available constraints
 
 
     On one set variable
+
 :ref:`51_scstr_note`.    
 
     On two set variables
+
 :ref:`51_scstr_dis`,
 :ref:`51_scstr_off`.
 
     On an undefined number of set variables
+
 :ref:`51_scstr_alldif`,
 :ref:`51_scstr_alldis`,
 :ref:`51_scstr_alleq`,
@@ -514,6 +525,7 @@ Available constraints
     
 
     On integer and set variables
+
 :ref:`51_scstr_card`,
 :ref:`51_scstr_elm`,
 :ref:`51_scstr_icha`,
@@ -524,6 +536,7 @@ Available constraints
 :ref:`51_scstr_sum`.
 
     On real variables
+
 :ref:`51_rcstr_main`.
 
 
@@ -605,10 +618,12 @@ The second API ``constraint.reifyWith(b)`` reify the constraint with the given v
 
     A constraint is reified with only one boolean variable. If multiple reification are required, equality constraints will be created.
 
-
-Reifying a constraint means that we allow the constraint not to be satisfied. Therefore, the constraint **should not** be posted.
-
 The ``LogicalConstraintFactory`` enables to manipulate constraints through their reification.
+
+Reifying a constraint means that we allow the constraint not to be satisfied. Therefore, the reified constraint **should not** be posted.
+Only the reifying constraint should be posted. Note also that, for performance reasons, some reifying constraints available
+in the ``LogicalConstraintFactory`` are **automatically posted** (the factory method returns void).
+
 For instance, we can represent the constraint "either ``x<0`` or ``y>42``" as the following: ::
 
  Constraint a = IntConstraintFactory.arithm(x,"<",0);
@@ -619,6 +634,15 @@ For instance, we can represent the constraint "either ``x<0`` or ``y>42``" as th
 This will actually reify both constraints ``a`` and ``b`` and say that at least one of the corresponding boolean variables must be true.
 Note that only the constraint ``c`` is posted.
 
+As a second reification example, let us consider "if ``x<0`` then ``y>42``": ::
+
+ Constraint a = IntConstraintFactory.arithm(x,"<",0);
+ Constraint b = IntConstraintFactory.arithm(y,">",42);
+ LogicalConstraintFactory.ifThen(a,b);
+
+This time the ``LogicalConstraintFactory.ifThen`` returns void, meaning that the constraint is automatically posted.
+If one really needs to access an ``ifThen`` ``Constraint`` object, then the ``LogicalConstraintFactory.ifThen_reifiable``
+method should be used instead.
 
 SAT constraints
 ---------------
@@ -639,16 +663,19 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 
 
     On one boolean variable
+
 :ref:`51_lcstr_true`,
 :ref:`51_lcstr_false`.
 
     On two boolean variables
+
 :ref:`51_lcstr_booleq`,
 :ref:`51_lcstr_boolle`,
 :ref:`51_lcstr_boollt`,
 :ref:`51_lcstr_boolnot`.
 
     Reification on two boolean variables
+
 :ref:`51_lcstr_booliseqvar`,
 :ref:`51_lcstr_boolislevar`,
 :ref:`51_lcstr_boolisltvar`,
@@ -658,6 +685,7 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 :ref:`51_lcstr_andeqvar`.
 
     On undefined number of boolean variables
+
 :ref:`51_lcstr_orarrayqualtrue`,
 :ref:`51_lcstr_atmostnminusone`,
 :ref:`51_lcstr_atmostone`,
@@ -684,7 +712,7 @@ A ``LogOp`` is an implementation of ``ILogical``, just like ``BoolVar``, and pro
 
   ``LogOp ifOnlyIf(ILogical a, ILogical b)``:  create a biconditional, results in `true` if and only if both operands are false or both operands are `true`.
 
-  ``LogOp ifThenElse(ILogical a, ILogical b, ILogical c)`` : create an implication, results in `true` if ``a`` is `true` and ``b`` is `true` or ``a`` is ``false` and ``c`` is `true.
+  ``LogOp ifThenElse(ILogical a, ILogical b, ILogical c)`` : create an implication, results in `true` if ``a`` is `true` and ``b`` is `true` or ``a`` is ``false` and ``c`` is `true`.
 
   ``LogOp implies(ILogical a, ILogical b)`` : create an implication, results in `true` if ``a`` is `false` or ``b`` is `true`.
 

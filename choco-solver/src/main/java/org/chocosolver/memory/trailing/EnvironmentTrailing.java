@@ -95,6 +95,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      */
     @Override
     public void worldPush() {
+        timestamp++;
         //code optim.: replace loop by enumeration
         final int wi = currentWorld + 1;
         for (int i = 0; i < trailSize; i++) {
@@ -112,6 +113,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      */
     @Override
     public void worldPop() {
+        timestamp++;
         //code optim.: replace loop by enumeration
         final int wi = currentWorld;
         for (int i = trailSize - 1; i >= 0; i--) {
@@ -225,7 +227,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     intTrail = new StoredIntChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    intTrail = new UnsafeIntTrail(maxWorld);
+                    intTrail = new UnsafeIntTrail(MaxHist, maxWorld);
                     break;
             }
             increaseTrail();
@@ -244,7 +246,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     longTrail = new StoredLongChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    longTrail = new UnsafeLongTrail(maxWorld);
+                    longTrail = new UnsafeLongTrail(MaxHist, maxWorld);
                     break;
             }
 
@@ -264,7 +266,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     boolTrail = new StoredBoolChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    boolTrail = new UnsafeBoolTrail(maxWorld);
+                    boolTrail = new UnsafeBoolTrail(MaxHist, maxWorld);
                     break;
             }
 
@@ -284,7 +286,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                     doubleTrail = new StoredDoubleChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
-                    doubleTrail = new UnsafeDoubleTrail(maxWorld);
+                    doubleTrail = new UnsafeDoubleTrail(MaxHist, maxWorld);
                     break;
             }
             increaseTrail();

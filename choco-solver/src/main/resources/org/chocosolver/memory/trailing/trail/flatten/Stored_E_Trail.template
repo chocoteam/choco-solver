@@ -160,7 +160,7 @@ public class Stored#E#Trail implements IStored#E#Trail {
         variableStack[currentLevel] = v;
         stampStack[currentLevel] = oldStamp;
         currentLevel++;
-        if (currentLevel == maxUpdates) {
+        if (currentLevel == variableStack.length) {
             resizeUpdateCapacity();
         }
     }
@@ -169,44 +169,32 @@ public class Stored#E#Trail implements IStored#E#Trail {
     public void buildFakeHistory(Stored#E# v, #e# initValue, int olderStamp) {
         // from world 0 to fromStamp (excluded), create a fake history based on initValue
         // kind a copy of the current elements
-        // 1. make a copy of variableStack
-        Stored#E#[] _variableStack = variableStack;
-        #e#[] _valueStack = valueStack;
-        int[] _stampStack = stampStack;
-        int[] _worldStartLevels = worldStartLevels;
-        int _maxUpdates = variableStack.length + olderStamp;
-        int _currentLevel = currentLevel;
-
-        variableStack = new Stored#E#[_maxUpdates];
-        valueStack = new #e#[_maxUpdates];
-        stampStack = new int[_maxUpdates];
-        worldStartLevels = new int[worldStartLevels.length];
-        currentLevel = 0;
-
-        // then replay the history
-        for (int w = 1; w < olderStamp; w++) {
-            // copy the true history
-            rebuild(_worldStartLevels[w], _worldStartLevels[w + 1], _variableStack, _valueStack, _stampStack);
-            // add the fake one
-            savePreviousState(v, initValue, w - 1);
-            worldPush(w + 1);
-        }
-        // copy the true history
-        rebuild(_worldStartLevels[olderStamp], _currentLevel, _variableStack, _valueStack, _stampStack);
-
+        // first save the current state on the top of the stack
         savePreviousState(v, initValue, olderStamp - 1);
-    }
-
-    private void rebuild(int f, int t, Stored#E#[] _variableStack, #e#[] _valueStack, int[] _stampStack) {
-        System.arraycopy(_variableStack, f, variableStack, currentLevel, t - f);
-        System.arraycopy(_valueStack, f, valueStack, currentLevel, t - f);
-        System.arraycopy(_stampStack, f, stampStack, currentLevel, t - f);
-        currentLevel += (t - f);
+        // second: ensures capacities
+        while (currentLevel + olderStamp > variableStack.length) {
+            resizeUpdateCapacity();
+        }
+        int i1, f, s = currentLevel;
+        for (int w = olderStamp; w > 1; w--) {
+            f = worldStartLevels[w];
+            i1 = f + w - 1;
+            s -= f;
+            System.arraycopy(variableStack, f, variableStack, i1, s);
+            System.arraycopy(valueStack, f, valueStack, i1, s);
+            System.arraycopy(stampStack, f, stampStack, i1, s);
+            variableStack[i1 - 1] = v;
+            valueStack[i1 - 1] = initValue;
+            stampStack[i1 - 1] = w - 2;
+            worldStartLevels[w] += w - 1;
+            currentLevel++;
+            s = f;
+        }
     }
 
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((maxUpdates * 3) / 2);
+        final int newCapacity = ((variableStack.length * 3) / 2);
         // first, copy the stack of variables
         final Stored#E#[] tmp1 = new Stored#E#[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);

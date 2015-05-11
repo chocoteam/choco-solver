@@ -43,12 +43,10 @@ public class TimeCounter extends ACounter implements IMonitorOpenNode {
 
     private Solver solver;
 
-    private static final int IN_NS = 1000 * 1000;
-
     private long offset;
 
     public TimeCounter(Solver solver, long timeLimit) {
-        super(timeLimit * IN_NS); // <- timelimit is in ms, we compare with ns!
+        super(timeLimit);
         this.solver = solver;
     }
 
@@ -56,13 +54,13 @@ public class TimeCounter extends ACounter implements IMonitorOpenNode {
     @Override
     public void init() {
         solver.getMeasures().updateTimeCount();
-        long time = (long) (solver.getMeasures().getTimeCount() * IN_NS);
-        offset = System.nanoTime() - time;
+        long time = (long) (solver.getMeasures().getTimeCount());
+        offset = System.currentTimeMillis() - time;
     }
 
     @Override
     public void beforeOpenNode() {
-        setCounter(System.nanoTime() - offset);
+        setCounter(System.currentTimeMillis() - offset);
     }
 
     @Override

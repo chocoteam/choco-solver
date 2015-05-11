@@ -183,6 +183,19 @@ public class SatTest {
     }
 
     @Test(groups = "1s")
+    public void test12() {
+        Solver solver = new Solver();
+        BoolVar[] bs = VF.boolArray("b", 3, solver);
+        SatFactory.addBoolOrArrayEqualTrue(bs);
+        SatFactory.addFalse(bs[0]);
+        SatFactory.addFalse(bs[1]);
+        SatFactory.addFalse(bs[2]);
+        //        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
+    }
+
+    @Test(groups = "1s")
     public void testAlexLoboda() throws ContradictionException {
         Solver solver = new Solver();
         // VARS

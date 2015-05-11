@@ -46,6 +46,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -56,6 +57,13 @@ import java.util.Random;
  * @since 29/08/2014
  */
 public class DuplicateTest {
+
+    private String[] sort(String output){
+        String[] os = output.split("\n");
+        Arrays.sort(os);
+        return os;
+    }
+
 
     @Test(groups = "1s")
     public void test1() {
@@ -109,7 +117,7 @@ public class DuplicateTest {
         Solver copy = solver.duplicateModel();
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
-        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(sort(copy.toString()), sort(solver.toString()));
     }
 
     @Test(groups = "1s")
@@ -695,7 +703,7 @@ public class DuplicateTest {
 
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
-        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(sort(copy.toString()), sort(solver.toString()));
         Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
     }
 
@@ -726,7 +734,7 @@ public class DuplicateTest {
 
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
         Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
-        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(sort(copy.toString()), sort(solver.toString()));
         Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
     }
 

@@ -33,8 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -131,42 +132,63 @@ public class PropSumEq extends Propagator<IntVar> {
         return linComb.toString();
     }
 
+
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d != null && d.getmType() == Deduction.Type.ValRem) {
-            ValueRemoval vr = (ValueRemoval) d;
-            IntVar var = (IntVar) vr.getVar();
-            int val = vr.getVal();
-            // 1. find the pos of var in vars
-            boolean ispos = vars[n].getId() != var.getId();
-            if (val < var.getLB()) { // explain LB
-                for (int i = 0; i < n; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        // 1. find the pos of var in vars
+        boolean ispos = vars[n].getId() != var.getId();
+        // to deal with BoolVar: any event is automatically promoted to INSTANTIATE
+        if (IntEventType.isInstantiate(evt.getMask())) {
+            assert var.isBool() : "BoolVar excepted";
+            evt = (var.getValue() == 0 ? IntEventType.DECUPP : IntEventType.INCLOW);
+        }
+        if (IntEventType.isInclow(evt.getMask())) {
+            for (int i = 0; i < n; i++) { // first the positive coefficients
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
                     }
                 }
-                // then the negative one
+            }
+            // then the negative one
+            if (vars[n] != var) {
                 if (vars[n] != var) {
-                    vars[n].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
-                }
-            } else if (val > var.getUB()) { // explain UB
-                for (int i = 0; i < n; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(xengine, ispos ? VariableState.LB : VariableState.UB, e);
+                    if (ispos) {
+                        newrules |= ruleStore.addLowerBoundRule(vars[n]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[n]);
                     }
                 }
-                // then the negative one
-                if (vars[n] != var) {
-                    vars[n].explain(xengine, ispos ? VariableState.UB : VariableState.LB, e);
+            }
+        } else if (IntEventType.isDecupp(evt.getMask())) {
+            for (int i = 0; i < n; i++) { // first the positive coefficients
+                if (vars[i] != var) {
+                    if (ispos) {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    }
                 }
-            } else {
-                super.explain(xengine, d, e);
+            }
+            // then the negative one
+            if (vars[n] != var) {
+                if (ispos) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[n]);
+                } else {
+                    newrules |= ruleStore.addLowerBoundRule(vars[n]);
+                }
             }
         } else {
-            super.explain(xengine, d, e);
+            for (int i = 0; i < vars.length; i++) {
+                newrules |= ruleStore.addFullDomainRule(vars[i]);
+            }
         }
+        return newrules;
     }
+
 
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {

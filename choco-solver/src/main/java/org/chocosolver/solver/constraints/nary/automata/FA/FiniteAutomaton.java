@@ -30,10 +30,10 @@ package org.chocosolver.solver.constraints.nary.automata.FA;
 
 import dk.brics.automaton.*;
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.tools.StringUtils;
 
 import java.io.BufferedWriter;
@@ -50,9 +50,10 @@ import java.util.*;
  */
 public class FiniteAutomaton implements IAutomaton {
 
+    protected int min = Character.MIN_VALUE, max = Character.MAX_VALUE;
 
-    protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap();
-    protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap();
+    protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap(16, .5f, -1, -1);
+    protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap(16, .5f, -1, -1);
 
     static {
         int delta = 0;
@@ -71,7 +72,13 @@ public class FiniteAutomaton implements IAutomaton {
     }
 
     public static char getCharFromInt(int i) {
-        return (char) charFromIntMap.get(i);
+        int c = charFromIntMap.get(i);
+        if (c > -1) {
+            return (char) charFromIntMap.get(i);
+        } else {
+            throw new SolverException("Unknwon value \"" + i + "\". Note that only integers in [" +
+                    (int) Character.MIN_VALUE + "," + (int) (Character.MAX_VALUE) + "] are allowed by FiniteAutomaton.");
+        }
     }
 
 
@@ -92,18 +99,35 @@ public class FiniteAutomaton implements IAutomaton {
 
     }
 
-    public FiniteAutomaton(String regexp) {
+    /**
+     * Create a finite automaton based on a regular expression.
+     * The regexp accepts digits  and numbers, in [0,65535].
+     * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
+     * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
+     *
+     * @param regexp the regular expression
+     * @param min    an overall minimum value for transitions
+     * @param max    an overall maximum value for transitions
+     */
+    public FiniteAutomaton(String regexp, int min, int max) {
         this();
         String correct = StringUtils.toCharExp(regexp);
         this.representedBy = new RegExp(correct).toAutomaton();
-        for (State s : representedBy.getStates()) {
-            for (Transition t : s.getTransitions()) {
-                for (char c = t.getMin(); c <= t.getMax(); c++) {
-                    alphabet.add(getIntFromChar(c));
-                }
-            }
-        }
+        this.min = Math.max(Character.MIN_VALUE, min);
+        this.max = Math.min(Character.MAX_VALUE, max);
         syncStates();
+    }
+
+    /**
+     * Create a finite automaton based on a regular expression.
+     * The regexp accepts digits  and numbers, in [0,65535].
+     * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
+     * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
+     *
+     * @param regexp
+     */
+    public FiniteAutomaton(String regexp) {
+        this(regexp, Character.MIN_VALUE, Character.MAX_VALUE);
     }
 
     public FiniteAutomaton(FiniteAutomaton other) {
@@ -322,7 +346,7 @@ public class FiniteAutomaton implements IAutomaton {
     }
 
 
-    public TIntArrayList getOutSymbols(int source) {
+    /*public TIntArrayList getOutSymbols(int source) {
         try {
             checkState(source);
         } catch (StateNotInAutomatonException e) {
@@ -337,9 +361,9 @@ public class FiniteAutomaton implements IAutomaton {
         }
         return new TIntArrayList(set.toArray());
 
-    }
+    }*/
 
-    private TIntHashSet tmpSet = new TIntHashSet();
+    /*private TIntHashSet tmpSet = new TIntHashSet();
 
     public int[] getOutSymbolsArray(int source) {
         try {
@@ -356,7 +380,7 @@ public class FiniteAutomaton implements IAutomaton {
         }
         return tmpSet.toArray();
 
-    }
+    }*/
 
     public void addToAlphabet(int a) {
         alphabet.add(a);
@@ -457,7 +481,9 @@ public class FiniteAutomaton implements IAutomaton {
             states.add(s);
             stateToIndex.put(s, idx++);
             for (Transition t : s.getTransitions()) {
-                for (char c = t.getMin(); c <= t.getMax(); c++) {
+                char m = (char) Math.max(min, t.getMin());
+                char M = (char) Math.min(max, t.getMax());
+                for (char c = m; c <= M; c++) {
                     alphabet.add(getIntFromChar(c));
                 }
             }
@@ -606,7 +632,9 @@ public class FiniteAutomaton implements IAutomaton {
             State s = states.get(i);
             for (Transition t : s.getTransitions()) {
                 int dest = stateToIndex.get(t.getDest());
-                for (char c = t.getMin(); c <= t.getMax(); c++) {
+                char m = (char) Math.max(min, t.getMin());
+                char M = (char) Math.min(max, t.getMax());
+                for (char c = m; c <= M; c++) {
                     int symbol = getIntFromChar(c);
                     transitions.add(new int[]{i, dest, symbol});
                 }
@@ -620,7 +648,9 @@ public class FiniteAutomaton implements IAutomaton {
         List<int[]> transitions = new ArrayList<>();
         for (Transition t : states.get(state).getTransitions()) {
             int dest = stateToIndex.get(t.getDest());
-            for (char c = t.getMin(); c <= t.getMax(); c++) {
+            char m = (char) Math.max(min, t.getMin());
+            char M = (char) Math.min(max, t.getMax());
+            for (char c = m; c <= M; c++) {
                 int symbol = getIntFromChar(c);
                 transitions.add(new int[]{state, dest, symbol});
             }

@@ -30,7 +30,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -84,7 +83,9 @@ public interface IntVar extends Variable {
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException
      *          if the domain become empty due to this action
+     * @deprecated
      */
+    @Deprecated
     boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
 
     /**
@@ -142,13 +143,6 @@ public interface IntVar extends Variable {
      * @throws ContradictionException if the domain become empty due to this action
      */
     boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
-
-    /**
-     * Force <code>this</code> to fail
-     * @param cause cause of the wipe out
-     * @throws ContradictionException
-     */
-    void wipeOut(ICause cause) throws ContradictionException;
 
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
@@ -323,9 +317,7 @@ public interface IntVar extends Variable {
     <DM extends IIntDeltaMonitor> DM monitorDelta(ICause propagator);
 
 
-    AntiDomain antiDomain();
-
-	/**
+    /**
 	 * @return true iff the variable has a binary domain
 	 */
 	boolean isBool();

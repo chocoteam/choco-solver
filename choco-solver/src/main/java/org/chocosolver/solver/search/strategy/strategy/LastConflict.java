@@ -49,11 +49,11 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     // VARIABLES
     //***********************************************************************************
 
-	protected Solver solver;
+    protected Solver solver;
     protected AbstractStrategy<Variable> mainStrategy;
-	protected boolean active;
-	protected int nbCV;
-	protected Variable[] conflictingVariables;
+    protected boolean active;
+    protected int nbCV;
+    protected Variable[] conflictingVariables;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -61,13 +61,13 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     public LastConflict(Solver solver, AbstractStrategy<Variable> mainStrategy, int k) {
         super(mainStrategy.vars);
-		assert k>0 : "parameter K of last conflict must be strictly positive!";
+        assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.solver = solver;
         this.mainStrategy = mainStrategy;
         solver.getSearchLoop().plugSearchMonitor(this);
-		conflictingVariables = new Variable[k];
-		nbCV = 0;
-		active = false;
+        conflictingVariables = new Variable[k];
+        nbCV = 0;
+        active = false;
     }
 
     //***********************************************************************************
@@ -76,22 +76,22 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void init() throws ContradictionException {
-		mainStrategy.init();
+        mainStrategy.init();
     }
 
     @Override
     public Decision getDecision() {
-		if(active){
-			Variable decVar = firstNotInst();
-			if (decVar != null) {
-				Decision d = mainStrategy.computeDecision(decVar);
-				if(d != null){
-					return d;
-				}
-			}
-		}
-		active = true;
-		return mainStrategy.getDecision();
+        if (active) {
+            Variable decVar = firstNotInst();
+            if (decVar != null) {
+                Decision d = mainStrategy.computeDecision(decVar);
+                if (d != null) {
+                    return d;
+                }
+            }
+        }
+        active = true;
+        return mainStrategy.getDecision();
     }
 
     //***********************************************************************************
@@ -102,50 +102,53 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     @Override
     public void onContradiction(ContradictionException cex) {
         Variable curDecVar = solver.getSearchLoop().getLastDecision().getDecisionVariable();
-		if(nbCV>0 && conflictingVariables[nbCV-1]==curDecVar)return;
-		if(inScope(curDecVar)){
-			if(nbCV<conflictingVariables.length){
-				conflictingVariables[nbCV++] = curDecVar;
-			}else{
-				assert nbCV==conflictingVariables.length;
-				System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
-				conflictingVariables[nbCV-1] = curDecVar;
-			}
-		}
+        if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
+        if (inScope(curDecVar)) {
+            if (nbCV < conflictingVariables.length) {
+                conflictingVariables[nbCV++] = curDecVar;
+            } else {
+                assert nbCV == conflictingVariables.length;
+                System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
+                conflictingVariables[nbCV - 1] = curDecVar;
+            }
+        }
     }
 
     @Override
-    public void beforeRestart() {}
+    public void beforeRestart() {
+    }
 
     @Override
     public void afterRestart() {
-		active = false;
+        active = false;
     }
 
     @Override
     public void onSolution() {
-		active = false;
+        active = false;
     }
 
     //***********************************************************************************
     //***********************************************************************************
 
     private Variable firstNotInst() {
-		for(int i=nbCV-1;i>=0;i--){
-			if(!conflictingVariables[i].isInstantiated()){
-				return conflictingVariables[i];
-			}
-		}
+        for (int i = nbCV - 1; i >= 0; i--) {
+            if (!conflictingVariables[i].isInstantiated()) {
+                return conflictingVariables[i];
+            }
+        }
         return null;
     }
 
-	private boolean inScope(Variable target){
-		Variable[] scope = mainStrategy.vars;
-		for(int v=0; v<scope.length; v++){
-			if(scope[v].getId()==target.getId()){
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean inScope(Variable target) {
+        Variable[] scope = mainStrategy.vars;
+        if (target != null) {
+            for (int v = 0; v < scope.length; v++) {
+                if (scope[v].getId() == target.getId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

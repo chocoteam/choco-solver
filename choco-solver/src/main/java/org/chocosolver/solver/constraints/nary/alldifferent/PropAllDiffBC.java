@@ -34,7 +34,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -46,7 +48,7 @@ import org.chocosolver.util.ESat;
  *
  * @author Hadrien Cambazard, Charles Prud'homme, Jean-Guillaume fages
  * @since 07/02/11
- * <p/>
+ * <p>
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
@@ -84,5 +86,16 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             identitymap.put(this, new PropAllDiffBC(aVars));
         }
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        for (int i = 0; i < vars.length; i++) {
+            if(vars[i]!=var){
+                nrules |= ruleStore.addBoundsRule(vars[i]);
+            }
+        }
+        return nrules;
     }
 }

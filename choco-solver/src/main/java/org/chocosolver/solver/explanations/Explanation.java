@@ -1,24 +1,22 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,146 +26,237 @@
  */
 package org.chocosolver.solver.explanations;
 
-import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.list.TIntList;
+import gnu.trove.set.hash.THashSet;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.IntVar;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * An explanation is the combination of two sets: a set of deduction and a set of propagators.
- * The deductions are stored in a list, and the uniqueness of elements is ensured during the add operation.
- * This allows fast iteration over elements.
- * The propagators are stored in the same way.
- * <p>
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 26 oct. 2010
- * Time: 12:54:50
- * An explanation
+ * An explanation is simply a set of causes and decisions explaining a <i>situation</i>, for instance a conflict.
+ * It is related to the explanation engine (replacement of Explanation)
+ * Created by cprudhom on 09/12/14.
+ * Project: choco.
  */
+public class Explanation {
 
-public class Explanation extends Deduction {
-    public static ThreadLocal<Explanation> SYSTEM = new ThreadLocal<Explanation>() {
-        @Override
-        protected Explanation initialValue() {
-            return new Explanation();
-        }
-    };
+    private final boolean saveCauses;
+    private Rules rules; // null when explanation is complete
+    private final THashSet<ICause> causes;
+    private final BitSet decisions;
+    private int evtstrIdx;  // event store index of the last analysis
 
-    private List<Deduction> deductions;
-    private TIntHashSet did;
-
-    public Explanation() {
-        super(Type.Exp);
+    public Explanation(boolean saveCauses) {
+        this.causes = new THashSet<>();
+        this.decisions = new BitSet();
+        this.saveCauses = saveCauses;
     }
 
-
     /**
-     * Add a new explanation to this.
-     * Extract the deductions and the propagators from expl, and add them to this.
+     * Add a cause, which explains, partially, the situation
      *
-     * @param expl explanation to add
+     * @param cause a cause
+     * @return true if this was an unknown cause
      */
-    public void add(Explanation expl) {
-        int nbd = expl.nbDeductions();
-        if (nbd > 0) {
-            // 1. add all deductions of expl
-            for (int i = 0; i < nbd; i++) {
-                add(expl.getDeduction(i));
-            }
-        }
+    public boolean addCause(ICause cause) {
+        return saveCauses && causes.add(cause);
     }
 
     /**
-     * Add a new deduction to the set of deductions of this
+     * Add a decision, which explains, partially, the situation
      *
-     * @param d deduction to add
+     * @param decision a decision
      */
-    public void add(Deduction d) {
-        if (d.mType == Type.Exp) {
-            add((Explanation) d);
-        } else {
-            if (d.getmType() == Type.PropAct) {
-                PropagatorActivation pa = (PropagatorActivation) d;
-                if (pa.getPropagator().isReifiedAndSilent()) {
-                    throw new UnsupportedOperationException();
-                }
-            }
-
-            if (this.deductions == null) {
-                this.deductions = new ArrayList<>(4);
-                this.did = new TIntHashSet();
-            }
-            if (this.did.add(d.id)) {
-                this.deductions.add(d);
-            }
-        }
+    public void addDecicion(Decision decision) {
+        decisions.set(decision.getWorldIndex());
     }
 
+
     /**
-     * Remove a deduction from the set of deductions of this.
+     * Return the number of causes explaining the situation
      *
-     * @param d deduction to remove
+     * @return an int
      */
-    public void remove(Deduction d) {
-        this.deductions.remove(d);
-        this.did.remove(d.id);
-    }
-
-
-    public boolean contain(Deduction d) {
-        return deductions != null && did.contains(d.id);
+    public int nbCauses() {
+        return causes.size();
     }
 
     /**
-     * Reset internal strucutre, forget all deductions and propagators.
+     * Return the number of decisions explaining the situation
+     *
+     * @return an int
      */
-    public void reset() {
-        if (this.deductions != null) {
-            this.deductions.clear();
-            this.did.clear();
+    public int nbDecisions() {
+        return decisions.cardinality();
+    }
+
+    /**
+     * Merge all causes and decisions from <code>explanation</code> in this.
+     *
+     * @param explanation a given explanation
+     */
+    public void addCausesAndDecisions(Explanation explanation) {
+        if (explanation.nbCauses() > 0) {
+            this.causes.addAll(explanation.causes);
+        }
+        if (explanation.nbDecisions() > 0) {
+            this.decisions.or(explanation.decisions);
         }
     }
 
     /**
-     * Return the size of deduction set
+     * Merge 'someRules' into this rules
      *
-     * @return number of deductions
+     * @param someRules the rules to add
      */
-    public int nbDeductions() {
-        return deductions == null ? 0 : deductions.size();
+    public void addRules(Rules someRules) {
+        if (rules != null && someRules != null) {
+            rules.or(someRules);
+        } else if (rules == null && someRules != null) {
+            rules = someRules.duplicate();
+        }
     }
 
     /**
-     * Return the i^th deduction contains in this.
-     * Deductions are stored in a list, their uniqueness is ensured during the add operation.
-     * This allows simple iteration over deductions of an explanation.
+     * Remove one cause from the set of causes explaining the situation
      *
-     * @param i index of the deduction
-     * @return the deduction at rank i
+     * @param cause a cause to remove
+     * @return true if the explanation changed
      */
-    public Deduction getDeduction(int i) {
-        return deductions.get(i);
+    public boolean remove(ICause cause) {
+        return causes.remove(cause);
     }
 
+    /**
+     * Remove one decision from the set of decisions explaining the situation
+     *
+     * @param decision a decision to remove
+     */
+    public void remove(Decision decision) {
+        decisions.clear(decision.getWorldIndex());
+    }
+
+
+    /**
+     * Return a unmodifiable copy of the set of decisions
+     */
+    public BitSet getDecisions() {
+        return decisions;
+    }
+
+    /**
+     * Return a unmodifiable copy of the set of causes
+     */
+    public Set<ICause> getCauses() {
+        return Collections.unmodifiableSet(causes);
+    }
+
+    /**
+     * Indicates whether or not the explanation is complete
+     */
+    public boolean isComplete() {
+        return rules == null;
+    }
+
+    /**
+     * Copy the rules
+     * The rules define which events should be filtered from the event store.
+     *
+     * @param rules set of rules (when not complete)
+     */
+    public void copyRules(Rules rules, int i) {
+        if (rules != this.rules) { // small improvement
+            addRules(rules);
+        }
+        setEvtstrIdx(i);
+    }
+
+    /**
+     * Get the event store idx at which the last analysis ends
+     *
+     * @return an event store index
+     */
+    public int getEvtstrIdx() {
+        return evtstrIdx;
+    }
+
+    /**
+     * Set the event store idx, where the last analysis ends
+     *
+     * @param evtstrIdx an event store index
+     */
+    public void setEvtstrIdx(int evtstrIdx) {
+        this.evtstrIdx = evtstrIdx;
+    }
+
+    /**
+     * Return the rules, may be null
+     *
+     * @return the rules or null
+     */
+    public Rules getRules() {
+        return rules;
+    }
+
+    /**
+     * Duplicate the current explanation
+     *
+     * @return a new explanation
+     */
+    public Explanation duplicate() {
+        Explanation explanation = new Explanation(this.saveCauses);
+        explanation.addCausesAndDecisions(this);
+        explanation.addRules(this.rules);
+        return explanation;
+    }
+
+    /**
+     * Clear the explanation, to enable reusing it.
+     */
+    public void clear() {
+        causes.clear();
+        decisions.clear();
+        if (rules != null) {
+            rules.clear();
+        }
+    }
 
     @Override
     public String toString() {
-        StringBuilder bf = new StringBuilder("E_" + id);
-
-
-        bf.append(" D: ");
-        if (this.deductions != null && !this.deductions.isEmpty()) {
-            bf.append("(").append(this.deductions.size()).append(") ");
-            for (Deduction d : this.deductions) {
-                bf.append(d).append(", ");
-            }
-            if (deductions.size() > 1) {
-                bf.delete(bf.lastIndexOf(","), bf.length() - 1);
-            }
+        StringBuilder st = new StringBuilder("Explanation ");
+        if (saveCauses) {
+            st.append(Arrays.toString(causes.toArray()));
         }
+        st.append(decisions);
+        if (rules != null) {
+            st.append(rules.toString());
+        }
+        return st.toString();
+    }
 
-        bf.append(" ;");
-        return bf.toString();
+    @SuppressWarnings("unchecked")
+    public void postNogood(PropNogoods ngstore, TIntList ps) {
+        if (rules == null) {
+            Solver mSolver = ngstore.getSolver();
+            Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
+            ps.clear();
+            while (decision != RootDecision.ROOT) {
+                if (decisions.get(decision.getWorldIndex())) {
+                    assert decision.hasNext();
+                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
+                }
+                decision = decision.getPrevious();
+            }
+            ngstore.addLearnt(ps.toArray());
+        }
     }
 }

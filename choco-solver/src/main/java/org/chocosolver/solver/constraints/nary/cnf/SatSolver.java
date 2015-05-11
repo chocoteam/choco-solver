@@ -33,10 +33,11 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A MiniSat solver.
- * <p/>
+ * <p>
  * (or-tools, booleans.cc, ty L. Perron).
  * <br/>
  *
@@ -51,16 +52,13 @@ public class SatSolver {
      */
     static final int kUndefinedLiteral = -2;
 
-    /**
-     * static const Literal kErrorLiteral = Literal(-1);
-     */
-    static final int kErrorLiteral = -1;
-
     // If false, the constraints are already unsatisfiable. No part of
     // the solver state may be used!
     boolean ok_;
     // List of problem addClauses.
     ArrayList<Clause> clauses;
+    // List of learnt addClauses.
+    ArrayList<Clause> learnts;
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
     TIntObjectHashMap<ArrayList<Watcher>> watches_;
@@ -87,6 +85,7 @@ public class SatSolver {
         this.qhead_ = 0;
         num_vars_ = 0;
         this.clauses = new ArrayList<>();
+        this.learnts = new ArrayList<>();
         this.watches_ = new TIntObjectHashMap<>();
         this.implies_ = new TIntObjectHashMap<>();
         this.assignment_ = new TIntObjectHashMap<>();
@@ -144,10 +143,10 @@ public class SatSolver {
 
         switch (ps.size()) {
             case 0:
-            return (ok_ = false);
+                return (ok_ = false);
             case 1:
-            uncheckedEnqueue(ps.get(0));
-            return (ok_ = propagate());
+                uncheckedEnqueue(ps.get(0));
+                return (ok_ = propagate());
             case 2:
                 int l0 = ps.get(0);
                 int l1 = ps.get(1);
@@ -166,11 +165,28 @@ public class SatSolver {
                 i1.add(l0);
                 break;
             default:
-            Clause cr = new Clause(ps.toArray());
-            clauses.add(cr);
-            attachClause(cr);
+                Clause cr = new Clause(ps.toArray());
+                clauses.add(cr);
+                attachClause(cr);
                 break;
 
+        }
+        return true;
+    }
+
+    public boolean learnClause(int... ps) {
+        Arrays.sort(ps);
+        switch (ps.length) {
+            case 0:
+                return (ok_ = false);
+            case 1:
+                dynUncheckedEnqueue(ps[0]);
+                return (ok_ = propagate());
+            default:
+                Clause cr = new Clause(ps);
+                learnts.add(cr);
+                attachClause(cr);
+                break;
         }
         return true;
     }
@@ -245,6 +261,11 @@ public class SatSolver {
         return clauses.size();
     }
 
+    // The current number of original clauses.
+    int nLearnt() {
+        return learnts.size();
+    }
+
     // Propagates one literal, returns true if successful, false in case
     // of failure.
     boolean propagateOneLiteral(int lit) {
@@ -288,6 +309,11 @@ public class SatSolver {
         trail_.add(l);
     }
 
+    void dynUncheckedEnqueue(int l) {
+        touched_variables_.add(l);
+    }
+
+
     // Test if fact 'p' contradicts current state, Enqueue otherwise.
     boolean enqueue(int l) {
         if (valueLit(l) != Boolean.kUndefined) {
@@ -313,6 +339,26 @@ public class SatSolver {
         }
         l0.add(new Watcher(cr, cr._g(1)));
         l1.add(new Watcher(cr, cr._g(0)));
+    }
+
+    public void detachLearnt(int ci) {
+        Clause cr = learnts.get(ci);
+        learnts.remove(ci);
+
+        ArrayList<Watcher> ws = watches_.get(negated(cr._g(0)));
+        int i = ws.size() - 1;
+        while (i >= 0 && ws.get(i).clause != cr) {
+            i--;
+        }
+        assert i > -1;
+        ws.remove(i);
+        ws = watches_.get(negated(cr._g(1)));
+        i = ws.size() - 1;
+        while (i >= 0 && ws.get(i).clause != cr) {
+            i--;
+        }
+        assert i > -1;
+        ws.remove(i);
     }
 
     // Perform unit propagation. returns true upon success.
@@ -478,6 +524,14 @@ public class SatSolver {
         int _s(int pos, int l) {
             return literals_[pos] = l;
         }
+
+        int pos(int l) {
+            int i = literals_.length - 1;
+            while (i >= 0 && literals_[i] != l) {
+                i--;
+            }
+            return i;
+        }
     }
 
     /**
@@ -492,10 +546,6 @@ public class SatSolver {
 
         Clause clause;
         int blocker;
-
-        public Watcher() {
-            blocker = kUndefinedLiteral;
-        }
 
         public Watcher(final Clause cr, int l) {
             this.clause = cr;

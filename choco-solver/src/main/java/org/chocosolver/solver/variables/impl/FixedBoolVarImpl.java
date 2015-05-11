@@ -114,7 +114,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public String toString() {
-        return name;
+        return name + " = " + String.valueOf(constante);
     }
 
     @Override
@@ -126,6 +126,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             identitymap.put(this, VF.fixed(this.name, this.constante, solver));
+            assert mIdx == 0;
         }
     }
 }

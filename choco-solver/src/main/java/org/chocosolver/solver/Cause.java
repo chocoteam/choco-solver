@@ -28,10 +28,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-
 /**
  * <br/>
  *
@@ -40,9 +36,5 @@ import org.chocosolver.solver.explanations.ExplanationEngine;
  */
 public enum Cause implements ICause {
     Null;
-
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-    }
 
 }

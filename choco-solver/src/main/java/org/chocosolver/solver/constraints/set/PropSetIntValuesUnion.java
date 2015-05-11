@@ -88,12 +88,13 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 			}
 		}
 		for(int i=0;i<X.length;i++){
-			for(int v=X[i].getLB();v<=X[i].getUB();v=X[i].nextValue(v)){
-				if(!values.envelopeContains(v)){
-					X[i].removeValue(v,aCause);
-				}
-				if(X[i].isInstantiated()){
-					values.addToKernel(v,aCause);
+			if(X[i].isInstantiated()){
+				values.addToKernel(X[i].getValue(),aCause);
+			}else {
+				for (int v = X[i].getLB(); v <= X[i].getUB(); v = X[i].nextValue(v)) {
+					if (!values.envelopeContains(v)) {
+						X[i].removeValue(v, aCause);
+					}
 				}
 			}
 		}

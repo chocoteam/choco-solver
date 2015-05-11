@@ -37,9 +37,13 @@ import java.io.Serializable;
  * @version choco
  * @since 24/09/2014
  */
-public interface ICondition extends Serializable{
+public interface ICondition extends Serializable {
 
     boolean satisfied();
+
+    default void set(IEnvironment environment) {
+
+    }
 
     /**
      * False condition, never satisfied

@@ -36,10 +36,11 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.slf4j.Logger;
@@ -50,7 +51,6 @@ import java.io.Serializable;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
-import static org.chocosolver.solver.explanations.VariableState.DOM;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
 
@@ -62,7 +62,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * Propagator methods are assumed to be idempotent, ie :
  * Let f be a propagator method, such that f : D -> D' include D, where D the union of variable domains involved in f.
  * Then, f(D)=f(D').
- * <p/>
+ * <p>
  * <br/>
  * A <code>Propagator</code> declares a filtering algorithm to apply to the <code>Variables</code> objects
  * in scope in order to reduce their <code>Domain</code> objects.
@@ -79,7 +79,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * <br/>
  * <code>this</code> can be deactivated using the <code>setPassive</code>method.
  * It automatically informs <code>Constraint</code> observers of this new "state".
- * <p/>
+ * <p>
  * The developer of a propagator must respect some rules to create a efficient propagator:
  * <br/>- internal references to variables must be achieved referencing the <code>this.vars</code> after the call to super,
  * this prevents from wrong references when a variable occurs more than once in the scope (See {@link org.chocosolver.solver.constraints.nary.count.PropCount_AC} for instance).
@@ -108,7 +108,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private short state;  // 0 : new -- 1 : active -- 2 : passive
     private Operation[] operations; // propagator state operations
     private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
-    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
     protected Propagator aCause; // cause of variable modifications. The default value is 'this"
     protected final PropagatorPriority priority;
     protected final boolean reactToFineEvt;
@@ -125,7 +124,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Creates a new propagator to filter the domains of vars.
-     * <p/>
+     * <p>
      * <br/>
      * To limit memory consumption, the array of variables is <b>referenced directly</b> (no clone).
      * This is the responsibility of the propagator's developer to take care of that point.
@@ -206,6 +205,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }
+        if (solver.getEngine() != NoPropagationEngine.SINGLETON && solver.getEngine().isInitialized()) {
+            solver.getEngine().updateInvolvedVariables(this);
+        }
+        if (isActive()) {
+            for (int v = tmp.length; v < vars.length; v++) {
+                vars[v].recordMask(getPropagationConditions(v));
+            }
+        }
     }
 
     /**
@@ -264,7 +271,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable
      * of index idxVarInProp has changed. This method calls a CUSTOM_PROPAGATION (coarse-grained) by default.
-     * <p/>
+     * <p>
      * This method should be overridden if the argument <code>reactToFineEvt</code> is set to <code>true</code> in the constructor.
      * Otherwise, it executes <code>propagate(PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask());</code>
      *
@@ -286,7 +293,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Schedules a coarse propagation to filter all variables at once.
-     * <p/>
+     * <p>
      * Add the coarse event recorder into the engine
      *
      * @param evt event type
@@ -351,23 +358,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return ESat.TRUE if entailed, ESat.FALSE if not entailed, ESat.UNDEFINED if unknown
      */
     public abstract ESat isEntailed();
-
-    /**
-     * returns a explanation for the decision mentioned in parameters
-     *
-     *
-     * @param xengine an explanation engine
-     * @param d : a <code>Deduction</code> to explain
-     * @param e : the explanation to feed
-     */
-    @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        // the current deduction is due to the current domain of the involved variables
-        for (Variable v : this.vars) {
-            v.explain(xengine, DOM, e);
-        }
-    }
 
     /**
      * @return true iff all this propagator's variables are instantiated
@@ -607,5 +597,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        for (int i = 0; i < vars.length; i++) {
+            if(vars[i]!= var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
+        }
+        return nrules;
     }
 }

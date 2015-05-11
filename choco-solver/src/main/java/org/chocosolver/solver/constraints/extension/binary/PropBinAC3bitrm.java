@@ -32,7 +32,9 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -57,56 +59,46 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
     public PropBinAC3bitrm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
+        offset0 = v0.getLB();
+        offset1 = v1.getLB();
+
+        initDomSize0 = v0.getUB() - offset0 + 1;
+        initDomSize1 = v1.getUB() - offset1 + 1;
+        assert v0.hasEnumeratedDomain() && v1.hasEnumeratedDomain() : "PropBinAC3bitrm may produce incorrect filtering with bounded variables";
     }
 
     private PropBinAC3bitrm(IntVar x, IntVar y, CouplesBitSetTable table) {
         super(x, y, table);
+        offset0 = v0.getLB();
+        offset1 = v1.getLB();
+
+        initDomSize0 = v0.getUB() - offset0 + 1;
+        initDomSize1 = v1.getUB() - offset1 + 1;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
-            offset0 = v0.getLB();
-            offset1 = v1.getLB();
-
-            initDomSize0 = v0.getDomainSize();
-            initDomSize1 = v1.getDomainSize();
-
             fastInitNbSupports();
-            int left = Integer.MIN_VALUE;
-            int right = left;
             DisposableValueIterator itv0 = v0.getValueIterator(true);
             try {
                 while (itv0.hasNext()) {
                     int val0 = itv0.next();
                     if (!((CouplesBitSetTable) relation).checkValue(0, val0, v1)) {
-                        if (val0 == right + 1) {
-                            right = val0;
-                        } else {
-                            v0.removeInterval(left, right, this);
-                            left = right = val0;
-                        }
+                        v0.removeValue(val0, this);
                     }
                 }
-                v0.removeInterval(left, right, this);
             } finally {
                 itv0.dispose();
             }
             itv0 = v1.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
             try {
                 while (itv0.hasNext()) {
                     int val1 = itv0.next();
                     if (!((CouplesBitSetTable) relation).checkValue(1, val1, v0)) {
-                        if (val1 == right + 1) {
-                            right = val1;
-                        } else {
-                            v1.removeInterval(left, right, this);
-                            left = right = val1;
-                        }
+                        v1.removeValue(val1, this);
                     }
                 }
-                v1.removeInterval(left, right, this);
             } finally {
                 itv0.dispose();
             }
@@ -144,7 +136,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
 
     private void fastInitNbSupports() {
-        int[] initS1 = new int[v1.getUB() - v1.getLB() + 1];
+        int[] initS1 = new int[initDomSize1];
         minS0 = Integer.MAX_VALUE;
         minS1 = Integer.MAX_VALUE;
         DisposableValueIterator itv0 = v0.getValueIterator(true);
@@ -175,23 +167,14 @@ public class PropBinAC3bitrm extends PropBinCSP {
     private void reviseV1() throws ContradictionException {
         int v0Size = v0.getDomainSize();
         if (minS1 <= (initDomSize0 - v0Size)) {
-            int left = Integer.MIN_VALUE;
-            int right = left;
             DisposableValueIterator itv1 = v1.getValueIterator(true);
             try {
                 while (itv1.hasNext()) {
                     int y = itv1.next();
                     if (!((CouplesBitSetTable) relation).checkValue(1, y, v0)) {
-                        if (y == right + 1) {
-                            right = y;
-                        } else {
-                            v1.removeInterval(left, right, this);
-                            left = right = y;
-                        }
-                        //                        v1.removeVal(y, this, false);
+                        v1.removeValue(y, this);
                     }
                 }
-                v1.removeInterval(left, right, this);
             } finally {
                 itv1.dispose();
             }
@@ -204,23 +187,14 @@ public class PropBinAC3bitrm extends PropBinCSP {
     private void reviseV0() throws ContradictionException {
         int v1Size = v1.getDomainSize();
         if (minS0 <= (initDomSize1 - v1Size)) {
-            int left = Integer.MIN_VALUE;
-            int right = left;
             DisposableValueIterator itv0 = v0.getValueIterator(true);
             try {
                 while (itv0.hasNext()) {
                     int x = itv0.next();
                     if (!((CouplesBitSetTable) relation).checkValue(0, x, v1)) {
-                        if (x == right + 1) {
-                            right = x;
-                        } else {
-                            v0.removeInterval(left, right, this);
-                            left = right = x;
-                        }
-                        //                        v0.removeVal(x, this, false);
+                        v0.removeValue(x, this);
                     }
                 }
-                v0.removeInterval(left, right, this);
             } finally {
                 itv0.dispose();
             }
@@ -231,47 +205,49 @@ public class PropBinAC3bitrm extends PropBinCSP {
     private void onInstantiationOf(int idx) throws ContradictionException {
         if (idx == 0) {
             int value = v0.getValue();
-            int left = Integer.MIN_VALUE;
-            int right = left;
             DisposableValueIterator itv1 = v1.getValueIterator(true);
             try {
                 while (itv1.hasNext()) {
                     int val = itv1.next();
                     if (!relation.isConsistent(value, val)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            v1.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        v1.removeValue(val, this);
                     }
                 }
-                v1.removeInterval(left, right, this);
             } finally {
                 itv1.dispose();
             }
         } else {
             int value = v1.getValue();
-            int left = Integer.MIN_VALUE;
-            int right = left;
             DisposableValueIterator itv0 = v0.getValueIterator(true);
             try {
                 while (itv0.hasNext()) {
                     int val = itv0.next();
                     if (!relation.isConsistent(val, value)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            v0.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        v0.removeValue(val, this);
                     }
                 }
-                v0.removeInterval(left, right, this);
             } finally {
                 itv0.dispose();
             }
         }
     }
 
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == v0) {
+            for (int i = 0; i < initDomSize1; i++) {
+                if (relation.checkCouple(value, i + offset1)) {
+                    nrules |= ruleStore.addRemovalRule(v1, i + offset1);
+                }
+            }
+        } else {
+            for (int i = 0; i < initDomSize0; i++) {
+                if (relation.checkCouple(i + offset0, value)) {
+                    nrules |= ruleStore.addRemovalRule(v0, i + offset0);
+                }
+            }
+        }
+        return nrules;
+    }
 }

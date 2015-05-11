@@ -36,17 +36,16 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.ReificationConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.Deduction;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 
 /**
  * Implication propagator
- * <p/>
+ * <p>
  * <br/>
  *
  * @author Jean-Guillaume Fages
@@ -149,16 +148,16 @@ public class PropReif extends Propagator<Variable> {
     }
 
     @Override
-    public void explain(ExplanationEngine xengine, Deduction d, Explanation e) {
-        e.add(xengine.getPropagatorActivation(this));
-        if (d.getVar() == bVar) {
-            // the current deduction is due to the current domain of the involved variables
-            for (Variable v : vars) {
-                v.explain(xengine, VariableState.DOM, e);
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = ruleStore.addPropagatorActivationRule(this);
+        if (var.equals(bVar)) {
+            for (int i = 1; i < vars.length; i++) { // vars[0] is bVar
+                newrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
             }
         } else {
-            throw new UnsupportedOperationException();
+            newrules |= super.why(ruleStore, var, evt, value);
         }
+        return newrules;
     }
 
     @Override

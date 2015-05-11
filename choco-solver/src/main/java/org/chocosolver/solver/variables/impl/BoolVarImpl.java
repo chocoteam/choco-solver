@@ -33,11 +33,6 @@ import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.VariableState;
-import org.chocosolver.solver.explanations.antidom.AntiDomBool;
-import org.chocosolver.solver.explanations.antidom.AntiDomain;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -61,7 +56,7 @@ import org.chocosolver.util.tools.StringUtils;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BoolVarImpl extends AbstractVariable implements BoolVar {
+public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -175,14 +170,14 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
+                    solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else {
             if (value == 0 || value == 1) {
-				IntEventType e = IntEventType.INSTANTIATE;
+                IntEventType e = IntEventType.INSTANTIATE;
                 assert notInstanciated.contains(offset);
                 notInstanciated.swap(offset);
                 if (reactOnRemoval) {
@@ -190,13 +185,13 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                 }
                 mValue = value;
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                    solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
                 if (_plugexpl) {
-                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                    solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
@@ -248,12 +243,6 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         return value < 1 && instantiateTo(value, cause);
-    }
-
-    @Override
-    public void wipeOut(ICause cause) throws ContradictionException {
-        assert cause != null;
-        removeInterval(0, 1, cause);
     }
 
     @Override
@@ -380,7 +369,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new OneValueDelta(solver.getSearchLoop());
+            delta = new OneValueDelta(solver.getEnvironment());
             reactOnRemoval = true;
         }
     }
@@ -396,31 +385,6 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
-    }
-
-    @Override
-    public AntiDomain antiDomain() {
-        return new AntiDomBool(this);
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, Explanation to) {
-        AntiDomain invdom = xengine.getRemovedValues(this);
-        DisposableValueIterator it = invdom.getValueIterator();
-        while (it.hasNext()) {
-            int val = it.next();
-            if ((what == VariableState.LB && val < this.getLB())
-                    || (what == VariableState.UB && val > this.getUB())
-                    || (what == VariableState.DOM)) {
-                to.add(xengine.explain(this, val));
-            }
-        }
-        it.dispose();
-    }
-
-    @Override
-    public void explain(ExplanationEngine xengine, VariableState what, int val, Explanation to) {
-        to.add(xengine.explain(this, val));
     }
 
     @Override
@@ -449,6 +413,9 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                 this.not.duplicate(solver, identitymap);
                 clone._setNot((BoolVar) identitymap.get(this.not));
                 clone.not._setNot(clone);
+            }
+            for (int i = mIdx - 1; i >= 0; i--) {
+                monitors[i].duplicate(solver, identitymap);
             }
         }
     }

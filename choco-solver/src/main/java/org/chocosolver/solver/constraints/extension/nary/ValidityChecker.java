@@ -28,69 +28,59 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.sort.ArraySort;
+import org.chocosolver.util.sort.IntComparator;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * A simple class that provides a method to check if a given
  * tuple is valid i.e. if it is ok regarding the current domain
  * of the variables
  */
-public class ValidityChecker implements Comparator<IntVar>, Serializable {
+public class ValidityChecker implements IntComparator, Serializable {
 
     //variables sorted from the minimum domain to the max
-    protected IntVar[] sortedvs;
-    public int[] position;
-    protected TObjectIntHashMap<IntVar> mapinit;
+    protected IntVar[] vars;
+    public int[] sortedidx;
     protected int arity;
+    protected ArraySort sorter;
 
     public ValidityChecker(int ari, IntVar[] vars) {
         arity = ari;
-        sortedvs = new IntVar[arity];
-        mapinit = new TObjectIntHashMap<>(arity);
-        position = new int[arity];
+        this.vars = new IntVar[arity];
+        sortedidx = new int[arity];
+        sorter = new ArraySort(arity, false, true);
         for (int i = 0; i < vars.length; i++) {
-            sortedvs[i] = vars[i];
-            mapinit.put(vars[i], i);
-            position[i] = i;
+            this.vars[i] = vars[i];
+            sortedidx[i] = i;
         }
     }
 
     public final int getPosition(int idx) {
-        return position[idx];
+        return idx;
     }
 
     /**
      * Sort the variable to speedup the check
      */
     public void sortvars() {
-        Arrays.sort(sortedvs, this);
         for (int i = 0; i < arity; i++) {
-            position[i] = mapinit.get(sortedvs[i]);
+            sortedidx[i] = i;
         }
+        sorter.sort(sortedidx, arity, this);
     }
 
     // Is tuple valide ?
     public boolean isValid(int[] tuple) {
         for (int i = 0; i < arity; i++)
-            if (!sortedvs[i].contains(tuple[position[i]])) return false;
+            if (!vars[sortedidx[i]].contains(tuple[sortedidx[i]])) return false;
         return true;
     }
 
-    public boolean isValid(int[] tuple, int i) {
-        return sortedvs[i].contains(tuple[position[i]]);
+    @Override
+    public int compare(int i1, int i2) {
+        return vars[sortedidx[i1]].getDomainSize() - vars[sortedidx[i2]].getDomainSize();
     }
-
-    /**
-     * Sort the variables by domain size
-     */
-    public int compare(IntVar o, IntVar o1) {
-        return o.getDomainSize() - o1.getDomainSize();
-    }
-
-
 }

@@ -28,12 +28,18 @@
  */
 package org.chocosolver.solver.search.restart;
 
+import org.chocosolver.memory.Environments;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.limits.NodeCounter;
+import org.chocosolver.solver.search.limits.TimeCounter;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -63,6 +69,7 @@ public class RestartTest {
                 solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
+        solver.set(ISF.lexico_LB(vars));
         return solver;
     }
 
@@ -117,6 +124,37 @@ public class RestartTest {
         checkRestart(r, 4, LUBY_4);
         r = new GeometricalRestartStrategy(1, 1.3);
         checkRestart(r, 1.3, GEOMETRIC_1_3);
+    }
+
+    @Test(groups = "10s")
+    public void test1() {
+
+        for (int j = 1; j < 5; j++) {
+            int n = 200;
+            Solver solver = new Solver(Environments.TRAIL.make(), "Test");
+            IntVar[] X = VF.enumeratedArray("X", n, 1, n, solver);
+            IntVar[] Y = VF.enumeratedArray("Y", n, n + 1, 2 * (n + 1), solver);
+            solver.post(ICF.alldifferent(X));
+            for (int i = 0; i < n; i++) {
+                solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
+            }
+            SMF.restartAfterEachSolution(solver);
+            solver.set(ISF.lexico_LB(X));
+//            SMF.log(solver, false, false);
+            SMF.limitSolution(solver, 100);
+            solver.findAllSolutions();
+            //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testGeometricalRestart2() {
+        Solver solver = buildQ(8);
+        SearchMonitorFactory.geometrical(solver, 10, 1.2, new TimeCounter(solver, 10), 2);
+        solver.findAllSolutions();
+        // not 2, because of restart, that found twice the same solution
+//        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+        Assert.assertEquals(solver.getMeasures().getRestartCount(), 2);
     }
 
 }
