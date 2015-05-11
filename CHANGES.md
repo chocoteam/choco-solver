@@ -6,6 +6,10 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+
+3.3.1 - 11 May 2015
+-------------------
+
 - Change the default propagation engine (default is now SevenQueuesPropagatorEngine)
 - Add clause_channeling constraint
 - Remove IntVar.wipeOut(...)
