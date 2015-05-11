@@ -78,27 +78,30 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     final Logger LOGGER = LoggerFactory.getLogger(TwoBucketPropagationEngine.class);
 
     private static final int WORD_MASK = 0xffffffff;
-    private final short[] match_f;
-    private final short[] match_c;
 
-    private final short max_f;
-    private final short max_c;
-
-
+    protected final Solver solver;
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected Propagator[] propagators;
-    protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
+
+
+    private final short[] match_f;
+    private final short[] match_c;
+
+    private short max_f;
+    private short max_c;
+
+    protected IId2AbId p2i; // mapping between propagator ID and its absolute index
 
     protected Propagator lastProp;
     protected int notEmpty; // point out the no empty queues
 
-    protected final ArrayDeque<Propagator>[] pro_queue_f;
+    protected ArrayDeque<Propagator>[] pro_queue_f;
     protected boolean[] schedule_f; // also maintains the index of the queue!
     protected IntCircularQueue[] event_f;
     protected int[][] eventmasks;// the i^th event mask stores modification events on the i^th variable, since the last propagation
 
-    protected final ArrayDeque<Propagator>[] pro_queue_c;
+    protected ArrayDeque<Propagator>[] pro_queue_c;
     protected boolean[] schedule_c;
     protected PropagatorEventType[] event_c;
 
@@ -112,71 +115,79 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
-
-        List<Propagator> _propagators = new ArrayList<>();
-        Constraint[] constraints = solver.getCstrs();
-        int nbProp = 0;
-        int m = Integer.MAX_VALUE, M = 0;
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] cprops = constraints[c].getPropagators();
-            for (int j = 0; j < cprops.length; j++, nbProp++) {
-                _propagators.add(cprops[j]);
-                int id = cprops[j].getId();
-                m = Math.min(m, id);
-                M = Math.max(M, id);
-            }
-        }
-        propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-        //p2i = new AId2AbId(m, M, -1);
-        p2i = new MId2AbId(M - m + 1, -1);
-        for (int j = 0; j < propagators.length; j++) {
-            p2i.set(propagators[j].getId(), j);
-        }
-        trigger.addAll(propagators);
+        this.solver = solver;
 
         match_f = solver.getSettings().getFineEventPriority();
         match_c = solver.getSettings().getCoarseEventPriority();
 
-        short _max_ = -1;
-        for (int i = 0; i < match_f.length; i++) {
-            if (_max_ < match_f[i]) _max_ = match_f[i];
-        }
-        _max_++;
-        max_f = _max_;
-        _max_ = -1;
-        for (int i = 0; i < match_c.length; i++) {
-            if (_max_ < match_c[i]) _max_ = match_c[i];
-        }
-        _max_++;
-        max_c = _max_;
+    }
 
-        pro_queue_f = new ArrayDeque[max_f];
-        for (int i = 0; i < max_f; i++) {
-            pro_queue_f[i] = new ArrayDeque<>(propagators.length / 2 + 1);
-        }
-        schedule_f = new boolean[nbProp];
-
-
-        pro_queue_c = new ArrayDeque[max_c];
-        for (int i = 0; i < max_c; i++) {
-            pro_queue_c[i] = new ArrayDeque<>(propagators.length / 2 + 1);
-        }
-        schedule_c = new boolean[nbProp];
-
-        notEmpty = 0;
-
-        event_f = new IntCircularQueue[nbProp];
-        eventmasks = new int[nbProp][];
-        for (int i = 0; i < nbProp; i++) {
-            if (propagators[i].reactToFineEvent()) {
-                int nbv = propagators[i].getNbVars();
-                event_f[i] = new IntCircularQueue(nbv);
-                eventmasks[i] = new int[nbv];
+    @Override
+    public void initialize() {
+        if (!init) {
+            List<Propagator> _propagators = new ArrayList<>();
+            Constraint[] constraints = solver.getCstrs();
+            int nbProp = 0;
+            int m = Integer.MAX_VALUE, M = 0;
+            for (int c = 0; c < constraints.length; c++) {
+                Propagator[] cprops = constraints[c].getPropagators();
+                for (int j = 0; j < cprops.length; j++, nbProp++) {
+                    _propagators.add(cprops[j]);
+                    int id = cprops[j].getId();
+                    m = Math.min(m, id);
+                    M = Math.max(M, id);
+                }
             }
+            propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+            //p2i = new AId2AbId(m, M, -1);
+            p2i = new MId2AbId(M - m + 1, -1);
+            for (int j = 0; j < propagators.length; j++) {
+                p2i.set(propagators[j].getId(), j);
+            }
+            trigger.addAll(propagators);
+
+
+            short _max_ = -1;
+            for (int i = 0; i < match_f.length; i++) {
+                if (_max_ < match_f[i]) _max_ = match_f[i];
+            }
+            _max_++;
+            max_f = _max_;
+            _max_ = -1;
+            for (int i = 0; i < match_c.length; i++) {
+                if (_max_ < match_c[i]) _max_ = match_c[i];
+            }
+            _max_++;
+            max_c = _max_;
+
+            pro_queue_f = new ArrayDeque[max_f];
+            for (int i = 0; i < max_f; i++) {
+                pro_queue_f[i] = new ArrayDeque<>(propagators.length / 2 + 1);
+            }
+            schedule_f = new boolean[nbProp];
+
+
+            pro_queue_c = new ArrayDeque[max_c];
+            for (int i = 0; i < max_c; i++) {
+                pro_queue_c[i] = new ArrayDeque<>(propagators.length / 2 + 1);
+            }
+            schedule_c = new boolean[nbProp];
+
+            notEmpty = 0;
+
+            event_f = new IntCircularQueue[nbProp];
+            eventmasks = new int[nbProp][];
+            for (int i = 0; i < nbProp; i++) {
+                if (propagators[i].reactToFineEvent()) {
+                    int nbv = propagators[i].getNbVars();
+                    event_f[i] = new IntCircularQueue(nbv);
+                    eventmasks[i] = new int[nbv];
+                }
+            }
+            event_c = new PropagatorEventType[nbProp];
+            Arrays.fill(event_c, PropagatorEventType.VOID);
+            init = true;
         }
-        event_c = new PropagatorEventType[nbProp];
-        Arrays.fill(event_c, PropagatorEventType.VOID);
-        init = true;
     }
 
     @Override
@@ -385,7 +396,20 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void clear() {
-        // void
+        propagators = null;
+        p2i = null;
+        trigger.clear();
+        max_f = 0;
+        max_c = 0;
+        pro_queue_f = null;
+        schedule_f = null;
+        pro_queue_c = null;
+        schedule_c = null;
+        notEmpty = 0;
+        event_f = null;
+        eventmasks = null;
+        event_c = null;
+        init = false;
     }
 
     @Override

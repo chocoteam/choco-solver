@@ -123,6 +123,12 @@ public class PropagationTrigger implements Serializable {
         return size > 0;
     }
 
+    public void clear(){
+        sta_propagators.clear();
+        perm_propagators.clear();
+        perm_world.clear();
+        size = 0;
+    }
 
     /**
      * Define a way to initialize the propagation engine.

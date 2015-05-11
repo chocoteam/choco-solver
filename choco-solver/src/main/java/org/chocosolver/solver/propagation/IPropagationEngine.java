@@ -72,6 +72,13 @@ public interface IPropagationEngine extends Serializable {
     }
 
     /**
+     * Build up internal structure, if not yet done, in order to allow propagation.
+     * If new constraints are added after having initializing the engine, dynamic addition is used.
+     * A call to clear erase the internal structure, and allow new initialisation.
+     */
+    default void initialize(){}
+
+    /**
      * Is the engine initialized?
      * Important for dynamic addition of constraints
      *

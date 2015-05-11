@@ -68,11 +68,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
+    private final Solver solver;
     protected Propagator[] propagators;
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
+    protected IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected int notEmpty; // point out the no empty queues
     protected short[] scheduled; // also maintains the index of the queue!
     protected IntCircularQueue[] eventsets;
@@ -89,45 +90,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
-
-        List<Propagator> _propagators = new ArrayList<>();
-        Constraint[] constraints = solver.getCstrs();
-        int nbProp = 0;
-        int m = Integer.MAX_VALUE, M = 0;
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] cprops = constraints[c].getPropagators();
-            for (int j = 0; j < cprops.length; j++, nbProp++) {
-                _propagators.add(cprops[j]);
-                int id = cprops[j].getId();
-                m = Math.min(m, id);
-                M = Math.max(M, id);
-            }
-        }
-        propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-        trigger.addAll(propagators);
-
-        //p2i = new AId2AbId(m, M, -1);
-        p2i = new MId2AbId(M - m + 1, -1);
-        for (int j = 0; j < propagators.length; j++) {
-            p2i.set(propagators[j].getId(), j);
-        }
+        this.solver = solver;
         pro_queue = new CircularQueue[8];
-        for (int i = 0; i < 8; i++) {
-            pro_queue[i] = new CircularQueue<>(16);
-        }
 
-        scheduled = new short[nbProp];
-        eventsets = new IntCircularQueue[nbProp];
-        eventmasks = new int[nbProp][];
-        for (int i = 0; i < nbProp; i++) {
-            int nbv = propagators[i].getNbVars();
-            if (propagators[i].reactToFineEvent()) {
-                eventsets[i] = new IntCircularQueue(nbv);
-                eventmasks[i] = new int[nbv];
-            }
-        }
-        notEmpty = 0;
-        init = true;
     }
 
     @Override
@@ -138,6 +103,49 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public ContradictionException getContradictionException() {
         return exception;
+    }
+
+    @Override
+    public void initialize() {
+        if (!init) {
+            List<Propagator> _propagators = new ArrayList<>();
+            Constraint[] constraints = solver.getCstrs();
+            int nbProp = 0;
+            int m = Integer.MAX_VALUE, M = 0;
+            for (int c = 0; c < constraints.length; c++) {
+                Propagator[] cprops = constraints[c].getPropagators();
+                for (int j = 0; j < cprops.length; j++, nbProp++) {
+                    _propagators.add(cprops[j]);
+                    int id = cprops[j].getId();
+                    m = Math.min(m, id);
+                    M = Math.max(M, id);
+                }
+            }
+            propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+            trigger.addAll(propagators);
+
+            //p2i = new AId2AbId(m, M, -1);
+            p2i = new MId2AbId(M - m + 1, -1);
+            for (int j = 0; j < propagators.length; j++) {
+                p2i.set(propagators[j].getId(), j);
+            }
+            for (int i = 0; i < 8; i++) {
+                pro_queue[i] = new CircularQueue<>(16);
+            }
+
+            scheduled = new short[nbProp];
+            eventsets = new IntCircularQueue[nbProp];
+            eventmasks = new int[nbProp][];
+            for (int i = 0; i < nbProp; i++) {
+                int nbv = propagators[i].getNbVars();
+                if (propagators[i].reactToFineEvent()) {
+                    eventsets[i] = new IntCircularQueue(nbv);
+                    eventmasks[i] = new int[nbv];
+                }
+            }
+            notEmpty = 0;
+            init = true;
+        }
     }
 
     @Override
@@ -312,7 +320,17 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void clear() {
-        // void
+        propagators = null;
+        trigger.clear();
+        p2i = null;
+        for (int i = 0; i < 8; i++) {
+            pro_queue[i] = null;
+        }
+        scheduled = null;
+        eventsets = null;
+        eventmasks = null;
+        notEmpty = 0;
+        init = false;
     }
 
     @Override

@@ -23,7 +23,7 @@ NEXT MILESTONE
 - Add possibility to complete the declared search strategy (#291)
 - Add new methods to Chatterbox (#292)
 
-Bug fixes: #168, #221, #239, #259, #262, #264, #265, #267, #269, #271, #273, #275, #279, #281
+Bug fixes: #168, #221, #239, #259, #262, #264, #265, #267, #269, #271, #273, #275, #279, #281, #295
 
 
 3.3.0 - 04 Dec 2014

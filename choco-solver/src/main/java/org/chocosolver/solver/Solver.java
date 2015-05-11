@@ -884,6 +884,9 @@ public class Solver implements Serializable {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
+        if(!engine.isInitialized()){
+            engine.initialize();
+        }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
     }
@@ -897,6 +900,9 @@ public class Solver implements Serializable {
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
+        }
+        if(!engine.isInitialized()){
+            engine.initialize();
         }
         engine.propagate();
     }
