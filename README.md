@@ -40,7 +40,7 @@ Chatterbox.printStatistics(solver);
 ## Download and installation ##
 
 Requirements:
-* JDK 8+
+* JDK 8+ (JDK 7 compliant jars are also available)
 * maven 3+
 
 In the following, we distinguish two usages of Choco:

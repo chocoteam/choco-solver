@@ -35,7 +35,7 @@ import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.explanations.strategies.ConflictStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.EventObserver;
+import org.chocosolver.solver.variables.FilteringMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -47,7 +47,7 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public class ExplanationEngine implements EventObserver {
+public class ExplanationEngine implements FilteringMonitor {
 
     protected final IEventStore eventStore; // set of generated events
     private final RuleStore ruleStore; // set of active rules

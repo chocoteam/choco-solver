@@ -29,7 +29,7 @@ package org.chocosolver.solver.variables.observers;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.EventObserver;
+import org.chocosolver.solver.variables.FilteringMonitor;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -38,9 +38,9 @@ import java.util.ArrayList;
  * Created by cprudhom on 26/01/15.
  * Project: choco.
  */
-public class EventObserverList implements EventObserver {
+public class FilteringMonitorList implements FilteringMonitor {
 
-    ArrayList<EventObserver> observers = new ArrayList<>();
+    ArrayList<FilteringMonitor> observers = new ArrayList<>();
 
     @Override
     public void activePropagator(BoolVar var, Propagator propagator) {
@@ -77,8 +77,8 @@ public class EventObserverList implements EventObserver {
         }
     }
 
-    public boolean add(EventObserver anObserver) {
-        for (EventObserver eo : observers) {
+    public boolean add(FilteringMonitor anObserver) {
+        for (FilteringMonitor eo : observers) {
             if (eo == anObserver) {
                 return false;
             }

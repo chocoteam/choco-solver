@@ -57,7 +57,7 @@ import org.chocosolver.solver.search.solution.*;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
-import org.chocosolver.solver.variables.observers.EventObserverList;
+import org.chocosolver.solver.variables.observers.FilteringMonitorList;
 import org.chocosolver.util.ESat;
 
 import java.io.*;
@@ -86,7 +86,7 @@ public class Solver implements Serializable {
 
     private ExplanationEngine explainer;
 
-    private EventObserverList eoList;
+    private FilteringMonitorList eoList;
 
     /**
      * Variables of the solver
@@ -169,7 +169,7 @@ public class Solver implements Serializable {
         this.environment = environment;
         this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
         this.search = new SearchLoop(this);
-        this.eoList = new EventObserverList();
+        this.eoList = new FilteringMonitorList();
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
@@ -395,7 +395,7 @@ public class Solver implements Serializable {
     /**
      * Return the current event observer list
      */
-    public EventObserver getEventObserver() {
+    public FilteringMonitor getEventObserver() {
         return this.eoList;
     }
 
@@ -449,7 +449,7 @@ public class Solver implements Serializable {
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
-        add(explainer);
+        plugMonitor(explainer);
     }
 
     /**
@@ -490,10 +490,10 @@ public class Solver implements Serializable {
      * <p>
      * Erase the current event observer if any.
      *
-     * @param eventObserver an event observer
+     * @param filteringMonitor an event observer
      */
-    public void add(EventObserver eventObserver) {
-        this.eoList.add(eventObserver);
+    public void plugMonitor(FilteringMonitor filteringMonitor) {
+        this.eoList.add(filteringMonitor);
     }
 
     /**

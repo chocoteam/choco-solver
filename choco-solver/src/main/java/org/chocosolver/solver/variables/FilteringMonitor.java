@@ -32,12 +32,12 @@ import org.chocosolver.solver.constraints.Propagator;
 import java.io.Serializable;
 
 /**
- * Observer of events generated during resolution.
+ * Monitor filter generated during resolution.
  * Defined initially for explanation engine.
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public interface EventObserver extends Serializable {
+public interface FilteringMonitor extends Serializable {
 
     /**
      * Explain the activation of a propagator involved in a reified constraint

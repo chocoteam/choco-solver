@@ -175,6 +175,10 @@ logback.xml
 
 Please, refer to `README.md` for more details.
 
+.. note::
+
+    Java 7 compliant jars are also available, post-fixed with 'jk7'.
+
 Extensions
 ^^^^^^^^^^
 

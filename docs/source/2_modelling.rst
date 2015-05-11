@@ -44,7 +44,7 @@ Variables
 | ``Variable getVar(int i)``                    | Return the :math:`i^th` variable declared in the solver.                                                                                                                     |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``IntVar[] retrieveIntVars()``                | Extract from the solver variables those which are integer (ie whose *KIND* is set to *INT*, that is, including *fixed* integer variables and boolean variables).             |
+| ``IntVar[] retrieveIntVars()``                | Extract from the solver variables those which are integer (ie whose *KIND* is set to *INT*, that is, including *fixed* integer variables).                                   |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``retrieveBoolVars()``                        | Extract from the solver variables those which are boolean (ie whose *KIND* is set to *BOOL*, that is, including ``Solver.ZERO`` and ``Solver.ONE``).                         |
@@ -138,13 +138,13 @@ Others
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | **Method**                                        | **Definition**                                                                                                                       |
 +===================================================+======================================================================================================================================+
-| ``void add(EventObserver eventObserver)``         | Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.          |
-+---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | ``Solver duplicateModel()``                       | Duplicate the model associates with a solver, ie only variables and constraints, and return a new solver.                            |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | ``void makeCompleteSearch(boolean isComplete)``   | Add a strategy to the declared one in order to ensure that all variables are covered by (at least) one strategy.                     |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | ``void plugMonitor(ISearchMonitor sm)``           | Put a :ref:`search monitor <44_monitors_label>` to react on search events (solutions, decisions, fails, ...).                        |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void plugMonitor(FilteringMonitor fm)``         | Add an filtering monitor, that is an object that is kept informed of all (propagation) events generated during the resolution.       |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 
 
