@@ -151,16 +151,16 @@ public class DefaultSearchBinder implements ISearchBinder {
                 case Variable.INT:
                 case Variable.BOOL:
                     if (max) {
-                        strats[nb] = ISF.minDom_UB((IntVar) objective);
+                        strats[nb++] = ISF.minDom_UB((IntVar) objective);
                     } else {
-                        strats[nb] = ISF.minDom_LB((IntVar) objective);
+                        strats[nb++] = ISF.minDom_LB((IntVar) objective);
                     }
                     break;
                 case Variable.REAL:
                     if (max) {
-                        strats[nb] = RSF.custom(RealStrategyFactory.cyclic(), RSF.max_value_selector(), (RealVar) objective);
+                        strats[nb++] = RSF.custom(RealStrategyFactory.cyclic(), RSF.max_value_selector(), (RealVar) objective);
                     } else {
-                        strats[nb] = RSF.custom(RealStrategyFactory.cyclic(), RSF.min_value_selector(), (RealVar) objective);
+                        strats[nb++] = RSF.custom(RealStrategyFactory.cyclic(), RSF.min_value_selector(), (RealVar) objective);
                     }
                     break;
                 default:
