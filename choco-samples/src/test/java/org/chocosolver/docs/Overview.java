@@ -58,4 +58,8 @@ public class Overview {
         //6. Print search statistics
         Chatterbox.printStatistics(solver);
     }
+
+    public static void main(String[] args) {
+        new Overview().overview1();
+    }
 }
