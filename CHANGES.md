@@ -6,6 +6,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+Bug fixes: #296, #297
 
 3.3.1 - 11 May 2015
 -------------------
