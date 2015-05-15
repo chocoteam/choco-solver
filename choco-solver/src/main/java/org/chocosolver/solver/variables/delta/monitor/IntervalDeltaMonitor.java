@@ -62,6 +62,7 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     @Override
     public void freeze() {
 		if (needReset()) {
+            delta.lazyClear(); // fix #298
 			this.first = this.last = 0;
 			resetStamp();
 		}

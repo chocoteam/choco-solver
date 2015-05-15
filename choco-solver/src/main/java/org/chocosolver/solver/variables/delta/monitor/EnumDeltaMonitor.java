@@ -62,6 +62,7 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     @Override
     public void freeze() {
 		if (needReset()) {
+            delta.lazyClear();
 			this.first = this.last = 0;
 			resetStamp();
 		}

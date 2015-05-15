@@ -30,12 +30,18 @@ package org.chocosolver.choco.propagation.event;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.delta.EnumDelta;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -75,7 +81,7 @@ public class DeltaTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s")
     public void testJL() {
         Solver solver = new Solver();
         final SetVar s0 = VF.set("s0", 0, 1, solver);
@@ -91,4 +97,114 @@ public class DeltaTest {
         solver.findSolution();
     }
 
+
+    @Test(groups = "1s")
+    public void testJL2() {
+        for (int k = 0; k < 50; k++) {
+            Solver s = new Solver();
+            final IntVar i = VF.enumerated("i", -2, 2, s);
+            final IntVar j = VF.enumerated("j", -2, 2, s);
+            //Chatterbox.showDecisions(s);
+            //Chatterbox.showSolutions(s);
+            s.set(ISF.random_value(new IntVar[]{i, j}));
+            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.findAllSolutions();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testJL3() {
+        for (int k = 0; k < 10; k++) {
+            Solver s = new Solver();
+            final IntVar i = VF.bounded("i", -2, 2, s);
+            final IntVar j = VF.bounded("j", -2, 2, s);
+            //Chatterbox.showDecisions(s);
+            //Chatterbox.showSolutions(s);
+            s.set(ISF.random_bound(new IntVar[]{i, j}));
+            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.findAllSolutions();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testJL4() {
+        for (int k = 0; k < 10; k++) {
+            Solver s = new Solver();
+            final IntVar i = VF.bool("i", s);
+            final IntVar j = VF.bool("j", s);
+            //Chatterbox.showDecisions(s);
+            //Chatterbox.showSolutions(s);
+            s.set(ISF.random_value(new IntVar[]{i, j}));
+            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.findAllSolutions();
+        }
+    }
+
+    private static class PropTestDM1 extends Propagator<IntVar> {
+        IntVar i, j;
+        IIntDeltaMonitor iD;
+        IIntDeltaMonitor jD;
+
+        private PropTestDM1(IntVar i, IntVar j) {
+            super(new IntVar[]{i, j}, PropagatorPriority.UNARY, false);
+            this.i = i;
+            this.j = j;
+            iD = i.monitorDelta(this);
+            jD = j.monitorDelta(this);
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            iD.unfreeze();
+            jD.unfreeze();
+        }
+
+        @Override
+        public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+            iD.freeze();
+            iD.forEachRemVal((IntProcedure) x -> {
+                System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable i");
+                if (i.contains(x)) {
+                    throw new Error("Delta monitor lied to me.");
+                }
+            });
+            iD.unfreeze();
+            jD.freeze();
+            jD.forEachRemVal((IntProcedure) x -> {
+                System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable j");
+                if (j.contains(x)) {
+                    throw new Error("Delta monitor lied to me.");
+                }
+            });
+            jD.unfreeze();
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.TRUE;
+        }
+    }
+
+    private static class PropTestDM2 extends Propagator<IntVar> {
+        IntVar i, j;
+
+        private PropTestDM2(IntVar i, IntVar j) {
+            super(new IntVar[]{i, j}, PropagatorPriority.UNARY, false);
+            this.i = i;
+            this.j = j;
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            if (j.isInstantiatedTo(1)) {
+                i.removeValue(1, aCause);
+            }
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.TRUE;
+        }
+
+    }
 }
