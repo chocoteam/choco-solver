@@ -223,6 +223,41 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         }
     }
 
+    public void remove(ISearchMonitor sm) {
+        if (sm != null) {
+            if (sm instanceof IMonitorClose) {
+                mclos.remove((IMonitorClose) sm);
+            }
+            if (sm instanceof IMonitorContradiction) {
+                mcont.remove((IMonitorContradiction) sm);
+            }
+            if (sm instanceof IMonitorDownBranch) {
+                mdbra.remove((IMonitorDownBranch) sm);
+            }
+            if (sm instanceof IMonitorInitialize) {
+                minit.remove((IMonitorInitialize) sm);
+            }
+            if (sm instanceof IMonitorInitPropagation) {
+                mipro.remove((IMonitorInitPropagation) sm);
+            }
+            if (sm instanceof IMonitorInterruption) {
+                minte.remove((IMonitorInterruption) sm);
+            }
+            if (sm instanceof IMonitorOpenNode) {
+                mopno.remove((IMonitorOpenNode) sm);
+            }
+            if (sm instanceof IMonitorRestart) {
+                mrest.remove((IMonitorRestart) sm);
+            }
+            if (sm instanceof IMonitorSolution) {
+                msolu.remove((IMonitorSolution) sm);
+            }
+            if (sm instanceof IMonitorUpBranch) {
+                mubra.remove((IMonitorUpBranch) sm);
+            }
+        }
+    }
+
     public boolean contains(ISearchMonitor sm) {
         boolean isPluggedIn = false;
         if (sm != null) {

@@ -117,6 +117,8 @@ public interface ISearchLoop extends Serializable {
      */
     void plugSearchMonitor(ISearchMonitor sm);
 
+    void unplugSearchMonitor(ISearchMonitor sm);
+
     void set(AbstractStrategy strategy);
 
     void setObjectiveManager(ObjectiveManager om);
