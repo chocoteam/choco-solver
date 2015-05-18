@@ -51,23 +51,23 @@ parser = argparse.ArgumentParser(description='Convert MiniZinc files in FlatZinc
 parser.add_argument(
     "-G", "--globals",
     help='Directory wherein global constraints supported by Choco are given.',
-    default='/Users/kyzrsoze/Sources/Choco/choco-parsers/src/chocofzn/globals',
+    default='/Users/cprudhom/Sources/choco/extensions/choco-parsers/src/chocofzn/globals',
 )
 parser.add_argument(
     "-d", "--directory",
     help="MiniZinc files directory.",
-    default="/Users/kyzrsoze/Sandbox/MiniZinc/2014"
+    default="/Users/cprudhom/Sources/MiniZinc/Challenges/mzn/2012"
 )
 parser.add_argument(
     "-o", "--outputdirectory",
     help="Output files directory.",
-    default="/Users/kyzrsoze/Sandbox/MiniZinc/fzn/2014"
+    default="/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/2012"
 )
 parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=2
+    default=4
 )
 
 args = parser.parse_args()
