@@ -146,7 +146,7 @@ public class DeltaTest {
         IIntDeltaMonitor jD;
 
         private PropTestDM1(IntVar i, IntVar j) {
-            super(new IntVar[]{i, j}, PropagatorPriority.UNARY, false);
+            super(new IntVar[]{i, j}, PropagatorPriority.UNARY, true);
             this.i = i;
             this.j = j;
             iD = i.monitorDelta(this);
@@ -161,22 +161,25 @@ public class DeltaTest {
 
         @Override
         public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-            iD.freeze();
-            iD.forEachRemVal((IntProcedure) x -> {
-                System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable i");
-                if (i.contains(x)) {
-                    throw new Error("Delta monitor lied to me.");
-                }
-            });
-            iD.unfreeze();
-            jD.freeze();
-            jD.forEachRemVal((IntProcedure) x -> {
-                System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable j");
-                if (j.contains(x)) {
-                    throw new Error("Delta monitor lied to me.");
-                }
-            });
-            jD.unfreeze();
+            if (idxVarInProp == 0) {
+                iD.freeze();
+                iD.forEachRemVal((IntProcedure) x -> {
+                    System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable i");
+                    if (i.contains(x)) {
+                        throw new Error("Delta monitor lied to me.");
+                    }
+                });
+                iD.unfreeze();
+            } else {
+                jD.freeze();
+                jD.forEachRemVal((IntProcedure) x -> {
+                    System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable j");
+                    if (j.contains(x)) {
+                        throw new Error("Delta monitor lied to me.");
+                    }
+                });
+                jD.unfreeze();
+            }
         }
 
         @Override
