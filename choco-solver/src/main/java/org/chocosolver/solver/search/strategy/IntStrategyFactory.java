@@ -338,6 +338,31 @@ public class IntStrategyFactory {
         return custom(maxRegret_var_selector(), min_value_selector(), VARS);
     }
 
+	/**
+	 * Randomly selects a variable and assigns it to a value randomly taken in
+	 * - the domain in case the variable has an enumerated domain
+	 * - {LB,UB} (one of the two bounds) in case the domain is bounded
+	 *
+	 * @param VARS list of variables
+	 * @param SEED a seed for random
+	 * @return assignment strategy
+	 */
+	public static IntStrategy random(IntVar[] VARS, long SEED) {
+		IntValueSelector value = random_value_selector(SEED);
+		IntValueSelector bound = randomBound_value_selector(SEED);
+		IntValueSelector selector = new IntValueSelector() {
+			@Override
+			public int selectValue(IntVar var) {
+				if(var.hasEnumeratedDomain()){
+					return value.selectValue(var);
+				}else{
+					return bound.selectValue(var);
+				}
+			}
+		};
+		return custom(random_var_selector(SEED), selector, VARS);
+	}
+
     /**
      * Randomly selects a variable and assigns it to a value randomly taken in {LB,UB}
      * i.e. it fixes the variable to one of its bounds
@@ -363,13 +388,21 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Randomly selects a variable and assigns it to a value randomly taken in [LB,UB]
+     * Randomly selects a variable and assigns it to a value randomly taken in the domain.
+	 * This is dedicated to enumerated domains.
+	 * In case some variables have bounded domains, please use random_valueOrBound instead
      *
      * @param VARS list of variables
      * @param SEED a seed for random
      * @return assignment strategy
      */
     public static IntStrategy random_value(IntVar[] VARS, long SEED) {
+		for(IntVar v:VARS){
+			if(!v.hasEnumeratedDomain()){
+				throw new UnsupportedOperationException("Some variables have bounded domains, " +
+						"please use random heuristic instead");
+			}
+		}
         return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
     }
 
