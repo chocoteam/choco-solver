@@ -108,7 +108,7 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
         if (var.equals(x)) {
             newrules |=ruleStore.addLowerBoundRule(y);
         } else if (var.equals(y)) {
-            newrules |=ruleStore.addUpperBoundRule(y);
+            newrules |=ruleStore.addLowerBoundRule(x);
         } else {
             newrules |=super.why(ruleStore, var, evt, value);
         }
