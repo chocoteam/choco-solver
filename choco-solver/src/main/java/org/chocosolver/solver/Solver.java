@@ -794,13 +794,10 @@ public class Solver implements Serializable {
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
         }
-        ISolutionRecorder oldRecorder = getSolutionRecorder();
         LastSolutionRecorder recorder = new LastSolutionRecorder(new Solution(), true, this);
-        set(recorder);
         try {
                 solve(false);
         } finally {
-                set(oldRecorder);
                 recorder.stop();
         }
     }
@@ -889,13 +886,10 @@ public class Solver implements Serializable {
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
         }
-        ISolutionRecorder oldRecorder = getSolutionRecorder();
         LastSolutionRecorder recorder = new LastSolutionRecorder(new Solution(), true, this);
-        set(recorder);
         try {
                 solve(false);
         } finally {
-                set(oldRecorder);
                 recorder.stop();
         }
     }
