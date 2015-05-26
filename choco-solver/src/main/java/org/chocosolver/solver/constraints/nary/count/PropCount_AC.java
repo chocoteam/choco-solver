@@ -87,13 +87,14 @@ public class PropCount_AC extends Propagator<IntVar> {
         StringBuilder st = new StringBuilder();
         st.append("PropFastCount_(");
         int i = 0;
-        for (; i < Math.min(4, vars.length); i++) {
+        for (; i < Math.min(4, vars.length-1); i++) {
             st.append(vars[i].getName()).append(", ");
         }
         if (i < vars.length - 2) {
-            st.append("...,");
+            st.append("..., ");
         }
-        st.append(vars[vars.length - 1].getName()).append(")");
+        st.append("limit=").append(vars[vars.length - 1].getName());
+	    st.append(", value=").append(value).append(')');
         return st.toString();
     }
 
