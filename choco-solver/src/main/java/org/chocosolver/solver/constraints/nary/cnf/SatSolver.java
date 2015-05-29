@@ -371,6 +371,7 @@ public class SatSolver {
             if (to_add != null) {
                 for (int i = 0; i < to_add.size(); ++i) {
                     if (!enqueue(to_add.get(i))) {
+                        touched_variables_.add(to_add.get(i));
                         return false;
                     }
                 }
@@ -434,6 +435,7 @@ public class SatSolver {
                         while (i < ws.size()) {
                             ws.set(j++, ws.get(i++));
                         }
+                        touched_variables_.add(first);
                     } else {
                         uncheckedEnqueue(first);
                     }
@@ -531,6 +533,10 @@ public class SatSolver {
                 i--;
             }
             return i;
+        }
+
+        public String toString() {
+            return Arrays.toString(literals_);
         }
     }
 
