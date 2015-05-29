@@ -172,19 +172,18 @@ public class PropSat extends Propagator<BoolVar> {
         int var = index;
         boolean new_value = vars[index].getValue() != 0;
         int lit = makeLiteral(var, new_value);
-        if (!sat_.propagateOneLiteral(lit)) {
-            // force failure by removing the last value, required for explanations
-            // TODO: inutile dans le cas des implications, peut être remplacé par contradiction(vars[index], "");
+        boolean fail = !sat_.propagateOneLiteral(lit);
+        // Remark: explanations require to instantiated variables even if fail is set to true
+        sat_trail_.set(sat_.trailMarker());
+        for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
+            lit = sat_.touched_variables_.get(i);
+            var = var(lit);
+            boolean assigned_bool = sign(lit);
+            vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
+        }
+        if (fail) {
+//            force failure by removing the last value
             vars[index].instantiateTo(1 - vars[index].getValue(), this);
-        } else {
-            sat_trail_.set(sat_.trailMarker());
-            for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
-                lit = sat_.touched_variables_.get(i);
-                var = var(lit);
-                boolean assigned_bool = sign(lit);
-//                demons_[var.value()].inhibit(solver());
-                vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
-            }
         }
     }
 
@@ -272,7 +271,7 @@ public class PropSat extends Propagator<BoolVar> {
         int neg = negated(lit);
         // A. implications:
         // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(neg);
+        TIntList implies = sat_.implies_.get(lit);
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
                 newrules |= _why(implies.get(i), ruleStore);

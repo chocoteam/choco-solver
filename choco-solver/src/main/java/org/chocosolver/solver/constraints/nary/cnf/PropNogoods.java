@@ -256,8 +256,28 @@ public class PropNogoods extends Propagator<IntVar> {
             assert (sat_trail_.get() == sat_.trailMarker());
         }
         int lit = makeLiteral(var, new_value);
-        if (!sat_.propagateOneLiteral(lit)) {
-            // force failure by removing the last value, required for explanations
+        boolean fail = !sat_.propagateOneLiteral(lit);
+        // Remark: explanations require to instantiated variables even if fail is set to true
+        sat_trail_.set(sat_.trailMarker());
+        for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
+            lit = sat_.touched_variables_.get(i);
+            var = var(lit);
+            if (sign(lit)) {
+                vars[lit2pos[var]].instantiateTo(lit2val[var], this);
+            } else {
+                vars[lit2pos[var]].removeValue(lit2val[var], this);
+                if (vars[lit2pos[var]].isInstantiated()) {
+                    IntVar tvar = vars[lit2pos[var]];
+                    int value = tvar.getValue();
+                    int alit = vv2lit[tvar.getId()].get(value);
+                    if (alit != NO_ENTRY) {
+                        fp.push(alit);
+                    }
+                }
+            }
+        }
+        if (fail) {
+            // force failure by removing the last value
             IntVar iv = vars[lit2pos[var]];
             if (sign(lit)) {
                 iv.removeValue(lit2val[var], this);
@@ -265,25 +285,6 @@ public class PropNogoods extends Propagator<IntVar> {
                 iv.instantiateTo(lit2val[var], this);
             }
 
-        } else {
-            sat_trail_.set(sat_.trailMarker());
-            for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
-                lit = sat_.touched_variables_.get(i);
-                var = var(lit);
-                if (sign(lit)) {
-                    vars[lit2pos[var]].instantiateTo(lit2val[var], this);
-                } else {
-                    vars[lit2pos[var]].removeValue(lit2val[var], this);
-                    if (vars[lit2pos[var]].isInstantiated()) {
-                        IntVar tvar = vars[lit2pos[var]];
-                        int value = tvar.getValue();
-                        int alit = vv2lit[tvar.getId()].get(value);
-                        if (alit != NO_ENTRY) {
-                            fp.push(alit);
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -373,7 +374,7 @@ public class PropNogoods extends Propagator<IntVar> {
         int neg = negated(lit);
         // A. implications:
         // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(neg);
+        TIntList implies = sat_.implies_.get(lit);
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);

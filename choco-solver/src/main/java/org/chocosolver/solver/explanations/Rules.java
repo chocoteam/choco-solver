@@ -143,6 +143,7 @@ public class Rules {
      * @param vid variable id
      */
     public boolean intersect(int i1, int i2, int vid) {
+        assert vmRemval[vid].size() > 0;
         while (i1 <= i2 && !vmRemval[vid].contains(i1)) {
             i1++;
         }
@@ -158,7 +159,12 @@ public class Rules {
         Rules nrules = new Rules(paRules.length(), vmRemval.length);
         nrules.paRules.or(this.paRules);
         System.arraycopy(this.vmRules, 0, nrules.vmRules, 0, nrules.vmRules.length);
-        System.arraycopy(this.vmRemval, 0, nrules.vmRemval, 0, nrules.vmRemval.length);
+        for (int i = 0; i < this.vmRemval.length; i++) {
+            if (this.vmRemval[i] != null && this.vmRemval[i].size() > 0) {
+                nrules.vmRemval[i] = new TIntHashSet(16, .5f, NO_ENTRY);
+                nrules.vmRemval[i].addAll(this.vmRemval[i]);
+            }
+        }
         return nrules;
     }
 
