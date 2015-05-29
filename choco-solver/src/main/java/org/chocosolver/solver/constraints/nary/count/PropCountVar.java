@@ -202,7 +202,7 @@ public class PropCountVar extends Propagator<IntVar> {
             assert evt == IntEventType.REMOVE;
             // "value" is the removed value:
             // either not enough variable has "value" in their domain,
-            // or too much has not "value"
+            // or too many has not "value"
             for (int i = 0; i < n; i++) {
                 if (vars[i].isInstantiatedTo(value)) {
                     nrules |= ruleStore.addFullDomainRule(vars[i]);
@@ -212,6 +212,7 @@ public class PropCountVar extends Propagator<IntVar> {
             }
             nrules |= ruleStore.addBoundsRule(card);
         } else if (var == card) { // deal with "card" variable
+            assert IntEventType.isBound(evt.getMask()) || IntEventType.isInstantiate(evt.getMask());
             for (int i = 0; i < n; i++) {
                 nrules |= ruleStore.addFullDomainRule(vars[i]);
             }
