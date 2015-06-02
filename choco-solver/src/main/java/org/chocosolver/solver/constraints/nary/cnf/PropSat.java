@@ -30,6 +30,7 @@ package org.chocosolver.solver.constraints.nary.cnf;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
@@ -146,6 +147,25 @@ public class PropSat extends Propagator<BoolVar> {
 
     public SatSolver getSatSolver() {
         return sat_;
+    }
+
+    @Override
+    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+        // Specific duplication: first create an empty PropSat
+        PropSat ps = (PropSat) identitymap.get(this);
+        if (ps == null) {
+            ps = new PropSat(solver);
+            identitymap.put(this, ps);
+        }
+        // Then duplicate
+        for (BoolVar b : this.vars) {
+            BoolVar a = (BoolVar) identitymap.get(b);
+            int v = this.indices_.get(b);
+            ps.addVariable(a);
+            ps.indices_.putIfAbsent(a, v);
+        }
+        ps.early_deductions_.addAll(this.early_deductions_);
+        ps.sat_.copyFrom(this.sat_);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

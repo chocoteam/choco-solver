@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropScale;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -58,7 +59,7 @@ import java.util.Random;
  */
 public class DuplicateTest {
 
-    private String[] sort(String output){
+    private String[] sort(String output) {
         String[] os = output.split("\n");
         Arrays.sort(os);
         return os;
@@ -1765,6 +1766,27 @@ public class DuplicateTest {
 
         Solver copy = solver.duplicateModel();
 
+        solver.findAllSolutions();
+        copy.findAllSolutions();
+
+        Assert.assertEquals(copy.getNbVars(), solver.getNbVars());
+        Assert.assertEquals(copy.getNbCstrs(), solver.getNbCstrs());
+        Assert.assertEquals(copy.toString(), solver.toString());
+        Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+    }
+
+
+    @Test(groups = "1s")
+    public void test85() {
+        Solver solver = new Solver("Choco");
+        BoolVar a = VF.bool("a", solver);
+        BoolVar b = VF.bool("b", solver);
+        BoolVar c = VF.bool("c", solver);
+
+        SatFactory.addBoolLe(a, b);
+        SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{a, b, c});
+
+        Solver copy = solver.duplicateModel();
         solver.findAllSolutions();
         copy.findAllSolutions();
 

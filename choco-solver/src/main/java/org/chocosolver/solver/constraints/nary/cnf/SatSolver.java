@@ -34,6 +34,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * A MiniSat solver.
@@ -589,6 +590,44 @@ public class SatSolver {
             else return kUndefined;
         }
 
+    }
+
+    void copyFrom(SatSolver AAAo) {
+        // Then, copy all data structures:
+        this.ok_ = AAAo.ok_;
+        this.qhead_ = AAAo.qhead_;
+        this.num_vars_ = AAAo.num_vars_;
+        this.trail_.addAll(AAAo.trail_);
+        this.trail_markers_.addAll(AAAo.trail_markers_);
+        this.touched_variables_.addAll(AAAo.touched_variables_);
+        this.temporary_add_vector_.addAll(AAAo.temporary_add_vector_);
+        for (int k : AAAo.assignment_.keys()) {
+            this.assignment_.put(k, AAAo.assignment_.get(k));
+        }
+        for (int k : AAAo.implies_.keys()) {
+            TIntList tl = new TIntArrayList();
+            tl.addAll(AAAo.implies_.get(k));
+            this.implies_.put(k, tl);
+        }
+        final HashMap<Clause, Clause> map = new HashMap<>();
+        for (Clause cl : AAAo.clauses) {
+            Clause _cl = new Clause(cl.literals_);
+            map.put(cl, _cl);
+            this.clauses.add(_cl);
+        }
+        for (Clause cl : AAAo.learnts) {
+            Clause _cl = new Clause(cl.literals_);
+            map.put(cl, _cl);
+            this.learnts.add(_cl);
+        }
+        for (int k : AAAo.watches_.keys()) {
+            ArrayList<Watcher> ws = AAAo.watches_.get(k);
+            ArrayList<Watcher> _ws = new ArrayList<>(ws.size());
+            for (Watcher w : ws) {
+                _ws.add(new Watcher(map.get(w.clause), w.blocker));
+            }
+            this.watches_.put(k, _ws);
+        }
     }
 
 }
