@@ -29,7 +29,7 @@
 package org.chocosolver.solver.search.strategy;
 
 /**
- * A short-named version of {@code IntStrategyFactory}
+ * A short-name version of {@code IntStrategyFactory}
  * <br/>
  *
  * @author Charles Prud'homme

@@ -55,8 +55,8 @@ public final class ScaleView extends IntView {
 
     public final int cste;
 
-    public ScaleView(final IntVar var, final int cste, Solver solver) {
-        super("(" + var.getName() + "*" + cste + ")", var, solver);
+    public ScaleView(final IntVar var, final int cste) {
+        super("(" + var.getName() + "*" + cste + ")", var);
         assert (cste > 0) : "view cste must be >0";
         this.cste = cste;
     }
@@ -226,7 +226,7 @@ public final class ScaleView extends IntView {
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             this.var.duplicate(solver, identitymap);
-            ScaleView clone = new ScaleView((IntVar) identitymap.get(this.var), this.cste, solver);
+            ScaleView clone = new ScaleView((IntVar) identitymap.get(this.var), this.cste);
             identitymap.put(this, clone);
             for (int i = mIdx - 1; i >= 0; i--) {
                 monitors[i].duplicate(solver, identitymap);

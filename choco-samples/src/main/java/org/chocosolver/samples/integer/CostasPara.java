@@ -35,22 +35,28 @@
 
 package org.chocosolver.samples.integer;
 
-import org.chocosolver.samples.MasterProblem;
-import org.chocosolver.samples.ParallelizedProblem;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Portfolio;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
 
-public class CostasPara extends ParallelizedProblem {
+public class CostasPara extends AbstractProblem {
 
-    private static int n = 12;
+    private static int n = 14;
     IntVar[] vars, vectors;
 
-	public CostasPara(int searchIdx){
-		super(searchIdx);
-	}
+    Portfolio prtfl;
+
+    @Override
+    public void createSolver() {
+        prtfl = SolverFactory.makePortelio("CostasPara", 3);
+        solver = prtfl._fes_();
+    }
 
     @Override
     public void buildModel() {
@@ -60,9 +66,9 @@ public class CostasPara extends ParallelizedProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i != j) {
-					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i], k}, vars[j]));
-					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
+                    IntVar k = VariableFactory.bounded(StringUtils.randomName(), -20000, 20000, solver);
+                    solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i], k}, vars[j]));
+                    vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
                     idx++;
                 }
             }
@@ -73,22 +79,17 @@ public class CostasPara extends ParallelizedProblem {
 
     @Override
     public void configureSearch() {
-		switch (searchIdx){
-			case 0:
-				solver.set(ISF.lexico_LB(vars));
-				break;
-			case 1:
-				solver.set(ISF.minDom_LB(vars));
-				break;
-			default:
-					solver.set(ISF.activity(vars, 0));
-		}
+        prtfl.carbonCopy();
+        Solver[] solvers = prtfl.getWorkers();
+        solvers[0].set(ISF.activity(prtfl.retrieveVarIn(0, vars), 0));
+        solvers[1].set(ISF.lexico_LB(prtfl.retrieveVarIn(1, vars)));
+        solvers[2].set(ISF.minDom_LB(prtfl.retrieveVarIn(2, vars)));
     }
 
 
     @Override
     public void solve() {
-        solver.findSolution();
+        prtfl.findSolution();
     }
 
     @Override
@@ -108,7 +109,7 @@ public class CostasPara extends ParallelizedProblem {
         System.out.println(s);
     }
 
-	public static void main(String[] args){
-		new MasterProblem(CostasPara.class.getCanonicalName(),3);
-	}
+    public static void main(String[] args) {
+        new CostasPara().execute(args);
+    }
 }

@@ -77,7 +77,7 @@ import java.util.Arrays;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Solver implements Serializable {
+public class Solver implements Serializable, ISolver {
 
     private static final long serialVersionUID = 1L;
 
@@ -148,9 +148,19 @@ public class Solver implements Serializable {
      */
     public final BoolVar ZERO, ONE;
 
-
+    /**
+     * A MiniSat instance, useful to deal with clauses
+     */
     protected SatConstraint minisat;
+
+    /**
+     * A MiniSat instance adapted to nogood management
+     */
     protected NogoodConstraint nogoods;
+
+    /**
+     * An Ibex (continuous constraint solver) instance
+     */
     private Ibex ibex;
 
     /**
@@ -159,6 +169,7 @@ public class Solver implements Serializable {
      *
      * @param environment a backtracking environment
      * @param name        a name
+     * @see SolverFactory
      */
     public Solver(IEnvironment environment, String name) {
         this.name = name;
@@ -185,16 +196,31 @@ public class Solver implements Serializable {
 
     /**
      * Create a solver object with default parameters.
+     *
+     * @see SolverFactory
+     * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
+     * @deprecated
      */
+    @Deprecated
     public Solver() {
         this(Environments.DEFAULT.make(), "");
     }
 
     /**
      * Create a solver object with default parameters, named <code>name</code>.
+     *
+     * @see SolverFactory
+     * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
+     * @deprecated
      */
+    @Deprecated
     public Solver(String name) {
         this(Environments.DEFAULT.make(), name);
+    }
+
+    @Override
+    public Solver _fes_() {
+        return this;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -503,7 +529,7 @@ public class Solver implements Serializable {
      *
      * @param isComplete completeness of the declared search strategy
      */
-    public void makeCompleteSearch(boolean isComplete){
+    public void makeCompleteSearch(boolean isComplete) {
         this.search.makeCompleteStrategy(isComplete);
     }
 
@@ -518,6 +544,7 @@ public class Solver implements Serializable {
      *
      * @param variable a newly created variable, not already added
      */
+    @Override
     public void associates(Variable variable) {
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
@@ -552,6 +579,7 @@ public class Solver implements Serializable {
      *
      * @param c a Constraint
      */
+    @Override
     public void post(Constraint c) {
         _post(true, c);
     }
@@ -564,6 +592,7 @@ public class Solver implements Serializable {
      *
      * @param cs Constraints
      */
+    @Override
     public void post(Constraint... cs) {
         _post(true, cs);
     }
@@ -698,6 +727,7 @@ public class Solver implements Serializable {
      *
      * @return an {@link ESat}.
      */
+    @Override
     public ESat isFeasible() {
         return feasible;
     }
@@ -728,6 +758,7 @@ public class Solver implements Serializable {
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
      */
+    @Override
     public boolean hasReachedLimit() {
         return search.hasReachedLimit();
     }
@@ -740,6 +771,7 @@ public class Solver implements Serializable {
      *
      * @return <code>true</code> if and only if a solution has been found.
      */
+    @Override
     public boolean findSolution() {
         solve(true);
         return measures.getSolutionCount() > 0;
@@ -752,6 +784,7 @@ public class Solver implements Serializable {
      *
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
+    @Override
     public boolean nextSolution() {
         long nbsol = measures.getSolutionCount();
         search.resume();
@@ -763,6 +796,7 @@ public class Solver implements Serializable {
      *
      * @return the number of found solutions.
      */
+    @Override
     public long findAllSolutions() {
         solve(false);
         return measures.getSolutionCount();
@@ -775,6 +809,7 @@ public class Solver implements Serializable {
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
+    @Override
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
@@ -884,7 +919,7 @@ public class Solver implements Serializable {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
-        if(!engine.isInitialized()){
+        if (!engine.isInitialized()) {
             engine.initialize();
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
@@ -901,7 +936,7 @@ public class Solver implements Serializable {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
-        if(!engine.isInitialized()){
+        if (!engine.isInitialized()) {
             engine.initialize();
         }
         engine.propagate();

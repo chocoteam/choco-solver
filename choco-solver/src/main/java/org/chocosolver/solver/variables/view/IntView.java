@@ -30,7 +30,6 @@ package org.chocosolver.solver.variables.view;
 
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -66,8 +65,8 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
 
     protected DisposableRangeIterator _riterator;
 
-    public IntView(String name, IntVar var, Solver solver) {
-        super(name, solver);
+    public IntView(String name, IntVar var) {
+        super(name, var._bes_());
         this.var = var;
         this.delta = NoDelta.singleton;
         this.var.subscribeView(this);

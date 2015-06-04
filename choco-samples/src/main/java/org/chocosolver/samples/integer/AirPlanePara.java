@@ -188,7 +188,7 @@ public class AirPlanePara extends AbstractProblem {
     @Override
     public void configureSearch() {
         prtfl.carbonCopy();
-        Solver[] solvers = prtfl.getSlaves();
+        Solver[] solvers = prtfl.getWorkers();
         solvers[1].set(ISF.activity(prtfl.retrieveVarIn(1, prtfl._fes_().retrieveIntVars()), 0));
         Arrays.sort(planes, new Comparator<IntVar>() {
             @Override

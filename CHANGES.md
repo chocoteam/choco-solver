@@ -6,6 +6,12 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+- Add a solver interface (ISolver), a solver factory (SolverFactory) and a solver portfolio (Portfolio) + tests (#293)
+- Update Variable and VariableFactory to deal with ISolver (#293)
+- Remove MasterSolver and SlaveSolver (#293)
+- Add unplugSearchMonitor() to SearchLoop, Solver ans SearchMonitorList (#300)
+- Modify 'ISearchLoop.interrupt()', add new parameter 'avoidable' to qualify the strength of the interruption (#304)
+
 Bug fixes: #296, #297, #298
 
 3.3.1 - 11 May 2015

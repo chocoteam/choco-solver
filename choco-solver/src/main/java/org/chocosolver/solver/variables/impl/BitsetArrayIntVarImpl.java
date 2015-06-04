@@ -33,6 +33,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -79,8 +80,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BitsetArrayIntVarImpl(String name, int[] sortedValues, Solver solver) {
-        super(name, solver);
+    public BitsetArrayIntVarImpl(String name, int[] sortedValues, ISolver isolver) {
+        super(name, isolver);
         IEnvironment env = solver.getEnvironment();
         this.LENGTH = sortedValues.length;
         this.values = sortedValues.clone();

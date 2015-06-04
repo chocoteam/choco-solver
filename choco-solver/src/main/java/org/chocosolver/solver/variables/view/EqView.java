@@ -48,8 +48,8 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class EqView extends IntView {
 
-    public EqView(IntVar var, Solver solver) {
-        super("eq(" + var.getName() + ")", var, solver);
+    public EqView(IntVar var) {
+        super("eq(" + var.getName() + ")", var);
     }
 
     @Override
@@ -82,6 +82,7 @@ public class EqView extends IntView {
         return false;
     }
 
+    @Deprecated
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -196,7 +197,7 @@ public class EqView extends IntView {
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             this.var.duplicate(solver, identitymap);
-            EqView clone = new EqView((IntVar) identitymap.get(this.var), solver);
+            EqView clone = new EqView((IntVar) identitymap.get(this.var));
             identitymap.put(this, clone);
             for (int i = mIdx - 1; i >= 0; i--) {
                 monitors[i].duplicate(solver, identitymap);

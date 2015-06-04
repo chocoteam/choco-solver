@@ -30,6 +30,7 @@ package org.chocosolver.solver.variables;
 
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
@@ -204,6 +205,11 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @return a Solver object
      */
     Solver getSolver();
+
+    /**
+     * Return the back end solver.
+     */
+    ISolver _bes_();
 
     /**
      * Return a MASK composed of 2 main information: TYPE and KIND.

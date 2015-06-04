@@ -55,8 +55,8 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 public class MinusView extends IntView {
 
 
-    public MinusView(final IntVar var, Solver solver) {
-        super("-(" + var.getName() + ")", var, solver);
+    public MinusView(final IntVar var) {
+        super("-(" + var.getName() + ")", var);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class MinusView extends IntView {
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             this.var.duplicate(solver, identitymap);
-            MinusView clone = new MinusView((IntVar) identitymap.get(this.var), solver);
+            MinusView clone = new MinusView((IntVar) identitymap.get(this.var));
             identitymap.put(this, clone);
             for (int i = mIdx - 1; i >= 0; i--) {
                 monitors[i].duplicate(solver, identitymap);
