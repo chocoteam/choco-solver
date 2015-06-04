@@ -1775,6 +1775,7 @@ public class DuplicateTest {
         Assert.assertEquals(copy.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
     }
 
+<<<<<<< HEAD
 
     @Test(groups = "1s")
     public void test85() {
@@ -1787,6 +1788,18 @@ public class DuplicateTest {
         SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{a, b, c});
 
         Solver copy = solver.duplicateModel();
+=======
+    @Test(groups = "1s")
+    public void test85() {
+        Solver solver = new Solver("Choco");
+        IntVar[][] X = VF.enumeratedMatrix("X", 2, 3, 1, 3, solver);
+        IntVar[][] Y = VF.enumeratedMatrix("Y", 2, 3, 1, 3, solver);
+
+        solver.post(ICF.keysorting(X, null, Y, 2));
+
+        Solver copy = solver.duplicateModel();
+
+>>>>>>> feature-keysort
         solver.findAllSolutions();
         copy.findAllSolutions();
 
