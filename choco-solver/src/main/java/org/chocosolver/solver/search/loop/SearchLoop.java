@@ -128,6 +128,8 @@ public class SearchLoop implements ISearchLoop {
 
     boolean hasEndedUnexpectedly = true; // to capture external shut down
 
+    boolean canBeResumed = true;
+
     public SearchMonitorList smList;
 
     /**
@@ -179,6 +181,7 @@ public class SearchLoop implements ISearchLoop {
             measures.reset();
             objectivemanager = SAT();
             solver.set(SINGLETON);
+            canBeResumed = true;
         }
     }
 
@@ -233,7 +236,8 @@ public class SearchLoop implements ISearchLoop {
     }
 
     @Override
-    public final void interrupt(String message) {
+    public final void interrupt(String message, boolean voidable) {
+        canBeResumed = voidable;
         nextState = RESUME;
         alive = false;
         smList.afterInterrupt();
@@ -255,7 +259,7 @@ public class SearchLoop implements ISearchLoop {
      * Main loop. Flatten representation of recursive tree search.
      */
     private void loop() {
-        alive = true;
+        alive = canBeResumed;
         while (alive) {
             switch (nextState) {
                 // INITIALIZE THE SEARCH LOOP
@@ -326,7 +330,7 @@ public class SearchLoop implements ISearchLoop {
         } catch (ContradictionException e) {
             solver.getEngine().flush();
             solver.setFeasible(FALSE);
-            interrupt(MSG_INIT);
+            interrupt(MSG_INIT, true);
             smList.onContradiction(e);
             this.env.worldPop();
             return;
@@ -353,7 +357,7 @@ public class SearchLoop implements ISearchLoop {
             this.env.worldPop();
             solver.setFeasible(FALSE);
             solver.getEngine().flush();
-            interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage());
+            interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage(), true);
         }
         moveTo(OPEN_NODE);
     }
@@ -379,7 +383,7 @@ public class SearchLoop implements ISearchLoop {
         assert (TRUE.equals(solver.isSatisfied())) : fullReport(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
-            interrupt(MSG_FIRST_SOL);
+            interrupt(MSG_FIRST_SOL, true);
         } else {
             moveTo(UP_BRANCH);
         }
@@ -425,7 +429,7 @@ public class SearchLoop implements ISearchLoop {
         env.worldPop();
         if (decision == ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
-            interrupt(MSG_ROOT);
+            interrupt(MSG_ROOT, true);
         } else {
             jumpTo--;
             if (jumpTo <= 0 && decision.hasNext()) {
@@ -449,7 +453,7 @@ public class SearchLoop implements ISearchLoop {
             solver.getEngine().propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
-            interrupt(MSG_CUT);
+            interrupt(MSG_CUT, true);
         }
     }
 
@@ -508,7 +512,7 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public final void reachLimit() {
         hasReachedLimit = true;
-        interrupt(MSG_LIMIT);
+        interrupt(MSG_LIMIT, true);
     }
 
     @Override
@@ -549,6 +553,11 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public boolean hasEndedUnexpectedly() {
         return hasEndedUnexpectedly;
+    }
+
+    @Override
+    public boolean canBeResumed() {
+        return canBeResumed;
     }
 
     @Override

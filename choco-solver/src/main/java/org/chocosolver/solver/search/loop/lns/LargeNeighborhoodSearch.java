@@ -86,7 +86,11 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
 
     @Override
     public void afterInterrupt() {
-        if (hasAppliedNeighborhood && solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
+        if (hasAppliedNeighborhood
+                && solver.getMeasures().getSolutionCount() > 0
+                && solver.getSearchLoop().canBeResumed()
+                && !solver.getSearchLoop().hasReachedLimit()
+                && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
             solver.getSearchLoop().forceAlive(true);
             solver.getSearchLoop().restart();
