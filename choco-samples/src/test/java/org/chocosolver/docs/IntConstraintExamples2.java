@@ -70,4 +70,15 @@ public class IntConstraintExamples2 {
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
+
+    @Test(groups = "1s")
+    public void keysorting() {
+        Solver solver = new Solver();
+        IntVar[][] X = VF.enumeratedMatrix("X", 2, 3, 1, 3, solver);
+        IntVar[][] Y = VF.enumeratedMatrix("Y", 2, 3, 1, 3, solver);
+        IntVar[] P = VF.enumeratedArray("P", 3, 0, 3, solver);
+        solver.post(ICF.keysorting(X, P, Y, 2));
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
+    }
 }

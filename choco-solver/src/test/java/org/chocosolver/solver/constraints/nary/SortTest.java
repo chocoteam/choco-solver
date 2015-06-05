@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.nary.sort.PropSort;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -64,7 +65,7 @@ public class SortTest {
         Y[4] = VF.bounded("Y5", 14, 18, solver);
 
         solver.post(new Constraint("sort", new PropSort(X, Y)));
-        /*if (solver.findSolution()) {
+        if (solver.findSolution()) {
             do {
                 System.out.printf("Solution:\n");
                 for (IntVar x : X) {
@@ -76,7 +77,7 @@ public class SortTest {
                 }
                 System.out.printf("\n\n");
             } while (solver.nextSolution());
-        }*/
+        }
         Assert.assertEquals(solver.findAllSolutions(), 182);
 
     }

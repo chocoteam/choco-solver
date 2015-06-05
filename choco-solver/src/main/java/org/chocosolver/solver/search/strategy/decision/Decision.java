@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -160,8 +159,6 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
      * @return a value object
      */
     public abstract Object getDecisionValue();
-
-    public abstract DecisionOperator<V> getDecisionOperator();
 
     /**
      * Free the decision, ie, it can be reused

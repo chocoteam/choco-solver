@@ -30,7 +30,6 @@ package org.chocosolver.solver.search.strategy.decision;
 
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -54,11 +53,6 @@ public class RootDecision extends Decision {
 
     @Override
     public Object getDecisionValue() {
-        return null;
-    }
-
-    @Override
-    public DecisionOperator getDecisionOperator() {
         return null;
     }
 

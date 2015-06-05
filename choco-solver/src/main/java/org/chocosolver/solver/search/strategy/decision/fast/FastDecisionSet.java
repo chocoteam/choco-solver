@@ -54,11 +54,6 @@ public class FastDecisionSet extends Decision<SetVar> {
     }
 
     @Override
-    public DecisionOperator<SetVar> getDecisionOperator() {
-        return operator;
-    }
-
-    @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
             operator.apply(var, value, this);
