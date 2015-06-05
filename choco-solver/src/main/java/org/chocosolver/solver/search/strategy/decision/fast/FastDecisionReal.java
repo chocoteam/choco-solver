@@ -29,7 +29,6 @@
 package org.chocosolver.solver.search.strategy.decision.fast;
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.PoolManager;
@@ -53,11 +52,6 @@ public class FastDecisionReal extends Decision<RealVar> {
     @Override
     public Double getDecisionValue() {
         return value;
-    }
-
-    @Override
-    public DecisionOperator<RealVar> getDecisionOperator() {
-        return null;
     }
 
     @Override
