@@ -29,17 +29,22 @@ package org.chocosolver.solver;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.solution.LastSolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
@@ -54,17 +59,16 @@ import java.util.concurrent.CyclicBarrier;
 public class Portfolio implements Serializable, ISolver {
 
     private static final int FRONTEND = 0;
-
-    private int nvars, ncstrs;
     /**
      * Number of threads used, ie, number of workers
      */
     int nthreads;
 
     /**
+     * FOR ADVANCED USAGES ONLY.
      * The workers/solvers.
      */
-    final Solver[] workers;
+    public final Solver[] workers;
 
     /**
      * The identity maps
@@ -83,6 +87,19 @@ public class Portfolio implements Serializable, ISolver {
 
     private boolean skip_conformity = false;
 
+    private boolean skip_strategy_configuration = false;
+
+    /**
+     * Ordered list of created model objects, to ensure carbon copies are EXACTLY the same (wrt to the variables and proapgators ID)
+     */
+    private List<Object> cmo;
+
+    /**
+     * Index of the last copied object form cmo to workers[i], i>0
+     */
+    private int lco;
+
+
     @SuppressWarnings("unchecked")
     public Portfolio(String name, int nthreads) {
         if (nthreads < 2) {
@@ -97,20 +114,41 @@ public class Portfolio implements Serializable, ISolver {
         }
         this.barrier = new CyclicBarrier(nthreads + 1);
         this.new_solutions = new long[nthreads];
-        this.nvars = 0;
-        this.ncstrs = 0;
+        this.cmo = new ArrayList<>();
+        this.cmo.add(workers[lco].ZERO);
+        this.cmo.add(workers[lco].ONE);
+        this.cmo.add(workers[lco].TRUE);
+        this.cmo.add(workers[lco].FALSE);
+        this.lco = 4;
     }
 
+    /**
+     * Associate a variable to the front-end solver
+     *
+     * @param variable a newly created variable, not already added
+     */
     @Override
     public void associates(Variable variable) {
         _fes_().associates(variable);
+        cmo.add(variable);
     }
 
+    /**
+     * Post a constraint in the front-end solver
+     *
+     * @param c a Constraint
+     */
     @Override
     public void post(Constraint c) {
         _fes_().post(c);
+        cmo.add(c);
     }
 
+    /**
+     * Post constraints in the front-end solver
+     *
+     * @param cs Constraints
+     */
     @Override
     public void post(Constraint... cs) {
         for (int i = 0; i < cs.length; i++) {
@@ -118,10 +156,24 @@ public class Portfolio implements Serializable, ISolver {
         }
     }
 
+    @Override
+    public IMeasures getMeasures() {
+        throw new SolverException("Solver Portfolio does not yet enable to get global measures.");
+    }
+
+    /**
+     * Set the search strategy of the front-end solver
+     *
+     * @param strategies the search strategies to use.
+     */
+    @Override
+    public void set(AbstractStrategy... strategies) {
+        workers[FRONTEND].set(strategies);
+    }
+
     private boolean needCopy() {
         return skip_conformity
-                || nvars != _fes_().vIdx
-                || ncstrs != _fes_().cIdx
+                || cmo.size() != lco
                 || _fes_().minisat != null && workers[1].minisat == null
                 || _fes_().minisat != null && workers[1].minisat != null &&
                 (_fes_().minisat.getSatSolver().numvars() != workers[1].minisat.getSatSolver().numvars()
@@ -129,7 +181,7 @@ public class Portfolio implements Serializable, ISolver {
     }
 
     /**
-     * Make a carbon copy of the front end solver to the other ones.
+     * Make a carbon copy of the front-end solver to the other ones.
      */
     public void carbonCopy() {
         // TODO: Ibex may have received new constraints or NogoodStore
@@ -137,33 +189,59 @@ public class Portfolio implements Serializable, ISolver {
             if (_fes_().getEnvironment().getWorldIndex() > 0) {
                 throw new SolverException("Duplicating a solver cannot be achieved once the resolution has begun.");
             }
+            // Iterate over objects and over workers.
+            // like this, the objects are ensured to be created in the same order,
+            // and then their ID are the same too.
+            for (; lco < cmo.size(); lco++) {
+                Object o = cmo.get(lco);
+                if (o instanceof Constraint) {
+                    Constraint c = (Constraint) o;
+                    Propagator[] ops = c.getPropagators();
+                    for (int i = 1; i < nthreads; i++) {
+                        Propagator[] cps = new Propagator[ops.length];
+                        for (int j = 0; j < ops.length; j++) {
+                            ops[j].duplicate(workers[i], imaps[i]);
+                            cps[j] = (Propagator) imaps[i].get(ops[j]);
+                        }
+                        Constraint cc = new Constraint(c.getName(), cps);
+                        workers[i].post(cc);
+                    }
+                } else {
+                    Variable v = (Variable) o;
+                    for (int i = 1; i < nthreads; i++) {
+                        v.duplicate(workers[i], imaps[i]);
+                    }
+                }
+            }
+            // Then deal with clauses
             for (int n = 1; n < nthreads; n++) {
-                Solver worker = workers[n];
-                THashMap<Object, Object> imap = imaps[n];
-                // duplicate variables
-                if (nvars != _fes_().vIdx) {
-                    for (int i = 0; i < _fes_().vIdx; i++) {
-                        _fes_().vars[i].duplicate(worker, imap);
-                    }
-                }
-                // duplicate constraints
-                if (ncstrs != _fes_().cIdx) {
-                    for (int i = 0; i < _fes_().cIdx; i++) {
-                        _fes_().cstrs[i].duplicate(worker, imap);
-                        //TODO How to deal with temporary constraints ?
-                        worker.post((Constraint) imap.get(_fes_().cstrs[i]));
-                    }
-                }
                 if (_fes_().minisat != null && workers[1].minisat != null
                         && (_fes_().minisat.getSatSolver().numvars() != workers[n].minisat.getSatSolver().numvars()
                         || _fes_().minisat.getSatSolver().nbclauses() != workers[n].minisat.getSatSolver().nbclauses())) {
                     workers[n].minisat.getSatSolver().copyFrom(_fes_().minisat.getSatSolver());
                 }
             }
-            nvars = _fes_().vIdx;
-            ncstrs = _fes_().cIdx;
         }
     }
+
+//    private boolean assertCarbonCopy() {
+//        for (int i = 0; i < workers[0].getNbVars(); i++) {
+//            Variable v = workers[0].getVar(i);
+//            for (int j = 1; j < nthreads; j++) {
+//                assert workers[j].getVar(i).getId() == v.getId();
+//            }
+//        }
+//        for (int i = 0; i < workers[0].getNbCstrs(); i++) {
+//            Constraint c = workers[0].getCstrs()[i];
+//            for (int k = 0; k < c.getPropagators().length; k++) {
+//                Propagator p = c.getPropagator(k);
+//                for (int j = 1; j < nthreads; j++) {
+//
+//                }
+//            }
+//        }
+//        return true;
+//    }
 
     private long countNewSolutions() {
         long nsol = 0;
@@ -223,6 +301,9 @@ public class Portfolio implements Serializable, ISolver {
         // TODO: deal with same solutions
         if (needCopy()) {
             carbonCopy();
+        }
+        if (!skip_strategy_configuration) {
+            setStrategies(ResolutionPolicy.SATISFACTION);
         }
         Arrays.fill(new_solutions, 0);
         for (int s = 0; s < nthreads; s++) {
@@ -297,6 +378,9 @@ public class Portfolio implements Serializable, ISolver {
         if (needCopy()) {
             carbonCopy();
         }
+        if (!skip_strategy_configuration) {
+            setStrategies(ResolutionPolicy.SATISFACTION);
+        }
         Arrays.fill(new_solutions, 0);
         for (int s = 0; s < nthreads; s++) {
             int _s = s;
@@ -338,8 +422,10 @@ public class Portfolio implements Serializable, ISolver {
         if (needCopy()) {
             carbonCopy();
         }
+        if (!skip_strategy_configuration) {
+            setStrategies(policy);
+        }
         Portfolio _me = this;
-
         for (int s = 0; s < nthreads; s++) {
             int _s = s;
             Thread r = new Thread() {
@@ -379,26 +465,6 @@ public class Portfolio implements Serializable, ISolver {
     }
 
     /**
-     * Return the solvers used in the portfolio.
-     */
-    public Solver[] getWorkers() {
-        return workers;
-    }
-
-    /**
-     * Return widx^th the worker-solver
-     *
-     * @param widx index of the worker in the portfolio
-     * @return a worker solver
-     */
-    public Solver getWorker(int widx) {
-        if (widx < 0 || widx > nthreads) {
-            throw new SolverException(String.format("Worker-solver index %d not in range [0,%d].", widx, nthreads));
-        }
-        return workers[widx];
-    }
-
-    /**
      * Return the number of workers
      *
      * @return
@@ -414,6 +480,7 @@ public class Portfolio implements Serializable, ISolver {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public <V extends Variable> V retrieveVarIn(int i, V var) {
         if (i == FRONTEND) {
             return var;
@@ -422,6 +489,7 @@ public class Portfolio implements Serializable, ISolver {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public <V extends Variable> V[] retrieveVarIn(int i, V... vars) {
         if (i == FRONTEND) {
             return vars;
@@ -443,6 +511,20 @@ public class Portfolio implements Serializable, ISolver {
      */
     public void skipConformity(boolean sc) {
         this.skip_conformity = sc;
+    }
+
+    /**
+     * Enable to skip the strategy configrations, that is, that all solvers, except the front-end, have an automatically defined search strategy
+     * based (or not) on the decisions variables (if any).
+     * The default value of <code>ssc</code> is <code>false</code>, setting it to <code>true</code> will skip the configuration steps
+     * achieved before calling {@link #findSolution()}, {@link #findAllSolutions()}
+     * and {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}.
+     * Skipping the configurations may be interesting if one have a better knowledge of the strategies adapted to solve the underlying problem.
+     *
+     * @param ssc set to true to skip the strategy configurations.
+     */
+    public void skipStrategyConfiguration(boolean ssc) {
+        this.skip_strategy_configuration = ssc;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -480,4 +562,12 @@ public class Portfolio implements Serializable, ISolver {
     }
 
 
+    /**
+     * Retrieve decisions variables from the front-end solver and define strategies for the others
+     *
+     * @param policy resolution policy, among SATISFACTION, MINIMIZE and MAXIMIZE
+     */
+    private void setStrategies(ResolutionPolicy policy) {
+        //TODO
+    }
 }

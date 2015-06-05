@@ -27,6 +27,8 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
@@ -68,6 +70,24 @@ public interface ISolver {
      * @param cs Constraints
      */
     void post(Constraint... cs);
+
+    /**
+     * Return a reference to the measures recorder.
+     * This enables to get, for instance, the number of solutions found, time count, etc.
+     */
+    public IMeasures getMeasures();
+
+    /**
+     * Override the default search strategies to use in the solver.
+     * In case many strategies are given, they will be called in sequence:
+     * The first strategy in parameter is first called to compute a decision, if possible.
+     * If it cannot provide a new decision, the second strategy is called ...
+     * and so on, until the last strategy.
+     * <p>
+     *
+     * @param strategies the search strategies to use.
+     */
+    public void set(AbstractStrategy... strategies);
 
     /**
      * Returns information on the feasibility of the current problem defined by the solver.

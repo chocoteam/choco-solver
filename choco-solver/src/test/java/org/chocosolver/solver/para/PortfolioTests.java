@@ -97,7 +97,7 @@ public class PortfolioTests {
             prtfl.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
         prtfl._fes_().set(IntStrategyFactory.lexico_LB(ticks));
-        for(Solver s: prtfl.getWorkers()){
+        for(Solver s: prtfl.workers){
             Chatterbox.showSolutions(s);
         }
         return prtfl;
@@ -172,7 +172,7 @@ public class PortfolioTests {
         IntVar bound = VF.bounded("bounded", 0, 10, prtfl);
         IntVar enuma = VF.enumerated("enum", 0, 10, prtfl);
         prtfl.carbonCopy();
-        Solver[] solvers = prtfl.getWorkers();
+        Solver[] solvers = prtfl.workers;
         for (int i = 0; i < 4; i++) {
             Assert.assertEquals(solvers[i].getNbVars(), 5);
         }
@@ -185,7 +185,7 @@ public class PortfolioTests {
         BoolVar b = VF.bool("b", prtfl);
         BoolVar c = VF.bool("c", prtfl);
         prtfl.carbonCopy();
-        Solver[] solvers = prtfl.getWorkers();
+        Solver[] solvers = prtfl.workers;
         for (int i = 0; i < 4; i++) {
             Assert.assertEquals(solvers[i].getNbVars(), 5);
         }
@@ -230,7 +230,7 @@ public class PortfolioTests {
         if (m > 2) {
             prtfl.post(arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
-        Solver[] solvers = prtfl.getWorkers();
+        Solver[] solvers = prtfl.workers;
         for (int i = 0; i < 4; i++) {
             Chatterbox.showSolutions(solvers[i]);
         }
