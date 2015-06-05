@@ -58,7 +58,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     public static final int BOOL = INT | (1 << 4);
     public static final int SET = 1 << 5;
     public static final int REAL = 1 << 6;
-    public static final int KIND = (1 << 7) - 1 - TYPE;
+    public static final int KIND = (1 << 10) - 1 - TYPE;
 
     /**
      * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
