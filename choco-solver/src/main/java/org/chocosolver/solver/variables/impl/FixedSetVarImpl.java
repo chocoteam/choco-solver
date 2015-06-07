@@ -208,7 +208,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public SetVar duplicate() {
-        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), this.getSolver());
+        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), isolver);
     }
 
     @Override

@@ -454,7 +454,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public IntVar duplicate() {
-        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.getSolver());
+        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), isolver);
     }
 
     @Override

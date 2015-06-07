@@ -113,7 +113,7 @@ public class DuplicateTest {
         VF.scale(e, 3);
         VF.minus(e);
         VF.eq(e);
-        VF.task(e, solver.ONE, VF.offset(e, 1));
+        VF.task(e, solver.ONE(), VF.offset(e, 1));
 
         Solver copy = solver.duplicateModel();
         Assert.assertEquals(copy.getNbVars(), solver.getNbVars());

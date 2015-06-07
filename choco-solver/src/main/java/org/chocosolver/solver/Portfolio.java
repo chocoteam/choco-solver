@@ -30,12 +30,15 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.solution.LastSolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -115,11 +118,7 @@ public class Portfolio implements Serializable, ISolver {
         this.barrier = new CyclicBarrier(nthreads + 1);
         this.new_solutions = new long[nthreads];
         this.cmo = new ArrayList<>();
-        this.cmo.add(workers[lco].ZERO);
-        this.cmo.add(workers[lco].ONE);
-        this.cmo.add(workers[lco].TRUE);
-        this.cmo.add(workers[lco].FALSE);
-        this.lco = 4;
+        this.lco = 0;
     }
 
     /**
@@ -161,6 +160,26 @@ public class Portfolio implements Serializable, ISolver {
         throw new SolverException("Solver Portfolio does not yet enable to get global measures.");
     }
 
+    @Override
+    public SatConstraint getMinisat() {
+        SatConstraint sc = _fes_().minisat;
+        if (sc == null) {
+            sc = _fes_().getMinisat();
+            cmo.add(sc);
+        }
+        return sc;
+    }
+
+    @Override
+    public NogoodConstraint getNogoodStore() {
+        NogoodConstraint ngc = _fes_().nogoods;
+        if (ngc == null) {
+            ngc = _fes_().getNogoodStore();
+            cmo.add(ngc);
+        }
+        return ngc;
+    }
+
     /**
      * Set the search strategy of the front-end solver
      *
@@ -168,7 +187,7 @@ public class Portfolio implements Serializable, ISolver {
      */
     @Override
     public void set(AbstractStrategy... strategies) {
-        workers[FRONTEND].set(strategies);
+        _fes_().set(strategies);
     }
 
     private boolean needCopy() {
@@ -202,6 +221,10 @@ public class Portfolio implements Serializable, ISolver {
                         for (int j = 0; j < ops.length; j++) {
                             ops[j].duplicate(workers[i], imaps[i]);
                             cps[j] = (Propagator) imaps[i].get(ops[j]);
+                            assert cps[j].getId() == ops[j].getId() :
+                                    String.format("%s [%d]: wrong ID",
+                                            ops[j].getClass().getSimpleName(),
+                                            ops[j].getId());
                         }
                         Constraint cc = new Constraint(c.getName(), cps);
                         workers[i].post(cc);
@@ -210,6 +233,7 @@ public class Portfolio implements Serializable, ISolver {
                     Variable v = (Variable) o;
                     for (int i = 1; i < nthreads; i++) {
                         v.duplicate(workers[i], imaps[i]);
+                        assert v.getId() == ((Variable) imaps[i].get(v)).getId();
                     }
                 }
             }
@@ -223,25 +247,6 @@ public class Portfolio implements Serializable, ISolver {
             }
         }
     }
-
-//    private boolean assertCarbonCopy() {
-//        for (int i = 0; i < workers[0].getNbVars(); i++) {
-//            Variable v = workers[0].getVar(i);
-//            for (int j = 1; j < nthreads; j++) {
-//                assert workers[j].getVar(i).getId() == v.getId();
-//            }
-//        }
-//        for (int i = 0; i < workers[0].getNbCstrs(); i++) {
-//            Constraint c = workers[0].getCstrs()[i];
-//            for (int k = 0; k < c.getPropagators().length; k++) {
-//                Propagator p = c.getPropagator(k);
-//                for (int j = 1; j < nthreads; j++) {
-//
-//                }
-//            }
-//        }
-//        return true;
-//    }
 
     private long countNewSolutions() {
         long nsol = 0;
@@ -480,7 +485,6 @@ public class Portfolio implements Serializable, ISolver {
     }
 
     @SuppressWarnings("unchecked")
-    @Deprecated
     public <V extends Variable> V retrieveVarIn(int i, V var) {
         if (i == FRONTEND) {
             return var;
@@ -489,7 +493,6 @@ public class Portfolio implements Serializable, ISolver {
     }
 
     @SuppressWarnings("unchecked")
-    @Deprecated
     public <V extends Variable> V[] retrieveVarIn(int i, V... vars) {
         if (i == FRONTEND) {
             return vars;
@@ -568,6 +571,50 @@ public class Portfolio implements Serializable, ISolver {
      * @param policy resolution policy, among SATISFACTION, MINIMIZE and MAXIMIZE
      */
     private void setStrategies(ResolutionPolicy policy) {
-        //TODO
+        //TODO deal with other type of variables
+        IntVar[] dvars = new IntVar[_fes_().getNbVars()];
+        Variable[] vars = _fes_().getVars();
+        if (_fes_().getStrategy() != null
+                && _fes_().getStrategy().getVariables().length > 0) {
+            vars = _fes_().getStrategy().getVariables();
+        }
+        assert vars.length > 0;
+        int k = 0;
+        for (int i = 0; i < vars.length; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.INT) > 0) {
+                dvars[k++] = (IntVar) vars[i];
+            }
+        }
+        dvars = Arrays.copyOf(dvars, k);
+        int t = 1;
+        switch (policy) {
+            default:
+                // 2nd worker
+                if (t < nthreads) {
+                    IntVar[] mvars = retrieveVarIn(t, dvars);
+                    workers[t].set(ISF.activity(mvars, 0));
+                    t++;
+                }
+                // 3rd worker
+                if (t < nthreads) {
+                    IntVar[] mvars = retrieveVarIn(t, dvars);
+                    workers[t].set(ISF.domOverWDeg(mvars, 0));
+                    t++;
+                }
+                // 4th worker
+                if (t < nthreads) {
+                    IntVar[] mvars = retrieveVarIn(t, dvars);
+                    workers[t].set(
+                            ISF.lastConflict(workers[t], ISF.minDom_LB(mvars))
+                    );
+                    t++;
+                }
+                // then I'm feeling lucky
+                for (; t < nthreads; t++) {
+                    IntVar[] mvars = retrieveVarIn(t, dvars);
+                    workers[t].set(ISF.activity(mvars, t));
+                }
+                break;
+        }
     }
 }

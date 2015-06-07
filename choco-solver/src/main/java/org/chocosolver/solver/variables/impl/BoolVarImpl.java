@@ -402,7 +402,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), this.getSolver());
+        return VariableFactory.bool(StringUtils.randomName(this.name), isolver);
     }
 
     @Override

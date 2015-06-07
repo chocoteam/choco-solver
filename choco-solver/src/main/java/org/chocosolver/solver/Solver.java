@@ -141,12 +141,12 @@ public class Solver implements Serializable, ISolver {
     /**
      * Two basic constraints TRUE and FALSE, cached to avoid multiple useless occurrences
      */
-    public final Constraint TRUE, FALSE;
+    private Constraint TRUE, FALSE;
 
     /**
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
-    public final BoolVar ZERO, ONE;
+    private BoolVar ZERO, ONE;
 
     /**
      * A MiniSat instance, useful to deal with clauses
@@ -184,12 +184,6 @@ public class Solver implements Serializable, ISolver {
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = (BoolVar) VF.fixed(0, this);
-        ONE = (BoolVar) VF.fixed(1, this);
-        ZERO._setNot(ONE);
-        ONE._setNot(ZERO);
-        TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
-        FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
         solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
         set(ObjectiveManager.SAT());
     }
@@ -226,6 +220,60 @@ public class Solver implements Serializable, ISolver {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The basic constant "0"
+     *
+     * @return a boolean variable set to 0
+     */
+    public BoolVar ZERO() {
+        if (ZERO == null) {
+            ZERO = (BoolVar) VF.fixed(0, this);
+            ONE = (BoolVar) VF.fixed(1, this);
+            ZERO._setNot(ONE);
+            ONE._setNot(ZERO);
+        }
+        return ZERO;
+    }
+
+    /**
+     * The basic constant "1"
+     *
+     * @return a boolean variable set to 1
+     */
+    public BoolVar ONE() {
+        if (ONE == null) {
+            ZERO = (BoolVar) VF.fixed(0, this);
+            ONE = (BoolVar) VF.fixed(1, this);
+            ZERO._setNot(ONE);
+            ONE._setNot(ZERO);
+        }
+        return ONE;
+    }
+
+    /**
+     * The basic "true" constraint
+     *
+     * @return a "true" constraint
+     */
+    public Constraint TRUE() {
+        if (TRUE == null) {
+            TRUE = new Constraint("TRUE cstr", new PropTrue(ONE()));
+        }
+        return TRUE;
+    }
+
+    /**
+     * The basic "false" constraint
+     *
+     * @return a "false" constraint
+     */
+    public Constraint FALSE() {
+        if (FALSE == null) {
+            FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO()));
+        }
+        return FALSE;
+    }
 
 
     /**

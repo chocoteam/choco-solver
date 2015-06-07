@@ -266,9 +266,9 @@ public class LogicalConstraintFactory {
 		// PRESOLVE
 		ESat entail = CSTR.isSatisfied();
 		if (BVAR.isInstantiatedTo(0) || (BVAR.isInstantiatedTo(1) && entail == ESat.TRUE)) {
-			return s.TRUE;
+			return s.TRUE();
 		}else if (BVAR.isInstantiatedTo(1) && entail == ESat.FALSE) {
-			return s.FALSE;
+			return s.FALSE();
 		}
 		// END PRESOLVE
 		return ICF.arithm(BVAR, "<=", CSTR.reif());
@@ -286,9 +286,9 @@ public class LogicalConstraintFactory {
 		if (BVAR.isInstantiated() && entail != ESat.UNDEFINED) {
 			if ((BVAR.getValue() == 1 && entail == ESat.TRUE)
 					|| (BVAR.getValue() == 0 && entail == ESat.FALSE)) {
-				return s.TRUE;
+				return s.TRUE();
 			} else {
-				return s.FALSE;
+				return s.FALSE();
 			}
 		}
 		// END PRESOLVE

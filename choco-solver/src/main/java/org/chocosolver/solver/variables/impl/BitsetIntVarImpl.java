@@ -531,7 +531,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), this.getSolver());
+        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), isolver);
     }
 
     @Override

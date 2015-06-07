@@ -534,7 +534,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public IntVar duplicate() {
-        return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.values.clone(), this.getSolver());
+        return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.values.clone(), isolver);
     }
 
     @Override

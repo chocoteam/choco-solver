@@ -235,7 +235,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return VF.fixed(StringUtils.randomName(), this.constante, this.getSolver());
+        return VF.fixed(StringUtils.randomName(), this.constante, isolver);
     }
 
     @Override

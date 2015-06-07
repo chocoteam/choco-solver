@@ -42,8 +42,13 @@ import org.chocosolver.solver.variables.view.IView;
 import java.io.Serializable;
 
 /**
+ *
+ * To developers: any constructor of variable must pass in parameter
+ * the back-end ISolver, that is, in decreasing order:
+ * - the solver portfolio,
+ * - the solver (or portfolio workers but fes).
  * Created by IntelliJ IDEA.
- * User: xlorca
+ * User: xlorca, Charles Prud'homme
  */
 public interface Variable extends Identity, Serializable, Comparable<Variable> {
 

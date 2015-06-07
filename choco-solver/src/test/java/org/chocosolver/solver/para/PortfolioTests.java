@@ -174,7 +174,7 @@ public class PortfolioTests {
         prtfl.carbonCopy();
         Solver[] solvers = prtfl.workers;
         for (int i = 0; i < 4; i++) {
-            Assert.assertEquals(solvers[i].getNbVars(), 5);
+            Assert.assertEquals(solvers[i].getNbVars(), 3);
         }
     }
 
@@ -187,7 +187,7 @@ public class PortfolioTests {
         prtfl.carbonCopy();
         Solver[] solvers = prtfl.workers;
         for (int i = 0; i < 4; i++) {
-            Assert.assertEquals(solvers[i].getNbVars(), 5);
+            Assert.assertEquals(solvers[i].getNbVars(), 3);
         }
         SatFactory.addBoolAndEqVar(a, b, c);
         prtfl.carbonCopy();

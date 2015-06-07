@@ -29,7 +29,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISolver;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
@@ -54,7 +53,7 @@ public class VariableFactory {
     VariableFactory() {
     }
 
-    private static final String CSTE_NAME = "cste -- ";
+    public static final String CSTE_NAME = "cste -- ";
 
     /**
      * Provide a minimum value for integer variable lower bound.
@@ -644,7 +643,7 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static BoolVar zero(ISolver SOLVER) {
-        return SOLVER._fes_().ZERO;
+        return SOLVER._fes_().ZERO();
     }
 
     /**
@@ -654,7 +653,7 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static BoolVar one(ISolver SOLVER) {
-        return SOLVER._fes_().ONE;
+        return SOLVER._fes_().ONE();
     }
 
     //*************************************************************************************
@@ -695,9 +694,9 @@ public class VariableFactory {
      */
     public static IntVar fixed(boolean VALUE, ISolver SOLVER) {
         if (VALUE) {
-            return SOLVER._fes_().ONE;
+            return SOLVER._fes_().ONE();
         } else {
-            return SOLVER._fes_().ZERO;
+            return SOLVER._fes_().ZERO();
         }
     }
 
@@ -732,7 +731,7 @@ public class VariableFactory {
         if (VAR.getSolver().getSettings().enableViews()) {
             return new OffsetView(VAR, CSTE);
         } else {
-            Solver s = VAR.getSolver();
+            ISolver s = VAR._bes_();
             int lb = VAR.getLB() + CSTE;
             int ub = VAR.getUB() + CSTE;
             String name = "(" + VAR.getName() + "+" + CSTE + ")";
@@ -816,7 +815,7 @@ public class VariableFactory {
             if (BOOL.hasNot()) {
                 return BOOL.not();
             } else {
-                Solver s = BOOL.getSolver();
+                ISolver s = BOOL._bes_();
                 BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
                 s.post(ICF.arithm(ov, "!=", BOOL));
                 BOOL._setNot(ov);
@@ -840,7 +839,7 @@ public class VariableFactory {
         if (VAR.getSolver().getSettings().enableViews()) {
             return new MinusView(VAR);
         } else {
-            Solver s = VAR.getSolver();
+            ISolver s = VAR._bes_();
             int ub = -VAR.getLB();
             int lb = -VAR.getUB();
             String name = "-(" + VAR.getName() + ")";
@@ -879,14 +878,14 @@ public class VariableFactory {
         } else {
             IntVar var;
             if (CSTE == 0) {
-                var = fixed(0, VAR.getSolver());
+                var = fixed(0, VAR._bes_());
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
                 if (VAR.getSolver().getSettings().enableViews()) {
                     var = new ScaleView(VAR, CSTE);
                 } else {
-                    Solver s = VAR.getSolver();
+                    ISolver s = VAR._bes_();
                     int lb = VAR.getLB() * CSTE;
                     int ub = VAR.getUB() * CSTE;
                     String name = "(" + VAR.getName() + "*" + CSTE + ")";
@@ -925,7 +924,7 @@ public class VariableFactory {
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-            Solver s = VAR.getSolver();
+            ISolver s = VAR._bes_();
             int ub = Math.max(-VAR.getLB(), VAR.getUB());
             String name = "|" + VAR.getName() + "|";
             IntVar abs;
@@ -951,7 +950,7 @@ public class VariableFactory {
         if (VAR.getSolver().getSettings().enableViews()) {
             return new RealView(VAR, PRECISION);
         } else {
-            Solver s = VAR.getSolver();
+            ISolver s = VAR._bes_();
             double lb = VAR.getLB();
             double ub = VAR.getUB();
             RealVar rv = real("(real)" + VAR.getName(), lb, ub, PRECISION, s);
@@ -976,7 +975,7 @@ public class VariableFactory {
                 reals[i] = real(VARS[i], PRECISION);
             }
         } else {
-            Solver s = VARS[0].getSolver();
+            ISolver s = VARS[0]._bes_();
             for (int i = 0; i < VARS.length; i++) {
                 double lb = VARS[i].getLB();
                 double ub = VARS[i].getUB();

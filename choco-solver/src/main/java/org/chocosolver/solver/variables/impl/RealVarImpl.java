@@ -193,7 +193,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public RealVar duplicate() {
-        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
+        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, isolver);
     }
 
     @Override

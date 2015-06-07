@@ -12,6 +12,7 @@ NEXT MILESTONE
 - Remove MasterSolver and SlaveSolver (#293)
 - Add unplugSearchMonitor() to SearchLoop, Solver ans SearchMonitorList (#300)
 - Modify 'ISearchLoop.interrupt()', add new parameter 'avoidable' to qualify the strength of the interruption (#304)
+- lazy creation of ZERO, ONE, TRUE and FALSE through methods of Solver (#293)
 
 Bug fixes: #296, #297, #298
 

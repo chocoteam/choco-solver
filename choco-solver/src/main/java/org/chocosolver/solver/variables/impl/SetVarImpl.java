@@ -287,7 +287,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
             ker[idx++] = i;
         }
-        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), solver);
+        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), isolver);
     }
 
     @Override

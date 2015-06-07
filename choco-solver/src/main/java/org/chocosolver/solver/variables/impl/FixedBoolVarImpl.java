@@ -120,7 +120,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public IntVar duplicate() {
-        return VF.fixed(StringUtils.randomName(), this.constante, this.getSolver());
+        return VF.fixed(StringUtils.randomName(), this.constante, isolver);
     }
 
     @Override

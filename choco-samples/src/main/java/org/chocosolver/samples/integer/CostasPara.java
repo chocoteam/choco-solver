@@ -80,7 +80,7 @@ public class CostasPara extends AbstractProblem {
     @Override
     public void configureSearch() {
         prtfl.carbonCopy();
-        Solver[] solvers = prtfl.getWorkers();
+        Solver[] solvers = prtfl.workers;
         solvers[0].set(ISF.activity(prtfl.retrieveVarIn(0, vars), 0));
         solvers[1].set(ISF.lexico_LB(prtfl.retrieveVarIn(1, vars)));
         solvers[2].set(ISF.minDom_LB(prtfl.retrieveVarIn(2, vars)));

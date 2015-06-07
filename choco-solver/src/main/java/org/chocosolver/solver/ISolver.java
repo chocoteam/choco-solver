@@ -27,6 +27,8 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -76,6 +78,24 @@ public interface ISolver {
      * This enables to get, for instance, the number of solutions found, time count, etc.
      */
     public IMeasures getMeasures();
+
+    /**
+     * Return a constraint embedding a minisat solver.
+     * It is highly recommended that there is only once instance of this constraint in a solver.
+     * So a call to this method will create and post the constraint if it does not exist.
+     *
+     * @return the minisat constraint
+     */
+    public SatConstraint getMinisat();
+
+    /**
+     * Return a constraint embedding a nogood store (based on a sat solver).
+     * It is highly recommended that there is only once instance of this constraint in a solver.
+     * So a call to this method will create and post the constraint if it does not exist.
+     *
+     * @return the minisat constraint
+     */
+    public NogoodConstraint getNogoodStore();
 
     /**
      * Override the default search strategies to use in the solver.

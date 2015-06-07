@@ -30,6 +30,7 @@ package org.chocosolver.choco;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -194,7 +195,7 @@ public class SolverTest {
         RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
 
         BoolVar[] bvars = solver.retrieveBoolVars();
-        Assert.assertEquals(bvars, new BoolVar[]{solver.ZERO, solver.ONE, b});
+        Assert.assertEquals(bvars, new BoolVar[]{solver.ZERO(), solver.ONE(), b});
 
         IntVar[] ivars = solver.retrieveIntVars();
         Assert.assertEquals(ivars, new IntVar[]{i});
@@ -207,4 +208,21 @@ public class SolverTest {
 
     }
 
+
+    @Test(groups = "1s")
+    public void testRetrieveInt() {
+        Solver solver = SolverFactory.makeSolver();
+        BoolVar b = VF.bool("b", solver);
+        IntVar i = VF.enumerated("i", 1, 3, solver);
+        IntVar[] is = solver.retrieveIntVars();
+        Assert.assertEquals(1, is.length);
+    }
+    @Test(groups = "1s")
+        public void testRetrieveBool() {
+            Solver solver = SolverFactory.makeSolver();
+            BoolVar b = VF.bool("b", solver);
+            IntVar i = VF.enumerated("i", 1, 3, solver);
+            IntVar[] bs = solver.retrieveBoolVars();
+            Assert.assertEquals(1, bs.length);
+        }
 }
