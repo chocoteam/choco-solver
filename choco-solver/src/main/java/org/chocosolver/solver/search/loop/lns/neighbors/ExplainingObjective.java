@@ -225,7 +225,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         // mimic explanation computation
         RuleStore rs = mExplanationEngine.getRuleStore();
         rs.init();
-        Explanation explanation = new Explanation(false);
+        Explanation explanation = mExplanationEngine.makeExplanation(false);
         rs.addRemovalRule(objective, value);
         IEventStore es = mExplanationEngine.getEventStore();
         int i = es.getSize() - 1;
@@ -303,7 +303,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         // mimic explanation computation
         RuleStore rs = mExplanationEngine.getRuleStore();
         rs.init();
-        Explanation explanation = new Explanation(false);
+        Explanation explanation = mExplanationEngine.makeExplanation(false);
         rs.addRemovalRule(objective, value);
 
         while (i > -1) {

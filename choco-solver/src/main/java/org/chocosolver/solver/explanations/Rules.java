@@ -28,6 +28,7 @@ package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.util.PoolManager;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -44,12 +45,14 @@ public class Rules {
     private final BitSet paRules; // rules for propagator activation
     private final int[] vmRules;    // rules for variable modification
     private final TIntSet[] vmRemval;    // store value removal when necessary
+    private final PoolManager<Rules> rulPool;
 
-    public Rules(int maxPid, int maxVid) {
+    public Rules(PoolManager<Rules> rulPool, int maxPid, int maxVid) {
         this.paRules = new BitSet(maxPid);
         this.vmRules = new int[maxVid];
         Arrays.fill(vmRules, NO_ENTRY);
         this.vmRemval = new TIntSet[maxVid];
+        this.rulPool = rulPool;
     }
 
     /**
@@ -156,7 +159,10 @@ public class Rules {
      * @return a copy of the current object
      */
     public Rules duplicate() {
-        Rules nrules = new Rules(paRules.length(), vmRemval.length);
+        Rules nrules = rulPool.getE();
+        if(nrules == null){
+            nrules = new Rules(rulPool, paRules.length(), vmRemval.length);
+        }
         nrules.paRules.or(this.paRules);
         System.arraycopy(this.vmRules, 0, nrules.vmRules, 0, nrules.vmRules.length);
         for (int i = 0; i < this.vmRemval.length; i++) {
@@ -185,5 +191,10 @@ public class Rules {
                 }
             }
         }
+    }
+
+    public void free() {
+        this.clear();
+        rulPool.returnE(this);
     }
 }

@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.PoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,7 @@ public class RuleStore {
     private boolean preemptedStop; // when conditions are favorable, a preempted stop can be considered
     private int swi; // search world index
     private final Solver mSolver;
+    private final PoolManager<Rules> rulPool;
 
 
     private IntVar lastVar;
@@ -102,7 +104,8 @@ public class RuleStore {
             }
         }
         _v++;
-        mRules = new Rules(_p, _v);
+        this.rulPool = new PoolManager<>();
+        mRules = new Rules(rulPool, _p, _v);
         decRefut = new Explanation[16];
     }
 
@@ -427,6 +430,19 @@ public class RuleStore {
         if (to < decision.getWorldIndex()) {
             decRefut[to] = decRefut[decision.getWorldIndex()];
             decRefut[decision.getWorldIndex()] = null;
+        }
+    }
+
+    /**
+     * Free the explanation related to the decision (for efficiency purpose only)
+     *
+     * @param decision the decision which is going to be forgotten
+     */
+    public void freeDecisionExplanation(Decision decision) {
+        int w = decision.getWorldIndex();
+        if (decRefut[w] != null) {
+            decRefut[w].free();
+            decRefut[w] = null;
         }
     }
 

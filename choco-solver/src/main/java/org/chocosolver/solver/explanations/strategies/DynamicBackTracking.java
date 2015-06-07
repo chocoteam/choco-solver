@@ -121,7 +121,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
                     dbTstrategy.add(dup);
                 } else {
                     // else  we need to forget everything and start from scratch on this decision
-                    mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
+                    mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
                 }
             }
             // get the previous

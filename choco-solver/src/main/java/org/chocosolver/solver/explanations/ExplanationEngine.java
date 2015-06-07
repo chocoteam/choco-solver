@@ -39,6 +39,7 @@ import org.chocosolver.solver.variables.FilteringMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.PoolManager;
 
 /**
  * An Asynchronous, Reverse, Low-Intrusive and Lazy explanation engine
@@ -54,6 +55,7 @@ public class ExplanationEngine implements FilteringMonitor {
     private final boolean saveCauses; // save the clauses in Explanation
     private final Solver mSolver;
     private ConflictStrategy cstrat;
+    PoolManager<Explanation> explanationPool;
 
 
     /**
@@ -69,6 +71,7 @@ public class ExplanationEngine implements FilteringMonitor {
         eventStore = new ArrayEventStore(solver.getEnvironment());
         ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
         solver.set(this);
+        this.explanationPool = new PoolManager<>();
     }
 
     /**
@@ -101,7 +104,7 @@ public class ExplanationEngine implements FilteringMonitor {
      * @return an explanation (set of decisions and propagators).
      */
     public Explanation explain(ContradictionException cex) {
-        Explanation explanation = new Explanation(saveCauses);
+        Explanation explanation = makeExplanation(saveCauses);
         ruleStore.init();
 
         if (cex.v != null) {
@@ -116,6 +119,14 @@ public class ExplanationEngine implements FilteringMonitor {
                 ruleStore.update(i, eventStore, explanation);
             }
             i--;
+        }
+        return explanation;
+    }
+
+    public Explanation makeExplanation(boolean saveCauses) {
+        Explanation explanation = explanationPool.getE();
+        if (explanation == null) {
+            explanation = new Explanation(explanationPool, saveCauses);
         }
         return explanation;
     }
@@ -161,6 +172,16 @@ public class ExplanationEngine implements FilteringMonitor {
      */
     public void moveDecisionRefutation(Decision decision, int to) {
         ruleStore.moveDecisionRefutation(decision, to);
+    }
+
+
+    /**
+     * Free the explanation related to the decision (for efficiency purpose only)
+     *
+     * @param decision the decision which is going to be forgotten
+     */
+    public void freeDecisionExplanation(Decision decision) {
+        ruleStore.freeDecisionExplanation(decision);
     }
 
     /**

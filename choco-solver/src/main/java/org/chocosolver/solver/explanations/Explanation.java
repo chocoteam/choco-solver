@@ -35,6 +35,7 @@ import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.PoolManager;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -54,11 +55,13 @@ public class Explanation {
     private final THashSet<ICause> causes;
     private final BitSet decisions;
     private int evtstrIdx;  // event store index of the last analysis
+    private final PoolManager<Explanation> explanationPool;
 
-    public Explanation(boolean saveCauses) {
+    Explanation(PoolManager<Explanation> explanationPool, boolean saveCauses) {
         this.causes = new THashSet<>();
         this.decisions = new BitSet();
         this.saveCauses = saveCauses;
+        this.explanationPool = explanationPool;
     }
 
     /**
@@ -213,21 +216,13 @@ public class Explanation {
      * @return a new explanation
      */
     public Explanation duplicate() {
-        Explanation explanation = new Explanation(this.saveCauses);
+        Explanation explanation = explanationPool.getE();
+        if (explanation == null) {
+            explanation = new Explanation(explanationPool, saveCauses);
+        }
         explanation.addCausesAndDecisions(this);
         explanation.addRules(this.rules);
         return explanation;
-    }
-
-    /**
-     * Clear the explanation, to enable reusing it.
-     */
-    public void clear() {
-        causes.clear();
-        decisions.clear();
-        if (rules != null) {
-            rules.clear();
-        }
     }
 
     @Override
@@ -258,5 +253,16 @@ public class Explanation {
             }
             ngstore.addLearnt(ps.toArray());
         }
+    }
+
+    public void free() {
+        evtstrIdx = -1;
+        causes.clear();
+        decisions.clear();
+        if (rules != null) {
+            rules.free();
+            rules = null;
+        }
+        explanationPool.returnE(this);
     }
 }
