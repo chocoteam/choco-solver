@@ -29,6 +29,7 @@
 package org.chocosolver.solver.search.strategy;
 
 /**
+ * A short-name version of {@code SetStrategyFactory}
  * @author Jean-Guillaume Fages
  */
 public class SSF extends SetStrategyFactory{

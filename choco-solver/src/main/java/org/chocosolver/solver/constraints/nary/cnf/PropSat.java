@@ -63,7 +63,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     public PropSat(Solver solver) {
         // this propagator initially has no variable
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
+        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
         this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
 
         this.indices_ = new TObjectIntHashMap<>();
@@ -154,16 +154,22 @@ public class PropSat extends Propagator<BoolVar> {
         // Specific duplication: first create an empty PropSat
         PropSat ps = (PropSat) identitymap.get(this);
         if (ps == null) {
-            ps = new PropSat(solver);
+            ps = solver.getMinisat().getPropSat();
+            // calling getMinisat() lazily post the constraint
+            // so the constraint appears twice ...
+            solver.unpost(solver.getMinisat());
             identitymap.put(this, ps);
         }
         // Then duplicate
         for (BoolVar b : this.vars) {
             BoolVar a = (BoolVar) identitymap.get(b);
             int v = this.indices_.get(b);
-            ps.addVariable(a);
-            ps.indices_.putIfAbsent(a, v);
+            if (!ps.indices_.containsKey(a)) {
+                ps.addVariable(a);
+                ps.indices_.put(a, v);
+            }
         }
+        ps.early_deductions_.clear();
         ps.early_deductions_.addAll(this.early_deductions_);
         ps.sat_.copyFrom(this.sat_);
     }

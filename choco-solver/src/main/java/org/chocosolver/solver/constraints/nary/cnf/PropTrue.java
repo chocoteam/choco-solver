@@ -72,7 +72,7 @@ public class PropTrue extends Propagator<BoolVar> {
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
-            identitymap.put(this, new PropTrue(solver.ONE));
+            identitymap.put(this, solver.TRUE().getPropagator(0));
         }
     }
 }

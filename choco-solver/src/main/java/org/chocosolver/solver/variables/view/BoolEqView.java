@@ -34,6 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
@@ -48,8 +49,8 @@ public final class BoolEqView extends EqView implements BoolVar {
 
     protected final BoolVar var;
 
-    public BoolEqView(BoolVar var, Solver solver) {
-        super(var, solver);
+    public BoolEqView(BoolVar var) {
+        super(var);
         this.var = var;
     }
 
@@ -70,14 +71,14 @@ public final class BoolEqView extends EqView implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return new BoolEqView(this.var, this.getSolver());
+        return VF.eq(this.var);
     }
 
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
             this.var.duplicate(solver, identitymap);
-            BoolEqView clone = new BoolEqView((BoolVar) identitymap.get(this.var), solver);
+            BoolEqView clone = new BoolEqView((BoolVar) identitymap.get(this.var));
             identitymap.put(this, clone);
             for (int i = mIdx - 1; i >= 0; i--) {
                 monitors[i].duplicate(solver, identitymap);

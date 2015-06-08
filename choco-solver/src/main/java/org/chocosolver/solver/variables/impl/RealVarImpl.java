@@ -31,6 +31,7 @@ package org.chocosolver.solver.variables.impl;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -54,8 +55,8 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     IStateDouble LB, UB;
     double precision;
 
-    public RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
-        super(name, solver);
+    public RealVarImpl(String name, double lb, double ub, double precision, ISolver isolver) {
+        super(name, isolver);
         this.LB = solver.getEnvironment().makeFloat(lb);
         this.UB = solver.getEnvironment().makeFloat(ub);
         this.precision = precision;
@@ -192,7 +193,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public RealVar duplicate() {
-        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
+        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, isolver);
     }
 
     @Override

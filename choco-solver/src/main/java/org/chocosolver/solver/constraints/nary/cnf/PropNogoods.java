@@ -71,7 +71,7 @@ public class PropNogoods extends Propagator<IntVar> {
     TIntStack fp;  // lit instantiated -> fix point
 
     public PropNogoods(Solver solver) {
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);
+        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);
         this.vars = new IntVar[0];// erase solver.ONE from the variable scope
 
         int k = 16;

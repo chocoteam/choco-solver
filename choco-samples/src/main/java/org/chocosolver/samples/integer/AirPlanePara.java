@@ -29,9 +29,11 @@
 package org.chocosolver.samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import org.chocosolver.samples.MasterProblem;
-import org.chocosolver.samples.ParallelizedProblem;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.Portfolio;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
@@ -41,6 +43,7 @@ import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -63,7 +66,7 @@ import java.util.regex.Pattern;
  * @author Charles Prud'homme
  * @since 18/04/11
  */
-public class AirPlanePara extends ParallelizedProblem {
+public class AirPlanePara extends AbstractProblem {
 
     private static final String groupSeparator = "\\,";
     private static final String decimalSeparator = "\\.";
@@ -108,13 +111,17 @@ public class AirPlanePara extends ParallelizedProblem {
 
     IntVar objective;
 
-	public AirPlanePara(int searchIdx){
-		super(searchIdx);
-	}
+    Portfolio prtfl;
+
+    @Override
+    public void createSolver() {
+        prtfl = SolverFactory.makePortelio("AirPlanePara", 3);
+        solver = prtfl._fes_();
+    }
 
     @Override
     public void buildModel() {
-		mData = Data.airland1;
+        mData = Data.airland1;
         data = parse(mData.source());
         n = data.length;
         planes = new IntVar[n];
@@ -122,12 +129,12 @@ public class AirPlanePara extends ParallelizedProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
-        IntVar ZERO = VariableFactory.fixed(0, solver);
+        IntVar ZERO = VariableFactory.fixed(0, prtfl);
         for (int i = 0; i < n; i++) {
-            planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
+            planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], prtfl);
 
-//            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
-//            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
+//            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], prtfl);
+//            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], prtfl);
 
             obj_ub += Math.max(
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
@@ -141,7 +148,7 @@ public class AirPlanePara extends ParallelizedProblem {
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                BoolVar boolVar = VariableFactory.bool("b_" + i + "_" + j, solver);
+                BoolVar boolVar = VariableFactory.bool("b_" + i + "_" + j, prtfl);
                 booleans.add(boolVar);
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
@@ -152,7 +159,7 @@ public class AirPlanePara extends ParallelizedProblem {
 
         bVars = booleans.toArray(new BoolVar[booleans.size()]);
 
-        objective = VariableFactory.bounded("obj", 0, obj_ub, solver);
+        objective = VariableFactory.bounded("obj", 0, obj_ub, prtfl);
 
         // build cost array
         costLAT = new int[2 * n];
@@ -163,15 +170,15 @@ public class AirPlanePara extends ParallelizedProblem {
             maxCost.put(planes[i], Math.max(data[i][PCBT], data[i][PCAT]));
         }
 
-//        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
-        IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
-        solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), obj_e));
+//        prtfl.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, prtfl));
+        IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, prtfl);
+        prtfl.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), obj_e));
 
-        IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, solver);
-        solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t));
-        solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, objective));
+        IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, prtfl);
+        prtfl.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t));
+        prtfl.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, objective));
 
-        solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
+        prtfl.post(IntConstraintFactory.alldifferent(planes, "BC"));
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
@@ -180,36 +187,39 @@ public class AirPlanePara extends ParallelizedProblem {
 
     @Override
     public void configureSearch() {
-		if(searchIdx==1){
-			solver.set(ISF.activity(solver.retrieveIntVars(), 0));
-		}else{
-			Arrays.sort(planes, new Comparator<IntVar>() {
-				@Override
-				public int compare(IntVar o1, IntVar o2) {
-					return maxCost.get(o2) - maxCost.get(o1);
-				}
-			});
-			solver.set(
-					IntStrategyFactory.random_bound(bVars, seed),
-					IntStrategyFactory.lexico_LB(planes)
-			);
-		}
-		if(searchIdx>=2){
-			IntVar[] ivars = solver.retrieveIntVars();
-			LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
-		}
-	}
+        prtfl.carbonCopy();
+        Solver[] solvers = prtfl.workers;
+        solvers[1].set(ISF.activity(prtfl.retrieveVarIn(1, prtfl._fes_().retrieveIntVars()), 0));
+        Arrays.sort(planes, new Comparator<IntVar>() {
+            @Override
+            public int compare(IntVar o1, IntVar o2) {
+                return maxCost.get(o2) - maxCost.get(o1);
+            }
+        });
+        solvers[0].set(
+                IntStrategyFactory.random_bound(bVars, seed),
+                IntStrategyFactory.lexico_LB(planes)
+        );
+        solvers[2].set(
+                IntStrategyFactory.random_bound(prtfl.retrieveVarIn(2, bVars), seed),
+                IntStrategyFactory.lexico_LB(prtfl.retrieveVarIn(2, planes))
+        );
+        LNSFactory.pglns(solvers[2], solvers[2].retrieveIntVars(), 30, 10, 200, 0, new FailCounter(100));
+        SMF.limitTime(solvers[2], 5000); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
+        Chatterbox.showSolutions(solvers[1]);
+        Chatterbox.showSolutions(solvers[2]);
+    }
+
 
     @Override
     public void solve() {
-        SMF.limitTime(solver, 5000); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        prtfl.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder(String.format("Air plane landing (%s)\n", mData));
-        if (solver.isFeasible() != ESat.TRUE) {
+        if (prtfl.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < n; i++) {
@@ -222,7 +232,7 @@ public class AirPlanePara extends ParallelizedProblem {
     }
 
     public static void main(String[] args) {
-		new MasterProblem(AirPlanePara.class.getCanonicalName(),3);
+        new AirPlanePara().execute(args);
     }
 
     private int[][] parse(String source) {
@@ -247,7 +257,7 @@ public class AirPlanePara extends ParallelizedProblem {
         return data;
     }
 
-    /////////////////////////////////////////
+/////////////////////////////////////////
 
     static enum Data {
         airland1(" 10 10 \n" +

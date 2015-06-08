@@ -128,7 +128,7 @@ public class IntConstraintFactory {
      * @return a true constraint
      */
     public static Constraint TRUE(Solver solver) {
-        return solver.TRUE;
+        return solver.TRUE();
     }
 
     /**
@@ -138,7 +138,7 @@ public class IntConstraintFactory {
      * @return a false constraint
      */
     public static Constraint FALSE(Solver solver) {
-        return solver.FALSE;
+        return solver.FALSE();
     }
 
     //##################################################################################################################
@@ -1209,7 +1209,7 @@ public class IntConstraintFactory {
                 };
             default:
                 if (START == END) {
-                    return new Constraint[]{START.getSolver().FALSE};
+                    return new Constraint[]{START.getSolver().FALSE()};
                 } else {
                     return new Constraint[]{
                             arithm(START, "!=", END),

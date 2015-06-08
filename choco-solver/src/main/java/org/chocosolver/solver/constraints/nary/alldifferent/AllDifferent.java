@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary.alldifferent;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.binary.PropNotEqualX_Y;
-import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -50,7 +49,7 @@ public class AllDifferent extends Constraint {
 
 	private static Propagator[] createPropagators(IntVar[] VARS, String consistency) {
 		if(VARS.length<=1){
-			return new Propagator[]{new PropTrue(VARS[0].getSolver().ONE)};
+			return new Propagator[]{VARS[0].getSolver().TRUE().getPropagator(0)};
 		}
 		switch (AllDifferent.Type.valueOf(consistency)) {
 			case NEQS: {

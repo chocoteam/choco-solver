@@ -149,7 +149,7 @@ public class ObjectiveTest {
         solver.post(new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{iv},
                         new Constraint[]{ICF.arithm(iv, ">=", 4)},
-                        new Constraint[]{solver.TRUE}) {
+                        new Constraint[]{solver.TRUE()}) {
                     @Override
                     public ESat checkCondition() {
                         int nbNode = (int) solver.getMeasures().getNodeCount();

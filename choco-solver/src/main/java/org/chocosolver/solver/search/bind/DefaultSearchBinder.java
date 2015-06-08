@@ -170,7 +170,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            strats[nb++] = ISF.minDom_LB(solver.ONE);
+            strats[nb++] = ISF.minDom_LB(solver.ONE());
         }
         return Arrays.copyOf(strats, nb);
     }

@@ -31,6 +31,7 @@ package org.chocosolver.solver.variables.impl;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -90,9 +91,9 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BoolVarImpl(String name, Solver solver) {
-        super(name, solver);
-        notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
+    public BoolVarImpl(String name, ISolver isolver) {
+        super(name, isolver);
+        notInstanciated = this.solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = notInstanciated.add();
         mValue = 0;
     }
@@ -401,7 +402,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), this.getSolver());
+        return VariableFactory.bool(StringUtils.randomName(this.name), isolver);
     }
 
     @Override

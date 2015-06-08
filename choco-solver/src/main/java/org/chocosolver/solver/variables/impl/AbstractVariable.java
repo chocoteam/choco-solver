@@ -30,6 +30,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -61,6 +62,7 @@ public abstract class AbstractVariable implements Variable {
     public static final String MSG_BOUND = "new bounds are incorrect";
 
     private final int ID; // unique id of this
+    protected final ISolver isolver; // Reference to the solver containing this variable.
     protected final Solver solver; // Reference to the solver containing this variable.
 
     protected final String name;
@@ -81,16 +83,17 @@ public abstract class AbstractVariable implements Variable {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    protected AbstractVariable(String name, Solver solver) {
+    protected AbstractVariable(String name, ISolver isolver) {
         this.name = name;
-        this.solver = solver;
-        views = new IView[2];
-        monitors = new IVariableMonitor[2];
-        propagators = new Propagator[8];
-        pindices = new int[8];
-        ID = solver.nextId();
-        _plugexpl = solver.getSettings().plugExplanationIn();
-        solver.associates(this);
+        this.isolver = isolver;
+        this.solver = isolver._fes_();
+        this.views = new IView[2];
+        this.monitors = new IVariableMonitor[2];
+        this.propagators = new Propagator[8];
+        this.pindices = new int[8];
+        this.ID = this.solver.nextId();
+        this._plugexpl = this.solver.getSettings().plugExplanationIn();
+        this.isolver.associates(this);
     }
 
     @Override
@@ -176,7 +179,7 @@ public abstract class AbstractVariable implements Variable {
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
 
-	@Override
+    @Override
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
@@ -238,6 +241,11 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
+    public ISolver _bes_() {
+        return isolver;
+    }
+
+    @Override
     public IView[] getViews() {
         return Arrays.copyOfRange(views, 0, vIdx);
     }
@@ -252,7 +260,7 @@ public abstract class AbstractVariable implements Variable {
         return getName();
     }
 
-    public boolean isBool(){
-		return (getTypeAndKind()&KIND)==BOOL;
-	}
+    public boolean isBool() {
+        return (getTypeAndKind() & KIND) == BOOL;
+    }
 }

@@ -260,6 +260,41 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         return isPluggedIn;
     }
 
+    public void remove(ISearchMonitor sm) {
+        if (sm != null) {
+            if (sm instanceof IMonitorClose) {
+                mclos.remove(sm);
+            }
+            if (sm instanceof IMonitorContradiction) {
+                mcont.remove(sm);
+            }
+            if (sm instanceof IMonitorDownBranch) {
+                mdbra.remove(sm);
+            }
+            if (sm instanceof IMonitorInitialize) {
+                minit.remove(sm);
+            }
+            if (sm instanceof IMonitorInitPropagation) {
+                mipro.remove(sm);
+            }
+            if (sm instanceof IMonitorInterruption) {
+                minte.remove(sm);
+            }
+            if (sm instanceof IMonitorOpenNode) {
+                mopno.remove(sm);
+            }
+            if (sm instanceof IMonitorRestart) {
+                mrest.remove(sm);
+            }
+            if (sm instanceof IMonitorSolution) {
+                msolu.remove(sm);
+            }
+            if (sm instanceof IMonitorUpBranch) {
+                mubra.remove(sm);
+            }
+        }
+    }
+
     public void reset() {
         mclos.clear();
         mcont.clear();

@@ -30,6 +30,7 @@ package org.chocosolver.solver.variables;
 
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
@@ -41,8 +42,13 @@ import org.chocosolver.solver.variables.view.IView;
 import java.io.Serializable;
 
 /**
+ *
+ * To developers: any constructor of variable must pass in parameter
+ * the back-end ISolver, that is, in decreasing order:
+ * - the solver portfolio,
+ * - the solver (or portfolio workers but fes).
  * Created by IntelliJ IDEA.
- * User: xlorca
+ * User: xlorca, Charles Prud'homme
  */
 public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
@@ -204,6 +210,11 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @return a Solver object
      */
     Solver getSolver();
+
+    /**
+     * Return the back end solver.
+     */
+    ISolver _bes_();
 
     /**
      * Return a MASK composed of 2 main information: TYPE and KIND.

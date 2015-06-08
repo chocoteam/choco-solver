@@ -77,7 +77,7 @@ public class PropFalse extends Propagator<BoolVar> {
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
-            identitymap.put(this, new PropFalse(solver.ZERO));
+            identitymap.put(this, solver.FALSE().getPropagator(0));
         }
     }
 }
