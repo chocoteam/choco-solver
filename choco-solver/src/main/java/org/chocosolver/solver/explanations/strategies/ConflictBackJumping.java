@@ -100,7 +100,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
             dec = dec.getPrevious();
         }
         if (dec != ROOT) {
-            Explanation explanation = new Explanation(saveCauses);
+            Explanation explanation = mExplainer.makeExplanation(saveCauses);
             // 1. skip the current one which is refuted...
             Decision d = dec.getPrevious();
             while ((d != ROOT)) {
@@ -136,7 +136,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
     void identifyRefutedDecision(int nworld, ICause cause) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
-            mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
+            mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
             dec = dec.getPrevious();
             nworld--;
         }

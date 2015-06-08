@@ -29,7 +29,6 @@ package org.chocosolver.solver.explanations;
 import gnu.trove.set.TIntSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
@@ -62,7 +61,7 @@ public class RuleStore {
     static final int LB = 3;
     static final int RM = 1;
 
-    private Rules mRules;
+    private Rules cRules;
     private Explanation[] decRefut; // store refuted decisions
     private final boolean saveCauses; // does user require feedback, ie, keep trace of the constraints in conflict ?
     private final boolean enablePartialExplanation; //do explanations need to be complete (for DBT or nogood extraction) ?
@@ -86,31 +85,14 @@ public class RuleStore {
         this.mSolver = solver;
         this.saveCauses = saveCauses;
         this.enablePartialExplanation = enablePartialExplanation;
-        int _p = -1;
-        for (Constraint c : solver.getCstrs()) {
-            for (Propagator p : c.getPropagators()) {
-                if (_p < p.getId()) {
-                    _p = p.getId();
-                }
-            }
-        }
-        _p++;
-        int _v = -1;
-        for (Variable v : solver.getVars()) {
-            if (_v < v.getId()) {
-                _v = v.getId();
-            }
-        }
-        _v++;
-        mRules = new Rules(_p, _v);
         decRefut = new Explanation[16];
     }
 
     /**
      * Initialize the rulestore for a new explanation
      */
-    public void init() {
-        mRules.clear();
+    public void init(Explanation expl) {
+        this.cRules = expl.getRules();
         preemptedStop = false;
         swi = mSolver.getSearchLoop().getSearchWorldIndex();
     }
@@ -142,7 +124,7 @@ public class RuleStore {
         if (lastEvt != FULL_PROPAGATION) {
             // the event is a variable modification
             int lastVid = lastVar.getId();
-            int lastMask = mRules.getVmRules(lastVid);
+            int lastMask = cRules.getVmRules(lastVid);
 
             if (lastMask == DM) { // only to speed up the entire process
                 return true;
@@ -153,7 +135,7 @@ public class RuleStore {
             return false;
         } else {
             // Does it match a propagator activation known rule?
-            return mRules.getPaRules(lastValue);
+            return cRules.getPaRules(lastValue);
         }
     }
 
@@ -207,13 +189,13 @@ public class RuleStore {
                 if (ivar.hasEnumeratedDomain()) {
                     switch (evt) {
                         case INSTANTIATE:
-                            return mRules.intersect(i2, i3, vid);
+                            return cRules.intersect(i2, i3, vid);
                         case DECUPP:
-                            return mRules.intersect(i1, i2, vid);
+                            return cRules.intersect(i1, i2, vid);
                         case INCLOW:
-                            return mRules.intersect(i2, i1, vid);
+                            return cRules.intersect(i2, i1, vid);
                         case REMOVE:
-                            return mRules.getVmRemval(vid).contains(i1);
+                            return cRules.getVmRemval(vid).contains(i1);
                     }
                 }
         }
@@ -247,15 +229,15 @@ public class RuleStore {
                 if (decision.hasNext()) {
                     explanation.addDecicion(decision);
                     // if partial explanation is enabled, finding the first decision in conflict is enough
-                    if (preemptedStop |= enablePartialExplanation) { // and the rules have to be stored
-                        explanation.copyRules(mRules, idx);
+                    if(preemptedStop |= enablePartialExplanation){
+                        explanation.setEvtstrIdx(idx);
                     }
                 } else {
                     // Otherwise, get the explanation of the refutation
                     Explanation drr = getDecisionRefutation(decision);
                     assert drr != null : "No explanation for decision refutation :" + decision.toString();
                     explanation.addCausesAndDecisions(drr); //update decisions and causes into the current explanation
-                    addRules(drr.getRules());
+                    explanation.addRules(drr.getRules());
                 }
                 // if no user feedback is required, ie, no conflict constraints are needed, then..
                 if (!saveCauses) {
@@ -278,35 +260,10 @@ public class RuleStore {
             // 1. add a new rule: explanation of the variable instantiation
             addFullDomainRule(lastVar);
             // 2. remove the propagator activation rule, now we know it depends on the variable
-            mRules.paRulesClear(lastValue);
+            cRules.paRulesClear(lastValue);
         }
     }
 
-    /**
-     * Update the current rules with the one in 'rules'
-     *
-     * @param someRules some rules
-     */
-    public void addRules(Rules someRules) {
-        mRules.or(someRules);
-    }
-
-    /**
-     * Return the current rules, for copy only.
-     *
-     * @return a set of rules
-     */
-    public Rules getRules() {
-        return mRules;
-    }
-
-    /**
-     * Replace the rules by a new one.
-     * This should be done carefully since the set of rules are cleared on each contradiction.
-     */
-    public void setRules(Rules someRules) {
-        this.mRules = someRules;
-    }
 
     /**
      * Add a value removal rule, that is, the event which remove the value needs to be retained.
@@ -319,8 +276,8 @@ public class RuleStore {
     public boolean addRemovalRule(IntVar var, int value) {
         if (var.hasEnumeratedDomain()) {
             int vid = var.getId();
-            mRules.putMask(vid, RM);
-            TIntSet remvals = mRules.getVmRemval(vid);
+            cRules.putMask(vid, RM);
+            TIntSet remvals = cRules.getVmRemval(vid);
             return remvals.add(value);
         } else {
             if (value <= var.getLB()) {
@@ -344,7 +301,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addFullDomainRule(IntVar var) {
-        return mRules.putMask(var.getId(), DM);
+        return cRules.putMask(var.getId(), DM);
     }
 
     /**
@@ -354,7 +311,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addLowerBoundRule(IntVar var) {
-        return mRules.putMask(var.getId(), LB);
+        return cRules.putMask(var.getId(), LB);
     }
 
     /**
@@ -364,7 +321,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addUpperBoundRule(IntVar var) {
-        return mRules.putMask(var.getId(), UB);
+        return cRules.putMask(var.getId(), UB);
     }
 
     /**
@@ -374,7 +331,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addBoundsRule(IntVar var) {
-        return mRules.putMask(var.getId(), BD);
+        return cRules.putMask(var.getId(), BD);
     }
 
     /**
@@ -384,7 +341,7 @@ public class RuleStore {
      * @return the current mask or NO_ENTRY
      */
     public int getMask(Variable var) {
-        return mRules.getVmRules(var.getId());
+        return cRules.getVmRules(var.getId());
     }
 
     /**
@@ -394,7 +351,7 @@ public class RuleStore {
      * @return true if a new rule has been adde
      */
     public boolean addPropagatorActivationRule(Propagator propagator) {
-        mRules.addPaRules(propagator.getId());
+        cRules.addPaRules(propagator.getId());
         return false;
     }
 
@@ -427,6 +384,19 @@ public class RuleStore {
         if (to < decision.getWorldIndex()) {
             decRefut[to] = decRefut[decision.getWorldIndex()];
             decRefut[decision.getWorldIndex()] = null;
+        }
+    }
+
+    /**
+     * Free the explanation related to the decision (for efficiency purpose only)
+     *
+     * @param decision the decision which is going to be forgotten
+     */
+    public void freeDecisionExplanation(Decision decision) {
+        int w = decision.getWorldIndex();
+        if (decRefut[w] != null) {
+            decRefut[w].recycle();
+            decRefut[w] = null;
         }
     }
 

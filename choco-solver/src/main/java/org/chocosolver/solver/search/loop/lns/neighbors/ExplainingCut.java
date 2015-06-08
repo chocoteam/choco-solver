@@ -255,6 +255,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
                 related.clear();
                 related.or(explanation.getDecisions());
+                explanation.recycle();
 
                 unrelated.clear();
                 unrelated.or(related);

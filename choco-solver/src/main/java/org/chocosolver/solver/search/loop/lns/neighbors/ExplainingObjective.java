@@ -223,9 +223,9 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
     private void explainValueE(int value) {
 
         // mimic explanation computation
+        Explanation explanation = mExplanationEngine.makeExplanation(false);
         RuleStore rs = mExplanationEngine.getRuleStore();
-        rs.init();
-        Explanation explanation = new Explanation(false);
+        rs.init(explanation);
         rs.addRemovalRule(objective, value);
         IEventStore es = mExplanationEngine.getEventStore();
         int i = es.getSize() - 1;
@@ -246,6 +246,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         if (tmpDeductions.addAll(tmpValueDeductions)) {
             clusters.add(tmpDeductions.size());
         }
+        explanation.recycle();
     }
 
 
@@ -256,9 +257,10 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         clusters.add(0);
         // 2'. compute bounds to avoid explaining the whole domain
         boolean ismax = om.getPolicy() == ResolutionPolicy.MAXIMIZE;
+        Explanation explanation = mExplanationEngine.makeExplanation(false);
         RuleStore rs = mExplanationEngine.getRuleStore();
         IEventStore es = mExplanationEngine.getEventStore();
-        rs.init();
+        rs.init(explanation);
         int i = 0;
         int far, near;
         if (ismax) {
@@ -273,7 +275,10 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
                         explainValueB(far, es, i);
                         far = val;
                     }
-                    if (far < near) return;
+                    if (far < near) {
+                        explanation.recycle();
+                        return;
+                    }
                 }
                 i++;
             }
@@ -290,20 +295,24 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
                         explainValueB(far, es, i);
                         far = val;
                     }
-                    if (far > near) return;
+                    if (far > near) {
+                        explanation.recycle();
+                        return;
+                    }
                 }
                 i++;
             }
         }
+        explanation.recycle();
     }
 
 
     private void explainValueB(int value, IEventStore es, int i) {
 
         // mimic explanation computation
+        Explanation explanation = mExplanationEngine.makeExplanation(false);
         RuleStore rs = mExplanationEngine.getRuleStore();
-        rs.init();
-        Explanation explanation = new Explanation(false);
+        rs.init(explanation);
         rs.addRemovalRule(objective, value);
 
         while (i > -1) {
@@ -322,6 +331,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         if (tmpDeductions.addAll(tmpValueDeductions)) {
             clusters.add(tmpDeductions.size());
         }
+        explanation.recycle();
     }
 
     /**

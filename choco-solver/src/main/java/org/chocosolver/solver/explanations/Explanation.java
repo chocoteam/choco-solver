@@ -35,6 +35,7 @@ import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.PoolManager;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -50,15 +51,18 @@ import java.util.Set;
 public class Explanation {
 
     private final boolean saveCauses;
-    private Rules rules; // null when explanation is complete
+    private Rules rules;
     private final THashSet<ICause> causes;
     private final BitSet decisions;
     private int evtstrIdx;  // event store index of the last analysis
+    private final PoolManager<Explanation> explanationPool;
 
-    public Explanation(boolean saveCauses) {
+    Explanation(PoolManager<Explanation> explanationPool, boolean saveCauses) {
         this.causes = new THashSet<>();
         this.decisions = new BitSet();
         this.saveCauses = saveCauses;
+        this.explanationPool = explanationPool;
+        this.rules = new Rules(16, 16);
     }
 
     /**
@@ -119,11 +123,7 @@ public class Explanation {
      * @param someRules the rules to add
      */
     public void addRules(Rules someRules) {
-        if (rules != null && someRules != null) {
-            rules.or(someRules);
-        } else if (rules == null && someRules != null) {
-            rules = someRules.duplicate();
-        }
+        rules.or(someRules);
     }
 
     /**
@@ -168,19 +168,6 @@ public class Explanation {
     }
 
     /**
-     * Copy the rules
-     * The rules define which events should be filtered from the event store.
-     *
-     * @param rules set of rules (when not complete)
-     */
-    public void copyRules(Rules rules, int i) {
-        if (rules != this.rules) { // small improvement
-            addRules(rules);
-        }
-        setEvtstrIdx(i);
-    }
-
-    /**
      * Get the event store idx at which the last analysis ends
      *
      * @return an event store index
@@ -213,21 +200,13 @@ public class Explanation {
      * @return a new explanation
      */
     public Explanation duplicate() {
-        Explanation explanation = new Explanation(this.saveCauses);
+        Explanation explanation = explanationPool.getE();
+        if (explanation == null) {
+            explanation = new Explanation(explanationPool, saveCauses);
+        }
         explanation.addCausesAndDecisions(this);
         explanation.addRules(this.rules);
         return explanation;
-    }
-
-    /**
-     * Clear the explanation, to enable reusing it.
-     */
-    public void clear() {
-        causes.clear();
-        decisions.clear();
-        if (rules != null) {
-            rules.clear();
-        }
     }
 
     @Override
@@ -258,5 +237,13 @@ public class Explanation {
             }
             ngstore.addLearnt(ps.toArray());
         }
+    }
+
+    public void recycle() {
+        evtstrIdx = 0;
+        causes.clear();
+        decisions.clear();
+        rules.clear();
+        explanationPool.returnE(this);
     }
 }

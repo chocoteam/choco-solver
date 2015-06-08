@@ -377,7 +377,7 @@ public class RuleStoreTest {
             Assert.fail();
         }
 
-        Explanation r = new Explanation(false);
+        Explanation r = new Explanation(null, false);
         r.addDecicion(d1);
         r.addDecicion(d2);
 
