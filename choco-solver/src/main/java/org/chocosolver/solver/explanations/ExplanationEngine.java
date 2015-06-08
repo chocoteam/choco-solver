@@ -53,6 +53,7 @@ public class ExplanationEngine implements FilteringMonitor {
     protected final IEventStore eventStore; // set of generated events
     private final RuleStore ruleStore; // set of active rules
     private final boolean saveCauses; // save the clauses in Explanation
+    private final boolean enablePartialExplanation;
     private final Solver mSolver;
     private ConflictStrategy cstrat;
     PoolManager<Explanation> explanationPool;
@@ -68,6 +69,7 @@ public class ExplanationEngine implements FilteringMonitor {
     public ExplanationEngine(Solver solver, boolean userFeedback, boolean enablePartialExplanation) {
         this.mSolver = solver;
         this.saveCauses = userFeedback;
+        this.enablePartialExplanation = enablePartialExplanation;
         eventStore = new ArrayEventStore(solver.getEnvironment());
         ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
         solver.set(this);
@@ -105,7 +107,7 @@ public class ExplanationEngine implements FilteringMonitor {
      */
     public Explanation explain(ContradictionException cex) {
         Explanation explanation = makeExplanation(saveCauses);
-        ruleStore.init();
+        ruleStore.init(explanation);
 
         if (cex.v != null) {
             ruleStore.addFullDomainRule((IntVar) cex.v);
@@ -119,6 +121,9 @@ public class ExplanationEngine implements FilteringMonitor {
                 ruleStore.update(i, eventStore, explanation);
             }
             i--;
+        }
+        if (!enablePartialExplanation) {
+            explanation.getRules().clear(); // not required, for assertion purpose only
         }
         return explanation;
     }

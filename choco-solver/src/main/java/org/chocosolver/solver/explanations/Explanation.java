@@ -51,7 +51,7 @@ import java.util.Set;
 public class Explanation {
 
     private final boolean saveCauses;
-    private Rules rules; // null when explanation is complete
+    private Rules rules;
     private final THashSet<ICause> causes;
     private final BitSet decisions;
     private int evtstrIdx;  // event store index of the last analysis
@@ -62,6 +62,7 @@ public class Explanation {
         this.decisions = new BitSet();
         this.saveCauses = saveCauses;
         this.explanationPool = explanationPool;
+        this.rules = new Rules(16, 16);
     }
 
     /**
@@ -122,11 +123,7 @@ public class Explanation {
      * @param someRules the rules to add
      */
     public void addRules(Rules someRules) {
-        if (rules != null && someRules != null) {
-            rules.or(someRules);
-        } else if (rules == null && someRules != null) {
-            rules = someRules.duplicate();
-        }
+        rules.or(someRules);
     }
 
     /**
@@ -168,19 +165,6 @@ public class Explanation {
      */
     public boolean isComplete() {
         return rules == null;
-    }
-
-    /**
-     * Copy the rules
-     * The rules define which events should be filtered from the event store.
-     *
-     * @param rules set of rules (when not complete)
-     */
-    public void copyRules(Rules rules, int i) {
-        if (rules != this.rules) { // small improvement
-            addRules(rules);
-        }
-        setEvtstrIdx(i);
     }
 
     /**
@@ -255,14 +239,11 @@ public class Explanation {
         }
     }
 
-    public void free() {
-        evtstrIdx = -1;
+    public void recycle() {
+        evtstrIdx = 0;
         causes.clear();
         decisions.clear();
-        if (rules != null) {
-            rules.free();
-            rules = null;
-        }
+        rules.clear();
         explanationPool.returnE(this);
     }
 }
