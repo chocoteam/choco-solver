@@ -92,6 +92,8 @@ public class Chatterbox {
      * @param solver the solver to evaluate
      */
     public static void printStatistics(Solver solver) {
+        printVersion(solver);
+        printFeatures(solver);
         System.out.println(solver.getMeasures().toString());
     }
 
@@ -186,7 +188,7 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                printStatistics(solver);
+                System.out.println(solver.getMeasures().toString());
             }
 
             @Override

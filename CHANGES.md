@@ -14,7 +14,7 @@ NEXT MILESTONE
 - Modify 'ISearchLoop.interrupt()', add new parameter 'avoidable' to qualify the strength of the interruption (#304)
 - lazy creation of ZERO, ONE, TRUE and FALSE through methods of Solver (#293)
 
-Bug fixes: #296, #297, #298
+Bug fixes: #296, #297, #298, #303
 
 3.3.1 - 11 May 2015
 -------------------
