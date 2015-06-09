@@ -195,7 +195,7 @@ public class SolverTest {
         RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
 
         BoolVar[] bvars = solver.retrieveBoolVars();
-        Assert.assertEquals(bvars, new BoolVar[]{solver.ZERO(), solver.ONE(), b});
+        Assert.assertEquals(bvars, new BoolVar[]{b});
 
         IntVar[] ivars = solver.retrieveIntVars();
         Assert.assertEquals(ivars, new IntVar[]{i});

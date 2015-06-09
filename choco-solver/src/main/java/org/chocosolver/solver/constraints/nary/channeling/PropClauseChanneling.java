@@ -140,7 +140,7 @@ public class PropClauseChanneling extends Propagator<IntVar> {
         UB.set(ub);
 
         // finally delta monitor
-        dm.freeze();
+        dm.unfreeze();
     }
 
     @Override

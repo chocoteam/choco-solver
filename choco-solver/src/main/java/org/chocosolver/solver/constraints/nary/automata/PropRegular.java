@@ -43,6 +43,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.jgrapht.graph.DirectedMultigraph;
@@ -81,8 +82,8 @@ public class PropRegular extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert evtmask == PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask();
         for (int i = 0; i < idms.length; i++) {
-            idms[i].freeze();
             idms[i].forEachRemVal(rem_proc.set(i));
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
                 if (!graph.hasSupport(i, j)) {

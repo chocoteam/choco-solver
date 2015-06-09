@@ -144,7 +144,7 @@ public class KnapsackTest {
 //        SearchMonitorFactory.log(s, false, false);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 29, "nb sol");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 27, "nb sol");
 //        Assert.assertEquals(s.getMeasures().getNodeCount(), 1153919, "nb nod");
     }
 

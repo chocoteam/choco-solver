@@ -87,7 +87,7 @@ public class MagicSquareTest {
         Solver solver = modeler(4);
         Variable[] vars = solver.getVars();
         solver.propagate();
-		int offset = 2;
+		int offset = 0;
         ((IntVar) vars[offset]).instantiateTo(3, Cause.Null);
         ((IntVar) vars[15+offset]).instantiateTo(4, Cause.Null);
         ((IntVar) vars[5+offset]).removeInterval(11, 15, Cause.Null);
@@ -116,7 +116,7 @@ public class MagicSquareTest {
         //[R]!square3,0  ==  14 (1)
         Solver solver = modeler(4);
         solver.propagate();
-		int offset = 2;
+		int offset = 0;
         Variable[] vars = solver.getVars();
         ((IntVar) vars[offset]).instantiateTo(2, Cause.Null);
         solver.propagate();
