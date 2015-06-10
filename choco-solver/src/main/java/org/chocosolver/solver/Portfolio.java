@@ -32,11 +32,17 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.solution.LastSolutionRecorder;
+import org.chocosolver.solver.search.solution.ISolutionRecorder;
+import org.chocosolver.solver.search.solution.LastSharedSolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -72,6 +78,8 @@ public class Portfolio implements Serializable, ISolver {
      * The workers/solvers.
      */
     public final Solver[] workers;
+
+    protected ISolutionRecorder solutionRecorder;
 
     /**
      * The identity maps
@@ -115,6 +123,7 @@ public class Portfolio implements Serializable, ISolver {
             this.workers[i] = SolverFactory.makeSolver(Environments.DEFAULT.make(), name + "_" + i);
             this.imaps[i] = new THashMap<>();
         }
+        solutionRecorder = new LastSharedSolutionRecorder(new Solution(), this);
         this.barrier = new CyclicBarrier(nthreads + 1);
         this.new_solutions = new long[nthreads];
         this.cmo = new ArrayList<>();
@@ -158,6 +167,11 @@ public class Portfolio implements Serializable, ISolver {
     @Override
     public IMeasures getMeasures() {
         throw new SolverException("Solver Portfolio does not yet enable to get global measures.");
+    }
+
+    @Override
+    public ISolutionRecorder getSolutionRecorder() {
+        return solutionRecorder;
     }
 
     @Override
@@ -257,6 +271,19 @@ public class Portfolio implements Serializable, ISolver {
         return nsol;
     }
 
+    private void restoreSolution(Solution solution) {
+        for (int i = 0; i < nthreads; i++) {
+            try {
+                workers[i].getSearchLoop().restoreRootNode();
+                workers[i].getEnvironment().worldPush();
+                solution.restore(workers[i]);
+            } catch (ContradictionException e) {
+                throw new SolverException("restoring the last solution ended in a failure");
+            }
+            workers[i].getEngine().flush();
+        }
+    }
+
     /**
      * Check feasibility of all workers:
      * returns {@link ESat#FALSE} if one at least is false,
@@ -302,7 +329,6 @@ public class Portfolio implements Serializable, ISolver {
 
     @Override
     public boolean findSolution() {
-        // TODO: deal with distinct search strategies, if none is declared
         // TODO: deal with same solutions
         if (needCopy()) {
             carbonCopy();
@@ -337,9 +363,14 @@ public class Portfolio implements Serializable, ISolver {
         return nsols > 0;
     }
 
+    /**
+     * Look for a new solution, if any.
+     * Beware, some search strategies allow finding the same solutions more than once.
+     * In consequence, calling this method in while-loop from a Portfolio may lead to infinite loop.
+     * @return true if a new solution is found
+     */
     @Override
     public boolean nextSolution() {
-        // TODO: deal with distinct search strategies, if none is declared
         // TODO: deal with same solutions
         if (needCopy()) {
             throw new SolverException("Calling this method required all workers to be populated (see Portfolio.carbonCopy()).");
@@ -351,8 +382,9 @@ public class Portfolio implements Serializable, ISolver {
                 @Override
                 public void run() {
                     // If the search tree has not been fully run out..
-                    if (workers[_s].getSearchLoop().getCurrentDepth() < workers[_s].getEnvironment().getWorldIndex()) {
-                        workers[_s].getSearchLoop().forceAlive(true); // beacuse last stop was strong
+                    // TODO: the test is not safe,
+                    if (!workers[_s].getSearchLoop().isComplete()) {
+                        workers[_s].getSearchLoop().forceAlive(true); // because last stop was strong
                         workers[_s].getSearchLoop().resume();
                         stopAll();
                     }
@@ -360,7 +392,6 @@ public class Portfolio implements Serializable, ISolver {
                         barrier.await();
                     } catch (InterruptedException | BrokenBarrierException e) {
                         e.printStackTrace();
-
                     }
                 }
             };
@@ -376,48 +407,25 @@ public class Portfolio implements Serializable, ISolver {
         return nsols > 0;
     }
 
+    /**
+     * This method is not implemented for solver portfolio.
+     * Actually, looking for all solutions of a given problem with a portfolio approach is relevant if the solution pool is shared which
+     * prevent from finding the same solution more than twice.
+     * As Portfolio limits the data shared between workers to objective cuts (which is out of the scope when looking for all solutions),
+     * some solutions may be discovered more than once.
+     * In conclusion, one should use a Solver instead for such purpose.
+     * @exception SolverException always thrown
+     */
     @Override
     public long findAllSolutions() {
-        // TODO: deal with distinct search strategies, if none is declared
-        // TODO: deal with same solutions
-        if (needCopy()) {
-            carbonCopy();
-        }
-        if (!skip_strategy_configuration) {
-            setStrategies(ResolutionPolicy.SATISFACTION);
-        }
-        Arrays.fill(new_solutions, 0);
-        for (int s = 0; s < nthreads; s++) {
-            int _s = s;
-            Thread r = new Thread() {
-                @Override
-                public void run() {
-                    workers[_s].solve(false);
-                    stopAll();
-                    try {
-                        barrier.await();
-                    } catch (InterruptedException | BrokenBarrierException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            r.setName(workers[s].getName());
-            r.start();
-        }
-        try {
-            barrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-        }
-        // TODO merge all solutions into _fes_()
-        long nsols = countNewSolutions();
-        return nsols;
+        throw new SolverException("A solver portfolio does not allow to search for all solutions of a problem. See Portfolio.findAllSolutions() javadoc for more details.");
     }
 
     @Override
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        // TODO: deal with distinct search strategies, if none is declared
         // TODO: deal with same solutions
+        // TODO remove SyncObjective from SM list of each solvers
+        // TODO deal with directed SyncObjective
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
         }
@@ -439,7 +447,6 @@ public class Portfolio implements Serializable, ISolver {
                     if (!workers[_s].getObjectiveManager().isOptimization()) {
                         workers[_s].set(new ObjectiveManager<IntVar, Integer>(_s == 0 ? objective : retrieveVarIn(_s, objective), policy, true));
                     }
-                    workers[_s].set(new LastSolutionRecorder(new Solution(), true, workers[_s]));
                     workers[_s].plugMonitor(new SyncObjective(_me, _s, policy));
                     workers[_s].solve(false);
 
@@ -460,8 +467,30 @@ public class Portfolio implements Serializable, ISolver {
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-        // TODO remove SyncObjective from SM list of each solvers
-        // TODO restore the best solution into _fes_()
+        // restore the best solution into the workers
+        Solution bstsol = workers[FRONTEND].getSolutionRecorder().getLastSolution();
+        int bstval = bstsol.getIntVal(objective);
+        for (int i = 1; i < nthreads; i++) {
+            Solution crtsol = workers[i].getSolutionRecorder().getLastSolution();
+            int crtval = crtsol.getIntVal(objective);
+            switch (policy) {
+                case MINIMIZE:
+                    if (crtval < bstval) {
+                        bstsol = crtsol;
+                        bstval = crtval;
+                    }
+                    break;
+                case MAXIMIZE:
+                    if (crtval > bstval) {
+                        bstsol = crtsol;
+                        bstval = crtval;
+                    }
+                    break;
+                default:
+                    throw new SolverException("Unknown policy");
+            }
+        }
+        restoreSolution(bstsol);
     }
 
     @Override
@@ -480,7 +509,7 @@ public class Portfolio implements Serializable, ISolver {
 
     private void stopAll() {
         for (int i = 0; i < nthreads; i++) {
-            workers[i].getSearchLoop().interrupt("Portfolio orders to interrupt");
+            workers[i].getSearchLoop().interrupt("Portfolio orders to interrupt", false);
         }
     }
 
@@ -586,33 +615,41 @@ public class Portfolio implements Serializable, ISolver {
             }
         }
         dvars = Arrays.copyOf(dvars, k);
-        int t = 1;
-        switch (policy) {
+        for (int w = 1; w < nthreads; w++) {
+            pickStrategy(w, dvars, policy);
+        }
+    }
+
+    private void pickStrategy(int w, IntVar[] vars, ResolutionPolicy policy) {
+        switch (w) {
             default:
-                // 2nd worker
-                if (t < nthreads) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(ISF.activity(mvars, 0));
-                    t++;
-                }
-                // 3rd worker
-                if (t < nthreads) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(ISF.domOverWDeg(mvars, 0));
-                    t++;
-                }
-                // 4th worker
-                if (t < nthreads) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(
-                            ISF.lastConflict(workers[t], ISF.minDom_LB(mvars))
-                    );
-                    t++;
-                }
-                // then I'm feeling lucky
-                for (; t < nthreads; t++) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(ISF.activity(mvars, t));
+            case 1: {
+                IntVar[] mvars = retrieveVarIn(w, vars);
+                workers[w].set(ISF.lastConflict(workers[w], ISF.activity(mvars, w)));
+                SMF.geometrical(workers[w], 500, 1.2, new FailCounter(100), 200);
+                SMF.nogoodRecordingFromRestarts(workers[0]);
+            }
+            break;
+            case 2: {
+                IntVar[] mvars = retrieveVarIn(w, vars);
+                workers[w].set(ISF.minDom_LB(mvars));
+                ExplanationFactory.CBJ.plugin(workers[w], false, false);
+            }
+            break;
+            case 3:
+                switch (policy) {
+                    case SATISFACTION: {
+                        IntVar[] mvars = retrieveVarIn(w, vars);
+                        workers[w].set(ISF.random(mvars, w));
+                        SMF.geometrical(workers[w], 100, 1.0001, new FailCounter(100), Integer.MAX_VALUE);
+                        SMF.nogoodRecordingFromRestarts(workers[0]);
+                    }
+                    break;
+                    default: {
+                        IntVar[] mvars = retrieveVarIn(w, vars);
+                        LNSFactory.pglns(workers[w], mvars, 30, 10, 200, w, new FailCounter(100));
+                    }
+                    break;
                 }
                 break;
         }

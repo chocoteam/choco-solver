@@ -97,7 +97,7 @@ public class PortfolioTests {
             prtfl.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
         prtfl._fes_().set(IntStrategyFactory.lexico_LB(ticks));
-        for(Solver s: prtfl.workers){
+        for (Solver s : prtfl.workers) {
             Chatterbox.showSolutions(s);
         }
         return prtfl;
@@ -203,7 +203,8 @@ public class PortfolioTests {
     }
 
     private Portfolio GR(int m) {
-        Portfolio prtfl = SolverFactory.makePortelio("test", 4);
+        int n = 4;
+        Portfolio prtfl = SolverFactory.makePortelio("test", n);
         IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
 
         prtfl.post(arithm(ticks[0], "=", 0));
@@ -230,10 +231,6 @@ public class PortfolioTests {
         if (m > 2) {
             prtfl.post(arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
-        Solver[] solvers = prtfl.workers;
-        for (int i = 0; i < 4; i++) {
-            Chatterbox.showSolutions(solvers[i]);
-        }
         return prtfl;
     }
 
@@ -241,10 +238,13 @@ public class PortfolioTests {
     public void test3() {
         Portfolio prtfl = GR(3);
         prtfl.findSolution();
-        while (prtfl.nextSolution()) ;
+        int count = 1;
+        while (count < 10 && prtfl.nextSolution()) {
+            count++;
+        }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void test4() {
         Portfolio prtfl = GR(3);
         prtfl.findAllSolutions();
@@ -254,7 +254,9 @@ public class PortfolioTests {
     public void test5() {
         int m = 9;
         Portfolio prtfl = GR(m);
-        prtfl.findOptimalSolution(ResolutionPolicy.MINIMIZE, prtfl._fes_().retrieveIntVars()[m - 1]);
+        IntVar obj = prtfl._fes_().retrieveIntVars()[m - 1];
+        prtfl.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
+        Assert.assertEquals((int)prtfl.getSolutionRecorder().getLastSolution().getIntVal(obj), 44, "");
     }
 
 }

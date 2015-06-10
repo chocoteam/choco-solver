@@ -51,7 +51,6 @@ public interface ISearchLoop extends Serializable {
     static final int DOWN_RIGHT_BRANCH = 1 << 3;
     static final int UP_BRANCH = 1 << 4;
     static final int RESTART = 1 << 5;
-    static final int RESUME = 1 << 6;
 
     static final String MSG_LIMIT = "a limit has been reached";
     static final String MSG_ROOT = "the entire search space has been explored";
@@ -103,8 +102,9 @@ public interface ISearchLoop extends Serializable {
      * Force the search to stop
      *
      * @param msgNgood a message to motivate the interruption -- for logging only
+     * @param voidable is the interruption weak, or not
      */
-    void interrupt(String msgNgood);
+    void interrupt(String msgNgood, boolean voidable);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ public interface ISearchLoop extends Serializable {
 
     void setObjectiveManager(ObjectiveManager om);
 
-    void reachLimit();
+    void reachLimit(boolean voidable);
 
     /**
      * Complete (or not) the declared search strategy with one over all variables
@@ -141,6 +141,10 @@ public interface ISearchLoop extends Serializable {
     boolean hasReachedLimit();
 
     boolean hasEndedUnexpectedly();
+
+    boolean isComplete();
+
+    boolean canBeResumed();
 
     @Deprecated
     int getTimeStamp();

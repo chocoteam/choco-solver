@@ -10,9 +10,10 @@ NEXT MILESTONE
 - Add a solver interface (ISolver), a solver factory (SolverFactory) and a solver portfolio (Portfolio) + tests (#293)
 - Update Variable and VariableFactory to deal with ISolver (#293)
 - Remove MasterSolver and SlaveSolver (#293)
-- Add unplugSearchMonitor() to SearchLoop, Solver ans SearchMonitorList (#300)
-- Modify 'ISearchLoop.interrupt()', add new parameter 'avoidable' to qualify the strength of the interruption (#304)
+- Add unplugSearchMonitor() to SearchLoop, Solver and SearchMonitorList (#300)
+- Modify 'ISearchLoop.interrupt()', add new parameter 'voidable' to qualify the strength of the interruption (#304)
 - lazy creation of ZERO, ONE, TRUE and FALSE through methods of Solver (#293)
+- Refactor Solution (#306)
 
 Bug fixes: #296, #297, #298, #303
 

@@ -93,7 +93,7 @@ public class SearchMonitorFactory {
      */
     public static void limitNode(Solver solver, long limit) {
         NodeCounter counter = new NodeCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -105,7 +105,7 @@ public class SearchMonitorFactory {
      */
     public static void limitSolution(Solver solver, long limit) {
         SolutionCounter counter = new SolutionCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -123,7 +123,7 @@ public class SearchMonitorFactory {
      */
     public static void limitTime(Solver solver, long limit) {
         TimeCounter counter = new TimeCounter(solver, limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -154,7 +154,7 @@ public class SearchMonitorFactory {
      */
     public static void limitThreadTime(Solver solver, long limit) {
         ThreadTimeCounter counter = new ThreadTimeCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -226,7 +226,7 @@ public class SearchMonitorFactory {
 
     public static void limitFail(Solver solver, long limit) {
         FailCounter counter = new FailCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -238,7 +238,7 @@ public class SearchMonitorFactory {
      */
     public static void limitBacktrack(Solver solver, long limit) {
         BacktrackCounter counter = new BacktrackCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
