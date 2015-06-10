@@ -103,8 +103,9 @@ public interface ISearchLoop extends Serializable {
      * Force the search to stop
      *
      * @param msgNgood a message to motivate the interruption -- for logging only
+     * @param voidable is the interruption weak, or not
      */
-    void interrupt(String msgNgood);
+    void interrupt(String msgNgood, boolean voidable);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
@@ -141,6 +142,8 @@ public interface ISearchLoop extends Serializable {
     boolean hasReachedLimit();
 
     boolean hasEndedUnexpectedly();
+
+    boolean canBeResumed();
 
     @Deprecated
     int getTimeStamp();
