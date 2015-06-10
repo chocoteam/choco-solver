@@ -34,8 +34,12 @@ import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.LastSharedSolutionRecorder;
@@ -359,6 +363,12 @@ public class Portfolio implements Serializable, ISolver {
         return nsols > 0;
     }
 
+    /**
+     * Look for a new solution, if any.
+     * Beware, some search strategies allow finding the same solutions more than once.
+     * In consequence, calling this method in while-loop from a Portfolio may lead to infinite loop.
+     * @return true if a new solution is found
+     */
     @Override
     public boolean nextSolution() {
         // TODO: deal with same solutions
@@ -373,8 +383,8 @@ public class Portfolio implements Serializable, ISolver {
                 public void run() {
                     // If the search tree has not been fully run out..
                     // TODO: the test is not safe,
-                    if (workers[_s].getSearchLoop().getCurrentDepth() < workers[_s].getEnvironment().getWorldIndex()) {
-                        workers[_s].getSearchLoop().forceAlive(true); // beacuse last stop was strong
+                    if (!workers[_s].getSearchLoop().isComplete()) {
+                        workers[_s].getSearchLoop().forceAlive(true); // because last stop was strong
                         workers[_s].getSearchLoop().resume();
                         stopAll();
                     }
@@ -397,42 +407,18 @@ public class Portfolio implements Serializable, ISolver {
         return nsols > 0;
     }
 
+    /**
+     * This method is not implemented for solver portfolio.
+     * Actually, looking for all solutions of a given problem with a portfolio approach is relevant if the solution pool is shared which
+     * prevent from finding the same solution more than twice.
+     * As Portfolio limits the data shared between workers to objective cuts (which is out of the scope when looking for all solutions),
+     * some solutions may be discovered more than once.
+     * In conclusion, one should use a Solver instead for such purpose.
+     * @exception SolverException always thrown
+     */
     @Override
     public long findAllSolutions() {
-        throw new SolverException("A solver portfolio does yet not allow to search for all solutions of a problem.");
-        // TODO: deal with same solutions
-        /*if (needCopy()) {
-            carbonCopy();
-        }
-        if (!skip_strategy_configuration) {
-            setStrategies(ResolutionPolicy.SATISFACTION);
-        }
-        Arrays.fill(new_solutions, 0);
-        for (int s = 0; s < nthreads; s++) {
-            int _s = s;
-            Thread r = new Thread() {
-                @Override
-                public void run() {
-                    workers[_s].solve(false);
-                    stopAll();
-                    try {
-                        barrier.await();
-                    } catch (InterruptedException | BrokenBarrierException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            r.setName(workers[s].getName());
-            r.start();
-        }
-        try {
-            barrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-        }
-        // TODO merge all solutions into _fes_()
-        long nsols = countNewSolutions();
-        return nsols;*/
+        throw new SolverException("A solver portfolio does not allow to search for all solutions of a problem. See Portfolio.findAllSolutions() javadoc for more details.");
     }
 
     @Override
@@ -523,7 +509,7 @@ public class Portfolio implements Serializable, ISolver {
 
     private void stopAll() {
         for (int i = 0; i < nthreads; i++) {
-            workers[i].getSearchLoop().interrupt("Portfolio orders to interrupt");
+            workers[i].getSearchLoop().interrupt("Portfolio orders to interrupt", false);
         }
     }
 
@@ -629,33 +615,41 @@ public class Portfolio implements Serializable, ISolver {
             }
         }
         dvars = Arrays.copyOf(dvars, k);
-        int t = 1;
-        switch (policy) {
+        for (int w = 1; w < nthreads; w++) {
+            pickStrategy(w, dvars, policy);
+        }
+    }
+
+    private void pickStrategy(int w, IntVar[] vars, ResolutionPolicy policy) {
+        switch (w) {
             default:
-                // 2nd worker
-                if (t < nthreads) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(ISF.activity(mvars, 0));
-                    t++;
-                }
-                // 3rd worker
-                if (t < nthreads) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(ISF.domOverWDeg(mvars, 0));
-                    t++;
-                }
-                // 4th worker
-                if (t < nthreads) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(
-                            ISF.lastConflict(workers[t], ISF.minDom_LB(mvars))
-                    );
-                    t++;
-                }
-                // then I'm feeling lucky
-                for (; t < nthreads; t++) {
-                    IntVar[] mvars = retrieveVarIn(t, dvars);
-                    workers[t].set(ISF.activity(mvars, t));
+            case 1: {
+                IntVar[] mvars = retrieveVarIn(w, vars);
+                workers[w].set(ISF.lastConflict(workers[w], ISF.activity(mvars, w)));
+                SMF.geometrical(workers[w], 500, 1.2, new FailCounter(100), 200);
+                SMF.nogoodRecordingFromRestarts(workers[0]);
+            }
+            break;
+            case 2: {
+                IntVar[] mvars = retrieveVarIn(w, vars);
+                workers[w].set(ISF.minDom_LB(mvars));
+                ExplanationFactory.CBJ.plugin(workers[w], false, false);
+            }
+            break;
+            case 3:
+                switch (policy) {
+                    case SATISFACTION: {
+                        IntVar[] mvars = retrieveVarIn(w, vars);
+                        workers[w].set(ISF.random(mvars, w));
+                        SMF.geometrical(workers[w], 100, 1.0001, new FailCounter(100), Integer.MAX_VALUE);
+                        SMF.nogoodRecordingFromRestarts(workers[0]);
+                    }
+                    break;
+                    default: {
+                        IntVar[] mvars = retrieveVarIn(w, vars);
+                        LNSFactory.pglns(workers[w], mvars, 30, 10, 200, w, new FailCounter(100));
+                    }
+                    break;
                 }
                 break;
         }

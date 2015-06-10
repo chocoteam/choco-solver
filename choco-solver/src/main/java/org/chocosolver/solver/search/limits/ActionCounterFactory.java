@@ -60,8 +60,10 @@ public class ActionCounterFactory {
     }
 
 
-    public static ICounterAction interruptSearch(final ISearchLoop searchLoop) {
-        return searchLoop::reachLimit;
+    public static ICounterAction interruptSearch(final ISearchLoop searchLoop, boolean voidable) {
+        return () -> {
+            searchLoop.reachLimit(voidable);
+        };
     }
 
     public static ICounterAction restartSearch(final ISearchLoop searchLoop) {

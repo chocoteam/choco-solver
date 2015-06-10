@@ -95,6 +95,27 @@ public class SearchLoop implements ISearchLoop {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(SearchLoop.class);
 
+    /**
+     * Unexpected end of the search
+     */
+    private static final byte M_UNEXPECTED_END = 0b0001;
+
+    /**
+     * The search can be resumed
+     */
+    private static final byte M_RESUMABLE = 0b0010;
+
+    /**
+     * All search space has been explored
+     */
+    private static final byte M_COMPLETE = 0b0100;
+
+    /**
+     * A limit has been reached
+     */
+    private static final byte M_LIMIT = 0b1000;
+
+
     /* Reference to the solver */
     final Solver solver;
 
@@ -124,11 +145,10 @@ public class SearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    boolean hasReachedLimit = false;
-
-    boolean hasEndedUnexpectedly = true; // to capture external shut down
-
-    boolean canBeResumed = true;
+    /**
+     * Indication about the way the search ends
+     */
+    byte searchStatus = M_RESUMABLE;
 
     public SearchMonitorList smList;
 
@@ -181,7 +201,7 @@ public class SearchLoop implements ISearchLoop {
             measures.reset();
             objectivemanager = SAT();
             solver.set(SINGLETON);
-            canBeResumed = true;
+            searchStatus = M_RESUMABLE;
         }
     }
 
@@ -201,10 +221,7 @@ public class SearchLoop implements ISearchLoop {
         if (nextState == INIT) {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
-        } else if (nextState != RESUME) {
-            throw new SolverException("The search cannot be resumed.");
         }
-        moveTo(UP_BRANCH);
         loop();
     }
 
@@ -237,8 +254,10 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public final void interrupt(String message, boolean voidable) {
-        canBeResumed = voidable;
-        nextState = RESUME;
+        if (!voidable) {
+            searchStatus &= ~M_RESUMABLE;
+        }
+//        nextState = RESUME;
         alive = false;
         smList.afterInterrupt();
     }
@@ -246,6 +265,11 @@ public class SearchLoop implements ISearchLoop {
     @Override
     public final void forceAlive(boolean bvalue) {
         alive = bvalue;
+        if(alive){
+            searchStatus |= M_RESUMABLE;
+        }else{
+            searchStatus &= ~M_RESUMABLE;
+        }
     }
 
     @Override
@@ -259,7 +283,7 @@ public class SearchLoop implements ISearchLoop {
      * Main loop. Flatten representation of recursive tree search.
      */
     private void loop() {
-        alive = canBeResumed;
+        alive = canBeResumed();
         while (alive) {
             switch (nextState) {
                 // INITIALIZE THE SEARCH LOOP
@@ -331,6 +355,7 @@ public class SearchLoop implements ISearchLoop {
             solver.getEngine().flush();
             solver.setFeasible(FALSE);
             interrupt(MSG_INIT, true);
+            searchStatus |= M_COMPLETE; // set the bit
             smList.onContradiction(e);
             this.env.worldPop();
             return;
@@ -358,6 +383,7 @@ public class SearchLoop implements ISearchLoop {
             solver.setFeasible(FALSE);
             solver.getEngine().flush();
             interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage(), true);
+            searchStatus |= M_COMPLETE; // set the bit
         }
         moveTo(OPEN_NODE);
     }
@@ -384,9 +410,8 @@ public class SearchLoop implements ISearchLoop {
         objectivemanager.update();
         if (stopAtFirstSolution) {
             interrupt(MSG_FIRST_SOL, true);
-        } else {
-            moveTo(UP_BRANCH);
         }
+        moveTo(UP_BRANCH);
         smList.onSolution();
     }
 
@@ -430,6 +455,7 @@ public class SearchLoop implements ISearchLoop {
         if (decision == ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
             interrupt(MSG_ROOT, true);
+            searchStatus |= M_COMPLETE;
         } else {
             jumpTo--;
             if (jumpTo <= 0 && decision.hasNext()) {
@@ -462,14 +488,15 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
-        hasEndedUnexpectedly = false;
+        searchStatus &= ~M_UNEXPECTED_END; //clear the bit
         ESat sat = FALSE;
+        boolean hrl = (searchStatus & M_LIMIT) != 0;
         if (measures.getSolutionCount() > 0) {
             sat = TRUE;
             if (objectivemanager.isOptimization()) {
-                measures.setObjectiveOptimal(!hasReachedLimit);
+                measures.setObjectiveOptimal(!hrl);
             }
-        } else if (hasReachedLimit) {
+        } else if (hrl) {
             measures.setObjectiveOptimal(false);
             sat = UNDEFINED;
         }
@@ -510,9 +537,9 @@ public class SearchLoop implements ISearchLoop {
     }
 
     @Override
-    public final void reachLimit() {
-        hasReachedLimit = true;
-        interrupt(MSG_LIMIT, true);
+    public final void reachLimit(boolean voidable) {
+        searchStatus |= M_LIMIT;
+        interrupt(MSG_LIMIT, voidable);
     }
 
     @Override
@@ -547,17 +574,22 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public boolean hasReachedLimit() {
-        return hasReachedLimit;
+        return (searchStatus & M_LIMIT) != 0;
     }
 
     @Override
     public boolean hasEndedUnexpectedly() {
-        return hasEndedUnexpectedly;
+        return (searchStatus & M_UNEXPECTED_END) != 0;
+    }
+
+    @Override
+    public boolean isComplete() {
+        return (searchStatus & M_COMPLETE) != 0;
     }
 
     @Override
     public boolean canBeResumed() {
-        return canBeResumed;
+        return (searchStatus & (M_RESUMABLE | M_UNEXPECTED_END)) != 0;
     }
 
     @Override
