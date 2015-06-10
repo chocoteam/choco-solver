@@ -30,6 +30,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -78,6 +79,11 @@ public interface ISolver {
      * This enables to get, for instance, the number of solutions found, time count, etc.
      */
     public IMeasures getMeasures();
+
+    /**
+     * Return the solution recorder
+     */
+    public ISolutionRecorder getSolutionRecorder();
 
     /**
      * Return a constraint embedding a minisat solver.

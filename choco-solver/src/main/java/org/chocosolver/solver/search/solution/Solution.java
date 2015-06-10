@@ -28,8 +28,12 @@
  */
 package org.chocosolver.solver.search.solution;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -42,7 +46,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * Class which stores the value of each variable in a solution
@@ -52,17 +55,25 @@ import java.util.HashMap;
  * @author Charles Prud'homme
  * @since 05/06/2013
  */
-public class Solution implements Serializable {
+public class Solution implements Serializable, ICause {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Solution.class);
 
-    HashMap<IntVar, Integer> intmap = new HashMap<>();
-    HashMap<RealVar, double[]> realmap = new HashMap<>();
-    HashMap<SetVar, int[]> setmap = new HashMap<>();
-    TIntHashSet dvars = new TIntHashSet(16, .5f, -1);
-    boolean empty = true;
+    private static final int NO_ENTRY = Integer.MAX_VALUE;
 
+    TIntIntHashMap intmap;
+    TIntObjectHashMap<double[]> realmap;
+    TIntObjectHashMap<int[]> setmap;
+    TIntHashSet dvars;
+    boolean empty;
+
+    @SuppressWarnings("unchecked")
     public Solution() {
+        intmap = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+        realmap = new TIntObjectHashMap(16, 05f, NO_ENTRY);
+        setmap = new TIntObjectHashMap(16, 05f, NO_ENTRY);
+        dvars = new TIntHashSet(16, .5f, -1);
+        empty = true;
     }
 
     /**
@@ -97,15 +108,15 @@ public class Solution implements Serializable {
                     case Variable.INT:
                     case Variable.BOOL:
                         IntVar v = (IntVar) vars[i];
-                        intmap.put(v, v.getValue());
+                        intmap.put(v.getId(), v.getValue());
                         break;
                     case Variable.REAL:
                         RealVar r = (RealVar) vars[i];
-                        realmap.put(r, new double[]{r.getLB(), r.getUB()});
+                        realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
                         break;
                     case Variable.SET:
                         SetVar s = (SetVar) vars[i];
-                        setmap.put(s, s.getValues());
+                        setmap.put(s.getId(), s.getValues());
                         break;
                 }
             }
@@ -122,36 +133,54 @@ public class Solution implements Serializable {
      * <p>
      * BEWARE: A restart might be required so that domains contain the solution values
      */
-    public void restore() throws ContradictionException {
+    public void restore(Solver solver) throws ContradictionException {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        for (IntVar i : intmap.keySet()) {
-            i.instantiateTo(intmap.get(i), Cause.Null);
-        }
-        for (SetVar s : setmap.keySet()) {
-            s.instantiateTo(setmap.get(s), Cause.Null);
-        }
-        for (RealVar r : realmap.keySet()) {
-            double[] bounds = realmap.get(r);
-            r.updateBounds(bounds[0], bounds[1], Cause.Null);
+        Variable[] vars = solver.getVars();
+        for (int i = 0; i < vars.length; i++) {
+            int kind = vars[i].getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                case Variable.BOOL:
+                    IntVar v = (IntVar) vars[i];
+                    v.instantiateTo(intmap.get(v.getId()), this);
+                    break;
+                case Variable.REAL:
+                    RealVar r = (RealVar) vars[i];
+                    double[] bounds = realmap.get(r.getId());
+                    r.updateBounds(bounds[0], bounds[1], this);
+                    break;
+                case Variable.SET:
+                    SetVar s = (SetVar) vars[i];
+                    s.instantiateTo(setmap.get(s.getId()), Cause.Null);
+                    break;
+            }
         }
     }
 
-    @Override
-    public String toString() {
+    public String toString(ISolver solver) {
+        Variable[] vars = solver._fes_().getVars();
         StringBuilder st = new StringBuilder("Solution: ");
-        for (IntVar i : intmap.keySet()) {
-            st.append(i.getName()).append("=").append(intmap.get(i)).append(", ");
+        for (int i = 0; i < vars.length; i++) {
+            int kind = vars[i].getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                case Variable.BOOL:
+                    IntVar v = (IntVar) vars[i];
+                    st.append(v.getName()).append("=").append(intmap.get(v.getId())).append(", ");
+                    break;
+                case Variable.REAL:
+                    RealVar r = (RealVar) vars[i];
+                    double[] bounds = realmap.get(r.getId());
+                    st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
+                    break;
+                case Variable.SET:
+                    SetVar s = (SetVar) vars[i];
+                    st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s.getId()))).append(", ");
+                    break;
+            }
         }
-        for (SetVar s : setmap.keySet()) {
-            st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s))).append(", ");
-        }
-        for (RealVar r : realmap.keySet()) {
-            double[] bounds = realmap.get(r);
-            st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
-        }
-
         return st.toString();
     }
 
@@ -165,8 +194,8 @@ public class Solution implements Serializable {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        if (intmap.containsKey(v)) {
-            return intmap.get(v);
+        if (intmap.containsKey(v.getId())) {
+            return intmap.get(v.getId());
         } else {
             return null;
         }
@@ -182,8 +211,8 @@ public class Solution implements Serializable {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        if (setmap.containsKey(s)) {
-            return setmap.get(s);
+        if (setmap.containsKey(s.getId())) {
+            return setmap.get(s.getId());
         } else
             return null;
     }
@@ -198,8 +227,8 @@ public class Solution implements Serializable {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        if (realmap.containsKey(r)) {
-            return realmap.get(r);
+        if (realmap.containsKey(r.getId())) {
+            return realmap.get(r.getId());
         } else return null;
     }
 

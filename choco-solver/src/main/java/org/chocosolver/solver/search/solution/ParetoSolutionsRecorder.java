@@ -71,7 +71,7 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
                     try {
                         solver.getSearchLoop().restoreRootNode();
                         solver.getEnvironment().worldPush();
-                        last.restore();
+                        last.restore(solver);
                     } catch (ContradictionException e) {
                         throw new UnsupportedOperationException("restoring the last solution ended in a failure");
                     }

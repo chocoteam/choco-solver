@@ -28,56 +28,50 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
+import org.chocosolver.solver.Portfolio;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.variables.IntVar;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * Class to store best solutions found.
- * Worse solutions are removed from the solution set.
- * This enables to get all optimal solutions of a problem.
+ * Recorder for the last (presumably best) solution found so far by a solver portfolio
+ * The Solution object is updated on each solution
  *
- * @author Jean-Guillaume Fages
+ * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @since 2015
  */
-public class BestSolutionsRecorder extends AllSolutionsRecorder {
+public class LastSharedSolutionRecorder implements ISolutionRecorder {
 
-	IntVar objective;
-	int lastValue;
+    Solution solution;
+    Portfolio prtfl;
+    boolean restoreOnClose;
 
-	public BestSolutionsRecorder(final IntVar objective){
-		super(objective.getSolver());
-		this.objective = objective;
-		solver.plugMonitor(new IMonitorClose() {
-			@Override
-			public void beforeClose() {
-				Solution last = getLastSolution();
-				if(last!=null){
-					try{
-						solver.getSearchLoop().restoreRootNode();
-						solver.getEnvironment().worldPush();
-						last.restore(solver);
-					}catch (ContradictionException e){
-						throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-					}
-					solver.getEngine().flush();
-				}
-			}
-			@Override
-			public void afterClose() {}
-		});
-	}
+    public LastSharedSolutionRecorder(final Solution solution, final Portfolio prtfl) {
+        this.prtfl = prtfl;
+        this.solution = solution;
+        for (int i = 0; i < prtfl.workers.length; i++) {
+            final int _i = i;
+            prtfl.workers[i].set(this);
+            prtfl.workers[i].plugMonitor((IMonitorSolution) () -> {
+                synchronized (solution) {
+                    solution.record(prtfl.workers[_i]);
+                }
+            });
+        }
+    }
 
-	@Override
-	protected IMonitorSolution createRecMonitor() {
-		return () -> {
-            if(objective.getValue()!=lastValue){
-                lastValue = objective.getValue();
-                solutions.clear();
-            }
-            Solution solution = new Solution();
-            solution.record(solver);
-            solutions.add(solution);
-        };
-	}
+    @Override
+    public Solution getLastSolution() {
+        return solution.hasBeenFound() ? solution : null;
+    }
+
+    @Override
+    public List<Solution> getSolutions() {
+        List<Solution> l = new LinkedList<>();
+        if (solution.hasBeenFound()) {
+            l.add(solution);
+        }
+        return l;
+    }
 }
