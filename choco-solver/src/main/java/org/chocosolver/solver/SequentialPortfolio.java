@@ -36,13 +36,14 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.Arrays;
 
 /**
- * A multisolvers implementation which enables running a "relay race" for solvers team.
+ * A portfolio of {@code Solver} enabling solving one problem with various strategies: a time limit is allocated
+ * to each of the solvers to solve the problem, in turn (kind of a "relay race" for a solvers team).
  * Each solver searches for a solution in a given time limit then another one search...
  * <p>
  * Created by cprudhom on 10/06/15.
  * Project: choco.
  */
-public class RelayRace extends MultiSolvers {
+public class SequentialPortfolio extends Portfolio {
 
     /**
      * The relay limit
@@ -64,12 +65,7 @@ public class RelayRace extends MultiSolvers {
      */
     ACounter[] counters;
 
-    /**
-     * Count the number of new solutions -- for internal purpose only
-     */
-    private long new_solutions[];
-
-    public RelayRace(String name, int nbworkers, long limit) {
+    public SequentialPortfolio(String name, int nbworkers, long limit) {
         super(name, nbworkers);
         this.limit = limit;
         counters = new ACounter[nbworkers];
@@ -79,7 +75,7 @@ public class RelayRace extends MultiSolvers {
 //            counters[i] = new NodeCounter(limit); // for tests only
             counters[i].setAction(() -> {
                 ridx = finalI;
-                workers[finalI].getSearchLoop().interrupt("RelayRace orders to interrupt", false);
+                workers[finalI].getSearchLoop().interrupt("SequentialPortfolio orders to interrupt", false);
             });
             workers[i].plugMonitor(counters[i]);
         }
@@ -88,7 +84,7 @@ public class RelayRace extends MultiSolvers {
 
     @Override
     public IMeasures getMeasures() {
-        throw new SolverException("Relay Race Solver does not yet enable to get global measures.");
+        throw new SolverException("SequentialPortfolio does not yet enable to get global measures.");
     }
 
     @Override
@@ -166,7 +162,7 @@ public class RelayRace extends MultiSolvers {
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         // TODO remove SyncObjective from SM list of each solvers
         if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+            throw new SolverException("SequentialPortfolio.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");

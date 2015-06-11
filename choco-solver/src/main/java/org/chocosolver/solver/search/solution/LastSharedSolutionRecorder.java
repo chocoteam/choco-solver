@@ -28,7 +28,7 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.MultiSolvers;
+import org.chocosolver.solver.Portfolio;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 
 import java.util.LinkedList;
@@ -44,9 +44,9 @@ import java.util.List;
 public class LastSharedSolutionRecorder implements ISolutionRecorder {
 
     Solution solution;
-    MultiSolvers mltslvr;
+    Portfolio mltslvr;
 
-    public LastSharedSolutionRecorder(final Solution solution, final MultiSolvers mltslvr) {
+    public LastSharedSolutionRecorder(final Solution solution, final Portfolio mltslvr) {
         this.mltslvr = mltslvr;
         this.solution = solution;
         for (int i = 0; i < mltslvr.workers.length; i++) {

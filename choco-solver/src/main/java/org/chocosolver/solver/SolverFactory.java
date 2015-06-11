@@ -77,26 +77,27 @@ public class SolverFactory {
 
 
     /**
-     * Create a Solver portfolio.
+     * Create a parallel solver portfolio wherein <code>n</code> solvers solve the same problem in parallel.
      *
      * @param name a name
      * @param n    number of solvers to create.
-     * @return a Solver portfolio.
+     * @return a parallel solver portfolio.
      */
-    public static Portfolio makePortelio(String name, int n) {
-        return new Portfolio(name, n);
+    public static ParallelPortfolio makeParallelPortfolio(String name, int n) {
+        return new ParallelPortfolio(name, n);
     }
 
     /**
-     * Create a Relay Race Solver .
+     * Create a sequential solver portfolio wherein <code>tl</code>ms is allocated
+     * to each of the <code>n</code> solvers to solve the problem, in turn.
      *
      * @param name a name
      * @param n    number of solvers to create.
      * @param tl   a time limit in millisecond
-     * @return a Relay Race Solver.
+     * @return a sequential solver portfolio.
      */
-    public static RelayRace makeRelayRace(String name, int n, long tl) {
-        return new RelayRace(name, n, tl);
+    public static SequentialPortfolio makeSequentialPortfolio(String name, int n, long tl) {
+        return new SequentialPortfolio(name, n, tl);
     }
 
 }

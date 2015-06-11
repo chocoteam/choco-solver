@@ -53,8 +53,8 @@ import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
  */
 public class PortfolioTests {
 
-    private Portfolio langford(int k, int n, int t) {
-        Portfolio prtfl = SolverFactory.makePortelio("LF", t);
+    private ParallelPortfolio langford(int k, int n, int t) {
+        ParallelPortfolio prtfl = SolverFactory.makeParallelPortfolio("LF", t);
         IntVar[] p = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, prtfl);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
@@ -66,8 +66,8 @@ public class PortfolioTests {
         return prtfl;
     }
 
-    private Portfolio golomb(int m, int t) {
-        Portfolio prtfl = SolverFactory.makePortelio("GR", t);
+    private ParallelPortfolio golomb(int m, int t) {
+        ParallelPortfolio prtfl = SolverFactory.makeParallelPortfolio("GR", t);
         IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
 
         prtfl.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
@@ -101,37 +101,37 @@ public class PortfolioTests {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testSatOneSolver() {
-        Portfolio s0 = langford(3, 9, 1);
+        ParallelPortfolio s0 = langford(3, 9, 1);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatTwoSolvers() {
-        Portfolio s0 = langford(3, 9, 2);
+        ParallelPortfolio s0 = langford(3, 9, 2);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatFourSolvers() {
-        Portfolio s0 = langford(3, 9, 4);
+        ParallelPortfolio s0 = langford(3, 9, 4);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatTwoSolversNoSol() {
-        Portfolio s0 = langford(3, 8, 2);
+        ParallelPortfolio s0 = langford(3, 8, 2);
         Assert.assertFalse(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatFourSolversNoSol() {
-        Portfolio s0 = langford(3, 8, 4);
+        ParallelPortfolio s0 = langford(3, 8, 4);
         Assert.assertFalse(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testOptTwoSolvers() {
-        Portfolio s0 = golomb(10, 2);
+        ParallelPortfolio s0 = golomb(10, 2);
         IntVar obj = (IntVar) s0._fes_().getVars()[9];
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals(ESat.TRUE, s0.isFeasible());
@@ -140,7 +140,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void testOptFourSolvers() {
-        Portfolio s0 = golomb(10, 4);
+        ParallelPortfolio s0 = golomb(10, 4);
         IntVar obj = (IntVar) s0._fes_().getVars()[9];
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals(ESat.TRUE, s0.isFeasible());
@@ -149,7 +149,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void testOptTwoSolversNoSol() {
-        Portfolio s0 = golomb(10, 2);
+        ParallelPortfolio s0 = golomb(10, 2);
         s0.post(ICF.arithm((IntVar) s0._fes_().getVars()[9], "=", (IntVar) s0._fes_().getVars()[0]));
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
         Assert.assertEquals(ESat.FALSE, s0.isFeasible());
@@ -157,7 +157,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void testOptFourSolversNoSol() {
-        Portfolio s0 = golomb(10, 4);
+        ParallelPortfolio s0 = golomb(10, 4);
         s0.post(ICF.arithm((IntVar) s0._fes_().getVars()[9], "=", (IntVar) s0._fes_().getVars()[0]));
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
         Assert.assertEquals(ESat.FALSE, s0.isFeasible());
@@ -165,7 +165,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void test1() {
-        Portfolio prtfl = SolverFactory.makePortelio("test", 4);
+        ParallelPortfolio prtfl = SolverFactory.makeParallelPortfolio("test", 4);
         BoolVar bool = VF.bool("b", prtfl);
         IntVar bound = VF.bounded("bounded", 0, 10, prtfl);
         IntVar enuma = VF.enumerated("enum", 0, 10, prtfl);
@@ -178,7 +178,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void test2() {
-        Portfolio prtfl = SolverFactory.makePortelio("test", 4);
+        ParallelPortfolio prtfl = SolverFactory.makeParallelPortfolio("test", 4);
         BoolVar a = VF.bool("a", prtfl);
         BoolVar b = VF.bool("b", prtfl);
         BoolVar c = VF.bool("c", prtfl);
@@ -200,9 +200,9 @@ public class PortfolioTests {
         }
     }
 
-    private Portfolio GR(int m) {
+    private ParallelPortfolio GR(int m) {
         int n = 4;
-        Portfolio prtfl = SolverFactory.makePortelio("test", n);
+        ParallelPortfolio prtfl = SolverFactory.makeParallelPortfolio("test", n);
         IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
 
         prtfl.post(arithm(ticks[0], "=", 0));
@@ -234,7 +234,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void test3() {
-        Portfolio prtfl = GR(3);
+        ParallelPortfolio prtfl = GR(3);
         prtfl.findSolution();
         int count = 1;
         while (count < 10 && prtfl.nextSolution()) {
@@ -244,14 +244,14 @@ public class PortfolioTests {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void test4() {
-        Portfolio prtfl = GR(3);
+        ParallelPortfolio prtfl = GR(3);
         prtfl.findAllSolutions();
     }
 
     @Test(groups = "1s")
     public void test5() {
         int m = 9;
-        Portfolio prtfl = GR(m);
+        ParallelPortfolio prtfl = GR(m);
         IntVar obj = prtfl._fes_().retrieveIntVars()[m - 1];
         prtfl.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals((int)prtfl.getSolutionRecorder().getLastSolution().getIntVal(obj), 44, "");

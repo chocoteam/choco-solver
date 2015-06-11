@@ -53,8 +53,8 @@ import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
  */
 public class RelayRaceTests {
 
-    private RelayRace langford(int k, int n, int t) {
-        RelayRace rlrc = SolverFactory.makeRelayRace("LF", t, 250);
+    private SequentialPortfolio langford(int k, int n, int t) {
+        SequentialPortfolio rlrc = SolverFactory.makeSequentialPortfolio("LF", t, 250);
         IntVar[] p = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, rlrc);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
@@ -69,8 +69,8 @@ public class RelayRaceTests {
         return rlrc;
     }
 
-    private RelayRace golomb(int m, int t) {
-        RelayRace rlrc = SolverFactory.makeRelayRace("GR", t, 250);
+    private SequentialPortfolio golomb(int m, int t) {
+        SequentialPortfolio rlrc = SolverFactory.makeSequentialPortfolio("GR", t, 250);
         IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), rlrc);
 
         rlrc.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
@@ -104,37 +104,37 @@ public class RelayRaceTests {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testSatOneSolver() {
-        RelayRace s0 = langford(3, 9, 1);
+        SequentialPortfolio s0 = langford(3, 9, 1);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatTwoSolvers() {
-        RelayRace s0 = langford(3, 9, 2);
+        SequentialPortfolio s0 = langford(3, 9, 2);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatFourSolvers() {
-        RelayRace s0 = langford(3, 9, 4);
+        SequentialPortfolio s0 = langford(3, 9, 4);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatTwoSolversNoSol() {
-        RelayRace s0 = langford(3, 8, 2);
+        SequentialPortfolio s0 = langford(3, 8, 2);
         Assert.assertFalse(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatFourSolversNoSol() {
-        RelayRace s0 = langford(3, 8, 4);
+        SequentialPortfolio s0 = langford(3, 8, 4);
         Assert.assertFalse(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testOptTwoSolvers() {
-        RelayRace s0 = golomb(10, 2);
+        SequentialPortfolio s0 = golomb(10, 2);
         IntVar obj = (IntVar) s0._fes_().getVars()[9];
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals(ESat.TRUE, s0.isFeasible());
@@ -143,7 +143,7 @@ public class RelayRaceTests {
 
     @Test(groups = "1s")
     public void testOptFourSolvers() {
-        RelayRace s0 = golomb(10, 4);
+        SequentialPortfolio s0 = golomb(10, 4);
         IntVar obj = (IntVar) s0._fes_().getVars()[9];
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals(ESat.TRUE, s0.isFeasible());
@@ -152,7 +152,7 @@ public class RelayRaceTests {
 
     @Test(groups = "1s")
     public void testOptTwoSolversNoSol() {
-        RelayRace s0 = golomb(10, 2);
+        SequentialPortfolio s0 = golomb(10, 2);
         s0.post(ICF.arithm((IntVar) s0._fes_().getVars()[9], "=", (IntVar) s0._fes_().getVars()[0]));
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
         Assert.assertEquals(ESat.FALSE, s0.isFeasible());
@@ -160,7 +160,7 @@ public class RelayRaceTests {
 
     @Test(groups = "1s")
     public void testOptFourSolversNoSol() {
-        RelayRace s0 = golomb(10, 4);
+        SequentialPortfolio s0 = golomb(10, 4);
         s0.post(ICF.arithm((IntVar) s0._fes_().getVars()[9], "=", (IntVar) s0._fes_().getVars()[0]));
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
         Assert.assertEquals(ESat.FALSE, s0.isFeasible());
@@ -168,7 +168,7 @@ public class RelayRaceTests {
 
     @Test(groups = "1s")
     public void test1() {
-        RelayRace rlrc = SolverFactory.makeRelayRace("test", 4, 3);
+        SequentialPortfolio rlrc = SolverFactory.makeSequentialPortfolio("test", 4, 3);
         BoolVar bool = VF.bool("b", rlrc);
         IntVar bound = VF.bounded("bounded", 0, 10, rlrc);
         IntVar enuma = VF.enumerated("enum", 0, 10, rlrc);
@@ -181,7 +181,7 @@ public class RelayRaceTests {
 
     @Test(groups = "1s")
     public void test2() {
-        RelayRace rlrc = SolverFactory.makeRelayRace("test", 4, 1000);
+        SequentialPortfolio rlrc = SolverFactory.makeSequentialPortfolio("test", 4, 1000);
         BoolVar a = VF.bool("a", rlrc);
         BoolVar b = VF.bool("b", rlrc);
         BoolVar c = VF.bool("c", rlrc);
@@ -203,8 +203,8 @@ public class RelayRaceTests {
         }
     }
 
-    private RelayRace GR(int m) {
-        RelayRace rlrc = SolverFactory.makeRelayRace("test", 2, 250);
+    private SequentialPortfolio GR(int m) {
+        SequentialPortfolio rlrc = SolverFactory.makeSequentialPortfolio("test", 2, 250);
         IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), rlrc);
 
         rlrc.post(arithm(ticks[0], "=", 0));
@@ -239,7 +239,7 @@ public class RelayRaceTests {
 
     @Test(groups = "1s")
     public void test3() {
-        RelayRace rlrc = GR(3);
+        SequentialPortfolio rlrc = GR(3);
         rlrc.findSolution();
         int count = 1;
         while (count < 10 && rlrc.nextSolution()) {
@@ -253,14 +253,14 @@ public class RelayRaceTests {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void test4() {
-        RelayRace rlrc = GR(3);
+        SequentialPortfolio rlrc = GR(3);
         rlrc.findAllSolutions();
     }
 
     @Test(groups = "1s")
     public void test5() {
         int m = 9;
-        RelayRace rlrc = GR(m);
+        SequentialPortfolio rlrc = GR(m);
         IntVar obj = rlrc._fes_().retrieveIntVars()[m - 1];
         rlrc.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals((int) rlrc.getSolutionRecorder().getLastSolution().getIntVal(obj), 44, "");

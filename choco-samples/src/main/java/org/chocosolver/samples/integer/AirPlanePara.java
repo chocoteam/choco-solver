@@ -30,7 +30,7 @@ package org.chocosolver.samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Portfolio;
+import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.SolverFactory;
@@ -111,11 +111,11 @@ public class AirPlanePara extends AbstractProblem {
 
     IntVar objective;
 
-    Portfolio prtfl;
+    ParallelPortfolio prtfl;
 
     @Override
     public void createSolver() {
-        prtfl = SolverFactory.makePortelio("AirPlanePara", 3);
+        prtfl = SolverFactory.makeParallelPortfolio("AirPlanePara", 3);
         solver = prtfl._fes_();
     }
 

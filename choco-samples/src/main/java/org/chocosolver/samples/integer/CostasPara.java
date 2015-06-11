@@ -36,7 +36,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Portfolio;
+import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -50,11 +50,11 @@ public class CostasPara extends AbstractProblem {
     private static int n = 14;
     IntVar[] vars, vectors;
 
-    Portfolio prtfl;
+    ParallelPortfolio prtfl;
 
     @Override
     public void createSolver() {
-        prtfl = SolverFactory.makePortelio("CostasPara", 3);
+        prtfl = SolverFactory.makeParallelPortfolio("CostasPara", 3);
         solver = prtfl._fes_();
     }
 
