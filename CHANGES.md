@@ -8,6 +8,7 @@ NEXT MILESTONE
 
 - Add keysorting() constraint
 - Add a solver interface (ISolver), a solver factory (SolverFactory) and a solver portfolio (Portfolio) + tests (#293)
+- Add "relay race" solver (RelayRace) simulating kind of mono-core, multi-threads resolutions
 - Update Variable and VariableFactory to deal with ISolver (#293)
 - Remove MasterSolver and SlaveSolver (#293)
 - Add unplugSearchMonitor() to SearchLoop, Solver and SearchMonitorList (#300)

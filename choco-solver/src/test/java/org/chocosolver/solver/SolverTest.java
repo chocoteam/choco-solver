@@ -26,11 +26,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.choco;
+package org.chocosolver.solver;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;

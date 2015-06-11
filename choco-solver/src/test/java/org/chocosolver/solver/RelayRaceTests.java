@@ -26,12 +26,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.para;
+package org.chocosolver.solver;
 
-import org.chocosolver.solver.Portfolio;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
@@ -55,103 +51,108 @@ import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
  * @version choco
  * @since 27/10/14
  */
-public class PortfolioTests {
+public class RelayRaceTests {
 
-    private Portfolio langford(int k, int n, int t) {
-        Portfolio prtfl = SolverFactory.makePortelio("LF", t);
-        IntVar[] p = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, prtfl);
+    private RelayRace langford(int k, int n, int t) {
+        RelayRace rlrc = SolverFactory.makeRelayRace("LF", t, 250);
+        IntVar[] p = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, rlrc);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
-                prtfl.post(IntConstraintFactory.arithm(VariableFactory.offset(p[i + j * n], i + 2), "=", p[i + (j + 1) * n]));
+                rlrc.post(IntConstraintFactory.arithm(VariableFactory.offset(p[i + j * n], i + 2), "=", p[i + (j + 1) * n]));
             }
         }
-        prtfl.post(IntConstraintFactory.arithm(p[0], "<", p[n * k - 1]));
-        prtfl.post(IntConstraintFactory.alldifferent(p, "AC"));
-        return prtfl;
+        rlrc.post(IntConstraintFactory.arithm(p[0], "<", p[n * k - 1]));
+        rlrc.post(IntConstraintFactory.alldifferent(p, "AC"));
+        for (Solver s : rlrc.workers) {
+            Chatterbox.showSolutions(s);
+        }
+        return rlrc;
     }
 
-    private Portfolio golomb(int m, int t) {
-        Portfolio prtfl = SolverFactory.makePortelio("GR", t);
-        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
+    private RelayRace golomb(int m, int t) {
+        RelayRace rlrc = SolverFactory.makeRelayRace("GR", t, 250);
+        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), rlrc);
 
-        prtfl.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
+        rlrc.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
         for (int i = 0; i < m - 1; i++) {
-            prtfl.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
+            rlrc.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
         }
 
-        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
+        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), rlrc);
         IntVar[][] m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
-                prtfl.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
-                prtfl.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                prtfl.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                prtfl.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                rlrc.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
+                rlrc.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                rlrc.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                rlrc.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
                 m_diffs[i][j] = diffs[k];
             }
         }
-        prtfl.post(IntConstraintFactory.alldifferent(diffs, "BC"));
+        rlrc.post(IntConstraintFactory.alldifferent(diffs, "BC"));
         // break symetries
         if (m > 2) {
-            prtfl.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            rlrc.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
-        prtfl._fes_().set(IntStrategyFactory.lexico_LB(ticks));
-        for (Solver s : prtfl.workers) {
+        rlrc._fes_().set(IntStrategyFactory.lexico_LB(ticks));
+        for (Solver s : rlrc.workers) {
             Chatterbox.showSolutions(s);
         }
-        return prtfl;
+        return rlrc;
     }
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testSatOneSolver() {
-        Portfolio s0 = langford(3, 9, 1);
+        RelayRace s0 = langford(3, 9, 1);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatTwoSolvers() {
-        Portfolio s0 = langford(3, 9, 2);
+        RelayRace s0 = langford(3, 9, 2);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatFourSolvers() {
-        Portfolio s0 = langford(3, 9, 4);
+        RelayRace s0 = langford(3, 9, 4);
         Assert.assertTrue(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatTwoSolversNoSol() {
-        Portfolio s0 = langford(3, 8, 2);
+        RelayRace s0 = langford(3, 8, 2);
         Assert.assertFalse(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testSatFourSolversNoSol() {
-        Portfolio s0 = langford(3, 8, 4);
+        RelayRace s0 = langford(3, 8, 4);
         Assert.assertFalse(s0.findSolution());
     }
 
     @Test(groups = "1s")
     public void testOptTwoSolvers() {
-        Portfolio s0 = golomb(10, 2);
-        s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
+        RelayRace s0 = golomb(10, 2);
+        IntVar obj = (IntVar) s0._fes_().getVars()[9];
+        s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals(ESat.TRUE, s0.isFeasible());
-//        Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
+        Assert.assertEquals((int) s0.getSolutionRecorder().getLastSolution().getIntVal(obj), 55, "");
     }
 
     @Test(groups = "1s")
     public void testOptFourSolvers() {
-        Portfolio s0 = golomb(10, 4);
-        s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
+        RelayRace s0 = golomb(10, 4);
+        IntVar obj = (IntVar) s0._fes_().getVars()[9];
+        s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
         Assert.assertEquals(ESat.TRUE, s0.isFeasible());
-//        Assert.assertEquals(34, s0.getObjectiveManager().getBestSolutionValue());
+        Assert.assertEquals((int) s0.getSolutionRecorder().getLastSolution().getIntVal(obj), 55, "");
     }
 
     @Test(groups = "1s")
     public void testOptTwoSolversNoSol() {
-        Portfolio s0 = golomb(10, 2);
+        RelayRace s0 = golomb(10, 2);
         s0.post(ICF.arithm((IntVar) s0._fes_().getVars()[9], "=", (IntVar) s0._fes_().getVars()[0]));
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
         Assert.assertEquals(ESat.FALSE, s0.isFeasible());
@@ -159,7 +160,7 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void testOptFourSolversNoSol() {
-        Portfolio s0 = golomb(10, 4);
+        RelayRace s0 = golomb(10, 4);
         s0.post(ICF.arithm((IntVar) s0._fes_().getVars()[9], "=", (IntVar) s0._fes_().getVars()[0]));
         s0.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) s0._fes_().getVars()[9]);
         Assert.assertEquals(ESat.FALSE, s0.isFeasible());
@@ -167,12 +168,12 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void test1() {
-        Portfolio prtfl = SolverFactory.makePortelio("test", 4);
-        BoolVar bool = VF.bool("b", prtfl);
-        IntVar bound = VF.bounded("bounded", 0, 10, prtfl);
-        IntVar enuma = VF.enumerated("enum", 0, 10, prtfl);
-        prtfl.carbonCopy();
-        Solver[] solvers = prtfl.workers;
+        RelayRace rlrc = SolverFactory.makeRelayRace("test", 4, 3);
+        BoolVar bool = VF.bool("b", rlrc);
+        IntVar bound = VF.bounded("bounded", 0, 10, rlrc);
+        IntVar enuma = VF.enumerated("enum", 0, 10, rlrc);
+        rlrc.carbonCopy();
+        Solver[] solvers = rlrc.workers;
         for (int i = 0; i < 4; i++) {
             Assert.assertEquals(solvers[i].getNbVars(), 3);
         }
@@ -180,83 +181,89 @@ public class PortfolioTests {
 
     @Test(groups = "1s")
     public void test2() {
-        Portfolio prtfl = SolverFactory.makePortelio("test", 4);
-        BoolVar a = VF.bool("a", prtfl);
-        BoolVar b = VF.bool("b", prtfl);
-        BoolVar c = VF.bool("c", prtfl);
-        prtfl.carbonCopy();
-        Solver[] solvers = prtfl.workers;
+        RelayRace rlrc = SolverFactory.makeRelayRace("test", 4, 1000);
+        BoolVar a = VF.bool("a", rlrc);
+        BoolVar b = VF.bool("b", rlrc);
+        BoolVar c = VF.bool("c", rlrc);
+        rlrc.carbonCopy();
+        Solver[] solvers = rlrc.workers;
         for (int i = 0; i < 4; i++) {
             Assert.assertEquals(solvers[i].getNbVars(), 3);
         }
         SatFactory.addBoolAndEqVar(a, b, c);
-        prtfl.carbonCopy();
+        rlrc.carbonCopy();
         for (int i = 0; i < 4; i++) {
             Assert.assertEquals(solvers[i].getNbCstrs(), 1);
         }
         SatFactory.addBoolIsLeVar(a, b, c);
-        prtfl.carbonCopy();
+        rlrc.carbonCopy();
         long ns = solvers[0].findAllSolutions();
         for (int i = 1; i < 4; i++) {
             Assert.assertEquals(solvers[i].findAllSolutions(), ns);
         }
     }
 
-    private Portfolio GR(int m) {
-        int n = 4;
-        Portfolio prtfl = SolverFactory.makePortelio("test", n);
-        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
+    private RelayRace GR(int m) {
+        RelayRace rlrc = SolverFactory.makeRelayRace("test", 2, 250);
+        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), rlrc);
 
-        prtfl.post(arithm(ticks[0], "=", 0));
+        rlrc.post(arithm(ticks[0], "=", 0));
 
         for (int i = 0; i < m - 1; i++) {
-            prtfl.post(arithm(ticks[i + 1], ">", ticks[i]));
+            rlrc.post(arithm(ticks[i + 1], ">", ticks[i]));
         }
 
-        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), prtfl);
+        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), rlrc);
         IntVar[][] m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                prtfl.post(scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
-                prtfl.post(arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                prtfl.post(arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                prtfl.post(arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                rlrc.post(scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
+                rlrc.post(arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                rlrc.post(arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                rlrc.post(arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
                 m_diffs[i][j] = diffs[k];
             }
         }
-        prtfl.post(alldifferent(diffs, "FC"));
+        rlrc.post(alldifferent(diffs, "FC"));
 
         // break symetries
         if (m > 2) {
-            prtfl.post(arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            rlrc.post(arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
-        return prtfl;
+        for (Solver s : rlrc.workers) {
+            Chatterbox.showSolutions(s);
+        }
+        return rlrc;
     }
 
     @Test(groups = "1s")
     public void test3() {
-        Portfolio prtfl = GR(3);
-        prtfl.findSolution();
+        RelayRace rlrc = GR(3);
+        rlrc.findSolution();
         int count = 1;
-        while (count < 10 && prtfl.nextSolution()) {
+        while (count < 10 && rlrc.nextSolution()) {
             count++;
         }
+        for (int i = 0; i < rlrc.getNbWorkers(); i++) {
+            count -= rlrc.workers[i].getMeasures().getSolutionCount();
+        }
+        Assert.assertEquals(count, 0);
     }
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void test4() {
-        Portfolio prtfl = GR(3);
-        prtfl.findAllSolutions();
+        RelayRace rlrc = GR(3);
+        rlrc.findAllSolutions();
     }
 
     @Test(groups = "1s")
     public void test5() {
         int m = 9;
-        Portfolio prtfl = GR(m);
-        IntVar obj = prtfl._fes_().retrieveIntVars()[m - 1];
-        prtfl.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
-        Assert.assertEquals((int)prtfl.getSolutionRecorder().getLastSolution().getIntVal(obj), 44, "");
+        RelayRace rlrc = GR(m);
+        IntVar obj = rlrc._fes_().retrieveIntVars()[m - 1];
+        rlrc.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
+        Assert.assertEquals((int) rlrc.getSolutionRecorder().getLastSolution().getIntVal(obj), 44, "");
     }
 
 }

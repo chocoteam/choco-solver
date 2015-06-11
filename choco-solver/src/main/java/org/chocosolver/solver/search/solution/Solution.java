@@ -96,28 +96,30 @@ public class Solution implements Serializable, ICause {
         setmap.clear();
         Variable[] vars = solver.getVars();
         for (int i = 0; i < vars.length; i++) {
-            int kind = vars[i].getTypeAndKind() & Variable.KIND;
-            if (!vars[i].isInstantiated()) {
-                if (dvars.contains(vars[i].getId())) {
-                    throw new SolverException(vars[i] + " is not instantiated when recording a solution.");
+            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                if (!vars[i].isInstantiated()) {
+                    if (dvars.contains(vars[i].getId())) {
+                        throw new SolverException(vars[i] + " is not instantiated when recording a solution.");
+                    } else {
+                        warn = true;
+                    }
                 } else {
-                    warn = true;
-                }
-            } else {
-                switch (kind) {
-                    case Variable.INT:
-                    case Variable.BOOL:
-                        IntVar v = (IntVar) vars[i];
-                        intmap.put(v.getId(), v.getValue());
-                        break;
-                    case Variable.REAL:
-                        RealVar r = (RealVar) vars[i];
-                        realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
-                        break;
-                    case Variable.SET:
-                        SetVar s = (SetVar) vars[i];
-                        setmap.put(s.getId(), s.getValues());
-                        break;
+                    switch (kind) {
+                        case Variable.INT:
+                        case Variable.BOOL:
+                            IntVar v = (IntVar) vars[i];
+                            intmap.put(v.getId(), v.getValue());
+                            break;
+                        case Variable.REAL:
+                            RealVar r = (RealVar) vars[i];
+                            realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
+                            break;
+                        case Variable.SET:
+                            SetVar s = (SetVar) vars[i];
+                            setmap.put(s.getId(), s.getValues());
+                            break;
+                    }
                 }
             }
         }
@@ -139,22 +141,24 @@ public class Solution implements Serializable, ICause {
         }
         Variable[] vars = solver.getVars();
         for (int i = 0; i < vars.length; i++) {
-            int kind = vars[i].getTypeAndKind() & Variable.KIND;
-            switch (kind) {
-                case Variable.INT:
-                case Variable.BOOL:
-                    IntVar v = (IntVar) vars[i];
-                    v.instantiateTo(intmap.get(v.getId()), this);
-                    break;
-                case Variable.REAL:
-                    RealVar r = (RealVar) vars[i];
-                    double[] bounds = realmap.get(r.getId());
-                    r.updateBounds(bounds[0], bounds[1], this);
-                    break;
-                case Variable.SET:
-                    SetVar s = (SetVar) vars[i];
-                    s.instantiateTo(setmap.get(s.getId()), Cause.Null);
-                    break;
+            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                    case Variable.BOOL:
+                        IntVar v = (IntVar) vars[i];
+                        v.instantiateTo(intmap.get(v.getId()), this);
+                        break;
+                    case Variable.REAL:
+                        RealVar r = (RealVar) vars[i];
+                        double[] bounds = realmap.get(r.getId());
+                        r.updateBounds(bounds[0], bounds[1], this);
+                        break;
+                    case Variable.SET:
+                        SetVar s = (SetVar) vars[i];
+                        s.instantiateTo(setmap.get(s.getId()), Cause.Null);
+                        break;
+                }
             }
         }
     }
@@ -163,22 +167,24 @@ public class Solution implements Serializable, ICause {
         Variable[] vars = solver._fes_().getVars();
         StringBuilder st = new StringBuilder("Solution: ");
         for (int i = 0; i < vars.length; i++) {
-            int kind = vars[i].getTypeAndKind() & Variable.KIND;
-            switch (kind) {
-                case Variable.INT:
-                case Variable.BOOL:
-                    IntVar v = (IntVar) vars[i];
-                    st.append(v.getName()).append("=").append(intmap.get(v.getId())).append(", ");
-                    break;
-                case Variable.REAL:
-                    RealVar r = (RealVar) vars[i];
-                    double[] bounds = realmap.get(r.getId());
-                    st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
-                    break;
-                case Variable.SET:
-                    SetVar s = (SetVar) vars[i];
-                    st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s.getId()))).append(", ");
-                    break;
+            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                    case Variable.BOOL:
+                        IntVar v = (IntVar) vars[i];
+                        st.append(v.getName()).append("=").append(intmap.get(v.getId())).append(", ");
+                        break;
+                    case Variable.REAL:
+                        RealVar r = (RealVar) vars[i];
+                        double[] bounds = realmap.get(r.getId());
+                        st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
+                        break;
+                    case Variable.SET:
+                        SetVar s = (SetVar) vars[i];
+                        st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s.getId()))).append(", ");
+                        break;
+                }
             }
         }
         return st.toString();
@@ -197,7 +203,11 @@ public class Solution implements Serializable, ICause {
         if (intmap.containsKey(v.getId())) {
             return intmap.get(v.getId());
         } else {
-            return null;
+            if ((v.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
+                return v.getValue();
+            } else {
+                return null;
+            }
         }
     }
 
@@ -213,8 +223,11 @@ public class Solution implements Serializable, ICause {
         }
         if (setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
-        } else
+        } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
+            return s.getValues();
+        } else {
             return null;
+        }
     }
 
     /**
@@ -229,12 +242,19 @@ public class Solution implements Serializable, ICause {
         }
         if (realmap.containsKey(r.getId())) {
             return realmap.get(r.getId());
-        } else return null;
+        } else {
+            if ((r.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
+                return new double[]{r.getLB(), r.getUB()};
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
      * @return true iff this is a valid solution
      */
+
     public boolean hasBeenFound() {
         return !empty;
     }

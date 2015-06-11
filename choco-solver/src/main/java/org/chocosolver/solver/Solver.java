@@ -806,7 +806,6 @@ public class Solver implements Serializable, ISolver {
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
      */
-    @Override
     public boolean hasReachedLimit() {
         return search.hasReachedLimit();
     }

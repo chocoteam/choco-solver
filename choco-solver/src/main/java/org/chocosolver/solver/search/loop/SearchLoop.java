@@ -455,7 +455,6 @@ public class SearchLoop implements ISearchLoop {
         if (decision == ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
             interrupt(MSG_ROOT, true);
-            searchStatus |= M_COMPLETE;
         } else {
             jumpTo--;
             if (jumpTo <= 0 && decision.hasNext()) {
@@ -488,6 +487,9 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
+        if(decision == ROOT){
+            searchStatus |= M_COMPLETE;
+        }
         searchStatus &= ~M_UNEXPECTED_END; //clear the bit
         ESat sat = FALSE;
         boolean hrl = (searchStatus & M_LIMIT) != 0;

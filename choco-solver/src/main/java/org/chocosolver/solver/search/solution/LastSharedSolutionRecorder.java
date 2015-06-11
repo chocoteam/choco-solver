@@ -28,34 +28,33 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.Portfolio;
+import org.chocosolver.solver.MultiSolvers;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Recorder for the last (presumably best) solution found so far by a solver portfolio
+ * Recorder for the last (presumably best) solution found so far by a multisolvers
  * The Solution object is updated on each solution
  *
- * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @author Charles Prud'homme
  * @since 2015
  */
 public class LastSharedSolutionRecorder implements ISolutionRecorder {
 
     Solution solution;
-    Portfolio prtfl;
-    boolean restoreOnClose;
+    MultiSolvers mltslvr;
 
-    public LastSharedSolutionRecorder(final Solution solution, final Portfolio prtfl) {
-        this.prtfl = prtfl;
+    public LastSharedSolutionRecorder(final Solution solution, final MultiSolvers mltslvr) {
+        this.mltslvr = mltslvr;
         this.solution = solution;
-        for (int i = 0; i < prtfl.workers.length; i++) {
+        for (int i = 0; i < mltslvr.workers.length; i++) {
             final int _i = i;
-            prtfl.workers[i].set(this);
-            prtfl.workers[i].plugMonitor((IMonitorSolution) () -> {
+            mltslvr.workers[i].set(this);
+            mltslvr.workers[i].plugMonitor((IMonitorSolution) () -> {
                 synchronized (solution) {
-                    solution.record(prtfl.workers[_i]);
+                    solution.record(mltslvr.workers[_i]);
                 }
             });
         }

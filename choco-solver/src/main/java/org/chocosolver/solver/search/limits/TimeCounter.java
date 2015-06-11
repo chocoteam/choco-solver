@@ -45,6 +45,10 @@ public class TimeCounter extends ACounter implements IMonitorOpenNode {
 
     private long offset;
 
+    /**
+     * @param solver a solver
+     * @param timeLimit in millisecond
+     */
     public TimeCounter(Solver solver, long timeLimit) {
         super(timeLimit);
         this.solver = solver;

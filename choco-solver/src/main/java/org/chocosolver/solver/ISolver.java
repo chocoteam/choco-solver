@@ -129,23 +129,6 @@ public interface ISolver {
     public ESat isFeasible();
 
     /**
-     * Returns information on the completeness of the search process.
-     * <p>
-     * A call to {@link #isFeasible()} may provide complementary information.
-     * <p>
-     * Possible back values are:
-     * <p>
-     * <br/>- <code>false</code> : the resolution is complete and
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}: the optimal solution has been found and
-     * proven to be optimal, or the CSP has been proven to be unsatisfiable.
-     * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
-     */
-    boolean hasReachedLimit();
-
-    /**
      * Attempts to find the first solution of the declared problem.
      * Then, following solutions can be found using {@link #nextSolution()}.
      * <p>

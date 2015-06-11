@@ -79,11 +79,24 @@ public class SolverFactory {
     /**
      * Create a Solver portfolio.
      *
-     * @param n number of solvers to create.
+     * @param name a name
+     * @param n    number of solvers to create.
      * @return a Solver portfolio.
      */
     public static Portfolio makePortelio(String name, int n) {
         return new Portfolio(name, n);
+    }
+
+    /**
+     * Create a Relay Race Solver .
+     *
+     * @param name a name
+     * @param n    number of solvers to create.
+     * @param tl   a time limit in millisecond
+     * @return a Relay Race Solver.
+     */
+    public static RelayRace makeRelayRace(String name, int n, long tl) {
+        return new RelayRace(name, n, tl);
     }
 
 }
