@@ -53,7 +53,7 @@ Variables
 | ``SetVar[] retrieveSetVars()``                | Extract from the solver variables those which are set (ie whose *KIND* is set to *SET*)                                                                                      |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``RealVar[] retrieveRealVars()``              | Extract from the solver variables those which are set (ie whose *KIND* is set to *REAL*)                                                                                     |
+| ``RealVar[] retrieveRealVars()``              | Extract from the solver variables those which are real (ie whose *KIND* is set to *REAL*)                                                                                    |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Constraints
@@ -138,7 +138,7 @@ Others
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | **Method**                                        | **Definition**                                                                                                                       |
 +===================================================+======================================================================================================================================+
-| ``Solver duplicateModel()``                       | Duplicate the model associates with a solver, ie only variables and constraints, and return a new solver.                            |
+| ``Solver duplicateModel()``                       | Duplicate the model associated with a solver, ie only variables and constraints, and return a new solver.                            |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | ``void makeCompleteSearch(boolean isComplete)``   | Add a strategy to the declared one in order to ensure that all variables are covered by (at least) one strategy.                     |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
@@ -175,7 +175,7 @@ An alternative is to declare variable-based views.
 
 .. important::
 
-    It is highly advisable not to define domain like ``[Integer.MIN_VALUE, Integer.MAX_VALUE]``.
+    It is strongly recommended to not define unbounded domain like ``[Integer.MIN_VALUE, Integer.MAX_VALUE]``.
     Indeed, such domain definition may lead to :
 
     - incorrect domain size (``Integer.MAX_VALUE - Integer.MIN_VALUE +1 = 0``)
@@ -321,7 +321,7 @@ A set variable ``SV`` represents a set of integers.
 Its domain is defined by a set interval: ``[S_E,S_K]``
 
 - the envelope ``S_E`` is an ``ISet`` object which contains integers that potentially figure in at least one solution,
-- the kernel ``S_K`` is an ``ISet`` object which contains integers that figure in every solutions.
+- the kernel ``S_K`` is an ``ISet`` object which contains integers that figure in every solution.
 
 Initial values for both ``S_K`` and ``S_E`` can be specified. If no initial value is given for ``S_K``, it is empty by default.
 Then, decisions and filtering algorithms will remove integers from ``S_E`` and add some others to ``S_K``.
