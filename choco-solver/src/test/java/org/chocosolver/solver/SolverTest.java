@@ -28,10 +28,12 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -222,5 +224,14 @@ public class SolverTest {
         IntVar i = VF.enumerated("i", 1, 3, solver);
         IntVar[] bs = solver.retrieveBoolVars();
         Assert.assertEquals(1, bs.length);
+    }
+
+    @Test(groups="1s")
+    public void testFH2(){
+        Solver solver = SF.makeSolver();
+        BoolVar b = VF.bool("b", solver);
+        solver.post(ICF.arithm(b, "=", 2));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.isFeasible(), ESat.FALSE);
     }
 }
