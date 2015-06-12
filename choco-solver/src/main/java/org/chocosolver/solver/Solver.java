@@ -833,8 +833,11 @@ public class Solver implements Serializable, ISolver {
      */
     @Override
     public boolean nextSolution() {
+        if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
+            throw new SolverException("Solver.findSolution() must be called once before calling Solver.nextSolution()");
+        }
         long nbsol = measures.getSolutionCount();
-        search.resume();
+        search.launch(true);
         return (measures.getSolutionCount() - nbsol) > 0;
     }
 

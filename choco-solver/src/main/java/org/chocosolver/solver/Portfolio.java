@@ -35,6 +35,8 @@ import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.propagation.NoPropagationEngine;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -207,7 +209,7 @@ public abstract class Portfolio implements Serializable, ISolver {
                     feas = ESat.TRUE;
                     break;
                 case FALSE:
-                    if(workers[i].getSearchLoop().isComplete()) {
+                    if (workers[i].getSearchLoop().isComplete()) {
                         return ESat.FALSE;
                     }
                 default:
@@ -290,6 +292,18 @@ public abstract class Portfolio implements Serializable, ISolver {
         }
     }
 
+    void initWorkers() {
+        for (int w = 0; w < nbworkers; w++) {
+            if (workers[w].getEngine() == NoPropagationEngine.SINGLETON) {
+                workers[w].set(PropagationEngineFactory.DEFAULT.make(workers[w]));
+            }
+            if (!workers[w].getEngine().isInitialized()) {
+                workers[w].getEngine().initialize();
+            }
+            workers[w].measures.setReadingTimeCount(workers[w].creationTime + System.nanoTime());
+        }
+    }
+
     long countNewSolutions() {
         long nsol = 0;
         for (int i = 0; i < nbworkers; i++) {
@@ -350,7 +364,7 @@ public abstract class Portfolio implements Serializable, ISolver {
      * based (or not) on the decisions variables (if any).
      * The default value of <code>ssc</code> is <code>false</code>, setting it to <code>true</code> will skip the configuration steps
      * achieved before calling {@link #findSolution()}, {@link #findAllSolutions()}
-     * and {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}.
+     * and {@link #findOptimalSolution(org.chocosolver.solver.ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}.
      * Skipping the configurations may be interesting if one have a better knowledge of the strategies adapted to solve the underlying problem.
      *
      * @param ssc set to true to skip the strategy configurations.

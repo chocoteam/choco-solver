@@ -71,11 +71,6 @@ public interface ISearchLoop extends Serializable {
     void launch(boolean stopAtFirst);
 
     /**
-     * Resume the resolution of the problem described in a Solver.
-     */
-    void resume();
-
-    /**
      * This method enables to solve a problem another time:
      * <ul>
      * <li>It backtracks up to the root node of the search tree,</li>

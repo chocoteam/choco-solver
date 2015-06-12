@@ -51,12 +51,7 @@ public class SequentialPortfolio extends Portfolio {
     long limit;
 
     /**
-     * For nextsolution() only, store whether or not findSolution() has initialized all workers.
-     */
-    boolean early_found;
-
-    /**
-     * index of the running working
+     * index of the running working, initialized to {@link this#nbworkers}
      */
     int ridx;
 
@@ -64,6 +59,11 @@ public class SequentialPortfolio extends Portfolio {
      * Array of counters, one for each worker
      */
     ACounter[] counters;
+
+    /**
+     * The worker selector
+     */
+    WorkerSelector wselector;
 
     public SequentialPortfolio(String name, int nbworkers, long limit) {
         super(name, nbworkers);
@@ -80,6 +80,8 @@ public class SequentialPortfolio extends Portfolio {
             workers[i].plugMonitor(counters[i]);
         }
         this.new_solutions = new long[nbworkers];
+        this.wselector = new WorkerSelector(this);
+        ridx = nbworkers;
     }
 
     @Override
@@ -95,25 +97,17 @@ public class SequentialPortfolio extends Portfolio {
         if (!skip_strategy_configuration) {
             setStrategies(ResolutionPolicy.SATISFACTION);
         }
+        initWorkers();
         Arrays.fill(new_solutions, 0);
-        early_found = false;
-        for (int i = 0; !early_found && i < nbworkers; i++) {
-            ridx = i;
-            workers[i].solve(true);
-            if (workers[ridx].getMeasures().getSolutionCount() != new_solutions[ridx]) {
-                early_found = true;
-            }
-        }
-        boolean run = !early_found;
+        boolean run = true;
         while (run) {
-            ridx = (ridx + 1) % nbworkers;
-
+            ridx = wselector.nextWorker(ridx);
             // manually reset the worker
             workers[ridx].getSearchLoop().forceAlive(true);
             // update the limit
             counters[ridx].reset();
             // resume the search
-            workers[ridx].getSearchLoop().resume();
+            workers[ridx].getSearchLoop().launch(true);
             // keep on running until no solution is found
             run = workers[ridx].getMeasures().getSolutionCount() == new_solutions[ridx]
                     && !workers[ridx].getSearchLoop().isComplete();
@@ -127,27 +121,15 @@ public class SequentialPortfolio extends Portfolio {
         if (needCopy()) {
             throw new SolverException("Calling this method required all workers to be populated (see Portfolio.carbonCopy()).");
         }
-        if (early_found) {
-            // some solvers have not been initialized
-            early_found = false;
-            // so, keep on initializing them
-            for (int i = ridx + 1; !early_found && i < nbworkers; i++) {
-                ridx = i;
-                workers[i].solve(true);
-                if (workers[ridx].getMeasures().getSolutionCount() != new_solutions[ridx]) {
-                    early_found = true;
-                }
-            }
-        }
-        boolean run = !early_found;
+        boolean run = true;
         while (run) {
-            ridx = (ridx + 1) % nbworkers;
+            ridx = wselector.nextWorker(ridx);
             // manually reset the worker
             workers[ridx].getSearchLoop().forceAlive(true);
             // update the limit
             counters[ridx].reset();
             // resume the search
-            workers[ridx].getSearchLoop().resume();
+            workers[ridx].getSearchLoop().launch(true);
             // keep on running until no solution is found
             run = workers[ridx].getMeasures().getSolutionCount() == new_solutions[ridx]
                     && !workers[ridx].getSearchLoop().isComplete();
@@ -177,25 +159,46 @@ public class SequentialPortfolio extends Portfolio {
             workers[w].set(new ObjectiveManager<IntVar, Integer>(w == 0 ? objective : retrieveVarIn(w, objective), policy, true));
             workers[w].plugMonitor(new SyncObjective(this, w, policy));
         }
-        for (int i = 0; i < nbworkers; i++) {
-            ridx = i;
-            workers[i].solve(false);
-            if (workers[ridx].getSearchLoop().isComplete()) {
-                early_found = true;
-            }
-        }
-        boolean run = !early_found;
+        initWorkers();
+        boolean run = true;
         while (run) {
-            ridx = (ridx + 1) % nbworkers;
+            ridx = wselector.nextWorker(ridx);
             // manually reset the worker
             workers[ridx].getSearchLoop().forceAlive(true);
             // update the limit
             counters[ridx].reset();
             // resume the search
-            workers[ridx].getSearchLoop().resume();
+            workers[ridx].getSearchLoop().launch(false);
             // keep on running until no solution is found
             run = !workers[ridx].getSearchLoop().isComplete();
         }
         restoreSolution(objective, policy);
+    }
+
+    /**
+     * Override the default (round-robin like) worker selector
+     *
+     * @param workerSelector a worker selector
+     */
+    public void set(WorkerSelector workerSelector) {
+        this.wselector = workerSelector;
+    }
+
+    public static class WorkerSelector {
+
+        SequentialPortfolio sprtfl;
+
+        public WorkerSelector(SequentialPortfolio sprtfl) {
+            this.sprtfl = sprtfl;
+        }
+
+        /**
+         * Stating that <code>current</code> worker has just consumed its time, select the following worker to execute.
+         *
+         * @return the index of the worker to launch
+         */
+        int nextWorker(int current) {
+            return (current + 1) % sprtfl.nbworkers;
+        }
     }
 }

@@ -207,21 +207,13 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public void launch(boolean stopatfirst) {
-        if (nextState != INIT) {
-            throw new SolverException("!! The search has not been initialized.\n" +
-                    "!! Be sure you are respecting one of these call configurations :\n " +
-                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+        if(isComplete()){
+            throw new SolverException("The entire search space has been explored.\nConsider resetting the search loop.");
+        }
+        if(!canBeResumed()){
+            throw new SolverException("The search loop can't be resumed.\nConsider resetting the search loop.");
         }
         this.stopAtFirstSolution = stopatfirst;
-        loop();
-    }
-
-    @Override
-    public void resume() {
-        if (nextState == INIT) {
-            throw new SolverException("the search loop has not been initialized.\n " +
-                    "This appears when 'nextSolution' is called before 'findSolution'.");
-        }
         loop();
     }
 

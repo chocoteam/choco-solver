@@ -71,12 +71,13 @@ public class ParallelPortfolio extends Portfolio {
             setStrategies(ResolutionPolicy.SATISFACTION);
         }
         Arrays.fill(new_solutions, 0);
+        initWorkers();
         for (int s = 0; s < nbworkers; s++) {
             int _s = s;
             Thread r = new Thread() {
                 @Override
                 public void run() {
-                    workers[_s].solve(true);
+                    workers[_s].getSearchLoop().launch(true);
                     stopAll();
                     try {
                         barrier.await();
@@ -120,7 +121,7 @@ public class ParallelPortfolio extends Portfolio {
                     // TODO: the test is not safe,
                     if (!workers[_s].getSearchLoop().isComplete()) {
                         workers[_s].getSearchLoop().forceAlive(true); // because last stop was strong
-                        workers[_s].getSearchLoop().resume();
+                        workers[_s].getSearchLoop().launch(true);
                         stopAll();
                     }
                     try {
@@ -161,12 +162,13 @@ public class ParallelPortfolio extends Portfolio {
             workers[s].set(new ObjectiveManager<IntVar, Integer>(s == 0 ? objective : retrieveVarIn(s, objective), policy, true));
             workers[s].plugMonitor(new SyncObjective(this, s, policy));
         }
+        initWorkers();
         for (int s = 0; s < nbworkers; s++) {
             int _s = s;
             Thread r = new Thread() {
                 @Override
                 public void run() {
-                    workers[_s].solve(false);
+                    workers[_s].getSearchLoop().launch(false);
                     stopAll();
                     try {
                         barrier.await();
