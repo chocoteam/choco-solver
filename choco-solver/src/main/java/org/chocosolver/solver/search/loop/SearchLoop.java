@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
@@ -207,14 +206,11 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public void launch(boolean stopatfirst) {
-        if(isComplete()){
-            throw new SolverException("The entire search space has been explored.\nConsider resetting the search loop.");
+        if(!isComplete()
+                && canBeResumed()) {
+            this.stopAtFirstSolution = stopatfirst;
+            loop();
         }
-        if(!canBeResumed()){
-            throw new SolverException("The search loop can't be resumed.\nConsider resetting the search loop.");
-        }
-        this.stopAtFirstSolution = stopatfirst;
-        loop();
     }
 
     /**

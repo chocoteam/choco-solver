@@ -232,7 +232,7 @@ public class ParallelPortfolioTests {
         return prtfl;
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", invocationTimeOut = 1000L)
     public void test3() {
         ParallelPortfolio prtfl = GR(3);
         prtfl.findSolution();

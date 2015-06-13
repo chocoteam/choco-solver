@@ -1003,21 +1003,24 @@ public class Solver implements Serializable, ISolver {
      * Presumably, not all variables are instantiated.
      */
     public ESat isSatisfied() {
-        int OK = 0;
-        for (int c = 0; c < cIdx; c++) {
-            ESat satC = cstrs[c].isSatisfied();
-            if (ESat.FALSE == satC) {
-                System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
-                return ESat.FALSE;
-            } else if (ESat.TRUE == satC) {
-                OK++;
+        if(isFeasible()!=ESat.FALSE) {
+            int OK = 0;
+            for (int c = 0; c < cIdx; c++) {
+                ESat satC = cstrs[c].isSatisfied();
+                if (ESat.FALSE == satC) {
+                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
+                    return ESat.FALSE;
+                } else if (ESat.TRUE == satC) {
+                    OK++;
+                }
+            }
+            if (OK == cIdx) {
+                return ESat.TRUE;
+            } else {
+                return ESat.UNDEFINED;
             }
         }
-        if (OK == cIdx) {
-            return ESat.TRUE;
-        } else {
-            return ESat.UNDEFINED;
-        }
+        return ESat.FALSE;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

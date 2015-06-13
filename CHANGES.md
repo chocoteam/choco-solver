@@ -16,7 +16,7 @@ NEXT MILESTONE
 - lazy creation of ZERO, ONE, TRUE and FALSE through methods of Solver (#293)
 - Refactor Solution (#306)
 
-Bug fixes: #296, #297, #298, #303, #311
+Bug fixes: #296, #297, #298, #303, #309, #311, #313
 
 3.3.1 - 11 May 2015
 -------------------

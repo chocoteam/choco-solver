@@ -125,6 +125,30 @@ public class SolverTest {
                     case 8:
                         conf(s, OPT);
                         break;
+                    case 9:
+                        conf(s, ALL, ONE);
+                        break;
+                    case 10:
+                        conf(s, ALL, ALL);
+                        break;
+                    case 11:
+                        conf(s, ALL, OPT);
+                        break;
+                    case 12:
+                        conf(s, ALL, NEXT);
+                        break;
+                    case 13:
+                        conf(s, OPT, ONE);
+                        break;
+                    case 14:
+                        conf(s, OPT, ALL);
+                        break;
+                    case 15:
+                        conf(s, OPT, OPT);
+                        break;
+                    case 16:
+                        conf(s, OPT, NEXT);
+                        break;
                     default:
                         alive = false;
 
@@ -139,7 +163,7 @@ public class SolverTest {
     @Test(groups = "1s")
     public void testWrong() {
         boolean alive = true;
-        int cas = 1;
+        int cas = 2;
         while (alive) {
             cas++;
             Solver s = knapsack();
@@ -147,30 +171,6 @@ public class SolverTest {
                 switch (cas) {
                     case 1:
                         conf(s, NEXT);
-                        break;
-                    case 2:
-                        conf(s, ALL, ONE);
-                        break;
-                    case 3:
-                        conf(s, ALL, ALL);
-                        break;
-                    case 4:
-                        conf(s, ALL, OPT);
-                        break;
-                    case 5:
-                        conf(s, ALL, NEXT);
-                        break;
-                    case 6:
-                        conf(s, OPT, ONE);
-                        break;
-                    case 7:
-                        conf(s, OPT, ALL);
-                        break;
-                    case 8:
-                        conf(s, OPT, OPT);
-                        break;
-                    case 9:
-                        conf(s, OPT, NEXT);
                         break;
                     default:
                         alive = false;
@@ -226,12 +226,21 @@ public class SolverTest {
         Assert.assertEquals(1, bs.length);
     }
 
-    @Test(groups="1s")
-    public void testFH2(){
+    @Test(groups = "1s")
+    public void testFH2() {
         Solver solver = SF.makeSolver();
         BoolVar b = VF.bool("b", solver);
         solver.post(ICF.arithm(b, "=", 2));
         solver.findAllSolutions();
         Assert.assertEquals(solver.isFeasible(), ESat.FALSE);
+    }
+
+    @Test(groups = "1s")
+    public void testJL1() {
+        Solver s = SF.makeSolver();
+        s.post(ICF.arithm(s.ONE(), "!=", s.ZERO()));
+        if (s.findSolution()) {
+            while (s.nextSolution()) ;
+        }
     }
 }
