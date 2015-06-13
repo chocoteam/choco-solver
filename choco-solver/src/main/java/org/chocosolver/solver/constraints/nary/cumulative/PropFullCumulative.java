@@ -137,11 +137,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
         filter(allTasks);
     }
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-    }
-
     protected void propIni() throws ContradictionException {
         for (int i = 0; i < n; i++) {
             d[i].updateLowerBound(0, aCause); // should even be 1
