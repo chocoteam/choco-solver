@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
@@ -38,6 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -67,7 +66,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     /**
      * Variables that are not proved to be GAC yet
      */
-    protected TIntList futureVars;
+    protected BitSet futureVars;
 
     /**
      * Values that have found a support for each variable
@@ -87,7 +86,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
         super(vs, relation);
         this.arity = vs.length;
-        this.futureVars = new TIntLinkedList();
+        this.futureVars = new BitSet(arity);
         this.gacValues = new BitSet[arity];
         this.nbGacValues = new int[arity];
 
@@ -149,17 +148,16 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
 
     public void initializeData() {
         //INITIALIZATION
-        futureVars.clear();
+        Arrays.fill(nbGacValues, 0);
+        futureVars.set(0, arity);
         for (int i = 0; i < arity; i++) {
             gacValues[i].clear();
-            nbGacValues[i] = 0;
-            futureVars.add(i);
         }
     }
 
     public void pruningPhase() throws ContradictionException {
-        for (int i = 0; i < futureVars.size(); i++) {
-            int vIdx = futureVars.get(i);
+        for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
+            int vIdx = i;
             IntVar v = vars[vIdx];
             DisposableValueIterator it3 = v.getValueIterator(true);
             int left = Integer.MIN_VALUE;
@@ -200,14 +198,13 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
 
             if (valcheck.isValid(tuple/*,idx*/)) {
                 //extract the supports
-                for (int i = 0; i < futureVars.size(); i++) {
-                    int vIdx = futureVars.get(i);
+                for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
+                    int vIdx = i;
                     if (!gacValues[vIdx].get(tuple[vIdx] - offsets[vIdx])) {
                         gacValues[vIdx].set(tuple[vIdx] - offsets[vIdx]);
                         nbGacValues[vIdx]++;
                         if (nbGacValues[vIdx] == vars[vIdx].getDomainSize()) {
-                            futureVars.removeAt(i);
-                            i--;
+                            futureVars.clear(i);
                         }
                     }
                 }

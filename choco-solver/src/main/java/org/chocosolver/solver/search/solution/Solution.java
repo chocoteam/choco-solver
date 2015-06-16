@@ -147,16 +147,24 @@ public class Solution implements Serializable, ICause {
                     case Variable.INT:
                     case Variable.BOOL:
                         IntVar v = (IntVar) vars[i];
-                        v.instantiateTo(intmap.get(v.getId()), this);
+                        int value = intmap.get(v.getId());
+                        if(value != NO_ENTRY){
+                            v.instantiateTo(value, this);
+                        } // otherwise, this is not a decision variable
                         break;
                     case Variable.REAL:
                         RealVar r = (RealVar) vars[i];
                         double[] bounds = realmap.get(r.getId());
-                        r.updateBounds(bounds[0], bounds[1], this);
+                        if(bounds != null){
+                            r.updateBounds(bounds[0], bounds[1], this);
+                        }  // otherwise, this is not a decision variable
                         break;
                     case Variable.SET:
                         SetVar s = (SetVar) vars[i];
-                        s.instantiateTo(setmap.get(s.getId()), Cause.Null);
+                        int[]values = setmap.get(s.getId());
+                        if(values != null){
+                            s.instantiateTo(values, Cause.Null);
+                        } // otherwise, this is not a decision variable
                         break;
                 }
             }

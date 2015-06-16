@@ -452,7 +452,7 @@ public abstract class Portfolio implements Serializable, ISolver {
                 IntVar[] mvars = retrieveVarIn(w, vars);
                 workers[w].set(ISF.lastConflict(workers[w], ISF.activity(mvars, w)));
                 SMF.geometrical(workers[w], 500, 1.2, new FailCounter(100), 200);
-                SMF.nogoodRecordingFromRestarts(workers[0]);
+                SMF.nogoodRecordingFromRestarts(workers[w]);
             }
             break;
             case 2: {
@@ -467,7 +467,7 @@ public abstract class Portfolio implements Serializable, ISolver {
                         IntVar[] mvars = retrieveVarIn(w, vars);
                         workers[w].set(ISF.random(mvars, w));
                         SMF.geometrical(workers[w], 100, 1.0001, new FailCounter(100), Integer.MAX_VALUE);
-                        SMF.nogoodRecordingFromRestarts(workers[0]);
+                        SMF.nogoodRecordingFromRestarts(workers[w]);
                     }
                     break;
                     default: {
