@@ -79,7 +79,7 @@ public abstract class Portfolio implements Serializable, ISolver {
     /**
      * The identity maps
      */
-    THashMap<Object, Object>[] imaps;
+    public THashMap<Object, Object>[] imaps;
 
     /**
      * Ordered list of created model objects, to ensure carbon copies are EXACTLY the same (wrt to the variables and proapgators ID)
