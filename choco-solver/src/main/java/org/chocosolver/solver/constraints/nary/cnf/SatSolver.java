@@ -194,20 +194,20 @@ public class SatSolver {
 
     // Add the empty clause, making the solver contradictory.
     boolean addEmptyClause() {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         return addClause(temporary_add_vector_);
     }
 
     // Add a unit clause to the solver.
     boolean addClause(int l) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(l);
         return addClause(temporary_add_vector_);
     }
 
     // Add a binary clause to the solver.
     boolean addClause(int p, int q) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(p);
         temporary_add_vector_.add(q);
         return addClause(temporary_add_vector_);
@@ -215,7 +215,7 @@ public class SatSolver {
 
     // Add a ternary clause to the solver.
     boolean addClause(int p, int q, int r) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(p);
         temporary_add_vector_.add(q);
         temporary_add_vector_.add(r);
@@ -224,7 +224,7 @@ public class SatSolver {
 
     // Incremental propagation.
     boolean initPropagator() {
-        touched_variables_.clear();
+        touched_variables_.resetQuick();
         return !ok_;
     }
 
@@ -271,7 +271,7 @@ public class SatSolver {
     // of failure.
     boolean propagateOneLiteral(int lit) {
         assert ok_;
-        touched_variables_.clear();
+        touched_variables_.resetQuick();
         if (!propagate()) {
             return false;
         }

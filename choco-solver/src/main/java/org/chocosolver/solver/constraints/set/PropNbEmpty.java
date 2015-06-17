@@ -69,7 +69,7 @@ public class PropNbEmpty extends Propagator<Variable> {
      * Restricts the number of empty sets
      * |{s in sets such that |s|=0}| = nbEmpty
      *
-     * @param sets array of set variables
+     * @param sets    array of set variables
      * @param nbEmpty integer variable
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
@@ -80,7 +80,7 @@ public class PropNbEmpty extends Propagator<Variable> {
             this.sets[i] = (SetVar) vars[i];
         }
         this.nbEmpty = (IntVar) vars[n];
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         this.canBeEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
         this.isEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
         this.nbAlreadyEmpty = environment.makeInt();
@@ -94,7 +94,7 @@ public class PropNbEmpty extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx < vars.length-1) {
+        if (vIdx < vars.length - 1) {
             return SetEventType.all();
         } else {
             return IntEventType.boundAndInst();
@@ -128,16 +128,17 @@ public class PropNbEmpty extends Propagator<Variable> {
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
         if (v < n) {
-            assert canBeEmpty.contain(v);
-            if (sets[v].getKernelSize() > 0) {
-                canBeEmpty.remove(v);
-                nbMaybeEmpty.add(-1);
-            } else {
-                if (sets[v].getEnvelopeSize() == 0) {
-                    isEmpty.add(v);
+            if (canBeEmpty.contain(v)) {
+                if (sets[v].getKernelSize() > 0) {
                     canBeEmpty.remove(v);
                     nbMaybeEmpty.add(-1);
-                    nbAlreadyEmpty.add(1);
+                } else {
+                    if (sets[v].getEnvelopeSize() == 0) {
+                        isEmpty.add(v);
+                        canBeEmpty.remove(v);
+                        nbMaybeEmpty.add(-1);
+                        nbAlreadyEmpty.add(1);
+                    }
                 }
             }
         }

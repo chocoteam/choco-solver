@@ -166,8 +166,8 @@ public abstract class AbstractVariable implements Variable {
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
         if (i < nbPropagators) {
             cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
+            nbPropagators--;
         }
-        nbPropagators--;
     }
 
     private void cancel(int pp, int i) {

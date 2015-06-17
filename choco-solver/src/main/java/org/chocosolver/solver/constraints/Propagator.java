@@ -195,7 +195,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected final void addVariable(V... nvars) {
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
-        arraycopy(tmp, 0, vars, 0, tmp.length);
         arraycopy(nvars, 0, vars, tmp.length, nvars.length);
         int[] itmp = this.vindices;
         vindices = new int[vars.length];

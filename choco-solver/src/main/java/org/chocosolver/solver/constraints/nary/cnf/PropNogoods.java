@@ -337,7 +337,7 @@ public class PropNogoods extends Propagator<IntVar> {
             int lit = sat_.touched_variables_.get(i);
             early_deductions_.add(lit);
         }
-        sat_.touched_variables_.clear();
+        sat_.touched_variables_.resetQuick();
     }
 
     void applyEarlyDeductions() throws ContradictionException {

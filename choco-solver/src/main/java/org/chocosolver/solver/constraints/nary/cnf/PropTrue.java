@@ -56,7 +56,7 @@ public class PropTrue extends Propagator<BoolVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.VOID.getMask();
+        return IntEventType.all();
     }
 
     @Override
