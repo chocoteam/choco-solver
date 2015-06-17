@@ -109,38 +109,6 @@ public class PropAmongGAC extends Propagator<IntVar> {
     }
 
     @Override
-    public boolean advise(int varIdx, int mask) {
-        if (super.advise(varIdx, mask)) {
-            if (varIdx == nb_vars) {
-                return true;
-            } else {
-                needFilter = false;
-                if (IntEventType.isInstantiate(mask)) {
-                    if (both.get(varIdx)) {
-                        IntVar var = vars[varIdx];
-                        int val = var.getValue();
-                        if (setValues.contains(val)) {
-                            LB.add(1);
-                            both.set(varIdx, false);
-                            needFilter = true;
-                        } else {
-                            UB.add(-1);
-                            both.set(varIdx, false);
-                            needFilter = true;
-                        }
-                    }
-                } else {
-                    idms[varIdx].freeze();
-                    idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-                    idms[varIdx].unfreeze();
-                }
-                return needFilter;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             int lb = 0;

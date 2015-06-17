@@ -71,6 +71,12 @@ public class PropDiffN extends Propagator<IntVar> {
         }
         overlappingBoxes = new UndirectedGraph(solver, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, solver);
+        super.linkVariables();
+    }
+
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     //***********************************************************************************

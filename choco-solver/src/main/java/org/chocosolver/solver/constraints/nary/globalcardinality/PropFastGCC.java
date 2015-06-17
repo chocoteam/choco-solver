@@ -98,6 +98,12 @@ public class PropFastGCC extends Propagator<IntVar> {
                 boundVar.add(i);
             }
         }
+        super.linkVariables();
+    }
+
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     @Override

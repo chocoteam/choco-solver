@@ -89,7 +89,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return (vIdx != zIdx ? IntEventType.all() : IntEventType.boundAndInst());
+        return (vIdx != vars.length - 1 ? IntEventType.all() : IntEventType.boundAndInst());
     }
 
     /**

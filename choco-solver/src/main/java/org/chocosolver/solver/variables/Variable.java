@@ -38,6 +38,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 import java.io.Serializable;
 
@@ -103,6 +104,8 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     int getNbProps();
 
     int[] getPIndices();
+
+    int getDindex(int i);
 
     /**
      * Return the position of the variable in the propagator at position pidx
@@ -256,4 +259,9 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @param identitymap a map to guarantee uniqueness of objects
      */
     void duplicate(Solver solver, THashMap<Object, Object> identitymap);
+
+    /**
+     * For scheduling purpose only
+     */
+    EvtScheduler _schedIter();
 }

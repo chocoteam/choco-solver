@@ -75,7 +75,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (bothEnumerated)
+        if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain())
             return IntEventType.all();
         else
             return IntEventType.boundAndInst();

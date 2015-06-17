@@ -156,7 +156,7 @@ public class PropCountVar extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == n) {// cardinality variables
+        if (vIdx == vars.length - 2) {// cardinality variables
             return IntEventType.boundAndInst();
         }
         return IntEventType.all();
