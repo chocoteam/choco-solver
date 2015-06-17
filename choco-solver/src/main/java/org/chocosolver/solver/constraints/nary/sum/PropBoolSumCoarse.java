@@ -115,9 +115,7 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == n)
-            return IntEventType.boundAndInst();
-        return IntEventType.instantiation();
+        return IntEventType.boundAndInst();
     }
 
     @Override

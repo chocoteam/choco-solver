@@ -243,8 +243,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         this.boundUpdate = new TIntHashSet();
         this.pi = cauto;
         rem_proc = new RemProc(this);
+        super.linkVariables();
     }
 
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

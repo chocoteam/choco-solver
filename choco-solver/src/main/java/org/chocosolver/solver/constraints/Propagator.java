@@ -145,9 +145,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         // This is the responsibility of the propagator's developer to take care of that point.
         this.vars = vars;
         this.vindices = new int[vars.length];
-        for (int v = 0; v < vars.length; v++) {
-            vindices[v] = vars[v].link(this, v);
-        }
+        this.linkVariables();
         ID = solver.nextId();
         operations = new Operation[]{
                 new Operation() {
@@ -215,6 +213,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
+    protected void linkVariables(){
+        for (int v = 0; v < vars.length; v++) {
+            vindices[v] = vars[v].link(this, v);
+        }
+    }
+
     /**
      * Informs this propagator the (unique) constraint it filters.
      * The constraint reference will be overwritten in case of reification.
@@ -235,7 +239,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
-    protected int getPropagationConditions(int vIdx) {
+    public int getPropagationConditions(int vIdx) {
         return ALL_EVENTS;
     }
 
@@ -252,21 +256,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
     public abstract void propagate(int evtmask) throws ContradictionException;
-
-    /**
-     * Advise a propagator of a modification occurring on one of its variables,
-     * and decide if <code>this</code> should be scheduled.
-     * At least, this method SHOULD check the propagation condition of the event received.
-     * In addition, this method can be used to update internal state of <code>this</code>.
-     * This method can returns <code>true</code> even if the propagator is already scheduled.
-     *
-     * @param idxVarInProp index of the modified variable
-     * @param mask         modification event mask
-     * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
-     */
-    public boolean advise(int idxVarInProp, int mask) {
-        return (mask & getPropagationConditions(idxVarInProp)) != 0;
-    }
 
     /**
      * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable

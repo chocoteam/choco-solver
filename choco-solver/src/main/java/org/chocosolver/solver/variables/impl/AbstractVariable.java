@@ -37,7 +37,11 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
+import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
+import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
 import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 import java.util.Arrays;
 
@@ -69,7 +73,8 @@ public abstract class AbstractVariable implements Variable {
 
     private Propagator[] propagators; // list of propagators of the variable
     private int[] pindices;    // index of the variable in the i^th propagator
-    private int pIdx;
+    private int[] dindices; // dependency indices -- for scheduling
+    private int nbPropagators;
 
     private IView[] views; // views to inform of domain modification
     private int vIdx; // index of the last view not null in views -- not backtrable
@@ -81,6 +86,8 @@ public abstract class AbstractVariable implements Variable {
 
     protected final boolean _plugexpl;
 
+    private EvtScheduler scheduler;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     protected AbstractVariable(String name, ISolver isolver) {
@@ -91,9 +98,23 @@ public abstract class AbstractVariable implements Variable {
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
         this.pindices = new int[8];
+        this.dindices = new int[6];
         this.ID = this.solver.nextId();
         this._plugexpl = this.solver.getSettings().plugExplanationIn();
         this.isolver.associates(this);
+        int kind = getTypeAndKind() & Variable.KIND;
+        switch (kind) {
+            case Variable.INT:
+            case Variable.BOOL:
+                this.scheduler = new IntEvtScheduler();
+                break;
+            case Variable.REAL:
+                this.scheduler = new RealEvtScheduler();
+                break;
+            case Variable.SET:
+                this.scheduler = new SetEvtScheduler();
+                break;
+        }
     }
 
     @Override
@@ -103,21 +124,33 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public int link(Propagator propagator, int idxInProp) {
-        //ensure capacity
-        if (pIdx == propagators.length) {
+        // 1. ensure capacity
+        if (nbPropagators == propagators.length) {
             Propagator[] tmp = propagators;
             propagators = new Propagator[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, propagators, 0, pIdx);
+            System.arraycopy(tmp, 0, propagators, 0, nbPropagators);
 
             int[] itmp = pindices;
             pindices = new int[itmp.length * 3 / 2 + 1];
-            System.arraycopy(itmp, 0, pindices, 0, pIdx);
+            System.arraycopy(itmp, 0, pindices, 0, nbPropagators);
 
         }
-        propagators[pIdx] = propagator;
-        pindices[pIdx++] = idxInProp;
-        return pIdx - 1;
+        // 2. put it in the right place
+        subscribe(propagator, idxInProp, scheduler.select(propagator.getPropagationConditions(idxInProp)));
+        return nbPropagators++;
     }
+
+
+    private void subscribe(Propagator p, int ip, int i) {
+        for (int j = 4; j >= i; j--) {
+            propagators[dindices[j + 1]] = propagators[dindices[j]];
+            pindices[dindices[j + 1]] = pindices[dindices[j]];
+            dindices[j + 1] = dindices[j + 1] + 1;
+        }
+        propagators[dindices[i]] = p;
+        pindices[dindices[i]] = ip;
+    }
+
 
     @Override
     public void recordMask(int mask) {
@@ -127,22 +160,32 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void unlink(Propagator propagator) {
         int i = 0;
-        while (i < pIdx && propagators[i] != propagator) {
+        while (i < nbPropagators && propagators[i] != propagator) {
             i++;
         }
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-        if (i < pIdx) {
-            propagators[i] = propagators[pIdx - 1];
-            pindices[i] = pindices[--pIdx];
-            propagators[pIdx] = null;
-            pindices[pIdx] = 0;
+        if (i < nbPropagators) {
+            cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
         }
+        nbPropagators--;
+    }
+
+    private void cancel(int pp, int i) {
+        propagators[pp] = propagators[dindices[i + 1] - 1];
+        for (int k = i + 1; k < 5; k++) {
+            propagators[dindices[k] - 1] = propagators[dindices[k + 1] - 1];
+            pindices[dindices[k] - 1] = pindices[dindices[k + 1] - 1];
+            dindices[k] = dindices[k] - 1;
+        }
+        propagators[nbPropagators - 1] = null;
+        pindices[nbPropagators - 1] = -1;
+        dindices[5] = dindices[5] - 1;
     }
 
     @Override
     public Propagator[] getPropagators() {
-        if (propagators.length > pIdx) {
-            propagators = Arrays.copyOf(propagators, pIdx);
+        if (propagators.length > nbPropagators) {
+            propagators = Arrays.copyOf(propagators, nbPropagators);
         }
         return propagators;
     }
@@ -154,15 +197,20 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public int getNbProps() {
-        return pIdx;
+        return nbPropagators;
     }
 
     @Override
     public int[] getPIndices() {
-        if (pindices.length > pIdx) {
-            pindices = Arrays.copyOf(pindices, pIdx);
+        if (pindices.length > nbPropagators) {
+            pindices = Arrays.copyOf(pindices, nbPropagators);
         }
         return pindices;
+    }
+
+    @Override
+    public int getDindex(int i) {
+        return dindices[i];
     }
 
     @Override
@@ -263,4 +311,13 @@ public abstract class AbstractVariable implements Variable {
     public boolean isBool() {
         return (getTypeAndKind() & KIND) == BOOL;
     }
+
+    public EvtScheduler _schedIter() {
+        return scheduler;
+    }
+
+    public void _setschedIter(EvtScheduler siter) {
+        this.scheduler = siter;
+    }
+
 }

@@ -410,8 +410,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         if (!identitymap.containsKey(this)) {
             BoolVarImpl clone = new BoolVarImpl(this.name, solver);
             identitymap.put(this, clone);
-            if (this.not != null) {
-                this.not.duplicate(solver, identitymap);
+            if (this.not != null && identitymap.containsKey(this.not)) {
                 clone._setNot((BoolVar) identitymap.get(this.not));
                 clone.not._setNot(clone);
             }

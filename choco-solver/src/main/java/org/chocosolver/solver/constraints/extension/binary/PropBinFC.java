@@ -54,7 +54,7 @@ public class PropBinFC extends PropBinCSP {
     }
 
     @Override
-    protected int getPropagationConditions(int vIdx) {
+    public int getPropagationConditions(int vIdx) {
         return IntEventType.instantiation();
     }
 

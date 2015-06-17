@@ -64,7 +64,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
     protected CumulFilter[] filters;
     protected ISet allTasks;
     protected final boolean fast;
-    protected final int awakeningMask;
     protected final IStateInt lastCapaMax;
     protected final Cumulative.Filter[] _filters;
 
@@ -93,10 +92,10 @@ public class PropFullCumulative extends Propagator<IntVar> {
         for (int f = 0; f < filters.length; f++) {
             this.filters[f] = filters[f].make(n, this);
         }
-        // awakes on instantiations only when FAST mode is set to true
-        awakeningMask = fast ? IntEventType.instantiation() : IntEventType.boundAndInst();
+
         lastCapaMax = solver.getEnvironment().makeInt(capa.getUB() + 1);
         allTasks = SetFactory.makeFullSet(n);
+        super.linkVariables();
     }
 
     /**
@@ -116,16 +115,22 @@ public class PropFullCumulative extends Propagator<IntVar> {
         this(s, d, e, h, capa, false, fast, filters);
     }
 
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
+    }
+
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int idx) {
-        if (idx >= 4 * n) {
+        if (idx == vars.length - 1) {
             return IntEventType.DECUPP.getMask() + IntEventType.INSTANTIATE.getMask();
         }
-        return awakeningMask;
+        // awakes on instantiations only when FAST mode is set to true
+        return fast ? IntEventType.instantiation() : IntEventType.boundAndInst();
     }
 
     @Override

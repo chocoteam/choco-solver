@@ -93,13 +93,8 @@ public class PropNbEmpty extends Propagator<Variable> {
 
 
     @Override
-    public boolean advise(int idxVarInProp, int mask) {
-        return super.advise(idxVarInProp, mask) && (idxVarInProp >= n || canBeEmpty.contain(idxVarInProp));
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx < n) {
+        if (vIdx < vars.length-1) {
             return SetEventType.all();
         } else {
             return IntEventType.boundAndInst();

@@ -42,6 +42,7 @@ import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.queues.CircularQueue;
 import org.slf4j.Logger;
@@ -250,35 +251,39 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         Propagator[] vpropagators = variable.getPropagators();
-        int nbp = vpropagators.length;
         int[] vindices = variable.getPIndices();
         Propagator prop;
         int pindice;
-
-        for (int p = nbp - 1; p >= 0; p--) {
-            prop = vpropagators[p];
-            pindice = vindices[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
-                int aid = p2i.get(prop.getId());
-                if (prop.reactToFineEvent()) {
-                    boolean needSched = (eventmasks[aid][pindice] == 0);
-                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
-                    if (needSched) {
-                        if (LOGGER.isDebugEnabled()) {
-                            IPropagationEngine.Trace.printSchedule(prop);
+        EvtScheduler si = variable._schedIter();
+        si.init(type);
+        while (si.hasNext()) {
+            int p = variable.getDindex(si.next());
+            int t = variable.getDindex(si.next());
+            for (; p < t; p++) {
+                prop = vpropagators[p];
+                pindice = vindices[p];
+                if (prop.isActive() && cause != prop) {
+                    int aid = p2i.get(prop.getId());
+                    if (prop.reactToFineEvent()) {
+                        boolean needSched = (eventmasks[aid][pindice] == 0);
+                        eventmasks[aid][pindice] |= type.getStrengthenedMask();
+                        if (needSched) {
+                            if (LOGGER.isDebugEnabled()) {
+                                IPropagationEngine.Trace.printSchedule(prop);
+                            }
+                            prop.incNbPendingEvt();
+                            eventsets[aid].addLast(pindice);
+                        } else if (LOGGER.isDebugEnabled()) {
+                            IPropagationEngine.Trace.printAlreadySchedule(prop);
                         }
-                        prop.incNbPendingEvt();
-                        eventsets[aid].addLast(pindice);
-                    } else if (LOGGER.isDebugEnabled()) {
-                        IPropagationEngine.Trace.printAlreadySchedule(prop);
                     }
-                }
-                if (scheduled[aid] == 0) {
-                    int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
-                    pro_queue[prio].addLast(prop);
-                    scheduled[aid] = (short) (prio + 1);
+                    if (scheduled[aid] == 0) {
+                        int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
+                        pro_queue[prio].addLast(prop);
+                        scheduled[aid] = (short) (prio + 1);
 //                    notEmpty.set(prio);
-                    notEmpty = notEmpty | (1 << prio);
+                        notEmpty = notEmpty | (1 << prio);
+                    }
                 }
             }
         }
