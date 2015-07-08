@@ -147,7 +147,7 @@ public class SearchLoop implements ISearchLoop {
     /**
      * Indication about the way the search ends
      */
-    byte searchStatus = M_RESUMABLE;
+    byte searchStatus = M_RESUMABLE | M_UNEXPECTED_END;
 
     public SearchMonitorList smList;
 
@@ -200,7 +200,7 @@ public class SearchLoop implements ISearchLoop {
             measures.reset();
             objectivemanager = SAT();
             solver.set(SINGLETON);
-            searchStatus = M_RESUMABLE;
+            searchStatus = M_RESUMABLE | M_UNEXPECTED_END;
         }
     }
 
