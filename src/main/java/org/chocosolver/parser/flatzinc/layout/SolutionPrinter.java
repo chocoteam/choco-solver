@@ -45,7 +45,7 @@ public class SolutionPrinter extends ASolutionPrinter {
     @Override
     public void onSolution() {
         super.onSolution();
-        System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+//        System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
     }
 
     public void doFinalOutPut() {
