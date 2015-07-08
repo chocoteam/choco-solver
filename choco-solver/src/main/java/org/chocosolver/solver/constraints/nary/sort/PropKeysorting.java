@@ -71,7 +71,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         if (SCC[XMATE[i]] != SCC[XMATE[j]]) {
             return SCC[XMATE[i]] - SCC[XMATE[j]];
         } else {
-            return SORTMIN[i] - SORTMIN[j];
+            return 0;
         }
     };
 
@@ -87,7 +87,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         if (SCC[XMATE[i]] != SCC[XMATE[j]]) {
             return SCC[XMATE[i]] - SCC[XMATE[j]];
         } else {
-            return SORTMAX[i] - SORTMAX[j];
+            return 0;
         }
     };
 
@@ -362,7 +362,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
     }
 
     /**
-     * Matching, up phase. Simulate a priority queue iterating y from 0 to n-1 ...
+     * Matching, down phase. Simulate a priority queue iterating y from n-1 to 0 ...
      */
     private void matchDown() throws ContradictionException {
         int e = 0, i = 0;

@@ -448,4 +448,15 @@ public class TestCorrectness {
 
         }
     }
+
+    @Test(groups = "correctness.1m")
+    public void testIntValuePrecedeChain() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelivpcAC, n, -n, 2 * n, seed, false);
+            }
+
+        }
+    }
 }

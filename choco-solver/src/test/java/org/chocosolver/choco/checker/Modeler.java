@@ -761,7 +761,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram)parameters));
+            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram) parameters));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -769,6 +769,27 @@ public interface Modeler {
         @Override
         public String name() {
             return "modelmddAC";
+        }
+    };
+
+    Modeler modelivpcAC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("ivpc" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.int_value_precede_chain(vars, 1, 2));
+            s.set(ISF.random_value(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelivpcAC";
         }
     };
 }

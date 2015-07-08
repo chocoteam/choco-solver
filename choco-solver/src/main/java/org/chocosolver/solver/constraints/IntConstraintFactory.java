@@ -39,6 +39,7 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
 import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
+import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
 import org.chocosolver.solver.constraints.nary.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
@@ -993,6 +994,42 @@ public class IntConstraintFactory {
                 alldifferent(VARS2).getPropagators(),
                 new Propagator[]{ip}
         ));
+    }
+
+    /**
+     * Ensure that if there exists <code>j</code> such that X[j] = T, then, there must exist <code>i</code> < <code>j</code> such that
+     * X[i] = S.
+     * @param X an array of variables
+     * @param S a value
+     * @param T another value
+     */
+    public static Constraint int_value_precede_chain(IntVar[] X, int S, int T) {
+        return new Constraint("int_value_precede", new PropIntValuePrecedeChain(X, S, T));
+    }
+
+    /**
+     * Ensure that, for each pair of V[k] and V[l] of values in V, such that k < l,
+     * if there exists <code>j</code> such that X[j] = V[l], then, there must exist <code>i</code> < <code>j</code> such that
+     * X[i] = V[k].
+     * @param X array of variables
+     * @param V array of (distinct) values
+     */
+    public static Constraint int_value_precede_chain(IntVar[] X, int[] V) {
+        if (V.length > 1) {
+            TIntHashSet values = new TIntHashSet();
+            PropIntValuePrecedeChain[] ps = new PropIntValuePrecedeChain[V.length - 1];
+            values.add(V[0]);
+            for (int i = 1; i < V.length; i++) {
+                if (values.contains(V[i])) {
+                    throw new SolverException("\"int_value_precede\" requires V to be made of distinct values");
+                }
+                values.add(V[i]);
+                ps[i - 1] = new PropIntValuePrecedeChain(X, V[i - 1], V[i]);
+            }
+            return new Constraint("int_value_precede", ps);
+        } else {
+            return X[0].getSolver().TRUE();
+        }
     }
 
     /**

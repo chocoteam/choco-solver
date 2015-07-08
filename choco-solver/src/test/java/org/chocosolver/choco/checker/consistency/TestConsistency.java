@@ -424,6 +424,20 @@ public class TestConsistency {
         }
     }
 
+    @Test(groups = "consistency.1m")
+    public void testIVPC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelivpcAC, 5, -5, 5, null, seed + i, "ac");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testIVPC2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelivpcAC, 10, -2, 3, null, seed + i, "ac");
+    }
+
     /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/kyzrsoze/Sources/Choco3/SOLVER_ERROR.ser");
