@@ -35,34 +35,17 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class IntEvtScheduler implements EvtScheduler<IntEventType> {
 
-    final int[] dis = new int[]{-1, -1, -1, -1};
+    static final int[] DIS = new int[]{
+            4, 5, -1, //REMOVE
+            1, 2, 3, 5, -1,// INCLOW
+            2, 5, -1, // DECUPP
+            0, 5, -1, // INSTANTIATE
+    };
+    static final int[] IDX = new int[]{-1, 0, 3, 8, -1, 11};
     int i = 0;
 
     public void init(IntEventType evt) {
-        i = 0;
-        switch (evt) {
-            case REMOVE: // rem
-                dis[0] = 4; // included
-                dis[1] = 5; // excluded
-                dis[2] = dis[3] = -1;
-                break;
-            case INCLOW: // lb
-                dis[0] = 1; // included
-                dis[1] = 2; // excluded
-                dis[2] = 3; // included
-                dis[3] = 5; // excluded
-                break;
-            case DECUPP: // ub
-                dis[0] = 2; // included
-                dis[1] = 5; // excluded
-                dis[2] = dis[3] = -1;
-                break;
-            case INSTANTIATE: // inst
-                dis[0] = 0; // included
-                dis[1] = 5; // excluded
-                dis[2] = dis[3] = -1;
-                break;
-        }
+        i = IDX[evt.ordinal()];
     }
 
     @Override
@@ -86,12 +69,12 @@ public class IntEvtScheduler implements EvtScheduler<IntEventType> {
 
     @Override
     public boolean hasNext() {
-        return i < 4 && dis[i] > -1;
+        return DIS[i] > -1;
     }
 
     @Override
     public int next() {
-        return dis[i++];
+        return DIS[i++];
     }
 
     @Override
