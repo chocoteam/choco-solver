@@ -55,7 +55,7 @@ public class IntSearch {
     public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Solver solver) {
         VariableSelector<IntVar> varsel = variableSelector(varChoice);
         if (varsel == null) { // free search
-            return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 2.0d, 1, seed);
+            return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 1, seed);
         }
         return valueSelector(variables, varsel, assignment);
     }

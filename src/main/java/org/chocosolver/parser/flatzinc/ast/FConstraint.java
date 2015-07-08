@@ -86,7 +86,7 @@ public final class FConstraint {
                 }
                 builder = (IBuilder) loadManager(name);
                 if (((FznSettings) aSolver.getSettings()).printConstraint())
-                    System.out.printf("%% %s", name);
+                    System.out.printf("%% %s\n", name);
                 builders.put(id, builder);
             }
             last = id;

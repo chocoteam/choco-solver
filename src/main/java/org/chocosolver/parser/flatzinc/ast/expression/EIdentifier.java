@@ -116,9 +116,9 @@ public final class EIdentifier extends Expression {
     @Override
     public BoolVar boolVarValue(Solver solver) {
         if (Integer.class.isInstance(object)) {
-            return ((Integer) object == 1) ? solver.ONE : solver.ZERO;
+            return ((Integer) object == 1) ? solver.ONE() : solver.ZERO();
         } else if (Boolean.class.isInstance(object)) {
-            return ((Boolean) object) ? solver.ONE : solver.ZERO;
+            return ((Boolean) object) ? solver.ONE() : solver.ZERO();
         }
         return (BoolVar) object;
     }
@@ -131,14 +131,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Integer) object == 1) ? solver.ONE : solver.ZERO;
+                    vars[i] = ((Integer) object == 1) ? solver.ONE() : solver.ZERO();
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Boolean) object) ? solver.ONE : solver.ZERO;
+                    vars[i] = ((Boolean) object) ? solver.ONE() : solver.ZERO();
                 }
                 return vars;
             }

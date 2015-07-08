@@ -34,6 +34,7 @@ import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.List;
@@ -52,8 +53,16 @@ public class BoolEqReifBuilder implements IBuilder {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-        if (((FznSettings)solver.getSettings()).enableClause()) {
+        // Adding clause seems more efficient than other alternatives
+        if (((FznSettings) solver.getSettings()).enableClause()) {
             SatFactory.addBoolIsEqVar(a, b, r);
+        } else if (solver.getSettings().enableTableSubstitution()) {
+            Tuples t = new Tuples(true);
+            t.add(1, 1, 1);
+            t.add(0, 0, 1);
+            t.add(1, 0, 0);
+            t.add(0, 1, 0);
+            solver.post(ICF.table(new BoolVar[]{a, b, r}, t, "default"));
         } else {
             ICF.arithm(a, "=", b).reifyWith(r);
         }

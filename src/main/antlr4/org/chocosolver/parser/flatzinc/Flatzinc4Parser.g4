@@ -275,7 +275,7 @@ constraint
 solve_goal
 	:   SOLVE anns=annotations res=resolution SC
 	{
-    FGoal.define_goal(mSolver, freeSearch, $anns.anns,$res.rtype,$res.exp);
+    FGoal.define_goal(mSolver, $anns.anns,$res.rtype,$res.exp);
     }
 	;
 

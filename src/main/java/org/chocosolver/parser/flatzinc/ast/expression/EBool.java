@@ -84,7 +84,7 @@ public final class EBool extends Expression {
 
     @Override
     public BoolVar boolVarValue(Solver solver) {
-        return intValue() == 1? solver.ONE: solver.ZERO;
+        return intValue() == 1? solver.ONE(): solver.ZERO();
     }
 
     @Override
