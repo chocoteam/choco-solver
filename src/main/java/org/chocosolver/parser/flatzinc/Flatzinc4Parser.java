@@ -1320,7 +1320,7 @@ public class Flatzinc4Parser extends Parser {
 			setState(299); ((Solve_goalContext)_localctx).res = resolution();
 			setState(300); match(SC);
 
-			    FGoal.define_goal(mSolver, freeSearch, ((Solve_goalContext)_localctx).anns.anns,((Solve_goalContext)_localctx).res.rtype,((Solve_goalContext)_localctx).res.exp);
+			    FGoal.define_goal(mSolver, ((Solve_goalContext)_localctx).anns.anns,((Solve_goalContext)_localctx).res.rtype,((Solve_goalContext)_localctx).res.exp);
 			    
 			}
 		}

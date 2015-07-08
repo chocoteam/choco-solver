@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2015, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,46 +24,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.parser.flatzinc;
+package org.chocosolver.parser.flatzinc.layout;
 
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.Solver;
 
 /**
- * Basic settings for Fzn
- * Created by cprudhom on 08/12/14.
+ * Created by cprudhom on 18/06/15.
  * Project: choco-parsers.
  */
-public class FznSettings implements Settings {
+public class SolutionPrinter extends ASolutionPrinter {
 
-    /**
-     * Set to true to print constraint creation during parsing
-     */
-    public boolean printConstraint() {
-        return false;
-    }
+    Solver solver;
 
-    /**
-     * Set to true to enable clause detection (for boolean variables only)
-     */
-    public boolean enableClause() {
-        return true;
+    public SolutionPrinter(Solver solver, boolean printAll) {
+        super(solver.getSolutionRecorder(), printAll);
+        this.solver = solver;
+        solver.plugMonitor(this);
     }
 
     @Override
-    public boolean enableTableSubstitution() {
-        return true;
+    public void onSolution() {
+        super.onSolution();
+        System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
     }
 
-    /**
-     * Faster reification (but quite dirty)
-     */
-    public boolean adhocReification() {
-        return true;
-    }
-
-    @Override
-    public ISearchBinder getSearchBinder() {
-        return new FznSearchBinder();
+    public void doFinalOutPut() {
+        userinterruption = false;
+        boolean complete = !solver.getSearchLoop().hasReachedLimit() && !solver.getSearchLoop().hasEndedUnexpectedly();
+        if (nbSolution == 0) {
+            if (complete) {
+                System.out.printf("=====UNSATISFIABLE=====\n");
+            } else {
+                System.out.printf("=====UNKNOWN=====\n");
+            }
+        } else { // at least one solution
+            if (!printAll) { // print the first/best solution when -a is not enabled
+                printSolution(solrecorder.getLastSolution());
+            }
+            if (complete) {
+                System.out.printf("==========\n");
+            } else {
+                if ((solver.getObjectiveManager().isOptimization())) {
+                    System.out.printf("=====UNBOUNDED=====\n");
+                }
+            }
+        }
+        System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
     }
 }

@@ -27,10 +27,8 @@
 package org.chocosolver.parser.flatzinc;
 
 import org.chocosolver.parser.ParserListener;
-import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.parser.flatzinc.layout.FZNLayout;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.constraints.Propagator;
 
 import java.util.ArrayList;
 
@@ -69,7 +67,6 @@ public class BaseFlatzincListener implements ParserListener {
 
     @Override
     public void afterSolverCreation() {
-        buildLayout(fznparser.instance, fznparser.printAllSolutions());
     }
 
     @Override
@@ -80,13 +77,16 @@ public class BaseFlatzincListener implements ParserListener {
     @Override
     public void afterParsingFile() {
 
-        if (((FznSettings) fznparser.getSolver().getSettings()).printConstraint()) {
+        if (((FznSettings) fznparser.getSolver()._fes_().getSettings()).printConstraint()) {
             ArrayList<String> l = new ArrayList<>();
             System.out.println("% INVOLVED CONSTRAINTS (CHOCO) ");
-            for (Constraint c : fznparser.getSolver().getCstrs()) {
+            for (Constraint c : fznparser.getSolver()._fes_().getCstrs()) {
                 if (!l.contains(c.getName())) {
                     l.add(c.getName());
-                    System.out.printf("%% %s", c.getName());
+                    System.out.printf("%% %s\n", c.getName());
+                    for(Propagator p: c.getPropagators()) {
+                        System.out.printf("%% \t%s\n", p.getClass().getName());
+                    }
                 }
             }
         }
@@ -107,22 +107,11 @@ public class BaseFlatzincListener implements ParserListener {
     public void beforeSolving() {
         System.out.println("% solve instance...");
 
-        if (((FznSettings) fznparser.getSolver().getSettings()).printSearch()) {
-            Chatterbox.showDecisions(fznparser.getSolver());
-        }
-        fznparser.getSolver().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        fznparser.getSolver()._fes_().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
     }
 
     @Override
     public void afterSolving() {
 
-    }
-
-
-    public void buildLayout(String instance, boolean printAll) {
-        FZNLayout fl = new FZNLayout(instance, printAll);
-        fznparser.datas.setLayout(fl);
-        fznparser.getSolver().plugMonitor(fl);
-        fl.set(fznparser.getSolver());
     }
 }

@@ -30,7 +30,7 @@ import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.parser.flatzinc.layout.FZNLayout;
+import org.chocosolver.parser.flatzinc.layout.ASolutionPrinter;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
@@ -52,7 +52,7 @@ public class Datas {
     final THashSet<SetVar> setsearchVariables;
     final THashSet<Variable> outputVariables;
 
-    FZNLayout mLayout;
+    ASolutionPrinter sprinter;
 
     public Datas() {
         this.map = new THashMap<>();
@@ -93,17 +93,17 @@ public class Datas {
     }
 
     public void declareOutput(String name, Variable variable, Declaration type) {
-        mLayout.addOutputVar(name, variable, type);
         outputVariables.add(variable);
+        sprinter.addOutputVar(name, variable, type);
     }
 
     public void declareOutput(String name, Variable[] variables, List<Expression> indices, Declaration type) {
-        mLayout.addOutputArrays(name, variables, indices, type);
+        sprinter.addOutputArrays(name, variables, indices, type);
         outputVariables.addAll(Arrays.asList(variables));
     }
 
-    public void setLayout(FZNLayout layout) {
-        this.mLayout = layout;
+    public void setSolPrint(ASolutionPrinter sprinter) {
+        this.sprinter = sprinter;
     }
 
     public void clear() {
