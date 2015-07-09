@@ -252,11 +252,13 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public final void forceAlive(boolean bvalue) {
-        alive = bvalue;
-        if(alive){
-            searchStatus |= M_RESUMABLE;
-        }else{
-            searchStatus &= ~M_RESUMABLE;
+        if((searchStatus & M_RESUMABLE) != 0) { // the search seems resumable
+            alive = bvalue;
+            if (alive) {
+                searchStatus |= M_RESUMABLE;
+            } else {
+                searchStatus &= ~M_RESUMABLE;
+            }
         }
     }
 
