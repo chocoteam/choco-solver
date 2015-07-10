@@ -41,6 +41,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.procedure.UnarySafeIntProcedure;
@@ -79,6 +81,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     protected boolean needFilter;
 
+    protected final IRemovals vrms;
+
     public PropAmongGAC(IntVar[] variables, int[] values) {
         super(variables, PropagatorPriority.LINEAR, true);
         nb_vars = variables.length - 1;
@@ -98,6 +102,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
             occs[i] = environment.makeInt(0);
         }
         rem_proc = new RemProc(this);
+        vrms = new BitsetRemovals();
     }
 
     @Override
@@ -210,23 +215,18 @@ public class PropAmongGAC extends Propagator<IntVar> {
      * @throws ContradictionException if contradiction occurs.
      */
     private void removeButValues() throws ContradictionException {
-        int left, right;
         for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
             IntVar v = vars[i];
             DisposableValueIterator it = v.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(v.getLB());
             while (it.hasNext()) {
                 int value = it.next();
                 if (!setValues.contains(value)) {
-                    if (value == right + 1) {
-                        right = value;
-                    } else {
-                        v.removeInterval(left, right, aCause);
-                        left = right = value;
-                    }
+                    vrms.add(value);
                 }
             }
-            v.removeInterval(left, right, aCause);
+            v.removeValues(vrms, aCause);
             it.dispose();
         }
     }

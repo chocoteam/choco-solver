@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
@@ -96,6 +97,54 @@ public class MinusView extends IntView {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        boolean hasChanged = false;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(nlb);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+            // the new lower bound is now known,  delegate to the right method
+            hasChanged = updateLowerBound(olb, cause);
+        } else if (nlb > oub) {
+            return false;
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(nub);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            // the new upper bound is now known, delegate to the right method
+            hasChanged |= updateUpperBound(oub, cause);
+        } else if (nub < olb) {
+            return hasChanged;
+        }
+        // now deal with holes
+        int value = nlb;
+        int to = nub;
+        boolean hasRemoved = false;
+        while (value <= to) {
+            hasRemoved |= var.removeValue(value, cause);
+            value = values.nextValue(value);
+        }
+        if (hasRemoved) {
+            IntEventType e = IntEventType.REMOVE;
+            if (var.isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
     }
 
     @Override

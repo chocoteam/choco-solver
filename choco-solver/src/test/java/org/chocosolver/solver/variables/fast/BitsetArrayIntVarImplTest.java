@@ -34,7 +34,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
+import org.chocosolver.solver.variables.impl.BitsetArrayIntVarImpl;
 import org.chocosolver.solver.variables.ranges.BitsetRemovals;
 import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -48,12 +48,12 @@ import org.testng.annotations.Test;
  * @author Charles Prud'homme
  * @since 18/02/13
  */
-public class BitsetIntVarImplTest {
+public class BitsetArrayIntVarImplTest {
 
-    BitsetIntVarImpl var;
+    BitsetArrayIntVarImpl var;
 
     public void setUp() throws Exception {
-        var = new BitsetIntVarImpl("test", new int[]{-5, 0, 3, 4, 5}, new Solver());
+        var = new BitsetArrayIntVarImpl("test", new int[]{-5, 0, 3, 4, 5}, new Solver());
     }
 
     @Test(groups = "1s")

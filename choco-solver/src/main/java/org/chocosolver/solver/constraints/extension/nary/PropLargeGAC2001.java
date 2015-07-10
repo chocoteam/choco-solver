@@ -38,6 +38,8 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 
 /**
  * <br/>
@@ -63,6 +65,8 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
+
+    protected final IRemovals vrms;
 
     private PropLargeGAC2001(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);
@@ -90,6 +94,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
         else
             valcheck = new ValidityChecker(size, vars);
 
+        vrms = new BitsetRemovals();
     }
 
     public PropLargeGAC2001(IntVar[] vs, Tuples tuples) {
@@ -134,24 +139,19 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
     // and remove unsupported values for variable
     public void reviseVar(int indexVar, boolean fromScratch) throws ContradictionException {
         int[] currentSupport;
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[indexVar].getLB());
         int val;
         for (val = vars[indexVar].getLB(); val <= vars[indexVar].getUB(); val = vars[indexVar].nextValue(val)) {
             currentSupport = seekNextSupport(indexVar, val, fromScratch);
             if (currentSupport != null) {
                 setSupport(indexVar, val, currentSupport);
             } else {
-                if (val == right + 1) {
-                    right = val;
-                } else {
-                    vars[indexVar].removeInterval(left, right, this);
-                    left = right = val;
-                }
+                vrms.add(val);
                 //                vars[indexVar].removeVal(val, this, false);
             }
         }
-        vars[indexVar].removeInterval(left, right, this);
+        vars[indexVar].removeValues(vrms, this);
     }
 
 

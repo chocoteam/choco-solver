@@ -34,6 +34,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
@@ -45,12 +47,15 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class PropBinFC extends PropBinCSP {
 
+    protected final IRemovals vrms;
+
     public PropBinFC(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesTable(tuples, x, y));
     }
 
     private PropBinFC(IntVar x, IntVar y, CouplesTable table) {
         super(x, y, table);
+        vrms = new BitsetRemovals();
     }
 
     @Override
@@ -89,46 +94,36 @@ public class PropBinFC extends PropBinCSP {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void onInstantiation0() throws ContradictionException {
-        int left, right;
         int value = v0.getValue();
         DisposableValueIterator values = v1.getValueIterator(true);
-        left = right = Integer.MIN_VALUE;
+        vrms.clear();
+        vrms.setOffset(v1.getLB());
         try {
             while (values.hasNext()) {
                 int val = values.next();
                 if (!relation.isConsistent(value, val)) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        v1.removeInterval(left, right, this);
-                        left = right = val;
-                    }
+                    vrms.add(val);
                 }
             }
-            v1.removeInterval(left, right, this);
+            v1.removeValues(vrms, aCause);
         } finally {
             values.dispose();
         }
     }
 
     private void onInstantiation1() throws ContradictionException {
-        int left, right;
         int value = v1.getValue();
         DisposableValueIterator values = v0.getValueIterator(true);
-        left = right = Integer.MIN_VALUE;
+        vrms.clear();
+        vrms.setOffset(v0.getLB());
         try {
             while (values.hasNext()) {
                 int val = values.next();
                 if (!relation.isConsistent(val, value)) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        v0.removeInterval(left, right, this);
-                        left = right = val;
-                    }
+                    vrms.add(val);
                 }
             }
-            v0.removeInterval(left, right, this);
+            v0.removeValues(vrms, aCause);
         } finally {
             values.dispose();
         }

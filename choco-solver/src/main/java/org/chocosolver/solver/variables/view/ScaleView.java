@@ -37,13 +37,14 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.MathUtils;
 
 /**
  * declare an IntVar based on X and C, such as X * C
- * <p/>
+ * <p>
  * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
  * C. Shulte and G. Tack.<br/>
  * Eleventh International Conference on Principles and Practice of Constraint Programming
@@ -83,7 +84,7 @@ public final class ScaleView extends IntView {
             int inf = getLB();
             int sup = getUB();
             if (inf <= value && value <= sup) {
-				IntEventType e = IntEventType.REMOVE;
+                IntEventType e = IntEventType.REMOVE;
 
                 boolean done = var.removeValue(value / cste, this);
                 if (done) {
@@ -101,6 +102,54 @@ public final class ScaleView extends IntView {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        boolean hasChanged = false;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(nlb);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+            // the new lower bound is now known,  delegate to the right method
+            hasChanged = updateLowerBound(olb, cause);
+        } else if (nlb > oub) {
+            return false;
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(nub);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            // the new upper bound is now known, delegate to the right method
+            hasChanged |= updateUpperBound(oub, cause);
+        } else if (nub < olb) {
+            return hasChanged;
+        }
+        // now deal with holes
+        int value = nlb;
+        int to = nub;
+        boolean hasRemoved = false;
+        while (value <= to) {
+            hasRemoved |= var.removeValue(value, cause);
+            value = values.nextValue(value);
+        }
+        if (hasRemoved) {
+            IntEventType e = IntEventType.REMOVE;
+            if (var.isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
     }
 
     @Override
@@ -138,7 +187,7 @@ public final class ScaleView extends IntView {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-			IntEventType e = IntEventType.INCLOW;
+            IntEventType e = IntEventType.INCLOW;
             boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
             if (isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
@@ -156,7 +205,7 @@ public final class ScaleView extends IntView {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-			IntEventType e = IntEventType.DECUPP;
+            IntEventType e = IntEventType.DECUPP;
             boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
             if (isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
@@ -297,8 +346,7 @@ public final class ScaleView extends IntView {
 
 
                 DisposableValueIterator vit;
-                int min
-                        ,
+                int min,
                         max;
 
                 @Override

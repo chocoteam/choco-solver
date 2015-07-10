@@ -44,6 +44,7 @@ import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -125,6 +126,39 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         else if (value == 1)
             return instantiateTo(0, cause);
         return false;
+    }
+
+    @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        boolean hasChanged = false;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(nlb);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+            // the new lower bound is now known,  delegate to the right method
+            hasChanged = updateLowerBound(olb, cause);
+        } else if (nlb > oub) {
+            return false;
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(nub);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            // the new upper bound is now known, delegate to the right method
+            hasChanged |= updateUpperBound(oub, cause);
+        } else if (nub < olb) {
+            return hasChanged;
+        }
+        assert nlb >= nub;
+        return hasChanged;
     }
 
     /**

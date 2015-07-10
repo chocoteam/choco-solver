@@ -34,6 +34,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.ESat;
 
 /**
@@ -45,10 +47,12 @@ import org.chocosolver.util.ESat;
 public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     protected final int[] currentTuple;
+    protected final IRemovals vrms;
 
     private PropLargeFC(IntVar[] vars, LargeRelation relation) {
         super(vars, relation);
         this.currentTuple = new int[vars.length];
+        vrms = new BitsetRemovals();
     }
 
     public PropLargeFC(IntVar[] vars, Tuples tuples) {
@@ -127,22 +131,17 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
         }
         if (!stop) {
             if (nbUnassigned == 1) {
-                int left = Integer.MIN_VALUE;
-                int right = left;
+                vrms.clear();
+                vrms.setOffset(vars[index].getLB());
 
                 int ub = vars[index].getUB();
                 for (int val = vars[index].getLB(); val <= ub; val = vars[index].nextValue(val)) {
                     currentTuple[index] = val;
                     if (!relation.isConsistent(currentTuple)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            vars[index].removeInterval(left, right, aCause);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                     }
                 }
-                vars[index].removeInterval(left, right, aCause);
+                vars[index].removeValues(vrms, aCause);
             } else {
                 if (!relation.isConsistent(currentTuple)) {
                     this.contradiction(null, "not consistent");

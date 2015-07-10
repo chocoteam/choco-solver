@@ -38,6 +38,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -53,6 +55,7 @@ public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
+    protected final IRemovals vrms;
 
     public PropSquare(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
@@ -60,6 +63,7 @@ public class PropSquare extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
+        vrms = new BitsetRemovals();
         rem_proc = new RemProc(this);
     }
 
@@ -172,19 +176,15 @@ public class PropSquare extends Propagator<IntVar> {
     protected void updateHolesinX() throws ContradictionException {
         // remove intervals to deal with consecutive value removal and upper bound modification
         if (vars[1].hasEnumeratedDomain()) {
-            int left = Integer.MIN_VALUE, right = Integer.MIN_VALUE;
             int ub = vars[0].getUB();
+            vrms.clear();
+            vrms.setOffset(vars[0].getLB());
             for (int value = vars[0].getLB(); value <= ub; value = vars[0].nextValue(value)) {
                 if (!vars[1].contains(floor_sqrt(value)) && !vars[1].contains(-floor_sqrt(value))) {
-                    if (value == right + 1) {
-                        right = value;
-                    } else {
-                        vars[0].removeInterval(left, right, aCause);
-                        left = right = value;
-                    }
+                    vrms.add(value);
                 }
             }
-            vars[0].removeInterval(left, right, aCause);
+            vars[0].removeValues(vrms, aCause);
         } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
@@ -225,19 +225,15 @@ public class PropSquare extends Propagator<IntVar> {
     protected void updateHolesinY() throws ContradictionException {
         // remove intervals to deal with consecutive value removal and upper bound modification
         if (vars[0].hasEnumeratedDomain()) {
-            int left = Integer.MIN_VALUE, right = Integer.MIN_VALUE;
             int ub = vars[1].getUB();
+            vrms.clear();
+            vrms.setOffset(vars[0].getLB());
             for (int value = vars[1].getLB(); value <= ub; value = vars[1].nextValue(value)) {
                 if (!vars[0].contains(sqr(value))) {
-                    if (value == right + 1) {
-                        right = value;
-                    } else {
-                        vars[1].removeInterval(left, right, aCause);
-                        left = right = value;
-                    }
+                    vrms.add(value);
                 }
             }
-            vars[1].removeInterval(left, right, aCause);
+            vars[1].removeValues(vrms, aCause);
         } else {
             int lb = vars[1].getLB();
             int ub = vars[1].getUB();

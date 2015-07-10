@@ -50,6 +50,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
@@ -202,7 +204,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     protected final RemProc rem_proc;
 
     public final double _MCR_DECIMAL_PREC;
-    
+
+    protected final IRemovals vrms;
 
     /**
      * Constructs a multi-cost-regular propagator
@@ -243,6 +246,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         this.boundUpdate = new TIntHashSet();
         this.pi = cauto;
         rem_proc = new RemProc(this);
+        vrms = new BitsetRemovals();
         super.linkVariables();
     }
 
@@ -267,21 +271,16 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         checkBounds();
         initGraph();
         this.slp = graph.getPathFinder();
-        int left, right;
         for (int i = 0; i < offset; i++) {
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(vs[i].getLB());
             for (int j = vs[i].getLB(); j <= vs[i].getUB(); j = vs[i].nextValue(j)) {
                 StoredIndexedBipartiteSet sup = graph.getUBport(i, j);
                 if (sup == null || sup.isEmpty()) {
-                    if (j == right + 1) {
-                        right = j;
-                    } else {
-                        vs[i].removeInterval(left, right, aCause);//, false);
-                        left = right = j;
-                    }
+                    vrms.add(j);
                 }
             }
-            vs[i].removeInterval(left, right, aCause);//, false);
+            vs[i].removeValues(vrms, aCause);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
     }

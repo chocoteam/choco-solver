@@ -6,15 +6,18 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
-- Add keysorting() constraint
+- Add keysorting() constraint, int_value_precede_chain() constraint
 - Add a solver interface (ISolver), a solver factory (SolverFactory) and a solver portfolio (Portfolio) + tests (#293)
-- Add "relay race" solver (RelayRace) simulating kind of mono-core, multi-threads resolutions
+- Add Portfolio solver simulating kind of mono-core, multi-threads resolutions
 - Update Variable and VariableFactory to deal with ISolver (#293)
 - Remove MasterSolver and SlaveSolver (#293)
 - Add unplugSearchMonitor() to SearchLoop, Solver and SearchMonitorList (#300)
 - Modify 'ISearchLoop.interrupt()', add new parameter 'voidable' to qualify the strength of the interruption (#304)
 - lazy creation of ZERO, ONE, TRUE and FALSE through methods of Solver (#293)
 - Refactor Solution (#306)
+- Improve propagator iteration in propagation engine
+- add UCB1 option for ICF.alldifferent()
+- add IntVar#removeValues(IRemovals, ICause) (#270)
 
 Bug fixes: #296, #297, #298, #303, #309, #311, #313
 

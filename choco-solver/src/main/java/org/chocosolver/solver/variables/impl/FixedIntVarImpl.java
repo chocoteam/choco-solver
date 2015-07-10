@@ -42,6 +42,7 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -74,6 +75,16 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
+            assert cause != null;
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
+            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        if (values.contains(constante)) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.REMOVE, "unique value removal");

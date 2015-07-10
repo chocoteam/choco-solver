@@ -35,6 +35,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
@@ -65,6 +67,8 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
+
+    protected final IRemovals vrms;
 
     private PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
         super(vs, relation);
@@ -107,6 +111,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         if (fastBooleanValidCheckAllowed) {
             valcheck = new FastBooleanValidityChecker(arity, vars);
         } else valcheck = new ValidityChecker(arity, vars);
+        vrms = new BitsetRemovals();
     }
 
     public PropLargeGAC2001Positive(IntVar[] vs, Tuples tuples) {
@@ -141,8 +146,8 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      */
     public void reviseVar(int indexVar) throws ContradictionException {
         DisposableValueIterator itv = vars[indexVar].getValueIterator(true);
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[indexVar].getLB());
         try {
             while (itv.hasNext()) {
                 int val = itv.next();
@@ -150,18 +155,13 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
                 int currentIdxSupport = getUBport(indexVar, val);
                 currentIdxSupport = seekNextSupport(indexVar, nva, currentIdxSupport);
                 if (currentIdxSupport == NO_SUPPORT) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        vars[indexVar].removeInterval(left, right, aCause);
-                        left = right = val;
-                    }
+                    vrms.add(val);
                     //                    vars[indexVar].removeVal(val, this, false);
                 } else {
                     setSupport(indexVar, val, currentIdxSupport);
                 }
             }
-            vars[indexVar].removeInterval(left, right, aCause);
+            vars[indexVar].removeValues(vrms, aCause);
         } finally {
             itv.dispose();
         }

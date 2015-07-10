@@ -43,6 +43,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueBoundIterator;
@@ -110,7 +111,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             }
             this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
-			IntEventType e;
+            IntEventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
@@ -143,6 +144,38 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        boolean hasChanged = false;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(nlb);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+            // the new lower bound is now known,  delegate to the right method
+            hasChanged = updateLowerBound(olb, cause);
+        } else if (nlb > oub) {
+            return false;
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(nub);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            // the new upper bound is now known, delegate to the right method
+            hasChanged |= updateUpperBound(oub, cause);
+        } else if (nub < olb) {
+            return hasChanged;
+        }
+        return hasChanged;
     }
 
     /**
@@ -187,7 +220,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             }
             return false;
         } else if (contains(value)) {
-			IntEventType e = IntEventType.INSTANTIATE;
+            IntEventType e = IntEventType.INSTANTIATE;
 
             int lb = 0;
             int ub = 0;
@@ -247,7 +280,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-				IntEventType e = IntEventType.INCLOW;
+                IntEventType e = IntEventType.INCLOW;
 
                 if (reactOnRemoval) {
                     if (old <= value - 1) delta.add(old, value - 1, cause);
@@ -298,7 +331,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-				IntEventType e = IntEventType.DECUPP;
+                IntEventType e = IntEventType.DECUPP;
 
                 if (reactOnRemoval) {
                     if (value + 1 <= old) delta.add(value + 1, old, cause);
