@@ -266,10 +266,25 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else {     // TODO: really ugly .........
+        else {
             boolean anyChange = false;
+            int count = SIZE.get();
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+                if (v >= 0 && v <= LENGTH && VALUES.get(v)) {
+                    anyChange = true;
+                    count--;
+                    this.VALUES.clear(v);
+                    if (reactOnRemoval) {
+                        delta.add(v, cause);
+                    }
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, v, cause);
+                    }
+                }
+            }
+            if (anyChange) {
+                SIZE.set(count);
+                this.notifyPropagators(IntEventType.REMOVE, cause);
             }
             return anyChange;
         }

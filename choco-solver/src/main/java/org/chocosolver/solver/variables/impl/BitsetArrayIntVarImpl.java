@@ -242,10 +242,26 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else {     // TODO: really ugly .........
+        else {
             boolean anyChange = false;
+            int count = SIZE.get();
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+                int index = V2I.get(v);
+                if (index != -1) {
+                    anyChange = true;
+                    count--;
+                    this.INDEXES.clear(index);
+                    if (reactOnRemoval) {
+                        delta.add(v, cause);
+                    }
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, v, cause);
+                    }
+                }
+            }
+            if (anyChange) {
+                SIZE.set(count);
+                this.notifyPropagators(IntEventType.REMOVE, cause);
             }
             return anyChange;
         }
