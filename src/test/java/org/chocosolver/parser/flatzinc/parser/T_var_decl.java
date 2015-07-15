@@ -179,7 +179,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test8() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false);
+        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
         datas.setSolPrint(sp);
 
         Flatzinc4Parser fp = parser("var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;", mSolver, datas);
@@ -203,7 +203,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test9() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false);
+        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
         datas.setSolPrint(sp);
 
         Flatzinc4Parser fp = parser("array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);", mSolver, datas);
@@ -219,7 +219,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test10() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false);
+        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
         datas.setSolPrint(sp);
 
         Flatzinc4Parser fp = parser("var 1 .. 5: a ::output_var;", mSolver, datas);
@@ -243,7 +243,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test11() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false);
+        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
         datas.setSolPrint(sp);
 
         Flatzinc4Parser fp = parser("array [1..8] of var 1..8: queens " +

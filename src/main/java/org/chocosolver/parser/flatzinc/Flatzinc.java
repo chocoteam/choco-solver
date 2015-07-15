@@ -94,6 +94,9 @@ public class Flatzinc implements IParser {
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected String tl = "-1";
 
+    @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution.", required = false)
+    protected boolean stat = false;
+
     protected long tl_ = -1;
     // A unique solver
     protected Solver mSolver;
@@ -164,7 +167,7 @@ public class Flatzinc implements IParser {
             }
             prtfl.skipConformity(true);
             prtfl.skipStrategyConfiguration(true);
-            sprinter = new SharedSolutionPrinter(prtfl, all);
+            sprinter = new SharedSolutionPrinter(prtfl, all, stat);
         } else if (nb_cores > 1) {
             nb_cores = Math.min(nb_cores, ps.length);
 //            System.out.printf("%% parallel portfolio\n");
@@ -176,12 +179,12 @@ public class Flatzinc implements IParser {
             }
             prtfl.skipConformity(true);
             prtfl.skipStrategyConfiguration(true);
-            sprinter = new SharedSolutionPrinter(prtfl, all);
+            sprinter = new SharedSolutionPrinter(prtfl, all, stat);
         } else {
 //            System.out.printf("%% simple solver\n");
             mSolver = SF.makeSolver(instance);
             mSolver.set(defaultSettings);
-            sprinter = new SolutionPrinter(mSolver, all);
+            sprinter = new SolutionPrinter(mSolver, all, stat);
 //            Chatterbox.showSolutions(mSolver);
         }
         datas = new Datas();
@@ -243,7 +246,7 @@ public class Flatzinc implements IParser {
             if (prtfl != null) {
                 long _tl = SMF.convertInMilliseconds(tl);
                 // The time is now initialized for all workers at the same point
-                for (int i = 1; i < prtfl.getNbWorkers(); i++) {
+                for (int i = 0; i < prtfl.getNbWorkers(); i++) {
                     SMF.limitTime(prtfl.workers[i], _tl);
                 }
             } else {
@@ -332,7 +335,7 @@ public class Flatzinc implements IParser {
                     break;
                     default: {
                         prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w]));
-                        LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
+                            LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
                     }
                     break;
                 }

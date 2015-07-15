@@ -50,7 +50,11 @@ public class ArrayBoolOrBuilder implements IBuilder {
         BoolVar r = exps.get(1).boolVarValue(solver);
 
         if (as.length > 0) {
-            SatFactory.addBoolOrArrayEqVar(as, r);
+            if(r.isInstantiatedTo(1)){
+                SatFactory.addBoolOrArrayEqualTrue(as);
+            }else {
+                SatFactory.addBoolOrArrayEqVar(as, r);
+            }
         }
     }
 }

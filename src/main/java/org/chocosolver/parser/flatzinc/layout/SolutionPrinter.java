@@ -36,8 +36,8 @@ public class SolutionPrinter extends ASolutionPrinter {
 
     Solver solver;
 
-    public SolutionPrinter(Solver solver, boolean printAll) {
-        super(solver.getSolutionRecorder(), printAll);
+    public SolutionPrinter(Solver solver, boolean printAll, boolean printStat) {
+        super(solver.getSolutionRecorder(), printAll, printStat);
         this.solver = solver;
         solver.plugMonitor(this);
     }
@@ -45,7 +45,9 @@ public class SolutionPrinter extends ASolutionPrinter {
     @Override
     public void onSolution() {
         super.onSolution();
-//        System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+        if(printStat) {
+            System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+        }
     }
 
     public void doFinalOutPut() {
@@ -69,6 +71,8 @@ public class SolutionPrinter extends ASolutionPrinter {
                 }
             }
         }
-        System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+        if(printStat){
+            System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+        }
     }
 }

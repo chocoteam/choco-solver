@@ -39,8 +39,9 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
 
     Portfolio prtfl;
     boolean fo = false;
-    public SharedSolutionPrinter(Portfolio prtfl, boolean printAll) {
-        super(prtfl.getSolutionRecorder(), printAll);
+
+    public SharedSolutionPrinter(Portfolio prtfl, boolean printAll, boolean printStat) {
+        super(prtfl.getSolutionRecorder(), printAll, printStat);
         this.prtfl = prtfl;
         for (int i = 0; i < prtfl.workers.length; i++) {
             prtfl.workers[i].plugMonitor(this);
@@ -50,7 +51,9 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
     @Override
     public synchronized void onSolution() {
         super.onSolution();
-//        statistics();
+        if(printStat){
+            statistics();
+        }
     }
 
     @Override
@@ -83,7 +86,9 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
                     }
                 }
             }
-            statistics();
+            if(printStat){
+                statistics();
+            }
         }
     }
 
@@ -92,10 +97,10 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
         if (prtfl instanceof SequentialPortfolio) {
             // if none has reached limit
             boolean hrl = false;
-            boolean heu = false;
+            boolean heu = true;
             for (int i = 0; i < prtfl.getNbWorkers(); i++) {
                 hrl |= prtfl.workers[i].getSearchLoop().hasReachedLimit();
-                heu |= prtfl.workers[i].getSearchLoop().hasEndedUnexpectedly();
+                heu &= prtfl.workers[i].getSearchLoop().hasEndedUnexpectedly();
             }
             complete = !hrl && !heu;
         } else {
@@ -110,8 +115,32 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
     private void statistics() {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", nbSolution));
-        if (prtfl._fes_().getObjectiveManager().isOptimization()) {
-            st.append(prtfl._fes_().getObjectiveManager()).append(", ");
+        switch (prtfl._fes_().getObjectiveManager().getPolicy()) {
+            case MINIMIZE: {
+                st.append("Minimize ");
+                st.append(prtfl.workers[0].getObjectiveManager().getObjective().getName()).append(" = ");
+                int best = prtfl.workers[0].getObjectiveManager().getBestUB().intValue();
+                for (int i = 1; i < prtfl.getNbWorkers(); i++) {
+                    if (best > prtfl.workers[i].getObjectiveManager().getBestUB().intValue()) {
+                        best = prtfl.workers[i].getObjectiveManager().getBestUB().intValue();
+                    }
+                }
+                st.append(best).append(", ");
+            }
+            break;
+            case MAXIMIZE: {
+                st.append("Maximize ");
+                st.append(prtfl.workers[0].getObjectiveManager().getObjective().getName()).append(" = ");
+                int best = prtfl.workers[0].getObjectiveManager().getBestLB().intValue();
+                for (int i = 1; i < prtfl.getNbWorkers(); i++) {
+                    if (best < prtfl.workers[i].getObjectiveManager().getBestLB().intValue()) {
+                        best = prtfl.workers[i].getObjectiveManager().getBestLB().intValue();
+                    }
+                }
+                st.append(best).append(", ");
+            }
+            break;
+
         }
         long[] stats;
         if (prtfl instanceof SequentialPortfolio) {
@@ -127,7 +156,6 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
     public long[] statistics(SequentialPortfolio prtfl) {
         long[] stats = new long[]{0, 0, 0, 0, 0};
         for (int i = 0; i < prtfl.getNbWorkers(); i++) {
-//            System.out.printf("%% [Worker %d] %s \n", i, prtfl.workers[i].getMeasures().toOneShortLineString());
             stats[0] = Math.max(stats[0], (long) (prtfl.workers[i].getMeasures().getTimeCount() * 1000));
             stats[1] += prtfl.workers[i].getMeasures().getNodeCount();
             stats[2] += prtfl.workers[i].getMeasures().getBackTrackCount();
@@ -140,7 +168,6 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
     public long[] statistics(ParallelPortfolio prtfl) {
         long[] stats = new long[]{0, 0, 0, 0, 0};
         for (int i = 0; i < prtfl.getNbWorkers(); i++) {
-//            System.out.printf("%% [Worker %d] %s \n", i, prtfl.workers[i].getMeasures().toOneShortLineString());
             stats[0] = Math.max(stats[0], (long) (prtfl.workers[i].getMeasures().getTimeCount() * 1000));
             stats[1] = Math.max(stats[1], prtfl.workers[i].getMeasures().getNodeCount());
             stats[2] = Math.max(stats[2], prtfl.workers[i].getMeasures().getBackTrackCount());

@@ -51,6 +51,7 @@ import java.util.List;
 public abstract class ASolutionPrinter implements IMonitorSolution {
 
     boolean printAll;
+    boolean printStat;
     boolean wrongSolution;
     int nbSolution;
     boolean userinterruption = true;
@@ -70,9 +71,10 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
     final Thread statOnKill;
 
 
-    public ASolutionPrinter(ISolutionRecorder solrecorder, boolean printAll) {
+    public ASolutionPrinter(ISolutionRecorder solrecorder, boolean printAll, boolean printStat) {
         this.solrecorder = solrecorder;
         this.printAll = printAll;
+        this.printStat = printStat;
         output_vars = new ArrayList<>();
         output_names = new ArrayList<>();
         output_types = new ArrayList<>();
