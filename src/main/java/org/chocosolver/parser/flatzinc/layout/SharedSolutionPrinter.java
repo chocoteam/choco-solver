@@ -51,7 +51,7 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
     @Override
     public synchronized void onSolution() {
         super.onSolution();
-        if(printStat){
+        if (printStat) {
             statistics();
         }
     }
@@ -86,7 +86,7 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
                     }
                 }
             }
-            if(printStat){
+            if (printStat) {
                 statistics();
             }
         }
@@ -104,10 +104,9 @@ public class SharedSolutionPrinter extends ASolutionPrinter {
             }
             complete = !hrl && !heu;
         } else {
-            // if at least one is complete
-            for (int i = 0; i < prtfl.getNbWorkers() && !complete; i++) {
-                complete = !prtfl.workers[i].getSearchLoop().hasReachedLimit() && !prtfl.workers[i].getSearchLoop().hasEndedUnexpectedly();
-            }
+            // if one has reached
+            int f = ((ParallelPortfolio) prtfl).getFinisher();
+            complete = !prtfl.workers[f].getSearchLoop().hasReachedLimit() && !prtfl.workers[f].getSearchLoop().hasReachedLimit();
         }
         return complete;
     }
