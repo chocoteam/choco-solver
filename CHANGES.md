@@ -19,7 +19,7 @@ NEXT MILESTONE
 - add UCB1 option for ICF.alldifferent()
 - add IntVar#removeValues(IRemovals, ICause) (#270)
 
-Bug fixes: #176, #296, #297, #298, #303, #309, #311, #313
+Bug fixes: #176, #296, #297, #298, #303, #309, #311, #313, #314
 
 3.3.1 - 11 May 2015
 -------------------
