@@ -459,4 +459,48 @@ public class TestCorrectness {
 
         }
     }
+
+    @Test(groups = "correctness.1m")
+    public void testMaximum() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelmaxbc, n, -n, 2 * n, seed, false);
+            }
+
+        }
+    }
+
+    @Test(groups = "correctness.1m")
+    public void testMinimum() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelminbc, n, -n, 2 * n, seed, false);
+            }
+
+        }
+    }
+
+    @Test(groups = "correctness.1m")
+    public void testMaximumb() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelmaxbbc, n, 0, 1, seed, false);
+            }
+
+        }
+    }
+
+    @Test(groups = "correctness.1m")
+    public void testMinimumb() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelminbbc, n, 0, 1, seed, false);
+            }
+
+        }
+    }
 }

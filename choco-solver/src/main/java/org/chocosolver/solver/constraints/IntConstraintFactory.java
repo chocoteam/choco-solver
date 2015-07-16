@@ -1127,14 +1127,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      */
     public static Constraint maximum(IntVar MAX, IntVar[] VARS) {
-        boolean enu = MAX.hasEnumeratedDomain();
-        for (int i = 0; i < VARS.length && !enu; i++) {
-            enu = VARS[i].hasEnumeratedDomain();
-        }
-        Propagator[] propagators = enu ?
-                new Propagator[]{new PropMax(VARS, MAX), new PropMax(VARS, MAX)} :
-                new Propagator[]{new PropMax(VARS, MAX)};
-        return new Constraint("Max", propagators);
+        return new Constraint("Max", new PropMax(VARS, MAX));
     }
 
     /**
@@ -1165,14 +1158,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      */
     public static Constraint minimum(IntVar MIN, IntVar[] VARS) {
-        boolean enu = MIN.hasEnumeratedDomain();
-        for (int i = 0; i < VARS.length && !enu; i++) {
-            enu = VARS[i].hasEnumeratedDomain();
-        }
-        Propagator[] propagators = enu ?
-                new Propagator[]{new PropMin(VARS, MIN), new PropMin(VARS, MIN)} :
-                new Propagator[]{new PropMin(VARS, MIN)};
-        return new Constraint("Min", propagators);
+        return new Constraint("Min", new PropMin(VARS, MIN));
     }
 
     /**
