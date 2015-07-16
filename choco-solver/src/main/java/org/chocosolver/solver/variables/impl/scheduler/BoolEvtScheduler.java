@@ -26,49 +26,36 @@
  */
 package org.chocosolver.solver.variables.impl.scheduler;
 
-import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
  * Created by cprudhom on 17/06/15.
  * Project: choco.
  */
-public class SetEvtScheduler implements EvtScheduler<SetEventType> {
+public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
 
-    final int[] DIS = new int[]{
-            0, 1, 2, 3, -1, // ADD_TO_KER
-            1, 3, -1, // REM_FROM_ENV
+    static final int[] dis = new int[]{0, 1, -1, // INSTANTIATE
     };
     int i = 0;
-    static final int[] IDX = new int[]{-1, 0, 5};
 
-    public void init(SetEventType evt) {
-        i = IDX[evt.ordinal()];
+    public void init(IntEventType evt) {
+        i = 0;
     }
 
     @Override
     public int select(int mask) {
-        switch (mask) {
-            case 1: // instantiate
-                return 0;
-            case 2: // lb or more
-                return 1;
-            case 3:
-            case 255: // all
-                return 2;
-            default:
-                throw new UnsupportedOperationException("Unknown case");
-        }
+        return 0;
     }
 
     @Override
     public boolean hasNext() {
-        return DIS[i] > -1;
+        return dis[i] > -1;
     }
 
     @Override
     public int next() {
-        return DIS[i++];
+        return dis[i++];
     }
 
     @Override

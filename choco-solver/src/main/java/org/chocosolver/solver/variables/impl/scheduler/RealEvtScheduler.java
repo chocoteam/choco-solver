@@ -35,24 +35,16 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class RealEvtScheduler implements EvtScheduler<RealEventType> {
 
-    final int[] dis = new int[]{-1, -1, -1, -1};
+    final int[] DIS = new int[]{
+            0, 1, 2, 3, -1, // INCLOW
+            1, 3, -1, // DECUPP
+            0, 3, -1 // BOUND
+    };
     int i = 0;
+    static final int[] IDX = new int[]{-1, 0, 5, 8, -1};
 
     public void init(RealEventType evt) {
-        i = 0;
-        switch (evt) {
-            case INCLOW: // lb
-                dis[0] = 0; // included
-                dis[1] = 1; // excluded
-                dis[2] = 2; // included
-                dis[3] = 3; // excluded
-                break;
-            case DECUPP: // ub
-                dis[0] = 1; // included
-                dis[1] = 3; // excluded
-                dis[2] = dis[3] = -1;
-                break;
-        }
+        i = IDX[evt.ordinal()];
     }
 
     @Override
@@ -72,12 +64,12 @@ public class RealEvtScheduler implements EvtScheduler<RealEventType> {
 
     @Override
     public boolean hasNext() {
-        return i < 4 && dis[i] > -1;
+        return DIS[i] > -1;
     }
 
     @Override
     public int next() {
-        return dis[i++];
+        return DIS[i++];
     }
 
     @Override

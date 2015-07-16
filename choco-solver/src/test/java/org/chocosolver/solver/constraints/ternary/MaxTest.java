@@ -51,5 +51,4 @@ public class MaxTest extends AbstractTernaryTest {
         return IntConstraintFactory.maximum(vars[0], vars[1], vars[2]);
     }
 
-
 }

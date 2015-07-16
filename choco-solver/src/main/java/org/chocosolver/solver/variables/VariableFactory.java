@@ -692,7 +692,7 @@ public class VariableFactory {
      * @param VALUE  its value
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static IntVar fixed(boolean VALUE, ISolver SOLVER) {
+    public static BoolVar fixed(boolean VALUE, ISolver SOLVER) {
         if (VALUE) {
             return SOLVER._fes_().ONE();
         } else {

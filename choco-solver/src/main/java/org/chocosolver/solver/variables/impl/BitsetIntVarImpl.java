@@ -44,6 +44,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.StringUtils;
@@ -101,7 +102,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         OFFSET = offset;
         int cardinality = values.cardinality();
         this.VALUES = env.makeBitSet(cardinality);
-        for (int i = 0; i > -1; i = values.nextSetBit(i+1)) {
+        for (int i = 0; i > -1; i = values.nextSetBit(i + 1)) {
             this.VALUES.set(i);
         }
         this.LB = env.makeInt(0);
@@ -159,11 +160,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 //            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
             }
-			IntEventType e = IntEventType.REMOVE;
+            IntEventType e = IntEventType.REMOVE;
             this.VALUES.clear(aValue);
             this.SIZE.add(-1);
             if (reactOnRemoval) {
-                delta.add(aValue + OFFSET, cause);
+                delta.add(value, cause);
             }
 
             if (value == getLB()) {
@@ -189,16 +190,101 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * {@inheritDoc}
      */
     @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        boolean hasChanged = false;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(nlb);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+            // the new lower bound is now known,  delegate to the right method
+            hasChanged = updateLowerBound(olb, cause);
+        } else if (nlb > oub) {
+            return false;
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(nub);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            // the new upper bound is now known, delegate to the right method
+            hasChanged |= updateUpperBound(oub, cause);
+        } else if (nub < olb) {
+            return hasChanged;
+        }
+        // now deal with holes
+        int value = nlb;
+        int to = nub;
+        boolean hasRemoved = false;
+        int count = SIZE.get();
+        while (value <= to) {
+            int aValue = value - OFFSET;
+            if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
+                if (count == 1) {
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, value, cause);
+                    }
+                    this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
+                }
+                count--;
+                hasRemoved = true;
+                VALUES.clear(aValue);
+                if (reactOnRemoval) {
+                    delta.add(value, cause);
+                }
+                if (_plugexpl) {
+                    solver.getEventObserver().removeValue(this, value, cause);
+                }
+            }
+            value = values.nextValue(value);
+        }
+        if (hasRemoved) {
+            SIZE.set(count);
+            IntEventType e = IntEventType.REMOVE;
+            if (count == 1) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else {     // TODO: really ugly .........
+        else {
             boolean anyChange = false;
+            int count = SIZE.get();
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+                if (v >= 0 && v <= LENGTH && VALUES.get(v)) {
+                    anyChange = true;
+                    count--;
+                    this.VALUES.clear(v);
+                    if (reactOnRemoval) {
+                        delta.add(v, cause);
+                    }
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, v, cause);
+                    }
+                }
+            }
+            if (anyChange) {
+                SIZE.set(count);
+                this.notifyPropagators(IntEventType.REMOVE, cause);
             }
             return anyChange;
         }
@@ -304,7 +390,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-				IntEventType e = IntEventType.INCLOW;
+                IntEventType e = IntEventType.INCLOW;
 
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
@@ -360,7 +446,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-				IntEventType e = IntEventType.DECUPP;
+                IntEventType e = IntEventType.DECUPP;
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances

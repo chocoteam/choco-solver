@@ -61,29 +61,48 @@ public class PropMax extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int idx = -1;
-        int lb = vars[n].getLB() - 1;
-        int ub = lb;
-        // update max
-        for (int i = 0; i < n; i++) {
-            lb = Math.max(lb, vars[i].getLB());
-            ub = Math.max(ub, vars[i].getUB());
-        }
-        vars[n].updateLowerBound(lb, aCause);
-        vars[n].updateUpperBound(ub, aCause);
-        ub = vars[n].getUB();
-        // back-propagation
-        for (int i = 0; i < n; i++) {
-            if (vars[i].getUB() >= lb) {
-                idx = idx == -1 ? i : -2;
-                vars[i].updateUpperBound(ub, aCause);
+        boolean filter;
+        do {
+            filter = false;
+            int lb = Integer.MIN_VALUE;
+            int ub = Integer.MIN_VALUE;
+            int max = vars[n].getUB();
+            // update max
+            for (int i = 0; i < n; i++) {
+                filter |= vars[i].updateUpperBound(max, aCause);
+                lb = Math.max(lb, vars[i].getLB());
+                ub = Math.max(ub, vars[i].getUB());
             }
-        }
-        if (idx >= 0) {
-            if (vars[idx].updateLowerBound(lb, aCause) && lb == ub) { // entailed
-                setPassive();
+            filter |= vars[n].updateLowerBound(lb, aCause);
+            filter |= vars[n].updateUpperBound(ub, aCause);
+            lb = Math.max(lb, vars[n].getLB());
+            // back-propagation
+            int c = 0, idx = -1;
+            for (int i = 0; i < n; i++) {
+                if (vars[i].getUB() < lb) {
+                    c++;
+                } else {
+                    idx = i;
+                }
             }
-        }
+            if (c == vars.length - 2) {
+                filter = false;
+                vars[idx].updateLowerBound(vars[n].getLB(), aCause);
+                vars[idx].updateUpperBound(vars[n].getUB(), aCause);
+                if (vars[n].isInstantiated()) {
+                    setPassive();
+                } else if (vars[idx].hasEnumeratedDomain()) {
+                    // for enumerated variables only
+                    while (vars[n].getLB() != vars[idx].getLB()
+                            || vars[n].getUB() != vars[idx].getUB()) {
+                        vars[n].updateLowerBound(vars[idx].getLB(), aCause);
+                        vars[n].updateUpperBound(vars[idx].getUB(), aCause);
+                        vars[idx].updateLowerBound(vars[n].getLB(), aCause);
+                        vars[idx].updateUpperBound(vars[n].getUB(), aCause);
+                    }
+                }
+            }
+        } while (filter);
     }
 
     @Override

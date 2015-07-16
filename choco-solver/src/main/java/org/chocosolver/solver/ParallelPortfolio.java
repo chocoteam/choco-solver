@@ -34,6 +34,7 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.Arrays;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A portfolio of {@code Solver} enabling solving one problem with various strategies:
@@ -48,6 +49,8 @@ public class ParallelPortfolio extends Portfolio {
      * A synchronisation aid
      */
     CyclicBarrier barrier;
+
+    AtomicInteger finisher = new AtomicInteger(-1);
 
     @SuppressWarnings("unchecked")
     public ParallelPortfolio(String name, int nthreads) {
@@ -72,13 +75,14 @@ public class ParallelPortfolio extends Portfolio {
         }
         Arrays.fill(new_solutions, 0);
         initWorkers();
+        finisher.set(-1);
         for (int s = 0; s < nbworkers; s++) {
             int _s = s;
             Thread r = new Thread() {
                 @Override
                 public void run() {
                     workers[_s].getSearchLoop().launch(true);
-                    stopAll();
+                    stopAll(_s);
                     try {
                         barrier.await();
                     } catch (InterruptedException | BrokenBarrierException e) {
@@ -112,6 +116,7 @@ public class ParallelPortfolio extends Portfolio {
             throw new SolverException("Calling this method required all workers to be populated (see Portfolio.carbonCopy()).");
         }
         barrier.reset();
+        finisher.set(-1);
         for (int s = 0; s < nbworkers; s++) {
             int _s = s;
             Thread r = new Thread() {
@@ -122,7 +127,7 @@ public class ParallelPortfolio extends Portfolio {
                     if (!workers[_s].getSearchLoop().isComplete()) {
                         workers[_s].getSearchLoop().forceAlive(true); // because last stop was strong
                         workers[_s].getSearchLoop().launch(true);
-                        stopAll();
+                        stopAll(_s);
                     }
                     try {
                         barrier.await();
@@ -163,13 +168,14 @@ public class ParallelPortfolio extends Portfolio {
             workers[s].plugMonitor(new SyncObjective(this, s, policy));
         }
         initWorkers();
+        finisher.set(-1);
         for (int s = 0; s < nbworkers; s++) {
             int _s = s;
             Thread r = new Thread() {
                 @Override
                 public void run() {
                     workers[_s].getSearchLoop().launch(false);
-                    stopAll();
+                    stopAll(_s);
                     try {
                         barrier.await();
                     } catch (InterruptedException | BrokenBarrierException e) {
@@ -188,10 +194,19 @@ public class ParallelPortfolio extends Portfolio {
         restoreSolution(objective, policy);
     }
 
-    private void stopAll() {
-        for (int i = 0; i < nbworkers; i++) {
-            workers[i].getSearchLoop().interrupt("Portfolio orders to interrupt", false);
+    private synchronized void stopAll(int sidx) {
+        if (finisher.get() == -1) {
+            finisher.set(sidx);
         }
+        for (int i = 0; i < nbworkers; i++) {
+            if (i != sidx) {
+                workers[i].getSearchLoop().interrupt("Portfolio orders to interrupt", false);
+            }
+        }
+    }
+
+    public int getFinisher() {
+        return finisher.get();
     }
 
 }

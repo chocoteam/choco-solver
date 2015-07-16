@@ -31,8 +31,11 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -238,7 +241,7 @@ public class KeysortingTest {
         Y[4][0] = VF.bounded("Y5", 14, 18, solver);
 
         solver.post(ICF.keysorting(X, null, Y, 1));
-        Assert.assertEquals(solver.findAllSolutions(), 28);
+        Assert.assertEquals(solver.findAllSolutions(), 182);
 
     }
 
@@ -311,4 +314,60 @@ public class KeysortingTest {
         }
     }
 
+    @Test(groups = "1s")
+    public void test5() {
+        Solver solver = new Solver();
+        IntVar[][] X, Y;
+        X = new IntVar[4][2];
+        Y = new IntVar[4][2];
+        X[0][0] = VF.bounded("X21", 3, 3, solver);
+        X[0][1] = VF.bounded("X22", 1, 1, solver);
+        X[1][0] = VF.bounded("X31", 1, 4, solver);
+        X[1][1] = VF.bounded("X32", 2, 2, solver);
+        X[2][0] = VF.bounded("X41", 4, 4, solver);
+        X[2][1] = VF.bounded("X42", 3, 3, solver);
+        X[3][0] = VF.bounded("X51", 1, 4, solver);
+        X[3][1] = VF.bounded("X52", 4, 4, solver);
+
+        Y[0][0] = VF.bounded("Y21", 1, 4, solver);
+        Y[0][1] = VF.bounded("Y22", 1, 4, solver);
+        Y[1][0] = VF.bounded("Y31", 1, 4, solver);
+        Y[1][1] = VF.bounded("Y32", 1, 4, solver);
+        Y[2][0] = VF.bounded("Y41", 1, 4, solver);
+        Y[2][1] = VF.bounded("Y42", 1, 4, solver);
+        Y[3][0] = VF.bounded("Y51", 1, 4, solver);
+        Y[3][1] = VF.bounded("Y52", 1, 4, solver);
+
+
+        solver.post(ICF.keysorting(X, null, Y, 2));
+        solver.set(ISF.lexico_LB(ArrayUtils.flatten(X)), ISF.lexico_LB(ArrayUtils.flatten(Y)));
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
+    }
+
+
+    @Test(groups = "1s")
+    public void test6() {
+        Solver solver = new Solver();
+        IntVar[][] X, Y;
+        X = new IntVar[1][4];
+        Y = new IntVar[1][4];
+        X[0][0] = VF.bounded("X21", 3, 3, solver);
+        X[0][1] = VF.bounded("X31", 1, 4, solver);
+        X[0][2] = VF.bounded("X41", 4, 4, solver);
+        X[0][3] = VF.bounded("X51", 1, 4, solver);
+
+        Y[0][0] = VF.bounded("Y21", 1, 4, solver);
+        Y[0][1] = VF.bounded("Y31", 1, 4, solver);
+        Y[0][2] = VF.bounded("Y41", 1, 4, solver);
+        Y[0][3] = VF.bounded("Y51", 1, 4, solver);
+
+
+        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.set(ISF.lexico_LB(ArrayUtils.flatten(X)), ISF.lexico_LB(ArrayUtils.flatten(Y)));
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
+    }
 }

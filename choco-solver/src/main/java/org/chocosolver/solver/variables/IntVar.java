@@ -31,6 +31,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
@@ -67,6 +68,25 @@ public interface IntVar extends Variable {
     boolean removeValue(int value, ICause cause) throws ContradictionException;
 
     /**
+     * Removes the value in <code>values</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If all values are out of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if removing a value leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if removing the <code>values</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param values set of ordered values to remove
+     * @param cause removal release
+     * @return true if the value has been removed, false otherwise
+     * @throws ContradictionException
+     *          if the domain become empty due to this action
+     */
+    boolean removeValues(IRemovals values, ICause cause) throws ContradictionException;
+
+    /**
      * Removes values between [<code>from, to</code>] from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
      * <ul>
      * <li>If union between values and the current domain is empty, nothing is done and the return value is <code>false</code>,</li>
@@ -83,9 +103,7 @@ public interface IntVar extends Variable {
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException
      *          if the domain become empty due to this action
-     * @deprecated
      */
-    @Deprecated
     boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
 
     /**

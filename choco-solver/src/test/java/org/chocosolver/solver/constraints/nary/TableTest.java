@@ -103,7 +103,7 @@ public class TableTest {
                     Solver tsolver = new Solver(ALGOS[a]);
                     IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allEquals(tsolver, tvars, a);
-                    tsolver.set(ISF.random_value(tvars));
+                    tsolver.set(ISF.random_value(tvars, s));
                     Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                     if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
 //                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
@@ -136,7 +136,7 @@ public class TableTest {
                     Solver tsolver = new Solver(ALGOS[a]);
                     IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allDifferent(tsolver, tvars, a);
-                    tsolver.set(ISF.random_value(tvars));
+                    tsolver.set(ISF.random_value(tvars, s));
                     Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                     if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
 //                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
@@ -269,7 +269,7 @@ public class TableTest {
                 rnd.setSeed(seed);
                 Tuples tuples = TuplesFactory.generateTuples(values -> rnd.nextBoolean(), true, vars);
                 solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
-                solver.set(ISF.random_value(vars));
+                solver.set(ISF.random_value(vars, seed));
                 long nbs = solver.findAllSolutions();
                 long nbn = solver.getMeasures().getNodeCount();
                 LoggerFactory.getLogger("test").info("{}", solver.getMeasures().toOneLineString());
@@ -278,7 +278,7 @@ public class TableTest {
                         Solver tsolver = new Solver(ALGOS[a]);
                         IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                         tsolver.post(ICF.table(tvars, tuples, ALGOS[a]));
-                        tsolver.set(ISF.random_value(tvars));
+                        tsolver.set(ISF.random_value(tvars, s));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
                         LoggerFactory.getLogger("test").info("{}", tsolver.getMeasures().toOneLineString());

@@ -37,6 +37,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
@@ -104,8 +105,10 @@ public abstract class AbstractVariable implements Variable {
         this.isolver.associates(this);
         int kind = getTypeAndKind() & Variable.KIND;
         switch (kind) {
-            case Variable.INT:
             case Variable.BOOL:
+                this.scheduler = new BoolEvtScheduler();
+                break;
+            case Variable.INT:
                 this.scheduler = new IntEvtScheduler();
                 break;
             case Variable.REAL:

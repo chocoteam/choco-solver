@@ -39,6 +39,7 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
 import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
+import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
 import org.chocosolver.solver.constraints.nary.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
@@ -989,10 +990,46 @@ public class IntConstraintFactory {
         Propagator ip = allEnum ? new PropInverseChannelAC(VARS1, VARS2, OFFSET1, OFFSET2)
                 : new PropInverseChannelBC(VARS1, VARS2, OFFSET1, OFFSET2);
         return new Constraint("InverseChanneling", ArrayUtils.append(
-                alldifferent(VARS1).getPropagators(),
-                alldifferent(VARS2).getPropagators(),
+                alldifferent(VARS1, "UCB1").getPropagators(),
+                alldifferent(VARS2, "UCB1").getPropagators(),
                 new Propagator[]{ip}
         ));
+    }
+
+    /**
+     * Ensure that if there exists <code>j</code> such that X[j] = T, then, there must exist <code>i</code> < <code>j</code> such that
+     * X[i] = S.
+     * @param X an array of variables
+     * @param S a value
+     * @param T another value
+     */
+    public static Constraint int_value_precede_chain(IntVar[] X, int S, int T) {
+        return new Constraint("int_value_precede", new PropIntValuePrecedeChain(X, S, T));
+    }
+
+    /**
+     * Ensure that, for each pair of V[k] and V[l] of values in V, such that k < l,
+     * if there exists <code>j</code> such that X[j] = V[l], then, there must exist <code>i</code> < <code>j</code> such that
+     * X[i] = V[k].
+     * @param X array of variables
+     * @param V array of (distinct) values
+     */
+    public static Constraint int_value_precede_chain(IntVar[] X, int[] V) {
+        if (V.length > 1) {
+            TIntHashSet values = new TIntHashSet();
+            PropIntValuePrecedeChain[] ps = new PropIntValuePrecedeChain[V.length - 1];
+            values.add(V[0]);
+            for (int i = 1; i < V.length; i++) {
+                if (values.contains(V[i])) {
+                    throw new SolverException("\"int_value_precede\" requires V to be made of distinct values");
+                }
+                values.add(V[i]);
+                ps[i - 1] = new PropIntValuePrecedeChain(X, V[i - 1], V[i]);
+            }
+            return new Constraint("int_value_precede", ps);
+        } else {
+            return X[0].getSolver().TRUE();
+        }
     }
 
     /**
@@ -1090,14 +1127,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      */
     public static Constraint maximum(IntVar MAX, IntVar[] VARS) {
-        boolean enu = MAX.hasEnumeratedDomain();
-        for (int i = 0; i < VARS.length && !enu; i++) {
-            enu = VARS[i].hasEnumeratedDomain();
-        }
-        Propagator[] propagators = enu ?
-                new Propagator[]{new PropMax(VARS, MAX), new PropMax(VARS, MAX)} :
-                new Propagator[]{new PropMax(VARS, MAX)};
-        return new Constraint("Max", propagators);
+        return new Constraint("Max", new PropMax(VARS, MAX));
     }
 
     /**
@@ -1128,14 +1158,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      */
     public static Constraint minimum(IntVar MIN, IntVar[] VARS) {
-        boolean enu = MIN.hasEnumeratedDomain();
-        for (int i = 0; i < VARS.length && !enu; i++) {
-            enu = VARS[i].hasEnumeratedDomain();
-        }
-        Propagator[] propagators = enu ?
-                new Propagator[]{new PropMin(VARS, MIN), new PropMin(VARS, MIN)} :
-                new Propagator[]{new PropMin(VARS, MIN)};
-        return new Constraint("Min", propagators);
+        return new Constraint("Min", new PropMin(VARS, MIN));
     }
 
     /**

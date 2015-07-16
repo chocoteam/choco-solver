@@ -41,6 +41,7 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.LastSharedSolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
@@ -235,12 +236,12 @@ public abstract class Portfolio implements Serializable, ISolver {
     }
 
     boolean needCopy() {
-        return skip_conformity
-                || cmo.size() != lco
+        return !skip_conformity &&
+                (cmo.size() != lco
                 || _fes_().minisat != null && workers[1].minisat == null
                 || _fes_().minisat != null && workers[1].minisat != null &&
                 (_fes_().minisat.getSatSolver().numvars() != workers[1].minisat.getSatSolver().numvars()
-                        || _fes_().minisat.getSatSolver().nbclauses() != workers[1].minisat.getSatSolver().nbclauses());
+                        || _fes_().minisat.getSatSolver().nbclauses() != workers[1].minisat.getSatSolver().nbclauses()));
     }
 
     /**
@@ -301,6 +302,7 @@ public abstract class Portfolio implements Serializable, ISolver {
                 workers[w].getEngine().initialize();
             }
             workers[w].measures.setReadingTimeCount(workers[w].creationTime + System.nanoTime());
+            ((MeasuresRecorder)workers[w].measures).beforeInitialize();
         }
     }
 

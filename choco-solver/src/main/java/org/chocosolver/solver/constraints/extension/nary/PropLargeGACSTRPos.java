@@ -34,6 +34,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -82,6 +84,8 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     protected IStateInt last;
     int[] listuples;
 
+    IRemovals vrms;
+
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
         super(vs, relation);
@@ -91,10 +95,14 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         this.nbGacValues = new int[arity];
 
         this.offsets = new int[arity];
+        int min = Integer.MAX_VALUE;
         for (int i = 0; i < arity; i++) {
             this.offsets[i] = vs[i].getLB();
             this.gacValues[i] = new BitSet(vs[i].getDomainSize());
+            min = Math.min(min, offsets[i]);
         }
+        vrms = new BitsetRemovals();
+        vrms.setOffset(min);
         listuples = new int[this.relation.getTupleTable().length];
         for (int i = 0; i < listuples.length; i++) {
             listuples[i] = i;
@@ -160,22 +168,16 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
             int vIdx = i;
             IntVar v = vars[vIdx];
             DisposableValueIterator it3 = v.getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
             try {
                 while (it3.hasNext()) {
                     int val = it3.next();
                     if (!gacValues[vIdx].get(val - offsets[vIdx])) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            v.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                         //                        v.removeVal(val, this, false);
                     }
                 }
-                v.removeInterval(left, right, this);
+                v.removeValues(vrms, this);
             } finally {
                 it3.dispose();
             }

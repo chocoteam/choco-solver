@@ -36,6 +36,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 
 /**
  * AC2001 algorithm for binary table constraint
@@ -51,6 +53,9 @@ public class PropBinAC2001 extends PropBinCSP {
 
     protected int offset0;
     protected int offset1;
+
+    protected final IRemovals vrms;
+
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesTable(tuples, x, y));
@@ -71,15 +76,15 @@ public class PropBinAC2001 extends PropBinCSP {
             currentSupport1[i] = environment.makeInt();
             currentSupport1[i].set(-1);
         }
-
+        vrms = new BitsetRemovals();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         int support = 0;
         boolean found = false;
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[0].getLB());
         int ub0 = vars[0].getUB();
         for (int val0 = vars[0].getLB(); val0 <= ub0; val0 = vars[0].nextValue(val0)) {
             int ub1 = vars[1].getUB();
@@ -91,22 +96,17 @@ public class PropBinAC2001 extends PropBinCSP {
                 }
             }
             if (!found) {
-                if (val0 == right + 1) {
-                    right = val0;
-                } else {
-                    vars[0].removeInterval(left, right, aCause);
-                    left = val0;
-                    right = val0;
-                }
+                vrms.add(val0);
             } else
                 currentSupport0[val0 - offset0].set(support);
 
             found = false;
         }
-        vars[0].removeInterval(left, right, aCause);
+        vars[0].removeValues(vrms, aCause);
 
         found = false;
-        right = left = Integer.MIN_VALUE;
+        vrms.clear();
+        vrms.setOffset(vars[1].getLB());
         int ub1 = vars[1].getUB();
         for (int val1 = vars[1].getLB(); val1 <= ub1; val1 = vars[1].nextValue(val1)) {
             ub0 = vars[0].getUB();
@@ -118,18 +118,12 @@ public class PropBinAC2001 extends PropBinCSP {
                 }
             }
             if (!found) {
-                if (val1 == right + 1) {
-                    right = val1;
-                } else {
-                    vars[1].removeInterval(left, right, aCause);
-                    left = val1;
-                    right = val1;
-                }
+                vrms.add(val1);
             } else
                 currentSupport1[val1 - offset1].set(support);
             found = false;
         }
-        vars[1].removeInterval(left, right, aCause);
+        vars[1].removeValues(vrms, aCause);
     }
 
     @Override
@@ -170,8 +164,8 @@ public class PropBinAC2001 extends PropBinCSP {
      * @throws ContradictionException
      */
     private void reviseV1() throws ContradictionException {
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[1].getLB());
         int ub1 = vars[1].getUB();
         for (int val1 = vars[1].getLB(); val1 <= ub1; val1 = vars[1].nextValue(val1)) {
             if (!vars[0].contains(currentSupport1[val1 - offset1].get())) {
@@ -185,16 +179,11 @@ public class PropBinAC2001 extends PropBinCSP {
                 if (found) {
                     currentSupport1[val1 - offset1].set(support);
                 } else {
-                    if (val1 == right + 1) {
-                        right = val1;
-                    } else {
-                        vars[1].removeInterval(left, right, aCause);
-                        left = right = val1;
-                    }
+                    vrms.add(val1);
                 }
             }
         }
-        vars[1].removeInterval(left, right, aCause);
+        vars[1].removeValues(vrms, aCause);
     }
 
     /**
@@ -203,8 +192,8 @@ public class PropBinAC2001 extends PropBinCSP {
      * @throws ContradictionException
      */
     private void reviseV0() throws ContradictionException {
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[0].getLB());
         int ub0 = vars[0].getUB();
         for (int val0 = vars[0].getLB(); val0 <= ub0; val0 = vars[0].nextValue(val0)) {
             if (!vars[1].contains(currentSupport0[val0 - offset0].get())) {
@@ -218,53 +207,36 @@ public class PropBinAC2001 extends PropBinCSP {
                 if (found)
                     currentSupport0[val0 - offset0].set(support);
                 else {
-                    if (val0 == right + 1) {
-                        right = val0;
-                    } else {
-                        vars[0].removeInterval(left, right, aCause);
-                        left = right = val0;
-                    }
+                    vrms.add(val0);
                 }
             }
         }
-        vars[0].removeInterval(left, right, aCause);
+        vars[0].removeValues(vrms, aCause);
     }
 
     private void onInstantiationOf(int idx) throws ContradictionException {
         if (idx == 0) {
             int value = vars[0].getValue();
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[1].getLB());
             int ub1 = vars[1].getUB();
             for (int val1 = vars[1].getLB(); val1 <= ub1; val1 = vars[1].nextValue(val1)) {
                 if (!relation.isConsistent(value, val1)) {
-                    if (val1 == right + 1) {
-                        right = val1;
-                    } else {
-                        vars[1].removeInterval(left, right, aCause);
-                        left = val1;
-                        right = val1;
-                    }
+                    vrms.add(val1);
                 }
             }
-            vars[1].removeInterval(left, right, aCause);
+            vars[1].removeValues(vrms, aCause);
         } else {
             int value = vars[1].getValue();
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[0].getLB());
             int ub0 = vars[0].getUB();
             for (int val0 = vars[0].getLB(); val0 <= ub0; val0 = vars[0].nextValue(val0)) {
                 if (!relation.isConsistent(val0, value)) {
-                    if (val0 == right + 1) {
-                        right = val0;
-                    } else {
-                        vars[0].removeInterval(left, right, aCause);
-                        left = val0;
-                        right = val0;
-                    }
+                    vrms.add(val0);
                 }
             }
-            vars[0].removeInterval(left, right, aCause);
+            vars[0].removeValues(vrms, aCause);
         }
     }
 }

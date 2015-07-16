@@ -24,55 +24,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.variables.impl.scheduler;
-
-import org.chocosolver.solver.variables.events.SetEventType;
-import org.chocosolver.util.iterators.EvtScheduler;
+package org.chocosolver.solver.variables.ranges;
 
 /**
- * Created by cprudhom on 17/06/15.
+ * An interface to store values to remove, to be used by IntVar.removeValues(IRemovals, ICause)
+ * Created by cprudhom on 09/07/15.
  * Project: choco.
  */
-public class SetEvtScheduler implements EvtScheduler<SetEventType> {
+public interface IRemovals{
 
-    final int[] DIS = new int[]{
-            0, 1, 2, 3, -1, // ADD_TO_KER
-            1, 3, -1, // REM_FROM_ENV
-    };
-    int i = 0;
-    static final int[] IDX = new int[]{-1, 0, 5};
+    void setOffset(int offset);
 
-    public void init(SetEventType evt) {
-        i = IDX[evt.ordinal()];
-    }
+    void add(int... values);
+    
+    void clear();
 
-    @Override
-    public int select(int mask) {
-        switch (mask) {
-            case 1: // instantiate
-                return 0;
-            case 2: // lb or more
-                return 1;
-            case 3:
-            case 255: // all
-                return 2;
-            default:
-                throw new UnsupportedOperationException("Unknown case");
-        }
-    }
+    /**
+     * @param aValue (exclusive)
+     * @return
+     */
+    int nextValue(int aValue);
 
-    @Override
-    public boolean hasNext() {
-        return DIS[i] > -1;
-    }
+    /**
+     * @param aValue (exclusive)
+     * @return
+     */
+    int previousValue(int aValue);
 
-    @Override
-    public int next() {
-        return DIS[i++];
-    }
+    boolean contains(int aValue);
 
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
+    IRemovals duplicate();
+
 }

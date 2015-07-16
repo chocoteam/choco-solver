@@ -29,6 +29,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
@@ -44,6 +45,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.StringUtils;
@@ -60,10 +62,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     protected boolean reactOnRemoval = false;
 
-    //  values
-    private final int[] values;
+    //  VALUES
+    private final int[] VALUES;
+    private final TIntIntHashMap V2I;
     //  Bitset of indexes
-    private final IStateBitSet indexes;
+    private final IStateBitSet INDEXES;
     // Lower bound of the current domain
     private final IStateInt LB;
     // Upper bound of the current domain
@@ -84,9 +87,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         super(name, isolver);
         IEnvironment env = solver.getEnvironment();
         this.LENGTH = sortedValues.length;
-        this.values = sortedValues.clone();
-        this.indexes = env.makeBitSet(LENGTH);
-        this.indexes.set(0, LENGTH);
+        this.VALUES = sortedValues.clone();
+        this.V2I = new TIntIntHashMap(VALUES.length, .5f, Integer.MIN_VALUE, -1);
+        this.INDEXES = env.makeBitSet(LENGTH);
+        this.INDEXES.set(0, LENGTH);
+        for (int i = 0; i < VALUES.length; i++) {
+            V2I.put(VALUES[i], i);
+        }
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(LENGTH - 1);
         this.SIZE = env.makeInt(LENGTH);
@@ -116,16 +123,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         assert cause != null;
-        if (value < values[LB.get()] || value > values[UB.get()]) {
+        if (value < VALUES[LB.get()] || value > VALUES[UB.get()]) {
             return false;
         }
-        int index = -1;
-        for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= value; i = indexes.nextSetBit(i + 1)) {
-            if (values[i] == value) {
-                index = i;
-                break;
-            }
-        }
+        int index = V2I.get(value);
         if (index != -1) {
             if (SIZE.get() == 1) {
                 if (_plugexpl) {
@@ -135,19 +136,19 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
             }
             IntEventType e = IntEventType.REMOVE;
-            this.indexes.clear(index);
+            this.INDEXES.clear(index);
             this.SIZE.add(-1);
             if (reactOnRemoval) {
                 delta.add(value, cause);
             }
             if (value == getLB()) {
-                LB.set(indexes.nextSetBit(LB.get()));
+                LB.set(INDEXES.nextSetBit(LB.get()));
                 e = IntEventType.INCLOW;
             } else if (value == getUB()) {
-                UB.set(indexes.prevSetBit(UB.get()));
+                UB.set(INDEXES.prevSetBit(UB.get()));
                 e = IntEventType.DECUPP;
             }
-            assert !indexes.isEmpty();
+            assert !INDEXES.isEmpty();
             if (this.isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
             }
@@ -165,16 +166,102 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
      * {@inheritDoc}
      */
     @Override
+    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        boolean hasChanged = false;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(nlb);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+            // the new lower bound is now known,  delegate to the right method
+            hasChanged = updateLowerBound(olb, cause);
+        } else if (nlb > oub) {
+            return false;
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(nub);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            // the new upper bound is now known, delegate to the right method
+            hasChanged |= updateUpperBound(oub, cause);
+        } else if (nub < olb) {
+            return hasChanged;
+        }
+        // now deal with holes
+        int value = nlb;
+        int to = nub;
+        boolean hasRemoved = false;
+        int count = SIZE.get();
+        while (value <= to) {
+            int index = V2I.get(value);
+            if (index > -1) {
+                if (count == 1) {
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, value, cause);
+                    }
+                    this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
+                }
+                count--;
+                hasRemoved = true;
+                INDEXES.clear(index);
+                if (reactOnRemoval) {
+                    delta.add(value, cause);
+                }
+                if (_plugexpl) {
+                    solver.getEventObserver().removeValue(this, value, cause);
+                }
+            }
+            value = values.nextValue(value);
+        }
+        if (hasRemoved) {
+            SIZE.set(count);
+            IntEventType e = IntEventType.REMOVE;
+            if (count == 1) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else {     // TODO: really ugly .........
+        else {
             boolean anyChange = false;
+            int count = SIZE.get();
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+                int index = V2I.get(v);
+                if (index != -1) {
+                    anyChange = true;
+                    count--;
+                    this.INDEXES.clear(index);
+                    if (reactOnRemoval) {
+                        delta.add(v, cause);
+                    }
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, v, cause);
+                    }
+                }
+            }
+            if (anyChange) {
+                SIZE.set(count);
+                this.notifyPropagators(IntEventType.REMOVE, cause);
             }
             return anyChange;
         }
@@ -210,18 +297,12 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             return false;
         } else {
-            int index = -1;
-            for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= value; i = indexes.nextSetBit(i + 1)) {
-                if (values[i] == value) {
-                    index = i;
-                    break;
-                }
-            }
+            int index = V2I.get(value);
             if (index != -1) {
                 if (reactOnRemoval) {
-                    for (int i = indexes.nextSetBit(LB.get()); i >= 0; i = indexes.nextSetBit(i + 1)) {
+                    for (int i = INDEXES.nextSetBit(LB.get()); i >= 0; i = INDEXES.nextSetBit(i + 1)) {
                         if (i != index) {
-                            delta.add(values[i], cause);
+                            delta.add(VALUES[i], cause);
                         }
                     }
                 }
@@ -232,13 +313,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                     oldUB = getUB();
                 }
 
-                this.indexes.clear();
-                this.indexes.set(index);
+                this.INDEXES.clear();
+                this.INDEXES.set(index);
                 this.LB.set(index);
                 this.UB.set(index);
                 this.SIZE.set(1);
 
-                if (indexes.isEmpty()) {
+                if (INDEXES.isEmpty()) {
                     this.contradiction(cause, IntEventType.INSTANTIATE, MSG_EMPTY);
                 }
                 if (_plugexpl) {
@@ -287,21 +368,21 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else {
                 IntEventType e = IntEventType.INCLOW;
                 int index;
-                index = indexes.nextSetBit(LB.get());
-                while (index >= 0 && values[index] < value) {
-                    index = indexes.nextSetBit(index + 1);
+                index = INDEXES.nextSetBit(LB.get());
+                while (index >= 0 && VALUES[index] < value) {
+                    index = INDEXES.nextSetBit(index + 1);
                 }
-                assert index >= 0 && values[index] >= value;
+                assert index >= 0 && VALUES[index] >= value;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = LB.get(); i >= 0 && i < index; i = indexes.nextSetBit(i + 1)) {
-                        delta.add(values[i], cause);
+                    for (int i = LB.get(); i >= 0 && i < index; i = INDEXES.nextSetBit(i + 1)) {
+                        delta.add(VALUES[i], cause);
                     }
                 }
-                indexes.clear(LB.get(), index);
+                INDEXES.clear(LB.get(), index);
                 LB.set(index);
-                assert SIZE.get() > indexes.cardinality();
-                SIZE.set(indexes.cardinality());
+                assert SIZE.get() > INDEXES.cardinality();
+                SIZE.set(INDEXES.cardinality());
                 if (isInstantiated()) {
                     e = IntEventType.INSTANTIATE;
                 }
@@ -346,21 +427,21 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else {
                 IntEventType e = IntEventType.DECUPP;
                 int index;
-                index = indexes.prevSetBit(UB.get());
-                while (index >= 0 && values[index] > value) {
-                    index = indexes.prevSetBit(index - 1);
+                index = INDEXES.prevSetBit(UB.get());
+                while (index >= 0 && VALUES[index] > value) {
+                    index = INDEXES.prevSetBit(index - 1);
                 }
-                assert index >= 0 && values[index] <= value;
+                assert index >= 0 && VALUES[index] <= value;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = UB.get(); i > index; i = indexes.prevSetBit(i - 1)) {
-                        delta.add(values[i], cause);
+                    for (int i = UB.get(); i > index; i = INDEXES.prevSetBit(i - 1)) {
+                        delta.add(VALUES[i], cause);
                     }
                 }
-                indexes.clear(index + 1, UB.get() + 1);
+                INDEXES.clear(index + 1, UB.get() + 1);
                 UB.set(index);
-                assert SIZE.get() > indexes.cardinality();
-                SIZE.set(indexes.cardinality());
+                assert SIZE.get() > INDEXES.cardinality();
+                SIZE.set(INDEXES.cardinality());
                 if (isInstantiated()) {
                     e = IntEventType.INSTANTIATE;
                 }
@@ -387,11 +468,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public boolean contains(int aValue) {
         if (aValue >= getLB() && aValue <= getUB()) {
-            for (int i = indexes.nextSetBit(LB.get()); i >= 0 && values[i] <= aValue; i = indexes.nextSetBit(i + 1)) {
-                if (values[i] == aValue) {
-                    return true;
-                }
-            }
+            int i = V2I.get(aValue);
+            return i > -1 && INDEXES.get(V2I.get(aValue));
         }
         return false;
     }
@@ -415,7 +493,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public int getLB() {
         assert LB.get() >= 0 && LB.get() < LENGTH;
-        return values[LB.get()];
+        return VALUES[LB.get()];
     }
 
     /**
@@ -426,7 +504,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public int getUB() {
         assert UB.get() >= 0 && UB.get() < LENGTH;
-        return values[UB.get()];
+        return VALUES[UB.get()];
     }
 
     @Override
@@ -440,11 +518,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (aValue < lb) return lb;
         if (aValue >= getUB()) return Integer.MAX_VALUE;
         int i;
-        i = indexes.nextSetBit(LB.get());
-        while (i >= 0 && values[i] <= aValue) {
-            i = indexes.nextSetBit(i + 1);
+        i = INDEXES.nextSetBit(LB.get());
+        while (i >= 0 && VALUES[i] <= aValue) {
+            i = INDEXES.nextSetBit(i + 1);
         }
-        return (i >= 0) ? values[i] : Integer.MAX_VALUE;
+        return (i >= 0) ? VALUES[i] : Integer.MAX_VALUE;
     }
 
     @Override
@@ -453,11 +531,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (aValue > ub) return ub;
         if (aValue <= getLB()) return Integer.MIN_VALUE;
         int i;
-        i = indexes.prevSetBit(UB.get());
-        while (i >= 0 && values[i] >= aValue) {
-            i = indexes.prevSetBit(i - 1);
+        i = INDEXES.prevSetBit(UB.get());
+        while (i >= 0 && VALUES[i] >= aValue) {
+            i = INDEXES.prevSetBit(i - 1);
         }
-        return (i >= 0) ? values[i] : Integer.MIN_VALUE;
+        return (i >= 0) ? VALUES[i] : Integer.MIN_VALUE;
     }
 
     @Override
@@ -534,13 +612,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public IntVar duplicate() {
-        return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.values.clone(), isolver);
+        return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.VALUES.clone(), isolver);
     }
 
     @Override
     public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
         if (!identitymap.containsKey(this)) {
-            BitsetArrayIntVarImpl clone = new BitsetArrayIntVarImpl(this.name, this.values, solver);
+            BitsetArrayIntVarImpl clone = new BitsetArrayIntVarImpl(this.name, this.VALUES, solver);
             identitymap.put(this, clone);
             for (int i = mIdx - 1; i >= 0; i--) {
                 monitors[i].duplicate(solver, identitymap);
@@ -560,13 +638,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    index = indexes.nextSetBit(LB.get());
+                    index = INDEXES.nextSetBit(LB.get());
                 }
 
                 @Override
                 public void topDownInit() {
                     super.topDownInit();
-                    index = indexes.prevSetBit(UB.get());
+                    index = INDEXES.prevSetBit(UB.get());
                 }
 
                 @Override
@@ -581,15 +659,15 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
                 @Override
                 public int next() {
-                    int old = values[index];
-                    index = indexes.nextSetBit(index + 1);
+                    int old = VALUES[index];
+                    index = INDEXES.nextSetBit(index + 1);
                     return old;
                 }
 
                 @Override
                 public int previous() {
-                    int old = values[index];
-                    index = indexes.prevSetBit(index - 1);
+                    int old = VALUES[index];
+                    index = INDEXES.prevSetBit(index - 1);
                     return old;
                 }
             };
@@ -613,11 +691,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    this.from = indexes.nextSetBit(LB.get());
-//					this.to = indexes.nextClearBit(from + 1) - 1;
+                    this.from = INDEXES.nextSetBit(LB.get());
+//					this.to = INDEXES.nextClearBit(from + 1) - 1;
                     this.to = from;
-                    while (indexes.get(to + 1)
-                            && (values[to] == values[to + 1] - 1)) {
+                    while (INDEXES.get(to + 1)
+                            && (VALUES[to] == VALUES[to + 1] - 1)) {
                         to++;
                     }
                 }
@@ -625,10 +703,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 @Override
                 public void topDownInit() {
                     super.topDownInit();
-                    this.to = indexes.prevSetBit(UB.get());
+                    this.to = INDEXES.prevSetBit(UB.get());
                     this.from = to;
-                    while (indexes.get(from - 1)
-                            && (values[from - 1] == values[from] - 1)) {
+                    while (INDEXES.get(from - 1)
+                            && (VALUES[from - 1] == VALUES[from] - 1)) {
                         from--;
                     }
                 }
@@ -643,32 +721,32 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
 
                 public void next() {
-                    this.from = indexes.nextSetBit(this.to + 1);
+                    this.from = INDEXES.nextSetBit(this.to + 1);
                     this.to = from;
-                    while (to > -1 && indexes.get(to + 1)
-                            && (values[to] == values[to + 1] - 1)) {
+                    while (to > -1 && INDEXES.get(to + 1)
+                            && (VALUES[to] == VALUES[to + 1] - 1)) {
                         to++;
                     }
                 }
 
                 @Override
                 public void previous() {
-                    this.to = indexes.prevSetBit(this.from - 1);
+                    this.to = INDEXES.prevSetBit(this.from - 1);
                     this.from = to;
-                    while (from > -1 && indexes.get(from - 1)
-                            && (values[from - 1] == values[from] - 1)) {
+                    while (from > -1 && INDEXES.get(from - 1)
+                            && (VALUES[from - 1] == VALUES[from] - 1)) {
                         from--;
                     }
                 }
 
                 @Override
                 public int min() {
-                    return values[from];
+                    return VALUES[from];
                 }
 
                 @Override
                 public int max() {
-                    return values[to];
+                    return VALUES[to];
                 }
             };
         }

@@ -229,7 +229,7 @@ public class RuleStore {
                 if (decision.hasNext()) {
                     explanation.addDecicion(decision);
                     // if partial explanation is enabled, finding the first decision in conflict is enough
-                    if(preemptedStop |= enablePartialExplanation){
+                    if (preemptedStop |= enablePartialExplanation) {
                         explanation.setEvtstrIdx(idx);
                     }
                 } else {
@@ -394,9 +394,13 @@ public class RuleStore {
      */
     public void freeDecisionExplanation(Decision decision) {
         int w = decision.getWorldIndex();
-        if (decRefut[w] != null) {
-            decRefut[w].recycle();
-            decRefut[w] = null;
+        // when dealing with parallel portfolio, the cut given by another worker
+        // may lead to free a decision which was not explained yet
+        if (w < decRefut.length) {
+            if (decRefut[w] != null) {
+                decRefut[w].recycle();
+                decRefut[w] = null;
+            }
         }
     }
 

@@ -35,6 +35,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -61,6 +63,8 @@ public class PropBinAC3rm extends PropBinCSP {
     protected int initDomSize0;
     protected int initDomSize1;
 
+    protected final IRemovals vrms;
+
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
@@ -68,6 +72,7 @@ public class PropBinAC3rm extends PropBinCSP {
 
     private PropBinAC3rm(IntVar x, IntVar y, CouplesBitSetTable table) {
         super(x, y, table);
+        vrms = new BitsetRemovals();
     }
 
 
@@ -163,8 +168,8 @@ public class PropBinAC3rm extends PropBinCSP {
         int v0Size = v0.getDomainSize();
         if (minS1 <= (initDomSize0 - v0Size)) {
             DisposableValueIterator itv1 = v1.getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(v1.getLB());
             try {
                 while (itv1.hasNext()) {
                     int y = itv1.next();
@@ -182,17 +187,12 @@ public class PropBinAC3rm extends PropBinCSP {
                             if (found) {
                                 storeSupportV1(support, y);
                             } else {
-                                if (y == right + 1) {
-                                    right = y;
-                                } else {
-                                    v1.removeInterval(left, right, this);
-                                    left = right = y;
-                                }
+                                vrms.add(y);
                             }
                         }
                     }
                 }
-                v1.removeInterval(left, right, this);
+                v1.removeValues(vrms, aCause);
             } finally {
                 itv1.dispose();
             }
@@ -208,8 +208,8 @@ public class PropBinAC3rm extends PropBinCSP {
         int v1Size = v1.getDomainSize();
         if (minS0 <= (initDomSize1 - v1Size)) {
             DisposableValueIterator itv0 = v0.getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(v0.getLB());
             try {
                 while (itv0.hasNext()) {
                     int x = itv0.next();
@@ -226,17 +226,12 @@ public class PropBinAC3rm extends PropBinCSP {
                             if (found) {
                                 storeSupportV0(support, x);
                             } else {
-                                if (x == right + 1) {
-                                    right = x;
-                                } else {
-                                    v0.removeInterval(left, right, this);
-                                    left = right = x;
-                                }
+                                vrms.add(x);
                             }
                         }
                     }
                 }
-                v0.removeInterval(left, right, this);
+                v0.removeValues(vrms, aCause);
             } finally {
                 itv0.dispose();
             }
@@ -272,8 +267,8 @@ public class PropBinAC3rm extends PropBinCSP {
         fastInitNbSupports(Integer.MAX_VALUE, Integer.MAX_VALUE);
         //else fastInitNbSupports(80,80);
         DisposableValueIterator itv0 = v0.getValueIterator(true);
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(v0.getLB());
         int support = 0;
         boolean found = false;
         try {
@@ -290,24 +285,20 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 itv1.dispose();
                 if (!found) {
-                    if (val0 == right + 1) {
-                        right = val0;
-                    } else {
-                        v0.removeInterval(left, right, this);
-                        left = right = val0;
-                    }
+                    vrms.add(val0);
                 } else {
                     storeSupportV0(support, val0);
                 }
                 found = false;
             }
-            v0.removeInterval(left, right, this);
+            v0.removeValues(vrms, aCause);
         } finally {
             itv0.dispose();
         }
         found = false;
         DisposableValueIterator itv1 = v1.getValueIterator(true);
-        left = right = Integer.MIN_VALUE;
+        vrms.clear();
+        vrms.setOffset(v1.getLB());
         try {
             while (itv1.hasNext()) {
                 itv0 = v0.getValueIterator(true);
@@ -322,18 +313,13 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 itv0.dispose();
                 if (!found) {
-                    if (val1 == right + 1) {
-                        right = val1;
-                    } else {
-                        v1.removeInterval(left, right, this);
-                        left = right = val1;
-                    }
+                    vrms.add(val1);
                 } else {
                     storeSupportV1(support, val1);
                 }
                 found = false;
             }
-            v1.removeInterval(left, right, this);
+            v1.removeValues(vrms, aCause);
         } finally {
             itv1.dispose();
         }
@@ -341,44 +327,35 @@ public class PropBinAC3rm extends PropBinCSP {
     }
 
     public void onInstantiationOf(int idx) throws ContradictionException {
-        int left, right;
         if (idx == 0) {
             int value = v0.getValue();
             DisposableValueIterator iterator = v1.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(v1.getLB());
             try {
                 while (iterator.hasNext()) {
                     int val = iterator.next();
                     if (!relation.isConsistent(value, val)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            v1.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                     }
                 }
-                v1.removeInterval(left, right, this);
+                v1.removeValues(vrms, aCause);
             } finally {
                 iterator.dispose();
             }
         } else {
             int value = v1.getValue();
             DisposableValueIterator iterator = v0.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(v0.getLB());
             try {
                 while (iterator.hasNext()) {
                     int val = iterator.next();
                     if (!relation.isConsistent(val, value)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else if (val > right + 1) {
-                            v0.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                     }
                 }
-                v0.removeInterval(left, right, this);
+                v0.removeValues(vrms, aCause);
             } finally {
                 iterator.dispose();
             }

@@ -29,7 +29,6 @@
 package org.chocosolver.solver.constraints.nary.min_max;
 
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -47,26 +46,26 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropBoolMin extends Propagator<BoolVar> {
 
     final int n;
-    final IStateInt x1, x2;
+    int x1, x2;
 
     public PropBoolMin(BoolVar[] variables, BoolVar maxVar) {
         super(ArrayUtils.append(variables, new BoolVar[]{maxVar}), PropagatorPriority.UNARY, true);
         n = variables.length;
-        x1 = solver.getEnvironment().makeInt(-1);
-        x2 = solver.getEnvironment().makeInt(-1);
+        x1 = -1;
+        x2 = -1;
         assert n > 0;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x1.set(-1);
-        x2.set(-1);
+        x1 = -1;
+        x2 = -1;
         for (int i = 0; i < n; i++) {
             if (!vars[i].isInstantiated()) {
-                if (x1.get() == -1) {
-                    x1.set(i);
-                } else if (x2.get() == -1) {
-                    x2.set(i);
+                if (x1 == -1) {
+                    x1 = i;
+                } else if (x2 == -1) {
+                    x2 = i;
                 }
             } else if (vars[i].getValue() == 0) {
                 if (vars[n].instantiateTo(0, aCause)) {
@@ -86,14 +85,14 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 if (vars[n].instantiateTo(0, aCause)) {
                     setPassive();
                 }
-            } else if (idxVarInProp == x1.get() || idxVarInProp == x2.get()) {
-                if (idxVarInProp == x1.get()) {
-                    x1.set(x2.get());
+            } else if (idxVarInProp == x1 || idxVarInProp == x2) {
+                if (idxVarInProp == x1) {
+                    x1 = x2;
                 }
-                x2.set(-1);
+                x2 = -1;
                 for (int i = 0; i < n; i++) {
-                    if (i != x1.get() && !vars[i].isInstantiated()) {
-                        x2.set(i);
+                    if (i != x1 && !vars[i].isInstantiated()) {
+                        x2 = i;
                         break;
                     }
                 }
@@ -103,14 +102,14 @@ public class PropBoolMin extends Propagator<BoolVar> {
     }
 
     public void filter() throws ContradictionException {
-        if (x1.get() == -1) {
+        if (x1 == -1) {
             if (vars[n].instantiateTo(1, aCause)) {
                 setPassive();
                 return;
             }
         }
-        if (x2.get() == -1 && vars[n].isInstantiatedTo(0)) {
-            if (vars[x1.get()].instantiateTo(0, aCause)) {
+        if (x2 == -1 && vars[n].isInstantiatedTo(0)) {
+            if (vars[x1].instantiateTo(0, aCause)) {
                 setPassive();
                 return;
             }

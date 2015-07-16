@@ -84,6 +84,7 @@ public class PropRegular extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         assert evtmask == PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask();
         for (int i = 0; i < idms.length; i++) {
+            idms[i].freeze(); // as the graph was build on initial domain, this is allowed (specific case)
             idms[i].forEachRemVal(rem_proc.set(i));
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
                 if (!graph.hasSupport(i, j)) {

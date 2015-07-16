@@ -81,7 +81,7 @@ public class SequentialPortfolio extends Portfolio {
         }
         this.new_solutions = new long[nbworkers];
         this.wselector = new WorkerSelector(this);
-        ridx = nbworkers;
+        ridx = nbworkers - 1;
     }
 
     @Override
@@ -110,7 +110,7 @@ public class SequentialPortfolio extends Portfolio {
             workers[ridx].getSearchLoop().launch(true);
             // keep on running until no solution is found
             run = workers[ridx].getMeasures().getSolutionCount() == new_solutions[ridx]
-                    && !workers[ridx].getSearchLoop().isComplete();
+                    && !(workers[ridx].getSearchLoop().isComplete() || workers[ridx].getSearchLoop().hasReachedLimit());
         }
         long nsols = countNewSolutions();
         return nsols > 0;
@@ -132,7 +132,7 @@ public class SequentialPortfolio extends Portfolio {
             workers[ridx].getSearchLoop().launch(true);
             // keep on running until no solution is found
             run = workers[ridx].getMeasures().getSolutionCount() == new_solutions[ridx]
-                    && !workers[ridx].getSearchLoop().isComplete();
+                    && !(workers[ridx].getSearchLoop().isComplete() || workers[ridx].getSearchLoop().hasReachedLimit());
 
         }
         long nsols = countNewSolutions();
@@ -170,7 +170,7 @@ public class SequentialPortfolio extends Portfolio {
             // resume the search
             workers[ridx].getSearchLoop().launch(false);
             // keep on running until no solution is found
-            run = !workers[ridx].getSearchLoop().isComplete();
+            run = !(workers[ridx].getSearchLoop().isComplete() || workers[ridx].getSearchLoop().hasReachedLimit());
         }
         restoreSolution(objective, policy);
     }
