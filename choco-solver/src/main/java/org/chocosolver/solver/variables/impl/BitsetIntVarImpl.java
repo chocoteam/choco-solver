@@ -201,7 +201,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             // look for the new lb
             do {
                 olb = nextValue(olb);
-                nlb = values.nextValue(nlb);
+                nlb = values.nextValue(olb - 1);
             } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
             // the new lower bound is now known,  delegate to the right method
             hasChanged = updateLowerBound(olb, cause);
@@ -212,7 +212,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             // look for the new ub
             do {
                 oub = previousValue(oub);
-                nub = values.previousValue(nub);
+                nub = values.previousValue(oub + 1);
             } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
             // the new upper bound is now known, delegate to the right method
             hasChanged |= updateUpperBound(oub, cause);
@@ -269,16 +269,17 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         else {
             boolean anyChange = false;
             int count = SIZE.get();
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                if (v >= 0 && v <= LENGTH && VALUES.get(v)) {
+            for (int value = this.nextValue(from - 1); value <= to; value = nextValue(value)) {
+                int aValue = value - OFFSET;
+                if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
                     anyChange = true;
                     count--;
-                    this.VALUES.clear(v);
+                    this.VALUES.clear(aValue);
                     if (reactOnRemoval) {
-                        delta.add(v, cause);
+                        delta.add(value, cause);
                     }
                     if (_plugexpl) {
-                        solver.getEventObserver().removeValue(this, v, cause);
+                        solver.getEventObserver().removeValue(this, value, cause);
                     }
                 }
             }

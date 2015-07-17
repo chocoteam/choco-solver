@@ -65,7 +65,9 @@ public class BitsetRemovals implements IRemovals {
             if (aValue < 0 || aValue < lb) {
                 return lb + OFFSET;
             }
-            aValue = VALUES.nextSetBit(aValue + 1);
+            if(aValue < Integer.MAX_VALUE) {
+                aValue = VALUES.nextSetBit(aValue + 1);
+            }
             if (aValue > -1) {
                 return aValue + OFFSET;
             }
@@ -81,7 +83,9 @@ public class BitsetRemovals implements IRemovals {
             if (aValue > ub) {
                 return ub + OFFSET;
             }
-            aValue = VALUES.previousSetBit(aValue - 1);
+            if (aValue > -1) {
+                aValue = VALUES.previousSetBit(aValue - 1);
+            }
             if (aValue > -1) {
                 return aValue + OFFSET;
             }
@@ -115,7 +119,7 @@ public class BitsetRemovals implements IRemovals {
         return b.toString();
     }
 
-    public IRemovals duplicate(){
+    public IRemovals duplicate() {
         BitsetRemovals bsrm = new BitsetRemovals();
         bsrm.setOffset(this.OFFSET);
         bsrm.VALUES.or(this.VALUES);

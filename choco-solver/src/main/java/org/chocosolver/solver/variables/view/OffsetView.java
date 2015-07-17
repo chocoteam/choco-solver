@@ -114,7 +114,7 @@ public final class OffsetView extends IntView {
             // look for the new lb
             do {
                 olb = nextValue(olb);
-                nlb = values.nextValue(nlb);
+                nlb = values.nextValue(olb - 1);
             } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
             // the new lower bound is now known,  delegate to the right method
             hasChanged = updateLowerBound(olb, cause);
@@ -125,7 +125,7 @@ public final class OffsetView extends IntView {
             // look for the new ub
             do {
                 oub = previousValue(oub);
-                nub = values.previousValue(nub);
+                nub = values.previousValue(oub + 1);
             } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
             // the new upper bound is now known, delegate to the right method
             hasChanged |= updateUpperBound(oub, cause);

@@ -57,23 +57,32 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     public PropMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
-        assert var.hasEnumeratedDomain();
         this.values = new TIntHashSet(values);
         vrms = new BitsetRemovals();
+        vrms.setOffset(vars[0].getLB());
+        int ub = this.vars[0].getUB();
+        for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
+            if (!this.values.contains(val)) {
+                vrms.add(val);
+            }
+        }
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vrms.clear();
-        vrms.setOffset(vars[0].getLB());
-        int ub = this.vars[0].getUB();
-        for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
-            if (!values.contains(val)) {
-                vrms.add(val);
+        vars[0].removeValues(vrms, aCause);
+        if (vars[0].hasEnumeratedDomain()) {
+            setPassive();
+        }else{
+            int lb = this.vars[0].getLB();
+            int ub = this.vars[0].getUB();
+            while(lb <= ub && values.contains(lb)){
+                lb++;
+            }
+            if(lb == ub){
+                setPassive();
             }
         }
-        vars[0].removeValues(vrms, aCause);
-        setPassive();
     }
 
     @Override

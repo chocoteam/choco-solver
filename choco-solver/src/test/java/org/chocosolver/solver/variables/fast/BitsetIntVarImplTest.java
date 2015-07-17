@@ -269,7 +269,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(2));
     }
 
-    @Test(groups = "1s",expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
     public void testRemVals15() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
@@ -353,6 +353,28 @@ public class BitsetIntVarImplTest {
         rems.add(-1, 0, 1);
         x.removeValues(rems, Cause.Null);
         Assert.fail();
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals6() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{0,2,3}, solver);
+        IRemovals rems = new BitsetRemovals();
+        rems.setOffset(0);
+        rems.add(0, 1, 2);
+        x.removeValues(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), 3);
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals7() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{0,1,3}, solver);
+        IRemovals rems = new BitsetRemovals();
+        rems.setOffset(0);
+        rems.add(1, 2, 3);
+        x.removeValues(rems, Cause.Null);
+        Assert.assertEquals(x.getUB(),0);
     }
 
 }

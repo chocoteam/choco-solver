@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Solver;
@@ -39,7 +38,6 @@ import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
 import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
@@ -53,25 +51,37 @@ import java.util.Arrays;
 public class PropNotMemberEnum extends Propagator<IntVar> {
 
     final TIntHashSet values;
-    protected final IRemovals vrms;
+    final BitsetRemovals vrms;
 
     public PropNotMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
-        assert var.hasEnumeratedDomain();
         this.values = new TIntHashSet(values);
         vrms = new BitsetRemovals();
-        vrms.setOffset(values[0]);
+        int of = Integer.MAX_VALUE;
+        for(int i = 0 ; i < values.length; i++){
+            if(values[i]<of){
+                of = values[i];
+            }
+        }
+        vrms.setOffset(of);
+        vrms.add(values);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        TIntIterator it = values.iterator();
-        vrms.clear();
-        for (; it.hasNext(); ) {
-            vrms.add(it.next());
-        }
         vars[0].removeValues(vrms, aCause);
-        setPassive();
+        if (vars[0].hasEnumeratedDomain()) {
+            setPassive();
+        }else{
+            int lb = this.vars[0].getLB();
+            int ub = this.vars[0].getUB();
+            while(lb <= ub && !values.contains(lb)){
+                lb++;
+            }
+            if(lb == ub){
+                setPassive();
+            }
+        }
     }
 
     @Override
