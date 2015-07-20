@@ -250,7 +250,7 @@ public class ParallelPortfolioTests {
 
     @Test(groups = "1s")
     public void test5() {
-        int m = 9;
+        int m = 14;
         ParallelPortfolio prtfl = GR(m);
         IntVar obj = prtfl._fes_().retrieveIntVars()[m - 1];
         prtfl.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);

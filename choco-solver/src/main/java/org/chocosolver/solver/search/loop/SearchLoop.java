@@ -218,7 +218,9 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public final void interrupt(String message, boolean voidable) {
-        bresum = voidable;
+        if(!voidable){
+            bresum = false;
+        }
         if (alive) {
             alive = false;
             smList.afterInterrupt();
@@ -227,9 +229,7 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public final void forceAlive(boolean bvalue) {
-        if (bresum) { // the search seems resumable
-            alive = bresum = bvalue;
-        }
+        bresum = alive = bvalue;
     }
 
     @Override

@@ -108,7 +108,7 @@ public class SequentialPortfolio extends Portfolio {
             counters[ridx].reset();
             // resume the search
             workers[ridx].getSearchLoop().launch(true);
-            // keep on running until no solution is found
+            // keep on running while no solution is found
             run = workers[ridx].getMeasures().getSolutionCount() == new_solutions[ridx]
                     && !(workers[ridx].getSearchLoop().isComplete() || workers[ridx].getSearchLoop().hasReachedLimit());
         }
@@ -130,7 +130,7 @@ public class SequentialPortfolio extends Portfolio {
             counters[ridx].reset();
             // resume the search
             workers[ridx].getSearchLoop().launch(true);
-            // keep on running until no solution is found
+            // keep on running while no solution is found
             run = workers[ridx].getMeasures().getSolutionCount() == new_solutions[ridx]
                     && !(workers[ridx].getSearchLoop().isComplete() || workers[ridx].getSearchLoop().hasReachedLimit());
 
@@ -169,7 +169,7 @@ public class SequentialPortfolio extends Portfolio {
             counters[ridx].reset();
             // resume the search
             workers[ridx].getSearchLoop().launch(false);
-            // keep on running until no solution is found
+            // keep on running while no solution is found
             run = !(workers[ridx].getSearchLoop().isComplete() || workers[ridx].getSearchLoop().hasReachedLimit());
         }
         restoreSolution(objective, policy);

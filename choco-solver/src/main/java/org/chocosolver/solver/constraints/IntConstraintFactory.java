@@ -76,7 +76,6 @@ import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R1;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
-import org.chocosolver.solver.constraints.nary.sort.PropSort;
 import org.chocosolver.solver.constraints.nary.sum.PropBoolSumCoarse;
 import org.chocosolver.solver.constraints.nary.sum.PropBoolSumIncremental;
 import org.chocosolver.solver.constraints.nary.sum.ScalarFactory;
@@ -1294,7 +1293,14 @@ public class IntConstraintFactory {
      * @return a sort constraint
      */
     public static Constraint sort(IntVar[] VARS, IntVar[] SORTEDVARS) {
-        return new Constraint("Sort", new PropSort(VARS, SORTEDVARS));
+//        return new Constraint("Sort", new PropSort(VARS, SORTEDVARS));
+        IntVar[][] X = new IntVar[VARS.length][1];
+        IntVar[][] Y = new IntVar[SORTEDVARS.length][1];
+        for (int i = 0; i < VARS.length; i++) {
+            X[i][0] = VARS[i];
+            Y[i][0] = SORTEDVARS[i];
+        }
+        return keysorting(X, null, Y, 1);
     }
 
 
