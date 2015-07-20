@@ -49,7 +49,7 @@ import java.util.Random;
  */
 public class NotMemberTest {
 
-    private int unionSize(int[] dom, int[] values) {
+    private int intersectionSize(int[] dom, int[] values) {
         int u = 0;
         la:
         for (int i = 0; i < dom.length; i++) {
@@ -60,7 +60,7 @@ public class NotMemberTest {
                 }
             }
         }
-        return u;
+        return dom.length - u;
     }
 
 
@@ -75,7 +75,7 @@ public class NotMemberTest {
                 }
             }
         }
-        return u;
+        return ub - lb +1 - u;
     }
 
     @Test(groups = "1s")
@@ -98,7 +98,7 @@ public class NotMemberTest {
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
-                Assert.assertEquals(sol, unionSize(values[0], values[1]), "nb sol incorrect");
+                Assert.assertEquals(sol, intersectionSize(values[0], values[1]), "nb sol incorrect");
                 Assert.assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
             }
         }

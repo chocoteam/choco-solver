@@ -38,6 +38,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -328,5 +329,49 @@ public class AllDifferentTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+    }
+
+    @Test(groups = "1s")
+    public void testB1() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[32];
+        X[0] = VF.enumerated("V0", new int[]{-1, 19, 24, 25}, solver);
+        X[1] = VF.enumerated("V1", new int[]{-13, 1, 12}, solver);
+        X[2] = VF.enumerated("V2", new int[]{-9, -8, 9, 19}, solver);
+        X[3] = VF.enumerated("V3", new int[]{6}, solver);
+        X[4] = VF.enumerated("V4", new int[]{-3, 4, 11, 12}, solver);
+        X[5] = VF.enumerated("V5", new int[]{-6, 25}, solver);
+        X[6] = VF.enumerated("V6", new int[]{7, 12, 21}, solver);
+        X[7] = VF.enumerated("V7", new int[]{4, 7, 11, 12}, solver);
+        X[8] = VF.enumerated("V8", new int[]{-8, -4, 0, 21}, solver);
+        X[9] = VF.enumerated("V9", new int[]{-3, 12}, solver);
+        X[10] = VF.enumerated("X10", new int[]{0}, solver);
+        X[11] = VF.enumerated("X11", new int[]{-15, -3, 3}, solver);
+        X[12] = VF.enumerated("X12", new int[]{-5, 3, 21, 24}, solver);
+        X[13] = VF.enumerated("X13", new int[]{3}, solver);
+        X[14] = VF.enumerated("X14", new int[]{-16, 13, 16}, solver);
+        X[15] = VF.enumerated("X15", new int[]{-14, -12, 0, 20}, solver);
+        X[16] = VF.enumerated("X16", new int[]{-9, 11}, solver);
+        X[17] = VF.enumerated("X17", new int[]{-15, 13}, solver);
+        X[18] = VF.enumerated("X18", new int[]{-12, -4, 21}, solver);
+        X[19] = VF.enumerated("X19", new int[]{-1}, solver);
+        X[20] = VF.enumerated("X20", new int[]{2, 11, 14}, solver);
+        X[21] = VF.enumerated("X21", new int[]{-9, 7, 21}, solver);
+        X[22] = VF.enumerated("X22", new int[]{-16, 10, 15}, solver);
+        X[23] = VF.enumerated("X23", new int[]{20, 24}, solver);
+        X[24] = VF.enumerated("X24", new int[]{23}, solver);
+        X[25] = VF.enumerated("X25", new int[]{-7, 5}, solver);
+        X[26] = VF.enumerated("X26", new int[]{-2, 1, 10, 12}, solver);
+        X[27] = VF.enumerated("X27", new int[]{-16, -6, 12, 15}, solver);
+        X[28] = VF.enumerated("X28", new int[]{-9}, solver);
+        X[29] = VF.enumerated("X29", new int[]{-6, -4}, solver);
+        X[30] = VF.enumerated("X30", new int[]{-15, -2, -1, 3}, solver);
+        X[31] = VF.enumerated("X31", new int[]{1, 10, 14}, solver);
+
+        solver.post(ICF.alldifferent(X, "AC"));
+        solver.propagate();
+        Assert.assertEquals(X[14].getUB(), 16);
+        Assert.assertEquals(X[14].getLB(), -16);
+        Assert.assertEquals(X[14].getDomainSize(), 2);
     }
 }

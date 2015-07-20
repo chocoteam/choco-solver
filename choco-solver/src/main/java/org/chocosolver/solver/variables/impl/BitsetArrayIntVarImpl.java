@@ -127,7 +127,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             return false;
         }
         int index = V2I.get(value);
-        if (index != -1) {
+        if (index > -1 && this.INDEXES.get(index)) {
             if (SIZE.get() == 1) {
                 if (_plugexpl) {
                     solver.getEventObserver().removeValue(this, value, cause);
@@ -202,7 +202,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int count = SIZE.get();
         while (value <= to) {
             int index = V2I.get(value);
-            if (index > -1) {
+            if (index > -1  && this.INDEXES.get(index)) {
                 if (count == 1) {
                     if (_plugexpl) {
                         solver.getEventObserver().removeValue(this, value, cause);
@@ -247,7 +247,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int count = SIZE.get();
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
                 int index = V2I.get(v);
-                if (index != -1) {
+                if (index > -1 && this.INDEXES.get(index)) {
                     anyChange = true;
                     count--;
                     this.INDEXES.clear(index);
@@ -298,7 +298,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             return false;
         } else {
             int index = V2I.get(value);
-            if (index != -1) {
+            if (index > -1 && this.INDEXES.get(index)) {
                 if (reactOnRemoval) {
                     for (int i = INDEXES.nextSetBit(LB.get()); i >= 0; i = INDEXES.nextSetBit(i + 1)) {
                         if (i != index) {

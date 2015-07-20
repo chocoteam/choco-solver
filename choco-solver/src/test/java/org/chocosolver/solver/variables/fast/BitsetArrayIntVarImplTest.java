@@ -376,4 +376,23 @@ public class BitsetArrayIntVarImplTest {
         Assert.assertEquals(x.getUB(), 0);
     }
 
+    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    public void testRemVals81() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{0, 1, 3}, solver);
+        x.removeValue(1, Cause.Null);
+        x.instantiateTo(1, Cause.Null);
+        Assert.assertFalse(x.isInstantiated());
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals82() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{0, 1, 3}, solver);
+        x.removeInterval(1, 2, Cause.Null);
+        x.removeInterval(1, 2, Cause.Null);
+        Assert.assertEquals(x.getUB(), 3);
+        Assert.assertEquals(x.getLB(), 0);
+        Assert.assertEquals(x.getDomainSize(), 2);
+    }
 }
