@@ -101,4 +101,9 @@ public final class EBool extends Expression {
     public IntVar[] toIntVarArray(Solver solver) {
         return new IntVar[]{intVarValue(solver)};
     }
+
+    @Override
+    public int[][] toIntMatrix() {
+        return new int[][]{{intValue()}};
+    }
 }

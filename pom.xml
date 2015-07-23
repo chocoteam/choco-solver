@@ -81,6 +81,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>choco-geost</artifactId>
+            <version>3.3.2-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.8</version>

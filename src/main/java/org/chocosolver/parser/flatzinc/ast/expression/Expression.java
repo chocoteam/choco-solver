@@ -85,6 +85,16 @@ public abstract class Expression {
     }
 
     /**
+     * Get array of int of the {@link Expression}
+     *
+     * @return int[]
+     */
+    public int[][] toIntMatrix() {
+        Exit.log();
+        return null;
+    }
+
+    /**
      * Get the boolean value of the {@link Expression}
      *
      * @return boolean

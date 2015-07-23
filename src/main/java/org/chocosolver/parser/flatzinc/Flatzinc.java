@@ -80,10 +80,10 @@ public class Flatzinc implements IParser {
     protected boolean free = false;
 
     @Option(name = "-ft", required = false)
-    protected long ft = 2000;
+    protected long ft = 1000;
 
     @Option(name = "-fs", required = false, handler = StringArrayOptionHandler.class)
-    protected String[] fs = new String[]{"0", "1"};
+    protected String[] fs = new String[]{"0", "1", "5"};
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
     protected int nb_cores = 1; // SEEMS USELESS, BUT NEEDED BY CHOCOFZN
@@ -159,7 +159,7 @@ public class Flatzinc implements IParser {
         listeners.forEach(ParserListener::beforeSolverCreation);
         if (free && ft > 0) {
 //            System.out.printf("%% sequential portfolio\n");
-            prtfl = SF.makeSequentialPortfolio(instance, 2, ft);
+            prtfl = SF.makeSequentialPortfolio(instance, fs.length, ft);
             mSolver = prtfl.workers[0];
             for (int i = 0; i < prtfl.getNbWorkers(); i++) {
                 prtfl.workers[i].set(defaultSettings);
@@ -313,8 +313,8 @@ public class Flatzinc implements IParser {
             }
             break;
             case 3:
-//                System.out.printf("%% worker %d: abs\n", w);
-                prtfl.workers[w].set(ISF.activity(vars, w));
+//                System.out.printf("%% worker %d: abs + LC\n", w);
+                prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.activity(vars, w)));
                 SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
                 SMF.nogoodRecordingFromRestarts(prtfl.workers[w]);
                 break;
@@ -328,14 +328,14 @@ public class Flatzinc implements IParser {
 //                System.out.printf("%% worker %d: abs / LNS\n", w);
                 switch (policy) {
                     case SATISFACTION: {
-                        prtfl.workers[w].set(ISF.activity(vars, w));
+                        prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.activity(vars, w)));
                         SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
                         SMF.nogoodRecordingFromRestarts(prtfl.workers[w]);
                     }
                     break;
                     default: {
                         prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w]));
-                            LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
+                        LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
                     }
                     break;
                 }

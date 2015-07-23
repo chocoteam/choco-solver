@@ -74,6 +74,14 @@ public final class EIdentifier extends Expression {
     }
 
     @Override
+    public int[][] toIntMatrix() {
+        if (bool_arr.isInstance(object)) {
+            return bools_to_ints((boolean[][]) object);
+        }
+        return (int[][]) object;
+    }
+
+    @Override
     public IntVar intVarValue(Solver solver) {
         return (IntVar) object;
     }
@@ -153,6 +161,17 @@ public final class EIdentifier extends Expression {
         final int[] values = new int[bar.length];
         for (int i = 0; i < bar.length; i++) {
             values[i] = bar[i] ? 1 : 0;
+        }
+        return values;
+    }
+
+    private static int[][] bools_to_ints(boolean[][] bar) {
+        final int[][] values = new int[bar.length][];
+        for (int i = 0; i < bar.length; i++) {
+            values[i] = new int[bar[i].length];
+            for(int j = 0; j < bar[i].length; j++){
+                values[i][j] = bar[i][j] ? 1 : 0;
+            }
         }
         return values;
     }
