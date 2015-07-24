@@ -75,7 +75,7 @@ def work1(args):
         os.remove(err)
 
 
-    ## CMD LINE ARGUMENT
+        ## CMD LINE ARGUMENT
 
 
 parser = argparse.ArgumentParser(description='Solve flatzinc files.')
@@ -112,8 +112,7 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'par1:-ps 0 1 3 5 -p 4  ',
-        'par2:-ps 0 1 4 6 -p 4  '
+       'fixed:-stat'
     ]
 )
 parser.add_argument(
@@ -124,8 +123,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "-jargs",
-    help='Java Virtual Machine arguments',
-    default='-Xss64m -Xms64m -Xmx4096m -server'
+    help='Java Virtual Machine arguments (eg: -Xss64m -Xms64m -Xmx4096m -server)',
+    default=''
 )
 
 cmd = 'java %s -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -tl %s %s %s'

@@ -158,7 +158,7 @@ public class Flatzinc implements IParser {
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
         if (free && ft > 0) {
-//            System.out.printf("%% sequential portfolio\n");
+//            System.out.printf("%% sequential portfolio (%s, %d)\n", Arrays.toString(fs), ft);
             prtfl = SF.makeSequentialPortfolio(instance, fs.length, ft);
             mSolver = prtfl.workers[0];
             for (int i = 0; i < prtfl.getNbWorkers(); i++) {
@@ -170,7 +170,7 @@ public class Flatzinc implements IParser {
             sprinter = new SharedSolutionPrinter(prtfl, all, stat);
         } else if (nb_cores > 1) {
             nb_cores = Math.min(nb_cores, ps.length);
-//            System.out.printf("%% parallel portfolio\n");
+//            System.out.printf("%% parallel portfolio (%d, %s)\n", nb_cores, Arrays.toString(ps));
             prtfl = SF.makeParallelPortfolio(instance, nb_cores);
             mSolver = prtfl.workers[0];
             for (int i = 0; i < prtfl.getNbWorkers(); i++) {
@@ -181,7 +181,7 @@ public class Flatzinc implements IParser {
             prtfl.skipStrategyConfiguration(true);
             sprinter = new SharedSolutionPrinter(prtfl, all, stat);
         } else {
-//            System.out.printf("%% simple solver\n");
+            System.out.printf("%% simple solver\n");
             mSolver = SF.makeSolver(instance);
             mSolver.set(defaultSettings);
             sprinter = new SolutionPrinter(mSolver, all, stat);
@@ -224,13 +224,13 @@ public class Flatzinc implements IParser {
      * Create a complementary search on non-decision variables
      * @param solver a solver
      */
-    private void makeComplementarySearch(Solver solver){
+    private void makeComplementarySearch(Solver solver) {
         IntVar[] ovars = new IntVar[solver.getNbVars()];
         THashSet<Variable> dvars = new THashSet<>(Arrays.asList(solver.getStrategy().getVariables()));
         int k = 0;
         for (int i = 0; i < solver.getNbVars(); i++) {
             Variable ivar = solver.getVar(i);
-            if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT)!=0) {
+            if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT) != 0) {
                 ovars[k++] = (IntVar) ivar;
             }
         }
@@ -281,8 +281,6 @@ public class Flatzinc implements IParser {
         if (free && ft == 0) {
             mSolver.set(ISF.lastConflict(mSolver));
         }
-
-
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 
