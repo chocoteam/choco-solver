@@ -29,6 +29,7 @@ package org.chocosolver.solver.constraints.nary.cnf;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IStateInt;
@@ -42,6 +43,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 
@@ -69,6 +71,9 @@ public class PropNogoods extends Propagator<IntVar> {
     BitSet test_eq;
 
     TIntStack fp;  // lit instantiated -> fix point
+
+    // For #why() method only, lazily initialized
+    TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     public PropNogoods(Solver solver) {
         super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);
@@ -358,6 +363,9 @@ public class PropNogoods extends Propagator<IntVar> {
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar ivar, IEventType evt, int ivalue) {
+        if (inClauses == null) {
+            fillInClauses();
+        }
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // When we got here, there are multiple cases:
         // 1. the propagator fails, at least one clause or implication cannot be satisfied
@@ -381,13 +389,26 @@ public class PropNogoods extends Propagator<IntVar> {
                 newrules |= _why(l, ruleStore);
             }
         }
-
+        implies = sat_.implies_.get(neg);
+        if (implies != null) {
+            for (int i = implies.size() - 1; i >= 0; i--) {
+                int l = implies.get(i);
+                newrules |= _why(l, ruleStore);
+            }
+        }
         // B. clauses:
         // We need to find the fully instantiated clauses where bvar appears
-        // we cannot rely on watches_ because is not backtrackable
-        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            newrules |= _why(neg, lit, sat_.clauses.get(k), ruleStore);
+        ArrayList<SatSolver.Clause> mClauses = inClauses.get(lit);
+        if (mClauses != null) {
+            for (int i = mClauses.size() - 1; i >= 0; i--) {
+                newrules |= _why(mClauses.get(i), ruleStore);
+            }
+        }
+        mClauses = inClauses.get(neg);
+        if (mClauses != null) {
+            for (int i = mClauses.size() - 1; i >= 0; i--) {
+                newrules |= _why(mClauses.get(i), ruleStore);
+            }
         }
         // C. learnt clauses:
         // We need to find the fully instantiated clauses where bvar appears
@@ -395,6 +416,33 @@ public class PropNogoods extends Propagator<IntVar> {
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
             newrules |= _why(neg, lit, sat_.learnts.get(k), ruleStore);
+        }
+        return newrules;
+    }
+
+    private void fillInClauses() {
+        inClauses = new TIntObjectHashMap<>();
+        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.clauses.get(k);
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                int l = cl._g(d);
+                ArrayList<SatSolver.Clause> mcls = inClauses.get(l);
+                if (mcls == null) {
+                    mcls = new ArrayList<>();
+                    inClauses.put(l, mcls);
+                }
+                mcls.add(cl);
+            }
+        }
+    }
+
+    private boolean _why(SatSolver.Clause cl, RuleStore ruleStore) {
+        boolean newrules = false;
+        // if the watched literals are instantiated
+        if (litIsKnown(cl._g(0)) && litIsKnown(cl._g(1))) {
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                newrules |= _why(cl._g(d), ruleStore);
+            }
         }
         return newrules;
     }

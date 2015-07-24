@@ -215,8 +215,13 @@ public class
         if (var == vars[0]) {
             if (IntEventType.isInstantiate(evt.getMask())) {
                 for (int i = 1; i < 3; i++) {
+                    // either variable 'i' is the smallest
                     if (vars[i].isInstantiatedTo(var.getValue())) {
                         newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    } else
+                    // or variable 'i' can't be assigned to 'best'
+                    {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
                     }
                 }
             } else {

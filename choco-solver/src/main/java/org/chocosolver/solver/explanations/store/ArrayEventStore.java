@@ -89,29 +89,31 @@ public class ArrayEventStore implements IEventStore {
     }
 
     private void increase() {
-        int _size = varChunks.length;
-        IntVar[] varBigger = new IntVar[_size + SIZE];
-        System.arraycopy(varChunks, 0, varBigger, 0, _size);
+        int oldCapacity = varChunks.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+
+        IntVar[] varBigger = new IntVar[newCapacity];
+        System.arraycopy(varChunks, 0, varBigger, 0, oldCapacity);
         varChunks = varBigger;
 
-        ICause[] cauBigger = new ICause[_size + SIZE];
-        System.arraycopy(cauChunks, 0, cauBigger, 0, _size);
+        ICause[] cauBigger = new ICause[newCapacity];
+        System.arraycopy(cauChunks, 0, cauBigger, 0, oldCapacity);
         cauChunks = cauBigger;
 
-        IEventType[] masBigger = new IEventType[_size + SIZE];
-        System.arraycopy(masChunks, 0, masBigger, 0, _size);
+        IEventType[] masBigger = new IEventType[newCapacity];
+        System.arraycopy(masChunks, 0, masBigger, 0, oldCapacity);
         masChunks = masBigger;
 
-        int[] valBigger = new int[_size + SIZE];
-        System.arraycopy(val1Chunks, 0, valBigger, 0, _size);
+        int[] valBigger = new int[newCapacity];
+        System.arraycopy(val1Chunks, 0, valBigger, 0, oldCapacity);
         val1Chunks = valBigger;
 
-        valBigger = new int[_size + SIZE];
-        System.arraycopy(val2Chunks, 0, valBigger, 0, _size);
+        valBigger = new int[newCapacity];
+        System.arraycopy(val2Chunks, 0, valBigger, 0, oldCapacity);
         val2Chunks = valBigger;
 
-        valBigger = new int[_size + SIZE];
-        System.arraycopy(val3Chunks, 0, valBigger, 0, _size);
+        valBigger = new int[newCapacity];
+        System.arraycopy(val3Chunks, 0, valBigger, 0, oldCapacity);
         val3Chunks = valBigger;
     }
 

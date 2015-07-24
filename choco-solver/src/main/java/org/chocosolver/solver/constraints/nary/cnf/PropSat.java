@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.nary.cnf;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
@@ -43,6 +44,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import java.util.ArrayList;
 
 import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
 
@@ -60,6 +63,9 @@ public class PropSat extends Propagator<BoolVar> {
     IStateInt sat_trail_;
 
     TIntList early_deductions_;
+
+    // For #why() method only, lazily initialized
+    TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     public PropSat(Solver solver) {
         // this propagator initially has no variable
@@ -284,6 +290,9 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar bvar, IEventType evt, int bvalue) {
+        if (inClauses == null) {
+            fillInClauses();
+        }
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // When we got here, there are multiple cases:
         // 1. the propagator fails, at least one clause or implication cannot be satisfied
@@ -303,20 +312,60 @@ public class PropSat extends Propagator<BoolVar> {
                 newrules |= _why(implies.get(i), ruleStore);
             }
         }
-
+        implies = sat_.implies_.get(neg);
+        if (implies != null) {
+            for (int i = implies.size() - 1; i >= 0; i--) {
+                newrules |= _why(implies.get(i), ruleStore);
+            }
+        }
         // B. clauses:
         // We need to find the fully instantiated clauses where bvar appears
-        // we cannot rely on watches_ because is not backtrackable
-        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            newrules |= _why(neg, lit, sat_.clauses.get(k), ruleStore);
+        ArrayList<SatSolver.Clause> mClauses = inClauses.get(lit);
+        if (mClauses != null) {
+            for (int i = mClauses.size() - 1; i >= 0; i--) {
+                newrules |= _why(mClauses.get(i), ruleStore);
+            }
         }
+        mClauses = inClauses.get(neg);
+        if (mClauses != null) {
+            for (int i = mClauses.size() - 1; i >= 0; i--) {
+                newrules |= _why(mClauses.get(i), ruleStore);
+            }
+        }
+
         // C. learnt clauses:
         // We need to find the fully instantiated clauses where bvar appears
         // we cannot rely on watches_ because is not backtrackable
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
             newrules |= _why(neg, lit, sat_.learnts.get(k), ruleStore);
+        }
+        return newrules;
+    }
+
+    private void fillInClauses() {
+        inClauses = new TIntObjectHashMap<>();
+        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.clauses.get(k);
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                int l = cl._g(d);
+                ArrayList<SatSolver.Clause> mcls = inClauses.get(l);
+                if (mcls == null) {
+                    mcls = new ArrayList<>();
+                    inClauses.put(l, mcls);
+                }
+                mcls.add(cl);
+            }
+        }
+    }
+
+    private boolean _why(SatSolver.Clause cl, RuleStore ruleStore) {
+        boolean newrules = false;
+        // if the variable watches
+        if (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated()) {
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                newrules |= _why(cl._g(d), ruleStore);
+            }
         }
         return newrules;
     }
