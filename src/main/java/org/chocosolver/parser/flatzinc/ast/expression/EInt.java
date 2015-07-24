@@ -96,6 +96,12 @@ public final class EInt extends Expression {
     }
 
     @Override
+    public int[][] toIntMatrix() {
+        return new int[][]{{intValue()}};
+    }
+
+
+    @Override
     public IntVar intVarValue(Solver solver) {
         return VariableFactory.fixed(intValue(), solver);
     }

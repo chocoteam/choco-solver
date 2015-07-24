@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2015, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,46 +24,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.parser.flatzinc;
+package org.chocosolver.parser.flatzinc.ast.constraints.global;
 
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
+import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
+import org.chocosolver.parser.flatzinc.ast.expression.Expression;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.variables.IntVar;
+
+import java.util.List;
 
 /**
- * Basic settings for Fzn
- * Created by cprudhom on 08/12/14.
+ * Created by cprudhom on 17/07/15.
  * Project: choco-parsers.
  */
-public class FznSettings implements Settings {
-
-    /**
-     * Set to true to print constraint creation during parsing
-     */
-    public boolean printConstraint() {
-        return true;
-    }
-
-    /**
-     * Set to true to enable clause detection (for boolean variables only)
-     */
-    public boolean enableClause() {
-        return true;
-    }
-
+public class ValuePrecedeChainInt implements IBuilder {
     @Override
-    public boolean enableTableSubstitution() {
-        return true;
-    }
-
-    /**
-     * Faster reification (but quite dirty)
-     */
-    public boolean adhocReification() {
-        return true;
-    }
-
-    @Override
-    public ISearchBinder getSearchBinder() {
-        return new FznSearchBinder();
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        int[] c = exps.get(0).toIntArray();
+        IntVar[] x = exps.get(1).toIntVarArray(solver);
+        solver.post(IntConstraintFactory.int_value_precede_chain(x, c));
     }
 }

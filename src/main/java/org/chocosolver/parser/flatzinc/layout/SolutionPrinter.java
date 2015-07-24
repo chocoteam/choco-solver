@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2015, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,49 +24,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.chocosolver.parser.flatzinc.layout;
 
-package org.chocosolver.parser.flatzinc.ast.constraints;
-
-import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
-import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.SatFactory;
-import org.chocosolver.solver.variables.BoolVar;
-
-import java.util.List;
 
 /**
- * (&#8704; i &#8712; 1..N: as[i]) &#8660; r where n is the length of as
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 26/01/11
+ * Created by cprudhom on 18/06/15.
+ * Project: choco-parsers.
  */
-public class ArrayBoolAndBuilder implements IBuilder {
-    @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar[] as = exps.get(0).toBoolVarArray(solver);
-        BoolVar r = exps.get(1).boolVarValue(solver);
-        if (as.length > 0) {
+public class SolutionPrinter extends ASolutionPrinter {
 
-            switch (as.length) {
-                case 0:
-                    break;
-                /*case 1:
-                    solver.post(ICF.arithm(as[0], "=", r));
-                    break;
-                case 2:
-                    ICF.arithm(as[0], "+", as[1], ">", 1).reifyWith(r);
-                    break;*/
-                default:
-                    if (r.isInstantiatedTo(0)) {
-                        SatFactory.addBoolAndArrayEqualFalse(as);
-                    } else {
-                        SatFactory.addBoolAndArrayEqVar(as, r);
-                    }
-                    break;
+    Solver solver;
+
+    public SolutionPrinter(Solver solver, boolean printAll, boolean printStat) {
+        super(solver.getSolutionRecorder(), printAll, printStat);
+        this.solver = solver;
+        solver.plugMonitor(this);
+    }
+
+    @Override
+    public void onSolution() {
+        super.onSolution();
+        if(printStat) {
+            System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+        }
+    }
+
+    public void doFinalOutPut() {
+        userinterruption = false;
+        boolean complete = !solver.getSearchLoop().hasReachedLimit() && !solver.getSearchLoop().hasEndedUnexpectedly();
+        if (nbSolution == 0) {
+            if (complete) {
+                System.out.printf("=====UNSATISFIABLE=====\n");
+            } else {
+                System.out.printf("=====UNKNOWN=====\n");
             }
+        } else { // at least one solution
+            if (!printAll) { // print the first/best solution when -a is not enabled
+                printSolution(solrecorder.getLastSolution());
+            }
+            if (complete) {
+                System.out.printf("==========\n");
+            } else {
+                if ((solver.getObjectiveManager().isOptimization())) {
+                    System.out.printf("=====UNBOUNDED=====\n");
+                }
+            }
+        }
+        if(printStat){
+            System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
         }
     }
 }

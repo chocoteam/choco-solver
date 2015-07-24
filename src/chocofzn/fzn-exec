@@ -4,8 +4,9 @@ STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
-JAVA_ARGS="-server"
-CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/3.3.1-SNAPSHOT/choco-parsers-3.3.1-SNAPSHOT-with-dependencies.jar
+JAVA_ARGS=""
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/3.3.2-SNAPSHOT/choco-parsers-3.3.2-SNAPSHOT-with-dependencies.jar
+#/home/user/entry_data/choco-parsers-3.3.2-SNAPSHOT-with-dependencies.jar
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
@@ -115,7 +116,7 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -lf"
+    ARGS=$ARGS" -f"
 fi
 
 CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,46 +24,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.parser.flatzinc;
 
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.search.bind.ISearchBinder;
+package org.chocosolver.parser.flatzinc.ast.constraints.global;
+
+import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
+import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
+import org.chocosolver.parser.flatzinc.ast.expression.Expression;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.variables.IntVar;
+
+import java.util.List;
 
 /**
- * Basic settings for Fzn
- * Created by cprudhom on 08/12/14.
- * Project: choco-parsers.
+ * @author Charles Prud'homme
+ * @since 17/07/2015
  */
-public class FznSettings implements Settings {
-
-    /**
-     * Set to true to print constraint creation during parsing
-     */
-    public boolean printConstraint() {
-        return true;
-    }
-
-    /**
-     * Set to true to enable clause detection (for boolean variables only)
-     */
-    public boolean enableClause() {
-        return true;
-    }
+public class DistributeBuilder implements IBuilder {
 
     @Override
-    public boolean enableTableSubstitution() {
-        return true;
-    }
-
-    /**
-     * Faster reification (but quite dirty)
-     */
-    public boolean adhocReification() {
-        return true;
-    }
-
-    @Override
-    public ISearchBinder getSearchBinder() {
-        return new FznSearchBinder();
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] card = exps.get(0).toIntVarArray(solver);
+        IntVar[] value = exps.get(1).toIntVarArray(solver);
+        IntVar[] base = exps.get(2).toIntVarArray(solver);
+        for(int i = 0 ; i < card.length; i++){
+            solver.post(ICF.count(value[i], base, card[i]));
+        }
     }
 }

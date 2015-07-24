@@ -24,38 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.parser.flatzinc.layout;
 
-import org.chocosolver.parser.flatzinc.para.ParserMaster;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.objective.ObjectiveManager;
+package org.chocosolver.parser.flatzinc.ast.constraints.global;
+
+import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
+import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
+import org.chocosolver.parser.flatzinc.ast.expression.Expression;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.variables.IntVar;
+
+import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 16/07/13
+ * @since 17/07/2015
  */
-public class FZNLayoutPara extends FZNLayout {
-
-    final ParserMaster master;
-
-    public FZNLayoutPara(ParserMaster master, String instance, boolean printAll) {
-        super(instance, printAll);
-        this.master = master;
-    }
+public class KnapsackBuilder implements IBuilder {
 
     @Override
-    public void onSolution() {
-        ObjectiveManager om = solver.getObjectiveManager();
-        int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
-        if (master.newSol(val, om.getPolicy())) {
-            super.onSolution();
-        }
-    }
-
-    @Override
-    public void beforeClose() {
-        // nothing to do
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        int[] w = exps.get(0).toIntArray();
+        int[] p = exps.get(1).toIntArray();
+        IntVar[] x = exps.get(2).toIntVarArray(solver);
+        IntVar W = exps.get(3).intVarValue(solver);
+        IntVar P = exps.get(4).intVarValue(solver);
+        solver.post(IntConstraintFactory.knapsack(x, W, P, w, p));
     }
 }

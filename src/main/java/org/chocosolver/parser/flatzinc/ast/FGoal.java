@@ -69,7 +69,7 @@ public class FGoal {
         set_search
     }
 
-    public static void define_goal(Solver aSolver, boolean freeSearch, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
+    public static void define_goal(Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
         IntVar obj = null;
         if (type != ResolutionPolicy.SATISFACTION) {
@@ -78,7 +78,7 @@ public class FGoal {
         aSolver.set(new ObjectiveManager<IntVar, Integer>(obj, type, true));
 
         // Then define search goal
-        Variable[] vars = aSolver.getVars();
+        Variable[] vars = aSolver. getVars();
         IntVar[] ivars = new IntVar[vars.length];
         for (int i = 0; i < ivars.length; i++) {
             ivars[i] = (IntVar) vars[i];
@@ -105,10 +105,6 @@ public class FGoal {
                 }
                 aSolver.set(strategy);
             }
-        }
-        // if free search, ok, then do something
-        if (freeSearch || annotations.size() == 0) {
-            aSolver.getSettings().getSearchBinder().configureSearch(aSolver);
         }
     }
 

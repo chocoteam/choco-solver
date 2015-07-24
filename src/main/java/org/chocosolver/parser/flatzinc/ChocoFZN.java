@@ -28,11 +28,9 @@ package org.chocosolver.parser.flatzinc;
 
 
 import org.antlr.v4.runtime.RecognitionException;
-import org.chocosolver.parser.flatzinc.para.ParserMaster;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 /**
  * The main entry point
@@ -44,23 +42,13 @@ import java.util.Arrays;
 public class ChocoFZN {
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
-
-        int i = Arrays.asList(args).indexOf("-p"); // look for the "-p" option
-        int nbCores = (i == -1 ? 1 : Integer.parseInt(args[i + 1])); // and get its value if declared
-
-        if (nbCores == 1) {
-            Flatzinc fzn = new Flatzinc();
-            fzn.addListener(new BaseFlatzincListener(fzn));
-
-            fzn.parseParameters(args);
-            fzn.defineSettings(new FznSettings());
-            fzn.createSolver();
-            fzn.parseInputFile();
-            fzn.configureSearch();
-            fzn.solve();
-        } else {
-            // will manage one ParseAndSolve per thread
-            new ParserMaster(nbCores, args);
-        }
+        Flatzinc fzn = new Flatzinc();
+        fzn.addListener(new BaseFlatzincListener(fzn));
+        fzn.parseParameters(args);
+        fzn.defineSettings(new FznSettings());
+        fzn.createSolver();
+        fzn.parseInputFile();
+        fzn.configureSearch();
+        fzn.solve();
     }
 }

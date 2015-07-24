@@ -57,8 +57,6 @@ public class GrammarTest {
         Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
         parser.datas = aDatas;
         parser.mSolver = aSolver;
-//        FZNLayout fl = new FZNLayout("", false);
-//        fl.makeup();
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);

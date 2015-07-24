@@ -74,6 +74,14 @@ public final class EIdentifier extends Expression {
     }
 
     @Override
+    public int[][] toIntMatrix() {
+        if (bool_arr.isInstance(object)) {
+            return bools_to_ints((boolean[][]) object);
+        }
+        return (int[][]) object;
+    }
+
+    @Override
     public IntVar intVarValue(Solver solver) {
         return (IntVar) object;
     }
@@ -116,9 +124,9 @@ public final class EIdentifier extends Expression {
     @Override
     public BoolVar boolVarValue(Solver solver) {
         if (Integer.class.isInstance(object)) {
-            return ((Integer) object == 1) ? solver.ONE : solver.ZERO;
+            return ((Integer) object == 1) ? solver.ONE() : solver.ZERO();
         } else if (Boolean.class.isInstance(object)) {
-            return ((Boolean) object) ? solver.ONE : solver.ZERO;
+            return ((Boolean) object) ? solver.ONE() : solver.ZERO();
         }
         return (BoolVar) object;
     }
@@ -131,14 +139,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Integer) object == 1) ? solver.ONE : solver.ZERO;
+                    vars[i] = ((Integer) object == 1) ? solver.ONE() : solver.ZERO();
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Boolean) object) ? solver.ONE : solver.ZERO;
+                    vars[i] = ((Boolean) object) ? solver.ONE() : solver.ZERO();
                 }
                 return vars;
             }
@@ -153,6 +161,17 @@ public final class EIdentifier extends Expression {
         final int[] values = new int[bar.length];
         for (int i = 0; i < bar.length; i++) {
             values[i] = bar[i] ? 1 : 0;
+        }
+        return values;
+    }
+
+    private static int[][] bools_to_ints(boolean[][] bar) {
+        final int[][] values = new int[bar.length][];
+        for (int i = 0; i < bar.length; i++) {
+            values[i] = new int[bar[i].length];
+            for(int j = 0; j < bar[i].length; j++){
+                values[i][j] = bar[i][j] ? 1 : 0;
+            }
         }
         return values;
     }

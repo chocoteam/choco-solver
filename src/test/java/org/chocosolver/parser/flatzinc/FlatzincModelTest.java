@@ -52,7 +52,7 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(in);
+        fzn.parse(fzn.mSolver, in);
         Solver solver = fzn.getSolver();
 
         solver.findSolution();
@@ -68,7 +68,7 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(in);
+        fzn.parse(fzn.mSolver, in);
         Solver solver = fzn.getSolver();
 
         solver.findSolution();
@@ -86,7 +86,7 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(in);
+        fzn.parse(fzn.mSolver, in);
         Solver solver = fzn.getSolver();
 
         solver.findSolution();
@@ -106,7 +106,7 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(in);
+        fzn.parse(fzn.mSolver, in);
         Solver solver = fzn.getSolver();
 
         solver.findSolution();

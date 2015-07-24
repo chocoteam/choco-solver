@@ -3,29 +3,35 @@ import os
 __author__ = 'cprudhom'
 
 import re
-from pylatex import Document, Section, Subsection, Table, Math, TikZ, Axis, \
-    Plot, Figure, Package, Subsubsection
-import argparse
 
 rsol = '%.*Solutions,.*'
 ropt = '%.*(Minimize|Maximize).*'
-
+comp = '=====.*'
 
 def read(dir, fname, opt):
     """
     Read the log file, in dir, postfixed by 'opt'
     :return: a list, the solution
     """
-    logfile = open(os.path.join(dir, fname + '+' + opt + '.log'), 'r', encoding='utf8')
+    try:
+        logfile = open(os.path.join(dir, fname + '+' + opt + '.log'), 'r', encoding='utf8')
+    except FileNotFoundError:
+        return [0, 900., 999999999, 'UNK', 0, opt]
+    sndlast = ""
     last = ""
     for line in logfile:
         if re.search(rsol, line):
+            sndlast = last
             last = line
     # get the last solution, there should be at least one
     # line = line.replace(',', '')
     last = last.replace('s', '')
     parts = last.split()
+    sndlast = sndlast.replace('s', '')
+    sndparts = sndlast.split()
     if len(parts) > 0:
+        if len(sndparts) > 0 and parts[1] == sndparts[1]:
+            parts = sndparts
         solution = [parts[1]]
         if re.search(ropt, last):
             # extract values
@@ -43,96 +49,12 @@ def read(dir, fname, opt):
             solution.append('SAT')
             solution.append(int(0))  # obj
         solution.append(opt)
-        print(solution)
         if solution[1] >= 900.:
             solution[1] = float(900.)
     else:
         solution = [0, 900., 999999999, 'UNK', 0, opt]
 
+    print(solution)
     return solution
 
 
-parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
-parser.add_argument(
-    "-fl", "--filelist",
-    help='File containing name of flatzinc files to pretty.',
-    default='/Users/kyzrsoze/Sandbox/fzn/fzn2014.txt'
-)
-parser.add_argument(
-    "-d", "--directory",
-    help="Log files directory.",
-    default='/Users/kyzrsoze/Sandbox/fzn/logs/'
-)
-parser.add_argument(
-    "-c", "--configurations",
-    help='Configurations to evaluate, \'name:options\'',
-    nargs='+',
-    default=['wigc', 'wigc+lc']
-)
-
-args = parser.parse_args()
-
-doc = Document(title='Benchmark analysis', author='Charles Prud\'homme')
-doc.packages.append(Package('geometry'))
-
-presec = ""
-prevsubsec = ""
-section = None
-subsection = None
-with open(args.filelist, 'r') as f:
-    for fname in f:
-        fname = fname.replace('\n', '')
-        print(fname)
-        solutions = []
-        for opt in args.configurations:
-            solutions.append(read(args.directory, fname, opt))
-
-        parts = fname.split("+")
-        if parts[0] != presec:
-            presec = parts[0]
-            section = Section('%s' % (presec.replace("_", "\_")))
-            doc.append(section)
-            print("create section: " + presec)
-
-        if parts[1] != prevsubsec:
-            prevsubsec = parts[1]
-            subsection = Subsection('%s' % (prevsubsec.replace("_", "\_")))
-            section.append(subsection)
-            print("create subsection: " + prevsubsec)
-
-        if len(parts)>2:
-            subsubsection = Subsubsection('%s' % (parts[2].replace("_", "\_")))
-            subsection.append(subsubsection)
-            print("create subsubsection: " + parts[2])
-        else:
-            subsubsection = Subsubsection('%s' % (parts[1].replace("_", "\_")))
-            subsection.append(subsubsection)
-            print("create subsubsection: " + parts[1])
-
-        if solutions[0][3] == 'SAT':
-            solutions.sort(key=lambda x: (x[3], x[1]))
-            table = Table('l|r|r|r')
-            subsubsection.append(table)
-            table.add_hline()
-            table.add_row(("Param.", "\#Sol", 'Time(sec)', 'Nodes'))
-            table.add_hline()
-            for i in range(0, len(solutions)):
-                table.add_row((solutions[i][5], solutions[i][0], solutions[i][1], solutions[i][2]))
-            table.add_hline()
-        else:
-            if solutions[0][3] == 'MIN':
-                solutions.sort(key=lambda x: (x[3], x[4], x[1]))
-            else:
-                solutions.sort(key=lambda x: (x[3], -x[4], x[1]))
-            table = Table('l|r|r|r|r')
-            subsubsection.append(table)
-
-            table.add_hline()
-            table.add_row(("Param.", solutions[0][3], "\#Sol", 'Time(sec)', 'Nodes'))
-            table.add_hline()
-            for i in range(0, len(solutions)):
-                table.add_row(
-                    (solutions[i][5], solutions[i][4], solutions[i][0], solutions[i][1], solutions[i][2]))
-            table.add_hline()
-
-doc.generate_pdf(True)
