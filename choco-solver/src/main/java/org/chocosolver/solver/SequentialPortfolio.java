@@ -197,7 +197,7 @@ public class SequentialPortfolio extends Portfolio {
          *
          * @return the index of the worker to launch
          */
-        int nextWorker(int current) {
+        public int nextWorker(int current) {
             return (current + 1) % sprtfl.nbworkers;
         }
     }

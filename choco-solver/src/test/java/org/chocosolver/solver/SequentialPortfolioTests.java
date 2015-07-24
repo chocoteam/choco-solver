@@ -276,7 +276,7 @@ public class SequentialPortfolioTests {
         rlrc.set(new SequentialPortfolio.WorkerSelector(rlrc) {
             Random rnd = new Random(0);
             @Override
-            int nextWorker(int current) {
+            public int nextWorker(int current) {
                 return rnd.nextInt(sprtfl.getNbWorkers());
             }
         });
