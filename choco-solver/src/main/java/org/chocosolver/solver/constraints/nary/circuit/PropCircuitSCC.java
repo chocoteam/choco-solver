@@ -127,23 +127,23 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		for (int i = 0; i < n_R; i++) {
 			if (G_R.getPredOf(i).isEmpty()) {
 				if(first!=-1){
-					contradiction(vars[0],"");
+					contradiction(null,"");
 				}
 				first = i;
 			}
 			if (G_R.getSuccOf(i).isEmpty()) {
 				if(last!=-1){
-					contradiction(vars[0],"");
+					contradiction(null,"");
 				}
 				last = i;
 			}
 		}
 		if (first == -1 || last == -1 || first == last) {
-			contradiction(vars[0], "");
+			contradiction(null, "");
 		}
 		// compute hamiltonian path and filter skipping arcs
 		if (visit(first, last, source) != n_R) {
-			contradiction(vars[0], "");
+			contradiction(null, "");
 		}
 		// additional filter (based on instantiated arcs)
 		filterFromInst(source);
@@ -196,7 +196,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 
 	private int visit(int node, int last, int source) throws ContradictionException {
 		if (node == -1) {
-			contradiction(vars[0], "G_R disconnected");
+			contradiction(null, "G_R disconnected");
 		}
 		if (node == last) {
 			return 1;

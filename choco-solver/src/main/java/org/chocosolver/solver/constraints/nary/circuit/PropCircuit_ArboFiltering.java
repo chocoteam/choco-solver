@@ -131,7 +131,7 @@ public class PropCircuit_ArboFiltering extends Propagator<IntVar> {
                 }
             }
         } else {
-            contradiction(vars[0], "the source cannot reach all nodes");
+            contradiction(null, "the source cannot reach all nodes");
         }
     }
 

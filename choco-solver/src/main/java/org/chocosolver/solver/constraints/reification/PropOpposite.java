@@ -62,7 +62,7 @@ public class PropOpposite extends Propagator<Variable> {
     public void propagate(int evtmask) throws ContradictionException {
         ESat op = original.isSatisfied();
         if (op == ESat.TRUE) {
-            contradiction(vars[0], "");
+            contradiction(null, "");
         }
         if (op == ESat.FALSE) {
             setPassive();

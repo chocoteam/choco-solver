@@ -194,7 +194,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
     private void makeLoops(int source, int cc, boolean sink) throws ContradictionException {
         if (cc == sccOf[source]) {
             if (sink) {
-                contradiction(vars[0], "");
+                contradiction(null, "");
             } else {
                 return;
             }
@@ -203,7 +203,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
             if (sink) {
                 return;
             } else {
-                contradiction(vars[0], "");
+                contradiction(null, "");
             }
         }
 //		if((sink && cc==sccOf[source]) || (cc==sccOf[n] && !sink)){
