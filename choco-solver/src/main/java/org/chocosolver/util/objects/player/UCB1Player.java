@@ -21,8 +21,8 @@ public class UCB1Player extends MultiArmedBanditPlayer{
 	}
     
 
-    public UCB1Player(int nbArms){
-    	super(nbArms);
+    public UCB1Player(int nbArms, long seed){
+    	super(nbArms, seed);
     }
 
     

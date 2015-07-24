@@ -15,8 +15,8 @@ public class CPUPlayer extends UCB1Player{
 	double MAX;
 	
 	
-    public CPUPlayer(int nbArms){
-    	super(nbArms);
+    public CPUPlayer(int nbArms, long seed){
+    	super(nbArms, seed);
     }
 
     @Override

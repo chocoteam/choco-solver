@@ -14,9 +14,9 @@ import java.util.Random;
 public class CPURandomPlayer extends CPUPlayer{
 	private Random rand;
 	
-    public CPURandomPlayer(int nbArms) {
-		super(nbArms);
-		rand=new Random();
+    public CPURandomPlayer(int nbArms, long seed) {
+		super(nbArms, seed);
+		rand=new Random(seed);
 	}
 
     @Override
