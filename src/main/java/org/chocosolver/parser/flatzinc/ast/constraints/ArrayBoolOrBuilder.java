@@ -49,12 +49,22 @@ public class ArrayBoolOrBuilder implements IBuilder {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar r = exps.get(1).boolVarValue(solver);
 
-        if (as.length > 0) {
-            if(r.isInstantiatedTo(1)){
-                SatFactory.addBoolOrArrayEqualTrue(as);
-            }else {
-                SatFactory.addBoolOrArrayEqVar(as, r);
-            }
+        switch (as.length) {
+            case 0:
+                break;
+            /*case 1:
+                solver.post(ICF.arithm(as[0], "=", r));
+                break;
+            case 2:
+                ICF.arithm(as[0], "+", as[1], ">", 0).reifyWith(r);
+                break;*/
+            default:
+                if (r.isInstantiatedTo(1)) {
+                    SatFactory.addBoolOrArrayEqualTrue(as);
+                } else {
+                    SatFactory.addBoolOrArrayEqVar(as, r);
+                }
+                break;
         }
     }
 }

@@ -49,7 +49,24 @@ public class ArrayBoolAndBuilder implements IBuilder {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar r = exps.get(1).boolVarValue(solver);
         if (as.length > 0) {
-            SatFactory.addBoolAndArrayEqVar(as, r);
+
+            switch (as.length) {
+                case 0:
+                    break;
+                /*case 1:
+                    solver.post(ICF.arithm(as[0], "=", r));
+                    break;
+                case 2:
+                    ICF.arithm(as[0], "+", as[1], ">", 1).reifyWith(r);
+                    break;*/
+                default:
+                    if (r.isInstantiatedTo(0)) {
+                        SatFactory.addBoolAndArrayEqualFalse(as);
+                    } else {
+                        SatFactory.addBoolAndArrayEqVar(as, r);
+                    }
+                    break;
+            }
         }
     }
 }

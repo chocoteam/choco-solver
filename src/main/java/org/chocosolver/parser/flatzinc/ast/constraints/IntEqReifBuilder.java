@@ -34,9 +34,11 @@ import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 
 import java.util.List;
@@ -101,6 +103,21 @@ public class IntEqReifBuilder implements IBuilder {
 //                            throw new UnsupportedOperationException("isEntailed not implemented ");
                             return ESat.TRUE;
                         }
+
+                        @Override
+                        public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+                            boolean nrules = ruleStore.addPropagatorActivationRule(this);
+                            if (var == vars[1]) {
+                                if (vars[1].isInstantiatedTo(1)) {
+                                    nrules |= ruleStore.addFullDomainRule(vars[0]);
+                                } else {
+                                    nrules |= ruleStore.addRemovalRule(vars[0], cste);
+                                }
+                            } else {
+                                nrules |= ruleStore.addFullDomainRule(vars[1]);
+                            }
+                            return nrules;
+                        }
                     }));
                 } else {
                     solver.post(new Constraint("reif(a=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
@@ -159,6 +176,36 @@ public class IntEqReifBuilder implements IBuilder {
                         @Override
                         public ESat isEntailed() {
                             throw new UnsupportedOperationException("isEntailed not implemented ");
+                        }
+
+                        @Override
+                        public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+                            boolean nrules = ruleStore.addPropagatorActivationRule(this);
+                            if (var == vars[2]) {
+                                if (vars[2].isInstantiatedTo(1)) {
+                                    nrules |= ruleStore.addFullDomainRule(vars[0]);
+                                    nrules |= ruleStore.addFullDomainRule(vars[1]);
+                                } else {
+                                    if (vars[0].isInstantiated()) {
+                                        nrules |= ruleStore.addRemovalRule(vars[1], vars[0].getValue());
+                                    } else {
+                                        nrules |= ruleStore.addFullDomainRule(vars[1]);
+                                    }
+                                    if (vars[1].isInstantiated()) {
+                                        nrules |= ruleStore.addRemovalRule(vars[0], vars[1].getValue());
+                                    } else {
+                                        nrules |= ruleStore.addFullDomainRule(vars[0]);
+                                    }
+                                }
+                            } else {
+                                if (var == vars[0]) {
+                                    nrules |= ruleStore.addFullDomainRule(vars[1]);
+                                } else if (var == vars[1]) {
+                                    nrules |= ruleStore.addFullDomainRule(vars[0]);
+                                }
+                                nrules |= ruleStore.addFullDomainRule(vars[2]);
+                            }
+                            return nrules;
                         }
                     }));
                 }
