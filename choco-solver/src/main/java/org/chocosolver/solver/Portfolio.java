@@ -484,7 +484,7 @@ public abstract class Portfolio implements Serializable, ISolver {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static class SyncObjective implements IMonitorSolution {
+    class SyncObjective implements IMonitorSolution {
 
         Portfolio mltslvr;
         int widx; // worker idx
@@ -498,21 +498,21 @@ public abstract class Portfolio implements Serializable, ISolver {
 
         @Override
         public synchronized void onSolution() {
+            Number bb;
             switch (policy) {
                 case MINIMIZE:
-                    Number bub = mltslvr.workers[widx].getObjectiveManager().getBestUB();
-                    for (int i = 0; i < mltslvr.nbworkers; i++) {
-                        mltslvr.workers[i].getObjectiveManager().updateBestUB(bub);
-                    }
-                    break;
+                   bb = mltslvr.workers[widx].getObjectiveManager().getBestUB();
+                   for (int i = 0; i < mltslvr.nbworkers; i++) {
+                         mltslvr.workers[i].getObjectiveManager().updateBestUB(bb);
+                   }
+                   break;
                 case MAXIMIZE:
-                    Number blb = mltslvr.workers[widx].getObjectiveManager().getBestLB();
-                    for (int i = 0; i < mltslvr.nbworkers; i++) {
-                        mltslvr.workers[i].getObjectiveManager().updateBestLB(blb);
-                    }
-                    break;
+                   bb = mltslvr.workers[widx].getObjectiveManager().getBestLB();
+                   for (int i = 0; i < mltslvr.nbworkers; i++) {
+                       mltslvr.workers[i].getObjectiveManager().updateBestLB(bb);
+                   }
+                   break;
             }
-
         }
     }
 }
