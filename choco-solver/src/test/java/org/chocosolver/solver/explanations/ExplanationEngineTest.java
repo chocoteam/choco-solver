@@ -46,7 +46,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -192,7 +191,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
             Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
@@ -211,7 +209,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
             Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
@@ -230,7 +227,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
@@ -250,7 +246,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(solver.getMeasures().getFailCount(), 1);

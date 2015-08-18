@@ -79,7 +79,7 @@ public interface Settings extends Serializable {
 
     /**
      * Define the maximum domain size threshold to force integer variable to be enumerated
-     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Solver)}.
+     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, ISolver)}.
      */
     default public int getMaxDomSizeForEnumerated() {
         return 32768;
@@ -154,4 +154,9 @@ public interface Settings extends Serializable {
     default public ICondition getEnvironmentHistorySimulationCondition(){
         return new Except_0();
     }
+
+    default public boolean warnUser(){
+        return true;
+    }
+
 }

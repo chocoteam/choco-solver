@@ -42,8 +42,6 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
@@ -91,8 +89,6 @@ public class SearchLoop implements ISearchLoop {
     //***********************************************************************************
 
     //***********************************************************************************
-
-    protected final static Logger LOGGER = LoggerFactory.getLogger(SearchLoop.class);
 
     /* Reference to the solver */
     final Solver solver;
@@ -468,8 +464,6 @@ public class SearchLoop implements ISearchLoop {
     public void plugSearchMonitor(ISearchMonitor sm) {
         if (!smList.contains(sm)) {
             smList.add(sm);
-        } else {
-            LOGGER.debug("The search monitor already exists and is ignored");
         }
     }
 

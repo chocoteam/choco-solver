@@ -43,8 +43,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -100,7 +98,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     //***********************************************************************************
 
     private static final long serialVersionUID = 2L;
-    protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
 
     // propagator attributes

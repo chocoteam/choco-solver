@@ -33,8 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
 import org.chocosolver.solver.variables.IntVar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.BitSet;
 
@@ -49,7 +47,6 @@ import static java.lang.Integer.MIN_VALUE;
  */
 public class ActivityBasedNeighborhood extends ANeighbor {
 
-    public static final Logger logger = LoggerFactory.getLogger(ActivityBasedNeighborhood.class);
 
     private final int n;
     private final IntVar[] vars;
@@ -78,11 +75,6 @@ public class ActivityBasedNeighborhood extends ANeighbor {
     @Override
     public void restrictLess() {
         nbFixedVars /= 2;
-//        System.out.println("nbFixedVars " + nbFixedVars);
-        if (logger.isDebugEnabled()) {
-            mSolver.getMeasures().updateTimeCount();
-            logger.debug(">> nbFixedVars {}", nbFixedVars);
-        }
     }
 
     @Override

@@ -41,8 +41,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -56,8 +54,6 @@ import java.util.Arrays;
  * @since 05/06/2013
  */
 public class Solution implements Serializable, ICause {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Solution.class);
 
     private static final int NO_ENTRY = Integer.MAX_VALUE;
 
@@ -123,8 +119,8 @@ public class Solution implements Serializable, ICause {
                 }
             }
         }
-        if (warn && LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Some non decision variables are not instantiated in the current solution.");
+        if (warn && solver.getSettings().warnUser()) {
+            System.out.printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
 

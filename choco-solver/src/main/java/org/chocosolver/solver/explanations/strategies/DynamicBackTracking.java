@@ -39,8 +39,6 @@ import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.BitSet;
@@ -53,7 +51,6 @@ import java.util.BitSet;
  */
 public class DynamicBackTracking extends ConflictBackJumping {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicBackTracking.class);
 
     final DBTstrategy dbTstrategy;
     final RuleStore mRuleStore;  // required to continue the computation of the explanations
@@ -86,9 +83,6 @@ public class DynamicBackTracking extends ConflictBackJumping {
             myworld--;
         }
         Decision jmpBck = dec;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
-        }
 
         // now we can explicitly enforce the jump
         dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
@@ -133,9 +127,6 @@ public class DynamicBackTracking extends ConflictBackJumping {
             }
             lastExplanation.remove(dec);
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("DynamicBackTracking>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
 

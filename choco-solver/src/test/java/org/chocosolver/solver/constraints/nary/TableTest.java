@@ -50,7 +50,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -272,7 +271,6 @@ public class TableTest {
                 solver.set(ISF.random_value(vars, seed));
                 long nbs = solver.findAllSolutions();
                 long nbn = solver.getMeasures().getNodeCount();
-                LoggerFactory.getLogger("test").info("{}", solver.getMeasures().toOneLineString());
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Solver tsolver = new Solver(ALGOS[a]);
@@ -281,7 +279,6 @@ public class TableTest {
                         tsolver.set(ISF.random_value(tvars, s));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
-                        LoggerFactory.getLogger("test").info("{}", tsolver.getMeasures().toOneLineString());
                     }
                 }
             }

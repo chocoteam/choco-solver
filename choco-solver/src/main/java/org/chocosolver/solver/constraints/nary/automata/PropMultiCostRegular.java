@@ -82,6 +82,9 @@ import java.util.*;
  * Resource constrained  shortest/longest path problems
  */
 public final class PropMultiCostRegular extends Propagator<IntVar> {
+
+    private static final boolean DEBUG = false;
+
     /**
      * Maximum number of iteration during a bound computation
      */
@@ -942,10 +945,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                LOGGER.error("z[" + i + "] in MCR should be instantiated : " + z[i]);
+                if(DEBUG)System.out.printf(String.format("z[" + i + "] in MCR should be instantiated : " + z[i]));
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
-                LOGGER.error("cost: " + gcost[i] + " != z:" + z[i].getValue());
+                if(DEBUG)System.out.printf(String.format("cost: " + gcost[i] + " != z:" + z[i].getValue()));
                 return false;
             }
 
