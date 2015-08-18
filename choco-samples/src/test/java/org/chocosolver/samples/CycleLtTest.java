@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.util.tools.StatisticUtils.*;
@@ -93,7 +92,6 @@ public class CycleLtTest {
         st.append(StringUtils.pad("(DIFF)", -15, " "));
         float[] times = new float[nbIt];
         for (int j = 0; j < PropagationEngineFactory.values().length; j++) {
-            LoggerFactory.getLogger("test").info(st.toString());
             st.setLength(0);
             st.append("-- ").append(j).append(" ------------------------------------------------------------------------------------\n");
             for (int i = 0; i < nbIt; i++) {
@@ -105,12 +103,10 @@ public class CycleLtTest {
                 times[i] = rand.getMeasures().getInitialPropagationTimeCount();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
-                LoggerFactory.getLogger("test").info(st.toString());
                 st.setLength(0);
             }
             st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));
             st.append(StringUtils.pad(String.format("DEVIATION : %fms ", standarddeviation(prepare(times))), -15, " "));
-            LoggerFactory.getLogger("test").info(st.toString());
             st.setLength(0);
         }
     }
