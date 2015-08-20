@@ -58,27 +58,6 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
 		this.condition = c;
     }
 
-
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
-
-    @Override
-    public String toString() {
-		StringBuilder st = new StringBuilder();
-		st.append("PropCondAllDiffInst(");
-		int i = 0;
-		for (; i < Math.min(4, n); i++) {
-			st.append(vars[i].getName()).append(", ");
-		}
-		if (i < n - 2) {
-			st.append("...,");
-		}
-		st.append(vars[n - 1].getName()).append(")");
-		st.append(condition);
-		return st.toString();
-    }
-
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
