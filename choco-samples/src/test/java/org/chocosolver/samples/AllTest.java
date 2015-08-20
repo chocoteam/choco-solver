@@ -35,7 +35,6 @@ import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -83,7 +82,6 @@ public class AllTest {
 
     @Test(groups = "1m")
     public void mainTest() {
-        LoggerFactory.getLogger("test").info(this.toString());
         prob.readArgs(args);
         prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
         prob.solver.set(new Settings() {

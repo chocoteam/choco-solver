@@ -31,8 +31,6 @@ package org.chocosolver.solver.search.strategy.strategy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -49,8 +47,6 @@ import java.io.Serializable;
  * @since 1 juil. 2010
  */
 public abstract class AbstractStrategy<V extends Variable> implements Serializable {
-
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     protected final V[] vars;
 

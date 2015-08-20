@@ -213,15 +213,13 @@ public class PropMaxBC extends Propagator<IntVar> {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         if (var == vars[0]) {
             if (IntEventType.isInstantiate(evt.getMask())) {
-                for (int i = 1; i < 3; i++) {
-                    // either variable 'i' is the largest
-                    if (vars[i].isInstantiatedTo(var.getValue())) {
-                        newrules |= ruleStore.addFullDomainRule(vars[i]);
-                    } else
-                    // or variable 'i' can't be assigned to 'best'
-                    {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    }
+                if (vars[1].isInstantiated()) {
+                    newrules |= ruleStore.addFullDomainRule(vars[1]);
+                    newrules |= ruleStore.addUpperBoundRule(vars[2]);
+                }
+                if (vars[2].isInstantiated()) {
+                    newrules |= ruleStore.addUpperBoundRule(vars[1]);
+                    newrules |= ruleStore.addFullDomainRule(vars[2]);
                 }
             } else {
                 if (IntEventType.isInclow(evt.getMask())) {
@@ -234,14 +232,30 @@ public class PropMaxBC extends Propagator<IntVar> {
                 }
             }
         } else {
+            int i = var == vars[1] ? 2 : 1;
             if (IntEventType.isInstantiate(evt.getMask())) {
                 newrules |= ruleStore.addFullDomainRule(vars[0]);
+                if (vars[i].isInstantiated()) {
+                    newrules |= ruleStore.addFullDomainRule(vars[i]);
+                } else {
+                    newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                }
             } else {
                 if (IntEventType.isInclow(evt.getMask())) {
-                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                    if (vars[0].isInstantiated()) {
+                        newrules |= ruleStore.addFullDomainRule(vars[0]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[0]);
+                    }
+                    if (vars[i].isInstantiated()) {
+                        newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
+                    }
                 }
                 if (IntEventType.isDecupp(evt.getMask())) {
-                    newrules |= ruleStore.addUpperBoundRule(vars[0]);
+                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                    newrules |= ruleStore.addUpperBoundRule(vars[i]);
                 }
             }
         }

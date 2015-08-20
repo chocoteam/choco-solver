@@ -35,7 +35,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -96,15 +95,12 @@ public class MagicSquareTest {
         ((IntVar) vars[13+offset]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[1+offset]).instantiateTo(6, Cause.Null);
         solver.propagate();
-        LoggerFactory.getLogger("test").error("************************");
         ((IntVar) vars[2+offset]).instantiateTo(12, Cause.Null);
         try {
             solver.propagate();
-            LoggerFactory.getLogger("test").error("************************");
             Assert.fail("should fail");
         } catch (ContradictionException ignored) {
         }
-        LoggerFactory.getLogger("test").error("************************");
     }
 
     @Test(groups = "1s")

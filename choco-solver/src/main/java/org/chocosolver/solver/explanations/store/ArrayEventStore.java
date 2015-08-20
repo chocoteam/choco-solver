@@ -33,8 +33,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by cprudhom on 13/11/14.
@@ -43,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public class ArrayEventStore implements IEventStore {
 
     private static final int SIZE = 128;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArrayEventStore.class);
 
     //*****************************************//
     // STRUCTURES DEDICATED TO EVENT RECORDING //
@@ -75,10 +72,6 @@ public class ArrayEventStore implements IEventStore {
         if (idx >= varChunks.length) {
             increase();
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("WRITE in {} ({}): < {} / {} / {} / {} / {} >", idx, size.getEnvironment().getWorldIndex(), var, cause, mask, one, two, three);
-        }
-
         varChunks[idx] = var;
         cauChunks[idx] = cause;
         masChunks[idx] = mask;

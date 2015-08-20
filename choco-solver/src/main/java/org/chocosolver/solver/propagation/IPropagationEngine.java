@@ -34,8 +34,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -48,28 +46,6 @@ import java.io.Serializable;
  */
 public interface IPropagationEngine extends Serializable {
 
-    final Logger LOGGER = LoggerFactory.getLogger(IPropagationEngine.class);
-
-    public enum Trace {
-        ;
-
-        public static void printPropagation(Variable v, Propagator p) {
-            LOGGER.debug("[P] {}", "(" + v + "::" + p + ")");
-        }
-
-        public static void printModification(Variable v, IEventType e, ICause c) {
-            LOGGER.debug("\t[M] {} {} ({})", v, e, c);
-        }
-
-
-        public static void printSchedule(Propagator p) {
-            LOGGER.debug("\t\t[S] {}", p);
-        }
-
-        public static void printAlreadySchedule(Propagator p) {
-            LOGGER.debug("\t\t[s] {}", p);
-        }
-    }
 
     /**
      * Build up internal structure, if not yet done, in order to allow propagation.

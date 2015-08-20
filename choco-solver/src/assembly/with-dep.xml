@@ -16,22 +16,9 @@
         <dependencySet>
             <outputDirectory>/</outputDirectory>
             <scope>test</scope>
-            <includes>
-                <include>ch.qos.logback:*</include>
-            </includes>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
         </dependencySet>
     </dependencySets>
-    <fileSets>
-    <fileSet>
-        <directory>src/main/resources/</directory>
-        <outputDirectory>/</outputDirectory>
-        <useDefaultExcludes>true</useDefaultExcludes>
-        <includes>
-            <include>logback.xml</include>
-        </includes>
-    </fileSet>
-</fileSets>
 
 </assembly>

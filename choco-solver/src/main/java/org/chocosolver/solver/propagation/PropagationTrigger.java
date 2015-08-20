@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -182,9 +181,6 @@ public class PropagationTrigger implements Serializable {
     }
 
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
-        if (LoggerFactory.getLogger(IPropagationEngine.class).isDebugEnabled()) {
-            LoggerFactory.getLogger(IPropagationEngine.class).debug("[A] {}", toPropagate);
-        }
         if (toPropagate.isStateLess()) {
             toPropagate.setActive();
             toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());

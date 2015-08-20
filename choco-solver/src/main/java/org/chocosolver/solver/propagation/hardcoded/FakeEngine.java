@@ -36,7 +36,6 @@ import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.slf4j.LoggerFactory;
 
 /**
  * An fake propagation engine for debugging uses only.
@@ -61,9 +60,6 @@ class FakeEngine implements IPropagationEngine {
     }
 
     public static void checkIdempotency(Propagator lastProp) throws ContradictionException {
-        if (LoggerFactory.getLogger(IPropagationEngine.class).isDebugEnabled()) {
-            IPropagationEngine.Trace.printPropagation(null, lastProp);
-        }
         switch (lastProp.getSolver().getSettings().getIdempotencyStrategy()) {
             case force:
                 if (lastProp.isActive()) {

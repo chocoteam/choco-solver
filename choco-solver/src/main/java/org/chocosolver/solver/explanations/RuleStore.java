@@ -37,8 +37,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 
@@ -54,7 +52,6 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
 public class RuleStore {
 
     private static final int NO_ENTRY = Integer.MIN_VALUE;
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuleStore.class);
     static final int DM = 15;
     static final int BD = 7;
     static final int UB = 5;
@@ -112,11 +109,6 @@ public class RuleStore {
      * @throws org.chocosolver.solver.exception.SolverException when the type of the variable is neither {@link Variable#BOOL} or {@link Variable#INT}.
      */
     public boolean match(final int idx, final IEventStore eventStore) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MATCH? < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
-                    eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
-        }
-
         lastVar = eventStore.getVariable(idx);
         lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
         lastEvt = eventStore.getEventType(idx);
@@ -212,10 +204,6 @@ public class RuleStore {
      */
     @SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
     public void update(final int idx, final IEventStore eventStore, Explanation explanation) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("UPDATE < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
-                    eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
-        }
         assert lastVar == eventStore.getVariable(idx) : "Wrong variable loaded";
         assert lastEvt == eventStore.getEventType(idx) : "Wrong event loaded";
         if (!lastEvt.equals(FULL_PROPAGATION)) {

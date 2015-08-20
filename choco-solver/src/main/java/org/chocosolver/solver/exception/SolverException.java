@@ -28,9 +28,6 @@
  */
 package org.chocosolver.solver.exception;
 
-import org.chocosolver.solver.Solver;
-import org.slf4j.LoggerFactory;
-
 /**
  * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
  * problem resolution.
@@ -55,7 +52,6 @@ public class SolverException extends RuntimeException {
      * @param message message to print
      */
     public SolverException(String message) {
-//		super(message);
-        LoggerFactory.getLogger(Solver.class).error(message);
+		super(message);
     }
 }

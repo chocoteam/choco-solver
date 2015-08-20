@@ -28,8 +28,6 @@
  */
 package org.chocosolver.memory;
 
-import org.slf4j.LoggerFactory;
-
 /**
  * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
  * problem resolution.
@@ -54,7 +52,6 @@ public class EnvironmentException extends RuntimeException {
      * @param message message to print
      */
     public EnvironmentException(String message) {
-//		super(message);
-        LoggerFactory.getLogger(IEnvironment.class).error(message);
+		super(message);
     }
 }
