@@ -166,18 +166,13 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        if (var == sum) {
-            for (int i = 0; i < vars.length; i++) {
-                if (vars[i] != var) {
-                    newrules |= ruleStore.addFullDomainRule(vars[i]);
-                }
+        for (int i = 0; i < vars.length -1; i++) {
+            if (vars[i] != var) {
+                newrules |= ruleStore.addFullDomainRule(vars[i]);
             }
-        } else {
-            if (var.isInstantiatedTo(1)) {
-                newrules |= ruleStore.addLowerBoundRule(sum);
-            } else {
-                newrules |= ruleStore.addUpperBoundRule(sum);
-            }
+        }
+        if(var != sum) {
+            newrules |= ruleStore.addBoundsRule(sum);
         }
         return newrules;
     }
