@@ -73,7 +73,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            sv.removeFromEnvelope(iv.getValue(), aCause);
+            sv.removeFromEnvelope(iv.getValue(), this);
 			setPassive();
         }
     }
@@ -81,7 +81,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     @Override
     public void propagate(int vidx, int evtmask) throws ContradictionException {
         assert iv.isInstantiated();
-        sv.removeFromEnvelope(iv.getValue(), aCause);
+        sv.removeFromEnvelope(iv.getValue(), this);
 		setPassive();
     }
 

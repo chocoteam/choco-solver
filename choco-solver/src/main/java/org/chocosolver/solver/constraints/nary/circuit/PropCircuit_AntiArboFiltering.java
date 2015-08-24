@@ -69,7 +69,7 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 							if(x==duplicatedNode) {
 								throw new UnsupportedOperationException();
 							}
-							vars[x].removeValue(y, aCause);
+							vars[x].removeValue(y, this);
 						}
 					}
 				}

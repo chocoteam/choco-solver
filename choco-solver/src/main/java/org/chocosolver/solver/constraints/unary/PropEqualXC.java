@@ -57,7 +57,7 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].instantiateTo(constant, aCause);
+        vars[0].instantiateTo(constant, this);
     }
 
     @Override

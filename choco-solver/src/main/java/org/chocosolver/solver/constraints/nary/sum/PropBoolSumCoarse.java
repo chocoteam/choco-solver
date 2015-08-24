@@ -91,20 +91,20 @@ public class PropBoolSumCoarse extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        sum.updateLowerBound(min, aCause);
-        sum.updateUpperBound(max, aCause);
+        sum.updateLowerBound(min, this);
+        sum.updateUpperBound(max, this);
         if (min != max && sum.isInstantiated()) {
             if (sum.getValue() == min) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(0, aCause);
+                        vars[i].instantiateTo(0, this);
                     }
                 }
             }
             if (sum.getValue() == max) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(1, aCause);
+                        vars[i].instantiateTo(1, this);
                     }
                 }
             }

@@ -79,12 +79,12 @@ public class PropAllEqual extends Propagator<SetVar> {
         }
         elementForced = element -> {
             for (int i = 0; i < n; i++) {
-                vars[i].addToKernel(element, aCause);
+                vars[i].addToKernel(element, this);
             }
         };
         elementRemoved = element -> {
             for (int i = 0; i < n; i++) {
-                vars[i].removeFromEnvelope(element, aCause);
+                vars[i].removeFromEnvelope(element, this);
             }
         };
     }
@@ -99,7 +99,7 @@ public class PropAllEqual extends Propagator<SetVar> {
             for (int i = 0; i < n; i++) {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
-                        vars[i2].addToKernel(j, aCause);
+                        vars[i2].addToKernel(j, this);
                     }
                 }
                 // removing elements that are not in all set envelope would be a waste of time

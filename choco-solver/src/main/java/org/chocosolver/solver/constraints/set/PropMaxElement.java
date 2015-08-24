@@ -113,14 +113,14 @@ public class PropMaxElement extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
-            max.updateLowerBound(get(j), aCause);
+            max.updateLowerBound(get(j), this);
         }
         int maxVal = Integer.MIN_VALUE;
         int ub = max.getUB();
         for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             int k = get(j);
             if (k > ub) {
-                set.removeFromEnvelope(j, aCause);
+                set.removeFromEnvelope(j, this);
             } else {
                 if (maxVal < k) {
                     maxVal = k;
@@ -128,7 +128,7 @@ public class PropMaxElement extends Propagator<Variable> {
             }
         }
         if (notEmpty || set.getKernelSize() > 0) {
-            max.updateUpperBound(maxVal, aCause);
+            max.updateUpperBound(maxVal, this);
         }
     }
 

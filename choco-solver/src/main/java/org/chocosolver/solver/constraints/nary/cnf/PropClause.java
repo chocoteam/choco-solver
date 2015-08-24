@@ -107,7 +107,7 @@ public class PropClause extends Propagator<BoolVar> {
             this.fails();
         }
         if (i == nbvars) {
-            vars[otherWL].instantiateTo(1, aCause);
+            vars[otherWL].instantiateTo(1, this);
             setPassive();
         }
     }
@@ -115,7 +115,7 @@ public class PropClause extends Propagator<BoolVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (vars.length == 1) {
-            vars[0].instantiateTo(1, aCause);
+            vars[0].instantiateTo(1, this);
             setPassive();
         } else {
             // search for watch literals and check the clause

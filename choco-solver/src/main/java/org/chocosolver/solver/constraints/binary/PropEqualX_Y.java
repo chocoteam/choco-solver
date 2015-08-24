@@ -55,7 +55,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     // enumerated domains
     private boolean bothEnumerated;
     private IIntDeltaMonitor[] idms;
-    private RemProc rem_proc;
+    private IntProcedure rem_proc;
     private int indexToFilter;
 
     public PropEqualX_Y(IntVar x, IntVar y) {
@@ -67,7 +67,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             idms = new IIntDeltaMonitor[2];
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
-            rem_proc = new RemProc();
+            rem_proc = i -> vars[indexToFilter].removeValue(i, this);
         }
     }
 
@@ -81,8 +81,8 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(y.getLB(), aCause) | y.updateLowerBound(x.getLB(), aCause)) ;
-        while (x.updateUpperBound(y.getUB(), aCause) | y.updateUpperBound(x.getUB(), aCause)) ;
+        while (x.updateLowerBound(y.getLB(), this) | y.updateLowerBound(x.getLB(), this)) ;
+        while (x.updateUpperBound(y.getUB(), this) | y.updateUpperBound(x.getUB(), this)) ;
     }
 
     @Override
@@ -93,13 +93,13 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!(y.contains(val))) {
-                    x.removeValue(val, aCause);
+                    x.removeValue(val, this);
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!(x.contains(val))) {
-                    y.removeValue(val, aCause);
+                    y.removeValue(val, this);
                 }
             }
             idms[0].unfreeze();
@@ -150,13 +150,6 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             if (y.contains(lb)) return true;
         }
         return false;
-    }
-
-    private class RemProc implements IntProcedure {
-        @Override
-        public void execute(int i) throws ContradictionException {
-            vars[indexToFilter].removeValue(i, aCause);
-        }
     }
 
     @Override

@@ -178,7 +178,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         }
                     }
                 }
-                v1.removeValues(vrms, aCause);
+                v1.removeValues(vrms, this);
             } finally {
                 itv1.dispose();
             }
@@ -217,7 +217,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         }
                     }
                 }
-                v0.removeValues(vrms, aCause);
+                v0.removeValues(vrms, this);
             } finally {
                 itv0.dispose();
             }
@@ -277,7 +277,7 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 found = false;
             }
-            v0.removeValues(vrms, aCause);
+            v0.removeValues(vrms, this);
         } finally {
             itv0.dispose();
         }
@@ -305,7 +305,7 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 found = false;
             }
-            v1.removeValues(vrms, aCause);
+            v1.removeValues(vrms, this);
         } finally {
             itv1.dispose();
         }
@@ -325,7 +325,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         vrms.add(val);
                     }
                 }
-                v1.removeValues(vrms, aCause);
+                v1.removeValues(vrms, this);
             } finally {
                 iterator.dispose();
             }
@@ -341,7 +341,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         vrms.add(val);
                     }
                 }
-                v0.removeValues(vrms, aCause);
+                v0.removeValues(vrms, this);
             } finally {
                 iterator.dispose();
             }

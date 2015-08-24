@@ -144,7 +144,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
                     setSupport(tab[i][nva][0]);
                 }
             }
-            vars[i].removeValues(vrms, aCause);
+            vars[i].removeValues(vrms, this);
         }
     }
 
@@ -190,7 +190,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
                 }
             }
         }
-        vars[indexVar].removeValues(vrms, aCause);
+        vars[indexVar].removeValues(vrms, this);
     }
 
 

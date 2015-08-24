@@ -55,7 +55,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     // incremental filtering of enumerated domains
     private boolean bothEnumerated;
     private IIntDeltaMonitor[] idms;
-    private RemProc rem_proc;
+    private IntProcedure rem_proc;
     private int indexToFilter;
 
     @SuppressWarnings({"unchecked"})
@@ -69,7 +69,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             idms = new IIntDeltaMonitor[2];
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
-            rem_proc = new RemProc();
+            rem_proc = i -> vars[indexToFilter].removeValue(cste - i, this);
         }
     }
 
@@ -89,13 +89,13 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(cste - val)) {
-                    x.removeValue(val, aCause);
+                    x.removeValue(val, this);
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!x.contains(cste - val)) {
-                    y.removeValue(val, aCause);
+                    y.removeValue(val, this);
                 }
             }
             idms[0].unfreeze();
@@ -123,8 +123,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(cste - y.getUB(), aCause) | y.updateUpperBound(cste - x.getLB(), aCause)) ;
-        while (x.updateUpperBound(cste - y.getLB(), aCause) | y.updateLowerBound(cste - x.getUB(), aCause)) ;
+        while (x.updateLowerBound(cste - y.getUB(), this) | y.updateUpperBound(cste - x.getLB(), this)) ;
+        while (x.updateUpperBound(cste - y.getLB(), this) | y.updateLowerBound(cste - x.getUB(), this)) ;
     }
 
     @Override
@@ -195,13 +195,6 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     @Override
     public String toString() {
         return vars[0] + " + " + vars[1] + " = " + cste;
-    }
-
-    private class RemProc implements IntProcedure {
-        @Override
-        public void execute(int i) throws ContradictionException {
-            vars[indexToFilter].removeValue(cste - i, aCause);
-        }
     }
 
 }

@@ -143,8 +143,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = LB.get();
         int ub = UB.get();
-        vars[nb_vars].updateLowerBound(lb, aCause);
-        vars[nb_vars].updateUpperBound(ub, aCause);
+        vars[nb_vars].updateLowerBound(lb, this);
+        vars[nb_vars].updateUpperBound(ub, this);
 
         int min = Math.max(vars[nb_vars].getLB(), lb);
         int max = Math.min(vars[nb_vars].getUB(), ub);
@@ -175,7 +175,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
-                    if (v.removeValue(value, aCause)) {
+                    if (v.removeValue(value, this)) {
                         occs[i].add(-1);
                     }
                 }
@@ -190,7 +190,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     k1++;
                 }
                 // and bottom-up shaving
-                while (k1 <= k2 && v.removeValue(values[k1], aCause)) {
+                while (k1 <= k2 && v.removeValue(values[k1], this)) {
                     occs[i].add(-1);
                     k1++;
                 }
@@ -199,7 +199,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     k2--;
                 }
                 // and top bottom shaving
-                while (k2 >= k1 && v.removeValue(values[k2], aCause)) {
+                while (k2 >= k1 && v.removeValue(values[k2], this)) {
                     occs[i].add(-1);
                     k2--;
                 }
@@ -224,7 +224,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     vrms.add(value);
                 }
             }
-            v.removeValues(vrms, aCause);
+            v.removeValues(vrms, this);
             it.dispose();
         }
     }

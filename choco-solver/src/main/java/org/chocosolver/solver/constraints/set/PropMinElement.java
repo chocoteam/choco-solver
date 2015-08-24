@@ -113,14 +113,14 @@ public class PropMinElement extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
-            min.updateUpperBound(get(j), aCause);
+            min.updateUpperBound(get(j), this);
         }
         int minVal = Integer.MAX_VALUE;
         int lb = min.getLB();
         for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             int k = get(j);
             if (k < lb) {
-                set.removeFromEnvelope(j, aCause);
+                set.removeFromEnvelope(j, this);
             } else {
                 if (minVal > k) {
                     minVal = k;
@@ -128,7 +128,7 @@ public class PropMinElement extends Propagator<Variable> {
             }
         }
         if (notEmpty || set.getKernelSize() > 0) {
-            min.updateLowerBound(minVal, aCause);
+            min.updateLowerBound(minVal, this);
         }
     }
 

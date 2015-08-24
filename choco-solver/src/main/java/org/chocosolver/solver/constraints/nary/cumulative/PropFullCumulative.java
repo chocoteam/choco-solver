@@ -147,14 +147,14 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
     protected void propIni() throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            d[i].updateLowerBound(0, aCause); // should even be 1
-            h[i].updateLowerBound(0, aCause);
-            s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), aCause);
-            s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), aCause);
-            e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), aCause);
-            e[i].updateLowerBound(s[i].getLB() + d[i].getLB(), aCause);
-            d[i].updateUpperBound(e[i].getUB() - s[i].getLB(), aCause);
-            d[i].updateLowerBound(e[i].getLB() - s[i].getUB(), aCause);
+            d[i].updateLowerBound(0, this); // should even be 1
+            h[i].updateLowerBound(0, this);
+            s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), this);
+            s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), this);
+            e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), this);
+            e[i].updateLowerBound(s[i].getLB() + d[i].getLB(), this);
+            d[i].updateUpperBound(e[i].getUB() - s[i].getLB(), this);
+            d[i].updateLowerBound(e[i].getLB() - s[i].getUB(), this);
         }
     }
 
@@ -163,7 +163,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
             int capaMax = capa.getUB();
             lastCapaMax.set(capaMax);
             for (int i = 0; i < n; i++) {
-                h[i].updateUpperBound(capaMax, aCause);
+                h[i].updateUpperBound(capaMax, this);
             }
         }
     }

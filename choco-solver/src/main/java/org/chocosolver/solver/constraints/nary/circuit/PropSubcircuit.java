@@ -91,8 +91,8 @@ public class PropSubcircuit extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-            vars[i].updateLowerBound(offset, aCause);
-            vars[i].updateUpperBound(n - 1 + offset, aCause);
+            vars[i].updateLowerBound(offset, this);
+            vars[i].updateUpperBound(n - 1 + offset, this);
             if (vars[i].isInstantiated() && i + offset != vars[i].getValue()) {
                 fixedVar.add(i);
             }
@@ -130,21 +130,21 @@ public class PropSubcircuit extends Propagator<IntVar> {
             contradiction(vars[var], "");
         }
         if (val == start) {
-            length.instantiateTo(size[start].get(), aCause);
+            length.instantiateTo(size[start].get(), this);
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == length.getUB()) {
-                vars[last].instantiateTo(start + offset, aCause);
+                vars[last].instantiateTo(start + offset, this);
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(i + offset, aCause);
+                        vars[i].instantiateTo(i + offset, this);
                     }
                 }
                 setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < length.getLB()) {
-                if (vars[last].removeValue(start + offset, aCause)) {
+                if (vars[last].removeValue(start + offset, this)) {
                     isInst = vars[last].isInstantiated();
                 }
             }

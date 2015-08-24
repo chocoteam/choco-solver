@@ -96,7 +96,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
@@ -105,8 +105,8 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         for (int j = maxVal; j != SetVar.END; j = set.getEnvelopeNext()) {
             maxVal = j;
         }
-        iv.updateUpperBound(maxVal, aCause);
-        iv.updateLowerBound(minVal, aCause);
+        iv.updateUpperBound(maxVal, this);
+        iv.updateLowerBound(minVal, this);
         minVal = iv.getLB();
         maxVal = iv.getUB();
         while (minVal <= maxVal && !set.envelopeContains(minVal)) {
@@ -116,7 +116,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
             iv.updateUpperBound(--maxVal, this);
         }
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
@@ -143,7 +143,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 1) {
             if (iv.isInstantiated()) {
-                set.addToKernel(iv.getValue(), aCause);
+                set.addToKernel(iv.getValue(), this);
                 setPassive();
             } else if (!iv.contains(watchLit1)) {
                 setWatchLiteral(watchLit2);
@@ -183,8 +183,8 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         if (cnt == set.getEnvelopeSize()) {
             this.contradiction(iv, "Inconsistent");
         }
-        set.addToKernel(otherWL, aCause);
-        iv.instantiateTo(otherWL, aCause);
+        set.addToKernel(otherWL, this);
+        iv.instantiateTo(otherWL, this);
         setPassive();
     }
 

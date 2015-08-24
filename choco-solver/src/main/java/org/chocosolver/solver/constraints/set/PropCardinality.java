@@ -88,20 +88,20 @@ public class PropCardinality extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         int k = set.getKernelSize();
-        card.updateLowerBound(k, aCause);
+        card.updateLowerBound(k, this);
         int e = set.getEnvelopeSize();
-        card.updateUpperBound(e, aCause);
+        card.updateUpperBound(e, this);
         if (card.isInstantiated()) {
             int c = card.getValue();
             if (c == k) {
                 for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
                     if (!set.kernelContains(j)) {
-                        set.removeFromEnvelope(j, aCause);
+                        set.removeFromEnvelope(j, this);
                     }
                 }
             } else if (c == e) {
                 for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
-                    set.addToKernel(j, aCause);
+                    set.addToKernel(j, this);
                 }
             }
         }

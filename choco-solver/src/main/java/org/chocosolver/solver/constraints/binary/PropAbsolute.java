@@ -28,6 +28,7 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -54,11 +55,13 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected IIntDeltaMonitor[] idms;
     protected IntVar X, Y;
     protected boolean bothEnumerated;
+    protected ICause cause;
 
     public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
         this.X = vars[0];
         this.Y = vars[1];
+        this.cause = this;
         bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();
         if (bothEnumerated) {
             rem_proc = new RemProc();
@@ -111,7 +114,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        X.updateLowerBound(0, aCause);
+        X.updateLowerBound(0, this);
         setBounds();
         if (bothEnumerated) {
             enumeratedFiltering();
@@ -135,27 +138,27 @@ public class PropAbsolute extends Propagator<IntVar> {
         // X = |Y|
         int max = X.getUB();
         int min = X.getLB();
-        Y.updateUpperBound(max, aCause);
-        Y.updateLowerBound(-max, aCause);
-        Y.removeInterval(1 - min, min - 1, aCause);
+        Y.updateUpperBound(max, this);
+        Y.updateLowerBound(-max, this);
+        Y.removeInterval(1 - min, min - 1, this);
         /////////////////////////////////////////////////
         int prevLB = X.getLB();
         int prevUB = X.getUB();
         min = Y.getLB();
         max = Y.getUB();
         if (max <= 0) {
-            X.updateLowerBound(-max, aCause);
-            X.updateUpperBound(-min, aCause);
+            X.updateLowerBound(-max, this);
+            X.updateUpperBound(-min, this);
         } else if (min >= 0) {
-            X.updateLowerBound(min, aCause);
-            X.updateUpperBound(max, aCause);
+            X.updateLowerBound(min, this);
+            X.updateUpperBound(max, this);
         } else {
             if (Y.hasEnumeratedDomain()) {
                 int mP = Y.nextValue(-1);
                 int mN = -Y.previousValue(1);
-                X.updateLowerBound(Math.min(mP, mN), aCause);
+                X.updateLowerBound(Math.min(mP, mN), this);
             }
-            X.updateUpperBound(Math.max(-min, max), aCause);
+            X.updateUpperBound(Math.max(-min, max), this);
         }
         if (prevLB != X.getLB() || prevUB != X.getUB()) setBounds();
     }
@@ -165,14 +168,14 @@ public class PropAbsolute extends Propagator<IntVar> {
         int max = X.getUB();
         for (int v = min; v <= max; v = X.nextValue(v)) {
             if (!(Y.contains(v) || Y.contains(-v))) {
-                X.removeValue(v, aCause);
+                X.removeValue(v, this);
             }
         }
         min = Y.getLB();
         max = Y.getUB();
         for (int v = min; v <= max; v = Y.nextValue(v)) {
             if (!(X.contains(Math.abs(v)))) {
-                Y.removeValue(v, aCause);
+                Y.removeValue(v, this);
             }
         }
     }
@@ -189,11 +192,11 @@ public class PropAbsolute extends Propagator<IntVar> {
         @Override
         public void execute(int val) throws ContradictionException {
             if (var == 0) {
-                vars[1].removeValue(val, aCause);
-                vars[1].removeValue(-val, aCause);
+                vars[1].removeValue(val, cause);
+                vars[1].removeValue(-val, cause);
             } else {
                 if (!vars[1].contains(-val))
-                    vars[0].removeValue(Math.abs(val), aCause);
+                    vars[0].removeValue(Math.abs(val), cause);
             }
         }
     }

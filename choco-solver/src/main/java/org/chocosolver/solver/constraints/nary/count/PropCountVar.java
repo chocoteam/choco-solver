@@ -114,21 +114,21 @@ public class PropCountVar extends Propagator<IntVar> {
                 }
             }
             if (cardLB > max || cardUB < min) {
-                val.removeValue(value, aCause);
+                val.removeValue(value, this);
             } else {
                 minCard = Math.min(minCard, min);
                 maxCard = Math.max(maxCard, max);
             }
         }
-        card.updateLowerBound(minCard, aCause);
-        card.updateUpperBound(maxCard, aCause);
+        card.updateLowerBound(minCard, this);
+        card.updateUpperBound(maxCard, this);
         if (val.isInstantiated() && card.isInstantiated()) {
             int nb = card.getValue();
             int value = val.getValue();
             if (maxCard == nb) {
                 for (int i = 0; i < n; i++) {
                     if (vars[i].contains(value)) {
-                        vars[i].instantiateTo(value, aCause);
+                        vars[i].instantiateTo(value, this);
                     }
                 }
                 setPassive();
@@ -139,11 +139,11 @@ public class PropCountVar extends Propagator<IntVar> {
                         if (vars[i].isInstantiated()) {
                             nbInst++;
                         } else {
-                            vars[i].removeValue(value, aCause);
+                            vars[i].removeValue(value, this);
                         }
                     }
                 }
-                card.instantiateTo(nbInst, aCause);
+                card.instantiateTo(nbInst, this);
             }
         }
     }

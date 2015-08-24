@@ -87,8 +87,8 @@ public class PropBoolChannel extends Propagator<Variable> {
         this.sdm = this.set.monitorDelta(this);
         this.offSet = offSet;
         // PROCEDURES
-        setForced = element -> bools[element - offSet].setToTrue(aCause);
-        setRemoved = element -> bools[element - offSet].setToFalse(aCause);
+        setForced = element -> bools[element - offSet].setToTrue(this);
+        setRemoved = element -> bools[element - offSet].setToFalse(this);
     }
 
     //***********************************************************************************
@@ -100,21 +100,21 @@ public class PropBoolChannel extends Propagator<Variable> {
         for (int i = 0; i < n; i++) {
             if (bools[i].isInstantiated()) {
                 if (bools[i].getValue() == 0) {
-                    set.removeFromEnvelope(i + offSet, aCause);
+                    set.removeFromEnvelope(i + offSet, this);
                 } else {
-                    set.addToKernel(i + offSet, aCause);
+                    set.addToKernel(i + offSet, this);
                 }
             } else if (!set.envelopeContains(i + offSet)) {
-                bools[i].setToFalse(aCause);
+                bools[i].setToFalse(this);
             }
         }
         for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             if (j < offSet || j >= n + offSet) {
-                set.removeFromEnvelope(j, aCause);
+                set.removeFromEnvelope(j, this);
             }
         }
         for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
-            bools[j - offSet].setToTrue(aCause);
+            bools[j - offSet].setToTrue(this);
         }
         sdm.unfreeze();
     }
@@ -123,9 +123,9 @@ public class PropBoolChannel extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         if (i < n) {
             if (bools[i].getValue() == 0) {
-                set.removeFromEnvelope(i + offSet, aCause);
+                set.removeFromEnvelope(i + offSet, this);
             } else {
-                set.addToKernel(i + offSet, aCause);
+                set.addToKernel(i + offSet, this);
             }
         } else {
             sdm.freeze();

@@ -104,12 +104,12 @@ public class PropKLoops extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         int nbMin = nbMinLoops.get();
         int nbMax = nbMin + possibleLoops.getSize();
-        vars[n].updateLowerBound(nbMin, aCause);
-        vars[n].updateUpperBound(nbMax, aCause);
+        vars[n].updateLowerBound(nbMin, this);
+        vars[n].updateUpperBound(nbMax, this);
         if (vars[n].isInstantiated() && nbMin != nbMax) {
             if (vars[n].getValue() == nbMax) {
                 for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
-                    vars[i].instantiateTo(i + offSet, aCause);
+                    vars[i].instantiateTo(i + offSet, this);
                     assert vars[i].isInstantiatedTo(i + offSet);
                     nbMinLoops.add(1);
                 }
@@ -117,7 +117,7 @@ public class PropKLoops extends Propagator<IntVar> {
                 setPassive();
             } else if (vars[n].getValue() == nbMin) {
                 for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
-                    if (vars[i].removeValue(i + offSet, aCause)) {
+                    if (vars[i].removeValue(i + offSet, this)) {
                         possibleLoops.remove(i);
                     }
                 }

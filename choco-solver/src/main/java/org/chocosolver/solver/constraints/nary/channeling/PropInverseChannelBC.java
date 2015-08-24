@@ -82,10 +82,10 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
-                X[i].updateLowerBound(minX, aCause);
-                X[i].updateUpperBound(n - 1 + minX, aCause);
-                Y[i].updateLowerBound(minY, aCause);
-                Y[i].updateUpperBound(n - 1 + minY, aCause);
+                X[i].updateLowerBound(minX, this);
+                X[i].updateUpperBound(n - 1 + minX, this);
+                Y[i].updateLowerBound(minY, this);
+                Y[i].updateUpperBound(n - 1 + minY, this);
             }
             toCompute.clear();
             for (int i = 0; i < n; i++) {
@@ -121,7 +121,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         int max = X[var].getUB();
         for (int v = min; v <= max; v = X[var].nextValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
-                X[var].removeValue(v, aCause);
+                X[var].removeValue(v, this);
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -129,7 +129,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         }
         for (int v = max; v >= min; v = X[var].previousValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
-                X[var].removeValue(v, aCause);
+                X[var].removeValue(v, this);
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -143,7 +143,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         int max = Y[var].getUB();
         for (int v = min; v <= max; v = Y[var].nextValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
-                Y[var].removeValue(v, aCause);
+                Y[var].removeValue(v, this);
                 toCompute.set(v - minY);
             } else {
                 break;
@@ -151,7 +151,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         }
         for (int v = max; v >= min; v = Y[var].previousValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
-                Y[var].removeValue(v, aCause);
+                Y[var].removeValue(v, this);
                 toCompute.set(v - minY);
             } else {
                 break;

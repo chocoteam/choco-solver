@@ -91,7 +91,7 @@ public class PropAMNV extends Propagator<IntVar> {
         do {
             heur.computeMIS();
             for (R rule : rules) {
-                rule.filter(vars, graph, heur, aCause);
+                rule.filter(vars, graph, heur, this);
             }
         } while (heur.hasNextMIS());
     }

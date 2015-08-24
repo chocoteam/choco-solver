@@ -86,8 +86,8 @@ public class PropInverse extends Propagator<SetVar> {
         for (int i = 0; i < n + n2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> toFilter[element - offSet].addToKernel(idx, aCause);
-        elementRemoved = element -> toFilter[element - offSet].removeFromEnvelope(idx, aCause);
+        elementForced = element -> toFilter[element - offSet].addToKernel(idx, this);
+        elementRemoved = element -> toFilter[element - offSet].removeFromEnvelope(idx, this);
     }
 
     //***********************************************************************************
@@ -99,21 +99,21 @@ public class PropInverse extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].envelopeContains(i + offSet1)) {
-                    sets[i].removeFromEnvelope(j, aCause);
+                    sets[i].removeFromEnvelope(j, this);
                 }
             }
             for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
-                invsets[j - offSet2].addToKernel(i + offSet1, aCause);
+                invsets[j - offSet2].addToKernel(i + offSet1, this);
             }
         }
         for (int i = 0; i < n2; i++) {
             for (int j=invsets[i].getEnvelopeFirst(); j!=SetVar.END; j=invsets[i].getEnvelopeNext()) {
                 if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].envelopeContains(i + offSet2)) {
-                    invsets[i].removeFromEnvelope(j, aCause);
+                    invsets[i].removeFromEnvelope(j, this);
                 }
             }
             for (int j=invsets[i].getKernelFirst(); j!=SetVar.END; j=invsets[i].getKernelNext()) {
-                sets[j - offSet1].addToKernel(i + offSet2, aCause);
+                sets[j - offSet1].addToKernel(i + offSet2, this);
             }
         }
         for (int i = 0; i < n + n2; i++) {

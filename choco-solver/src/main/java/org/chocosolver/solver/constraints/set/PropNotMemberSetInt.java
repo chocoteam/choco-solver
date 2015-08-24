@@ -63,8 +63,8 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
         super(new SetVar[]{setVar}, PropagatorPriority.UNARY, true);
         this.iv = intVar;
         this.sv = setVar;
-        this.sdm = sv.monitorDelta(aCause);
-        this.elemRem = i -> iv.removeValue(i, aCause);
+        this.sdm = sv.monitorDelta(this);
+        this.elemRem = i -> iv.removeValue(i, this);
 	}
 
 	//***********************************************************************************
@@ -79,7 +79,7 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int v=sv.getKernelFirst();v!=SetVar.END;v=sv.getKernelNext()){
-			iv.removeValue(v,aCause);
+			iv.removeValue(v, this);
 		}
 		if(sv.isInstantiated()) setPassive();
 		sdm.unfreeze();

@@ -104,7 +104,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private short state;  // 0 : new -- 1 : active -- 2 : passive
     private Operation[] operations; // propagator state operations
     private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
-    protected Propagator aCause; // cause of variable modifications. The default value is 'this"
     protected final PropagatorPriority priority;
     protected final boolean reactToFineEvt;
     // references
@@ -136,7 +135,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
-        this.aCause = this;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
         this.vars = vars;
@@ -411,7 +409,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        contradiction(null, this.getClass().getSimpleName()+" has failed");
+        contradiction(null, this.getClass().getSimpleName() + " has failed");
     }
 
     /**
@@ -422,7 +420,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(aCause, variable, message);
+        solver.getEngine().fails(this, variable, message);
     }
 
     @Override

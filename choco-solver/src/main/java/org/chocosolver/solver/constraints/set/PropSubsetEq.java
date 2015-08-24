@@ -75,8 +75,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
         for (int i = 0; i < 2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> vars[1].addToKernel(element, aCause);
-        elementRemoved = element -> vars[0].removeFromEnvelope(element, aCause);
+        elementForced = element -> vars[1].addToKernel(element, this);
+        elementRemoved = element -> vars[0].removeFromEnvelope(element, this);
     }
 
     //***********************************************************************************
@@ -94,11 +94,11 @@ public class PropSubsetEq extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
-            vars[1].addToKernel(j, aCause);
+            vars[1].addToKernel(j, this);
         }
         for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
             if (!vars[1].envelopeContains(j))
-                vars[0].removeFromEnvelope(j, aCause);
+                vars[0].removeFromEnvelope(j, this);
         }
         sdm[0].unfreeze();
         sdm[1].unfreeze();

@@ -59,7 +59,7 @@ public class PropNotEmpty extends Propagator<SetVar> {
 		if(e==0){
 			contradiction(vars[0],"");
 		}else if(e==1){
-			vars[0].addToKernel(vars[0].getEnvelopeFirst(),aCause);
+			vars[0].addToKernel(vars[0].getEnvelopeFirst(), this);
 		}
 		if(vars[0].getKernelSize()>0){
 			setPassive();

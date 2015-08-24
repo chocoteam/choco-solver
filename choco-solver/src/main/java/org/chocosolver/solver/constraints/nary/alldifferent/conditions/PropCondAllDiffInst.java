@@ -70,7 +70,7 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
 					int val = vars[vidx].getValue();
 					for (int i = 0; i < n; i++) {
 						if (i != vidx) {
-							if (vars[i].removeValue(val, aCause)) {
+							if (vars[i].removeValue(val, this)) {
 								if (vars[i].isInstantiated()) {
 									toCheck.push(i);
 								}

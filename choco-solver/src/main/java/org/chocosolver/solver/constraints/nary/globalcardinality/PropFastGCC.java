@@ -175,19 +175,19 @@ public class PropFastGCC extends Propagator<IntVar> {
     private boolean filter() throws ContradictionException {
         boolean again = false;
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
-            again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
-            again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
+            again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), this);
+            again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), this);
             if (vars[n + i].isInstantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
-                        again |= vars[j].instantiateTo(values[i], aCause);
+                        again |= vars[j].instantiateTo(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].getSize() == vars[n + i].getUB()) {
                     for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
-                        again |= vars[var].removeValue(values[i], aCause);
+                        again |= vars[var].removeValue(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
@@ -217,7 +217,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 boolean b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
                 while (b) {
                     useful = true;
-                    vars[var].removeValue(lb, aCause);
+                    vars[var].removeValue(lb, this);
                     lb = vars[var].getLB();
                     index = -1;
                     if (map.containsKey(lb)) {
@@ -233,7 +233,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
                 while (b) {
                     useful = true;
-                    vars[var].removeValue(ub, aCause);
+                    vars[var].removeValue(ub, this);
                     ub = vars[var].getUB();
                     index = -1;
                     if (map.containsKey(ub)) {

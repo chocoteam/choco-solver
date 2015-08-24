@@ -99,8 +99,8 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			for (int i = 0; i < n; i++) {
-				vars[i].updateLowerBound(offSet, aCause);
-				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+				vars[i].updateLowerBound(offSet, this);
+				vars[i].updateUpperBound(n - 1 + offSet, this);
 			}
 		}
 		switch (conf){
@@ -220,7 +220,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				if(to==n){
 					to=source;
 				}
-				vars[from].removeValue(to+offSet,aCause);
+				vars[from].removeValue(to+offSet, this);
 				mates[node].remove(e);
 			}
 		}
@@ -244,7 +244,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 							if(val==n){
 								val = source;
 							}
-							vars[a/n2-1].removeValue(val+offSet,aCause);
+							vars[a/n2-1].removeValue(val+offSet, this);
 						}
 					}
 					mates[x].clear();
@@ -296,7 +296,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 						size++;
 					}
 					if(size>2){
-						vars[in].removeValue(outDoor+offSet,aCause);
+						vars[in].removeValue(outDoor+offSet, this);
 					}
 				}
 			}
@@ -307,7 +307,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int sx = sccOf[x];
 		for(int i=0; i<n; i++){
 			if(sccOf[i]==sx){
-				vars[i].removeValue(x+offSet,aCause);
+				vars[i].removeValue(x+offSet, this);
 			}
 		}
 	}
@@ -318,7 +318,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int ub = vars[x].getUB();
 		for(int v=lb;v<=ub;v=vars[x].nextValue(v)){
 			if(sccOf[v-offSet]==sx){
-				vars[x].removeValue(v,aCause);
+				vars[x].removeValue(v, this);
 			}
 		}
 	}

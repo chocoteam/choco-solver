@@ -101,7 +101,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             int val = vars[vidx].getValue();
             for (int i = 0; i < n; i++) {
                 if (i != vidx) {
-                    if (vars[i].removeValue(val, aCause) && vars[i].isInstantiated()) {
+                    if (vars[i].removeValue(val, this) && vars[i].isInstantiated()) {
                         toCheck.push(i);
                     }
                 }

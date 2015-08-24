@@ -86,7 +86,7 @@ public class PropRegular extends Propagator<IntVar> {
             idms[i].forEachRemVal(rem_proc.set(i));
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
                 if (!graph.hasSupport(i, j)) {
-                    vars[i].removeValue(j, aCause);
+                    vars[i].removeValue(j, this);
                 }
             }
             idms[i].unfreeze();

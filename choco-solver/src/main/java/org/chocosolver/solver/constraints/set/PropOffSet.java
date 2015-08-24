@@ -64,8 +64,8 @@ public class PropOffSet extends Propagator<SetVar> {
         sdm = new ISetDeltaMonitor[2];
         sdm[0] = vars[0].monitorDelta(this);
         sdm[1] = vars[1].monitorDelta(this);
-        this.forced = i -> tmpSet.addToKernel(i + tmp, aCause);
-        this.removed = i -> tmpSet.removeFromEnvelope(i + tmp, aCause);
+        this.forced = i -> tmpSet.addToKernel(i + tmp, this);
+        this.removed = i -> tmpSet.removeFromEnvelope(i + tmp, this);
     }
 
     //***********************************************************************************
@@ -76,20 +76,20 @@ public class PropOffSet extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         // kernel
         for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
-            vars[1].addToKernel(j + offSet, aCause);
+            vars[1].addToKernel(j + offSet, this);
         }
         for (int j = vars[1].getKernelFirst(); j != SetVar.END; j = vars[1].getKernelNext()) {
-            vars[0].addToKernel(j - offSet, aCause);
+            vars[0].addToKernel(j - offSet, this);
         }
         // envelope
         for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
             if (!vars[1].envelopeContains(j + offSet)) {
-                vars[0].removeFromEnvelope(j, aCause);
+                vars[0].removeFromEnvelope(j, this);
             }
         }
         for (int j = vars[1].getEnvelopeFirst(); j != SetVar.END; j = vars[1].getEnvelopeNext()) {
             if (!vars[0].envelopeContains(j - offSet)) {
-                vars[1].removeFromEnvelope(j, aCause);
+                vars[1].removeFromEnvelope(j, this);
             }
         }
         sdm[0].unfreeze();

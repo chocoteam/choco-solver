@@ -177,13 +177,13 @@ public class PropLexChain extends Propagator<IntVar> {
     public void boundsLex(int[] a, IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         while (i < N && a[i] == b[i]) {
-            x[i].updateLowerBound(a[i], aCause);
-            x[i].updateUpperBound(b[i], aCause);
+            x[i].updateLowerBound(a[i], this);
+            x[i].updateUpperBound(b[i], this);
             i++;
         }
         if (i < N) {
-            x[i].updateLowerBound(a[i], aCause);
-            x[i].updateUpperBound(b[i], aCause);
+            x[i].updateLowerBound(a[i], this);
+            x[i].updateUpperBound(b[i], this);
         }
         if (i == N || x[i].nextValue(a[i]) < b[i]) {
             return;
@@ -191,13 +191,13 @@ public class PropLexChain extends Propagator<IntVar> {
         i++;
         while (i < N && x[i].getLB() == b[i] && x[i].getUB() == a[i]) {
             if (x[i].hasEnumeratedDomain()) {
-                x[i].removeInterval(b[i] + 1, a[i] - 1, aCause);
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
             i++;
         }
         if (i < N) {
             if (x[i].hasEnumeratedDomain()) {
-                x[i].removeInterval(b[i] + 1, a[i] - 1, aCause);
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
         }
     }

@@ -91,7 +91,7 @@ public class PropBinFC extends PropBinCSP {
                     vrms.add(val);
                 }
             }
-            v1.removeValues(vrms, aCause);
+            v1.removeValues(vrms, this);
         } finally {
             values.dispose();
         }
@@ -109,7 +109,7 @@ public class PropBinFC extends PropBinCSP {
                     vrms.add(val);
                 }
             }
-            v0.removeValues(vrms, aCause);
+            v0.removeValues(vrms, this);
         } finally {
             values.dispose();
         }

@@ -95,14 +95,14 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
                         if (s == 0) {
                             contradiction(vars[i], "");
                         } else if (s == 1) {
-                            vars[i].addToKernel(vars[i].getEnvelopeFirst(), aCause);
+                            vars[i].addToKernel(vars[i].getEnvelopeFirst(), this);
                         }
                     }
                 }
             }
         }
         if (vars[v].getEnvelopeSize() == 1 && emptySetIndex.get() != -1) {
-            vars[v].addToKernel(vars[v].getEnvelopeFirst(), aCause);
+            vars[v].addToKernel(vars[v].getEnvelopeFirst(), this);
         }
     }
 

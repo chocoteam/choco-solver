@@ -68,8 +68,8 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB(), aCause);
-        y.updateUpperBound(x.getUB(), aCause);
+        x.updateLowerBound(y.getLB(), this);
+        y.updateUpperBound(x.getUB(), this);
         if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
@@ -78,9 +78,9 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) {
-            y.updateUpperBound(x.getUB(), aCause);
+            y.updateUpperBound(x.getUB(), this);
         } else {
-            x.updateLowerBound(y.getLB(), aCause);
+            x.updateLowerBound(y.getLB(), this);
         }
         if (x.getLB() >= y.getUB()) {
             this.setPassive();

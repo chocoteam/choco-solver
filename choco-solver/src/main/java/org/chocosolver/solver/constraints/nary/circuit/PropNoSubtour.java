@@ -97,9 +97,9 @@ public class PropNoSubtour extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-            vars[i].removeValue(i + offset, aCause);
-            vars[i].updateLowerBound(offset, aCause);
-            vars[i].updateUpperBound(n - 1 + offset, aCause);
+            vars[i].removeValue(i + offset, this);
+            vars[i].updateLowerBound(offset, this);
+            vars[i].updateUpperBound(n - 1 + offset, this);
             if (vars[i].isInstantiated()) {
                 fixedVar.add(i);
             }
@@ -140,12 +140,12 @@ public class PropNoSubtour extends Propagator<IntVar> {
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
-                vars[last].instantiateTo(start + offset, aCause);
+                vars[last].instantiateTo(start + offset, this);
                 setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < n) {
-                if (vars[last].removeValue(start + offset, aCause)) {
+                if (vars[last].removeValue(start + offset, this)) {
                     isInst = vars[last].isInstantiated();
                 }
             }

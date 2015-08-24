@@ -163,7 +163,7 @@ public final class PropSort extends Propagator<IntVar> {
         /////////////////////////////////////////////////////////////
 
         for (i = 0; i < this.n; i++) {
-            y[i].updateUpperBound(x[this.f[i]].getUB(), aCause);
+            y[i].updateUpperBound(x[this.f[i]].getUB(), this);
         }
 
         /////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ public final class PropSort extends Propagator<IntVar> {
         /////////////////////////////////////////////////////////////
 
         for (i = 0; i < this.n; i++) {
-            y[i].updateLowerBound(x[this.fPrime[i]].getLB(), aCause);
+            y[i].updateLowerBound(x[this.fPrime[i]].getLB(), this);
         }
 
         /////////////////////////////////////////////////////////////
@@ -233,7 +233,7 @@ public final class PropSort extends Propagator<IntVar> {
                 }
                 // scan the sequence of the ys of the connected component, until one becomes greater than or equal to x
                 assert (this.sccSequences[i][k] != -1);
-                x[jprime].updateLowerBound(y[this.sccSequences[i][k]].getLB(), aCause);
+                x[jprime].updateLowerBound(y[this.sccSequences[i][k]].getLB(), this);
             }
         }
 
@@ -256,18 +256,18 @@ public final class PropSort extends Propagator<IntVar> {
                 }
                 // scan the sequence of the ys of the connected component, until one becomes lower than or equal to x
                 assert (this.sccSequences[i][k] != -1);
-                x[jprime].updateUpperBound(y[this.sccSequences[i][k]].getUB(), aCause);
+                x[jprime].updateUpperBound(y[this.sccSequences[i][k]].getUB(), this);
             }
         }
     }
 
     private void normalize(IntVar[] y) throws ContradictionException {
         for (int i = 1; i < this.n; i++) {
-            y[i].updateLowerBound(y[i - 1].getLB(), aCause);
+            y[i].updateLowerBound(y[i - 1].getLB(), this);
         }
 
         for (int i = this.n - 2; i >= 0; i--) {
-            y[i].updateUpperBound(y[i + 1].getUB(), aCause);
+            y[i].updateUpperBound(y[i + 1].getUB(), this);
         }
     }
 

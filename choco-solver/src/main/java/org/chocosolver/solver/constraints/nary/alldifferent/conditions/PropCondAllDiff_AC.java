@@ -84,7 +84,7 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
                 vs[nb] = v;
             }
         }
-        filter = new AlgoAllDiffAC(vs, aCause);
+        filter = new AlgoAllDiffAC(vs, this);
         filter.propagate();
     }
 

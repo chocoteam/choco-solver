@@ -96,7 +96,7 @@ public class PropBinAC3 extends PropBinCSP {
             }
             nbs = 0;
         }
-        v1.removeValues(vrms, aCause);
+        v1.removeValues(vrms, this);
         itv1.dispose();
     }
 
@@ -124,7 +124,7 @@ public class PropBinAC3 extends PropBinCSP {
             }
             nbs = 0;
         }
-        v0.removeValues(vrms, aCause);
+        v0.removeValues(vrms, this);
         itv0.dispose();
     }
 

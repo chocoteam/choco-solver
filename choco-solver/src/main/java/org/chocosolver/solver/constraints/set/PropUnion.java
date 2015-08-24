@@ -88,15 +88,15 @@ public class PropUnion extends Propagator<SetVar> {
             if (mate == -1) {
                 contradiction(vars[k], "");
             } else if (mate != -2) {
-                vars[mate].addToKernel(element, aCause);
+                vars[mate].addToKernel(element, this);
             }
         };
         unionRemoved = element -> {
             for (int i = 0; i < k; i++) {
-                vars[i].removeFromEnvelope(element, aCause);
+                vars[i].removeFromEnvelope(element, this);
             }
         };
-        setForced = element -> vars[k].addToKernel(element, aCause);
+        setForced = element -> vars[k].addToKernel(element, this);
         setRemoved = element -> {
             if (vars[k].envelopeContains(element)) {
                 int mate = -1;
@@ -110,9 +110,9 @@ public class PropUnion extends Propagator<SetVar> {
                     }
                 }
                 if (mate == -1) {
-                    vars[k].removeFromEnvelope(element, aCause);
+                    vars[k].removeFromEnvelope(element, this);
                 } else if (mate != -2 && vars[k].kernelContains(element)) {
-                    vars[mate].addToKernel(element, aCause);
+                    vars[mate].addToKernel(element, this);
                 }
             }
         };
@@ -128,10 +128,10 @@ public class PropUnion extends Propagator<SetVar> {
             SetVar union = vars[k];
             for (int i = 0; i < k; i++) {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext())
-                    union.addToKernel(j, aCause);
+                    union.addToKernel(j, this);
                 for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
                     if (!union.envelopeContains(j))
-                        vars[i].removeFromEnvelope(j, aCause);
+                        vars[i].removeFromEnvelope(j, this);
             }
             for (int j = union.getEnvelopeFirst(); j != SetVar.END; j = union.getEnvelopeNext()) {
                 if (union.kernelContains(j)) {
@@ -148,7 +148,7 @@ public class PropUnion extends Propagator<SetVar> {
                     if (mate == -1) {
                         contradiction(vars[k], "");
                     } else if (mate != -2) {
-                        vars[mate].addToKernel(j, aCause);
+                        vars[mate].addToKernel(j, this);
                     }
                 } else {
                     int mate = -1;
@@ -158,7 +158,7 @@ public class PropUnion extends Propagator<SetVar> {
                             break;
                         }
                     }
-                    if (mate == -1) union.removeFromEnvelope(j, aCause);
+                    if (mate == -1) union.removeFromEnvelope(j, this);
                 }
             }
             // ------------------

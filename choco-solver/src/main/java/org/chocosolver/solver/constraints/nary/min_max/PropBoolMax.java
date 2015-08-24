@@ -66,7 +66,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
                     x2 = i;
                 }
             } else if (vars[i].getValue() == 1) {
-                if (vars[n].instantiateTo(1, aCause)) {
+                if (vars[n].instantiateTo(1, this)) {
                     setPassive();
                     return;
                 }
@@ -80,7 +80,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
             filter();
         } else {
             if (vars[idxVarInProp].isInstantiatedTo(1)) {
-                if (vars[n].instantiateTo(1, aCause)) {
+                if (vars[n].instantiateTo(1, this)) {
                     setPassive();
                 }
             } else if (idxVarInProp == x1 || idxVarInProp == x2) {
@@ -101,20 +101,20 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     public void filter() throws ContradictionException {
         if (x1 == -1) {
-            if (vars[n].instantiateTo(0, aCause)) {
+            if (vars[n].instantiateTo(0, this)) {
                 setPassive();
                 return;
             }
         }
         if (x2 == -1 && vars[n].isInstantiatedTo(1)) {
-            if (vars[x1].instantiateTo(1, aCause)) {
+            if (vars[x1].instantiateTo(1, this)) {
                 setPassive();
                 return;
             }
         }
         if (vars[n].isInstantiatedTo(0)) {
             for (int i = 0; i < n; i++) {
-                vars[i].instantiateTo(0, aCause);
+                vars[i].instantiateTo(0, this);
             }
         }
     }

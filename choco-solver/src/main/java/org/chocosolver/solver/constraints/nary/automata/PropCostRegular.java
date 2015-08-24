@@ -97,8 +97,8 @@ public class PropCostRegular extends Propagator<IntVar> {
      */
     protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
-        vars[zIdx].updateLowerBound(bounds.min.value, aCause);
-        vars[zIdx].updateUpperBound(bounds.max.value, aCause);
+        vars[zIdx].updateLowerBound(bounds.min.value, this);
+        vars[zIdx].updateUpperBound(bounds.max.value, this);
         this.prefilter();
     }
 
@@ -162,8 +162,8 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), aCause);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), aCause);
+        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
+        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
 
         DisposableIntIterator it = this.graph.inGraph.getIterator();
         //for (int id = this.graph.inGraph.nextSetBit(0) ; id >=0 ; id = this.graph.inGraph.nextSetBit(id+1))  {
@@ -194,7 +194,7 @@ public class PropCostRegular extends Propagator<IntVar> {
                 while (toRemove.size() > 0) {
                     int id = toRemove.pop();
                     // toRemove.removeLast();
-                    this.graph.removeArc(id, toRemove, this, aCause);
+                    this.graph.removeArc(id, toRemove, this, this);
                 }
                 while (this.graph.toUpdateLeft.size() > 0) {
                     this.graph.updateLeft(this.graph.toUpdateLeft.pop(), toRemove, this);
@@ -260,7 +260,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             while (toRemove.size() > 0) {
                 int id = toRemove.pop();
                 // toRemove.removeLast();
-                this.graph.removeArc(id, toRemove, this, aCause);
+                this.graph.removeArc(id, toRemove, this, this);
             }
             while (this.graph.toUpdateLeft.size() > 0) {
                 this.graph.updateLeft(this.graph.toUpdateLeft.pop(), toRemove, this);
@@ -275,8 +275,8 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), aCause);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), aCause);
+        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
+        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
     }
 
 

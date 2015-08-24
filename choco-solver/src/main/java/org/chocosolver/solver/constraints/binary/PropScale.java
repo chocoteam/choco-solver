@@ -74,22 +74,22 @@ public class PropScale extends Propagator<IntVar> {
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        X.updateLowerBound((int) Math.ceil((double) Z.getLB() / (double) Y - 0.0001), aCause);
-        X.updateUpperBound((int) Math.floor((double) Z.getUB() / (double) Y + 0.0001), aCause);
+        X.updateLowerBound((int) Math.ceil((double) Z.getLB() / (double) Y - 0.0001), this);
+        X.updateUpperBound((int) Math.floor((double) Z.getUB() / (double) Y + 0.0001), this);
         boolean hasChanged;
-        hasChanged = Z.updateLowerBound(X.getLB() * Y, aCause);
-        hasChanged |= Z.updateUpperBound(X.getUB() * Y, aCause);
+        hasChanged = Z.updateLowerBound(X.getLB() * Y, this);
+        hasChanged |= Z.updateUpperBound(X.getUB() * Y, this);
         if (enumerated) {
             int ub = X.getUB();
             for (int v = X.getLB(); v <= ub; v = X.nextValue(v)) {
                 if (!Z.contains(v * Y)) {
-                    X.removeValue(v, aCause);
+                    X.removeValue(v, this);
                 }
             }
             ub = Z.getUB();
             for (int v = Z.getLB(); v <= ub; v = Z.nextValue(v)) {
                 if ((v / Y) * Y != v || !X.contains(v / Y)) {
-                    Z.removeValue(v, aCause);
+                    Z.removeValue(v, this);
                 }
             }
         } else if (hasChanged && Z.hasEnumeratedDomain()) {

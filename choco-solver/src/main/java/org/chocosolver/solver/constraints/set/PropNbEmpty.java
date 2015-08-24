@@ -146,14 +146,14 @@ public class PropNbEmpty extends Propagator<Variable> {
     public void filter() throws ContradictionException {
         int nbMin = nbAlreadyEmpty.get();
         int nbMax = nbMin + nbMaybeEmpty.get();
-        nbEmpty.updateLowerBound(nbMin, aCause);
-        nbEmpty.updateUpperBound(nbMax, aCause);
+        nbEmpty.updateLowerBound(nbMin, this);
+        nbEmpty.updateUpperBound(nbMax, this);
         ///////////////////////////////////////
         if (nbEmpty.isInstantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
-                        sets[i].removeFromEnvelope(j, aCause);
+                        sets[i].removeFromEnvelope(j, this);
                     }
                     canBeEmpty.remove(i);
                     isEmpty.add(i);
@@ -164,7 +164,7 @@ public class PropNbEmpty extends Propagator<Variable> {
                 boolean allFixed = true;
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     if (sets[i].getEnvelopeSize() == 1) {
-                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), aCause);
+                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), this);
                         canBeEmpty.remove(i);
                     } else {
                         allFixed = false;

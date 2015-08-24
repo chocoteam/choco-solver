@@ -141,7 +141,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] - (b - sumLB) > 0) {
                 lb = vars[i].getLB() * c[i];
                 ub = lb + I[i];
-                if (vars[i].updateUpperBound(divFloor(b - sumLB + lb, c[i]), aCause)) {
+                if (vars[i].updateUpperBound(divFloor(b - sumLB + lb, c[i]), this)) {
                     int nub = vars[i].getUB() * c[i];
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
@@ -154,7 +154,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] - (b - sumLB) > 0) {
                 lb = vars[i].getUB() * c[i];
                 ub = lb + I[i];
-                if (vars[i].updateLowerBound(divCeil(-(b - sumLB + lb), -c[i]), aCause)) {
+                if (vars[i].updateLowerBound(divCeil(-(b - sumLB + lb), -c[i]), this)) {
                     int nub = vars[i].getLB() * c[i];
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
@@ -178,7 +178,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] > -(b - sumUB)) {
                 ub = vars[i].getUB() * c[i];
                 lb = ub - I[i];
-                if (vars[i].updateLowerBound(divCeil(b - sumUB + ub, c[i]), aCause)) {
+                if (vars[i].updateLowerBound(divCeil(b - sumUB + ub, c[i]), this)) {
                     int nlb = vars[i].getLB() * c[i];
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;
@@ -191,7 +191,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] > -(b - sumUB)) {
                 ub = vars[i].getLB() * c[i];
                 lb = ub - I[i];
-                if (vars[i].updateUpperBound(divFloor(-(b - sumUB + ub), -c[i]), aCause)) {
+                if (vars[i].updateUpperBound(divFloor(-(b - sumUB + ub), -c[i]), this)) {
                     int nlb = vars[i].getUB() * c[i];
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;

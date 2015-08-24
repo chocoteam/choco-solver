@@ -70,7 +70,7 @@ public class PropIntersection extends Propagator<SetVar> {
         // PROCEDURES
         intersectionForced = element -> {
             for (int i = 0; i < k; i++) {
-                vars[i].addToKernel(element, aCause);
+                vars[i].addToKernel(element, this);
             }
         };
         intersectionRemoved = element -> {
@@ -92,14 +92,14 @@ public class PropIntersection extends Propagator<SetVar> {
             if (mate == -1) {
                 contradiction(vars[k], "");
             } else if (mate != -2) {
-                vars[mate].removeFromEnvelope(element, aCause);
+                vars[mate].removeFromEnvelope(element, this);
             }
         };
         setForced = element -> {
             boolean allKer = true;
             for (int i = 0; i < k; i++) {
                 if (!vars[i].envelopeContains(element)) {
-                    vars[k].removeFromEnvelope(element, aCause);
+                    vars[k].removeFromEnvelope(element, this);
                     allKer = false;
                     break;
                 } else if (!vars[i].kernelContains(element)) {
@@ -107,10 +107,10 @@ public class PropIntersection extends Propagator<SetVar> {
                 }
             }
             if (allKer) {
-                vars[k].addToKernel(element, aCause);
+                vars[k].addToKernel(element, this);
             }
         };
-        setRemoved = element -> vars[k].removeFromEnvelope(element, aCause);
+        setRemoved = element -> vars[k].removeFromEnvelope(element, this);
     }
 
     //***********************************************************************************
@@ -130,18 +130,18 @@ public class PropIntersection extends Propagator<SetVar> {
                     }
                 }
                 if (all) {
-                    intersection.addToKernel(j, aCause);
+                    intersection.addToKernel(j, this);
                 }
             }
             for (int j = intersection.getEnvelopeFirst(); j != SetVar.END; j = intersection.getEnvelopeNext()) {
                 if (intersection.kernelContains(j)) {
                     for (int i = 0; i < k; i++) {
-                        vars[i].addToKernel(j, aCause);
+                        vars[i].addToKernel(j, this);
                     }
                 } else {
                     for (int i = 0; i < k; i++)
                         if (!vars[i].envelopeContains(j)) {
-                            intersection.removeFromEnvelope(j, aCause);
+                            intersection.removeFromEnvelope(j, this);
                             break;
                         }
                 }

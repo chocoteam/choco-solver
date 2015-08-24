@@ -95,8 +95,8 @@ public class PropElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateLowerBound(offSet, aCause);
-        index.updateUpperBound(array.length - 1 + offSet, aCause);
+        index.updateLowerBound(offSet, this);
+        index.updateUpperBound(array.length - 1 + offSet, this);
         if (index.isInstantiated()) {
             // filter set and array
             setEq(set, array[index.getValue() - offSet]);
@@ -107,7 +107,7 @@ public class PropElement extends Propagator<Variable> {
             boolean noEmptyKer = true;
             for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
                 if (disjoint(set, array[i - offSet]) || disjoint(array[i - offSet], set)) {// array[i] != set
-                    index.removeValue(i, aCause);
+                    index.removeValue(i, this);
                 } else {
                     if (array[i - offSet].getKernelSize() == 0) {
                         noEmptyKer = false;
@@ -135,7 +135,7 @@ public class PropElement extends Propagator<Variable> {
                 }
                 for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
                     int j = constructiveDisjunction.get(cd);
-                    set.addToKernel(j, aCause);
+                    set.addToKernel(j, this);
                 }
             }
             if (!set.isInstantiated()) {// from env
@@ -148,7 +148,7 @@ public class PropElement extends Propagator<Variable> {
                         }
                     }
                     if (!valueExists) {
-                        set.removeFromEnvelope(j, aCause);
+                        set.removeFromEnvelope(j, this);
                     }
                 }
             }
@@ -157,11 +157,11 @@ public class PropElement extends Propagator<Variable> {
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
         for (int j = s2.getKernelFirst(); j != SetVar.END; j = s2.getKernelNext()) {
-            s1.addToKernel(j, aCause);
+            s1.addToKernel(j, this);
         }
         for (int j = s1.getEnvelopeFirst(); j != SetVar.END; j = s1.getEnvelopeNext()) {
             if (!s2.envelopeContains(j)) {
-                s1.removeFromEnvelope(j, aCause);
+                s1.removeFromEnvelope(j, this);
             }
         }
     }

@@ -139,7 +139,7 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
                         vrms.add(val);
                     }
                 }
-                vars[index].removeValues(vrms, aCause);
+                vars[index].removeValues(vrms, this);
             } else {
                 if (!relation.isConsistent(currentTuple)) {
                     fails();

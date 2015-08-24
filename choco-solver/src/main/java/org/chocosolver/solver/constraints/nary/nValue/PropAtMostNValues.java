@@ -102,7 +102,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateLowerBound(1, aCause);
+        vars[n].updateLowerBound(1, this);
         int count = 0;
         int countMax = 0;
         int idx = 0;
@@ -143,7 +143,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         }
         nbInst = count;
         // filtering cardinality variable
-        vars[n].updateLowerBound(count, aCause);
+        vars[n].updateLowerBound(count, this);
         // filtering decision variables
         if (count != countMax && vars[n].isInstantiated())
             if (count == vars[n].getUB()) {
@@ -151,13 +151,13 @@ public class PropAtMostNValues extends Propagator<IntVar> {
                 for (int i = 0; i < idx; i++) {
                     val = unusedValues[i];
                     for (int v = 0; v < n; v++) {
-                        vars[v].removeValue(val, aCause);
+                        vars[v].removeValue(val, this);
                     }
                 }
                 for (int i = idx - 1; i >= 0; i--) {
                     val = unusedValues[i];
                     for (int v = 0; v < n; v++) {
-                        vars[v].removeValue(val, aCause);
+                        vars[v].removeValue(val, this);
                     }
                 }
                 if (allEnum) setPassive();
@@ -247,8 +247,8 @@ public class PropAtMostNValues extends Propagator<IntVar> {
                     break;
                 }
             }
-            v.updateLowerBound(lb, aCause);
-            v.updateUpperBound(ub, aCause);
+            v.updateLowerBound(lb, this);
+            v.updateUpperBound(ub, this);
         }
     }
 

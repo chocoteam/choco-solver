@@ -75,7 +75,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         elementForced = element -> {
             for (int i = 0; i < n; i++) {
                 if (i != currentSet) {
-                    vars[i].removeFromEnvelope(element, aCause);
+                    vars[i].removeFromEnvelope(element, this);
                 }
             }
         };
@@ -97,7 +97,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
                         if (i2 != i) {
-                            vars[i2].removeFromEnvelope(j, aCause);
+                            vars[i2].removeFromEnvelope(j, this);
                         }
                     }
                 }

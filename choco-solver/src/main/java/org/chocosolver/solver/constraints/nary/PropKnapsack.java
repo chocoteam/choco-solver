@@ -116,9 +116,9 @@ public class PropKnapsack extends Propagator<IntVar> {
             camax -= weigth[i] * vars[i].getLB();
             pomin += energy[i] * vars[i].getLB();
         }
-        power.updateLowerBound((int) pomin, aCause);
+        power.updateLowerBound((int) pomin, this);
         if (camax == 0) {
-            power.updateUpperBound((int) pomin, aCause);
+            power.updateUpperBound((int) pomin, this);
         } else if (camax < 0) {
             contradiction(capacity, "");
         } else {
@@ -134,12 +134,12 @@ public class PropKnapsack extends Propagator<IntVar> {
                         pomin += energy[idx] * (vars[idx].getUB() - vars[idx].getLB());
                         camax -= delta;
                         if (camax == 0) {
-                            power.updateUpperBound((int) pomin, aCause);
+                            power.updateUpperBound((int) pomin, this);
                             return;
                         }
                     } else {
                         pomin += Math.ceil(camax * ratio[idx]);
-                        power.updateUpperBound((int) pomin, aCause);
+                        power.updateUpperBound((int) pomin, this);
                         return;
                     }
                 }

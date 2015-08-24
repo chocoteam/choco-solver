@@ -103,11 +103,11 @@ public class PropAllDiff extends Propagator<SetVar> {
                                 contradiction(vars[i], "");
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
                                 for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
-                                    vars[i].addToKernel(j, aCause);
+                                    vars[i].addToKernel(j, this);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
                             if (vars[i].envelopeContains(diff)) {
-                                vars[i].removeFromEnvelope(diff, aCause);
+                                vars[i].removeFromEnvelope(diff, this);
                             }
                         }
                     }

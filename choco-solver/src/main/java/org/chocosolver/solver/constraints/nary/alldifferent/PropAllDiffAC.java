@@ -67,7 +67,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      */
     public PropAllDiffAC(IntVar[] variables) {
         super(variables, PropagatorPriority.QUADRATIC, false);
-        this.filter = new AlgoAllDiffAC(variables, aCause);
+        this.filter = new AlgoAllDiffAC(variables, this);
     }
 
     //***********************************************************************************

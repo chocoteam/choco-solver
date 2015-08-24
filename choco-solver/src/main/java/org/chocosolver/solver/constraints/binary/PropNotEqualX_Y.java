@@ -90,13 +90,13 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue(), aCause) || !x.contains(y.getValue())) {
+        if (x.removeValue(y.getValue(), this) || !x.contains(y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue(), aCause) || !y.contains(x.getValue())) {
+        if (y.removeValue(x.getValue(), this) || !y.contains(x.getValue())) {
             this.setPassive();
         }
     }

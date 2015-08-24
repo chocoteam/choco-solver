@@ -59,30 +59,30 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
         this.n = bvars.length;
         this.offSet = offSet;
         this.idm = this.vars[n].monitorDelta(this);
-        this.rem_proc = i -> vars[i - offSet].instantiateTo(0, aCause);
+        this.rem_proc = i -> vars[i - offSet].instantiateTo(0, this);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateLowerBound(offSet, aCause);
-        vars[n].updateUpperBound(n - 1 + offSet, aCause);
+        vars[n].updateLowerBound(offSet, this);
+        vars[n].updateUpperBound(n - 1 + offSet, this);
         for (int i = 0; i < n; i++) {
             if (vars[i].isInstantiated()) {
                 if (vars[i].getValue() == 0) {
-                    vars[n].removeValue(i + offSet, aCause);
+                    vars[n].removeValue(i + offSet, this);
                 } else {
-                    vars[n].instantiateTo(i + offSet, aCause);
+                    vars[n].instantiateTo(i + offSet, this);
                 }
             } else if (!vars[n].contains(i + offSet)) {
-                vars[i].instantiateTo(0, aCause);
+                vars[i].instantiateTo(0, this);
             }
         }
         if (vars[n].isInstantiated()) {
             int v = vars[n].getValue() - offSet;
-            vars[v].instantiateTo(1, aCause);
+            vars[v].instantiateTo(1, this);
             for (int i = 0; i < n; i++) {
                 if (i != v) {
-                    vars[i].instantiateTo(0, aCause);
+                    vars[i].instantiateTo(0, this);
                 }
             }
         }
@@ -97,18 +97,18 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
             idm.unfreeze();
         } else {
             if (vars[varIdx].getValue() == 1) {
-                vars[n].instantiateTo(varIdx + offSet, aCause);
+                vars[n].instantiateTo(varIdx + offSet, this);
                 for (int i = 0; i < n; i++) {
                     if (i != varIdx) {
-                        vars[i].instantiateTo(0, aCause);
+                        vars[i].instantiateTo(0, this);
                     }
                 }
             } else {
-                vars[n].removeValue(varIdx + offSet, aCause);
+                vars[n].removeValue(varIdx + offSet, this);
             }
         }
         if (vars[n].isInstantiated()) {
-            vars[vars[n].getValue() - offSet].instantiateTo(1, aCause);
+            vars[vars[n].getValue() - offSet].instantiateTo(1, this);
         }
     }
 

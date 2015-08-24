@@ -68,7 +68,7 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].removeValues(vrms, aCause);
+        vars[0].removeValues(vrms, this);
         if (vars[0].hasEnumeratedDomain()) {
             setPassive();
         }else{

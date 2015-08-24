@@ -242,9 +242,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
                     if (digraph.getPredOf(i).getFirstElement() == j) {
-                        v.instantiateTo(k, aCause);
+                        v.instantiateTo(k, this);
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, this);
                         digraph.removeArc(i, j);
                     }
                 }
@@ -256,7 +256,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
                         break;
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, this);
                     }
                 }
                 int lb = v.getLB();
@@ -265,7 +265,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
                         break;
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, this);
                     }
                 }
             }
@@ -298,7 +298,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             }
         }
         int card = repairMatching();
-        vars[n].updateUpperBound(card, aCause);
+        vars[n].updateUpperBound(card, this);
         if (vars[n].getLB() == card) {
             filter();
         }

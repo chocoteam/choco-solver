@@ -85,7 +85,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateUpperBound(n, aCause);
+        vars[n].updateUpperBound(n, this);
         int count = 0;
         int countMax = 0;
         for (int i = concernedValues.size() - 1; i >= 0; i--) {
@@ -120,12 +120,12 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
         // filtering cardinality variable
-        vars[n].updateUpperBound(countMax, aCause);
+        vars[n].updateUpperBound(countMax, this);
         // filtering decision variables
         if (count != countMax && countMax == vars[n].getLB()) {
             for (int i = concernedValues.size() - 1; i >= 0; i--) {
                 if (mate[i] >= 0) {
-                    vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
+                    vars[mate[i]].instantiateTo(concernedValues.get(i), this);
                 }
             }
         }

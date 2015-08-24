@@ -61,17 +61,17 @@ public class PropTimesXY extends Propagator<IntVar> {
     public final void propagate(int evtmask) throws ContradictionException {
         // sign reasoning
         if (X.getLB() >= 0 && Y.getLB() >= 0) {// Z>=0
-            Z.updateLowerBound(X.getLB() * Y.getLB(), aCause);
-            Z.updateUpperBound(X.getUB() * Y.getUB(), aCause);
+            Z.updateLowerBound(X.getLB() * Y.getLB(), this);
+            Z.updateUpperBound(X.getUB() * Y.getUB(), this);
         } else if (X.getUB() < 0 && Y.getUB() < 0) { // Z>0
-            Z.updateLowerBound(X.getUB() * Y.getUB(), aCause);
-            Z.updateUpperBound(X.getLB() * Y.getLB(), aCause);
+            Z.updateLowerBound(X.getUB() * Y.getUB(), this);
+            Z.updateUpperBound(X.getLB() * Y.getLB(), this);
         } else if (X.getLB() > 0 && Y.getUB() < 0
                 || X.getUB() < 0 && Y.getLB() > 0) { // Z<0
             int a = X.getLB() * Y.getUB();
             int b = X.getUB() * Y.getLB();
-            Z.updateLowerBound(Math.min(a, b), aCause);
-            Z.updateUpperBound(Math.max(a, b), aCause);
+            Z.updateLowerBound(Math.min(a, b), this);
+            Z.updateUpperBound(Math.max(a, b), this);
         }
         // instantiation reasoning
         if (X.isInstantiated()) {
@@ -100,23 +100,23 @@ public class PropTimesXY extends Propagator<IntVar> {
 
     private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
         if (X.getValue() == 0) {
-            Z.instantiateTo(0, aCause);
+            Z.instantiateTo(0, this);
             setPassive();
         } else if (Y.isInstantiated()) {
-            Z.instantiateTo(X.getValue() * Y.getValue(), aCause);    // fix Z
+            Z.instantiateTo(X.getValue() * Y.getValue(), this);    // fix Z
             setPassive();
         } else if (Z.isInstantiated()) {
             double a = (double) Z.getValue() / (double) X.getValue();
             if (Math.abs(a - Math.round(a)) > 0.001) {
                 contradiction(Z, "");                        // not integer
             }
-            Y.instantiateTo((int) Math.round(a), aCause);        // fix Y
+            Y.instantiateTo((int) Math.round(a), this);        // fix Y
             setPassive();
         } else {
             int a = X.getValue() * Y.getLB();
             int b = X.getValue() * Y.getUB();
-            Z.updateLowerBound(Math.min(a, b), aCause);
-            Z.updateUpperBound(Math.max(a, b), aCause);
+            Z.updateLowerBound(Math.min(a, b), this);
+            Z.updateUpperBound(Math.max(a, b), this);
         }
     }
 

@@ -159,7 +159,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
                     setSupport(indexVar, val, currentIdxSupport);
                 }
             }
-            vars[indexVar].removeValues(vrms, aCause);
+            vars[indexVar].removeValues(vrms, this);
         } finally {
             itv.dispose();
         }

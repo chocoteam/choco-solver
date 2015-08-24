@@ -94,14 +94,14 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(cste - y.getValue(), aCause)
+        if (x.removeValue(cste - y.getValue(), this)
                 || !x.contains(cste - y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(cste - x.getValue(), aCause)
+        if (y.removeValue(cste - x.getValue(), this)
                 || !y.contains(cste - x.getValue())) {
             this.setPassive();
         }

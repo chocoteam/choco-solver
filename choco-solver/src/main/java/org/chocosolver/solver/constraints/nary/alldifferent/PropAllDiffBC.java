@@ -54,7 +54,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     public PropAllDiffBC(IntVar[] variables) {
         super(variables, PropagatorPriority.LINEAR, false);
-        filter = new AlgoAllDiffBC(aCause);
+        filter = new AlgoAllDiffBC(this);
         filter.reset(vars);
     }
 

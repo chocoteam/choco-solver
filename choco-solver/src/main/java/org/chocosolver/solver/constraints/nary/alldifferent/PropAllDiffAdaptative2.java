@@ -74,8 +74,8 @@ public class PropAllDiffAdaptative2 extends Propagator<IntVar> {
     public PropAllDiffAdaptative2(IntVar[] variables) {
         super(variables);
         player = new UCB1Player(2, 0);
-        this.filterac = new AlgoAllDiffAC(variables, aCause);
-        filterbc = new AlgoAllDiffBC(aCause);
+        this.filterac = new AlgoAllDiffAC(variables, this);
+        filterbc = new AlgoAllDiffBC(this);
         filterbc.reset(vars);
     }
 

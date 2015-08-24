@@ -172,7 +172,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
                 }
             }
         }
-        boolean hasChanged = vars[n].updateLowerBound(nbKer, aCause);
+        boolean hasChanged = vars[n].updateLowerBound(nbKer, this);
         if (nbKer == vars[n].getUB()) {
             stamp.clear();
             for (int i = 0; i < n; i++) {
@@ -214,7 +214,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
                 }
             }
         }
-        boolean hasChanged = vars[n].updateLowerBound(nbKer, aCause);
+        boolean hasChanged = vars[n].updateLowerBound(nbKer, this);
         if (nbKer == vars[n].getUB()) {
             stamp.clear();
             for (int i = 0; i < n; i++) {
@@ -240,7 +240,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
             }
             for (int i = stamp.size() - 1; i >= 0; i--) {
                 if (vars[stamp.get(i)].getUB() < newVal)
-                    hasChanged |= vars[stamp.get(i)].updateLowerBound(min, aCause);
+                    hasChanged |= vars[stamp.get(i)].updateLowerBound(min, this);
             }
         } else {
             int max = Integer.MAX_VALUE;
@@ -250,7 +250,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
             }
             for (int i = stamp.size() - 1; i >= 0; i--) {
                 if (vars[stamp.get(i)].getLB() > newVal)
-                    hasChanged |= vars[stamp.get(i)].updateUpperBound(max, aCause);
+                    hasChanged |= vars[stamp.get(i)].updateUpperBound(max, this);
             }
         }
         return hasChanged;

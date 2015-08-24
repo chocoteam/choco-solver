@@ -77,19 +77,19 @@ public class PropSumEq extends Propagator<IntVar> {
                 max += vars[i].getUB();
                 ampMax = Math.max(vars[i].getUB() - vars[i].getLB(), ampMax);
             }
-            vars[n].updateLowerBound(min, aCause);
-            vars[n].updateUpperBound(max, aCause);
+            vars[n].updateLowerBound(min, this);
+            vars[n].updateUpperBound(max, this);
             int lb = vars[n].getLB();
             int ub = vars[n].getUB();
             again = false;
             if (min + ampMax > ub) {
                 for (int i = 0; i < n; i++) {
-                    again |= vars[i].updateUpperBound(ub - min + vars[i].getLB(), aCause);
+                    again |= vars[i].updateUpperBound(ub - min + vars[i].getLB(), this);
                 }
             }
             if (max - ampMax < lb) {
                 for (int i = 0; i < n; i++) {
-                    again |= vars[i].updateLowerBound(lb - max + vars[i].getUB(), aCause);
+                    again |= vars[i].updateLowerBound(lb - max + vars[i].getUB(), this);
                 }
             }
         } while (again);

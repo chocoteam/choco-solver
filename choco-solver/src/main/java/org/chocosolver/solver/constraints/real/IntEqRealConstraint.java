@@ -96,11 +96,11 @@ public class IntEqRealConstraint extends Constraint {
             for (int i = 0; i < n; i++) {
                 IntVar intVar = intVars[i];
                 RealVar realVar = realVars[i];
-                realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, aCause);
-                intVar.updateLowerBound((int) Math.ceil(realVar.getLB() - epsilon), aCause);
-                intVar.updateUpperBound((int) Math.floor(realVar.getUB() + epsilon), aCause);
+                realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, this);
+                intVar.updateLowerBound((int) Math.ceil(realVar.getLB() - epsilon), this);
+                intVar.updateUpperBound((int) Math.floor(realVar.getUB() + epsilon), this);
                 if (intVar.hasEnumeratedDomain()) {
-                    realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, aCause);
+                    realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, this);
                 }
             }
         }

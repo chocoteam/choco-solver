@@ -189,14 +189,14 @@ public class PropDiffN extends Propagator<IntVar> {
         int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
         if (S_i < e_i || S_j < e_j) {
             if (e_j > S_i) {
-                vars[j + offSet].updateLowerBound(e_i, aCause);
-                vars[i + offSet].updateUpperBound(S_j - vars[i + 2 * n + offSet].getLB(), aCause);
-                vars[i + offSet + 2 * n].updateUpperBound(S_j - vars[i + offSet].getLB(), aCause);
+                vars[j + offSet].updateLowerBound(e_i, this);
+                vars[i + offSet].updateUpperBound(S_j - vars[i + 2 * n + offSet].getLB(), this);
+                vars[i + offSet + 2 * n].updateUpperBound(S_j - vars[i + offSet].getLB(), this);
             }
             if (S_j < e_i) {
-                vars[i + offSet].updateLowerBound(e_j, aCause);
-                vars[j + offSet].updateUpperBound(S_i - vars[j + 2 * n + offSet].getLB(), aCause);
-                vars[j + offSet + 2 * n].updateUpperBound(S_i - vars[j + offSet].getLB(), aCause);
+                vars[i + offSet].updateLowerBound(e_j, this);
+                vars[j + offSet].updateUpperBound(S_i - vars[j + 2 * n + offSet].getLB(), this);
+                vars[j + offSet + 2 * n].updateUpperBound(S_i - vars[j + offSet].getLB(), this);
             }
         }
     }

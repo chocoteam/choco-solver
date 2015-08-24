@@ -56,7 +56,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     // incremental filtering of enumerated domains
     private boolean bothEnumerated;
     private IIntDeltaMonitor[] idms;
-    private RemProc rem_proc;
+    private IntProcedure rem_proc;
     private int indexToFilter;
     private int offSet;
 
@@ -71,7 +71,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             idms = new IIntDeltaMonitor[2];
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
-            rem_proc = new RemProc();
+            rem_proc = i -> vars[indexToFilter].removeValue(i + offSet, this);
         }
     }
 
@@ -91,13 +91,13 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(val - cste)) {
-                    x.removeValue(val, aCause);
+                    x.removeValue(val, this);
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!x.contains(val + cste)) {
-                    y.removeValue(val, aCause);
+                    y.removeValue(val, this);
                 }
             }
             idms[0].unfreeze();
@@ -131,8 +131,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(y.getLB() + cste, aCause) | y.updateLowerBound(x.getLB() - cste, aCause)) ;
-        while (x.updateUpperBound(y.getUB() + cste, aCause) | y.updateUpperBound(x.getUB() - cste, aCause)) ;
+        while (x.updateLowerBound(y.getLB() + cste, this) | y.updateLowerBound(x.getLB() - cste, this)) ;
+        while (x.updateUpperBound(y.getUB() + cste, this) | y.updateUpperBound(x.getUB() - cste, this)) ;
     }
 
     @Override
@@ -166,36 +166,36 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             IntEventType ievt = (IntEventType) evt;
             switch (ievt) {
                 case REMOVE:
-                    newrules |=ruleStore.addRemovalRule(y, value - cste);
+                    newrules |= ruleStore.addRemovalRule(y, value - cste);
                     break;
                 case DECUPP:
-                    newrules |=ruleStore.addUpperBoundRule(y);
+                    newrules |= ruleStore.addUpperBoundRule(y);
                     break;
                 case INCLOW:
-                    newrules |=ruleStore.addLowerBoundRule(y);
+                    newrules |= ruleStore.addLowerBoundRule(y);
                     break;
                 case INSTANTIATE:
-                    newrules |=ruleStore.addFullDomainRule(y);
+                    newrules |= ruleStore.addFullDomainRule(y);
                     break;
             }
         } else if (var.equals(y)) {
             IntEventType ievt = (IntEventType) evt;
             switch (ievt) {
                 case REMOVE:
-                    newrules |=ruleStore.addRemovalRule(x, value + cste);
+                    newrules |= ruleStore.addRemovalRule(x, value + cste);
                     break;
                 case DECUPP:
-                    newrules |=ruleStore.addUpperBoundRule(x);
+                    newrules |= ruleStore.addUpperBoundRule(x);
                     break;
                 case INCLOW:
-                    newrules |=ruleStore.addLowerBoundRule(x);
+                    newrules |= ruleStore.addLowerBoundRule(x);
                     break;
                 case INSTANTIATE:
-                    newrules |=ruleStore.addFullDomainRule(x);
+                    newrules |= ruleStore.addFullDomainRule(x);
                     break;
             }
         } else {
-            newrules |=super.why(ruleStore, var, evt, value);
+            newrules |= super.why(ruleStore, var, evt, value);
         }
         return newrules;
     }
@@ -209,12 +209,5 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
         }
         bf.append(")");
         return bf.toString();
-    }
-
-    private class RemProc implements IntProcedure {
-        @Override
-        public void execute(int i) throws ContradictionException {
-            vars[indexToFilter].removeValue(i + offSet, aCause);
-        }
     }
 }

@@ -102,20 +102,20 @@ public class PropBoolSumIncremental extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         int lb = min.get();
         int ub = max.get();
-        sum.updateLowerBound(lb, aCause);
-        sum.updateUpperBound(ub, aCause);
+        sum.updateLowerBound(lb, this);
+        sum.updateUpperBound(ub, this);
         if (lb != ub && sum.isInstantiated()) {
             if (sum.getValue() == lb) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(0, aCause);
+                        vars[i].instantiateTo(0, this);
                     }
                 }
             }
             if (sum.getValue() == ub) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(1, aCause);
+                        vars[i].instantiateTo(1, this);
                     }
                 }
             }

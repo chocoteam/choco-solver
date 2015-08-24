@@ -100,7 +100,7 @@ public class PropBinAC2001 extends PropBinCSP {
 
             found = false;
         }
-        vars[0].removeValues(vrms, aCause);
+        vars[0].removeValues(vrms, this);
 
         found = false;
         vrms.clear();
@@ -121,7 +121,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 currentSupport1[val1 - offset1].set(support);
             found = false;
         }
-        vars[1].removeValues(vrms, aCause);
+        vars[1].removeValues(vrms, this);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 }
             }
         }
-        vars[1].removeValues(vrms, aCause);
+        vars[1].removeValues(vrms, this);
     }
 
     /**
@@ -197,7 +197,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 }
             }
         }
-        vars[0].removeValues(vrms, aCause);
+        vars[0].removeValues(vrms, this);
     }
 
     private void onInstantiationOf(int idx) throws ContradictionException {
@@ -211,7 +211,7 @@ public class PropBinAC2001 extends PropBinCSP {
                     vrms.add(val1);
                 }
             }
-            vars[1].removeValues(vrms, aCause);
+            vars[1].removeValues(vrms, this);
         } else {
             int value = vars[1].getValue();
             vrms.clear();
@@ -222,7 +222,7 @@ public class PropBinAC2001 extends PropBinCSP {
                     vrms.add(val0);
                 }
             }
-            vars[0].removeValues(vrms, aCause);
+            vars[0].removeValues(vrms, this);
         }
     }
 }
