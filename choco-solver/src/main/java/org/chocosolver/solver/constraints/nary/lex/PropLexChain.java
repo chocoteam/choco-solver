@@ -278,7 +278,7 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     public void computeUB(IntVar[] x, int[] b, int[] u) throws ContradictionException {
         int alpha = computeAlpha(x, b);
-        if (alpha == -1) this.contradiction(null, "");
+        if (alpha == -1) fails();
         for (int i = 0; i < N; i++) {
             if (i < alpha) {
                 u[i] = b[i];
@@ -305,7 +305,7 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     public void computeLB(IntVar[] x, int[] a, int[] lower) throws ContradictionException {
         int beta = computeBeta(x, a);
-        if (beta == -1) this.contradiction(null, "");
+        if (beta == -1) fails();
         for (int i = 0; i < N; i++) {
             if (i < beta) {
                 lower[i] = a[i];

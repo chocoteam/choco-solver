@@ -154,11 +154,11 @@ public class PropLex extends Propagator<IntVar> {
 
     public void updateAlpha(int i) throws ContradictionException {
         if (i == beta.get()) {
-            this.contradiction(null, "");
+            fails();
         }
         if (i == n) {
             if (strict) {
-                this.contradiction(null, "");
+                fails();
             } else {
                 entailed = true;
                 setPassive();
@@ -175,7 +175,7 @@ public class PropLex extends Propagator<IntVar> {
 
     public void updateBeta(int i) throws ContradictionException {
         if ((i + 1) == alpha.get()) {
-            this.contradiction(null, "");
+            fails();
         }
         if (x[i].getLB() < y[i].getUB()) {
             beta.set(i + 1);
@@ -204,7 +204,7 @@ public class PropLex extends Propagator<IntVar> {
                 entailed = true;
                 setPassive();
             } else {
-                this.contradiction(null, "");
+                fails();
             }
         } else {
             a = i;
@@ -231,7 +231,7 @@ public class PropLex extends Propagator<IntVar> {
                 b = i;
             }
             if (a >= b) {
-                this.contradiction(null, "");
+                fails();
             }
             alpha.set(a);
             beta.set(b);

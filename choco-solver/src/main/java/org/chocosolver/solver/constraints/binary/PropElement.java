@@ -247,7 +247,7 @@ public class PropElement extends Propagator<IntVar> {
         int maxFeasibleIndex = Math.min(this.vars[1].getUB(), lval.length - 1 + cste);
 
         if (minFeasibleIndex > maxFeasibleIndex) {
-            contradiction(null, "impossible");
+            fails();
         }
 
         while ((this.vars[1].contains(minFeasibleIndex))

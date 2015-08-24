@@ -132,7 +132,8 @@ public class PropScalarEq extends Propagator<IntVar> {
     boolean filterOnLeq() throws ContradictionException {
         boolean anychange = false;
         if (b - sumLB < 0) {
-            this.contradiction(null, "b - sumLB < 0");
+//            thisb - sumLB < 0
+            fails();
         }
         int lb, ub, i = 0;
         // positive coefficients first
@@ -168,7 +169,8 @@ public class PropScalarEq extends Propagator<IntVar> {
     boolean filterOnGeq() throws ContradictionException {
         boolean anychange = false;
         if (b - sumUB > 0) {
-            this.contradiction(null, "b - sumUB > 0");
+            // b - sumUB > 0
+            fails();
         }
         int lb, ub, i = 0;
         // positive coefficients first

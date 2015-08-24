@@ -149,7 +149,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         int min = Math.max(vars[nb_vars].getLB(), lb);
         int max = Math.min(vars[nb_vars].getUB(), ub);
 
-        if (max < min) this.contradiction(null, "impossible");
+        if (max < min) fails();
 
         if (lb == min && lb == max) {
             removeOnlyValues();

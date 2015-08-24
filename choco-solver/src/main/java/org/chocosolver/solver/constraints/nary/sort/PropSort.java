@@ -283,11 +283,11 @@ public final class PropSort extends Propagator<IntVar> {
 
     private int computeF(int j) throws ContradictionException {
         if (this.pQueue.isEmpty()) {
-            this.contradiction(null, "");
+            this.fails();
         }
         int i = this.pQueue.pop();
         if (x[i].getUB() < y[j].getLB()) {
-            this.contradiction(null, "");
+            this.fails();
         }
 
         return i;
@@ -295,11 +295,11 @@ public final class PropSort extends Propagator<IntVar> {
 
     private int computeFPrime(int j) throws ContradictionException {
         if (this.pQueue.isEmpty()) {
-            this.contradiction(null, "");
+            this.fails();
         }
         int i = this.pQueue.pop();
         if (x[i].getLB() > y[j].getUB()) {
-            this.contradiction(null, "");
+            this.fails();
         }
 
         return i;

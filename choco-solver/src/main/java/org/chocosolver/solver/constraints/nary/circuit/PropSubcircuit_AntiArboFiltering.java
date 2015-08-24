@@ -125,7 +125,8 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
                 }
             }
         } else {
-            contradiction(null, "the source cannot reach all nodes");
+             // the source cannot reach all nodes
+            fails();
         }
     }
 

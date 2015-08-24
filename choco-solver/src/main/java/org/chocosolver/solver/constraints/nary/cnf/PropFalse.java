@@ -49,7 +49,7 @@ public class PropFalse extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        this.contradiction(null, "FALSE");
+        fails();
     }
 
     @Override

@@ -233,7 +233,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         for (int i = 1; i < n; i++) {
             CUR[k]++;
             if (!lexFixMin(YLB[i], YUB[i], CUR)) {
-                this.contradiction(null, "");
+                this.fails();
             }
             System.arraycopy(YLB[i], 0, CUR, 0, k + 1);
         }
@@ -241,7 +241,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         for (int i = n - 2; i >= 0; i--) {
             CUR[k]--;
             if (!lexFixMax(YLB[i], YUB[i], CUR)) {
-                this.contradiction(null, "");
+                this.fails();
             }
             System.arraycopy(YUB[i], 0, CUR, 0, k + 1);
         }
@@ -259,11 +259,11 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 y++;
             }
             if (y == n) {
-                this.contradiction(null, "");
+                this.fails();
             }
             if (lexLt(XLB[x], YLB[y], k + 1)) {
                 if (!lexFixMin(XLB[x], XUB[x], YLB[y])) {
-                    this.contradiction(null, "");
+                    this.fails();
                 }
             }
         }
@@ -275,11 +275,11 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 y--;
             }
             if (y < 0) {
-                this.contradiction(null, "");
+                this.fails();
             }
             if (lexLt(YUB[y], XUB[x], k + 1)) {
                 if (!lexFixMax(XLB[x], XUB[x], YUB[y])) {
-                    this.contradiction(null, "");
+                    this.fails();
                 }
             }
         }
@@ -301,14 +301,14 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 }
             }
             if (i == e) {
-                this.contradiction(null, "");
+                this.fails();
             } else {
                 ARRAY[y] = y;
                 e++;
             }
         }
         if (i != e) {
-            this.contradiction(null, "");
+            this.fails();
         }
         for (e = 0; e < n; e++) {
             x = SORTMAX[e];
@@ -319,7 +319,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
             }
 
             if (lexLt(XUB[x], YLB[y], k + 1)) {
-                this.contradiction(null, "");
+                this.fails();
             }
             YMATE[y] = x;
             XMATE[x] = y;
@@ -328,7 +328,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         for (y = 0; y < n; y++) {
             x = YMATE[y];
             if (!lexFixMax(YLB[y], YUB[y], XUB[x])) {
-                this.contradiction(null, "");
+                this.fails();
             }
         }
     }
@@ -348,14 +348,14 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 }
             }
             if (i == e) {
-                this.contradiction(null, "");
+                this.fails();
             } else {
                 ARRAY[y] = y;
                 e++;
             }
         }
         if (i != e) {
-            this.contradiction(null, "");
+            this.fails();
         }
         for (e = n - 1; e >= 0; e--) {
             x = SORTMIN[e];
@@ -365,7 +365,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 y = ARRAY[y];
             }
             if (lexLt(YUB[y], XLB[x], k + 1)) {
-                this.contradiction(null, "");
+                this.fails();
             }
             YMATE[y] = x;
             XMATE[x] = y;
@@ -374,7 +374,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         for (y = 0; y < n; y++) {
             x = YMATE[y];
             if (!lexFixMin(YLB[y], YUB[y], XLB[x])) {
-                this.contradiction(null, "");
+                this.fails();
             }
         }
     }
@@ -437,7 +437,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 y = SORTY[i];
                 if (!lexLt(YUB[y], XLB[x], k + 1)) {
                     if (!lexFixMin(XLB[x], XUB[x], YLB[y])) {
-                        this.contradiction(null, "");
+                        this.fails();
                     }
                     j++;
                 } else {
@@ -460,7 +460,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
                 y = SORTY[i];
                 if (!lexLt(XUB[x], YLB[y], k + 1)) {
                     if (!lexFixMax(XLB[x], XUB[x], YUB[y])) {
-                        this.contradiction(null, "");
+                        this.fails();
                     }
                     j--;
                 } else {

@@ -75,7 +75,8 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 				}
 			}
 		} else {
-			contradiction(null, "the source cannot reach all nodes");
+			// "the source cannot reach all nodes"
+			fails();
 		}
 	}
 

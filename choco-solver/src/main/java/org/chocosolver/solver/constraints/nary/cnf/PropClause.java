@@ -104,7 +104,7 @@ public class PropClause extends Propagator<BoolVar> {
             i++;
         }
         if (cnt == nbvars) {
-            this.contradiction(null, "Inconsistent");
+            this.fails();
         }
         if (i == nbvars) {
             vars[otherWL].instantiateTo(1, aCause);
@@ -138,7 +138,7 @@ public class PropClause extends Propagator<BoolVar> {
                 i++;
             }
             if (cnt == n) {
-                this.contradiction(null, "Inconsistent");
+                this.fails();
             } else if (cnt == n - 1) {
                 setWatchLiteral(watchLit1);
             }

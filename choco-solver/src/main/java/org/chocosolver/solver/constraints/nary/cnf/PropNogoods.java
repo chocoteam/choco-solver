@@ -97,7 +97,7 @@ public class PropNogoods extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (!sat_.ok_) contradiction(null, "inconsistent");
+        if (!sat_.ok_) fails();
         fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
         storeEarlyDeductions();

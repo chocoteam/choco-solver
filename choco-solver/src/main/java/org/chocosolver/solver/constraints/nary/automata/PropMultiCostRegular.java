@@ -703,7 +703,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     protected void filterDown(final double realsp) throws ContradictionException {
 
         if (realsp - z[0].getUB() >= _MCR_DECIMAL_PREC) {
-            this.contradiction(null, "cost variable domain is emptied");
+            // "cost variable domain is emptied"
+            fails();
         }
         if (realsp - z[0].getLB() >= _MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
@@ -721,7 +722,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     protected void filterUp(final double reallp) throws ContradictionException {
         if (reallp - z[0].getLB() <= -_MCR_DECIMAL_PREC) {
-            this.contradiction(null, "cost variable domain is emptied");
+            // "cost variable domain is emptied"
+            fails();
         }
         if (reallp - z[0].getUB() <= -_MCR_DECIMAL_PREC) {
             double mr = Math.round(reallp);
