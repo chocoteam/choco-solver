@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.stack.array.TIntArrayStack;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -103,7 +101,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             int val = vars[vidx].getValue();
             for (int i = 0; i < n; i++) {
                 if (i != vidx) {
-                    if (vars[i].removeValue(val, aCause) && vars[i].isInstantiated()) {
+                    if (vars[i].removeValue(val, this) && vars[i].isInstantiated()) {
                         toCheck.push(i);
                     }
                 }
@@ -129,19 +127,6 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vars.length];
-            for (int i = 0; i < this.vars.length; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-
-            identitymap.put(this, new PropAllDiffInst(aVars));
-        }
     }
 
     @Override

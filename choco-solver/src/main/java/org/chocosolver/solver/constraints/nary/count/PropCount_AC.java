@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.count;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -144,18 +142,18 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        vars[n].updateLowerBound(mandatories.getSize(), aCause);
-        vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), aCause);
+        vars[n].updateLowerBound(mandatories.getSize(), this);
+        vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), this);
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    vars[j].instantiateTo(value, aCause);
+                    vars[j].instantiateTo(value, this);
                 }
                 setPassive();
             } else if (mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    if (vars[j].removeValue(value, aCause)) {
+                    if (vars[j].removeValue(value, this)) {
                         possibles.remove(j);
                     }
                 }
@@ -202,21 +200,6 @@ public class PropCount_AC extends Propagator<IntVar> {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropCount_AC(aVars, this.value, aVar));
-        }
     }
 
     @Override

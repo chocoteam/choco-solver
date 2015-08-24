@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -82,7 +80,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
         this.set = (SetVar) vars[0];
         this.iv = (IntVar) vars[1];
         this.sdm = set.monitorDelta(this);
-        elemRem = i -> iv.removeValue(i, aCause);
+        elemRem = i -> iv.removeValue(i, this);
     }
 
     //***********************************************************************************
@@ -101,19 +99,19 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
         int ub = iv.getUB();
         for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
             if (!set.envelopeContains(i)) {
-                iv.removeValue(i, aCause);
+                iv.removeValue(i, this);
             }
         }
         // now iv \subseteq set
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
         }
         sdm.unfreeze();
@@ -127,7 +125,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             sdm.unfreeze();
         }
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
         }
     }
@@ -166,16 +164,4 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            iv.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(iv);
-
-            identitymap.put(this, new PropIntEnumMemberSet(S, I));
-        }
-    }
 }

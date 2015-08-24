@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -105,11 +103,11 @@ public class PropAllDiff extends Propagator<SetVar> {
                                 contradiction(vars[i], "");
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
                                 for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
-                                    vars[i].addToKernel(j, aCause);
+                                    vars[i].addToKernel(j, this);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
                             if (vars[i].envelopeContains(diff)) {
-                                vars[i].removeFromEnvelope(diff, aCause);
+                                vars[i].removeFromEnvelope(diff, this);
                             }
                         }
                     }
@@ -147,16 +145,4 @@ public class PropAllDiff extends Propagator<SetVar> {
         return false;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            SetVar[] aVars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAllDiff(aVars));
-        }
-    }
 }

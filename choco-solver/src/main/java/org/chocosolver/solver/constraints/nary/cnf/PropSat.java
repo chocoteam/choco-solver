@@ -30,7 +30,6 @@ package org.chocosolver.solver.constraints.nary.cnf;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.memory.IStateInt;
@@ -85,7 +84,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (!sat_.ok_) contradiction(null, "inconsistent");
+        if (!sat_.ok_) fails();
         sat_.cancelUntil(0);
         storeEarlyDeductions();
         applyEarlyDeductions();
@@ -153,31 +152,6 @@ public class PropSat extends Propagator<BoolVar> {
 
     public SatSolver getSatSolver() {
         return sat_;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        // Specific duplication: first create an empty PropSat
-        PropSat ps = (PropSat) identitymap.get(this);
-        if (ps == null) {
-            ps = solver.getMinisat().getPropSat();
-            // calling getMinisat() lazily post the constraint
-            // so the constraint appears twice ...
-            solver.unpost(solver.getMinisat());
-            identitymap.put(this, ps);
-        }
-        // Then duplicate
-        for (BoolVar b : this.vars) {
-            BoolVar a = (BoolVar) identitymap.get(b);
-            int v = this.indices_.get(b);
-            if (!ps.indices_.containsKey(a)) {
-                ps.addVariable(a);
-                ps.indices_.put(a, v);
-            }
-        }
-        ps.early_deductions_.clear();
-        ps.early_deductions_.addAll(this.early_deductions_);
-        ps.sat_.copyFrom(this.sat_);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

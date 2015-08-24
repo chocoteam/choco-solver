@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -149,14 +147,14 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
     protected void propIni() throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            d[i].updateLowerBound(0, aCause); // should even be 1
-            h[i].updateLowerBound(0, aCause);
-            s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), aCause);
-            s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), aCause);
-            e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), aCause);
-            e[i].updateLowerBound(s[i].getLB() + d[i].getLB(), aCause);
-            d[i].updateUpperBound(e[i].getUB() - s[i].getLB(), aCause);
-            d[i].updateLowerBound(e[i].getLB() - s[i].getUB(), aCause);
+            d[i].updateLowerBound(0, this); // should even be 1
+            h[i].updateLowerBound(0, this);
+            s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), this);
+            s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), this);
+            e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), this);
+            e[i].updateLowerBound(s[i].getLB() + d[i].getLB(), this);
+            d[i].updateUpperBound(e[i].getUB() - s[i].getLB(), this);
+            d[i].updateLowerBound(e[i].getLB() - s[i].getUB(), this);
         }
     }
 
@@ -165,7 +163,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
             int capaMax = capa.getUB();
             lastCapaMax.set(capaMax);
             for (int i = 0; i < n; i++) {
-                h[i].updateUpperBound(capaMax, aCause);
+                h[i].updateUpperBound(capaMax, this);
             }
         }
     }
@@ -232,29 +230,4 @@ public class PropFullCumulative extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            // IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
-            // boolean fast, Cumulative.Filter... filters
-
-            IntVar[] sVars = new IntVar[n];
-            IntVar[] dVars = new IntVar[n];
-            IntVar[] eVars = new IntVar[n];
-            IntVar[] hVars = new IntVar[n];
-            for (int i = 0; i < this.n; i++) {
-                this.s[i].duplicate(solver, identitymap);
-                sVars[i] = (IntVar) identitymap.get(this.s[i]);
-                this.d[i].duplicate(solver, identitymap);
-                dVars[i] = (IntVar) identitymap.get(this.d[i]);
-                this.e[i].duplicate(solver, identitymap);
-                eVars[i] = (IntVar) identitymap.get(this.e[i]);
-                this.h[i].duplicate(solver, identitymap);
-                hVars[i] = (IntVar) identitymap.get(this.h[i]);
-            }
-            this.capa.duplicate(solver, identitymap);
-            IntVar cVar = (IntVar) identitymap.get(this.capa);
-            identitymap.put(this, new PropFullCumulative(sVars, dVars, eVars, hVars, cVar, fast, _filters.clone()));
-        }
-    }
 }

@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.nary.lex;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -115,25 +113,6 @@ public class PropLex extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.x.length;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.x[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.x[i]);
-            }
-            size = this.y.length;
-            IntVar[] Y = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.y[i].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.y[i]);
-            }
-            identitymap.put(this, new PropLex(X, Y, this.strict));
-        }
-    }
-
     /////////////////////
     public boolean groundEq(IntVar x1, IntVar y1) {
         return x1.isInstantiated() && y1.isInstantiated() && x1.getValue() == y1.getValue();
@@ -164,22 +143,22 @@ public class PropLex extends Propagator<IntVar> {
     }
 
     public void ACleq(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB(), aCause);
-        y[i].updateLowerBound(x[i].getLB(), aCause);
+        x[i].updateUpperBound(y[i].getUB(), this);
+        y[i].updateLowerBound(x[i].getLB(), this);
     }
 
     public void ACless(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB() - 1, aCause);
-        y[i].updateLowerBound(x[i].getLB() + 1, aCause);
+        x[i].updateUpperBound(y[i].getUB() - 1, this);
+        y[i].updateLowerBound(x[i].getLB() + 1, this);
     }
 
     public void updateAlpha(int i) throws ContradictionException {
         if (i == beta.get()) {
-            this.contradiction(null, "");
+            fails();
         }
         if (i == n) {
             if (strict) {
-                this.contradiction(null, "");
+                fails();
             } else {
                 entailed = true;
                 setPassive();
@@ -196,7 +175,7 @@ public class PropLex extends Propagator<IntVar> {
 
     public void updateBeta(int i) throws ContradictionException {
         if ((i + 1) == alpha.get()) {
-            this.contradiction(null, "");
+            fails();
         }
         if (x[i].getLB() < y[i].getUB()) {
             beta.set(i + 1);
@@ -225,7 +204,7 @@ public class PropLex extends Propagator<IntVar> {
                 entailed = true;
                 setPassive();
             } else {
-                this.contradiction(null, "");
+                fails();
             }
         } else {
             a = i;
@@ -252,7 +231,7 @@ public class PropLex extends Propagator<IntVar> {
                 b = i;
             }
             if (a >= b) {
-                this.contradiction(null, "");
+                fails();
             }
             alpha.set(a);
             beta.set(b);

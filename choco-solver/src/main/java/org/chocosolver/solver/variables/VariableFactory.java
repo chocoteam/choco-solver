@@ -28,7 +28,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.ISolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
@@ -80,7 +80,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return a BoolVar
      */
-    public static BoolVar bool(String NAME, ISolver SOLVER) {
+    public static BoolVar bool(String NAME, Solver SOLVER) {
         return new BoolVarImpl(NAME, SOLVER);
     }
 
@@ -92,7 +92,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an array of BoolVar
      */
-    public static BoolVar[] boolArray(String NAME, int SIZE, ISolver SOLVER) {
+    public static BoolVar[] boolArray(String NAME, int SIZE, Solver SOLVER) {
         BoolVar[] vars = new BoolVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
             vars[i] = bool(NAME + "[" + i + "]", SOLVER);
@@ -109,7 +109,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return a BoolVar matrix
      */
-    public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, ISolver SOLVER) {
+    public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, Solver SOLVER) {
         BoolVar[][] vars = new BoolVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = boolArray(NAME + "[" + i + "]", DIM2, SOLVER);
@@ -131,12 +131,12 @@ public class VariableFactory {
      * @param MAX    initial upper bound
      * @param SOLVER solver involving the variable
      * @return an integer variable with a bounded domain
-     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.ISolver)
-     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.ISolver)
+     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.Solver)
      */
-    public static IntVar integer(String NAME, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar integer(String NAME, int MIN, int MAX, Solver SOLVER) {
         int size = MAX - MIN + 1;
-        if (size < SOLVER._fes_().getSettings().getMaxDomSizeForEnumerated()) {
+        if (size < SOLVER.getSettings().getMaxDomSizeForEnumerated()) {
             return enumerated(NAME, MIN, MAX, SOLVER);
         } else {
             return bounded(NAME, MIN, MAX, SOLVER);
@@ -153,11 +153,11 @@ public class VariableFactory {
      * @param MAX    initial upper bound
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with bounded domains
-     * @see org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, org.chocosolver.solver.ISolver)
-     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.ISolver)
-     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.ISolver)
+     * @see org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.Solver)
      */
-    public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
             vars[i] = integer(NAME + "[" + i + "]", MIN, MAX, SOLVER);
@@ -176,11 +176,11 @@ public class VariableFactory {
      * @param MAX    initial upper bound
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with bounded domains
-     * @see org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, org.chocosolver.solver.ISolver)
-     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.ISolver)
-     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.ISolver)
+     * @see org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#bounded(String, int, int, org.chocosolver.solver.Solver)
+     * @see org.chocosolver.solver.variables.VariableFactory#enumerated(String, int, int, org.chocosolver.solver.Solver)
      */
-    public static IntVar[][] integerMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar[][] integerMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = integerArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
@@ -200,7 +200,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an integer variable with a bounded domain
      */
-    public static IntVar bounded(String NAME, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar bounded(String NAME, int MIN, int MAX, Solver SOLVER) {
         checkIntVar(NAME, MIN, MAX);
         if (MIN == MAX) {
             return fixed(NAME, MIN, SOLVER);
@@ -222,7 +222,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with bounded domains
      */
-    public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
             vars[i] = bounded(NAME + "[" + i + "]", MIN, MAX, SOLVER);
@@ -242,7 +242,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with bounded domains
      */
-    public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = boundedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
@@ -260,7 +260,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an integer variable with an enumerated domain
      */
-    public static IntVar enumerated(String NAME, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar enumerated(String NAME, int MIN, int MAX, Solver SOLVER) {
         checkIntVar(NAME, MIN, MAX);
         if (MIN == MAX) {
             return fixed(NAME, MIN, SOLVER);
@@ -281,7 +281,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an array of integer variables with enumerated domains
      */
-    public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
             vars[i] = enumerated(NAME + "[" + i + "]", MIN, MAX, SOLVER);
@@ -300,7 +300,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return a matrix of integer variables with enumerated domains
      */
-    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, ISolver SOLVER) {
+    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
@@ -317,7 +317,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
-    public static IntVar enumerated(String NAME, int[] VALUES, ISolver SOLVER) {
+    public static IntVar enumerated(String NAME, int[] VALUES, Solver SOLVER) {
         VALUES = sortIfNot(VALUES.clone());
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
@@ -342,7 +342,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an integer variable array with enumerated domains initialized to VALUES
      */
-    public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, ISolver SOLVER) {
+    public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
             vars[i] = enumerated(NAME + "[" + i + "]", VALUES, SOLVER);
@@ -361,7 +361,7 @@ public class VariableFactory {
      * @param SOLVER solver involving the variable
      * @return an integer variable matrix with enumerated domains initialized to VALUES
      */
-    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, ISolver SOLVER) {
+    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, VALUES, SOLVER);
@@ -383,7 +383,7 @@ public class VariableFactory {
      * @param SOLVER    solver involving the variable
      * @return a real variable with a bounded domain initialized to [MIN,MAX]
      */
-    public static RealVar real(String NAME, double MIN, double MAX, double PRECISION, ISolver SOLVER) {
+    public static RealVar real(String NAME, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         checkRealVar(NAME, MIN, MAX);
         return new RealVarImpl(NAME, MIN, MAX, PRECISION, SOLVER);
     }
@@ -400,7 +400,7 @@ public class VariableFactory {
      * @param SOLVER    solver involving the variable
      * @return a real variable array with bounded domains initialized to [MIN,MAX]
      */
-    public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, ISolver SOLVER) {
+    public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[] vars = new RealVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
             vars[i] = real(NAME + "[" + i + "]", MIN, MAX, PRECISION, SOLVER);
@@ -421,7 +421,7 @@ public class VariableFactory {
      * @param SOLVER    solver involving the variable
      * @return a real variable matrix with bounded domains initialized to [MIN,MAX]
      */
-    public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, ISolver SOLVER) {
+    public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[][] vars = new RealVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = realArray(NAME + "[" + i + "]", DIM2, MIN, MAX, PRECISION, SOLVER);
@@ -444,7 +444,7 @@ public class VariableFactory {
      * @param SOLVER   solver involving the variable
      * @return a set variable
      */
-    public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, ISolver SOLVER) {
+    public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, Solver SOLVER) {
         return new SetVarImpl(NAME, ENVELOPE, ENV_TYPE, KERNEL, KER_TYPE, SOLVER);
     }
 
@@ -457,7 +457,7 @@ public class VariableFactory {
      * @param SOLVER   solver involving the variable
      * @return a set variable
      */
-    public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, ISolver SOLVER) {
+    public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Solver SOLVER) {
         return set(NAME, ENVELOPE, SetType.BITSET, KERNEL, SetType.BITSET, SOLVER);
     }
 
@@ -469,7 +469,7 @@ public class VariableFactory {
      * @param SOLVER   solver involving the variable
      * @return a set variable
      */
-    public static SetVar set(String NAME, int[] ENVELOPE, ISolver SOLVER) {
+    public static SetVar set(String NAME, int[] ENVELOPE, Solver SOLVER) {
         return set(NAME, ENVELOPE, SetType.BITSET, new int[]{}, SetType.BITSET, SOLVER);
     }
 
@@ -484,7 +484,7 @@ public class VariableFactory {
      * @param SOLVER      solver involving the variable
      * @return a set variable
      */
-    public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, ISolver SOLVER) {
+    public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
         return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
     }
 
@@ -632,7 +632,7 @@ public class VariableFactory {
      * @param VALUE  the value
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static IntVar fixed(int VALUE, ISolver SOLVER) {
+    public static IntVar fixed(int VALUE, Solver SOLVER) {
         return fixed(CSTE_NAME + VALUE, VALUE, SOLVER);
     }
 
@@ -642,8 +642,8 @@ public class VariableFactory {
      *
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static BoolVar zero(ISolver SOLVER) {
-        return SOLVER._fes_().ZERO();
+    public static BoolVar zero(Solver SOLVER) {
+        return SOLVER.ZERO();
     }
 
     /**
@@ -652,8 +652,8 @@ public class VariableFactory {
      *
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static BoolVar one(ISolver SOLVER) {
-        return SOLVER._fes_().ONE();
+    public static BoolVar one(Solver SOLVER) {
+        return SOLVER.ONE();
     }
 
     //*************************************************************************************
@@ -669,9 +669,9 @@ public class VariableFactory {
      * @param VALUE  its value
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static IntVar fixed(String NAME, int VALUE, ISolver SOLVER) {
-        if (NAME.equals(CSTE_NAME + VALUE) && SOLVER._fes_().cachedConstants.containsKey(VALUE)) {
-            return SOLVER._fes_().cachedConstants.get(VALUE);
+    public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
+        if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
+            return SOLVER.cachedConstants.get(VALUE);
         }
         IntVar cste;
         if (VALUE == 0 || VALUE == 1) {
@@ -680,7 +680,7 @@ public class VariableFactory {
             cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
         }
         if (NAME.equals(CSTE_NAME + VALUE)) {
-            SOLVER._fes_().cachedConstants.put(VALUE, cste);
+            SOLVER.cachedConstants.put(VALUE, cste);
         }
         return cste;
     }
@@ -692,11 +692,11 @@ public class VariableFactory {
      * @param VALUE  its value
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static BoolVar fixed(boolean VALUE, ISolver SOLVER) {
+    public static BoolVar fixed(boolean VALUE, Solver SOLVER) {
         if (VALUE) {
-            return SOLVER._fes_().ONE();
+            return SOLVER.ONE();
         } else {
-            return SOLVER._fes_().ZERO();
+            return SOLVER.ZERO();
         }
     }
 
@@ -707,7 +707,7 @@ public class VariableFactory {
      * @param VALUE  its value, a set of integers (duplicates will be removed)
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static SetVar fixed(String NAME, int[] VALUE, ISolver SOLVER) {
+    public static SetVar fixed(String NAME, int[] VALUE, Solver SOLVER) {
         return new FixedSetVarImpl(NAME, VALUE, SOLVER);
     }
 
@@ -731,7 +731,7 @@ public class VariableFactory {
         if (VAR.getSolver().getSettings().enableViews()) {
             return new OffsetView(VAR, CSTE);
         } else {
-            ISolver s = VAR._bes_();
+            Solver s = VAR.getSolver();
             int lb = VAR.getLB() + CSTE;
             int ub = VAR.getUB() + CSTE;
             String name = "(" + VAR.getName() + "+" + CSTE + ")";
@@ -815,7 +815,7 @@ public class VariableFactory {
             if (BOOL.hasNot()) {
                 return BOOL.not();
             } else {
-                ISolver s = BOOL._bes_();
+                Solver s = BOOL.getSolver();
                 BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
                 s.post(ICF.arithm(ov, "!=", BOOL));
                 BOOL._setNot(ov);
@@ -839,7 +839,7 @@ public class VariableFactory {
         if (VAR.getSolver().getSettings().enableViews()) {
             return new MinusView(VAR);
         } else {
-            ISolver s = VAR._bes_();
+            Solver s = VAR.getSolver();
             int ub = -VAR.getLB();
             int lb = -VAR.getUB();
             String name = "-(" + VAR.getName() + ")";
@@ -878,14 +878,14 @@ public class VariableFactory {
         } else {
             IntVar var;
             if (CSTE == 0) {
-                var = fixed(0, VAR._bes_());
+                var = fixed(0, VAR.getSolver());
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
                 if (VAR.getSolver().getSettings().enableViews()) {
                     var = new ScaleView(VAR, CSTE);
                 } else {
-                    ISolver s = VAR._bes_();
+                    Solver s = VAR.getSolver();
                     int lb = VAR.getLB() * CSTE;
                     int ub = VAR.getUB() * CSTE;
                     String name = "(" + VAR.getName() + "*" + CSTE + ")";
@@ -918,13 +918,13 @@ public class VariableFactory {
      */
     public static IntVar abs(IntVar VAR) {
         if (VAR.isInstantiated()) {
-            return fixed(Math.abs(VAR.getValue()), VAR._bes_());
+            return fixed(Math.abs(VAR.getValue()), VAR.getSolver());
         } else if (VAR.getLB() >= 0) {
             return VAR;
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-            ISolver s = VAR._bes_();
+            Solver s = VAR.getSolver();
             int ub = Math.max(-VAR.getLB(), VAR.getUB());
             String name = "|" + VAR.getName() + "|";
             IntVar abs;
@@ -950,7 +950,7 @@ public class VariableFactory {
         if (VAR.getSolver().getSettings().enableViews()) {
             return new RealView(VAR, PRECISION);
         } else {
-            ISolver s = VAR._bes_();
+            Solver s = VAR.getSolver();
             double lb = VAR.getLB();
             double ub = VAR.getUB();
             RealVar rv = real("(real)" + VAR.getName(), lb, ub, PRECISION, s);
@@ -975,7 +975,7 @@ public class VariableFactory {
                 reals[i] = real(VARS[i], PRECISION);
             }
         } else {
-            ISolver s = VARS[0]._bes_();
+            Solver s = VARS[0].getSolver();
             for (int i = 0; i < VARS.length; i++) {
                 double lb = VARS[i].getLB();
                 double ub = VARS[i].getUB();

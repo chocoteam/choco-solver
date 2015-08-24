@@ -35,10 +35,8 @@
 
 package org.chocosolver.solver.constraints.nary.sum;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -104,20 +102,20 @@ public class PropBoolSumIncremental extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         int lb = min.get();
         int ub = max.get();
-        sum.updateLowerBound(lb, aCause);
-        sum.updateUpperBound(ub, aCause);
+        sum.updateLowerBound(lb, this);
+        sum.updateUpperBound(ub, this);
         if (lb != ub && sum.isInstantiated()) {
             if (sum.getValue() == lb) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(0, aCause);
+                        vars[i].instantiateTo(0, this);
                     }
                 }
             }
             if (sum.getValue() == ub) {
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(1, aCause);
+                        vars[i].instantiateTo(1, this);
                     }
                 }
             }
@@ -171,21 +169,6 @@ public class PropBoolSumIncremental extends Propagator<IntVar> {
         sb.append(vars[vars.length - 2]).append(")");
         sb.append(" = ").append(vars[vars.length - 1]);
         return sb.toString();
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            BoolVar[] aVars = new BoolVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (BoolVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar S = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropBoolSumIncremental(aVars, S));
-        }
     }
 
 

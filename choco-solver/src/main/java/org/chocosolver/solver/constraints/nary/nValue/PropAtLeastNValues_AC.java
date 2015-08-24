@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -244,9 +242,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
                     if (digraph.getPredOf(i).getFirstElement() == j) {
-                        v.instantiateTo(k, aCause);
+                        v.instantiateTo(k, this);
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, this);
                         digraph.removeArc(i, j);
                     }
                 }
@@ -258,7 +256,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
                         break;
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, this);
                     }
                 }
                 int lb = v.getLB();
@@ -267,7 +265,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
                         break;
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, this);
                     }
                 }
             }
@@ -300,7 +298,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             }
         }
         int card = repairMatching();
-        vars[n].updateUpperBound(card, aCause);
+        vars[n].updateUpperBound(card, this);
         if (vars[n].getLB() == card) {
             filter();
         }
@@ -364,18 +362,4 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropAtLeastNValues_AC(aVars, aVar));
-        }
-    }
 }

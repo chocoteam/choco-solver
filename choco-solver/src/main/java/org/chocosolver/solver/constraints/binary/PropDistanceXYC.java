@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -103,14 +101,14 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             if (vars[0].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[0], vars[1]);
             } else {
-                vars[0].updateLowerBound(vars[1].getLB() - cste, aCause);
-                vars[0].updateUpperBound(vars[1].getUB() + cste, aCause);
+                vars[0].updateLowerBound(vars[1].getLB() - cste, this);
+                vars[0].updateUpperBound(vars[1].getUB() + cste, this);
             }
             if (vars[1].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[1], vars[0]);
             } else {
-                vars[1].updateLowerBound(vars[0].getLB() - cste, aCause);
-                vars[1].updateUpperBound(vars[0].getUB() + cste, aCause);
+                vars[1].updateLowerBound(vars[0].getLB() - cste, this);
+                vars[1].updateUpperBound(vars[0].getUB() + cste, this);
             }
         } else if (operator == Operator.GT) {
             filterGT();
@@ -230,7 +228,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 int to = it.max();
                 for (int value = from; value <= to; value++)
                     if (!var2.contains(value - cste) && !var2.contains(value + cste)) {
-                        var1.removeValue(value, aCause);
+                        var1.removeValue(value, this);
                     }
                 it.next();
             }
@@ -247,11 +245,11 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int lbv0 = vars[1].getUB() - cste;
             int ubv0 = vars[1].getLB() + cste;
             // remove interval [lbv0, ubv0] from domain of vars[0]
-            vars[0].removeInterval(lbv0, ubv0, aCause);
+            vars[0].removeInterval(lbv0, ubv0, this);
             int lbv1 = vars[0].getUB() - cste;
             int ubv1 = vars[0].getLB() + cste;
             // remove interval [lbv1, ubv1] from domain of vars[1]
-            vars[1].removeInterval(lbv1, ubv1, aCause);
+            vars[1].removeInterval(lbv1, ubv1, this);
         } else {
             this.setPassive();
         }
@@ -265,7 +263,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int lbv0 = v0.getUB() - cste;
             int ubv0 = v0.getLB() + cste;
             // remove interval [lbv0, ubv0] from domain of vars[0]
-            v1.removeInterval(lbv0, ubv0, aCause);
+            v1.removeInterval(lbv0, ubv0, this);
         } else {
             this.setPassive();
         }
@@ -275,18 +273,18 @@ public class PropDistanceXYC extends Propagator<IntVar> {
      * In case of a LT
      */
     public void filterLT() throws ContradictionException {
-        vars[0].updateLowerBound(vars[1].getLB() - cste + 1, aCause);
-        vars[0].updateUpperBound(vars[1].getUB() + cste - 1, aCause);
-        vars[1].updateLowerBound(vars[0].getLB() - cste + 1, aCause);
-        vars[1].updateUpperBound(vars[0].getUB() + cste - 1, aCause);
+        vars[0].updateLowerBound(vars[1].getLB() - cste + 1, this);
+        vars[0].updateUpperBound(vars[1].getUB() + cste - 1, this);
+        vars[1].updateLowerBound(vars[0].getLB() - cste + 1, this);
+        vars[1].updateUpperBound(vars[0].getUB() + cste - 1, this);
     }
 
     /**
      * In case of a LT, due to a modification on v0 domain
      */
     public void filterLTonVar(IntVar v0, IntVar v1) throws ContradictionException {
-        v1.updateLowerBound(v0.getLB() - cste + 1, aCause);
-        v1.updateUpperBound(v0.getUB() + cste - 1, aCause);
+        v1.updateLowerBound(v0.getLB() - cste + 1, this);
+        v1.updateUpperBound(v0.getUB() + cste - 1, this);
     }
 
     /**
@@ -297,11 +295,11 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int end = v0.getLB() + cste;
             for (int val = v0.getLB(); val <= end; val = v1.nextValue(val)) {
                 if (!v0.contains(val - cste) && !v0.contains(val + cste)) {
-                    v1.removeValue(val, aCause);
+                    v1.removeValue(val, this);
                 }
             }
         } else {
-            v1.updateLowerBound(v0.getLB() - cste, aCause);
+            v1.updateLowerBound(v0.getLB() - cste, this);
         }
     }
 
@@ -319,12 +317,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int val = initval;
             do {
                 if (!v0.contains(val - cste) && !v0.contains(val + cste)) {
-                    v1.removeValue(val, aCause);
+                    v1.removeValue(val, this);
                 }
                 val = v1.nextValue(val);
             } while (val <= v1.getUB() && val > initval); //todo : pourquoi besoin du deuxieme currentElement ?
         } else {
-            v1.updateUpperBound(v0.getUB() + cste, aCause);
+            v1.updateUpperBound(v0.getUB() + cste, this);
         }
     }
 
@@ -333,9 +331,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
      */
     public void filterOnInst(IntVar v, int val) throws ContradictionException {
         if (!v.contains(val + cste)) {
-            v.instantiateTo(val - cste, aCause);
+            v.instantiateTo(val - cste, this);
         } else if (!v.contains(val - cste)) {
-            v.instantiateTo(val + cste, aCause);
+            v.instantiateTo(val + cste, this);
         } else {
             if (v.hasEnumeratedDomain()) {
                 DisposableRangeIterator rit = v.getRangeIterator(true);
@@ -345,7 +343,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                         int to = rit.max();
                         for (int value = from; value <= to; value++) {
                             if (value != (val - cste) && value != (val + cste)) {
-                                v.removeValue(value, aCause);
+                                v.removeValue(value, this);
                             }
                         }
                         rit.next();
@@ -354,8 +352,8 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     rit.dispose();
                 }
             } else {
-                v.updateLowerBound(val - cste, aCause);
-                v.updateUpperBound(val + cste, aCause);
+                v.updateLowerBound(val - cste, this);
+                v.updateUpperBound(val + cste, this);
             }
         }
     }
@@ -363,12 +361,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     public void filterNeq() throws ContradictionException {
         if (cste >= 0) {
             if (vars[0].isInstantiated()) {
-                vars[1].removeValue(vars[0].getValue() + cste, aCause);
-                vars[1].removeValue(vars[0].getValue() - cste, aCause);
+                vars[1].removeValue(vars[0].getValue() + cste, this);
+                vars[1].removeValue(vars[0].getValue() - cste, this);
             }
             if (vars[1].isInstantiated()) {
-                vars[0].removeValue(vars[1].getValue() + cste, aCause);
-                vars[0].removeValue(vars[1].getValue() - cste, aCause);
+                vars[0].removeValue(vars[1].getValue() + cste, this);
+                vars[0].removeValue(vars[1].getValue() - cste, this);
             }
         } else {
             this.setPassive();
@@ -410,16 +408,4 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropDistanceXYC(aVars, operator, cste));
-        }
-    }
 }

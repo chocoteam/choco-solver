@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.Operation;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -83,8 +81,8 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        this.vars[1].updateLowerBound(cste, aCause);
-        this.vars[1].updateUpperBound(lval.length - 1 + cste, aCause);
+        this.vars[1].updateLowerBound(cste, this);
+        this.vars[1].updateUpperBound(lval.length - 1 + cste, this);
         filter(false, 2);
     }
 
@@ -106,7 +104,7 @@ public class PropElement extends Propagator<IntVar> {
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (IntEventType.isInstantiate(mask)) {
             if (varIdx == 1) {  // INDEX (should be only that)
-                this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], aCause);
+                this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], this);
                 this.setPassive();
             }
         }
@@ -166,18 +164,6 @@ public class PropElement extends Propagator<IntVar> {
                 | ruleStore.addFullDomainRule((var == vars[0]) ? vars[1] : vars[0]);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropElement(X, this.lval, Y, this.cste, this.s));
-        }
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,11 +172,11 @@ public class PropElement extends Propagator<IntVar> {
         boolean hasChanged;
 
         if (s == Sort.desc) {
-            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getUB() - cste], aCause);
-            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getLB() - cste], aCause);
+            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getUB() - cste], this);
+            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getLB() - cste], this);
         } else if (s == Sort.asc) {
-            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getLB() - cste], aCause);
-            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getUB() - cste], aCause);
+            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getLB() - cste], this);
+            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getUB() - cste], this);
         } else {
             int minVal = Integer.MAX_VALUE;
             int maxVal = Integer.MIN_VALUE;
@@ -246,8 +232,8 @@ public class PropElement extends Propagator<IntVar> {
                         });
                     }
                 }
-                hasChanged = this.vars[0].updateLowerBound(minVal, aCause);
-                hasChanged |= this.vars[0].updateUpperBound(maxVal, aCause);
+                hasChanged = this.vars[0].updateLowerBound(minVal, this);
+                hasChanged |= this.vars[0].updateUpperBound(maxVal, this);
             } finally {
                 iter.dispose();
             }
@@ -261,23 +247,23 @@ public class PropElement extends Propagator<IntVar> {
         int maxFeasibleIndex = Math.min(this.vars[1].getUB(), lval.length - 1 + cste);
 
         if (minFeasibleIndex > maxFeasibleIndex) {
-            contradiction(null, "impossible");
+            fails();
         }
 
         while ((this.vars[1].contains(minFeasibleIndex))
                 && !(this.vars[0].contains(lval[minFeasibleIndex - this.cste])))
             minFeasibleIndex++;
-        hasChanged = this.vars[1].updateLowerBound(minFeasibleIndex, aCause);
+        hasChanged = this.vars[1].updateLowerBound(minFeasibleIndex, this);
 
         while ((this.vars[1].contains(maxFeasibleIndex))
                 && !(this.vars[0].contains(lval[maxFeasibleIndex - this.cste])))
             maxFeasibleIndex--;
-        hasChanged |= this.vars[1].updateUpperBound(maxFeasibleIndex, aCause);
+        hasChanged |= this.vars[1].updateUpperBound(maxFeasibleIndex, this);
 
         if (this.vars[1].hasEnumeratedDomain()) {
             for (int i = minFeasibleIndex + 1; i <= maxFeasibleIndex - 1; i++) {
                 if (this.vars[1].contains(i) && !(this.vars[0].contains(this.lval[i - this.cste])))
-                    hasChanged |= this.vars[1].removeValue(i, aCause);
+                    hasChanged |= this.vars[1].removeValue(i, this);
             }
         }
         return hasChanged;

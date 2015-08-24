@@ -34,10 +34,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.differences;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -77,17 +74,6 @@ public class AutoDiffDetection implements D {
                                 return true;
         }
         return false;
-    }
-
-    @Override
-    public D duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        int size = this.scope.length;
-        IntVar[] aVars = new IntVar[size];
-        for (int i = 0; i < size; i++) {
-            this.scope[i].duplicate(solver, identitymap);
-            aVars[i] = (IntVar) identitymap.get(this.scope[i]);
-        }
-        return new AutoDiffDetection(aVars);
     }
 
 }

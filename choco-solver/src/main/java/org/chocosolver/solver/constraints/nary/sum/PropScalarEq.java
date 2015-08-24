@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -134,7 +132,8 @@ public class PropScalarEq extends Propagator<IntVar> {
     boolean filterOnLeq() throws ContradictionException {
         boolean anychange = false;
         if (b - sumLB < 0) {
-            this.contradiction(null, "b - sumLB < 0");
+//            thisb - sumLB < 0
+            fails();
         }
         int lb, ub, i = 0;
         // positive coefficients first
@@ -142,7 +141,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] - (b - sumLB) > 0) {
                 lb = vars[i].getLB() * c[i];
                 ub = lb + I[i];
-                if (vars[i].updateUpperBound(divFloor(b - sumLB + lb, c[i]), aCause)) {
+                if (vars[i].updateUpperBound(divFloor(b - sumLB + lb, c[i]), this)) {
                     int nub = vars[i].getUB() * c[i];
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
@@ -155,7 +154,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] - (b - sumLB) > 0) {
                 lb = vars[i].getUB() * c[i];
                 ub = lb + I[i];
-                if (vars[i].updateLowerBound(divCeil(-(b - sumLB + lb), -c[i]), aCause)) {
+                if (vars[i].updateLowerBound(divCeil(-(b - sumLB + lb), -c[i]), this)) {
                     int nub = vars[i].getLB() * c[i];
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
@@ -170,7 +169,8 @@ public class PropScalarEq extends Propagator<IntVar> {
     boolean filterOnGeq() throws ContradictionException {
         boolean anychange = false;
         if (b - sumUB > 0) {
-            this.contradiction(null, "b - sumUB > 0");
+            // b - sumUB > 0
+            fails();
         }
         int lb, ub, i = 0;
         // positive coefficients first
@@ -178,7 +178,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] > -(b - sumUB)) {
                 ub = vars[i].getUB() * c[i];
                 lb = ub - I[i];
-                if (vars[i].updateLowerBound(divCeil(b - sumUB + ub, c[i]), aCause)) {
+                if (vars[i].updateLowerBound(divCeil(b - sumUB + ub, c[i]), this)) {
                     int nlb = vars[i].getLB() * c[i];
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;
@@ -191,7 +191,7 @@ public class PropScalarEq extends Propagator<IntVar> {
             if (I[i] > -(b - sumUB)) {
                 ub = vars[i].getLB() * c[i];
                 lb = ub - I[i];
-                if (vars[i].updateUpperBound(divFloor(-(b - sumUB + ub), -c[i]), aCause)) {
+                if (vars[i].updateUpperBound(divFloor(-(b - sumUB + ub), -c[i]), this)) {
                     int nlb = vars[i].getUB() * c[i];
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;
@@ -314,19 +314,6 @@ public class PropScalarEq extends Propagator<IntVar> {
             }
         }
         return newrules;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropScalarEq(aVars, this.c, this.pos, this.b));
-        }
     }
 
     private int divFloor(int a, int b) {

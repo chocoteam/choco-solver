@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.lex;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -143,23 +141,6 @@ public class PropLexChain extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int d1 = this.x.length;
-            IntVar[][] aVars = new IntVar[d1][];
-            for (int i = 0; i < d1; i++) {
-                int d2 = this.x[i].length;
-                aVars[i] = new IntVar[d2];
-                for (int j = 0; j < d2; j++) {
-                    this.x[i][j].duplicate(solver, identitymap);
-                    aVars[i][j] = (IntVar) identitymap.get(this.x[i][j]);
-                }
-            }
-            identitymap.put(this, new PropLexChain(aVars, this.strict));
-        }
-    }
-
     /**
      * check the feasibility of a tuple, recursively on each pair of consecutive vectors.
      * Compare vector xi with vector x(i+1):
@@ -196,13 +177,13 @@ public class PropLexChain extends Propagator<IntVar> {
     public void boundsLex(int[] a, IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         while (i < N && a[i] == b[i]) {
-            x[i].updateLowerBound(a[i], aCause);
-            x[i].updateUpperBound(b[i], aCause);
+            x[i].updateLowerBound(a[i], this);
+            x[i].updateUpperBound(b[i], this);
             i++;
         }
         if (i < N) {
-            x[i].updateLowerBound(a[i], aCause);
-            x[i].updateUpperBound(b[i], aCause);
+            x[i].updateLowerBound(a[i], this);
+            x[i].updateUpperBound(b[i], this);
         }
         if (i == N || x[i].nextValue(a[i]) < b[i]) {
             return;
@@ -210,13 +191,13 @@ public class PropLexChain extends Propagator<IntVar> {
         i++;
         while (i < N && x[i].getLB() == b[i] && x[i].getUB() == a[i]) {
             if (x[i].hasEnumeratedDomain()) {
-                x[i].removeInterval(b[i] + 1, a[i] - 1, aCause);
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
             i++;
         }
         if (i < N) {
             if (x[i].hasEnumeratedDomain()) {
-                x[i].removeInterval(b[i] + 1, a[i] - 1, aCause);
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
         }
     }
@@ -297,7 +278,7 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     public void computeUB(IntVar[] x, int[] b, int[] u) throws ContradictionException {
         int alpha = computeAlpha(x, b);
-        if (alpha == -1) this.contradiction(null, "");
+        if (alpha == -1) fails();
         for (int i = 0; i < N; i++) {
             if (i < alpha) {
                 u[i] = b[i];
@@ -324,7 +305,7 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     public void computeLB(IntVar[] x, int[] a, int[] lower) throws ContradictionException {
         int beta = computeBeta(x, a);
-        if (beta == -1) this.contradiction(null, "");
+        if (beta == -1) fails();
         for (int i = 0; i < N; i++) {
             if (i < beta) {
                 lower[i] = a[i];

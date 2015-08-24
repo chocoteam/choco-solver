@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
@@ -77,7 +76,7 @@ import java.util.Arrays;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Solver implements Serializable, ISolver {
+public class Solver implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
@@ -169,7 +168,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param environment a backtracking environment
      * @param name        a name
-     * @see SolverFactory
      */
     public Solver(IEnvironment environment, String name) {
         this.name = name;
@@ -191,11 +189,8 @@ public class Solver implements Serializable, ISolver {
     /**
      * Create a solver object with default parameters.
      *
-     * @see SolverFactory
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
-     * @deprecated
      */
-    @Deprecated
     public Solver() {
         this(Environments.DEFAULT.make(), "");
     }
@@ -203,18 +198,10 @@ public class Solver implements Serializable, ISolver {
     /**
      * Create a solver object with default parameters, named <code>name</code>.
      *
-     * @see SolverFactory
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
-     * @deprecated
      */
-    @Deprecated
     public Solver(String name) {
         this(Environments.DEFAULT.make(), name);
-    }
-
-    @Override
-    public Solver _fes_() {
-        return this;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -592,7 +579,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param variable a newly created variable, not already added
      */
-    @Override
     public void associates(Variable variable) {
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
@@ -627,7 +613,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param c a Constraint
      */
-    @Override
     public void post(Constraint c) {
         _post(true, c);
     }
@@ -640,7 +625,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param cs Constraints
      */
-    @Override
     public void post(Constraint... cs) {
         _post(true, cs);
     }
@@ -775,7 +759,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return an {@link ESat}.
      */
-    @Override
     public ESat isFeasible() {
         return feasible;
     }
@@ -818,7 +801,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return <code>true</code> if and only if a solution has been found.
      */
-    @Override
     public boolean findSolution() {
         solve(true);
         return measures.getSolutionCount() > 0;
@@ -831,7 +813,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
-    @Override
     public boolean nextSolution() {
         if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
             throw new SolverException("Solver.findSolution() must be called once before calling Solver.nextSolution()");
@@ -846,7 +827,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return the number of found solutions.
      */
-    @Override
     public long findAllSolutions() {
         solve(false);
         return measures.getSolutionCount();
@@ -859,7 +839,6 @@ public class Solver implements Serializable, ISolver {
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
-    @Override
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
@@ -1107,46 +1086,30 @@ public class Solver implements Serializable, ISolver {
 
 
     /**
-     * Duplicate the model declares within <code>this</code>, ie only variables and constraints.
-     * Some parameters are reset to default value: search loop (set to binary), explanation engine (set to NONE),
-     * propagation engine (set to NONE), objective manager (set to SAT), solution recorder (set to LastSolutionRecorder) and
-     * feasibility (set to UNDEFINED).
-     * The search strategies and search monitors are simply not reported in the copy.
-     * <p>
-     * Note that a new instance of the environment is made, preserving the initial choice.
-     * <p>
-     * Duplicating a solver is only possible before any resolution process began.
-     * This is a strong restriction which may be removed in the future.
-     * Indeed, duplicating a solver should only be considered while dealing with multi-threading.
+     * @deprecated To duplicate a model, the variables addition and constraints declaration must be done in a specific
+     *              method called with a solver as parameter:
+     *              <pre> {@code
      *
-     * @return a copy of <code>this</code>
-     * @throws org.chocosolver.solver.exception.SolverException if the search has already begun.
+     *              public void modelIt(Solver solver){
+     *                  // declare variables, for example:
+     *                  IntVar a = VF.enumerated("A", 0, 10, solver);
+     *                  // post constraints, for example:
+     *                  solver.post(ICF.arithm(a, ">=", 3));
+     *              }
+     *
+     *              public void main(){
+     *                  Solver s = new Solver();
+     *                  modelIt(s);
+     *                  Solver clone = new Solver();
+     *                  modelIt(clone);
+     *              }
+     *              }</pre>
+     *
      */
+    @Deprecated
     public Solver duplicateModel() {
-        if (environment.getWorldIndex() > 0) {
-            throw new SolverException("Duplicating a solver cannot be achieved once the resolution has begun.");
-        }
-        // Create a fresh solver
-        Solver clone;
-        try {
-            clone = new Solver(this.environment.getClass().newInstance(), this.name);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new SolverException("The current solver cannot be duplicated:\n" + e.getMessage());
-        }
-
-        THashMap<Object, Object> identitymap = new THashMap<>();
-        // duplicate variables
-        for (int i = 0; i < this.vIdx; i++) {
-            this.vars[i].duplicate(clone, identitymap);
-        }
-        // duplicate constraints
-        for (int i = 0; i < this.cIdx; i++) {
-            this.cstrs[i].duplicate(clone, identitymap);
-            //TODO How to deal with temporary constraints ?
-            clone.post((Constraint) identitymap.get(this.cstrs[i]));
-        }
-
-        return clone;
+        throw new SolverException("To duplicate a model, the variables addition and constraints declaration must be done in a specific\n" +
+                "method called with a solver as parameter.");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

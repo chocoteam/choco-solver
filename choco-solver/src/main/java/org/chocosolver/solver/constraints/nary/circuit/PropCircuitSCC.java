@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.circuit;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -101,8 +99,8 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			for (int i = 0; i < n; i++) {
-				vars[i].updateLowerBound(offSet, aCause);
-				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+				vars[i].updateLowerBound(offSet, this);
+				vars[i].updateUpperBound(n - 1 + offSet, this);
 			}
 		}
 		switch (conf){
@@ -127,23 +125,23 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		for (int i = 0; i < n_R; i++) {
 			if (G_R.getPredOf(i).isEmpty()) {
 				if(first!=-1){
-					contradiction(null,"");
+					fails();
 				}
 				first = i;
 			}
 			if (G_R.getSuccOf(i).isEmpty()) {
 				if(last!=-1){
-					contradiction(null,"");
+					fails();
 				}
 				last = i;
 			}
 		}
 		if (first == -1 || last == -1 || first == last) {
-			contradiction(null, "");
+			fails();
 		}
 		// compute hamiltonian path and filter skipping arcs
 		if (visit(first, last, source) != n_R) {
-			contradiction(null, "");
+			fails();
 		}
 		// additional filter (based on instantiated arcs)
 		filterFromInst(source);
@@ -196,7 +194,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 
 	private int visit(int node, int last, int source) throws ContradictionException {
 		if (node == -1) {
-			contradiction(null, "G_R disconnected");
+			fails();
 		}
 		if (node == last) {
 			return 1;
@@ -222,7 +220,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				if(to==n){
 					to=source;
 				}
-				vars[from].removeValue(to+offSet,aCause);
+				vars[from].removeValue(to+offSet, this);
 				mates[node].remove(e);
 			}
 		}
@@ -246,7 +244,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 							if(val==n){
 								val = source;
 							}
-							vars[a/n2-1].removeValue(val+offSet,aCause);
+							vars[a/n2-1].removeValue(val+offSet, this);
 						}
 					}
 					mates[x].clear();
@@ -298,7 +296,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 						size++;
 					}
 					if(size>2){
-						vars[in].removeValue(outDoor+offSet,aCause);
+						vars[in].removeValue(outDoor+offSet, this);
 					}
 				}
 			}
@@ -309,7 +307,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int sx = sccOf[x];
 		for(int i=0; i<n; i++){
 			if(sccOf[i]==sx){
-				vars[i].removeValue(x+offSet,aCause);
+				vars[i].removeValue(x+offSet, this);
 			}
 		}
 	}
@@ -320,21 +318,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int ub = vars[x].getUB();
 		for(int v=lb;v<=ub;v=vars[x].nextValue(v)){
 			if(sccOf[v-offSet]==sx){
-				vars[x].removeValue(v,aCause);
+				vars[x].removeValue(v, this);
 			}
 		}
 	}
 
-	@Override
-	public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-		if (!identitymap.containsKey(this)) {
-			int size = this.vars.length;
-			IntVar[] aVars = new IntVar[size];
-			for (int i = 0; i < size; i++) {
-				this.vars[i].duplicate(solver, identitymap);
-				aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-			}
-			identitymap.put(this, new PropCircuitSCC(aVars, this.offSet, this.conf));
-		}
-	}
 }

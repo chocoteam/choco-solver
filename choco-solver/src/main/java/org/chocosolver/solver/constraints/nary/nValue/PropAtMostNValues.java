@@ -29,8 +29,6 @@
 package org.chocosolver.solver.constraints.nary.nValue;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -104,7 +102,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateLowerBound(1, aCause);
+        vars[n].updateLowerBound(1, this);
         int count = 0;
         int countMax = 0;
         int idx = 0;
@@ -145,7 +143,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         }
         nbInst = count;
         // filtering cardinality variable
-        vars[n].updateLowerBound(count, aCause);
+        vars[n].updateLowerBound(count, this);
         // filtering decision variables
         if (count != countMax && vars[n].isInstantiated())
             if (count == vars[n].getUB()) {
@@ -153,13 +151,13 @@ public class PropAtMostNValues extends Propagator<IntVar> {
                 for (int i = 0; i < idx; i++) {
                     val = unusedValues[i];
                     for (int v = 0; v < n; v++) {
-                        vars[v].removeValue(val, aCause);
+                        vars[v].removeValue(val, this);
                     }
                 }
                 for (int i = idx - 1; i >= 0; i--) {
                     val = unusedValues[i];
                     for (int v = 0; v < n; v++) {
-                        vars[v].removeValue(val, aCause);
+                        vars[v].removeValue(val, this);
                     }
                 }
                 if (allEnum) setPassive();
@@ -249,8 +247,8 @@ public class PropAtMostNValues extends Propagator<IntVar> {
                     break;
                 }
             }
-            v.updateLowerBound(lb, aCause);
-            v.updateUpperBound(ub, aCause);
+            v.updateLowerBound(lb, this);
+            v.updateUpperBound(ub, this);
         }
     }
 
@@ -290,18 +288,4 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropAtMostNValues(aVars, this.concernedValues, aVar));
-        }
-    }
 }

@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.SF;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -61,7 +60,7 @@ public class ConstraintTest {
 
     @Test(groups = "1s")
     public void testDependencyConditions() {
-        Solver solver = SF.makeSolver();
+        Solver solver = new Solver();
         IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
         solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
         solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
@@ -76,7 +75,7 @@ public class ConstraintTest {
 
     @Test(groups = "1s")
     public void testDependencyConditions2() {
-        Solver solver = SF.makeSolver();
+        Solver solver = new Solver();
         IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
         solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
         solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()

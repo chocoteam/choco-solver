@@ -28,7 +28,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cnf;
 
-import org.chocosolver.solver.ISolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.ArrayList;
@@ -144,7 +144,7 @@ public class LogicTreeToolBox {
     }
 
 
-    public static ILogical simplify(ILogical t, ISolver solver) {
+    public static ILogical simplify(ILogical t, Solver solver) {
         if (t.isLit()) return t;
         // else
         LogOp n = (LogOp) t;
@@ -158,7 +158,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return solver._fes_().ONE();
+                        return solver.ONE();
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -174,7 +174,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return solver._fes_().ZERO();
+                        return solver.ZERO();
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -192,13 +192,13 @@ public class LogicTreeToolBox {
     }
 
 
-    public static ILogical simplifySingleton(ILogical l, ISolver solver) {
+    public static ILogical simplifySingleton(ILogical l, Solver solver) {
         if (l.isLit()) return l;
         LogOp t = (LogOp) l;
         ILogical[] children = t.getChildren();
         ArrayList<ILogical> toRemove = new ArrayList<>();
         for (int i = 0; i < children.length; i++) {
-            if (solver._fes_().ONE().equals(children[i])) {
+            if (solver.ONE().equals(children[i])) {
                 toRemove.add(children[i]);
             }
         }
@@ -217,7 +217,7 @@ public class LogicTreeToolBox {
      * @param logOp logical operator
      * @return an ILogical
      */
-    public static ILogical toCNF(LogOp logOp, ISolver solver) {
+    public static ILogical toCNF(LogOp logOp, Solver solver) {
         expandNot(logOp);
         logOp = distribute(logOp);
         // sort children of each clause with positive literals first

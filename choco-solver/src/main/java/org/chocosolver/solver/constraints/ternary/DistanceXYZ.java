@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.SolverException;
@@ -65,20 +63,4 @@ public class DistanceXYZ extends Constraint {
 //	public Constraint makeOpposite(){
 //		return new DistanceXYZ(X,Y,Operator.getOpposite(OP),Z);
 //	}
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.X.duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.X);
-            this.Y.duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.Y);
-            this.Z.duplicate(solver, identitymap);
-            IntVar Z = (IntVar) identitymap.get(this.Z);
-
-            Constraint clone = new DistanceXYZ(X, Y, this.OP, Z);
-            identitymap.put(this.propagators[0], clone.getPropagator(0));
-            identitymap.put(this, clone);
-        }
-    }
 }

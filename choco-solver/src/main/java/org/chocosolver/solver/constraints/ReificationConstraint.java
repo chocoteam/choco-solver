@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropReif;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -136,31 +135,4 @@ public class ReificationConstraint extends Constraint {
         return bool.toString() + "=>" + trueCons.toString() + ", !" + bool.toString() + "=>" + falseCons.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.bool.duplicate(solver, identitymap);
-            BoolVar bool = (BoolVar) identitymap.get(this.bool);
-
-            this.bool.not().duplicate(solver, identitymap);
-            BoolVar notbool = (BoolVar) identitymap.get(this.bool.not());
-
-            this.trueCons.duplicate(solver, identitymap);
-            Constraint trueCons = (Constraint) identitymap.get(this.trueCons);
-            trueCons.boolReif = bool;
-
-            this.falseCons.duplicate(solver, identitymap);
-            Constraint falseCons = (Constraint) identitymap.get(this.falseCons);
-            falseCons.boolReif = notbool;
-
-            trueCons.opposite = falseCons;
-            falseCons.opposite = trueCons;
-
-            identitymap.put(this, new ReificationConstraint(
-                    bool,
-                    trueCons,
-                    falseCons
-            ));
-        }
-    }
 }

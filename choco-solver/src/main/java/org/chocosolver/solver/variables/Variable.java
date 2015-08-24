@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
@@ -215,11 +213,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     Solver getSolver();
 
     /**
-     * Return the back end solver.
-     */
-    ISolver _bes_();
-
-    /**
      * Return a MASK composed of 2 main information: TYPE and KIND.
      * <br/>TYPE is defined in the 3 first bits : VAR ( 1 << 0), CSTE (1 << 1) or VIEW (1 << 2)
      * <br/>KIND is defined on the other bits : INT (1 << 3), BOOL (INT + 1 << 4), GRAPH (1 << 5) or META (1 << 6)
@@ -252,13 +245,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @return a copy of <code>this</code>
      */
     <V extends Variable> V duplicate();
-
-    /**
-     * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
-     * @param solver target solver
-     * @param identitymap a map to guarantee uniqueness of objects
-     */
-    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
 
     /**
      * For scheduling purpose only

@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.nary.circuit;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -109,8 +107,8 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
 		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			for (int i = 0; i < n; i++) {
-				vars[i].updateLowerBound(offSet, aCause);
-				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+				vars[i].updateLowerBound(offSet, this);
+				vars[i].updateUpperBound(n - 1 + offSet, this);
 			}
 		}
         int size = 0;
@@ -194,7 +192,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
     private void makeLoops(int source, int cc, boolean sink) throws ContradictionException {
         if (cc == sccOf[source]) {
             if (sink) {
-                contradiction(null, "");
+				fails();
             } else {
                 return;
             }
@@ -203,14 +201,14 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
             if (sink) {
                 return;
             } else {
-                contradiction(null, "");
+				fails();
             }
         }
 //		if((sink && cc==sccOf[source]) || (cc==sccOf[n] && !sink)){
 //			contradiction(vars[0],"");
 //		}
 		for(int i=SCCfinder.getSCCFirstNode(cc); i>=0; i=SCCfinder.getNextNode(i)){
-			vars[i].instantiateTo(i+offSet,aCause);
+			vars[i].instantiateTo(i+offSet, this);
 		}
 		mates[cc].clear();
 		if(sink){
@@ -249,7 +247,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
                             if (val == n) {
                                 val = source;
                             }
-                            vars[a / n2 - 1].removeValue(val + offSet, aCause);
+                            vars[a / n2 - 1].removeValue(val + offSet, this);
                         }
                     }
                     mates[x].clear();
@@ -275,7 +273,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 				for(int v=lb;v<=ub;v=vars[door].nextValue(v)){
 					if(sccOf[v-offSet]==sccFrom){
 						if(v-offSet!=door || mandSCC.get(sccFrom)){
-							vars[door].removeValue(v,aCause);
+							vars[door].removeValue(v, this);
 						}
 					}
 				}
@@ -283,16 +281,4 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		}
 	}
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropSubCircuitSCC(aVars, this.offSet));
-        }
-    }
 }

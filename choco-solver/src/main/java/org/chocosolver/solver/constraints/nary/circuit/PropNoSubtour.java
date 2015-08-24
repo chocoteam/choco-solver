@@ -36,10 +36,8 @@
 package org.chocosolver.solver.constraints.nary.circuit;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -99,9 +97,9 @@ public class PropNoSubtour extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-            vars[i].removeValue(i + offset, aCause);
-            vars[i].updateLowerBound(offset, aCause);
-            vars[i].updateUpperBound(n - 1 + offset, aCause);
+            vars[i].removeValue(i + offset, this);
+            vars[i].updateLowerBound(offset, this);
+            vars[i].updateUpperBound(n - 1 + offset, this);
             if (vars[i].isInstantiated()) {
                 fixedVar.add(i);
             }
@@ -142,12 +140,12 @@ public class PropNoSubtour extends Propagator<IntVar> {
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
-                vars[last].instantiateTo(start + offset, aCause);
+                vars[last].instantiateTo(start + offset, this);
                 setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < n) {
-                if (vars[last].removeValue(start + offset, aCause)) {
+                if (vars[last].removeValue(start + offset, this)) {
                     isInst = vars[last].isInstantiated();
                 }
             }
@@ -194,16 +192,4 @@ public class PropNoSubtour extends Propagator<IntVar> {
         return "PropNoSubTour(" + Arrays.toString(vars) + ")";
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropNoSubtour(aVars, this.offset));
-        }
-    }
 }

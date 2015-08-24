@@ -28,10 +28,9 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -136,7 +135,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
             while (vit.hasNext()) {
                 int value = vit.next();
                 if (!vst.index_map.containsKey(value)) {
-                    vst.var.removeValue(value, aCause);
+                    vst.var.removeValue(value, this);
                 }
             }
             vit.dispose();
@@ -175,7 +174,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
             }
         }
         for (str2_var v : Ssup) {
-            v.remove_unsupported_value();
+            v.remove_unsupported_value(this);
         }
     }
 
@@ -239,25 +238,13 @@ public class PropTableStr2 extends Propagator<IntVar> {
             nb_consistant++;
         }
 
-        void remove_unsupported_value() throws ContradictionException {
+        void remove_unsupported_value(ICause cause) throws ContradictionException {
             for (Entry<Integer, Integer> e : index_map.entrySet()) {
                 if (var.contains(e.getKey()) && !GAC_Val.get(e.getValue())) {
-                    var.removeValue(e.getKey(), aCause);
+                    var.removeValue(e.getKey(), cause);
                 }
             }
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropTableStr2(aVars, this.table.clone()));
-        }
-    }
 }

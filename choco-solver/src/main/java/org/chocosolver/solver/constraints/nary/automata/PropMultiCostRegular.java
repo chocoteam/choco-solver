@@ -29,13 +29,11 @@
 package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -283,7 +281,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                     vrms.add(j);
                 }
             }
-            vs[i].removeValues(vrms, aCause);//, false);
+            vs[i].removeValues(vrms, this);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
     }
@@ -705,12 +703,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     protected void filterDown(final double realsp) throws ContradictionException {
 
         if (realsp - z[0].getUB() >= _MCR_DECIMAL_PREC) {
-            this.contradiction(null, "cost variable domain is emptied");
+            // "cost variable domain is emptied"
+            fails();
         }
         if (realsp - z[0].getLB() >= _MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
             double rsp = (realsp - mr <= _MCR_DECIMAL_PREC) ? mr : realsp;
-            z[0].updateLowerBound((int) Math.ceil(rsp), aCause);//, false);
+            z[0].updateLowerBound((int) Math.ceil(rsp), this);//, false);
             modifiedBound[0] = true;
         }
     }
@@ -723,12 +722,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     protected void filterUp(final double reallp) throws ContradictionException {
         if (reallp - z[0].getLB() <= -_MCR_DECIMAL_PREC) {
-            this.contradiction(null, "cost variable domain is emptied");
+            // "cost variable domain is emptied"
+            fails();
         }
         if (reallp - z[0].getUB() <= -_MCR_DECIMAL_PREC) {
             double mr = Math.round(reallp);
             double rsp = (reallp - mr <= _MCR_DECIMAL_PREC) ? mr : reallp;
-            z[0].updateUpperBound((int) Math.floor(rsp), aCause);//, false);
+            z[0].updateUpperBound((int) Math.floor(rsp), this);//, false);
             modifiedBound[1] = true;
         }
     }
@@ -837,8 +837,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < nbCounters; i++) {
             IntVar z = this.z[i];
             Bounds bounds = counters.get(i).bounds();
-            z.updateLowerBound(bounds.min.value, aCause);//, false);
-            z.updateUpperBound(bounds.max.value, aCause);//, false);
+            z.updateLowerBound(bounds.min.value, this);//, false);
+            z.updateUpperBound(bounds.max.value, this);//, false);
 
         }
     }
@@ -1030,26 +1030,4 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vs.length];
-            for (int i = 0; i < this.vs.length; i++) {
-                this.vs[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vs[i]);
-            }
-            IntVar[] cVars = new IntVar[this.z.length];
-            for (int i = 0; i < this.z.length; i++) {
-                this.z[i].duplicate(solver, identitymap);
-                cVars[i] = (IntVar) identitymap.get(this.z[i]);
-            }
-            ICostAutomaton nauto = null;
-            try {
-                nauto = (ICostAutomaton) pi.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            identitymap.put(this, new PropMultiCostRegular(aVars, cVars, nauto));
-        }
-    }
 }

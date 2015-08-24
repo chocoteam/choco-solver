@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -146,7 +144,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
                     setSupport(tab[i][nva][0]);
                 }
             }
-            vars[i].removeValues(vrms, aCause);
+            vars[i].removeValues(vrms, this);
         }
     }
 
@@ -192,7 +190,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
                 }
             }
         }
-        vars[indexVar].removeValues(vrms, aCause);
+        vars[indexVar].removeValues(vrms, this);
     }
 
 
@@ -223,16 +221,4 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeGAC3rmPositive(aVars, (IterTuplesTable) relation.duplicate()));
-        }
-    }
 }

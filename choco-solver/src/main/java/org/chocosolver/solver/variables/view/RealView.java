@@ -29,9 +29,7 @@
 package org.chocosolver.solver.variables.view;
 
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -55,7 +53,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     protected final double precision;
 
     public RealView(IntVar var, double precision) {
-        super("(real)" + var.getName(), var._bes_());
+        super("(real)" + var.getName(), var.getSolver());
         this.var = var;
         this.precision = precision;
         this.var.subscribeView(this);
@@ -182,18 +180,6 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public RealVar duplicate() {
         return VariableFactory.real(this.var, this.precision);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.var.duplicate(solver, identitymap);
-            RealView clone = new RealView((IntVar) identitymap.get(this.var), this.precision);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
 }

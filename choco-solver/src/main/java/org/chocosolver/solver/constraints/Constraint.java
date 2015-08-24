@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropOpposite;
 import org.chocosolver.solver.variables.BoolVar;
@@ -232,25 +231,5 @@ public class Constraint implements Serializable {
             priority = Math.max(priority, p.getPriority().priority);
         }
         return PropagatorPriority.get(priority);
-    }
-
-    /**
-     * Duplicate the current constraint.
-     * The constraint is NOT posted into the solver.
-     *
-     * @param solver      the target solver
-     * @param identitymap a map to ensure uniqueness of objects
-     */
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            Propagator[] pclone = new Propagator[this.propagators.length];
-            // then duplicate propagators
-            for (int i = 0; i < propagators.length; i++) {
-                propagators[i].duplicate(solver, identitymap);
-                pclone[i] = (Propagator) identitymap.get(propagators[i]);
-            }
-            Constraint clone = new Constraint(this.name, pclone);
-            identitymap.put(this, clone);
-        }
     }
 }
