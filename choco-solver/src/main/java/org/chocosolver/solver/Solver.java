@@ -77,7 +77,7 @@ import java.util.Arrays;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Solver implements Serializable, ISolver {
+public class Solver implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
@@ -169,7 +169,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param environment a backtracking environment
      * @param name        a name
-     * @see SolverFactory
      */
     public Solver(IEnvironment environment, String name) {
         this.name = name;
@@ -191,11 +190,8 @@ public class Solver implements Serializable, ISolver {
     /**
      * Create a solver object with default parameters.
      *
-     * @see SolverFactory
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
-     * @deprecated
      */
-    @Deprecated
     public Solver() {
         this(Environments.DEFAULT.make(), "");
     }
@@ -203,18 +199,10 @@ public class Solver implements Serializable, ISolver {
     /**
      * Create a solver object with default parameters, named <code>name</code>.
      *
-     * @see SolverFactory
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
-     * @deprecated
      */
-    @Deprecated
     public Solver(String name) {
         this(Environments.DEFAULT.make(), name);
-    }
-
-    @Override
-    public Solver _fes_() {
-        return this;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -592,7 +580,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param variable a newly created variable, not already added
      */
-    @Override
     public void associates(Variable variable) {
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
@@ -627,7 +614,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param c a Constraint
      */
-    @Override
     public void post(Constraint c) {
         _post(true, c);
     }
@@ -640,7 +626,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @param cs Constraints
      */
-    @Override
     public void post(Constraint... cs) {
         _post(true, cs);
     }
@@ -775,7 +760,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return an {@link ESat}.
      */
-    @Override
     public ESat isFeasible() {
         return feasible;
     }
@@ -818,7 +802,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return <code>true</code> if and only if a solution has been found.
      */
-    @Override
     public boolean findSolution() {
         solve(true);
         return measures.getSolutionCount() > 0;
@@ -831,7 +814,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
-    @Override
     public boolean nextSolution() {
         if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
             throw new SolverException("Solver.findSolution() must be called once before calling Solver.nextSolution()");
@@ -846,7 +828,6 @@ public class Solver implements Serializable, ISolver {
      *
      * @return the number of found solutions.
      */
-    @Override
     public long findAllSolutions() {
         solve(false);
         return measures.getSolutionCount();
@@ -859,7 +840,6 @@ public class Solver implements Serializable, ISolver {
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
-    @Override
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");

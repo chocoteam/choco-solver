@@ -32,7 +32,6 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -72,8 +71,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public IntervalIntVarImpl(String name, int min, int max, ISolver isolver) {
-        super(name, isolver);
+    public IntervalIntVarImpl(String name, int min, int max, Solver solver) {
+        super(name, solver);
         IEnvironment env = solver.getEnvironment();
         this.LB = env.makeInt(min);
         this.UB = env.makeInt(max);
@@ -487,7 +486,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public IntVar duplicate() {
-        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), isolver);
+        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), solver);
     }
 
     @Override

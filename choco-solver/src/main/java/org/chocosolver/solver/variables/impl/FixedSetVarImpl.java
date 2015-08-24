@@ -32,7 +32,6 @@ import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
@@ -56,15 +55,15 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     private int kerIndex;
     private int envIndex;
 
-    public FixedSetVarImpl(String name, TIntSet values, ISolver isolver) {
-        super(name, isolver);
+    public FixedSetVarImpl(String name, TIntSet values, Solver solver) {
+        super(name, solver);
         this.values = values.toArray();
         Arrays.sort(this.values);
     }
 
-    public FixedSetVarImpl(String name, int[] values, ISolver isolver) {
+    public FixedSetVarImpl(String name, int[] values, Solver solver) {
         // Remove duplicates
-        this(name, new TIntHashSet(values), isolver);
+        this(name, new TIntHashSet(values), solver);
     }
 
     @Override
@@ -208,7 +207,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public SetVar duplicate() {
-        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), isolver);
+        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), solver);
     }
 
     @Override

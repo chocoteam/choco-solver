@@ -55,7 +55,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     protected final double precision;
 
     public RealView(IntVar var, double precision) {
-        super("(real)" + var.getName(), var._bes_());
+        super("(real)" + var.getName(), var.getSolver());
         this.var = var;
         this.precision = precision;
         this.var.subscribeView(this);

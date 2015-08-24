@@ -31,7 +31,6 @@ package org.chocosolver.solver.variables.impl;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
@@ -66,8 +65,8 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     private DisposableValueIterator _viterator;
     private DisposableRangeIterator _riterator;
 
-    public FixedIntVarImpl(String name, int constante, ISolver isolver) {
-        super(name, isolver);
+    public FixedIntVarImpl(String name, int constante, Solver solver) {
+        super(name, solver);
         this.constante = constante;
         this.empty = solver.getEnvironment().makeBool(false);
     }
@@ -246,7 +245,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return VF.fixed(StringUtils.randomName(), this.constante, isolver);
+        return VF.fixed(StringUtils.randomName(), this.constante, solver);
     }
 
     @Override

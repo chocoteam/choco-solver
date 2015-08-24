@@ -30,7 +30,6 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -67,7 +66,6 @@ public abstract class AbstractVariable implements Variable {
     public static final String MSG_BOUND = "new bounds are incorrect";
 
     private final int ID; // unique id of this
-    protected final ISolver isolver; // Reference to the solver containing this variable.
     protected final Solver solver; // Reference to the solver containing this variable.
 
     protected final String name;
@@ -91,10 +89,9 @@ public abstract class AbstractVariable implements Variable {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    protected AbstractVariable(String name, ISolver isolver) {
+    protected AbstractVariable(String name, Solver solver) {
         this.name = name;
-        this.isolver = isolver;
-        this.solver = isolver._fes_();
+        this.solver = solver;
         this.views = new IView[2];
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
@@ -102,7 +99,7 @@ public abstract class AbstractVariable implements Variable {
         this.dindices = new int[6];
         this.ID = this.solver.nextId();
         this._plugexpl = this.solver.getSettings().plugExplanationIn();
-        this.isolver.associates(this);
+        this.solver.associates(this);
         int kind = getTypeAndKind() & Variable.KIND;
         switch (kind) {
             case Variable.BOOL:
@@ -289,11 +286,6 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public Solver getSolver() {
         return solver;
-    }
-
-    @Override
-    public ISolver _bes_() {
-        return isolver;
     }
 
     @Override

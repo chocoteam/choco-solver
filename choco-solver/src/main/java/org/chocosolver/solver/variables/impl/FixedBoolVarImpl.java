@@ -30,7 +30,6 @@ package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -54,8 +53,8 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     private static final long serialVersionUID = 1L;
     private BoolVar not;
 
-    public FixedBoolVarImpl(String name, int constant, ISolver isolver) {
-        super(name, constant, isolver);
+    public FixedBoolVarImpl(String name, int constant, Solver solver) {
+        super(name, constant, solver);
         assert constant == 0 || constant == 1 : "FixedBoolVarImpl value should be taken in {0,1}";
     }
 
@@ -120,7 +119,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public IntVar duplicate() {
-        return VF.fixed(StringUtils.randomName(), this.constante, isolver);
+        return VF.fixed(StringUtils.randomName(), this.constante, solver);
     }
 
     @Override

@@ -33,7 +33,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -167,8 +166,8 @@ public class Solution implements Serializable, ICause {
         }
     }
 
-    public String toString(ISolver solver) {
-        Variable[] vars = solver._fes_().getVars();
+    public String toString(Solver solver) {
+        Variable[] vars = solver.getVars();
         StringBuilder st = new StringBuilder("Solution: ");
         for (int i = 0; i < vars.length; i++) {
             if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
