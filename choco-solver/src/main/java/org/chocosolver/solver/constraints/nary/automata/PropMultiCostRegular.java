@@ -29,13 +29,11 @@
 package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -1030,26 +1028,4 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vs.length];
-            for (int i = 0; i < this.vs.length; i++) {
-                this.vs[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vs[i]);
-            }
-            IntVar[] cVars = new IntVar[this.z.length];
-            for (int i = 0; i < this.z.length; i++) {
-                this.z[i].duplicate(solver, identitymap);
-                cVars[i] = (IntVar) identitymap.get(this.z[i]);
-            }
-            ICostAutomaton nauto = null;
-            try {
-                nauto = (ICostAutomaton) pi.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            identitymap.put(this, new PropMultiCostRegular(aVars, cVars, nauto));
-        }
-    }
 }

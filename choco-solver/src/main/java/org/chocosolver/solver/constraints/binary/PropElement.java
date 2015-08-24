@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.Operation;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -164,18 +162,6 @@ public class PropElement extends Propagator<IntVar> {
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         return ruleStore.addPropagatorActivationRule(this)
                 | ruleStore.addFullDomainRule((var == vars[0]) ? vars[1] : vars[0]);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropElement(X, this.lval, Y, this.cste, this.s));
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

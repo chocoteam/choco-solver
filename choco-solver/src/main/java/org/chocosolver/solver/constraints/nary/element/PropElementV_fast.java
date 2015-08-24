@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.nary.element;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -187,25 +185,6 @@ public class PropElementV_fast extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 2;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i + 2].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i + 2]);
-            }
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar V = (IntVar) identitymap.get(this.vars[0]);
-
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropElementV_fast(V, X, I, this.offset, this.fast));
-        }
     }
 
     @Override

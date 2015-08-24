@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -192,16 +190,4 @@ public class PropSumOfElements extends Propagator<Variable> {
         return (weights == null) ? j : weights[j - offSet];
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar se = (SetVar) identitymap.get(set);
-
-            sum.duplicate(solver, identitymap);
-            IntVar su = (IntVar) identitymap.get(sum);
-
-            identitymap.put(this, new PropSumOfElements(se, weights == null ? null : weights.clone(), offSet, su, notEmpty));
-        }
-    }
 }

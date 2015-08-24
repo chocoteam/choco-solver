@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
@@ -612,17 +611,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public IntVar duplicate() {
         return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.VALUES.clone(), solver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            BitsetArrayIntVarImpl clone = new BitsetArrayIntVarImpl(this.name, this.VALUES, solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -158,18 +156,4 @@ public class PropBoolMin extends Propagator<BoolVar> {
 
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            BoolVar[] aVars = new BoolVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (BoolVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            BoolVar M = (BoolVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropBoolMin(aVars, M));
-        }
-    }
 }

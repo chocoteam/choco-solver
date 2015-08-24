@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.lex;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -141,23 +139,6 @@ public class PropLexChain extends Propagator<IntVar> {
             return ESat.eval(checkTuple(0));
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int d1 = this.x.length;
-            IntVar[][] aVars = new IntVar[d1][];
-            for (int i = 0; i < d1; i++) {
-                int d2 = this.x[i].length;
-                aVars[i] = new IntVar[d2];
-                for (int j = 0; j < d2; j++) {
-                    this.x[i][j].duplicate(solver, identitymap);
-                    aVars[i][j] = (IntVar) identitymap.get(this.x[i][j]);
-                }
-            }
-            identitymap.put(this, new PropLexChain(aVars, this.strict));
-        }
     }
 
     /**

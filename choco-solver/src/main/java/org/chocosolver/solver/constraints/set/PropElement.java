@@ -36,8 +36,6 @@
 package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -193,22 +191,4 @@ public class PropElement extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 2;
-            SetVar[] aVars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            index.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(index);
-
-            identitymap.put(this, new PropElement(I, aVars, offSet, S));
-        }
-    }
 }

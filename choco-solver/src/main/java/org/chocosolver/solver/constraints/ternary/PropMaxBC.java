@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -192,20 +190,6 @@ public class PropMaxBC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return BST.toString() + ".MAX(" + v1.toString() + "," + v2.toString() + ")";
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-            this.vars[2].duplicate(solver, identitymap);
-            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
-
-            identitymap.put(this, new PropMaxBC(X, Y, Z));
-        }
     }
 
     @Override

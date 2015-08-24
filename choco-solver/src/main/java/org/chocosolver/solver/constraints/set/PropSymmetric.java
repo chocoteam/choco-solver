@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -127,17 +125,4 @@ public class PropSymmetric extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int n = vars.length;
-            SetVar[] svars = new SetVar[n];
-            for (int i = 0; i < n; i++) {
-                vars[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(vars[i]);
-            }
-
-            identitymap.put(this, new PropSymmetric(svars, offSet));
-        }
-    }
 }

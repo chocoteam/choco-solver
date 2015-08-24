@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -92,10 +90,4 @@ public class PropNotMemberBound extends Propagator<IntVar> {
         return ruleStore.addPropagatorActivationRule(this);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            identitymap.put(this, new PropNotMemberBound((IntVar) identitymap.get(vars[0]), lb, ub));
-        }
-    }
 }

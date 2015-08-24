@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -241,25 +239,4 @@ public class PropDiffN extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.n;
-            IntVar[] X = new IntVar[size];
-            IntVar[] Y = new IntVar[size];
-            IntVar[] dX = new IntVar[size];
-            IntVar[] dY = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i]);
-                this.vars[i + n].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
-                this.vars[i + 2 * n].duplicate(solver, identitymap);
-                dX[i] = (IntVar) identitymap.get(this.vars[i + 2 * n]);
-                this.vars[i + 3 * n].duplicate(solver, identitymap);
-                dY[i] = (IntVar) identitymap.get(this.vars[i + 3 * n]);
-            }
-            identitymap.put(this, new PropDiffN(X, Y, dX, dY, this.fast));
-        }
-    }
 }

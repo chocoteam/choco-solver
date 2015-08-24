@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -224,16 +222,4 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            iv.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(iv);
-
-            identitymap.put(this, new PropIntBoundedMemberSet(S, I));
-        }
-    }
 }

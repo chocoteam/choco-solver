@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
@@ -436,21 +435,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public BoolVar duplicate() {
         return VariableFactory.bool(StringUtils.randomName(this.name), solver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            BoolVarImpl clone = new BoolVarImpl(this.name, solver);
-            identitymap.put(this, clone);
-            if (this.not != null && identitymap.containsKey(this.not)) {
-                clone._setNot((BoolVar) identitymap.get(this.not));
-                clone.not._setNot(clone);
-            }
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -29,7 +29,6 @@
 package org.chocosolver.solver.constraints;
 
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -570,18 +569,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         st.append(')');
 
         return st.toString();
-    }
-
-    /**
-     * Duplicate the current propagator.
-     * A restriction is that the resolution process should have not begun yet.
-     * That's why state of the propagator may not be duplicated.
-     *
-     * @param solver      the target solver
-     * @param identitymap a map to ensure uniqueness of objects
-     */
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
     }
 
     @Override

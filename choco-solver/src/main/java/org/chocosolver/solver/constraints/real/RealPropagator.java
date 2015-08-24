@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.real;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -148,16 +146,4 @@ public class RealPropagator extends Propagator<RealVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = vars.length;
-            RealVar[] rvars = new RealVar[size];
-            for (int i = 0; i < size; i++) {
-                vars[i].duplicate(solver, identitymap);
-                rvars[i] = (RealVar) identitymap.get(vars[i]);
-            }
-            identitymap.put(this, new RealPropagator(functions, rvars, option));
-        }
-    }
 }

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.circuit;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -81,16 +79,4 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 		}
 	}
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropCircuit_AntiArboFiltering(aVars, this.offSet, this.conf));
-        }
-    }
 }

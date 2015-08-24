@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -387,25 +385,4 @@ public class PropDivXYZ extends Propagator<IntVar> {
         return res;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-            this.vars[2].duplicate(solver, identitymap);
-            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
-
-            this.absX.duplicate(solver, identitymap);
-            IntVar absX = (IntVar) identitymap.get(this.absX);
-            this.absY.duplicate(solver, identitymap);
-            IntVar absY = (IntVar) identitymap.get(this.absY);
-            this.absZ.duplicate(solver, identitymap);
-            IntVar absZ = (IntVar) identitymap.get(this.absZ);
-
-
-            identitymap.put(this, new PropDivXYZ(X, Y, Z, absX, absY, absZ));
-        }
-    }
 }

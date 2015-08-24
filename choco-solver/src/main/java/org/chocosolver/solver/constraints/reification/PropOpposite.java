@@ -28,13 +28,10 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
@@ -81,8 +78,4 @@ public class PropOpposite extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap identitymap) {
-        throw new SolverException("PropOpposite cannot be duplicated!");
-    }
 }

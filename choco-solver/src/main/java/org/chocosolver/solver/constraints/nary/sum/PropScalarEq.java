@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -314,19 +312,6 @@ public class PropScalarEq extends Propagator<IntVar> {
             }
         }
         return newrules;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropScalarEq(aVars, this.c, this.pos, this.b));
-        }
     }
 
     private int divFloor(int a, int b) {

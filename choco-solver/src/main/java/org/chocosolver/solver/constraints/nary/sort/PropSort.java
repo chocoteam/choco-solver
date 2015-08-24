@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.nary.sort;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -123,25 +121,6 @@ public final class PropSort extends Propagator<IntVar> {
             return ESat.eval(i == n);
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.x.length;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.x[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.x[i]);
-            }
-            size = this.y.length;
-            IntVar[] Y = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.x[i].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.y[i]);
-            }
-            identitymap.put(this, new PropSort(X, Y));
-        }
     }
 
     private void filter() throws ContradictionException {

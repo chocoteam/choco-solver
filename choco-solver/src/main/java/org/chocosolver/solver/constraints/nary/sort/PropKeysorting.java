@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.sort;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -141,32 +139,6 @@ public final class PropKeysorting extends Propagator<IntVar> {
         this.CUR = new int[k + 1];
 
         sorter = new ArraySort(n, false, true);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[][] _X = new IntVar[n][m], _Y = new IntVar[n][m];
-            IntVar[] _P = new IntVar[n];
-
-            for (int j, i = 0; i < n; i++) {
-                for (j = 0; j < k; j++) {
-                    this.X[i][j].duplicate(solver, identitymap);
-                    _X[i][j] = (IntVar) identitymap.get(this.X[i][j]);
-                    this.Y[i][j].duplicate(solver, identitymap);
-                    _Y[i][j] = (IntVar) identitymap.get(this.Y[i][j]);
-                }
-                this.Y[i][k].duplicate(solver, identitymap);
-                _P[i] = (IntVar) identitymap.get(this.Y[i][k]);
-                for (j = k + 1; j <= m; j++) {
-                    this.X[i][j].duplicate(solver, identitymap);
-                    _X[i][j - 1] = (IntVar) identitymap.get(this.X[i][j]);
-                    this.Y[i][j].duplicate(solver, identitymap);
-                    _Y[i][j - 1] = (IntVar) identitymap.get(this.Y[i][j]);
-                }
-            }
-            identitymap.put(this, new PropKeysorting(_X, _Y, _P, k));
-        }
     }
 
 

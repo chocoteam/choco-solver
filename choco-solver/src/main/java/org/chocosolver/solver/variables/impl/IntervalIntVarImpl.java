@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
@@ -487,17 +486,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public IntVar duplicate() {
         return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), solver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntervalIntVarImpl clone = new IntervalIntVarImpl(this.name, this.LB.get(), this.UB.get(), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

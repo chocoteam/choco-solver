@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -191,18 +189,4 @@ public class PropIntersection extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = k;
-            SetVar[] svars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                vars[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(vars[i]);
-            }
-            vars[k].duplicate(solver, identitymap);
-            SetVar I = (SetVar) identitymap.get(vars[k]);
-            identitymap.put(this, new PropIntersection(svars, I));
-        }
-    }
 }

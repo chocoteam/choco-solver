@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -287,27 +286,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
             ker[idx++] = i;
         }
         return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), solver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int[] env = new int[getEnvelopeSize()];
-            int idx = 0;
-            for (int i = getEnvelopeFirst(); i != END; i = getEnvelopeNext()) {
-                env[idx++] = i;
-            }
-            int[] ker = new int[getKernelSize()];
-            idx = 0;
-            for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
-                ker[idx++] = i;
-            }
-            SetVarImpl clone = new SetVarImpl(this.name, env, envelope.getSetType(), ker, kernel.getSetType(), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     @Override

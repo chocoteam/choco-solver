@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -185,24 +183,4 @@ public class PropIntChannel extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.nSets;
-            SetVar[] svars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-
-            int si = nInts;
-            IntVar[] ivars = new IntVar[si];
-            for (int i = 0; i < si; i++) {
-                ints[i].duplicate(solver, identitymap);
-                ivars[i] = (IntVar) identitymap.get(ints[i]);
-            }
-
-            identitymap.put(this, new PropIntChannel(svars, ivars, offSet1, offSet2));
-        }
-    }
 }

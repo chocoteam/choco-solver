@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.variables.view;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -269,18 +267,6 @@ public final class ScaleView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.scale(this.var, this.cste);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.var.duplicate(solver, identitymap);
-            ScaleView clone = new ScaleView((IntVar) identitymap.get(this.var), this.cste);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     @Override

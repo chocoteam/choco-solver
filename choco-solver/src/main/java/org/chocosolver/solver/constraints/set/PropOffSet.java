@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -131,16 +129,4 @@ public class PropOffSet extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            vars[0].duplicate(solver, identitymap);
-            SetVar s1 = (SetVar) identitymap.get(vars[0]);
-
-            vars[1].duplicate(solver, identitymap);
-            SetVar s2 = (SetVar) identitymap.get(vars[1]);
-
-            identitymap.put(this, new PropOffSet(s1, s2, offSet));
-        }
-    }
 }

@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
@@ -210,12 +209,4 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
         return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), solver);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            FixedSetVarImpl clone = new FixedSetVarImpl(this.name, this.values, solver);
-            identitymap.put(this, clone);
-            assert mIdx == 0;
-        }
-    }
 }
