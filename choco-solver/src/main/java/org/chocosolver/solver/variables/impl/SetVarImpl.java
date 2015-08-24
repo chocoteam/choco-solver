@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
@@ -76,10 +74,10 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 * @param envType	data structure of the envelope
 	 * @param ker		initial kernel domain
 	 * @param kerType	data structure of the kernel
-	 * @param isolver	solver of the variable.
+	 * @param solver	solver of the variable.
 	 */
-	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, ISolver isolver) {
-		super(name, isolver);
+	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
+		super(name, solver);
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		for(int i:env){
@@ -109,12 +107,12 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 * @param name		name of the variable
 	 * @param min		first envelope value
 	 * @param max		last envelope value
-	 * @param isolver	solver of the variable.
+	 * @param solver	solver of the variable.
 	 */
-	public SetVarImpl(String name, int min, int max, ISolver isolver) {
-		super(name, isolver);
-		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
-		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, solver);
+	public SetVarImpl(String name, int min, int max, Solver solver) {
+		super(name, solver);
+		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, this.solver);
+		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, this.solver);
 		for(int i=min; i<=max; i++){
 			envelope.add(i-min);
 		}
@@ -287,28 +285,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
             ker[idx++] = i;
         }
-        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), isolver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int[] env = new int[getEnvelopeSize()];
-            int idx = 0;
-            for (int i = getEnvelopeFirst(); i != END; i = getEnvelopeNext()) {
-                env[idx++] = i;
-            }
-            int[] ker = new int[getKernelSize()];
-            idx = 0;
-            for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
-                ker[idx++] = i;
-            }
-            SetVarImpl clone = new SetVarImpl(this.name, env, envelope.getSetType(), ker, kernel.getSetType(), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), solver);
     }
 
     @Override

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -165,11 +163,11 @@ public class PropSquare extends Propagator<IntVar> {
     protected void updateLowerBoundofX() throws ContradictionException {
         int a0 = vars[1].nextValue(-1);
         int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(sqr(a0), sqr(b0)), aCause);
+        vars[0].updateLowerBound(Math.min(sqr(a0), sqr(b0)), this);
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), aCause);
+        vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), this);
 
     }
 
@@ -184,7 +182,7 @@ public class PropSquare extends Propagator<IntVar> {
                     vrms.add(value);
                 }
             }
-            vars[0].removeValues(vrms, aCause);
+            vars[0].removeValues(vrms, this);
         } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
@@ -194,7 +192,7 @@ public class PropSquare extends Propagator<IntVar> {
                 }
                 value = vars[0].nextValue(value);
             }
-            vars[0].updateLowerBound(nlb, aCause);
+            vars[0].updateLowerBound(nlb, this);
 
             value = vars[0].getUB();
             int nub = value + 1;
@@ -204,22 +202,22 @@ public class PropSquare extends Propagator<IntVar> {
                 }
                 value = vars[0].previousValue(value);
             }
-            vars[0].updateUpperBound(nub, aCause);
+            vars[0].updateUpperBound(nub, this);
         }
     }
 
     protected void updateHoleinX(int remVal) throws ContradictionException {
         if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(sqr(remVal), aCause);
+            vars[0].removeValue(sqr(remVal), this);
         }
     }
 
     protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), aCause);
+        vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), this);
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), aCause);
+        vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
     }
 
     protected void updateHolesinY() throws ContradictionException {
@@ -233,7 +231,7 @@ public class PropSquare extends Propagator<IntVar> {
                     vrms.add(value);
                 }
             }
-            vars[1].removeValues(vrms, aCause);
+            vars[1].removeValues(vrms, this);
         } else {
             int lb = vars[1].getLB();
             int ub = vars[1].getUB();
@@ -241,19 +239,19 @@ public class PropSquare extends Propagator<IntVar> {
                 lb = vars[1].nextValue(lb + 1);
                 if (lb > ub) break;
             }
-            vars[1].updateLowerBound(lb, aCause);
+            vars[1].updateLowerBound(lb, this);
 
             while (!vars[0].contains(sqr(ub))) {
                 ub = vars[1].nextValue(ub + 1);
                 if (ub < lb) break;
             }
-            vars[1].updateUpperBound(ub, aCause);
+            vars[1].updateUpperBound(ub, this);
         }
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
-        vars[1].removeValue(floor_sqrt(remVal), aCause);
-        vars[1].removeValue(-ceil_sqrt(remVal), aCause);
+        vars[1].removeValue(floor_sqrt(remVal), this);
+        vars[1].removeValue(-ceil_sqrt(remVal), this);
     }
 
     @Override
@@ -270,18 +268,6 @@ public class PropSquare extends Propagator<IntVar> {
             newrules |= super.why(ruleStore, var, evt, value);
         }
         return newrules;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropSquare(X, Y));
-        }
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

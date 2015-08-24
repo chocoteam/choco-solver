@@ -200,7 +200,7 @@ public class DeltaTest {
         @Override
         public void propagate(int evtmask) throws ContradictionException {
             if (j.isInstantiatedTo(1)) {
-                i.removeValue(1, aCause);
+                i.removeValue(1, this);
             }
         }
 

@@ -82,18 +82,18 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 				}
 			}
 			if(support == -1){
-				values.removeFromEnvelope(v,aCause);
+				values.removeFromEnvelope(v, this);
 			}else if(support!=-2 && values.kernelContains(v)){
-				X[support].instantiateTo(v,aCause);
+				X[support].instantiateTo(v, this);
 			}
 		}
 		for(int i=0;i<X.length;i++){
 			if(X[i].isInstantiated()){
-				values.addToKernel(X[i].getValue(),aCause);
+				values.addToKernel(X[i].getValue(), this);
 			}else {
 				for (int v = X[i].getLB(); v <= X[i].getUB(); v = X[i].nextValue(v)) {
 					if (!values.envelopeContains(v)) {
-						X[i].removeValue(v, aCause);
+						X[i].removeValue(v, this);
 					}
 				}
 			}

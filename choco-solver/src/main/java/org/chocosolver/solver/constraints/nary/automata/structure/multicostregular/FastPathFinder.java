@@ -171,7 +171,7 @@ public class FastPathFinder {
 
             }
             //  destIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
         for (int i = nbLayer - 1; i >= 0; i--) {
             update = false;
@@ -210,7 +210,7 @@ public class FastPathFinder {
 
             }
             //origIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
 
 
@@ -283,7 +283,7 @@ public class FastPathFinder {
                 // in.dispose();
             }
             //  destIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
         for (int i = nbLayer - 1; i >= 0; i--) {
             update = false;
@@ -320,7 +320,7 @@ public class FastPathFinder {
 
             }
             //origIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
 
     }
@@ -396,7 +396,7 @@ public class FastPathFinder {
 
             }
             destIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
         for (int i = nbLayer - 1; i >= 0; i--) {
             update = false;
@@ -441,7 +441,7 @@ public class FastPathFinder {
 
             }
             origIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
 
 
@@ -503,7 +503,7 @@ public class FastPathFinder {
 
             }
             //  destIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
         for (int i = nbLayer - 1; i >= 0; i--) {
             update = false;
@@ -556,7 +556,7 @@ public class FastPathFinder {
 
             }
             //  origIter.dispose();
-            if (!update) propagator.contradiction(null, "no update");
+            if (!update) propagator.fails();
         }
 
         modified[0] = z[0].updateLowerBound((int) Math.ceil(spft[graph.sourceIndex][0]), propagator);//this.graph.constraint, false);

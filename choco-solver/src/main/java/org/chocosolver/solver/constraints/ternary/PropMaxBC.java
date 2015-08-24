@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -82,7 +80,7 @@ public class PropMaxBC extends Propagator<IntVar> {
         switch (c) {
             case 7: // everything is instantiated
             case 6:// Z and Y are instantiated
-                vars[0].instantiateTo(Math.max(vars[1].getValue(), vars[2].getValue()), aCause);
+                vars[0].instantiateTo(Math.max(vars[1].getValue(), vars[2].getValue()), this);
                 setPassive();
                 break;
             case 5: //  X and Z are instantiated
@@ -90,12 +88,12 @@ public class PropMaxBC extends Propagator<IntVar> {
                 int best = vars[0].getValue();
                 int val2 = vars[2].getValue();
                 if (best > val2) {
-                    vars[1].instantiateTo(best, aCause);
+                    vars[1].instantiateTo(best, this);
                     setPassive();
                 } else if (best < val2) {
                     contradiction(vars[2], "wrong max selected");
                 } else { // X = Z
-                    vars[1].updateUpperBound(best, aCause);
+                    vars[1].updateUpperBound(best, this);
                 }
             }
             break;
@@ -103,7 +101,7 @@ public class PropMaxBC extends Propagator<IntVar> {
             {
                 int val = vars[2].getValue();
                 if (val > vars[1].getUB()) { // => X = Z
-                    vars[0].instantiateTo(val, aCause);
+                    vars[0].instantiateTo(val, this);
                     setPassive();
                 } else {
                     _filter();
@@ -115,12 +113,12 @@ public class PropMaxBC extends Propagator<IntVar> {
                 int best = vars[0].getValue();
                 int val1 = vars[1].getValue();
                 if (best > val1) {
-                    vars[2].instantiateTo(best, aCause);
+                    vars[2].instantiateTo(best, this);
                     setPassive();
                 } else if (best < val1) {
                     contradiction(vars[1], "");
                 } else { // X = Y
-                    vars[2].updateUpperBound(best, aCause);
+                    vars[2].updateUpperBound(best, this);
                 }
             }
             break;
@@ -128,7 +126,7 @@ public class PropMaxBC extends Propagator<IntVar> {
             {
                 int val = vars[1].getValue();
                 if (val > vars[2].getUB()) { // => X = Y
-                    vars[0].instantiateTo(val, aCause);
+                    vars[0].instantiateTo(val, this);
                     setPassive();
                 } else { // val in Z
                     _filter();
@@ -142,13 +140,13 @@ public class PropMaxBC extends Propagator<IntVar> {
                     contradiction(vars[0], null);
                 }
                 if (vars[1].getUB() < best) {
-                    vars[2].instantiateTo(best, aCause);
+                    vars[2].instantiateTo(best, this);
                     setPassive();
                 } else if (vars[2].getUB() < best) {
-                    vars[1].instantiateTo(best, aCause);
+                    vars[1].instantiateTo(best, this);
                     setPassive();
                 } else {
-                    if (vars[1].updateUpperBound(best, aCause) | vars[2].updateUpperBound(best, aCause)) {
+                    if (vars[1].updateUpperBound(best, this) | vars[2].updateUpperBound(best, this)) {
                         filter(); // to ensure idempotency for "free"
                     }
                 }
@@ -164,15 +162,15 @@ public class PropMaxBC extends Propagator<IntVar> {
     private void _filter() throws ContradictionException {
         boolean change;
         do {
-            change = vars[0].updateLowerBound(Math.max(vars[1].getLB(), vars[2].getLB()), aCause);
-            change |= vars[0].updateUpperBound(Math.max(vars[1].getUB(), vars[2].getUB()), aCause);
-            change |= vars[1].updateUpperBound(vars[0].getUB(), aCause);
-            change |= vars[2].updateUpperBound(vars[0].getUB(), aCause);
+            change = vars[0].updateLowerBound(Math.max(vars[1].getLB(), vars[2].getLB()), this);
+            change |= vars[0].updateUpperBound(Math.max(vars[1].getUB(), vars[2].getUB()), this);
+            change |= vars[1].updateUpperBound(vars[0].getUB(), this);
+            change |= vars[2].updateUpperBound(vars[0].getUB(), this);
             if (vars[2].getUB() < vars[0].getLB()) {
-                change |= vars[1].updateLowerBound(vars[0].getLB(), aCause);
+                change |= vars[1].updateLowerBound(vars[0].getLB(), this);
             }
             if (vars[1].getUB() < vars[0].getLB()) {
-                change |= vars[2].updateLowerBound(vars[0].getLB(), aCause);
+                change |= vars[2].updateLowerBound(vars[0].getLB(), this);
             }
         } while (change);
     }
@@ -192,20 +190,6 @@ public class PropMaxBC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return BST.toString() + ".MAX(" + v1.toString() + "," + v2.toString() + ")";
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-            this.vars[2].duplicate(solver, identitymap);
-            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
-
-            identitymap.put(this, new PropMaxBC(X, Y, Z));
-        }
     }
 
     @Override

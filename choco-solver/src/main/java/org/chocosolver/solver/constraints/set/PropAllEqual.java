@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -81,12 +79,12 @@ public class PropAllEqual extends Propagator<SetVar> {
         }
         elementForced = element -> {
             for (int i = 0; i < n; i++) {
-                vars[i].addToKernel(element, aCause);
+                vars[i].addToKernel(element, this);
             }
         };
         elementRemoved = element -> {
             for (int i = 0; i < n; i++) {
-                vars[i].removeFromEnvelope(element, aCause);
+                vars[i].removeFromEnvelope(element, this);
             }
         };
     }
@@ -101,7 +99,7 @@ public class PropAllEqual extends Propagator<SetVar> {
             for (int i = 0; i < n; i++) {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
-                        vars[i2].addToKernel(j, aCause);
+                        vars[i2].addToKernel(j, this);
                     }
                 }
                 // removing elements that are not in all set envelope would be a waste of time
@@ -141,16 +139,4 @@ public class PropAllEqual extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            SetVar[] aVars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAllEqual(aVars));
-        }
-    }
 }

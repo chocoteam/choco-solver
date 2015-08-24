@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -221,29 +219,4 @@ public class PropGraphCumulative extends PropFullCumulative {
 
     private final static int START = 1, END = 2;
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            // IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
-            // boolean fast, Cumulative.Filter... filters
-
-            IntVar[] sVars = new IntVar[n];
-            IntVar[] dVars = new IntVar[n];
-            IntVar[] eVars = new IntVar[n];
-            IntVar[] hVars = new IntVar[n];
-            for (int i = 0; i < this.n; i++) {
-                this.s[i].duplicate(solver, identitymap);
-                sVars[i] = (IntVar) identitymap.get(this.s[i]);
-                this.d[i].duplicate(solver, identitymap);
-                dVars[i] = (IntVar) identitymap.get(this.d[i]);
-                this.e[i].duplicate(solver, identitymap);
-                eVars[i] = (IntVar) identitymap.get(this.e[i]);
-                this.h[i].duplicate(solver, identitymap);
-                hVars[i] = (IntVar) identitymap.get(this.h[i]);
-            }
-            this.capa.duplicate(solver, identitymap);
-            IntVar cVar = (IntVar) identitymap.get(this.capa);
-            identitymap.put(this, new PropGraphCumulative(sVars, dVars, eVars, hVars, cVar, fast, _filters.clone()));
-        }
-    }
 }

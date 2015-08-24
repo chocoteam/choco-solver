@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -102,7 +100,7 @@ public class PropBinAC2001 extends PropBinCSP {
 
             found = false;
         }
-        vars[0].removeValues(vrms, aCause);
+        vars[0].removeValues(vrms, this);
 
         found = false;
         vrms.clear();
@@ -123,7 +121,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 currentSupport1[val1 - offset1].set(support);
             found = false;
         }
-        vars[1].removeValues(vrms, aCause);
+        vars[1].removeValues(vrms, this);
     }
 
     @Override
@@ -142,18 +140,6 @@ public class PropBinAC2001 extends PropBinCSP {
     @Override
     public String toString() {
         return "Bin_AC2001(" + vars[0].getName() + ", " + vars[1].getName() + ", " + this.relation.getClass().getSimpleName() + ")";
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropBinAC2001(X, Y, (CouplesTable) relation.duplicate()));
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +169,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 }
             }
         }
-        vars[1].removeValues(vrms, aCause);
+        vars[1].removeValues(vrms, this);
     }
 
     /**
@@ -211,7 +197,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 }
             }
         }
-        vars[0].removeValues(vrms, aCause);
+        vars[0].removeValues(vrms, this);
     }
 
     private void onInstantiationOf(int idx) throws ContradictionException {
@@ -225,7 +211,7 @@ public class PropBinAC2001 extends PropBinCSP {
                     vrms.add(val1);
                 }
             }
-            vars[1].removeValues(vrms, aCause);
+            vars[1].removeValues(vrms, this);
         } else {
             int value = vars[1].getValue();
             vrms.clear();
@@ -236,7 +222,7 @@ public class PropBinAC2001 extends PropBinCSP {
                     vrms.add(val0);
                 }
             }
-            vars[0].removeValues(vrms, aCause);
+            vars[0].removeValues(vrms, this);
         }
     }
 }

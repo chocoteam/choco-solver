@@ -28,14 +28,11 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.ReificationConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -104,21 +101,21 @@ public class PropReif extends Propagator<Variable> {
             ESat sat = trueCons.isSatisfied();
             if (sat == ESat.TRUE) {
                 setPassive();
-                bVar.setToTrue(aCause);
+                bVar.setToTrue(this);
                 reifCons.activate(0);
             } else if (sat == ESat.FALSE) {
                 setPassive();
-                bVar.setToFalse(aCause);
+                bVar.setToFalse(this);
                 reifCons.activate(1);
             }
 //			else {// in case the entailment has not the same implementation
 //				sat = falseCons.isSatisfied();
 //				if (sat == ESat.FALSE) {
-//					bVar.setToTrue(aCause);
+//					bVar.setToTrue(this);
 //					reifCons.activate(0);
 //					setPassive();
 //				}else if(sat == ESat.TRUE){
-//					bVar.setToFalse(aCause);
+//					bVar.setToFalse(this);
 //					reifCons.activate(1);
 //					setPassive();
 //				}
@@ -165,8 +162,4 @@ public class PropReif extends Propagator<Variable> {
         return bVar.toString() + "=>" + trueCons.toString() + ", !" + bVar.toString() + "=>" + falseCons.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        throw new SolverException("PropReif cannot be duplicated!");
-    }
 }

@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.nary.element;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -76,8 +74,8 @@ public class PropElementV_fast extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateLowerBound(offset, aCause);
-        index.updateUpperBound(vars.length + offset - 3, aCause);
+        index.updateLowerBound(offset, this);
+        index.updateUpperBound(vars.length + offset - 3, this);
         int lb = index.getLB();
         int ub = index.getUB();
         int min = Integer.MAX_VALUE / 2;
@@ -85,7 +83,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         // 1. bottom up loop
         for (int i = lb; i <= ub; i = index.nextValue(i)) {
             if (disjoint(var, vars[2 + i - offset])) {
-                index.removeValue(i, aCause);
+                index.removeValue(i, this);
             }
             min = Math.min(min, vars[2 + i - offset].getLB());
             max = Math.max(max, vars[2 + i - offset].getUB());
@@ -95,13 +93,13 @@ public class PropElementV_fast extends Propagator<IntVar> {
             if (index.getUB() < ub) {
                 for (int i = ub - 1; i >= lb; i = index.previousValue(i)) {
                     if (disjoint(var, vars[2 + i - offset])) {
-                        index.removeValue(i, aCause);
+                        index.removeValue(i, this);
                     } else break;
                 }
             }
         }
-        var.updateLowerBound(min, aCause);
-        var.updateUpperBound(max, aCause);
+        var.updateLowerBound(min, this);
+        var.updateUpperBound(max, this);
         if (index.isInstantiated()) {
             equals(var, vars[2 + index.getValue() - offset]);
         }
@@ -115,17 +113,17 @@ public class PropElementV_fast extends Propagator<IntVar> {
 
     private void equals(IntVar a, IntVar b) throws ContradictionException {
         int s = a.getDomainSize() + b.getDomainSize();
-        a.updateLowerBound(b.getLB(), aCause);
-        a.updateUpperBound(b.getUB(), aCause);
-        b.updateLowerBound(a.getLB(), aCause);
-        b.updateUpperBound(a.getUB(), aCause);
+        a.updateLowerBound(b.getLB(), this);
+        a.updateUpperBound(b.getUB(), this);
+        b.updateLowerBound(a.getLB(), this);
+        b.updateUpperBound(a.getUB(), this);
         if (!fast) {
             if (a.getDomainSize() != b.getDomainSize()) {
                 int lb = a.getLB();
                 int ub = a.getUB();
                 for (int i = lb; i <= ub; i = a.nextValue(i)) {
                     if (!b.contains(i)) {
-                        a.removeValue(i, aCause);
+                        a.removeValue(i, this);
                     }
                 }
             }
@@ -134,7 +132,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                 int ub = b.getUB();
                 for (int i = lb; i <= ub; i = b.nextValue(i)) {
                     if (!a.contains(i)) {
-                        b.removeValue(i, aCause);
+                        b.removeValue(i, this);
                     }
                 }
             }
@@ -187,25 +185,6 @@ public class PropElementV_fast extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 2;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i + 2].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i + 2]);
-            }
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar V = (IntVar) identitymap.get(this.vars[0]);
-
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropElementV_fast(V, X, I, this.offset, this.fast));
-        }
     }
 
     @Override

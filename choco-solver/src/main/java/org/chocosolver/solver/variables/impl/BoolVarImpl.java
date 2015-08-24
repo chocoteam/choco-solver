@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -92,8 +90,8 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BoolVarImpl(String name, ISolver isolver) {
-        super(name, isolver);
+    public BoolVarImpl(String name, Solver solver) {
+        super(name, solver);
         notInstanciated = this.solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = notInstanciated.add();
         mValue = 0;
@@ -436,22 +434,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), isolver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            BoolVarImpl clone = new BoolVarImpl(this.name, solver);
-            identitymap.put(this, clone);
-            if (this.not != null && identitymap.containsKey(this.not)) {
-                clone._setNot((BoolVar) identitymap.get(this.not));
-                clone.not._setNot(clone);
-            }
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return VariableFactory.bool(StringUtils.randomName(this.name), solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

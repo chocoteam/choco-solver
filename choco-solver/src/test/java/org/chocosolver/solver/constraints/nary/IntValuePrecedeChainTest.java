@@ -27,7 +27,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.SolverFactory;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -62,7 +61,7 @@ public class IntValuePrecedeChainTest {
         for (int i = 0; i < 200; i++) {
             long s1, s2;
             {
-                Solver solver = SolverFactory.makeSolver();
+                Solver solver = new Solver();
                 IntVar[] vars = VF.enumeratedArray("X", 5, 0, 5, solver);
                 solver.post(ICF.int_value_precede_chain(vars, 1, 2));
                 solver.set(ISF.random(vars, i));
@@ -70,7 +69,7 @@ public class IntValuePrecedeChainTest {
                 s1 = solver.getMeasures().getSolutionCount();
             }
             {
-                Solver solver = SolverFactory.makeSolver();
+                Solver solver = new Solver();
                 IntVar[] vars = VF.enumeratedArray("X", 5, 0, 5, solver);
                 int_value_precede_chain_dec(vars, 1, 2);
                 solver.set(ISF.random(vars, i));

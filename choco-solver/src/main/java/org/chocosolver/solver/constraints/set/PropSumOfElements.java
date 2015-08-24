@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -116,7 +114,7 @@ public class PropSumOfElements extends Propagator<Variable> {
         if (weights != null) {
             for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
                 if (j < offSet || j >= weights.length + offSet) {
-                    set.removeFromEnvelope(j, aCause);
+                    set.removeFromEnvelope(j, this);
                 }
             }
         }
@@ -134,8 +132,8 @@ public class PropSumOfElements extends Propagator<Variable> {
             sE += get(j);
         }
         if (notEmpty || set.getKernelSize() > 0) {
-            sum.updateLowerBound(sK, aCause);
-            sum.updateUpperBound(sE, aCause);
+            sum.updateLowerBound(sK, this);
+            sum.updateUpperBound(sE, this);
         }
         boolean again = false;
         // filter set
@@ -144,11 +142,11 @@ public class PropSumOfElements extends Propagator<Variable> {
         for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             if (!set.kernelContains(j)) {
                 if (sE - get(j) < lb) {
-                    if (set.addToKernel(j, aCause)) {
+                    if (set.addToKernel(j, this)) {
                         again = true;
                     }
                 } else if (sK + get(j) > ub) {
-                    if (set.removeFromEnvelope(j, aCause)) {
+                    if (set.removeFromEnvelope(j, this)) {
                         again = true;
                     }
                 }
@@ -192,16 +190,4 @@ public class PropSumOfElements extends Propagator<Variable> {
         return (weights == null) ? j : weights[j - offSet];
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar se = (SetVar) identitymap.get(set);
-
-            sum.duplicate(solver, identitymap);
-            IntVar su = (IntVar) identitymap.get(sum);
-
-            identitymap.put(this, new PropSumOfElements(se, weights == null ? null : weights.clone(), offSet, su, notEmpty));
-        }
-    }
 }

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -114,18 +112,18 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
     public boolean filterFromXYtoLBZ() throws ContradictionException {
         int t = vars[1].getLB() - vars[0].getUB();
         if (t > 0) { // x < y
-            return vars[2].updateLowerBound(t, aCause);
+            return vars[2].updateLowerBound(t, this);
         }
         t = vars[0].getLB() - vars[1].getUB();
         // x > y
-        return t > 0 && vars[2].updateLowerBound(t, aCause);
+        return t > 0 && vars[2].updateLowerBound(t, this);
     }
 
     //update upper bound of vars[2] as max(|vars[1].sup - vars[0].inf|, |vars[1].inf - vars[0].sup|)
     public boolean filterFromXYtoUBZ() throws ContradictionException {
         int a = Math.abs(vars[1].getUB() - vars[0].getLB());
         int b = Math.abs(vars[0].getUB() - vars[1].getLB());
-        return vars[2].updateUpperBound((a > b) ? a : b, aCause);
+        return vars[2].updateUpperBound((a > b) ? a : b, this);
     }
 
     //*************************************************************//
@@ -141,7 +139,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         int ub = u1 + u2;
         int lbv0 = u1 - l2 + 1;
         int ubv0 = l1 + l2 - 1;
-        return vars[0].updateLowerBound(lb, aCause) | vars[0].updateUpperBound(ub, aCause) | vars[0].removeInterval(lbv0, ubv0, aCause);
+        return vars[0].updateLowerBound(lb, this) | vars[0].updateUpperBound(ub, this) | vars[0].removeInterval(lbv0, ubv0, this);
     }
 
     public boolean filterEQFromXZToY() throws ContradictionException {
@@ -153,9 +151,9 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         int ub = u0 + u2;
         int lbv1 = u0 - l2 + 1;
         int ubv1 = l0 + l2 - 1;
-        return vars[1].updateLowerBound(lb, aCause) |
-                vars[1].updateUpperBound(ub, aCause) |
-                vars[1].removeInterval(lbv1, ubv1, aCause);
+        return vars[1].updateLowerBound(lb, this) |
+                vars[1].updateUpperBound(ub, this) |
+                vars[1].removeInterval(lbv1, ubv1, this);
     }
 
     //*************************************************************//
@@ -167,7 +165,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         int u2 = vars[2].getUB();
         int lb = vars[1].getLB() - u2 + 1;
         int ub = vars[1].getUB() + u2 - 1;
-        return vars[0].updateLowerBound(lb, aCause) | vars[0].updateUpperBound(ub, aCause);
+        return vars[0].updateLowerBound(lb, this) | vars[0].updateUpperBound(ub, this);
     }
 
     // LEQ: update x from the domain of z and y
@@ -175,7 +173,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         int u2 = vars[2].getUB();
         int lb = vars[0].getLB() - u2 + 1;
         int ub = vars[0].getUB() + u2 - 1;
-        return vars[1].updateLowerBound(lb, aCause) | vars[1].updateUpperBound(ub, aCause);
+        return vars[1].updateLowerBound(lb, this) | vars[1].updateUpperBound(ub, this);
     }
 
     //*************************************************************//
@@ -196,7 +194,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         int lbv0 = vars[1].getUB() - l2;
         int ubv0 = vars[1].getLB() + l2;
         // remove interval [lbv0, ubv0] from domain of vars[0]
-        return vars[0].removeInterval(lbv0, ubv0, aCause);
+        return vars[0].removeInterval(lbv0, ubv0, this);
     }
 
     // GEQ: remove interval for y from the domain of x and y
@@ -214,7 +212,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         int lbv1 = vars[0].getUB() - l2;
         int ubv1 = vars[0].getLB() + l2;
         // remove interval [lbv0, ubv0] from domain of vars[0]
-        return vars[1].removeInterval(lbv1, ubv1, aCause);
+        return vars[1].removeInterval(lbv1, ubv1, this);
     }
 
     @Override
@@ -246,16 +244,4 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
         return "|" + vars[0] + " - " + vars[1] + "| " + op + " " + vars[2];
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropDistanceXYZ(aVars, operator));
-        }
-    }
 }

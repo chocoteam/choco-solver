@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -77,8 +75,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
         for (int i = 0; i < 2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> vars[1].addToKernel(element, aCause);
-        elementRemoved = element -> vars[0].removeFromEnvelope(element, aCause);
+        elementForced = element -> vars[1].addToKernel(element, this);
+        elementRemoved = element -> vars[0].removeFromEnvelope(element, this);
     }
 
     //***********************************************************************************
@@ -96,11 +94,11 @@ public class PropSubsetEq extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
-            vars[1].addToKernel(j, aCause);
+            vars[1].addToKernel(j, this);
         }
         for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
             if (!vars[1].envelopeContains(j))
-                vars[0].removeFromEnvelope(j, aCause);
+                vars[0].removeFromEnvelope(j, this);
         }
         sdm[0].unfreeze();
         sdm[1].unfreeze();
@@ -131,16 +129,4 @@ public class PropSubsetEq extends Propagator<SetVar> {
         return ESat.TRUE;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            vars[0].duplicate(solver, identitymap);
-            SetVar s1 = (SetVar) identitymap.get(vars[0]);
-
-            vars[1].duplicate(solver, identitymap);
-            SetVar s2 = (SetVar) identitymap.get(vars[1]);
-
-            identitymap.put(this, new PropSubsetEq(s1, s2));
-        }
-    }
 }

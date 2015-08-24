@@ -28,12 +28,10 @@
  */
 package org.chocosolver.solver.constraints.nary.among;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -145,13 +143,13 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = LB.get();
         int ub = UB.get();
-        vars[nb_vars].updateLowerBound(lb, aCause);
-        vars[nb_vars].updateUpperBound(ub, aCause);
+        vars[nb_vars].updateLowerBound(lb, this);
+        vars[nb_vars].updateUpperBound(ub, this);
 
         int min = Math.max(vars[nb_vars].getLB(), lb);
         int max = Math.min(vars[nb_vars].getUB(), ub);
 
-        if (max < min) this.contradiction(null, "impossible");
+        if (max < min) fails();
 
         if (lb == min && lb == max) {
             removeOnlyValues();
@@ -177,7 +175,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
-                    if (v.removeValue(value, aCause)) {
+                    if (v.removeValue(value, this)) {
                         occs[i].add(-1);
                     }
                 }
@@ -192,7 +190,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     k1++;
                 }
                 // and bottom-up shaving
-                while (k1 <= k2 && v.removeValue(values[k1], aCause)) {
+                while (k1 <= k2 && v.removeValue(values[k1], this)) {
                     occs[i].add(-1);
                     k1++;
                 }
@@ -201,7 +199,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     k2--;
                 }
                 // and top bottom shaving
-                while (k2 >= k1 && v.removeValue(values[k2], aCause)) {
+                while (k2 >= k1 && v.removeValue(values[k2], this)) {
                     occs[i].add(-1);
                     k2--;
                 }
@@ -226,7 +224,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     vrms.add(value);
                 }
             }
-            v.removeValues(vrms, aCause);
+            v.removeValues(vrms, this);
             it.dispose();
         }
     }
@@ -296,19 +294,6 @@ public class PropAmongGAC extends Propagator<IntVar> {
         sb.append("},");
         sb.append(vars[nb_vars].toString()).append(")");
         return sb.toString();
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAmongGAC(aVars, this.values));
-        }
     }
 
 }

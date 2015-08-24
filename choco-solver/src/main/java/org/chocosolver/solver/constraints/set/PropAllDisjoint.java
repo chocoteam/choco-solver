@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -77,7 +75,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         elementForced = element -> {
             for (int i = 0; i < n; i++) {
                 if (i != currentSet) {
-                    vars[i].removeFromEnvelope(element, aCause);
+                    vars[i].removeFromEnvelope(element, this);
                 }
             }
         };
@@ -99,7 +97,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
                         if (i2 != i) {
-                            vars[i2].removeFromEnvelope(j, aCause);
+                            vars[i2].removeFromEnvelope(j, this);
                         }
                     }
                 }
@@ -139,16 +137,4 @@ public class PropAllDisjoint extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            SetVar[] aVars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAllDisjoint(aVars));
-        }
-    }
 }

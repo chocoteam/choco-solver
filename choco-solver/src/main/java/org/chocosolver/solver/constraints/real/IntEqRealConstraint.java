@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.real;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -98,11 +96,11 @@ public class IntEqRealConstraint extends Constraint {
             for (int i = 0; i < n; i++) {
                 IntVar intVar = intVars[i];
                 RealVar realVar = realVars[i];
-                realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, aCause);
-                intVar.updateLowerBound((int) Math.ceil(realVar.getLB() - epsilon), aCause);
-                intVar.updateUpperBound((int) Math.floor(realVar.getUB() + epsilon), aCause);
+                realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, this);
+                intVar.updateLowerBound((int) Math.ceil(realVar.getLB() - epsilon), this);
+                intVar.updateUpperBound((int) Math.floor(realVar.getUB() + epsilon), this);
                 if (intVar.hasEnumeratedDomain()) {
-                    realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, aCause);
+                    realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, this);
                 }
             }
         }
@@ -124,23 +122,5 @@ public class IntEqRealConstraint extends Constraint {
             return allInst ? ESat.TRUE : ESat.UNDEFINED;
         }
 
-        @Override
-        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-            if (!identitymap.containsKey(this)) {
-                int size = this.n;
-
-                IntVar[] iVars = new IntVar[size];
-                for (int i = 0; i < size; i++) {
-                    this.vars[i].duplicate(solver, identitymap);
-                    iVars[i] = (IntVar) identitymap.get(this.vars[i]);
-                }
-                RealVar[] rVars = new RealVar[size];
-                for (int i = 0; i < size; i++) {
-                    this.vars[i + n].duplicate(solver, identitymap);
-                    rVars[i] = (RealVar) identitymap.get(this.vars[i + n]);
-                }
-                identitymap.put(this, new PropIntEqReal(iVars, rVars, epsilon));
-            }
-        }
     }
 }

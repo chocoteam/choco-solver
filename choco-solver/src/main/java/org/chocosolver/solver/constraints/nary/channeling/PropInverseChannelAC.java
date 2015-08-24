@@ -28,8 +28,7 @@
  */
 package org.chocosolver.solver.constraints.nary.channeling;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -59,6 +58,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     protected IntVar[] X, Y;
     protected RemProc rem_proc;
     protected IIntDeltaMonitor[] idms;
+    ICause cause;
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);
@@ -77,15 +77,16 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
+        this.cause = this;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            X[i].updateLowerBound(minX, aCause);
-            X[i].updateUpperBound(n - 1 + minX, aCause);
-            Y[i].updateLowerBound(minY, aCause);
-            Y[i].updateUpperBound(n - 1 + minY, aCause);
+            X[i].updateLowerBound(minX, this);
+            X[i].updateUpperBound(n - 1 + minX, this);
+            Y[i].updateLowerBound(minY, this);
+            Y[i].updateUpperBound(n - 1 + minY, this);
         }
         for (int i = 0; i < n; i++) {
             enumeratedFilteringOfX(i);
@@ -109,7 +110,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         int max = X[var].getUB();
         for (int v = min; v <= max; v = X[var].nextValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
-                X[var].removeValue(v, aCause);
+                X[var].removeValue(v, this);
             }
         }
     }
@@ -120,7 +121,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         int max = Y[var].getUB();
         for (int v = min; v <= max; v = Y[var].nextValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
-                Y[var].removeValue(v, aCause);
+                Y[var].removeValue(v, this);
             }
         }
     }
@@ -137,9 +138,9 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         @Override
         public void execute(int val) throws ContradictionException {
             if (var < n) {
-                Y[val - minX].removeValue(var + minY, aCause);
+                Y[val - minX].removeValue(var + minY, cause);
             } else {
-                X[val - minY].removeValue(var - n + minX, aCause);
+                X[val - minY].removeValue(var - n + minX, cause);
             }
         }
     }
@@ -165,24 +166,6 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return "Inverse_AC({" + X[0] + "...}{" + Y[0] + "...})";
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.n;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            IntVar[] Y = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i + n].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
-            }
-            identitymap.put(this, new PropInverseChannelAC(X, Y, this.minX, this.minY));
-        }
     }
 
     @Override

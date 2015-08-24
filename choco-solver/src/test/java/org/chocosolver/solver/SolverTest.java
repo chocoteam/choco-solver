@@ -210,7 +210,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testRetrieveInt() {
-        Solver solver = SolverFactory.makeSolver();
+        Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
         IntVar i = VF.enumerated("i", 1, 3, solver);
         IntVar[] is = solver.retrieveIntVars();
@@ -219,7 +219,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testRetrieveBool() {
-        Solver solver = SolverFactory.makeSolver();
+        Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
         IntVar i = VF.enumerated("i", 1, 3, solver);
         IntVar[] bs = solver.retrieveBoolVars();
@@ -228,7 +228,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testFH2() {
-        Solver solver = SF.makeSolver();
+        Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
         solver.post(ICF.arithm(b, "=", 2));
         solver.findAllSolutions();
@@ -237,7 +237,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testJL1() {
-        Solver s = SF.makeSolver();
+        Solver s = new Solver();
         s.post(ICF.arithm(s.ONE(), "!=", s.ZERO()));
         if (s.findSolution()) {
             while (s.nextSolution()) ;

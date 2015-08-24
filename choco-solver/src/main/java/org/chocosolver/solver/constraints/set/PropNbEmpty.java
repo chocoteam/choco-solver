@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -148,14 +146,14 @@ public class PropNbEmpty extends Propagator<Variable> {
     public void filter() throws ContradictionException {
         int nbMin = nbAlreadyEmpty.get();
         int nbMax = nbMin + nbMaybeEmpty.get();
-        nbEmpty.updateLowerBound(nbMin, aCause);
-        nbEmpty.updateUpperBound(nbMax, aCause);
+        nbEmpty.updateLowerBound(nbMin, this);
+        nbEmpty.updateUpperBound(nbMax, this);
         ///////////////////////////////////////
         if (nbEmpty.isInstantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
-                        sets[i].removeFromEnvelope(j, aCause);
+                        sets[i].removeFromEnvelope(j, this);
                     }
                     canBeEmpty.remove(i);
                     isEmpty.add(i);
@@ -166,7 +164,7 @@ public class PropNbEmpty extends Propagator<Variable> {
                 boolean allFixed = true;
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     if (sets[i].getEnvelopeSize() == 1) {
-                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), aCause);
+                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), this);
                         canBeEmpty.remove(i);
                     } else {
                         allFixed = false;
@@ -200,19 +198,4 @@ public class PropNbEmpty extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = sets.length;
-            SetVar[] svars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                sets[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(sets[i]);
-            }
-            nbEmpty.duplicate(solver, identitymap);
-            IntVar C = (IntVar) identitymap.get(nbEmpty);
-
-            identitymap.put(this, new PropNbEmpty(svars, C));
-        }
-    }
 }

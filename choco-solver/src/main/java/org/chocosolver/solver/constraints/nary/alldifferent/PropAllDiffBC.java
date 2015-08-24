@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
@@ -56,7 +54,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     public PropAllDiffBC(IntVar[] variables) {
         super(variables, PropagatorPriority.LINEAR, false);
-        filter = new AlgoAllDiffBC(aCause);
+        filter = new AlgoAllDiffBC(this);
         filter.reset(vars);
     }
 
@@ -73,19 +71,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         return ESat.TRUE; // redundant propagator (use PropAllDiffInst)
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vars.length];
-            for (int i = 0; i < this.vars.length; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-
-            identitymap.put(this, new PropAllDiffBC(aVars));
-        }
     }
 
     @Override

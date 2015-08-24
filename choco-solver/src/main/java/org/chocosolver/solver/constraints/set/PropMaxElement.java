@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -115,14 +113,14 @@ public class PropMaxElement extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
-            max.updateLowerBound(get(j), aCause);
+            max.updateLowerBound(get(j), this);
         }
         int maxVal = Integer.MIN_VALUE;
         int ub = max.getUB();
         for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             int k = get(j);
             if (k > ub) {
-                set.removeFromEnvelope(j, aCause);
+                set.removeFromEnvelope(j, this);
             } else {
                 if (maxVal < k) {
                     maxVal = k;
@@ -130,7 +128,7 @@ public class PropMaxElement extends Propagator<Variable> {
             }
         }
         if (notEmpty || set.getKernelSize() > 0) {
-            max.updateUpperBound(maxVal, aCause);
+            max.updateUpperBound(maxVal, this);
         }
     }
 
@@ -169,16 +167,4 @@ public class PropMaxElement extends Propagator<Variable> {
         return (weights == null) ? j : weights[j - offSet];
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            max.duplicate(solver, identitymap);
-            IntVar M = (IntVar) identitymap.get(max);
-
-            identitymap.put(this, new PropMaxElement(S, M, notEmpty));
-        }
-    }
 }

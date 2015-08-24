@@ -66,7 +66,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     protected DisposableRangeIterator _riterator;
 
     public IntView(String name, IntVar var) {
-        super(name, var._bes_());
+        super(name, var.getSolver());
         this.var = var;
         this.delta = NoDelta.singleton;
         this.var.subscribeView(this);

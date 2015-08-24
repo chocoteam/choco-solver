@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -78,8 +76,8 @@ public class PropSymmetric extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> vars[element - offSet].addToKernel(currentSet + offSet, aCause);
-        elementRemoved = element -> vars[element - offSet].removeFromEnvelope(currentSet + offSet, aCause);
+        elementForced = element -> vars[element - offSet].addToKernel(currentSet + offSet, this);
+        elementRemoved = element -> vars[element - offSet].removeFromEnvelope(currentSet + offSet, this);
     }
 
     //***********************************************************************************
@@ -91,11 +89,11 @@ public class PropSymmetric extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext()) {
                 if (j < offSet || j >= n + offSet || !vars[j - offSet].envelopeContains(i + offSet)) {
-                    vars[i].removeFromEnvelope(j, aCause);
+                    vars[i].removeFromEnvelope(j, this);
                 }
             }
             for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
-                vars[j - offSet].addToKernel(i + offSet, aCause);
+                vars[j - offSet].addToKernel(i + offSet, this);
             }
         }
         for (int i = 0; i < n; i++) {
@@ -127,17 +125,4 @@ public class PropSymmetric extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int n = vars.length;
-            SetVar[] svars = new SetVar[n];
-            for (int i = 0; i < n; i++) {
-                vars[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(vars[i]);
-            }
-
-            identitymap.put(this, new PropSymmetric(svars, offSet));
-        }
-    }
 }

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -68,7 +66,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
                     x2 = i;
                 }
             } else if (vars[i].getValue() == 1) {
-                if (vars[n].instantiateTo(1, aCause)) {
+                if (vars[n].instantiateTo(1, this)) {
                     setPassive();
                     return;
                 }
@@ -82,7 +80,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
             filter();
         } else {
             if (vars[idxVarInProp].isInstantiatedTo(1)) {
-                if (vars[n].instantiateTo(1, aCause)) {
+                if (vars[n].instantiateTo(1, this)) {
                     setPassive();
                 }
             } else if (idxVarInProp == x1 || idxVarInProp == x2) {
@@ -103,20 +101,20 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     public void filter() throws ContradictionException {
         if (x1 == -1) {
-            if (vars[n].instantiateTo(0, aCause)) {
+            if (vars[n].instantiateTo(0, this)) {
                 setPassive();
                 return;
             }
         }
         if (x2 == -1 && vars[n].isInstantiatedTo(1)) {
-            if (vars[x1].instantiateTo(1, aCause)) {
+            if (vars[x1].instantiateTo(1, this)) {
                 setPassive();
                 return;
             }
         }
         if (vars[n].isInstantiatedTo(0)) {
             for (int i = 0; i < n; i++) {
-                vars[i].instantiateTo(0, aCause);
+                vars[i].instantiateTo(0, this);
             }
         }
     }
@@ -158,18 +156,4 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            BoolVar[] aVars = new BoolVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (BoolVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            BoolVar M = (BoolVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropBoolMax(aVars, M));
-        }
-    }
 }

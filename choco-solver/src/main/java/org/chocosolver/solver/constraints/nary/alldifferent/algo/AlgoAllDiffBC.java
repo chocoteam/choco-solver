@@ -194,7 +194,7 @@ public class AlgoAllDiffBC {
 			}
 			pathset(t, x + 1, z, z);
 			if (d[z] < bounds[z] - bounds[y]) {
-				aCause.contradiction(null, "");
+				aCause.fails();
 			}
 			if (h[x] > x) {
 				int w = pathmax(h, h[x]);
@@ -230,7 +230,7 @@ public class AlgoAllDiffBC {
 			}
 			pathset(t, x - 1, z, z);
 			if (d[z] < bounds[y] - bounds[z]) {
-				aCause.contradiction(null, "");
+				aCause.fails();
 			}
 			if (h[x] < x) {
 				int w = pathmin(h, h[x]);

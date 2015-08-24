@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -70,7 +68,7 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].removeValues(vrms, aCause);
+        vars[0].removeValues(vrms, this);
         if (vars[0].hasEnumeratedDomain()) {
             setPassive();
         }else{
@@ -114,10 +112,4 @@ public class PropMemberEnum extends Propagator<IntVar> {
         return ruleStore.addPropagatorActivationRule(this);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            identitymap.put(this, new PropMemberEnum((IntVar) identitymap.get(vars[0]), values.toArray()));
-        }
-    }
 }

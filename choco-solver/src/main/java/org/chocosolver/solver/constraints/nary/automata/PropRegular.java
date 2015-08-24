@@ -29,10 +29,8 @@
 package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
@@ -88,7 +86,7 @@ public class PropRegular extends Propagator<IntVar> {
             idms[i].forEachRemVal(rem_proc.set(i));
             for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
                 if (!graph.hasSupport(i, j)) {
-                    vars[i].removeValue(j, aCause);
+                    vars[i].removeValue(j, this);
                 }
             }
             idms[i].unfreeze();
@@ -284,21 +282,4 @@ public class PropRegular extends Propagator<IntVar> {
         return new StoredDirectedMultiGraph(environment, graph, starts, offsets, totalSizes);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vars.length];
-            for (int i = 0; i < this.vars.length; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            IAutomaton nauto = null;
-            try {
-                nauto = automaton.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            identitymap.put(this, new PropRegular(aVars, nauto));
-        }
-    }
 }

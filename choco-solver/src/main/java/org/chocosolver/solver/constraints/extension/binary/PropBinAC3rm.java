@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -93,18 +91,6 @@ public class PropBinAC3rm extends PropBinCSP {
             reviseV1();
         } else {
             reviseV0();
-        }
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropBinAC3rm(X, Y, (CouplesBitSetTable) relation.duplicate()));
         }
     }
 
@@ -192,7 +178,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         }
                     }
                 }
-                v1.removeValues(vrms, aCause);
+                v1.removeValues(vrms, this);
             } finally {
                 itv1.dispose();
             }
@@ -231,7 +217,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         }
                     }
                 }
-                v0.removeValues(vrms, aCause);
+                v0.removeValues(vrms, this);
             } finally {
                 itv0.dispose();
             }
@@ -291,7 +277,7 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 found = false;
             }
-            v0.removeValues(vrms, aCause);
+            v0.removeValues(vrms, this);
         } finally {
             itv0.dispose();
         }
@@ -319,7 +305,7 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 found = false;
             }
-            v1.removeValues(vrms, aCause);
+            v1.removeValues(vrms, this);
         } finally {
             itv1.dispose();
         }
@@ -339,7 +325,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         vrms.add(val);
                     }
                 }
-                v1.removeValues(vrms, aCause);
+                v1.removeValues(vrms, this);
             } finally {
                 iterator.dispose();
             }
@@ -355,7 +341,7 @@ public class PropBinAC3rm extends PropBinCSP {
                         vrms.add(val);
                     }
                 }
-                v0.removeValues(vrms, aCause);
+                v0.removeValues(vrms, this);
             } finally {
                 iterator.dispose();
             }

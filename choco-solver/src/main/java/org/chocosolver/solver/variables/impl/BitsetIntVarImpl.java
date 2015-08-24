@@ -28,12 +28,10 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ISolver;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -81,8 +79,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    public BitsetIntVarImpl(String name, int[] sortedValues, ISolver isolver) {
-        super(name, isolver);
+    public BitsetIntVarImpl(String name, int[] sortedValues, Solver solver) {
+        super(name, solver);
         IEnvironment env = solver.getEnvironment();
         OFFSET = sortedValues[0];
         int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
@@ -96,9 +94,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         LENGTH = capacity;
     }
 
-    public BitsetIntVarImpl(String name, int offset, BitSet values, ISolver isolver) {
-        super(name, isolver);
-        IEnvironment env = solver.getEnvironment();
+    public BitsetIntVarImpl(String name, int offset, BitSet values, Solver solver) {
+        super(name, solver);
+        IEnvironment env = this.solver.getEnvironment();
         OFFSET = offset;
         int cardinality = values.cardinality();
         this.VALUES = env.makeBitSet(cardinality);
@@ -111,9 +109,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         LENGTH = this.UB.get();
     }
 
-    public BitsetIntVarImpl(String name, int min, int max, ISolver isolver) {
-        super(name, isolver);
-        IEnvironment env = solver.getEnvironment();
+    public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
+        super(name, solver);
+        IEnvironment env = this.solver.getEnvironment();
         this.OFFSET = min;
         int capacity = max - min + 1;
         this.VALUES = env.makeBitSet(capacity);
@@ -618,18 +616,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), isolver);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            BitsetIntVarImpl clone = new BitsetIntVarImpl(this.name, this.OFFSET, this.VALUES.copyToBitSet(), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

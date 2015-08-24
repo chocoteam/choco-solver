@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.count;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -116,21 +114,21 @@ public class PropCountVar extends Propagator<IntVar> {
                 }
             }
             if (cardLB > max || cardUB < min) {
-                val.removeValue(value, aCause);
+                val.removeValue(value, this);
             } else {
                 minCard = Math.min(minCard, min);
                 maxCard = Math.max(maxCard, max);
             }
         }
-        card.updateLowerBound(minCard, aCause);
-        card.updateUpperBound(maxCard, aCause);
+        card.updateLowerBound(minCard, this);
+        card.updateUpperBound(maxCard, this);
         if (val.isInstantiated() && card.isInstantiated()) {
             int nb = card.getValue();
             int value = val.getValue();
             if (maxCard == nb) {
                 for (int i = 0; i < n; i++) {
                     if (vars[i].contains(value)) {
-                        vars[i].instantiateTo(value, aCause);
+                        vars[i].instantiateTo(value, this);
                     }
                 }
                 setPassive();
@@ -141,11 +139,11 @@ public class PropCountVar extends Propagator<IntVar> {
                         if (vars[i].isInstantiated()) {
                             nbInst++;
                         } else {
-                            vars[i].removeValue(value, aCause);
+                            vars[i].removeValue(value, this);
                         }
                     }
                 }
-                card.instantiateTo(nbInst, aCause);
+                card.instantiateTo(nbInst, this);
             }
         }
     }
@@ -234,20 +232,4 @@ public class PropCountVar extends Propagator<IntVar> {
         return nrules;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 2;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size - 1].duplicate(solver, identitymap);
-            IntVar aVar1 = (IntVar) identitymap.get(this.vars[size - 1]);
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar2 = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropCountVar(aVars, aVar2, aVar1));
-        }
-    }
 }

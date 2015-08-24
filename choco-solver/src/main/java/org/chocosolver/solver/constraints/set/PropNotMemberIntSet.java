@@ -29,8 +29,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -75,7 +73,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            sv.removeFromEnvelope(iv.getValue(), aCause);
+            sv.removeFromEnvelope(iv.getValue(), this);
 			setPassive();
         }
     }
@@ -83,7 +81,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     @Override
     public void propagate(int vidx, int evtmask) throws ContradictionException {
         assert iv.isInstantiated();
-        sv.removeFromEnvelope(iv.getValue(), aCause);
+        sv.removeFromEnvelope(iv.getValue(), this);
 		setPassive();
     }
 
@@ -110,16 +108,4 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
         return ESat.FALSE;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            sv.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(sv);
-
-            iv.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(iv);
-
-            identitymap.put(this, new PropNotMemberIntSet(I, S));
-        }
-    }
 }
