@@ -105,7 +105,7 @@ parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=1
+    default=8
 )
 parser.add_argument(
     "-c", "--configurations",
@@ -124,7 +124,7 @@ parser.add_argument(
 parser.add_argument(
     "-jargs",
     help='Java Virtual Machine arguments (eg: -Xss64m -Xms64m -Xmx4096m -server)',
-    default=''
+    default='-Xss64m -Xms64m -Xmx4096m -server'
 )
 
 cmd = 'java %s -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -tl %s %s %s'

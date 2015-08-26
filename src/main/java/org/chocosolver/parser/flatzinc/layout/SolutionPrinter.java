@@ -37,41 +37,38 @@ public class SolutionPrinter extends ASolutionPrinter {
     Solver solver;
 
     public SolutionPrinter(Solver solver, boolean printAll, boolean printStat) {
-        super(solver.getSolutionRecorder(), printAll, printStat);
+        super(printAll, printStat);
         this.solver = solver;
         solver.plugMonitor(this);
     }
 
     @Override
     public void onSolution() {
+        bestSolution.record(solver);
         super.onSolution();
-        if(printStat) {
+        if (printStat) {
             System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
         }
     }
 
     public void doFinalOutPut() {
         userinterruption = false;
-        boolean complete = !solver.getSearchLoop().hasReachedLimit() && !solver.getSearchLoop().hasEndedUnexpectedly();
-        if (nbSolution == 0) {
-            if (complete) {
+        boolean complete = solver.getSearchLoop().isComplete() && !solver.getSearchLoop().hasReachedLimit() && !solver.getSearchLoop().hasEndedUnexpectedly();
+        if(nbSolution>0){
+            printSolution(bestSolution);
+            if(complete){
+                System.out.printf("==========\n");
+            }else if (solver.getObjectiveManager().isOptimization()) {
+                System.out.printf("=====UNBOUNDED=====\n");
+            }
+        }else{
+            if(complete){
                 System.out.printf("=====UNSATISFIABLE=====\n");
-            } else {
+            }else{
                 System.out.printf("=====UNKNOWN=====\n");
             }
-        } else { // at least one solution
-            if (!printAll) { // print the first/best solution when -a is not enabled
-                printSolution(solrecorder.getLastSolution());
-            }
-            if (complete) {
-                System.out.printf("==========\n");
-            } else {
-                if ((solver.getObjectiveManager().isOptimization())) {
-                    System.out.printf("=====UNBOUNDED=====\n");
-                }
-            }
         }
-        if(printStat){
+        if (printStat) {
             System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
         }
     }

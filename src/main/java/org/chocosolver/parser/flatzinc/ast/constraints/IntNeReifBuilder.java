@@ -79,21 +79,21 @@ public class IntNeReifBuilder implements IBuilder {
                         @Override
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
-                                if (var.removeValue(cste, aCause)) {
+                                if (var.removeValue(cste, this)) {
                                     setPassive();
                                 }
                             } else {
                                 if (r.getUB() == 0) {
-                                    if (var.instantiateTo(cste, aCause)) {
+                                    if (var.instantiateTo(cste, this)) {
                                         setPassive();
                                     }
                                 } else {
                                     if (!var.contains(cste)) {
                                         setPassive();
-                                        r.setToTrue(aCause);
+                                        r.setToTrue(this);
                                     } else if (var.isInstantiatedTo(cste)) {
                                         setPassive();
-                                        r.setToFalse(aCause);
+                                        r.setToFalse(this);
                                     }
                                 }
                             }
@@ -101,7 +101,8 @@ public class IntNeReifBuilder implements IBuilder {
 
                         @Override
                         public ESat isEntailed() {
-                            throw new UnsupportedOperationException("isEntailed not implemented ");
+                            return ESat.TRUE;
+                            //throw new UnsupportedOperationException("isEntailed not implemented ");
                         }
 
                         @Override
@@ -126,11 +127,11 @@ public class IntNeReifBuilder implements IBuilder {
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
                                 if (vars[0].isInstantiated()) {
-                                    if (vars[1].removeValue(vars[0].getValue(), aCause)) {
+                                    if (vars[1].removeValue(vars[0].getValue(), this)) {
                                         setPassive();
                                     }
                                 } else if (vars[1].isInstantiated()) {
-                                    if (vars[0].removeValue(vars[1].getValue(), aCause)) {
+                                    if (vars[0].removeValue(vars[1].getValue(), this)) {
                                         setPassive();
                                     }
                                 }
@@ -138,30 +139,30 @@ public class IntNeReifBuilder implements IBuilder {
                                 if (r.getUB() == 0) {
                                     if (vars[0].isInstantiated()) {
                                         setPassive();
-                                        vars[1].instantiateTo(vars[0].getValue(), aCause);
+                                        vars[1].instantiateTo(vars[0].getValue(), this);
                                     } else if (vars[1].isInstantiated()) {
                                         setPassive();
-                                        vars[0].instantiateTo(vars[1].getValue(), aCause);
+                                        vars[0].instantiateTo(vars[1].getValue(), this);
                                     }
                                 } else {
                                     if (vars[0].isInstantiated()) {
                                         if (vars[1].isInstantiated()) {
                                             if (vars[0].getValue() != vars[1].getValue()) {
-                                                r.setToTrue(aCause);
+                                                r.setToTrue(this);
                                             } else {
-                                                r.setToFalse(aCause);
+                                                r.setToFalse(this);
                                             }
                                             setPassive();
                                         } else {
                                             if (!vars[1].contains(vars[0].getValue())) {
-                                                r.setToTrue(aCause);
+                                                r.setToTrue(this);
                                                 setPassive();
                                             }
                                         }
                                     } else {
                                         if (vars[1].isInstantiated()) {
                                             if (!vars[0].contains(vars[1].getValue())) {
-                                                r.setToTrue(aCause);
+                                                r.setToTrue(this);
                                                 setPassive();
                                             }
                                         }

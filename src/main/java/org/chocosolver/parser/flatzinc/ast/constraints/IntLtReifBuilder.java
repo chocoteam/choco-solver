@@ -75,18 +75,18 @@ public class IntLtReifBuilder implements IBuilder {
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
                                 setPassive();
-                                var.updateLowerBound(cste + 1, aCause);
+                                var.updateLowerBound(cste + 1, this);
                             } else if (r.getUB() == 0) {
-                                if (var.updateUpperBound(cste, aCause)) {
+                                if (var.updateUpperBound(cste, this)) {
                                     setPassive();
                                 }
                             } else {
                                 if (var.getLB() > cste) {
                                     setPassive();
-                                    r.setToTrue(aCause);
+                                    r.setToTrue(this);
                                 } else if (var.getUB() <= cste) {
                                     setPassive();
-                                    r.setToFalse(aCause);
+                                    r.setToFalse(this);
                                 }
                             }
                         }
@@ -120,18 +120,18 @@ public class IntLtReifBuilder implements IBuilder {
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
                                 setPassive();
-                                var.updateUpperBound(cste - 1, aCause);
+                                var.updateUpperBound(cste - 1, this);
                             } else if (r.getUB() == 0) {
-                                if (var.updateLowerBound(cste, aCause)) {
+                                if (var.updateLowerBound(cste, this)) {
                                     setPassive();
                                 }
                             } else {
                                 if (var.getUB() < cste) {
                                     setPassive();
-                                    r.setToTrue(aCause);
+                                    r.setToTrue(this);
                                 } else if (var.getLB() >= cste) {
                                     setPassive();
-                                    r.setToFalse(aCause);
+                                    r.setToFalse(this);
                                 }
                             }
                         }
@@ -162,24 +162,24 @@ public class IntLtReifBuilder implements IBuilder {
                     @Override
                     public void propagate(int evtmask) throws ContradictionException {
                         if (r.getLB() == 1) {
-                            vars[0].updateUpperBound(vars[1].getUB() - 1, aCause);
-                            vars[1].updateLowerBound(vars[0].getLB() + 1, aCause);
+                            vars[0].updateUpperBound(vars[1].getUB() - 1, this);
+                            vars[1].updateLowerBound(vars[0].getLB() + 1, this);
                             if (vars[0].getUB() < vars[1].getLB()) {
                                 this.setPassive();
                             }
                         } else if (r.getUB() == 0) {
-                            vars[0].updateLowerBound(vars[1].getLB(), aCause);
-                            vars[1].updateUpperBound(vars[0].getUB(), aCause);
+                            vars[0].updateLowerBound(vars[1].getLB(), this);
+                            vars[1].updateUpperBound(vars[0].getUB(), this);
                             if (vars[0].getLB() >= vars[1].getUB()) {
                                 setPassive();
                             }
                         } else {
                             if (vars[0].getUB() < vars[1].getLB()) {
                                 setPassive();
-                                r.setToTrue(aCause);
+                                r.setToTrue(this);
                             } else if (vars[0].getLB() >= vars[1].getUB()) {
                                 setPassive();
-                                r.setToFalse(aCause);
+                                r.setToFalse(this);
                             }
                         }
                     }

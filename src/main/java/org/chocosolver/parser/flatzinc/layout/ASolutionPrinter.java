@@ -34,7 +34,6 @@ import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetList;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -57,6 +56,8 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
     boolean userinterruption = true;
     public boolean immutable = false;
 
+    final public Solution bestSolution = new Solution();
+
 
     List<String> output_names;
     List<Declaration.DType> output_types;
@@ -67,12 +68,11 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
     List<Variable[]> output_arrays_vars;
 
     StringBuilder stringBuilder = new StringBuilder();
-    final ISolutionRecorder solrecorder;
+
     final Thread statOnKill;
 
 
-    public ASolutionPrinter(ISolutionRecorder solrecorder, boolean printAll, boolean printStat) {
-        this.solrecorder = solrecorder;
+    public ASolutionPrinter(boolean printAll, boolean printStat) {
         this.printAll = printAll;
         this.printStat = printStat;
         output_vars = new ArrayList<>();
@@ -197,7 +197,7 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
         wrongSolution = false;
         nbSolution++;
         if (printAll) {
-            printSolution(solrecorder.getLastSolution());
+            printSolution(bestSolution);
         }
     }
 

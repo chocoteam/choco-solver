@@ -10,26 +10,19 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2014.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2014'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2012'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'free',
-        'seq2a',
-         # 'seq10',
-         # 'seq11',
-         'seq20',
-         'seq21',
-        'seq2b',
-        # 'seq2c',
+        'fixed',
         ]
 )
 
@@ -82,7 +75,7 @@ for fname in fnames:
                 tim =900.
             elif solution[3] == 'MAX' and best[fname] > solution[4]:
                 tim =900.
-        timPerOpt[solution[5]].append(tim)
+        timPerOpt[solution[6]].append(tim)
 
 
 # Then start the document
@@ -143,14 +136,14 @@ for fname in fnames:
 
     if solutions[0][3] == 'SAT':
         solutions.sort(key=lambda x: (x[3], x[1]))
-        table = Table('l|r|r|r')
+        table = Table('l|r|l|r|r')
         subsubsection.append(table)
         table.add_hline()
-        table.add_row(("Param.", "\#Sol", 'Time(sec)', 'Nodes'))
+        table.add_row(("Param.", 'Status', "\#Sol", 'Time(sec)', 'Nodes'))
         table.add_hline()
         for i in range(0, len(solutions)):
-            table.add_row((solutions[i][5], solutions[i][0], solutions[i][1], solutions[i][2]))
-            coords[solutions[i][5]].append((k, solutions[i][1]))
+            table.add_row((solutions[i][6], solutions[i][5], solutions[i][0], solutions[i][1], solutions[i][2]))
+            coords[solutions[i][6]].append((k, solutions[i][1]))
         table.add_hline()
     else:
         # sort for MIN
@@ -163,19 +156,19 @@ for fname in fnames:
             best = solutions[0][4]
             type = 'MAX'
 
-        table = Table('l|r|r|r|r')
+        table = Table('l|r|l|r|r|r')
         subsubsection.append(table)
 
         table.add_hline()
-        table.add_row(("Param.", type, "\#Sol", 'Time(sec)', 'Nodes'))
+        table.add_row(("Param.", type, 'Status', "\#Sol", 'Time(sec)', 'Nodes'))
         table.add_hline()
         for i in range(0, len(solutions)):
             table.add_row(
-                (solutions[i][5], solutions[i][4], solutions[i][0], solutions[i][1], solutions[i][2]))
+                (solutions[i][6], solutions[i][4], solutions[i][5], solutions[i][0], solutions[i][1], solutions[i][2]))
             if solutions[i][4] == best:
-                coords[solutions[i][5]].append((k, solutions[i][1]))
+                coords[solutions[i][6]].append((k, solutions[i][1]))
             else:
-                coords[solutions[i][5]].append((k, 900.0))
+                coords[solutions[i][6]].append((k, 900.0))
         table.add_hline()
     k += 1
 if k > 0:

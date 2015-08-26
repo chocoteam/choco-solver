@@ -37,7 +37,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -128,7 +127,7 @@ public class FznSearchBinder extends DefaultSearchBinder {
                 strats.add(makeComplementarySearch(intvars.toArray(new IntVar[intvars.size()])));
             }
             if (setvars.size() > 0) {
-                LoggerFactory.getLogger(FznSearchBinder.class).warn("% No complementary search for SetVar");
+                System.err.println("% No complementary search for SetVar");
             }
 
             // declare the search strategy

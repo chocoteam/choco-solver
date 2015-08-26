@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.slf4j.LoggerFactory;
 
 /**
  * <br/>
@@ -80,7 +79,7 @@ public class IntSearch {
             case max_regret:
                 return new MaxRegret();
             default:
-                LoggerFactory.getLogger(IntSearch.class).error("% No implementation for " + varChoice.name() + ". Set default.");
+                System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;
         }
     }
@@ -116,7 +115,7 @@ public class IntSearch {
                 assgnt = DecisionOperator.int_reverse_split;
                 break;
             default:
-                LoggerFactory.getLogger(IntSearch.class).error("% No implementation for " + assignmennt.name() + ". Set default.");
+                System.err.println("% No implementation for " + assignmennt.name() + ". Set default.");
                 valSelector = new IntDomainMin();
         }
         return new IntStrategy(scope, variableSelector, valSelector, assgnt);

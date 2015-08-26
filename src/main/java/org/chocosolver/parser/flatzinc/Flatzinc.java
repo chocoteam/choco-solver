@@ -33,12 +33,11 @@ import org.chocosolver.parser.IParser;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.layout.ASolutionPrinter;
-import org.chocosolver.parser.flatzinc.layout.SharedSolutionPrinter;
 import org.chocosolver.parser.flatzinc.layout.SolutionPrinter;
-import org.chocosolver.solver.*;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -79,11 +78,8 @@ public class Flatzinc implements IParser {
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy.", required = false)
     protected boolean free = false;
 
-    @Option(name = "-ft", required = false)
-    protected long ft = 1000;
-
-    @Option(name = "-fs", required = false, handler = StringArrayOptionHandler.class)
-    protected String[] fs = new String[]{"0", "1", "5"};
+    @Option(name = "-e", aliases = {"--explanations"}, usage = "Plug explanations in (cbj).", required = false)
+    protected boolean expl = false;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
     protected int nb_cores = 1; // SEEMS USELESS, BUT NEEDED BY CHOCOFZN
@@ -100,7 +96,6 @@ public class Flatzinc implements IParser {
     protected long tl_ = -1;
     // A unique solver
     protected Solver mSolver;
-    protected Portfolio prtfl;
     // Datas
     public Datas datas;
     public ASolutionPrinter sprinter;
@@ -157,32 +152,11 @@ public class Flatzinc implements IParser {
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        if (free && ft > 0) {
-//            System.out.printf("%% sequential portfolio (%s, %d)\n", Arrays.toString(fs), ft);
-            prtfl = SF.makeSequentialPortfolio(instance, fs.length, ft);
-            mSolver = prtfl.workers[0];
-            for (int i = 0; i < prtfl.getNbWorkers(); i++) {
-                prtfl.workers[i].set(defaultSettings);
-//                Chatterbox.showSolutions(prtfl.workers[i]);
-            }
-            prtfl.skipConformity(true);
-            prtfl.skipStrategyConfiguration(true);
-            sprinter = new SharedSolutionPrinter(prtfl, all, stat);
-        } else if (nb_cores > 1) {
-            nb_cores = Math.min(nb_cores, ps.length);
-//            System.out.printf("%% parallel portfolio (%d, %s)\n", nb_cores, Arrays.toString(ps));
-            prtfl = SF.makeParallelPortfolio(instance, nb_cores);
-            mSolver = prtfl.workers[0];
-            for (int i = 0; i < prtfl.getNbWorkers(); i++) {
-                prtfl.workers[i].set(defaultSettings);
-//                Chatterbox.showSolutions(prtfl.workers[i]);
-            }
-            prtfl.skipConformity(true);
-            prtfl.skipStrategyConfiguration(true);
-            sprinter = new SharedSolutionPrinter(prtfl, all, stat);
+        if (nb_cores > 1) {
+            throw new UnsupportedOperationException();
         } else {
             System.out.printf("%% simple solver\n");
-            mSolver = SF.makeSolver(instance);
+            mSolver = new Solver(instance);
             mSolver.set(defaultSettings);
             sprinter = new SolutionPrinter(mSolver, all, stat);
 //            Chatterbox.showSolutions(mSolver);
@@ -198,11 +172,6 @@ public class Flatzinc implements IParser {
         listeners.forEach(ParserListener::beforeParsingFile);
         parse(mSolver, new FileInputStream(new File(instance)));
         sprinter.immutable();
-        if (prtfl != null) {
-            for (int i = 1; i < prtfl.getNbWorkers(); i++) {
-                parse(prtfl.workers[i], new FileInputStream(new File(instance)));
-            }
-        }
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
@@ -222,6 +191,7 @@ public class Flatzinc implements IParser {
 
     /**
      * Create a complementary search on non-decision variables
+     *
      * @param solver a solver
      */
     private void makeComplementarySearch(Solver solver) {
@@ -243,147 +213,31 @@ public class Flatzinc implements IParser {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
 
         if (tl_ > -1) {
-            if (prtfl != null) {
-                long _tl = SMF.convertInMilliseconds(tl);
-                // The time is now initialized for all workers at the same point
-                for (int i = 0; i < prtfl.getNbWorkers(); i++) {
-                    SMF.limitTime(prtfl.workers[i], _tl);
-                }
-            } else {
-                SearchMonitorFactory.limitTime(mSolver._fes_(), tl);
-            }
+            SearchMonitorFactory.limitTime(mSolver, tl);
         }
-
-        if (prtfl != null) {
-            ResolutionPolicy policy = mSolver.getObjectiveManager().getPolicy();
-            for (int i = 0; i < prtfl.getNbWorkers(); i++) {
-                Solver worker = prtfl.workers[i];
-                Variable[] vars = worker.getVars();
-                if (worker.getStrategy() != null
-                        && worker.getStrategy().getVariables().length > 0) {
-                    vars = worker.getStrategy().getVariables();
-                }
-                IntVar[] dvars = new IntVar[vars.length];
-                int k = 0;
-                for (int j = 0; j < vars.length; j++) {
-                    if ((vars[j].getTypeAndKind() & Variable.INT) > 0) {
-                        dvars[k++] = (IntVar) vars[j];
-                    }
-                }
-                dvars = Arrays.copyOf(dvars, k);
-                if (free) {
-                    pickStrategy(i, Integer.parseInt(fs[i]), dvars, policy);
-                } else {
-                    pickStrategy(i, Integer.parseInt(ps[i]), dvars, policy);
-                }
-            }
-        }
-        if (free && ft == 0) {
+        if (free) {
             mSolver.set(ISF.lastConflict(mSolver));
         }
-        listeners.forEach(ParserListener::afterConfiguringSearch);
-    }
-
-    /**
-     * @param w      worker id
-     * @param s      strategy id
-     * @param vars   decision vars
-     * @param policy resolution policy
-     */
-    void pickStrategy(int w, int s, IntVar[] vars, ResolutionPolicy policy) {
-        switch (s) {
-            case 0:
-//                System.out.printf("%% worker %d: fixed + LC\n", w);
-                prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w]));
-                break;
-            case 1: {
-//                System.out.printf("%% worker %d: wdeg + LC\n", w);
-                prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.domOverWDeg(vars, w)));
-                SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                SMF.nogoodRecordingFromRestarts(prtfl.workers[w]);
-            }
-            break;
-            case 2: {
-//                System.out.printf("%% worker %d: wdeg + LNS + LC\n", w);
-                prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.domOverWDeg(vars, w)));
-                SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
-            }
-            break;
-            case 3:
-//                System.out.printf("%% worker %d: abs + LC\n", w);
-                prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.activity(vars, w)));
-                SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                SMF.nogoodRecordingFromRestarts(prtfl.workers[w]);
-                break;
-            case 4: {
-//                System.out.printf("%% worker %d: fixed + cbj + lc\n", w);
-                prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w]));
-                ExplanationFactory.CBJ.plugin(prtfl.workers[w], false, false);
-            }
-            break;
-            case 5:
-//                System.out.printf("%% worker %d: abs / LNS\n", w);
-                switch (policy) {
-                    case SATISFACTION: {
-                        prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.activity(vars, w)));
-                        SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                        SMF.nogoodRecordingFromRestarts(prtfl.workers[w]);
-                    }
-                    break;
-                    default: {
-                        prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w]));
-                        LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
-                    }
-                    break;
-                }
-                break;
-            case 6:
-//                System.out.printf("%% worker %d: abs + LC / LNS\n", w);
-                switch (policy) {
-                    case SATISFACTION: {
-                        prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w], ISF.activity(vars, w)));
-                        SearchMonitorFactory.geometrical(prtfl.workers[w], vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                        SMF.nogoodRecordingFromRestarts(prtfl.workers[w]);
-                    }
-                    break;
-                    default: {
-                        prtfl.workers[w].set(ISF.lastConflict(prtfl.workers[w]));
-                        LNSFactory.pglns(prtfl.workers[w], vars, 30, 10, 200, w, new FailCounter(100));
-                    }
-                    break;
-                }
-                break;
+        if (expl) {
+            ExplanationFactory.CBJ.plugin(mSolver, false, false);
         }
+        listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
         if (mSolver.getObjectiveManager().isOptimization()) { // optimization problem
-            assert !all;
             // To deal with Portfolios, we need to get policy and objective
             ResolutionPolicy policy = mSolver.getObjectiveManager().getPolicy();
             IntVar objective = (IntVar) mSolver.getObjectiveManager().getObjective();
-            if (prtfl != null) {
-                for (int i = 1; i < prtfl.getNbWorkers(); i++) {
-                    prtfl.imaps[i].put(objective, prtfl.workers[i].getObjectiveManager().getObjective());
-                }
-                prtfl.findOptimalSolution(policy, objective);
-            } else {
-                mSolver.findOptimalSolution(policy, objective);
+            mSolver.findOptimalSolution(policy, objective);
 //                mSolver.findSolution();
-            }
         } else {
             if (all) {
                 mSolver.findAllSolutions();
             } else {
-                if (prtfl != null) {
-                    prtfl.findSolution();
-                } else {
-
-                    mSolver.findSolution();
-                }
+                mSolver.findSolution();
             }
         }
         sprinter.finalOutPut();

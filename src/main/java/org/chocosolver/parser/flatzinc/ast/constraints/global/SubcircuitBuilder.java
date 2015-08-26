@@ -32,7 +32,7 @@ import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 
@@ -49,6 +49,12 @@ public class SubcircuitBuilder implements IBuilder {
     @Override
     public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
-        solver.post(IntConstraintFactory.subcircuit(vars, 1, VariableFactory.bounded("length", 0, vars.length, solver)));
+        if(vars.length>0) {
+            int min = vars[0].getLB();
+            for (IntVar v : vars) {
+                min = Math.min(min, v.getLB());
+            }
+            solver.post(ICF.subcircuit(vars, min, VariableFactory.bounded("length", 0, vars.length, solver)));
+        }
     }
 }

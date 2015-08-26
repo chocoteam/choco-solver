@@ -27,8 +27,6 @@
 package org.chocosolver.database;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +42,6 @@ import java.util.Properties;
  */
 public class MySQLAccess {
 
-    private static final Logger logger = LoggerFactory.getLogger(MySQLAccess.class);
 
     private static final String SAT = "SAT", MIN = "MIN", MAX = "MAX";
 
@@ -62,7 +59,7 @@ public class MySQLAccess {
         try {
             properties.load(new FileInputStream(mysqlProperties));
         } catch (Exception e) {
-            logger.error("Unable to load " + mysqlProperties + " file from classpath.", e);
+            System.err.println("Unable to load " + mysqlProperties + " file from classpath.\n" + e);
             System.exit(1);
         }
 

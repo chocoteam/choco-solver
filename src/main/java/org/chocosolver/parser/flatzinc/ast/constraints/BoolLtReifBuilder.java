@@ -61,11 +61,11 @@ public class BoolLtReifBuilder implements IBuilder {
                     @Override
                     public void propagate(int evtmask) throws ContradictionException {
                         if (!(vars[0].contains(0)) && (vars[1].contains(1))) {
-                            vars[2].setToFalse(aCause);
+                            vars[2].setToFalse(this);
                         }
                         if (vars[2].getLB() == 1) {
-                            vars[0].setToFalse(aCause);
-                            vars[1].setToTrue(aCause);
+                            vars[0].setToFalse(this);
+                            vars[1].setToTrue(this);
                         }
                     }
 

@@ -32,9 +32,15 @@ import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -52,6 +58,79 @@ public class KnapsackBuilder implements IBuilder {
         IntVar[] x = exps.get(2).toIntVarArray(solver);
         IntVar W = exps.get(3).intVarValue(solver);
         IntVar P = exps.get(4).intVarValue(solver);
-        solver.post(IntConstraintFactory.knapsack(x, W, P, w, p));
+
+        solver.post(ICF.scalar(x, w, W),ICF.scalar(x, p, P));
+        solver.post(new Constraint("knapsack", new Propagator<IntVar>(ArrayUtils.append(x,new IntVar[]{W,P})) {
+
+            private int[] order;
+            private double[] ratio;
+
+            @Override
+            public void propagate(int evtmask) throws ContradictionException {
+                // initial sort
+                if(order == null){
+                    order = new int[w.length];
+                    ratio = new double[w.length];
+                    for (int i = 0; i < w.length; i++) {
+                        ratio[i] = (double) (p[i]) / (double) (w[i]);
+                    }
+                    BitSet in = new BitSet(w.length);
+                    double best = -1;
+                    int index = 0;
+                    for (int i = 0; i < w.length; i++) {
+                        int item = -1;
+                        for (int o = in.nextClearBit(0); o < w.length; o = in.nextClearBit(o + 1)) {
+                            if (item == -1 || w[i] == 0 || ratio[o] > best) {
+                                best = ratio[o];
+                                item = o;
+                            }
+                        }
+                        in.set(item);
+                        if (item == -1) {
+                            throw new UnsupportedOperationException();
+                        } else {
+                            order[index++] = item;
+                        }
+                    }
+                }
+                // filtering algorithm
+                int pomin = 0;
+                int pomax = 0;
+                int cmin = 0;
+                int cmax = 0;
+                for (int i = 0; i < w.length; i++) {
+                    pomin += p[i] * vars[i].getLB();
+                    pomax += p[i] * vars[i].getUB();
+                    cmin += w[i] * vars[i].getLB();
+                    cmax += w[i] * vars[i].getUB();
+                }
+                P.updateLowerBound(pomin, this);
+                P.updateUpperBound(pomax, this);
+                W.updateLowerBound(cmin, this);
+                W.updateUpperBound(cmax, this);
+
+                {
+                    cmax = Math.min(cmax, W.getUB());
+                    for(int idx:order) {
+                        if (vars[idx].getUB() > vars[idx].getLB()) {
+                            int deltaW = w[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                            if (cmin + deltaW <= cmax) {
+                                pomin += p[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                                cmin += deltaW;
+                            } else {
+                                pomin += Math.ceil((cmax-cmin) * ratio[idx]);
+                                break;
+                            }
+                        }
+                    }
+                    P.updateUpperBound(pomin, this);
+                }
+            }
+
+            @Override
+            public ESat isEntailed() {
+                return ESat.TRUE;
+            }
+        }));
     }
 }

@@ -120,7 +120,7 @@ public class IntLinLeReifBuilder implements IBuilder {
             int n = vars.length - 1;
             if (vars[n].getLB() == 1) {
                 for (int i = 0; i < n; i++) {
-                    vars[i].setToFalse(aCause);
+                    vars[i].setToFalse(this);
                 }
                 setPassive();
                 return;
@@ -129,7 +129,7 @@ public class IntLinLeReifBuilder implements IBuilder {
             int secondOne = -1;
             for (int i = 0; i < n; i++) {
                 if (vars[i].getLB() == 1) {
-                    vars[n].setToFalse(aCause);
+                    vars[n].setToFalse(this);
                     setPassive();
                     return;
                 }
@@ -142,10 +142,10 @@ public class IntLinLeReifBuilder implements IBuilder {
                 }
             }
             if (firstOne == -1) {
-                vars[n].setToTrue(aCause);
+                vars[n].setToTrue(this);
                 setPassive();
             } else if (secondOne == -1 && vars[n].getUB() == 0) {
-                vars[firstOne].setToTrue(aCause);
+                vars[firstOne].setToTrue(this);
             }
         }
 

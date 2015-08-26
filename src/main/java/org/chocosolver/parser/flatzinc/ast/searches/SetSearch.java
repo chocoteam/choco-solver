@@ -35,7 +35,6 @@ import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.SetVar;
-import org.slf4j.LoggerFactory;
 
 /**
  * <br/>
@@ -51,7 +50,7 @@ public class SetSearch {
     public static AbstractStrategy build(SetVar[] variables, VarChoice varChoice, Assignment assignment) {
         VariableSelector<SetVar> varsel = variableSelector(varChoice);
         if (varsel == null) { // free search
-            LoggerFactory.getLogger("solver").error("% No free search defined for SetVar");
+            System.err.println("% No free search defined for SetVar");
             return null;
         }
         return valueSelector(variables, varsel, assignment);
@@ -70,7 +69,7 @@ public class SetSearch {
             case most_constrained:
             case max_regret:
             default:
-                LoggerFactory.getLogger(SetSearch.class).warn("% No implementation for " + varChoice.name() + ". Set default.");
+                System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
                 return new InputOrder<>();
         }
     }
@@ -91,7 +90,7 @@ public class SetSearch {
             case indomain_interval:
             case indomain_reverse_split:
             default:
-                LoggerFactory.getLogger(SetSearch.class).warn("% No implementation for " + assignment.name() + ". Set default.");
+                System.err.println("% No implementation for " + assignment.name() + ". Set default.");
                 valSelector = new SetDomainMin();
         }
         return new SetStrategy(scope, variableSelector, valSelector, true);

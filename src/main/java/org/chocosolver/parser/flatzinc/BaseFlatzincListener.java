@@ -77,10 +77,10 @@ public class BaseFlatzincListener implements ParserListener {
     @Override
     public void afterParsingFile() {
 
-        if (((FznSettings) fznparser.getSolver()._fes_().getSettings()).printConstraint()) {
+        if (((FznSettings) fznparser.getSolver().getSettings()).printConstraint()) {
             ArrayList<String> l = new ArrayList<>();
             System.out.println("% INVOLVED CONSTRAINTS (CHOCO) ");
-            for (Constraint c : fznparser.getSolver()._fes_().getCstrs()) {
+            for (Constraint c : fznparser.getSolver().getCstrs()) {
                 if (!l.contains(c.getName())) {
                     l.add(c.getName());
                     System.out.printf("%% %s\n", c.getName());
@@ -107,7 +107,7 @@ public class BaseFlatzincListener implements ParserListener {
     public void beforeSolving() {
         System.out.println("% solve instance...");
 
-        fznparser.getSolver()._fes_().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        fznparser.getSolver().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
     }
 
     @Override
