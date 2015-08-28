@@ -33,6 +33,7 @@ import org.chocosolver.parser.flatzinc.ast.expression.EArray;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetList;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
@@ -211,5 +212,9 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
 
     public void immutable() {
         this.immutable = true;
+    }
+
+    public void imdone(Solver solver){
+        // nothing to be done
     }
 }
