@@ -123,6 +123,7 @@ public abstract class RegParser implements IParser {
      * @param solver a solver
      */
     protected static void makeComplementarySearch(Solver solver) {
+        //TODO deal with no strategy
         IntVar[] ovars = new IntVar[solver.getNbVars()];
         THashSet<Variable> dvars = new THashSet<>(Arrays.asList(solver.getStrategy().getVariables()));
         int k = 0;
