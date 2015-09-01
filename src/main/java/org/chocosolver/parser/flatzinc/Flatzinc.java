@@ -27,17 +27,15 @@
 package org.chocosolver.parser.flatzinc;
 
 import gnu.trove.map.hash.THashMap;
-import gnu.trove.set.hash.THashSet;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
-import org.chocosolver.parser.IParser;
 import org.chocosolver.parser.ParserListener;
+import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.layout.ASolutionPrinter;
 import org.chocosolver.parser.flatzinc.layout.SharedSolutionPrinter;
 import org.chocosolver.parser.flatzinc.layout.SolutionPrinter;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.limits.FailCounter;
@@ -45,12 +43,9 @@ import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
@@ -60,7 +55,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * A Flatzinc to Choco parser.
@@ -71,9 +65,9 @@ import java.util.List;
  * @version choco-parsers
  * @since 21/10/2014
  */
-public class Flatzinc implements IParser {
+public class Flatzinc extends RegParser {
 
-    @Argument(required = true, metaVar = "FZN", usage = "Flatzinc file path.")
+    @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
     public String instance;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).", required = false)
@@ -82,76 +76,28 @@ public class Flatzinc implements IParser {
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
     protected boolean free = false;
 
-    @Option(name = "-e", aliases = {"--explanations"}, usage = "Plug explanations in : CBJ, DBT or NONE (default: NONE).", required = false)
-    protected ExplanationFactory expl = ExplanationFactory.NONE;
-
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
     protected int nb_cores = 1; // SEEMS USELESS, BUT NEEDED BY CHOCOFZN
 
     @Option(name = "-ps", required = false, handler = StringArrayOptionHandler.class)
     protected String[] ps = new String[]{"0", "1", "3", "5"};
 
-    @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
-    protected String tl = "-1";
-
-    @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution (default: false).", required = false)
-    protected boolean stat = false;
-
-    protected long tl_ = -1;
-    // A unique solver
-    protected Solver mSolver;
-    protected List<Solver> solvers;
     // Datas
     public Datas datas;
     public ASolutionPrinter sprinter;
-    // List of listeners plugged, ease user interactions.
-    List<ParserListener> listeners = new LinkedList<>();
-    protected Settings defaultSettings = new FznSettings();
 
 
     public Flatzinc() {
+        this(false, false, 1, -1);
     }
 
     public Flatzinc(boolean all, boolean free, int nb_cores, long tl) {
+        super("ChocoFZN");
         this.all = all;
         this.free = free;
         this.nb_cores = nb_cores;
         this.tl_ = tl;
-    }
-
-    @Override
-    public void addListener(ParserListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(ParserListener listener) {
-        listeners.remove(listener);
-    }
-
-    @Override
-    public void parseParameters(String[] args) {
-        listeners.forEach(ParserListener::beforeParsingParameters);
-        System.out.printf("%% %s\n", Arrays.toString(args));
-        CmdLineParser cmdparser = new CmdLineParser(this);
-        cmdparser.setUsageWidth(160);
-        try {
-            cmdparser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("ParseAndSolve [options...] VAL");
-            cmdparser.printUsage(System.err);
-            System.err.println();
-            return;
-        }
-        cmdparser.getArguments();
-        tl_ = SMF.convertInMilliseconds(tl);
-        listeners.forEach(ParserListener::afterParsingParameters);
-    }
-
-    @Override
-    public void defineSettings(Settings defaultSettings) {
-        this.defaultSettings = defaultSettings;
+        this.defaultSettings = new FznSettings();
     }
 
     @Override
@@ -206,24 +152,6 @@ public class Flatzinc implements IParser {
         parser.flatzinc_model(target, datas, all, free);
         // make complementary search
         makeComplementarySearch(target);
-    }
-
-    /**
-     * Create a complementary search on non-decision variables
-     *
-     * @param solver a solver
-     */
-    private void makeComplementarySearch(Solver solver) {
-        IntVar[] ovars = new IntVar[solver.getNbVars()];
-        THashSet<Variable> dvars = new THashSet<>(Arrays.asList(solver.getStrategy().getVariables()));
-        int k = 0;
-        for (int i = 0; i < solver.getNbVars(); i++) {
-            Variable ivar = solver.getVar(i);
-            if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT) != 0) {
-                ovars[k++] = (IntVar) ivar;
-            }
-        }
-        solver.set(solver.getStrategy(), new Once(Arrays.copyOf(ovars, k), ISF.lexico_var_selector(), ISF.min_value_selector()));
     }
 
 

@@ -26,7 +26,7 @@
  */
 package org.chocosolver.parser.flatzinc.layout;
 
-import org.chocosolver.parser.flatzinc.ast.Exit;
+import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.declaration.DArray;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;
 import org.chocosolver.parser.flatzinc.ast.expression.EArray;

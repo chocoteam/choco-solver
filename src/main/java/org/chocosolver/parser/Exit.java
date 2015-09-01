@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.chocosolver.parser.flatzinc.ast;
+package org.chocosolver.parser;
 
 /**
  * <br/>

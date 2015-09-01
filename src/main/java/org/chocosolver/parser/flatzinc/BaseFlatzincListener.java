@@ -90,8 +90,6 @@ public class BaseFlatzincListener implements ParserListener {
                 }
             }
         }
-
-
     }
 
     @Override

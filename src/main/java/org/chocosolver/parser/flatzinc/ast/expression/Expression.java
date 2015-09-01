@@ -28,7 +28,7 @@
 package org.chocosolver.parser.flatzinc.ast.expression;
 
 
-import org.chocosolver.parser.flatzinc.ast.Exit;
+import org.chocosolver.parser.Exit;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;

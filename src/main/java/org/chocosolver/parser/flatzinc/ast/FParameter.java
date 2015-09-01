@@ -27,6 +27,7 @@
 
 package org.chocosolver.parser.flatzinc.ast;
 
+import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.declaration.DArray;
 import org.chocosolver.parser.flatzinc.ast.declaration.DInt2;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;
