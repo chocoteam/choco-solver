@@ -30,6 +30,7 @@ package org.chocosolver.solver.variables.delta.monitor;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.TimeStampedObject;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.util.procedure.IntProcedure;
@@ -42,20 +43,26 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class OneValueDeltaMonitor implements IIntDeltaMonitor {
+public class OneValueDeltaMonitor extends TimeStampedObject implements IIntDeltaMonitor {
 
     protected final IEnumDelta delta;
     protected boolean used;
     protected ICause propagator;
 
     public OneValueDeltaMonitor(IEnumDelta delta, ICause propagator) {
+        super(delta.getEnvironment());
         this.delta = delta;
-        used = false;
+        this.used = false;
         this.propagator = propagator;
     }
 
     @Override
     public void freeze() {
+        if (needReset()) {
+            delta.lazyClear();
+            used = false;
+            resetStamp();
+        }
         used = delta.size() == 1;
     }
 
