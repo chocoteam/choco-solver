@@ -31,11 +31,12 @@ package org.chocosolver.choco;
 import org.chocosolver.choco.checker.DomainBuilder;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.*;
+import org.chocosolver.solver.constraints.nary.sum.PropBoolSumCoarse;
+import org.chocosolver.solver.constraints.nary.sum.PropScalar;
+import org.chocosolver.solver.constraints.nary.sum.PropSum;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -231,6 +232,235 @@ public class IntLinCombTest {
         solver.post(ICF.scalar(bs, new int[]{1, 2, 3}, "=", VF.fixed(2, solver)));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testS1_coeff_null() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        int[] coeffs = new int[]{1, 0, 0, 2};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropScalar);
+        Assert.assertEquals(3, p.getNbVars());
+    }
+
+    @Test(groups = "1s")
+    public void testS2_coeff_null() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        ivars[2] = ivars[1];
+        int[] coeffs = new int[]{1, 1, -1, 2};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropScalar);
+        Assert.assertEquals(3, p.getNbVars());
+    }
+
+    @Test(groups = "1s")
+    public void testD1() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        int[] coeffs = new int[]{1, 1, 1, 1};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSum);
+    }
+
+    @Test(groups = "1s")
+    public void testD2() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{1, 1, 1, 1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+    }
+
+    @Test(groups = "1s")
+    public void testD3() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{-1, -1, -1, -1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+    }
+
+    @Test(groups = "1s")
+    public void testD4() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{1, -1, 1, 1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+    }
+
+    @Test(groups = "1s")
+    public void testD5() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{-1, 1, -1, -1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+    }
+
+    @Test(groups = "1s")
+    public void testD6() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[1] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{1, -1, 1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+    }
+
+    @Test(groups = "1s")
+    public void testD7() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[1] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{-1, 1, -1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+    }
+
+    @Test(groups = "1s")
+    public void testD8() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[2] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{1, -1, 1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSum);
+    }
+
+    @Test(groups = "1s")
+    public void testD9() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[2] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{-1, 1, -1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSum);
+    }
+
+    @Test(groups = "1s")
+    public void testD10() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD11() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD12() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{-1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD13() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{-1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD14() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD15() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{-1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    public void testD16() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{1};
+        Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD20() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        int[] coeffs = new int[]{1, 2, 2, 1};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropScalar);
+    }
+
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    public void testD21() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{-1};
+        Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
+        Assert.assertTrue(c instanceof Arithmetic);
     }
 
 }

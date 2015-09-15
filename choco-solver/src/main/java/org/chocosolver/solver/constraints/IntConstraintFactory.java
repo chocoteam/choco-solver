@@ -76,9 +76,7 @@ import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R1;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
-import org.chocosolver.solver.constraints.nary.sum.PropBoolSumCoarse;
-import org.chocosolver.solver.constraints.nary.sum.PropBoolSumIncremental;
-import org.chocosolver.solver.constraints.nary.sum.ScalarFactory;
+import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.Member;
@@ -414,8 +412,8 @@ public class IntConstraintFactory {
         Solver solver = X.getSolver();
         IntVar t1 = VF.bounded(StringUtils.randomName(), -b, b, solver);
         IntVar t2 = VF.bounded(StringUtils.randomName(), -b, b, solver);
-		solver.post(eucl_div(X, Y, t1));
-		solver.post(times(t1, Y, t2));
+        solver.post(eucl_div(X, Y, t1));
+        solver.post(times(t1, Y, t2));
         return sum(new IntVar[]{Z, t2}, X);
     }
 
@@ -691,7 +689,7 @@ public class IntConstraintFactory {
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      * <p/> Strongly Connected Components based filtering (Cambazard & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
-	 * <p/> See Fages PhD Thesis (2014) for more information
+     * <p/> See Fages PhD Thesis (2014) for more information
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
@@ -998,6 +996,7 @@ public class IntConstraintFactory {
     /**
      * Ensure that if there exists <code>j</code> such that X[j] = T, then, there must exist <code>i</code> < <code>j</code> such that
      * X[i] = S.
+     *
      * @param X an array of variables
      * @param S a value
      * @param T another value
@@ -1010,6 +1009,7 @@ public class IntConstraintFactory {
      * Ensure that, for each pair of V[k] and V[l] of values in V, such that k < l,
      * if there exists <code>j</code> such that X[j] = V[l], then, there must exist <code>i</code> < <code>j</code> such that
      * X[i] = V[k].
+     *
      * @param X array of variables
      * @param V array of (distinct) values
      */
@@ -1276,7 +1276,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
-        return ScalarFactory.reduce(VARS, COEFFS, OPERATOR, SCALAR);
+        return IntLinCombFactory.reduce(VARS, COEFFS, Operator.get(OPERATOR), SCALAR, SCALAR.getSolver());
     }
 
     /**
@@ -1397,7 +1397,7 @@ public class IntConstraintFactory {
      * @return a sum constraint
      */
     public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
-        return ScalarFactory.reduce(VARS, OPERATOR, SUM);
+        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), SUM, SUM.getSolver());
     }
 
     /**
@@ -1408,17 +1408,7 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-        if (VARS.length == 0) {
-            return arithm(SUM, "=", 0);
-        }
-        if (VARS.length == 1) {
-            return arithm(VARS[0], "=", SUM);
-        }
-        if (VARS.length > 10) {
-            return new Constraint("SumOfBool", new PropBoolSumIncremental(VARS, SUM));
-        } else {
-            return new Constraint("SumOfBool", new PropBoolSumCoarse(VARS, SUM));
-        }
+        return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM, SUM.getSolver());
     }
 
     /**

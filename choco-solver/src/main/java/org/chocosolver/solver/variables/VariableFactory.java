@@ -985,4 +985,20 @@ public class VariableFactory {
         }
         return reals;
     }
+
+    /**
+     * Convert ivars into an array of boolean variables
+     *
+     * @param ivars an array of IntVar
+     * @return an array of BoolVar
+     * @throws java.lang.ClassCastException if one variable is not a BoolVar
+     */
+    public static BoolVar[] toBoolVar(IntVar[] ivars) {
+        BoolVar[] bvars = new BoolVar[ivars.length];
+        for (int i = ivars.length-1; i >= 0; i--) {
+            bvars[i] = (BoolVar) ivars[i];
+        }
+        return bvars;
+    }
+
 }

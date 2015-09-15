@@ -28,6 +28,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -47,14 +48,14 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class PropScalarEq extends Propagator<IntVar> {
+public class PropSum extends Propagator<IntVar> {
 
-    final int[] c; // list of coefficients
     final int pos; // index of the last positive coefficient
     final int l; // number of variables
     final int b; // bound to respect
     final int[] I; // variability of each variable -- domain amplitude
     int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
+    final Operator o;
 
 
     protected static PropagatorPriority computePriority(int nbvars) {
@@ -69,28 +70,49 @@ public class PropScalarEq extends Propagator<IntVar> {
         }
     }
 
-    public PropScalarEq(IntVar[] variables, int[] coeffs, int pos, int b) {
+    public PropSum(IntVar[] variables, int pos, Operator o, int b) {
         super(variables, computePriority(variables.length), false);
-        this.c = coeffs;
         this.pos = pos;
-        l = variables.length;
+        this.o = o;
         this.b = b;
+        l = variables.length;
         I = new int[l];
+        super.linkVariables();
     }
+
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        switch (o) {
+            case NQ:
+                return IntEventType.INSTANTIATE.getMask();
+            case LE:
+                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.DECUPP.getMask() : IntEventType.INCLOW.getMask());
+            case GE:
+                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.INCLOW.getMask() : IntEventType.DECUPP.getMask());
+            default:
+                return IntEventType.boundAndInst();
+        }
+    }
+
 
     protected void prepare() {
         int f = 0, e = 0, i = 0;
         int lb, ub;
         for (; i < pos; i++) { // first the positive coefficients
-            lb = vars[i].getLB() * c[i];
-            ub = vars[i].getUB() * c[i];
+            lb = vars[i].getLB();
+            ub = vars[i].getUB();
             f += lb;
             e += ub;
             I[i] = (ub - lb);
         }
         for (; i < l; i++) { // then the negative ones
-            lb = vars[i].getUB() * c[i];
-            ub = vars[i].getLB() * c[i];
+            lb = vars[i].getUB();
+            ub = vars[i].getLB();
             f += lb;
             e += ub;
             I[i] = (ub - lb);
@@ -102,28 +124,49 @@ public class PropScalarEq extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        filter(true, 2);
+        filter();
     }
 
-    protected void filter(boolean startWithLeq, int nbRules) throws ContradictionException {
-        prepare();
-        boolean run;
-        int nbR = 0;
-        do {
-            if (startWithLeq) {
-                run = filterOnLeq();
-            } else {
-                run = filterOnGeq();
-            }
-            startWithLeq ^= true;
-            nbR++;
-        } while (run || nbR < nbRules);
-        checkEntailment();
+    protected void filter() throws ContradictionException {
+        if (o == Operator.NQ) {
+            filterOnNeq();
+        } else {
+            prepare();
+            boolean changed;
+            do {
+                switch (o) {
+                    case LE:
+                        changed = filterOnLeq();
+                        break;
+                    case GE:
+                        changed = filterOnGeq();
+                        break;
+                    default:
+                        changed = filterOnLeq() | filterOnGeq();
+                        break;
+                }
+            } while (changed);
+            checkEntailment();
+        }
     }
 
     protected void checkEntailment() {
-        if (sumUB - b <= 0 && sumLB - b >= 0) {
-            this.setPassive();
+        switch (o) {
+            case LE:
+                if (sumUB - b <= 0) {
+                    this.setPassive();
+                }
+                break;
+            case GE:
+                if (sumLB - b >= 0) {
+                    this.setPassive();
+                }
+                break;
+            default:
+                if (sumUB - b <= 0 && sumLB - b >= 0) {
+                    this.setPassive();
+                }
+                break;
         }
     }
 
@@ -132,17 +175,16 @@ public class PropScalarEq extends Propagator<IntVar> {
     boolean filterOnLeq() throws ContradictionException {
         boolean anychange = false;
         if (b - sumLB < 0) {
-//            thisb - sumLB < 0
             fails();
         }
         int lb, ub, i = 0;
         // positive coefficients first
         for (; i < pos; i++) {
             if (I[i] - (b - sumLB) > 0) {
-                lb = vars[i].getLB() * c[i];
+                lb = vars[i].getLB();
                 ub = lb + I[i];
-                if (vars[i].updateUpperBound(divFloor(b - sumLB + lb, c[i]), this)) {
-                    int nub = vars[i].getUB() * c[i];
+                if (vars[i].updateUpperBound(b - sumLB + lb, this)) {
+                    int nub = vars[i].getUB();
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
                     anychange = true;
@@ -152,10 +194,10 @@ public class PropScalarEq extends Propagator<IntVar> {
         // then negative ones
         for (; i < l; i++) {
             if (I[i] - (b - sumLB) > 0) {
-                lb = vars[i].getUB() * c[i];
+                lb = vars[i].getUB();
                 ub = lb + I[i];
-                if (vars[i].updateLowerBound(divCeil(-(b - sumLB + lb), -c[i]), this)) {
-                    int nub = vars[i].getLB() * c[i];
+                if (vars[i].updateLowerBound(-(b - sumLB + lb), this)) {
+                    int nub = vars[i].getLB();
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
                     anychange = true;
@@ -176,10 +218,10 @@ public class PropScalarEq extends Propagator<IntVar> {
         // positive coefficients first
         for (; i < pos; i++) {
             if (I[i] > -(b - sumUB)) {
-                ub = vars[i].getUB() * c[i];
+                ub = vars[i].getUB();
                 lb = ub - I[i];
-                if (vars[i].updateLowerBound(divCeil(b - sumUB + ub, c[i]), this)) {
-                    int nlb = vars[i].getLB() * c[i];
+                if (vars[i].updateLowerBound(b - sumUB + ub, this)) {
+                    int nlb = vars[i].getLB();
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;
                     anychange = true;
@@ -189,10 +231,10 @@ public class PropScalarEq extends Propagator<IntVar> {
         // then negative ones
         for (; i < l; i++) {
             if (I[i] > -(b - sumUB)) {
-                ub = vars[i].getLB() * c[i];
+                ub = vars[i].getLB();
                 lb = ub - I[i];
-                if (vars[i].updateUpperBound(divFloor(-(b - sumUB + ub), -c[i]), this)) {
-                    int nlb = vars[i].getUB() * c[i];
+                if (vars[i].updateUpperBound(-(b - sumUB + ub), this)) {
+                    int nlb = vars[i].getUB();
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;
                     anychange = true;
@@ -202,21 +244,35 @@ public class PropScalarEq extends Propagator<IntVar> {
         return anychange;
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return IntEventType.boundAndInst();
+    void filterOnNeq() throws ContradictionException {
+        int w = -1;
+        int sum = 0;
+        for (int i = 0; i < l; i++) {
+            if (vars[i].isInstantiated()) {
+                sum += vars[i].getLB();
+            } else if (w == -1) {
+                w = i;
+            } else return;
+        }
+        if (w == -1) {
+            if (sum == b) {
+                this.fails();
+            }
+        } else {
+            vars[w].removeValue(w < pos ? b - sum : b + sum, this);
+        }
     }
 
     @Override
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
         for (; i < pos; i++) { // first the positive coefficients
-            sumLB += vars[i].getLB() * c[i];
-            sumUB += vars[i].getUB() * c[i];
+            sumLB += vars[i].getLB();
+            sumUB += vars[i].getUB();
         }
         for (; i < l; i++) { // then the negative ones
-            sumLB += vars[i].getUB() * c[i];
-            sumUB += vars[i].getLB() * c[i];
+            sumLB += vars[i].getUB();
+            sumUB += vars[i].getLB();
         }
         return compare(sumLB, sumUB);
     }
@@ -233,10 +289,13 @@ public class PropScalarEq extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(vars[0].getName()).append('.').append(c[0]);
+        linComb.append(vars[0].getName());
         int i = 1;
+        for (; i < pos; i++) {
+            linComb.append(" + ").append(vars[i].getName());
+        }
         for (; i < l; i++) {
-            linComb.append(" + ").append(vars[i].getName()).append('.').append(c[i]);
+            linComb.append(" - ").append(vars[i].getName());
         }
         linComb.append(" = ");
         linComb.append(b);
