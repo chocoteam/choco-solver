@@ -377,4 +377,15 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(),0);
     }
 
+    @Test(groups="1s")
+    public void testSte() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar v = VF.enumerated("V", new int[]{1,2,4,5}, solver);
+        v.removeValue(1, Cause.Null);
+        IntVar w = v.duplicate();
+        Assert.assertEquals(w.getLB(), v.getLB());
+        Assert.assertEquals(w.getUB(), v.getUB());
+        Assert.assertEquals(w.getDomainSize(), v.getDomainSize());
+    }
+
 }

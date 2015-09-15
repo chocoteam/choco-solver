@@ -98,13 +98,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         super(name, solver);
         IEnvironment env = this.solver.getEnvironment();
         OFFSET = offset;
-        int cardinality = values.size();
+        int cardinality = values.previousSetBit(values.size());
         this.VALUES = env.makeBitSet(cardinality);
-        for (int i = 0; i > -1; i = values.nextSetBit(i + 1)) {
+        for (int i = values.nextSetBit(0); i > -1; i = values.nextSetBit(i + 1)) {
             this.VALUES.set(i);
         }
-        assert VALUES.nextSetBit(0)== 0;
-        this.LB = env.makeInt(0);
+        this.LB = env.makeInt(VALUES.nextSetBit(0));
         this.UB = env.makeInt(VALUES.prevSetBit(VALUES.size()));
         this.SIZE = env.makeInt(values.cardinality());
         LENGTH = this.UB.get();
