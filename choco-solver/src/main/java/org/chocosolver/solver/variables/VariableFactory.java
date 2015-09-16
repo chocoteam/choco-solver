@@ -322,6 +322,8 @@ public class VariableFactory {
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
+        } else if (VALUES.length == 2 && VALUES[0] == 0 && VALUES[1] == 1) {
+            return bool(NAME, SOLVER);
         } else {
             int gap = VALUES[VALUES.length - 1] - VALUES[0];
             if (gap > 30 && gap / VALUES.length > 5) {
@@ -995,7 +997,7 @@ public class VariableFactory {
      */
     public static BoolVar[] toBoolVar(IntVar[] ivars) {
         BoolVar[] bvars = new BoolVar[ivars.length];
-        for (int i = ivars.length-1; i >= 0; i--) {
+        for (int i = ivars.length - 1; i >= 0; i--) {
             bvars[i] = (BoolVar) ivars[i];
         }
         return bvars;

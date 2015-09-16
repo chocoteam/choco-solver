@@ -458,7 +458,7 @@ public class IntLinCombTest {
     public void testD21() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
-        int[] coeffs = new int[]{-1};
+        int[] coeffs = new int[]{1};
         Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
         Assert.assertTrue(c instanceof Arithmetic);
     }

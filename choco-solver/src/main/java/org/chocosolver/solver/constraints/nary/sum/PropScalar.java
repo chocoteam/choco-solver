@@ -276,7 +276,40 @@ public class PropScalar extends Propagator<IntVar> {
             sumLB += vars[i].getUB() * c[i];
             sumUB += vars[i].getLB() * c[i];
         }
-        return compare(sumLB, sumUB);
+        switch (o) {
+            case NQ:
+                if (sumUB < b || sumLB > b) {
+                    return ESat.TRUE;
+                }
+                if (sumUB == b && sumLB == b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+            case LE:
+                if (sumUB <= b) {
+                    return ESat.TRUE;
+                }
+                if (b < sumLB) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+            case GE:
+                if (sumLB <= b) {
+                    return ESat.TRUE;
+                }
+                if (b < sumUB) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+            default:
+                if (sumLB == b && sumUB == b) {
+                    return ESat.TRUE;
+                }
+                if (sumUB < b || sumLB > b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+        }
     }
 
     protected ESat compare(int sumLB, int sumUB) {
@@ -291,12 +324,15 @@ public class PropScalar extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(vars[0].getName()).append('.').append(c[0]);
+        linComb.append(c[0]).append('.').append(vars[0].getName());
         int i = 1;
-        for (; i < l; i++) {
-            linComb.append(" + ").append(vars[i].getName()).append('.').append(c[i]);
+        for (; i < pos; i++) {
+            linComb.append(" + ").append(c[i]).append('.').append(vars[i].getName());
         }
-        linComb.append(" = ");
+        for (; i < l; i++) {
+            linComb.append(" - ").append(-c[i]).append('.').append(vars[i].getName());
+        }
+        linComb.append(" ").append(o).append(" ");
         linComb.append(b);
         return linComb.toString();
     }

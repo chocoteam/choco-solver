@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary.sum;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 
@@ -93,7 +92,7 @@ public class IntLinCombFactory {
         // a. quadratic iteration in order to detect multiple occurrences of a variable
         for (int i = 0; i < NVARS.length; i++) {
             if (NVARS[i].isInstantiated()) {
-                RESULT += NVARS[i].getValue() * NCOEFFS[i];
+                RESULT -= NVARS[i].getValue() * NCOEFFS[i];
                 NCOEFFS[i] = 0;
             } else if (NCOEFFS[i] != 0) {
                 int id = NVARS[i].getId();
@@ -114,7 +113,11 @@ public class IntLinCombFactory {
             }
         }
         if(k == 0) {
-            throw new SolverException("Cannot create an integer linear combination constraint with no variable.");
+            if(RESULT == 0){
+                return SOLVER.TRUE();
+            }else{
+                return SOLVER.FALSE();
+            }
         }
         // 2. resize NVARS and NCOEFFS
         if (k < NVARS.length) {

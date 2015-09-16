@@ -111,8 +111,8 @@ public class PropSum extends Propagator<IntVar> {
             I[i] = (ub - lb);
         }
         for (; i < l; i++) { // then the negative ones
-            lb = vars[i].getUB();
-            ub = vars[i].getLB();
+            lb = -vars[i].getUB();
+            ub = -vars[i].getLB();
             f += lb;
             e += ub;
             I[i] = (ub - lb);
@@ -194,10 +194,10 @@ public class PropSum extends Propagator<IntVar> {
         // then negative ones
         for (; i < l; i++) {
             if (I[i] - (b - sumLB) > 0) {
-                lb = vars[i].getUB();
+                lb = -vars[i].getUB();
                 ub = lb + I[i];
                 if (vars[i].updateLowerBound(-(b - sumLB + lb), this)) {
-                    int nub = vars[i].getLB();
+                    int nub = -vars[i].getLB();
                     sumUB -= ub - nub;
                     I[i] = nub - lb;
                     anychange = true;
@@ -231,10 +231,10 @@ public class PropSum extends Propagator<IntVar> {
         // then negative ones
         for (; i < l; i++) {
             if (I[i] > -(b - sumUB)) {
-                ub = vars[i].getLB();
+                ub = -vars[i].getLB();
                 lb = ub - I[i];
                 if (vars[i].updateUpperBound(-(b - sumUB + ub), this)) {
-                    int nlb = vars[i].getUB();
+                    int nlb = -vars[i].getUB();
                     sumLB += nlb - lb;
                     I[i] = ub - nlb;
                     anychange = true;
@@ -271,19 +271,43 @@ public class PropSum extends Propagator<IntVar> {
             sumUB += vars[i].getUB();
         }
         for (; i < l; i++) { // then the negative ones
-            sumLB += vars[i].getUB();
-            sumUB += vars[i].getLB();
+            sumLB -= vars[i].getUB();
+            sumUB -= vars[i].getLB();
         }
-        return compare(sumLB, sumUB);
-    }
-
-    protected ESat compare(int sumLB, int sumUB) {
-        if (sumUB == b && sumLB == b) {
-            return ESat.TRUE;
-        } else if (sumLB > b || sumUB < b) {
-            return ESat.FALSE;
+        switch (o) {
+            case NQ:
+                if (sumUB < b || sumLB > b) {
+                    return ESat.TRUE;
+                }
+                if (sumUB == b && sumLB == b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+            case LE:
+                if (sumUB <= b) {
+                    return ESat.TRUE;
+                }
+                if (b < sumLB) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+            case GE:
+                if (sumLB <= b) {
+                    return ESat.TRUE;
+                }
+                if (b < sumUB) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
+            default:
+                if (sumLB == b && sumUB == b) {
+                    return ESat.TRUE;
+                }
+                if (sumUB < b || sumLB > b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
         }
-        return ESat.UNDEFINED;
     }
 
     @Override

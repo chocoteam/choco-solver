@@ -259,7 +259,7 @@ public class ViewsTest {
             int n = seed * 2;
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
-                ref.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n, solver)));
+                ref.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n, ref)));
                 ref.set(IntStrategyFactory.minDom_LB(x));
             }
             {
