@@ -30,6 +30,7 @@ package org.chocosolver.choco;
 
 import org.chocosolver.choco.checker.DomainBuilder;
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.constraints.nary.sum.PropBoolSumCoarse;
@@ -461,6 +462,100 @@ public class IntLinCombTest {
         int[] coeffs = new int[]{1};
         Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
         Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testExt1() {
+        Solver s1 = new Solver();
+        s1.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s1);
+            s1.post(ICF.sum(bs, "!=", VF.fixed(3, s1)));
+        }
+        Solver s2 = new Solver();
+        s2.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 1000;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s2);
+            s2.post(ICF.sum(bs, "!=", VF.fixed(3, s2)));
+        }
+        s1.findAllSolutions();
+        s2.findAllSolutions();
+        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "1s")
+    public void testExt2() {
+        Solver s1 = new Solver();
+        s1.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s1);
+            s1.post(ICF.sum(bs, "<=", VF.fixed(3, s1)));
+        }
+        Solver s2 = new Solver();
+        s2.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 1000;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s2);
+            s2.post(ICF.sum(bs, "<=", VF.fixed(3, s2)));
+        }
+        s1.findAllSolutions();
+        s2.findAllSolutions();
+        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "1s")
+    public void testExt3() {
+        Solver s1 = new Solver();
+        s1.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 3, s1);
+            BoolVar r = VF.bool("r", s1);
+            ICF.scalar(bs, new int[]{-1, -1, -1}, "<=", VF.fixed(-2, s1)).reifyWith(r);
+        }
+        Solver s2 = new Solver();
+        s2.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 1000;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 3, s2);
+            BoolVar r = VF.bool("r", s2);
+            ICF.scalar(bs, new int[]{-1, -1, -1}, "<=", VF.fixed(-2, s2)).reifyWith(r);
+        }
+        Chatterbox.showDecisions(s1);
+        Chatterbox.showDecisions(s2);
+        s1.findAllSolutions();
+        s2.findAllSolutions();
+        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
 }

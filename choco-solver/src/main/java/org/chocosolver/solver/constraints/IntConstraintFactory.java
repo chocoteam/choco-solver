@@ -431,7 +431,7 @@ public class IntConstraintFactory {
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
         } else if (tupleIt(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "");
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "GAC3rm");
         } else {
             return new Times(X, Y, Z);
         }

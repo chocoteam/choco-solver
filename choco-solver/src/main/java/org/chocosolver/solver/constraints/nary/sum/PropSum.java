@@ -313,7 +313,7 @@ public class PropSum extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(vars[0].getName());
+        linComb.append(pos == 0?"-":"").append(vars[0].getName());
         int i = 1;
         for (; i < pos; i++) {
             linComb.append(" + ").append(vars[i].getName());
@@ -321,7 +321,7 @@ public class PropSum extends Propagator<IntVar> {
         for (; i < l; i++) {
             linComb.append(" - ").append(vars[i].getName());
         }
-        linComb.append(" = ");
+        linComb.append(" ").append(o).append(" ");
         linComb.append(b);
         return linComb.toString();
     }

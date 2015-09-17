@@ -31,13 +31,13 @@ package org.chocosolver.solver.constraints.nary.sum;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 
 import java.util.Arrays;
 
-import static org.chocosolver.solver.constraints.ICF.arithm;
-import static org.chocosolver.solver.constraints.ICF.times;
+import static org.chocosolver.solver.constraints.ICF.*;
 
 /**
  * A factory to reduce and detect specific cases related to integer linear combinations.
@@ -48,6 +48,8 @@ import static org.chocosolver.solver.constraints.ICF.times;
  * Project: choco.
  */
 public class IntLinCombFactory {
+
+    private static final String AC = "";
 
     private IntLinCombFactory() {
     }
@@ -78,16 +80,25 @@ public class IntLinCombFactory {
      */
     public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR, Solver SOLVER) {
         // 0. normalize data
-        IntVar[] NVARS = new IntVar[VARS.length + 1];
-        System.arraycopy(VARS, 0, NVARS, 0, VARS.length);
-        NVARS[VARS.length] = SCALAR;
-        int[] NCOEFFS = new int[COEFFS.length + 1];
-        System.arraycopy(COEFFS, 0, NCOEFFS, 0, COEFFS.length);
-        NCOEFFS[COEFFS.length] = -1;
+        IntVar[] NVARS;
+        int[] NCOEFFS;
         int RESULT = 0;
+        if (SCALAR.isInstantiated()) {
+            RESULT = SCALAR.getValue();
+            NVARS = VARS.clone();
+            NCOEFFS = COEFFS.clone();
+        } else {
+            NVARS = new IntVar[VARS.length + 1];
+            System.arraycopy(VARS, 0, NVARS, 0, VARS.length);
+            NVARS[VARS.length] = SCALAR;
+            NCOEFFS = new int[COEFFS.length + 1];
+            System.arraycopy(COEFFS, 0, NCOEFFS, 0, COEFFS.length);
+            NCOEFFS[COEFFS.length] = -1;
+        }
         int k = 0;
         int nbools = 0;
         int nones = 0, nmones = 0;
+        int ldom = 0, lidx = -1;
         // 1. reduce coefficients and variables
         // a. quadratic iteration in order to detect multiple occurrences of a variable
         for (int i = 0; i < NVARS.length; i++) {
@@ -109,13 +120,18 @@ public class IntLinCombFactory {
                 if (NCOEFFS[i] == -1) nmones++; // count number of coeff set to -1
                 NVARS[k] = NVARS[i];
                 NCOEFFS[k] = NCOEFFS[i];
+                if (NVARS[k].getDomainSize() > ldom) {
+                    lidx = k;
+                    ldom = NVARS[k].getDomainSize();
+                }
                 k++;
             }
         }
-        if(k == 0) {
-            if(RESULT == 0){
+        // b. resize arrays if needed
+        if (k == 0) {
+            if (RESULT == 0) {
                 return SOLVER.TRUE();
-            }else{
+            } else {
                 return SOLVER.FALSE();
             }
         }
@@ -123,6 +139,15 @@ public class IntLinCombFactory {
         if (k < NVARS.length) {
             NVARS = Arrays.copyOf(NVARS, k, IntVar[].class);
             NCOEFFS = Arrays.copyOf(NCOEFFS, k);
+        }
+        // and move the variable with the largest domain at the end, it helps when considering extension representation
+        if (ldom > 2 && lidx < k - 1) {
+            IntVar t = NVARS[k - 1];
+            NVARS[k - 1] = NVARS[lidx];
+            NVARS[lidx] = t;
+            int i = NCOEFFS[k - 1];
+            NCOEFFS[k - 1] = NCOEFFS[lidx];
+            NCOEFFS[lidx] = i;
         }
         if (nones + nmones == NVARS.length) {
             return selectSum(NVARS, NCOEFFS, OPERATOR, RESULT, SOLVER, nbools, nones);
@@ -207,6 +232,10 @@ public class IntLinCombFactory {
                     return arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR.toString()), -RESULT);
                 }
             default:
+                if (tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
+                    return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
+                            OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT), AC);
+                }
                 int b = 0, e = VARS.length;
                 IntVar[] tmpV = new IntVar[e];
                 for (int i = 0; i < VARS.length; i++) {
@@ -216,6 +245,13 @@ public class IntLinCombFactory {
                     } else if (COEFFS[i] < 0) {
                         tmpV[--e] = key;
                     }
+                }
+                if (OPERATOR == Operator.GT) {
+                    OPERATOR = Operator.GE;
+                    RESULT--;
+                } else if (OPERATOR == Operator.LT) {
+                    OPERATOR = Operator.LE;
+                    RESULT++;
                 }
                 return new Constraint("Sum", new PropSum(tmpV, b, OPERATOR, RESULT));
         }
@@ -235,6 +271,10 @@ public class IntLinCombFactory {
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
             return times(VARS[0], COEFFS[0], VF.fixed(RESULT, SOLVER));
         } else {
+            if (tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
+                return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
+                        OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT), AC);
+            }
             int b = 0, e = VARS.length;
             IntVar[] tmpV = new IntVar[e];
             int[] tmpC = new int[e];
@@ -247,6 +287,13 @@ public class IntLinCombFactory {
                     tmpV[--e] = key;
                     tmpC[e] = COEFFS[i];
                 }
+            }
+            if (OPERATOR == Operator.GT) {
+                OPERATOR = Operator.GE;
+                RESULT--;
+            } else if (OPERATOR == Operator.LT) {
+                OPERATOR = Operator.LE;
+                RESULT++;
             }
             return new Constraint("ScalarProduct", new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
         }

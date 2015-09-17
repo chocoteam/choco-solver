@@ -324,7 +324,7 @@ public class PropScalar extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(c[0]).append('.').append(vars[0].getName());
+        linComb.append(pos == 0 ? "-" : "").append(c[0]).append('.').append(vars[0].getName());
         int i = 1;
         for (; i < pos; i++) {
             linComb.append(" + ").append(c[i]).append('.').append(vars[i].getName());
