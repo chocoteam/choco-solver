@@ -48,14 +48,17 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 	Solution solution;
 	Solver solver;
 	boolean restoreOnClose;
+	IMonitorSolution solutionMonitor;
+	IMonitorClose restoreMonitor;
 
 	public LastSolutionRecorder(final Solution solution, boolean restoreOnClose, final Solver solver){
 		this.solver = solver;
 		this.solution = solution;
 		this.restoreOnClose = restoreOnClose;
-		solver.plugMonitor((IMonitorSolution) () -> solution.record(solver));
+                this.solutionMonitor = () -> solution.record(solver);
+		solver.plugMonitor(this.solutionMonitor);
 		if(restoreOnClose){
-			solver.plugMonitor(new IMonitorClose() {
+			this.restoreMonitor = new IMonitorClose() {
 				@Override
 				public void beforeClose() {
 					if(solution.hasBeenFound()){
@@ -71,7 +74,8 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 				}
 				@Override
 				public void afterClose() {}
-			});
+			};
+			solver.plugMonitor(this.restoreMonitor);
 		}
 	}
 
@@ -87,5 +91,12 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 			l.add(solution);
 		}
 		return l;
+	}
+
+	public void stop() {
+		solver.unplugMonitor(solutionMonitor);
+                if (restoreMonitor != null) {
+                        solver.unplugMonitor(restoreMonitor);
+                }
 	}
 }

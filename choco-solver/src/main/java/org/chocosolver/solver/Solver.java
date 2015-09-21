@@ -538,6 +538,15 @@ public class Solver implements Serializable{
     }
 
     /**
+     * Remove a search monitor.
+     *
+     * @param sm a search monitor to be unplugged from the solver
+     */
+    public void unplugMonitor(ISearchMonitor sm) {
+        search.unplugSearchMonitor(sm);
+    }
+
+    /**
      * Override the default {@link org.chocosolver.solver.Settings} object.
      *
      * @param defaults new settings
@@ -849,8 +858,12 @@ public class Solver implements Serializable{
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
         }
-        set(new LastSolutionRecorder(new Solution(), true, this));
-        solve(false);
+        LastSolutionRecorder recorder = new LastSolutionRecorder(new Solution(), true, this);
+        try {
+                solve(false);
+        } finally {
+                recorder.stop();
+        }
     }
 
     /**
@@ -937,8 +950,12 @@ public class Solver implements Serializable{
         if (!getObjectiveManager().isOptimization()) {
             set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
         }
-        set(new LastSolutionRecorder(new Solution(), true, this));
-        solve(false);
+        LastSolutionRecorder recorder = new LastSolutionRecorder(new Solution(), true, this);
+        try {
+                solve(false);
+        } finally {
+                recorder.stop();
+        }
     }
 
     /**
