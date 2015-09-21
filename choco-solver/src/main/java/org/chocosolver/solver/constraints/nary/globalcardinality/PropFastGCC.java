@@ -75,7 +75,7 @@ public class PropFastGCC extends Propagator<IntVar> {
      * @param valueCardinalities array of integer variables
      */
     public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities) {
-        super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, false);
         if (restrictedValues.length != valueCardinalities.length) {
             throw new UnsupportedOperationException();
         }
@@ -165,11 +165,6 @@ public class PropFastGCC extends Propagator<IntVar> {
             // filtering
             evtmask = PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask();
         } while (filter());
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     private boolean filter() throws ContradictionException {

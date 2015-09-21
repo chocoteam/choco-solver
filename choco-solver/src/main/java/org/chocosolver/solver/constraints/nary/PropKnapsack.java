@@ -68,7 +68,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     public PropKnapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
                         int[] weight, int[] energy) {
-        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, false);
         this.weigth = weight;
         this.energy = energy;
         this.n = itemOccurence.length;
@@ -145,11 +145,6 @@ public class PropKnapsack extends Propagator<IntVar> {
                 }
             }
         }
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     @Override
