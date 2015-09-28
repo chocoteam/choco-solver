@@ -44,6 +44,7 @@ import org.chocosolver.solver.constraints.nary.automata.structure.multicostregul
 import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
 import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -945,10 +946,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                if(DEBUG)System.out.printf(String.format("z[" + i + "] in MCR should be instantiated : " + z[i]));
+                if(DEBUG) Chatterbox.out.printf(String.format("z[" + i + "] in MCR should be instantiated : " + z[i]));
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
-                if(DEBUG)System.out.printf(String.format("cost: " + gcost[i] + " != z:" + z[i].getValue()));
+                if(DEBUG)Chatterbox.out.printf(String.format("cost: " + gcost[i] + " != z:" + z[i].getValue()));
                 return false;
             }
 

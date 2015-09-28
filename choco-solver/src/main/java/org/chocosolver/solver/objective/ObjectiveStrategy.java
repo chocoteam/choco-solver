@@ -44,6 +44,7 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 
@@ -178,7 +179,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         if(solver.getSettings().warnUser()){
-            System.out.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
+            Chatterbox.out.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
@@ -186,7 +187,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (dec == null) dec = new FastDecision(pool);
         dec.set(obj, target, decOperator);
         if(solver.getSettings().warnUser()){
-            System.out.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
+            Chatterbox.out.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
         }
         return dec;
     }

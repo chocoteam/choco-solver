@@ -36,6 +36,7 @@ import org.chocosolver.solver.search.strategy.RSF;
 import org.chocosolver.solver.search.strategy.RealStrategyFactory;
 import org.chocosolver.solver.search.strategy.SSF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class DefaultSearchBinder implements ISearchBinder {
     @Override
     public void configureSearch(Solver solver) {
         if(solver.getSettings().warnUser()) {
-            System.out.printf("No search strategies defined.\nSet to default ones.");
+            Chatterbox.out.printf("No search strategies defined.\nSet to default ones.");
         }
 
         solver.set(getDefault(solver));

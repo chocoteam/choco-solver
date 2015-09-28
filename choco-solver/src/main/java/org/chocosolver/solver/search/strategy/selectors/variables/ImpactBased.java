@@ -42,6 +42,7 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -262,7 +263,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             learnsAndFails = false;
             solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
         } else if (System.currentTimeMillis() > tl) {
-            if(solver.getSettings().warnUser())System.out.printf("impact Search stops its init phase -- reach time limit!");
+            if(solver.getSettings().warnUser()) Chatterbox.out.printf("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();

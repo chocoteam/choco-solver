@@ -409,7 +409,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        contradiction(null, this.getClass().getSimpleName() + " has failed");
+        solver.getEngine().fails(this, null, null);
     }
 
     /**

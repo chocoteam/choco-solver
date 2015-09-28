@@ -36,6 +36,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -119,7 +120,7 @@ public class Solution implements Serializable, ICause {
             }
         }
         if (warn && solver.getSettings().warnUser()) {
-            System.out.printf("Some non decision variables are not instantiated in the current solution.");
+            Chatterbox.out.printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
 
