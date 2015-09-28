@@ -33,13 +33,15 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
- * A propagator for SUM(x_i*c_i) = b
+ * A propagator for SUM(x_i) = y + b, where x_i are boolean variables
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
@@ -48,38 +50,28 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class PropScalar extends Propagator<IntVar> {
+public class PropSumBool extends Propagator<IntVar> {
 
-    final int[] c; // list of coefficients
     final int pos; // index of the last positive coefficient
     final int l; // number of variables
+    final IntVar sum;
     final int b; // bound to respect
-    final int[] I; // variability of each variable -- domain amplitude
     int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
     final Operator o;
 
 
-    protected static PropagatorPriority computePriority(int nbvars) {
-        if (nbvars == 1) {
-            return PropagatorPriority.UNARY;
-        } else if (nbvars == 2) {
-            return PropagatorPriority.BINARY;
-        } else if (nbvars == 3) {
-            return PropagatorPriority.TERNARY;
-        } else {
-            return PropagatorPriority.LINEAR;
-        }
-    }
-
-    public PropScalar(IntVar[] variables, int[] coeffs, int pos, Operator o, int b) {
-        super(variables, computePriority(variables.length), false);
-        this.c = coeffs;
+    protected PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b, boolean reactOnFineEvent) {
+        super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.BINARY, reactOnFineEvent);
         this.pos = pos;
         this.o = o;
         this.b = b;
+        this.sum = sum;
         l = variables.length;
-        I = new int[l];
         super.linkVariables();
+    }
+
+    public PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b) {
+        this(variables, pos, o, sum, b, false);
     }
 
     @Override
@@ -93,31 +85,11 @@ public class PropScalar extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.INSTANTIATE.getMask();
             case LE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.INCLOW.getMask() : IntEventType.DECUPP.getMask());
+                return IntEventType.INSTANTIATE.getMask() + (vIdx == l ? IntEventType.DECUPP.getMask() : 0);
             case GE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.DECUPP.getMask() : IntEventType.INCLOW.getMask());
+                return IntEventType.INSTANTIATE.getMask() + (vIdx == l ? IntEventType.INCLOW.getMask() : 0);
             default:
                 return IntEventType.boundAndInst();
-        }
-    }
-
-
-    protected void prepare() {
-        sumLB = sumUB = 0;
-        int i = 0, lb, ub;
-        for (; i < pos; i++) { // first the positive coefficients
-            lb = vars[i].getLB() * c[i];
-            ub = vars[i].getUB() * c[i];
-            sumLB += lb;
-            sumUB += ub;
-            I[i] = (ub - lb);
-        }
-        for (; i < l; i++) { // then the negative ones
-            lb = vars[i].getUB() * c[i];
-            ub = vars[i].getLB() * c[i];
-            sumLB += lb;
-            sumUB += ub;
-            I[i] = (ub - lb);
         }
     }
 
@@ -126,6 +98,32 @@ public class PropScalar extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         filter();
     }
+
+    protected void prepare() {
+        int i = 0, k;
+        int lb = 0, ub = 0;
+        for (; i < pos; i++) { // first the positive coefficients
+            if (vars[i].isInstantiated()) {
+                k = vars[i].getLB();
+                lb += k;
+                ub += k;
+            } else {
+                ub++;
+            }
+        }
+        for (; i < l; i++) { // then the negative ones
+            if (vars[i].isInstantiated()) {
+                k = vars[i].getLB();
+                lb -= k;
+                ub -= k;
+            } else {
+                lb--;
+            }
+        }
+        sumLB = lb - sum.getUB();
+        sumUB = ub - sum.getLB();
+    }
+
 
     protected void filter() throws ContradictionException {
         prepare();
@@ -145,72 +143,52 @@ public class PropScalar extends Propagator<IntVar> {
         }
     }
 
-
+    @SuppressWarnings({"NullableProblems"})
     void filterOnEq() throws ContradictionException {
-        boolean anychange;
         int F = b - sumLB;
         int E = sumUB - b;
-        do {
-            anychange = false;
-            if (F < 0 || E < 0) {
-                fails();
-            }
-            int lb, ub, i = 0;
+        if (F < 0 || E < 0) {
+            fails();
+        }
+        int lb, ub, i = 0;
+        // deal with sum
+        lb = -sum.getUB();
+        ub = -sum.getLB();
+        if (sum.updateLowerBound(-F - lb, this)) {
+            int nub = -sum.getLB();
+            E += nub - ub;
+            ub = nub;
+        }
+        if (sum.updateUpperBound(-ub + E, this)) {
+            int nlb = -sum.getUB();
+            F -= nlb - lb;
+        }
+        if (F == 0 || E == 0) { // the main reason we implemented a dedicated version
             // positive coefficients first
             while (i < pos) {
-                if (I[i] - F > 0) {
-                    lb = vars[i].getLB() * c[i];
-                    ub = lb + I[i];
-                    if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this)) {
-                        int nub = vars[i].getUB() * c[i];
-                        E += nub - ub;
-                        I[i] = nub - lb;
-                        anychange = true;
-                    }
+                if (F == 0 && !vars[i].isInstantiated() && vars[i].instantiateTo(0, this)) {
+                    E++;
                 }
-                if (I[i] - E > 0) {
-                    ub = vars[i].getUB() * c[i];
-                    lb = ub - I[i];
-                    if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this)) {
-                        int nlb = vars[i].getLB() * c[i];
-                        F -= nlb - lb;
-                        I[i] = ub - nlb;
-                        anychange = true;
-                    }
+                if (E == 0 && !vars[i].isInstantiated() && vars[i].instantiateTo(1, this)) {
+                    F++;
                 }
                 i++;
             }
             // then negative ones
             while (i < l) {
-                if (I[i] - F > 0) {
-                    lb = vars[i].getUB() * c[i];
-                    ub = lb + I[i];
-                    if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this)) {
-                        int nub = vars[i].getLB() * c[i];
-                        E += nub - ub;
-                        I[i] = nub - lb;
-                        anychange = true;
-                    }
+                if (F == 0 && !vars[i].isInstantiated() && vars[i].instantiateTo(1, this)) {
+                    E--;
                 }
-                if (I[i] - E > 0) {
-                    ub = vars[i].getLB() * c[i];
-                    lb = ub - I[i];
-                    if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this)) {
-                        int nlb = vars[i].getUB() * c[i];
-                        F -= nlb - lb;
-                        I[i] = ub - nlb;
-                        anychange = true;
-                    }
+                if (E == 0 && !vars[i].isInstantiated() && vars[i].instantiateTo(0, this)) {
+                    F--;
                 }
                 i++;
             }
-        } while (anychange);
-        // useless since true when all variables are instantiated
-        /*if (F <= 0 && E <= 0) {
-            this.setPassive();
-        }*/
+        }
     }
 
+
+    @SuppressWarnings({"NullableProblems"})
     void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -218,37 +196,35 @@ public class PropScalar extends Propagator<IntVar> {
             fails();
         }
         int lb, ub, i = 0;
-        // positive coefficients first
-        while (i < pos) {
-            if (I[i] - F > 0) {
-                lb = vars[i].getLB() * c[i];
-                ub = lb + I[i];
-                if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this)) {
-                    int nub = vars[i].getUB() * c[i];
-                    E += nub - ub;
-                    I[i] = nub - lb;
-                }
-            }
-            i++;
+        // deal with sum
+        lb = -sum.getUB();
+        ub = -sum.getLB();
+        if (sum.updateLowerBound(-F - lb, this)) {
+            int nub = -sum.getLB();
+            E += nub - ub;
         }
-        // then negative ones
-        while (i < l) {
-            if (I[i] - F > 0) {
-                lb = vars[i].getUB() * c[i];
-                ub = lb + I[i];
-                if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this)) {
-                    int nub = vars[i].getLB() * c[i];
-                    E += nub - ub;
-                    I[i] = nub - lb;
+        if (F == 0) { // the main reason we implemented a dedicated version
+            // positive coefficients first
+            while (i < pos) {
+                if (!vars[i].isInstantiated() && vars[i].instantiateTo(0, this)) {
+                    E++;
                 }
+                i++;
             }
-            i++;
+            // then negative ones
+            while (i < l) {
+                if (!vars[i].isInstantiated() && vars[i].instantiateTo(1, this)) {
+                    E--;
+                }
+                i++;
+            }
         }
         if (E <= 0) {
             this.setPassive();
         }
     }
 
+    @SuppressWarnings({"NullableProblems"})
     void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -256,31 +232,28 @@ public class PropScalar extends Propagator<IntVar> {
             fails();
         }
         int lb, ub, i = 0;
-        // positive coefficients first
-        while (i < pos) {
-            if (I[i] - E > 0) {
-                ub = vars[i].getUB() * c[i];
-                lb = ub - I[i];
-                if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this)) {
-                    int nlb = vars[i].getLB() * c[i];
-                    F -= nlb - lb;
-                    I[i] = ub - nlb;
-                }
-            }
-            i++;
+        // deal with sum
+        lb = -sum.getUB();
+        ub = -sum.getLB();
+        if (sum.updateUpperBound(-ub + E, this)) {
+            int nlb = -sum.getUB();
+            F -= nlb - lb;
         }
-        // then negative ones
-        while (i < l) {
-            if (I[i] - E > 0) {
-                ub = vars[i].getLB() * c[i];
-                lb = ub - I[i];
-                if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this)) {
-                    int nlb = vars[i].getUB() * c[i];
-                    F -= nlb - lb;
-                    I[i] = ub - nlb;
+        if (E == 0) { // the main reason we implemented a dedicated version
+            // positive coefficients first
+            while (i < pos) {
+                if (!vars[i].isInstantiated() && vars[i].instantiateTo(1, this)) {
+                    F++;
                 }
+                i++;
             }
-            i++;
+            // then negative ones
+            while (i < l) {
+                if (!vars[i].isInstantiated() && vars[i].instantiateTo(0, this)) {
+                    F--;
+                }
+                i++;
+            }
         }
         if (F <= 0) {
             this.setPassive();
@@ -296,9 +269,9 @@ public class PropScalar extends Propagator<IntVar> {
         }
         int w = -1;
         int sum = 0;
-        for (int i = 0; i < l; i++) {
-            if (!vars[i].isInstantiated()) {
-                sum += vars[i].getValue() * c[i];
+        for (int i = 0; i < l + 1; i++) {
+            if (vars[i].isInstantiated()) {
+                sum += i < pos ? vars[i].getValue() : -vars[i].getValue();
             } else if (w == -1) {
                 w = i;
             } else return;
@@ -316,12 +289,12 @@ public class PropScalar extends Propagator<IntVar> {
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
         for (; i < pos; i++) { // first the positive coefficients
-            sumLB += vars[i].getLB() * c[i];
-            sumUB += vars[i].getUB() * c[i];
+            sumLB += vars[i].getLB();
+            sumUB += vars[i].getUB();
         }
-        for (; i < l; i++) { // then the negative ones
-            sumLB += vars[i].getUB() * c[i];
-            sumUB += vars[i].getLB() * c[i];
+        for (; i < l + 1; i++) { // then the negative ones
+            sumLB -= vars[i].getUB();
+            sumUB -= vars[i].getLB();
         }
         switch (o) {
             case NQ:
@@ -359,28 +332,19 @@ public class PropScalar extends Propagator<IntVar> {
         }
     }
 
-    protected ESat compare(int sumLB, int sumUB) {
-        if (sumUB == b && sumLB == b) {
-            return ESat.TRUE;
-        } else if (sumLB > b || sumUB < b) {
-            return ESat.FALSE;
-        }
-        return ESat.UNDEFINED;
-    }
-
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(c[0]).append('.').append(vars[0].getName());
+        linComb.append(pos == 0 ? "-" : "").append(vars[0].getName());
         int i = 1;
         for (; i < pos; i++) {
-            linComb.append(" + ").append(c[i]).append('.').append(vars[i].getName());
+            linComb.append(" + ").append(vars[i].getName());
         }
         for (; i < l; i++) {
-            linComb.append(" - ").append(-c[i]).append('.').append(vars[i].getName());
+            linComb.append(" - ").append(vars[i].getName());
         }
         linComb.append(" ").append(o).append(" ");
-        linComb.append(b);
+        linComb.append(vars[i].getName()).append(" ").append(b < 0 ? "- " : "+ ").append(Math.abs(b));
         return linComb.toString();
     }
 
@@ -389,7 +353,7 @@ public class PropScalar extends Propagator<IntVar> {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // 1. find the pos of var in vars
         boolean ispos;
-        if (pos < (l / 2)) {
+        if (pos < ((l + 1) / 2)) {
             int i;
             i = 0;
             while (i < pos && vars[i] != var) {
@@ -399,7 +363,7 @@ public class PropScalar extends Propagator<IntVar> {
         } else {
             int i;
             i = pos;
-            while (i < l && vars[i] != var) {
+            while (i < l + 1 && vars[i] != var) {
                 i++;
             }
             ispos = i == l;
@@ -420,7 +384,7 @@ public class PropScalar extends Propagator<IntVar> {
                     }
                 }
             }
-            for (; i < l; i++) { // then the negative ones
+            for (; i < l + 1; i++) { // then the negative ones
                 if (vars[i] != var) {
                     if (ispos) {
                         newrules |= ruleStore.addLowerBoundRule(vars[i]);
@@ -440,7 +404,7 @@ public class PropScalar extends Propagator<IntVar> {
                     }
                 }
             }
-            for (; i < l; i++) { // then the negative ones
+            for (; i < l + 1; i++) { // then the negative ones
                 if (vars[i] != var) {
                     if (ispos) {
                         newrules |= ruleStore.addUpperBoundRule(vars[i]);
@@ -456,23 +420,4 @@ public class PropScalar extends Propagator<IntVar> {
         }
         return newrules;
     }
-
-    private int divFloor(int a, int b) {
-        // <!> we assume b > 0
-        if (a >= 0) {
-            return (a / b);
-        } else {
-            return (a - b + 1) / b;
-        }
-    }
-
-    private int divCeil(int a, int b) {
-        // <!> we assume b > 0
-        if (a >= 0) {
-            return ((a + b - 1) / b);
-        } else {
-            return a / b;
-        }
-    }
-
 }

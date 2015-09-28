@@ -44,6 +44,11 @@ import static org.chocosolver.solver.constraints.ICF.*;
  * <p>
  * It aims at first reducing the input (merge coefficients) and then select the right implementation (for performance concerns).
  * <p>
+ * 2015.09.24 (cprudhom)
+ * <q>
+ * dealing with tuples is only relevant for scalar in some very specific cases (eg. mzn 2014, elitserien+handball+handball14.fzn)
+ * </q>
+ * <p>
  * Created by cprudhom on 13/11/14.
  * Project: choco.
  */
@@ -129,10 +134,19 @@ public class IntLinCombFactory {
         }
         // b. resize arrays if needed
         if (k == 0) {
-            if (RESULT == 0) {
-                return SOLVER.TRUE();
-            } else {
-                return SOLVER.FALSE();
+            switch (OPERATOR) {
+                case EQ:
+                    return RESULT == 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case NQ:
+                    return RESULT != 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case LE:
+                    return RESULT <= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case LT:
+                    return RESULT < 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case GE:
+                    return RESULT >= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case GT:
+                    return RESULT < 0 ? SOLVER.TRUE() : SOLVER.FALSE();
             }
         }
         // 2. resize NVARS and NCOEFFS
@@ -150,7 +164,7 @@ public class IntLinCombFactory {
             NCOEFFS[lidx] = i;
         }
         if (nones + nmones == NVARS.length) {
-            return selectSum(NVARS, NCOEFFS, OPERATOR, RESULT, SOLVER, nbools, nones);
+            return selectSum(NVARS, NCOEFFS, OPERATOR, RESULT, SOLVER, nbools);
         } else {
             return selectScalar(NVARS, NCOEFFS, OPERATOR, RESULT, SOLVER);
         }
@@ -166,51 +180,10 @@ public class IntLinCombFactory {
      * @param RESULT   an integer
      * @param SOLVER   the solver
      * @param nbools   number of boolean variables
-     * @param nones    of coefficients set to one
      * @return a constraint
      */
-    public static Constraint selectSum(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, Solver SOLVER, int nbools, int nones) {
+    public static Constraint selectSum(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, Solver SOLVER, int nbools) {
         // if the operator is "="
-        if (VARS.length > 2 && OPERATOR == Operator.EQ) {
-            // if all variables are BoolVar
-            if (nbools == VARS.length) {
-                //TODO: deal with clauses and reification
-                if (nones == VARS.length) {
-                    if (VARS.length > 10) {
-                        return new Constraint("BoolSum", new PropBoolSumIncremental(VF.toBoolVar(VARS), VF.fixed(RESULT, SOLVER)));
-                    } else {
-                        return new Constraint("BoolSum", new PropBoolSumCoarse(VF.toBoolVar(VARS), VF.fixed(RESULT, SOLVER)));
-                    }
-                } else if (nones == 0) {
-                    if (VARS.length > 10) {
-                        return new Constraint("BoolSum", new PropBoolSumIncremental(VF.toBoolVar(VARS), VF.fixed(-RESULT, SOLVER)));
-                    } else {
-                        return new Constraint("BoolSum", new PropBoolSumCoarse(VF.toBoolVar(VARS), VF.fixed(-RESULT, SOLVER)));
-                    }
-                }
-            }
-            // if at most one variable is not a boolean and variable one coefficients is different from the others
-            if (nbools >= VARS.length - 1 && (nones == 1 || nones == VARS.length - 1) && RESULT == 0) {
-                int w = 0;
-                int c = nones == 1 ? 1 : -1;
-                while (w < COEFFS.length && COEFFS[w] != c) {
-                    w++;
-                }
-                if (w < VARS.length && (nbools == VARS.length || !VARS[w].isBool())) {
-                    IntVar vtmp = VARS[VARS.length - 1];
-                    VARS[VARS.length - 1] = VARS[w];
-                    VARS[w] = vtmp;
-                    int itmp = COEFFS[COEFFS.length - 1];
-                    COEFFS[COEFFS.length - 1] = COEFFS[w];
-                    COEFFS[w] = itmp;
-                    if (VARS.length > 10) {
-                        return new Constraint("BoolSum", new PropBoolSumIncremental(VF.toBoolVar(Arrays.copyOf(VARS, VARS.length - 1)), VARS[VARS.length - 1]));
-                    } else {
-                        return new Constraint("BoolSum", new PropBoolSumCoarse(VF.toBoolVar(Arrays.copyOf(VARS, VARS.length - 1)), VARS[VARS.length - 1]));
-                    }
-                }
-            }
-        }
         // 4. detect and return small arity constraints
         switch (VARS.length) {
             case 1:
@@ -218,7 +191,7 @@ public class IntLinCombFactory {
                     return arithm(VARS[0], OPERATOR.toString(), RESULT);
                 } else {
                     assert COEFFS[0] == -1;
-                    return arithm(VARS[0], OPERATOR.toString(), -RESULT);
+                    return arithm(VARS[0], Operator.getFlip(OPERATOR.toString()), -RESULT);
                 }
             case 2:
                 if (COEFFS[0] == 1 && COEFFS[1] == 1) {
@@ -232,13 +205,10 @@ public class IntLinCombFactory {
                     return arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR.toString()), -RESULT);
                 }
             default:
-                if (tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
-                    return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
-                            OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT), AC);
-                }
                 int b = 0, e = VARS.length;
                 IntVar[] tmpV = new IntVar[e];
-                for (int i = 0; i < VARS.length; i++) {
+                // go down to 0 to ensure that the largest domain variable is on last position
+                for (int i = VARS.length - 1; i >= 0; i--) {
                     IntVar key = VARS[i];
                     if (COEFFS[i] > 0) {
                         tmpV[b++] = key;
@@ -252,6 +222,29 @@ public class IntLinCombFactory {
                 } else if (OPERATOR == Operator.LT) {
                     OPERATOR = Operator.LE;
                     RESULT++;
+                }
+                //TODO: deal with clauses and reification
+                if (nbools == VARS.length) {
+                    if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
+                        return new Constraint("BoolSum", new PropSumBoolIncr(VF.toBoolVar(tmpV), b, OPERATOR,
+                                VF.fixed(RESULT, SOLVER), 0));
+                    } else {
+                        return new Constraint("BoolSum", new PropSumBool(VF.toBoolVar(tmpV), b, OPERATOR,
+                                VF.fixed(RESULT, SOLVER), 0));
+                    }
+                }
+                if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool()) {
+                    // the large domain variable is on the last idx
+                    assert COEFFS[VARS.length - 1] == -1;
+                    if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
+                        return new Constraint("BoolSum", new PropSumBoolIncr(VF.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                                b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
+
+                    } else {
+                        return new Constraint("BoolSum", new PropSumBool(VF.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                                b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
+
+                    }
                 }
                 return new Constraint("Sum", new PropSum(tmpV, b, OPERATOR, RESULT));
         }
@@ -270,33 +263,46 @@ public class IntLinCombFactory {
     public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, Solver SOLVER) {
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
             return times(VARS[0], COEFFS[0], VF.fixed(RESULT, SOLVER));
-        } else {
-            if (tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
-                return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
-                        OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT), AC);
-            }
-            int b = 0, e = VARS.length;
-            IntVar[] tmpV = new IntVar[e];
-            int[] tmpC = new int[e];
-            for (int i = 0; i < VARS.length; i++) {
-                IntVar key = VARS[i];
-                if (COEFFS[i] > 0) {
-                    tmpV[b] = key;
-                    tmpC[b++] = COEFFS[i];
-                } else if (COEFFS[i] < 0) {
-                    tmpV[--e] = key;
-                    tmpC[e] = COEFFS[i];
-                }
-            }
-            if (OPERATOR == Operator.GT) {
-                OPERATOR = Operator.GE;
-                RESULT--;
-            } else if (OPERATOR == Operator.LT) {
-                OPERATOR = Operator.LE;
-                RESULT++;
-            }
-            return new Constraint("ScalarProduct", new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
         }
+        if (VARS.length == 2 && OPERATOR == Operator.EQ && RESULT == 0) {
+            if (COEFFS[0] == 1) {
+                return times(VARS[1], -COEFFS[1], VARS[0]);
+            }
+            if (COEFFS[0] == -1) {
+                return times(VARS[1], COEFFS[1], VARS[0]);
+            }
+            if (COEFFS[1] == 1) {
+                return times(VARS[0], -COEFFS[0], VARS[1]);
+            }
+            if (COEFFS[1] == -1) {
+                return times(VARS[0], COEFFS[0], VARS[1]);
+            }
+        }
+        if (Operator.EQ == OPERATOR && VARS[VARS.length - 1].hasEnumeratedDomain() && tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
+            return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
+                    OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT), AC);
+        }
+        int b = 0, e = VARS.length;
+        IntVar[] tmpV = new IntVar[e];
+        int[] tmpC = new int[e];
+        for (int i = 0; i < VARS.length; i++) {
+            IntVar key = VARS[i];
+            if (COEFFS[i] > 0) {
+                tmpV[b] = key;
+                tmpC[b++] = COEFFS[i];
+            } else if (COEFFS[i] < 0) {
+                tmpV[--e] = key;
+                tmpC[e] = COEFFS[i];
+            }
+        }
+        if (OPERATOR == Operator.GT) {
+            OPERATOR = Operator.GE;
+            RESULT--;
+        } else if (OPERATOR == Operator.LT) {
+            OPERATOR = Operator.LE;
+            RESULT++;
+        }
+        return new Constraint("ScalarProduct", new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

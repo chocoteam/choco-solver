@@ -91,9 +91,9 @@ public class PropSum extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.INSTANTIATE.getMask();
             case LE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.DECUPP.getMask() : IntEventType.INCLOW.getMask());
-            case GE:
                 return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.INCLOW.getMask() : IntEventType.DECUPP.getMask());
+            case GE:
+                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.DECUPP.getMask() : IntEventType.INCLOW.getMask());
             default:
                 return IntEventType.boundAndInst();
         }
@@ -101,24 +101,23 @@ public class PropSum extends Propagator<IntVar> {
 
 
     protected void prepare() {
-        int f = 0, e = 0, i = 0;
+        sumLB = sumUB = 0;
+        int i = 0;
         int lb, ub;
         for (; i < pos; i++) { // first the positive coefficients
             lb = vars[i].getLB();
             ub = vars[i].getUB();
-            f += lb;
-            e += ub;
+            sumLB += lb;
+            sumUB += ub;
             I[i] = (ub - lb);
         }
         for (; i < l; i++) { // then the negative ones
             lb = -vars[i].getUB();
             ub = -vars[i].getLB();
-            f += lb;
-            e += ub;
+            sumLB += lb;
+            sumUB += ub;
             I[i] = (ub - lb);
         }
-        sumLB = f;
-        sumUB = e;
     }
 
 
@@ -128,128 +127,176 @@ public class PropSum extends Propagator<IntVar> {
     }
 
     protected void filter() throws ContradictionException {
-        if (o == Operator.NQ) {
-            filterOnNeq();
-        } else {
-            prepare();
-            boolean changed;
-            do {
-                switch (o) {
-                    case LE:
-                        changed = filterOnLeq();
-                        break;
-                    case GE:
-                        changed = filterOnGeq();
-                        break;
-                    default:
-                        changed = filterOnLeq() | filterOnGeq();
-                        break;
-                }
-            } while (changed);
-            checkEntailment();
-        }
-    }
-
-    protected void checkEntailment() {
+        prepare();
         switch (o) {
             case LE:
-                if (sumUB - b <= 0) {
-                    this.setPassive();
-                }
+                filterOnLeq();
                 break;
             case GE:
-                if (sumLB - b >= 0) {
-                    this.setPassive();
-                }
+                filterOnGeq();
+                break;
+            case NQ:
+                filterOnNeq();
                 break;
             default:
-                if (sumUB - b <= 0 && sumLB - b >= 0) {
-                    this.setPassive();
-                }
+                filterOnEq();
                 break;
         }
     }
 
-
-    @SuppressWarnings({"NullableProblems"})
-    boolean filterOnLeq() throws ContradictionException {
-        boolean anychange = false;
-        if (b - sumLB < 0) {
-            fails();
-        }
-        int lb, ub, i = 0;
-        // positive coefficients first
-        for (; i < pos; i++) {
-            if (I[i] - (b - sumLB) > 0) {
-                lb = vars[i].getLB();
-                ub = lb + I[i];
-                if (vars[i].updateUpperBound(b - sumLB + lb, this)) {
-                    int nub = vars[i].getUB();
-                    sumUB -= ub - nub;
-                    I[i] = nub - lb;
-                    anychange = true;
-                }
+    void filterOnEq() throws ContradictionException {
+        boolean anychange;
+        int F = b - sumLB;
+        int E = sumUB - b;
+        do {
+            anychange = false;
+            if (F < 0 || E < 0) {
+                fails();
             }
-        }
-        // then negative ones
-        for (; i < l; i++) {
-            if (I[i] - (b - sumLB) > 0) {
-                lb = -vars[i].getUB();
-                ub = lb + I[i];
-                if (vars[i].updateLowerBound(-(b - sumLB + lb), this)) {
-                    int nub = -vars[i].getLB();
-                    sumUB -= ub - nub;
-                    I[i] = nub - lb;
-                    anychange = true;
+            int lb, ub, i = 0;
+            // positive coefficients first
+            while (i < pos) {
+                if (I[i] - F > 0) {
+                    lb = vars[i].getLB();
+                    ub = lb + I[i];
+                    if (vars[i].updateUpperBound(F + lb, this)) {
+                        int nub = vars[i].getUB();
+                        E += nub - ub;
+                        I[i] = nub - lb;
+                        anychange = true;
+                    }
                 }
+                if (I[i] + E > 0) {
+                    ub = vars[i].getUB();
+                    lb = ub - I[i];
+                    if (vars[i].updateLowerBound(ub - E, this)) {
+                        int nlb = vars[i].getLB();
+                        F -= nlb - lb;
+                        I[i] = ub - nlb;
+                        anychange = true;
+                    }
+                }
+                i++;
             }
-        }
-        return anychange;
+            // then negative ones
+            while (i < l) {
+                if (I[i] - F > 0) {
+                    lb = -vars[i].getUB();
+                    ub = lb + I[i];
+                    if (vars[i].updateLowerBound(-F - lb, this)) {
+                        int nub = -vars[i].getLB();
+                        E += nub - ub;
+                        I[i] = nub - lb;
+                        anychange = true;
+                    }
+                }
+                if (I[i] - E > 0) {
+                    ub = -vars[i].getLB();
+                    lb = ub - I[i];
+                    if (vars[i].updateUpperBound(-ub + E, this)) {
+                        int nlb = -vars[i].getUB();
+                        F -= nlb - lb;
+                        I[i] = ub - nlb;
+                        anychange = true;
+                    }
+                }
+                i++;
+            }
+        } while (anychange);
+        // useless since true when all variables are instantiated
+        /*if (F <= 0 && E <= 0) {
+            this.setPassive();
+        }*/
     }
 
-    @SuppressWarnings({"NullableProblems"})
-    boolean filterOnGeq() throws ContradictionException {
-        boolean anychange = false;
-        if (b - sumUB > 0) {
-            // b - sumUB > 0
+    void filterOnLeq() throws ContradictionException {
+        int F = b - sumLB;
+        int E = sumUB - b;
+        if (F < 0) {
             fails();
         }
         int lb, ub, i = 0;
         // positive coefficients first
-        for (; i < pos; i++) {
-            if (I[i] > -(b - sumUB)) {
-                ub = vars[i].getUB();
-                lb = ub - I[i];
-                if (vars[i].updateLowerBound(b - sumUB + ub, this)) {
-                    int nlb = vars[i].getLB();
-                    sumLB += nlb - lb;
-                    I[i] = ub - nlb;
-                    anychange = true;
+        while (i < pos) {
+            if (I[i] - F > 0) {
+                lb = vars[i].getLB();
+                ub = lb + I[i];
+                if (vars[i].updateUpperBound(F + lb, this)) {
+                    int nub = vars[i].getUB();
+                    E += nub - ub;
+                    I[i] = nub - lb;
                 }
             }
+            i++;
         }
         // then negative ones
-        for (; i < l; i++) {
-            if (I[i] > -(b - sumUB)) {
-                ub = -vars[i].getLB();
-                lb = ub - I[i];
-                if (vars[i].updateUpperBound(-(b - sumUB + ub), this)) {
-                    int nlb = -vars[i].getUB();
-                    sumLB += nlb - lb;
-                    I[i] = ub - nlb;
-                    anychange = true;
+        while (i < l) {
+            if (I[i] - F > 0) {
+                lb = -vars[i].getUB();
+                ub = lb + I[i];
+                if (vars[i].updateLowerBound(-F - lb, this)) {
+                    int nub = -vars[i].getLB();
+                    E += nub - ub;
+                    I[i] = nub - lb;
                 }
             }
+            i++;
         }
-        return anychange;
+        if (E <= 0) {
+            this.setPassive();
+        }
+    }
+
+    void filterOnGeq() throws ContradictionException {
+        int F = b - sumLB;
+        int E = sumUB - b;
+        if (E < 0) {
+            fails();
+        }
+        int lb, ub, i = 0;
+        // positive coefficients first
+        while (i < pos) {
+            if (I[i] - E > 0) {
+                ub = vars[i].getUB();
+                lb = ub - I[i];
+                if (vars[i].updateLowerBound(ub - E, this)) {
+                    int nlb = vars[i].getLB();
+                    F -= nlb - lb;
+                    I[i] = ub - nlb;
+                }
+            }
+            i++;
+        }
+        // then negative ones
+        while (i < l) {
+            if (I[i] - E > 0) {
+                ub = -vars[i].getLB();
+                lb = ub - I[i];
+                if (vars[i].updateUpperBound(-ub + E, this)) {
+                    int nlb = -vars[i].getUB();
+                    F -= nlb - lb;
+                    I[i] = ub - nlb;
+                }
+            }
+            i++;
+        }
+        if (F <= 0) {
+            this.setPassive();
+        }
     }
 
     void filterOnNeq() throws ContradictionException {
+        int F = b - sumLB;
+        int E = sumUB - b;
+        if (F < 0 || E < 0) {
+            setPassive();
+            return;
+        }
         int w = -1;
         int sum = 0;
         for (int i = 0; i < l; i++) {
             if (vars[i].isInstantiated()) {
-                sum += vars[i].getLB();
+                sum += i < pos ? vars[i].getValue() : -vars[i].getValue();
             } else if (w == -1) {
                 w = i;
             } else return;
@@ -313,7 +360,7 @@ public class PropSum extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(pos == 0?"-":"").append(vars[0].getName());
+        linComb.append(pos == 0 ? "-" : "").append(vars[0].getName());
         int i = 1;
         for (; i < pos; i++) {
             linComb.append(" + ").append(vars[i].getName());
@@ -398,23 +445,4 @@ public class PropSum extends Propagator<IntVar> {
         }
         return newrules;
     }
-
-    private int divFloor(int a, int b) {
-        // <!> we assume b > 0
-        if (a >= 0) {
-            return (a / b);
-        } else {
-            return (a - b + 1) / b;
-        }
-    }
-
-    private int divCeil(int a, int b) {
-        // <!> we assume b > 0
-        if (a >= 0) {
-            return ((a + b - 1) / b);
-        } else {
-            return a / b;
-        }
-    }
-
 }

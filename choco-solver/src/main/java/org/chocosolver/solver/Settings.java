@@ -79,7 +79,7 @@ public interface Settings extends Serializable {
 
     /**
      * Define the maximum domain size threshold to force integer variable to be enumerated
-     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, ISolver)}.
+     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Solver)}.
      */
     default public int getMaxDomSizeForEnumerated() {
         return 32768;
@@ -151,12 +151,26 @@ public interface Settings extends Serializable {
      * The default condition is "at least one env.worldPush() has been called since the creation of the bck object".
      * The condition can be set to {@link org.chocosolver.memory.ICondition#FALSE} if no backtrackable object is created during the search.
      */
-    default public ICondition getEnvironmentHistorySimulationCondition(){
+    default public ICondition getEnvironmentHistorySimulationCondition() {
         return new Except_0();
     }
 
-    default public boolean warnUser(){
-        return true;
+    /**
+     * Return true if one wants to be informed of warnings detected during modeling/solving (default value is false)
+     */
+    default public boolean warnUser() {
+        return false;
     }
+
+
+    /**
+     * Return true if the incrementality is enabled on boolean sum, based on the number of variables involved.
+     * Default condition is : nbvars > 10
+     * @param nbvars number of variables in the constraint
+     */
+    default public boolean enableIncrementalityOnBoolSum(int nbvars) {
+        return nbvars > 10;
+    }
+
 
 }

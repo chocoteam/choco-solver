@@ -33,18 +33,20 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.*;
-import org.chocosolver.solver.constraints.nary.sum.PropBoolSumCoarse;
+import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.constraints.nary.sum.PropSum;
+import org.chocosolver.solver.constraints.nary.sum.PropSumBool;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -238,6 +240,12 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testS1_coeff_null() {
         Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
         int[] coeffs = new int[]{1, 0, 0, 2};
         IntVar res = VF.enumerated("R", 0, 10, solver);
@@ -251,6 +259,12 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testS2_coeff_null() {
         Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
         ivars[2] = ivars[1];
         int[] coeffs = new int[]{1, 1, -1, 2};
@@ -283,7 +297,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+        Assert.assertTrue(p instanceof PropSumBool);
     }
 
     @Test(groups = "1s")
@@ -295,7 +309,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+        Assert.assertTrue(p instanceof PropSumBool);
     }
 
     @Test(groups = "1s")
@@ -307,7 +321,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+        Assert.assertTrue(p instanceof PropSumBool);
     }
 
     @Test(groups = "1s")
@@ -319,7 +333,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+        Assert.assertTrue(p instanceof PropSumBool);
     }
 
     @Test(groups = "1s")
@@ -332,7 +346,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+        Assert.assertTrue(p instanceof PropSumBool);
     }
 
     @Test(groups = "1s")
@@ -345,7 +359,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropBoolSumCoarse);
+        Assert.assertTrue(p instanceof PropSum);
     }
 
     @Test(groups = "1s")
@@ -371,7 +385,7 @@ public class IntLinCombTest {
         Constraint c = ICF.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropSum);
+        Assert.assertTrue(p instanceof PropSumBool);
     }
 
     @Test(groups = "1s")
@@ -434,18 +448,26 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    @Test(groups = "1s")
     public void testD16() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
         int[] coeffs = new int[]{1};
         Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
-        Assert.assertTrue(c instanceof Arithmetic);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropTrue);
     }
 
     @Test(groups = "1s")
     public void testD20() {
         Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
         int[] coeffs = new int[]{1, 2, 2, 1};
         IntVar res = VF.enumerated("R", 0, 10, solver);
@@ -453,15 +475,6 @@ public class IntLinCombTest {
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
-    }
-
-    @Test(groups = "1s", expectedExceptions = SolverException.class)
-    public void testD21() {
-        Solver solver = new Solver();
-        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
-        int[] coeffs = new int[]{1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
-        Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups = "1s")
@@ -558,4 +571,131 @@ public class IntLinCombTest {
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
+    @Test(groups = "1s")
+    public void testB1() {
+        Solver solver = new Solver();
+        int n = 23;
+        BoolVar[] bs = VF.boolArray("b", n, solver);
+        int[] cs = new int[n];
+        int k = (int) (n * .7);
+        Arrays.fill(cs, 0, n, 1);
+        Arrays.fill(cs, k, n, -1);
+        IntVar sum = VF.bounded("S", -n / 2, n / 2, solver);
+        solver.post(ICF.scalar(bs, cs, "=", sum));
+        solver.set(ISF.lexico_LB(bs));
+//        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+    }
+
+
+    @Test(groups = "1s")
+    public void testB2() throws ContradictionException {
+        Solver solver = new Solver();
+        int n = 3;
+        BoolVar[] bs = VF.boolArray("b", n, solver);
+        int[] cs = new int[n];
+        Arrays.fill(cs, 0, n, -1);
+        IntVar sum = VF.fixed("S", -2, solver);
+        solver.post(ICF.scalar(bs, cs, "<=", sum));
+        solver.propagate();
+        bs[2].setToFalse(Cause.Null);
+        bs[0].setToTrue(Cause.Null);
+        solver.propagate();
+        Assert.assertTrue(bs[1].isInstantiatedTo(1));
+    }
+
+
+    @Test(groups = "1s")
+    public void testB3() {
+        Solver solver = new Solver();
+        solver.post(ICF.scalar(new IntVar[]{VF.fixed(1, solver), VF.fixed(3, solver)}, new int[]{1, -1}, "!=", VF.fixed(0, solver)));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testB4() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 1, 1, 3, solver);
+        solver.post(ICF.scalar(X, new int[]{-1}, "<=", VF.fixed(2, solver)));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+
+    }
+
+    @Test(groups = "1s")
+    public void testB5() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[3];
+        X[0] = VF.enumerated("X1", 6, 46, solver);
+        X[1] = VF.enumerated("X2", 6, 56, solver);
+        X[2] = VF.bounded("X3", -1140, 1140, solver);
+        solver.post(ICF.scalar(X, new int[]{1, -1, -1}, "=", VF.fixed(0, solver)));
+        solver.propagate();
+        X[1].updateUpperBound(46, Cause.Null);
+        solver.propagate();
+        Assert.assertEquals(X[2].getLB(), -40);
+        Assert.assertEquals(X[2].getUB(), 40);
+
+    }
+
+
+    @Test(groups = "1s")
+    public void testB6() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 1, 3, solver);
+        X[1] = VF.enumerated("X2", 2, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{2, 3}, "<=", VF.fixed(10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 1);
+        Assert.assertEquals(X[0].getUB(), 2);
+        Assert.assertEquals(X[1].getLB(), 2);
+        Assert.assertEquals(X[1].getUB(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testB61() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 1, 3, solver);
+        X[1] = VF.enumerated("X2", 2, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{-2, -3}, ">=", VF.fixed(-10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 1);
+        Assert.assertEquals(X[0].getUB(), 2);
+        Assert.assertEquals(X[1].getLB(), 2);
+        Assert.assertEquals(X[1].getUB(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testB7() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 0, 3, solver);
+        X[1] = VF.enumerated("X2", 1, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{2, 3}, ">=", VF.fixed(10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 0);
+        Assert.assertEquals(X[0].getUB(), 3);
+        Assert.assertEquals(X[1].getLB(), 2);
+        Assert.assertEquals(X[1].getUB(), 5);
+    }
+
+    @Test(groups = "1s")
+    public void testB71() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 0, 3, solver);
+        X[1] = VF.enumerated("X2", 1, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{-2, -3}, ">=", VF.fixed(-10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 0);
+        Assert.assertEquals(X[0].getUB(), 3);
+        Assert.assertEquals(X[1].getLB(), 1);
+        Assert.assertEquals(X[1].getUB(), 3);
+    }
 }
