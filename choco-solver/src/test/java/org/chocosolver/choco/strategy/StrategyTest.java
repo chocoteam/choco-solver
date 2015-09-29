@@ -33,6 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -40,6 +41,7 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -361,5 +363,25 @@ public class StrategyTest {
         VariableEvaluator<SetVar> eval = new MaxDelta();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-5.0, va);
+    }
+
+    @Test(groups = "1s")
+    public void testFH3321() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.reverse_split(), X));
+        SMF.limitTime(solver, "1s");
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+    }
+
+    @Test(groups = "1s")
+    public void testFH3322() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(false), ISF.reverse_split(), X));
+        SMF.limitTime(solver, "5s");
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
 }
