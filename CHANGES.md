@@ -18,8 +18,9 @@ NEXT MILESTONE
 - Improve propagator iteration in propagation engine
 - add UCB1 option for ICF.alldifferent()
 - add IntVar#removeValues(IRemovals, ICause) (#270)
+- revamp scalar and sum (#324)
 
-Bug fixes: #152, #153, #164, #176, #296, #297, #298, #303, #309, #311, #313, #314, #317, #320, #323, #326
+Bug fixes: #152, #153, #164, #176, #296, #297, #298, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, #331
 
 3.3.1 - 11 May 2015
 -------------------

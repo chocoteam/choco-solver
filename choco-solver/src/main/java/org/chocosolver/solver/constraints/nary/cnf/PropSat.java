@@ -171,25 +171,29 @@ public class PropSat extends Propagator<BoolVar> {
     }
 
     void VariableBound(int index) throws ContradictionException {
-        if (sat_trail_.get() < sat_.trailMarker()) {
-            sat_.cancelUntil(sat_trail_.get());
-            assert (sat_trail_.get() == sat_.trailMarker());
-        }
-        int var = index;
-        boolean new_value = vars[index].getValue() != 0;
-        int lit = makeLiteral(var, new_value);
-        boolean fail = !sat_.propagateOneLiteral(lit);
-        // Remark: explanations require to instantiated variables even if fail is set to true
-        sat_trail_.set(sat_.trailMarker());
-        for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
-            lit = sat_.touched_variables_.get(i);
-            var = var(lit);
-            boolean assigned_bool = sign(lit);
-            vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
-        }
-        if (fail) {
+        try {
+            if (sat_trail_.get() < sat_.trailMarker()) {
+                sat_.cancelUntil(sat_trail_.get());
+                assert (sat_trail_.get() == sat_.trailMarker());
+            }
+            int var = index;
+            boolean new_value = vars[index].getValue() != 0;
+            int lit = makeLiteral(var, new_value);
+            boolean fail = !sat_.propagateOneLiteral(lit);
+            // Remark: explanations require to instantiated variables even if fail is set to true
+            sat_trail_.set(sat_.trailMarker());
+            for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
+                lit = sat_.touched_variables_.get(i);
+                var = var(lit);
+                boolean assigned_bool = sign(lit);
+                vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
+            }
+            if (fail) {
 //            force failure by removing the last value
-            vars[index].instantiateTo(1 - vars[index].getValue(), this);
+                vars[index].instantiateTo(1 - vars[index].getValue(), this);
+            }
+        }finally {
+            sat_.touched_variables_.resetQuick(); // issue#327
         }
     }
 
@@ -230,6 +234,7 @@ public class PropSat extends Propagator<BoolVar> {
     // Add a learnt clause
     public void addLearnt(int... lits) {
         sat_.learnClause(lits);
+        this.getSolver().getEngine().propagateOnBacktrack(this); // issue#327
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
     }

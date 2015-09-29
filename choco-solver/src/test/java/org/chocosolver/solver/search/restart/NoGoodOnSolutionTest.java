@@ -7,6 +7,7 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
@@ -140,5 +141,52 @@ public class NoGoodOnSolutionTest {
         solver.findAllSolutions();
         System.out.println(solver.getMeasures());
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
+    }
+
+    @Test(groups = "1s")
+    public void testNQ3() { //issue 327
+        // restarts on solutions and on fails with restarts on solutions (ok)
+        Solver solver = new Solver();
+        int n = 8;
+        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                solver.post(neq);
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0]});
+        Chatterbox.showSolutions(solver);
+        solver.set(ISF.lexico_LB(vars));
+        solver.findAllSolutions();
+        System.out.println(solver.getMeasures());
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s")
+    public void testNQ4() { //issue 327
+        // restarts on solutions and on fails with restarts on solutions (ok)
+        Solver solver = new Solver();
+        int n = 8;
+        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                solver.post(neq);
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0], vars[1]});
+        Chatterbox.showSolutions(solver);
+        solver.set(ISF.lexico_LB(vars));
+//        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        System.out.println(solver.getMeasures());
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 36);
     }
 }

@@ -256,40 +256,44 @@ public class PropNogoods extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     void VariableBound(int var, boolean new_value) throws ContradictionException {
-        if (sat_trail_.get() < sat_.trailMarker()) {
-            sat_.cancelUntil(sat_trail_.get());
-            assert (sat_trail_.get() == sat_.trailMarker());
-        }
-        int lit = makeLiteral(var, new_value);
-        boolean fail = !sat_.propagateOneLiteral(lit);
-        // Remark: explanations require to instantiated variables even if fail is set to true
-        sat_trail_.set(sat_.trailMarker());
-        for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
-            lit = sat_.touched_variables_.get(i);
-            var = var(lit);
-            if (sign(lit)) {
-                vars[lit2pos[var]].instantiateTo(lit2val[var], this);
-            } else {
-                vars[lit2pos[var]].removeValue(lit2val[var], this);
-                if (vars[lit2pos[var]].isInstantiated()) {
-                    IntVar tvar = vars[lit2pos[var]];
-                    int value = tvar.getValue();
-                    int alit = vv2lit[tvar.getId()].get(value);
-                    if (alit != NO_ENTRY) {
-                        fp.push(alit);
+        try {
+            if (sat_trail_.get() < sat_.trailMarker()) {
+                sat_.cancelUntil(sat_trail_.get());
+                assert (sat_trail_.get() == sat_.trailMarker());
+            }
+            int lit = makeLiteral(var, new_value);
+            boolean fail = !sat_.propagateOneLiteral(lit);
+            // Remark: explanations require to instantiated variables even if fail is set to true
+            sat_trail_.set(sat_.trailMarker());
+            for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
+                lit = sat_.touched_variables_.get(i);
+                var = var(lit);
+                if (sign(lit)) {
+                    vars[lit2pos[var]].instantiateTo(lit2val[var], this);
+                } else {
+                    vars[lit2pos[var]].removeValue(lit2val[var], this);
+                    if (vars[lit2pos[var]].isInstantiated()) {
+                        IntVar tvar = vars[lit2pos[var]];
+                        int value = tvar.getValue();
+                        int alit = vv2lit[tvar.getId()].get(value);
+                        if (alit != NO_ENTRY) {
+                            fp.push(alit);
+                        }
                     }
                 }
             }
-        }
-        if (fail) {
-            // force failure by removing the last value
-            IntVar iv = vars[lit2pos[var]];
-            if (sign(lit)) {
-                iv.removeValue(lit2val[var], this);
-            } else {
-                iv.instantiateTo(lit2val[var], this);
-            }
+            if (fail) {
+                // force failure by removing the last value
+                IntVar iv = vars[lit2pos[var]];
+                if (sign(lit)) {
+                    iv.removeValue(lit2val[var], this);
+                } else {
+                    iv.instantiateTo(lit2val[var], this);
+                }
 
+            }
+        } finally {
+            sat_.touched_variables_.resetQuick(); // issue#327
         }
     }
 
@@ -312,7 +316,7 @@ public class PropNogoods extends Propagator<IntVar> {
         sat_.learnClause(lits);
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
-
+        this.getSolver().getEngine().propagateOnBacktrack(this); // issue#327
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {
