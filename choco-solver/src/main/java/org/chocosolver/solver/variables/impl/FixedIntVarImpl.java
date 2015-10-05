@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -48,7 +48,7 @@ import org.chocosolver.util.tools.StringUtils;
 
 /**
  * A IntVar with one domain value.
- * <p/>
+ * <p>
  * Based on "Views and Iterators for Generic Constraint Implementations",
  * C. Schulte and G. Tack
  * <br/>
@@ -81,8 +81,18 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         if (values.contains(constante)) {
+            assert cause != null;
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
+            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        if (!values.contains(constante)) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
@@ -126,6 +136,16 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, IntEventType.DECUPP, "outside domain update bound");
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        if (lb > constante || ub < constante) {
+            assert cause != null;
+            if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
+            this.contradiction(cause, IntEventType.INCLOW, "outside domain update bound");
         }
         return false;
     }

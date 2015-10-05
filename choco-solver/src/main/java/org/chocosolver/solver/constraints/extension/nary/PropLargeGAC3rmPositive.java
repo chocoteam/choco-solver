@@ -31,8 +31,8 @@ package org.chocosolver.solver.constraints.extension.nary;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 
 /**
  * <br/>
@@ -68,7 +68,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
     private PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
         super(vars, relation);
@@ -100,7 +100,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
             valcheck = new FastBooleanValidityChecker(arity, vars);
         } else valcheck = new ValidityChecker(arity, vars);
 
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeGAC3rmPositive(IntVar[] vars, Tuples tuples) {

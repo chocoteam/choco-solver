@@ -42,7 +42,7 @@ import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -127,35 +127,26 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (nlb == olb) {
-            // look for the new lb
-            do {
-                olb = nextValue(olb);
-                nlb = values.nextValue(olb - 1);
-            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
-            // the new lower bound is now known,  delegate to the right method
-            hasChanged = updateLowerBound(olb, cause);
-        } else if (nlb > oub) {
-            return false;
+        if (values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
         }
-        if (nub == oub) {
-            // look for the new ub
-            do {
-                oub = previousValue(oub);
-                nub = values.previousValue(oub + 1);
-            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
-            // the new upper bound is now known, delegate to the right method
-            hasChanged |= updateUpperBound(oub, cause);
-        } else if (nub < olb) {
-            return hasChanged;
+        if (values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
         }
-        assert nlb >= nub;
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (!values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        if (!values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
+        }
         return hasChanged;
     }
 
@@ -164,18 +155,21 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        assert cause != null;
-        if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
-        else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
-        else {
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+        boolean hasChanged = false;
+        if (from <= 1 && to >= 0) {
+            if (from == 1) {
+                hasChanged = instantiateTo(0, cause);
+            } else if (to == 0) {
+                hasChanged = instantiateTo(1, cause);
+            } else {
+                if (_plugexpl) {
+                    solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                }
+                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+
             }
-            return anyChange;
         }
+        return hasChanged;
     }
 
     /**
@@ -276,6 +270,24 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         return value < 1 && instantiateTo(value, cause);
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (lb > 1 || ub < 0) {
+            if (_plugexpl) {
+                solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+            }
+            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+        } else {
+            if (lb == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (ub == 0) {
+                hasChanged = instantiateTo(0, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override

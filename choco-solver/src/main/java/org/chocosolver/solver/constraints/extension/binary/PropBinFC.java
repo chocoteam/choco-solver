@@ -32,8 +32,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
@@ -45,7 +45,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class PropBinFC extends PropBinCSP {
 
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
     public PropBinFC(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesTable(tuples, x, y));
@@ -53,7 +53,7 @@ public class PropBinFC extends PropBinCSP {
 
     private PropBinFC(IntVar x, IntVar y, CouplesTable table) {
         super(x, y, table);
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
     @Override

@@ -32,8 +32,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -59,7 +59,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     protected DisposableValueIterator[] seekIter;
 
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
 
     private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
@@ -84,7 +84,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             seekIter[i] = vars[i].getValueIterator(true);
         }
         Arrays.fill(supports, Integer.MIN_VALUE);
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {

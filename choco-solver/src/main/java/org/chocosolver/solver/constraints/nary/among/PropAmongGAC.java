@@ -39,8 +39,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.procedure.UnarySafeIntProcedure;
@@ -79,7 +79,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     protected boolean needFilter;
 
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
     public PropAmongGAC(IntVar[] variables, int[] values) {
         super(variables, PropagatorPriority.LINEAR, true);
@@ -100,7 +100,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
             occs[i] = environment.makeInt(0);
         }
         rem_proc = new RemProc(this);
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
     @Override

@@ -32,8 +32,8 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -82,7 +82,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     protected IStateInt last;
     int[] listuples;
 
-    IRemovals vrms;
+    IntIterableSet vrms;
 
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
@@ -99,7 +99,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
             this.gacValues[i] = new BitSet(vs[i].getDomainSize());
             min = Math.min(min, offsets[i]);
         }
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
         vrms.setOffset(min);
         listuples = new int[this.relation.getTupleTable().length];
         for (int i = 0; i < listuples.length; i++) {

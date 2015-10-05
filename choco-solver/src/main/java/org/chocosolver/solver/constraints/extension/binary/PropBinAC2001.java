@@ -34,8 +34,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 
 /**
  * AC2001 algorithm for binary table constraint
@@ -52,7 +52,7 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset0;
     protected int offset1;
 
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {
@@ -74,7 +74,7 @@ public class PropBinAC2001 extends PropBinCSP {
             currentSupport1[i] = environment.makeInt();
             currentSupport1[i].set(-1);
         }
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
     @Override

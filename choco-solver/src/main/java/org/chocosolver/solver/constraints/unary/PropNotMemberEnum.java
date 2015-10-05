@@ -35,7 +35,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
 import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
@@ -49,12 +49,12 @@ import java.util.Arrays;
 public class PropNotMemberEnum extends Propagator<IntVar> {
 
     final TIntHashSet values;
-    final BitsetRemovals vrms;
+    final IntIterableBitSet vrms;
 
     public PropNotMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.values = new TIntHashSet(values);
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
         int of = Integer.MAX_VALUE;
         for(int i = 0 ; i < values.length; i++){
             if(values[i]<of){

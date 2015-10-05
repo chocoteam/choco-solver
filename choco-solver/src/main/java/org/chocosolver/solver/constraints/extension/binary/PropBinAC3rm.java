@@ -33,8 +33,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -61,7 +61,7 @@ public class PropBinAC3rm extends PropBinCSP {
     protected int initDomSize0;
     protected int initDomSize1;
 
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
@@ -70,7 +70,7 @@ public class PropBinAC3rm extends PropBinCSP {
 
     private PropBinAC3rm(IntVar x, IntVar y, CouplesBitSetTable table) {
         super(x, y, table);
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
 

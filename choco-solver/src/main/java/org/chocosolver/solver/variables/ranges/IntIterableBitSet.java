@@ -32,12 +32,12 @@ import java.util.BitSet;
  * Created by cprudhom on 09/07/15.
  * Project: choco.
  */
-public class BitsetRemovals implements IRemovals {
+public class IntIterableBitSet implements IntIterableSet {
 
     public BitSet VALUES;
     int OFFSET;
 
-    public BitsetRemovals() {
+    public IntIterableBitSet() {
         this.VALUES = new BitSet();
     }
 
@@ -119,10 +119,15 @@ public class BitsetRemovals implements IRemovals {
         return b.toString();
     }
 
-    public IRemovals duplicate() {
-        BitsetRemovals bsrm = new BitsetRemovals();
+    public IntIterableSet duplicate() {
+        IntIterableBitSet bsrm = new IntIterableBitSet();
         bsrm.setOffset(this.OFFSET);
         bsrm.VALUES.or(this.VALUES);
         return bsrm;
+    }
+
+    @Override
+    public int size() {
+        return VALUES.cardinality();
     }
 }

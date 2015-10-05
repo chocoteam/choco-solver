@@ -31,7 +31,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
@@ -40,7 +40,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  * Interface for integer variables. Provides every required services.
  * The domain is explicitly represented but is not (and should not be) accessible from outside.
  * <br/>
- * <p/>
+ * <p>
  * CPRU r544: remove default implementation
  *
  * @author Charles Prud'homme
@@ -62,8 +62,7 @@ public interface IntVar extends Variable {
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws ContradictionException
-     *          if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     boolean removeValue(int value, ICause cause) throws ContradictionException;
 
@@ -79,12 +78,30 @@ public interface IntVar extends Variable {
      * </ul>
      *
      * @param values set of ordered values to remove
-     * @param cause removal release
-     * @return true if the value has been removed, false otherwise
-     * @throws ContradictionException
-     *          if the domain become empty due to this action
+     * @param cause  removal release
+     * @return true if at least a value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean removeValues(IRemovals values, ICause cause) throws ContradictionException;
+    boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException;
+
+    /**
+     * Removes all values from the domain of <code>this</code> except those in <code>values</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If all values are out of the domain,
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>if the domain is a subset of values,
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>otherwise, if removing all values but <code>values</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param values set of ordered values to keep in the domain
+     * @param cause  removal release
+     * @return true if a at least a value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException;
 
     /**
      * Removes values between [<code>from, to</code>] from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -101,8 +118,7 @@ public interface IntVar extends Variable {
      * @param to    upper bound of the interval to remove(int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
-     * @throws ContradictionException
-     *          if the domain become empty due to this action
+     * @throws ContradictionException if the domain become empty due to this action
      */
     boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
 
@@ -162,6 +178,33 @@ public interface IntVar extends Variable {
      */
     boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
 
+
+    /**
+     * Updates the lower bound and the upper bound of the domain of <code>this</code> to, resp. <code>lb</code> and <code>ub</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     * <ul>
+     * <li>If <code>lb</code> is smaller than the lower bound of the domain
+     * and <code>ub</code> is greater than the upper bound of the domain,
+     * <p>
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>lb</code>, or updating the upper bound to <code>ub</code> leads to a dead-end (domain wipe-out),
+     * or if <code>lb</code> is strictly greater than <code>ub</code>,
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>lb</code> and/or the upper bound to <code>ub</code>
+     * can be done safely can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param lb    new lower bound (included)
+     * @param ub    new upper bound (included)
+     * @param cause update releaser
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException;
+
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
      *
@@ -170,13 +213,13 @@ public interface IntVar extends Variable {
      */
     boolean contains(int value);
 
-	/**
-	 * Checks wether <code>this</code> is instantiated to <code>val</code>
-	 *
-	 * @param value int
-	 * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
-	 */
-	boolean isInstantiatedTo(int value);
+    /**
+     * Checks wether <code>this</code> is instantiated to <code>val</code>
+     *
+     * @param value int
+     * @return true if <code>this</code> is instantiated to <code>val</code>, false otherwise
+     */
+    boolean isInstantiatedTo(int value);
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
@@ -209,10 +252,10 @@ public interface IntVar extends Variable {
     /**
      * Returns the next value just after v in <code>this</code>.
      * If no such value exists, returns Integer.MAX_VALUE;
-     * <p/>
+     * <p>
      * To iterate over the values in a <code>IntVar</code>,
      * use the following loop:
-     * <p/>
+     * <p>
      * <pre>
      * int ub = iv.getUB();
      * for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
@@ -227,10 +270,10 @@ public interface IntVar extends Variable {
     /**
      * Returns the previous value just befor v in <code>this</code>.
      * If no such value exists, returns Integer.MIN_VALUE;
-     * <p/>
+     * <p>
      * To iterate over the values in a <code>IntVar</code>,
      * use the following loop:
-     * <p/>
+     * <p>
      * <pre>
      * int lb = iv.getLB();
      * for (int i = iv.getUB(); i >= lb; i = iv.previousValue(i)) {
@@ -245,12 +288,12 @@ public interface IntVar extends Variable {
 
     /**
      * Retrieves an iterator over values of <code>this</code>.
-     * <p/>
+     * <p>
      * The values can be iterated in a bottom-up way or top-down way.
-     * <p/>
+     * <p>
      * To bottom-up iterate over the values in a <code>IntVar</code>,
      * use the following loop:
-     * <p/>
+     * <p>
      * <pre>
      * DisposableValueIterator vit = var.getValueIterator(true);
      * while(vit.hasNext()){
@@ -281,12 +324,12 @@ public interface IntVar extends Variable {
 
     /**
      * Retrieves an iterator over ranges (or intervals) of <code>this</code>.
-     * <p/>
+     * <p>
      * The ranges can be iterated in a bottom-up way or top-down way.
-     * <p/>
+     * <p>
      * To bottom-up iterate over the values in a <code>IntVar</code>,
      * use the following loop:
-     * <p/>
+     * <p>
      * <pre>
      * DisposableRangeIterator rit = var.getRangeIterator(true);
      * while (rit.hasNext()) {
@@ -336,7 +379,7 @@ public interface IntVar extends Variable {
 
 
     /**
-	 * @return true iff the variable has a binary domain
-	 */
-	boolean isBool();
+     * @return true iff the variable has a binary domain
+     */
+    boolean isBool();
 }

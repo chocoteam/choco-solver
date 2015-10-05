@@ -17,7 +17,8 @@ NEXT MILESTONE
 - Refactor Solution (#306)
 - Improve propagator iteration in propagation engine
 - add UCB1 option for ICF.alldifferent()
-- add IntVar#removeValues(IRemovals, ICause) (#270)
+- add IntVar#removeValues(IntIterableSet, ICause), IntVar#removeAllValuesBut(IntIterableSet, ICause)
+and IntVar#updateBounds(int, int, ICause) (#270)
 - revamp scalar and sum (#324)
 
 Bug fixes: #152, #153, #164, #176, #296, #297, #298, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, #331

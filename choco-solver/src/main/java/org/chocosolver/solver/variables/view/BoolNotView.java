@@ -36,7 +36,7 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 
 /**
@@ -88,54 +88,42 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
-    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
-        assert cause != null;
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (nlb == olb) {
-            // look for the new lb
-            do {
-                olb = nextValue(olb);
-                 nlb = values.nextValue(olb - 1);
-            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
-            // the new lower bound is now known,  delegate to the right method
-            hasChanged = updateLowerBound(olb, cause);
-        } else if (nlb > oub) {
-            return false;
+        if (values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
         }
-        if (nub == oub) {
-            // look for the new ub
-            do {
-                oub = previousValue(oub);
-                nub = values.previousValue(oub + 1);
-            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
-            // the new upper bound is now known, delegate to the right method
-            hasChanged |= updateUpperBound(oub, cause);
-        } else if (nub < olb) {
-            return hasChanged;
+        if (values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
         }
-        assert nlb >= nub;
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (!values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        if (!values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
+        }
         return hasChanged;
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
-        else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
-        else if (hasEnumeratedDomain()) {
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+        boolean hasChanged = false;
+        if (from <= 1 && to >= 0) {
+            if (from == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (to == 0) {
+                hasChanged = instantiateTo(0, cause);
+            } else {
+                instantiateTo(2, cause);
             }
-            return anyChange;
-        } else {
-            return false;
         }
+        return hasChanged;
     }
 
     @Override
@@ -167,6 +155,23 @@ public final class BoolNotView extends IntView implements BoolVar {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (lb > 1) {
+            var.instantiateTo(-1, cause);
+        } else if (ub < 0) {
+            var.instantiateTo(2, cause);
+        } else {
+            if (lb == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (ub == 0) {
+                hasChanged = instantiateTo(0, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override

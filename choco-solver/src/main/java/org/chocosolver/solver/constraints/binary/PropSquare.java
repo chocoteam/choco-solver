@@ -36,8 +36,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -53,7 +53,7 @@ public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
     public PropSquare(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
@@ -61,7 +61,7 @@ public class PropSquare extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
         rem_proc = new RemProc(this);
     }
 

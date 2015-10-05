@@ -35,7 +35,7 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.MathUtils;
@@ -103,13 +103,15 @@ public final class ScaleView extends IntView {
     }
 
     @Override
-    public boolean removeValues(IRemovals values, ICause cause) throws ContradictionException {
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
         int olb = getLB();
         int oub = getUB();
         int nlb = values.nextValue(olb - 1);
         int nub = values.previousValue(oub + 1);
-        boolean hasChanged = false;
+        if (nlb > oub || nub < olb) {
+            return false;
+        }
         if (nlb == olb) {
             // look for the new lb
             do {
@@ -117,9 +119,6 @@ public final class ScaleView extends IntView {
                 nlb = values.nextValue(olb - 1);
             } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
             // the new lower bound is now known,  delegate to the right method
-            hasChanged = updateLowerBound(olb, cause);
-        } else if (nlb > oub) {
-            return false;
         }
         if (nub == oub) {
             // look for the new ub
@@ -128,21 +127,48 @@ public final class ScaleView extends IntView {
                 nub = values.previousValue(oub + 1);
             } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
             // the new upper bound is now known, delegate to the right method
-            hasChanged |= updateUpperBound(oub, cause);
-        } else if (nub < olb) {
-            return hasChanged;
         }
+        // the new bounds are now known, delegate to the right method
+        boolean hasChanged = updateBounds(olb, oub, cause);
         // now deal with holes
         int value = nlb;
         int to = nub;
         boolean hasRemoved = false;
         while (value <= to) {
-            hasRemoved |= var.removeValue(value, cause);
+            hasRemoved |= var.removeValue(value / cste, cause);
             value = values.nextValue(value);
         }
         if (hasRemoved) {
             IntEventType e = IntEventType.REMOVE;
             if (var.isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        // the new bounds are now known, delegate to the right method
+        boolean hasChanged = updateBounds(nlb, nub, cause);
+        // now deal with holes
+        int to = previousValue(nub);
+        boolean hasRemoved = false;
+        int value = nextValue(nlb);
+        // iterate over the values in the domain, remove the ones that are not in values
+        for (; value <= to; value = nextValue(value)) {
+            if (!values.contains(value)) {
+                hasRemoved |= var.removeValue(value / cste, cause);
+            }
+        }
+        if (hasRemoved) {
+            IntEventType e = IntEventType.REMOVE;
+            if (isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
             }
             this.notifyPropagators(e, cause);
@@ -214,6 +240,33 @@ public final class ScaleView extends IntView {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = this.getLB();
+        int oub = this.getUB();
+        boolean hasChanged = false;
+        if (olb < lb || oub > ub) {
+            IntEventType e = null;
+
+            if (olb < lb) {
+                hasChanged = var.updateLowerBound(MathUtils.divCeil(lb, cste), this);
+                e = IntEventType.INCLOW;
+            }
+            if (oub > ub) {
+                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                hasChanged |= var.updateUpperBound(MathUtils.divFloor(ub, cste), this);
+            }
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            if (hasChanged) {
+                this.notifyPropagators(e, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override

@@ -27,11 +27,13 @@
 package org.chocosolver.solver.variables.ranges;
 
 /**
- * An interface to store values to remove, to be used by IntVar.removeValues(IRemovals, ICause)
+ * An interface to store a set of values, to be used with
+ * {@link org.chocosolver.solver.variables.IntVar#removeValues(IntIterableSet, org.chocosolver.solver.ICause)} and
+ * {@link org.chocosolver.solver.variables.IntVar#removeAllValuesBut(IntIterableSet, org.chocosolver.solver.ICause)}
  * Created by cprudhom on 09/07/15.
  * Project: choco.
  */
-public interface IRemovals{
+public interface IntIterableSet {
 
     void setOffset(int offset);
 
@@ -53,6 +55,12 @@ public interface IRemovals{
 
     boolean contains(int aValue);
 
-    IRemovals duplicate();
+    IntIterableSet duplicate();
+
+    /**
+     * Return the number of elements
+     * @return
+     */
+    int size();
 
 }

@@ -32,8 +32,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.BitsetRemovals;
-import org.chocosolver.solver.variables.ranges.IRemovals;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 
 /**
@@ -45,12 +45,12 @@ import org.chocosolver.util.ESat;
 public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     protected final int[] currentTuple;
-    protected final IRemovals vrms;
+    protected final IntIterableSet vrms;
 
     private PropLargeFC(IntVar[] vars, LargeRelation relation) {
         super(vars, relation);
         this.currentTuple = new int[vars.length];
-        vrms = new BitsetRemovals();
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeFC(IntVar[] vars, Tuples tuples) {

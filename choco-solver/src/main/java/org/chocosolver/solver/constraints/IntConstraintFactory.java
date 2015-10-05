@@ -34,6 +34,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.binary.*;
+import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
@@ -280,7 +281,7 @@ public class IntConstraintFactory {
      *               <p/> "detect" Let the constraint detects the ordering of TABLE, if any
      */
     public static Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
-        return new Constraint("Element", new PropElement(VALUE, TABLE, INDEX, OFFSET, PropElement.Sort.valueOf(SORT)));
+        return ElementFactory.detect(VALUE, TABLE, INDEX, OFFSET);
     }
 
     /**
