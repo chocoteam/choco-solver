@@ -156,30 +156,30 @@ public enum ArrayUtils {
         return ret;
     }
 
-	/**
-	 * Append int arrays
-	 *
-	 * @param toAppend array of arrays to append
-	 * @return a new Array composed of those given in parameters.
-	 */
-	@SuppressWarnings("unchecked")
-	public static int[] append(int[]... toAppend) {
-		int total = 0;
-		for(int[] tab:toAppend){
-			if(tab!=null) {
-				total += tab.length;
-			}
-		}
-		int[] ret = new int[total];
-		int pos = 0;
-		for (int[] tab : toAppend) {
-			if (tab != null) {
-				System.arraycopy(tab, 0, ret, pos, tab.length);
-				pos += tab.length;
-			}
-		}
-		return ret;
-	}
+    /**
+     * Append int arrays
+     *
+     * @param toAppend array of arrays to append
+     * @return a new Array composed of those given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static int[] append(int[]... toAppend) {
+        int total = 0;
+        for (int[] tab : toAppend) {
+            if (tab != null) {
+                total += tab.length;
+            }
+        }
+        int[] ret = new int[total];
+        int pos = 0;
+        for (int[] tab : toAppend) {
+            if (tab != null) {
+                System.arraycopy(tab, 0, ret, pos, tab.length);
+                pos += tab.length;
+            }
+        }
+        return ret;
+    }
 
     /**
      * Reverse all signs of the a given int table.
@@ -434,5 +434,83 @@ public enum ArrayUtils {
 
     public static <E> E[] randomPermutations(E[] tab, long seed) {
         return randomPermutations(tab, new Random(seed));
+    }
+
+    /**
+     * Adapted from java.util.Arrays#binarySearch0, it returns the value greater or equal to key in an increasing order value array
+     * If the key exists in a, it returns the index of key in a,
+     * otherwise it returns the index of the closest value greater than key when gq is set to true,
+     * or the index of the closest value smaller than key when gq is set to false.
+     *
+     * @param a         the values, increasingly ordered
+     * @param fromIndex starting index (inclusive)
+     * @param toIndex   ending index (inclusive)
+     * @param key       value to look for
+     * @param gq        set to true to look for the value greater or equal to key,
+     *                  false to look for the value smaller or equal to the key
+     */
+    public static int binarySearchInc(int[] a, int fromIndex, int toIndex, int key, boolean gq) {
+        int low = fromIndex;
+        int high = toIndex;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            int midVal = a[mid];
+
+            if (midVal < key)
+                low = mid + 1;
+            else if (midVal > key)
+                high = mid - 1;
+            else
+                return mid; // key found
+        }
+        // a is in increasing order, then we look for closest value
+        // greater than key
+        if (gq) {
+            return low;
+        }
+        // smaller than key
+        else {
+            return high;
+        }
+    }
+
+    /**
+     * Adapted from java.util.Arrays#binarySearch0, it returns the value greater or equal to key in a decreasing order value array.
+     * If the key exists in a, it returns the index of key in a,
+     * otherwise it returns the index of the closest value greater than key when gq is set to true,
+     * or the index of the closest value smaller than key when gq is set to false.
+     *
+     * @param a         the values, decreasingly ordered
+     * @param fromIndex starting index (inclusive)
+     * @param toIndex   ending index (inclusive)
+     * @param key       value to look for
+     * @param gq        set to true to look for the value greater or equal to key,
+     *                  false to look for the value smaller or equal to the key
+     */
+    public static int binarySearchDec(int[] a, int fromIndex, int toIndex, int key, boolean gq) {
+        int low = fromIndex;
+        int high = toIndex;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            int midVal = a[mid];
+
+            if (midVal < key)
+                high = mid - 1;
+            else if (midVal > key) {
+                low = mid + 1;
+            } else
+                return mid; // key found
+        }
+        // a is in decreasing order, then we look for closest value
+        // greater than key
+        if (gq) {
+            return high;
+        }
+        // smaller than key
+        else {
+            return low;
+        }
     }
 }

@@ -31,10 +31,13 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
@@ -189,4 +192,43 @@ public class ElementTest {
         nasty(153, 15, 192);
     }
 
+
+    @Test(groups = "1s")
+    public void testInc1() {
+        for (int i = 0; i < 20; i++) {
+            Solver solver = new Solver();
+            IntVar I = VF.enumerated("I", 0, 5, solver);
+            IntVar R = VF.enumerated("R", 0, 10, solver);
+            solver.post(ICF.element(R, new int[]{0, 2, 4, 6, 7}, I));
+            solver.set(ISF.random_value(new IntVar[]{I, R}, i));
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testDec1() {
+        for (int i = 0; i < 20; i++) {
+            Solver solver = new Solver();
+            IntVar I = VF.enumerated("I", 0, 5, solver);
+            IntVar R = VF.enumerated("R", 0, 10, solver);
+            solver.post(ICF.element(R, new int[]{7, 6, 4, 2, 0}, I));
+            solver.set(ISF.random_value(new IntVar[]{I, R}, i));
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testReg1() {
+        for (int i = 0; i < 20; i++) {
+            Solver solver = new Solver();
+            IntVar I = VF.enumerated("I", 0, 13, solver);
+            IntVar R = VF.enumerated("R", 0, 21, solver);
+            solver.post(ICF.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I));
+            solver.set(ISF.random_value(new IntVar[]{I, R}, i));
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 14);
+        }
+    }
 }
