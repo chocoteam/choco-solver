@@ -88,11 +88,6 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
         filter.propagate();
     }
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-    }
-
     //***********************************************************************************
     // INFO
     //***********************************************************************************
