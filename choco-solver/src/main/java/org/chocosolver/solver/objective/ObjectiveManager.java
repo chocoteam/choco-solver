@@ -196,11 +196,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
                 }
                 IntVar io = (IntVar) objective;
                 if (policy == ResolutionPolicy.MINIMIZE) {
-                    io.updateUpperBound(bestProvedUB.intValue() - offset, this);
-                    io.updateLowerBound(bestProvedLB.intValue(), this);
+                    io.updateBounds(bestProvedLB.intValue(), bestProvedUB.intValue() - offset, this);
                 } else {
-                    io.updateUpperBound(bestProvedUB.intValue(), this);
-                    io.updateLowerBound(bestProvedLB.intValue() + offset, this);
+                    io.updateBounds(bestProvedLB.intValue() + offset, bestProvedUB.intValue(), this);
                 }
             } else {
                 double offset = 0;
@@ -209,11 +207,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
                 }
                 RealVar io = (RealVar) objective;
                 if (policy == ResolutionPolicy.MINIMIZE) {
-                    io.updateUpperBound(bestProvedUB.doubleValue() - offset, this);
-                    io.updateLowerBound(bestProvedLB.doubleValue(), this);
+                    io.updateBounds(bestProvedLB.doubleValue(), bestProvedUB.doubleValue() - offset, this);
                 } else {
-                    io.updateUpperBound(bestProvedUB.doubleValue(), this);
-                    io.updateLowerBound(bestProvedLB.doubleValue() + offset, this);
+                    io.updateBounds(bestProvedLB.doubleValue() + offset, bestProvedUB.doubleValue(), this);
                 }
             }
         }

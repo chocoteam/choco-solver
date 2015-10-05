@@ -98,8 +98,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
             vars[i].removeValue(i + offset, this);
-            vars[i].updateLowerBound(offset, this);
-            vars[i].updateUpperBound(n - 1 + offset, this);
+            vars[i].updateBounds(offset, n - 1 + offset, this);
             if (vars[i].isInstantiated()) {
                 fixedVar.add(i);
             }

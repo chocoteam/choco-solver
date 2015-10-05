@@ -85,8 +85,7 @@ public class PropBitChanneling extends Propagator<IntVar> {
             }
             return;
         }
-        octet.updateLowerBound(0, this);
-        octet.updateUpperBound(MAX, this);
+        octet.updateBounds(0, MAX, this);
         int kb = 0;
         for (int i = 0; i < SIZE; i++) {
             if (bits[i].isInstantiated()) {

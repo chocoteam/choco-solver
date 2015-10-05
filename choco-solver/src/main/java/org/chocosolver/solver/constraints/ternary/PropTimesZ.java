@@ -35,6 +35,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
+import static java.lang.Math.ceil;
+
 /**
  * X*Y=Z filters from right to left
  *
@@ -184,27 +186,23 @@ public class PropTimesZ extends Propagator<IntVar> {
                 if (X.getLB() > 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateUpperBound((int) a, this);
-                    Y.updateLowerBound((int) Math.ceil(b), this);
+                    Y.updateBounds((int) ceil(b), (int) a, this);
                 }
                 if (X.getUB() < 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateUpperBound((int) a, this);
-                    Y.updateLowerBound((int) b, this);
+                    Y.updateBounds((int) b, (int) a, this);
                 }
             } else {
                 if (X.getLB() > 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateLowerBound((int) a, this);
-                    Y.updateUpperBound((int) b, this);
+                    Y.updateBounds((int) a, (int) b, this);
                 }
                 if (X.getUB() < 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateLowerBound((int) a, this);
-                    Y.updateUpperBound((int) b, this);
+                    Y.updateBounds((int) a, (int) b, this);
                 }
             }
         }

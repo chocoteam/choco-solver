@@ -38,6 +38,10 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} = occVar
  * assumes the occVar variable to be the last of the variables of the constraint:
@@ -97,7 +101,7 @@ public class PropCountVar extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int minCard = Integer.MAX_VALUE / 10;
+        int minCard = MAX_VALUE / 10;
         int maxCard = -minCard;
         int cardLB = card.getLB();
         int cardUB = card.getUB();
@@ -116,12 +120,11 @@ public class PropCountVar extends Propagator<IntVar> {
             if (cardLB > max || cardUB < min) {
                 val.removeValue(value, this);
             } else {
-                minCard = Math.min(minCard, min);
-                maxCard = Math.max(maxCard, max);
+                minCard = min(minCard, min);
+                maxCard = max(maxCard, max);
             }
         }
-        card.updateLowerBound(minCard, this);
-        card.updateUpperBound(maxCard, this);
+        card.updateBounds(minCard, maxCard, this);
         if (val.isInstantiated() && card.isInstantiated()) {
             int nb = card.getValue();
             int value = val.getValue();

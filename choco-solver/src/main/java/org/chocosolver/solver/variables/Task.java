@@ -206,14 +206,11 @@ public class Task {
         @Override
         public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
             // start
-            S.updateLowerBound(E.getLB() - D.getUB(), this);
-            S.updateUpperBound(E.getUB() - D.getLB(), this);
+            S.updateBounds(E.getLB() - D.getUB(), E.getUB() - D.getLB(), this);
             // end
-            E.updateLowerBound(S.getLB() + D.getLB(), this);
-            E.updateUpperBound(S.getUB() + D.getUB(), this);
+            E.updateBounds(S.getLB() + D.getLB(), S.getUB() + D.getUB(), this);
             // duration
-            D.updateLowerBound(E.getLB() - S.getUB(), this);
-            D.updateUpperBound(E.getUB() - S.getLB(), this);
+            D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
         }
 
         @Override

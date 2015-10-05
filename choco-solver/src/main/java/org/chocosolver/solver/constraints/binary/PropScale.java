@@ -36,6 +36,9 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+
 /**
  * Scale propagator : ensures x * y = z
  * With y a constant greater than one
@@ -74,8 +77,7 @@ public class PropScale extends Propagator<IntVar> {
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        X.updateLowerBound((int) Math.ceil((double) Z.getLB() / (double) Y - 0.0001), this);
-        X.updateUpperBound((int) Math.floor((double) Z.getUB() / (double) Y + 0.0001), this);
+        X.updateBounds((int) ceil((double) Z.getLB() / (double) Y - 0.0001), (int) floor((double) Z.getUB() / (double) Y + 0.0001), this);
         boolean hasChanged;
         hasChanged = Z.updateLowerBound(X.getLB() * Y, this);
         hasChanged |= Z.updateUpperBound(X.getUB() * Y, this);

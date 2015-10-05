@@ -138,8 +138,7 @@ public class PropAbsolute extends Propagator<IntVar> {
         // X = |Y|
         int max = X.getUB();
         int min = X.getLB();
-        Y.updateUpperBound(max, this);
-        Y.updateLowerBound(-max, this);
+        Y.updateBounds(-max, max, this);
         Y.removeInterval(1 - min, min - 1, this);
         /////////////////////////////////////////////////
         int prevLB = X.getLB();
@@ -147,11 +146,9 @@ public class PropAbsolute extends Propagator<IntVar> {
         min = Y.getLB();
         max = Y.getUB();
         if (max <= 0) {
-            X.updateLowerBound(-max, this);
-            X.updateUpperBound(-min, this);
+            X.updateBounds(-max, -min, this);
         } else if (min >= 0) {
-            X.updateLowerBound(min, this);
-            X.updateUpperBound(max, this);
+            X.updateBounds(min, max, this);
         } else {
             if (Y.hasEnumeratedDomain()) {
                 int mP = Y.nextValue(-1);

@@ -177,13 +177,11 @@ public class PropLexChain extends Propagator<IntVar> {
     public void boundsLex(int[] a, IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         while (i < N && a[i] == b[i]) {
-            x[i].updateLowerBound(a[i], this);
-            x[i].updateUpperBound(b[i], this);
+            x[i].updateBounds(a[i], b[i], this);
             i++;
         }
         if (i < N) {
-            x[i].updateLowerBound(a[i], this);
-            x[i].updateUpperBound(b[i], this);
+            x[i].updateBounds(a[i], b[i], this);
         }
         if (i == N || x[i].nextValue(a[i]) < b[i]) {
             return;

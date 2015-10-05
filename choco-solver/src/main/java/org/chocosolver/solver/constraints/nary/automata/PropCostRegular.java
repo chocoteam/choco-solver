@@ -47,6 +47,9 @@ import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+
 /**
  * <br/>
  *
@@ -97,8 +100,7 @@ public class PropCostRegular extends Propagator<IntVar> {
      */
     protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
-        vars[zIdx].updateLowerBound(bounds.min.value, this);
-        vars[zIdx].updateUpperBound(bounds.max.value, this);
+        vars[zIdx].updateBounds(bounds.min.value, bounds.max.value, this);
         this.prefilter();
     }
 
@@ -162,8 +164,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
+        vars[zIdx].updateBounds((int) ceil(zinf), (int) floor(zsup), this);
 
         DisposableIntIterator it = this.graph.inGraph.getIterator();
         //for (int id = this.graph.inGraph.nextSetBit(0) ; id >=0 ; id = this.graph.inGraph.nextSetBit(id+1))  {
@@ -275,8 +276,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
+        vars[zIdx].updateBounds((int) ceil(zinf), (int) floor(zsup), this);
     }
 
 

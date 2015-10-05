@@ -154,8 +154,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = nbSure.get();
         int ub = poss.getSize() + lb;
-        vars[nb_vars].updateLowerBound(lb, this);
-        vars[nb_vars].updateUpperBound(ub, this);
+        vars[nb_vars].updateBounds(lb, ub, this);
         if (vars[nb_vars].isInstantiated() && lb < ub) {
             if (vars[nb_vars].getValue() == lb) {
                 backPropRemPoss();
@@ -190,8 +189,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                         break;
                     }
                 }
-                v.updateLowerBound(newLB, this);
-                v.updateUpperBound(newUB, this);
+                v.updateBounds(newLB, newUB, this);
                 if (newLB > values[values.length - 1] || newUB < values[0]) {
                     poss.remove(i);
                 }
@@ -211,8 +209,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                 poss.remove(i);
                 nbSure.add(1);
             } else {
-                v.updateLowerBound(values[0], this);
-                v.updateUpperBound(values[values.length - 1], this);
+                v.updateBounds(values[0], values[values.length - 1], this);
                 int newLB = v.getLB();
                 int newUB = v.getUB();
                 for (int val = v.getLB(); val <= newUB; val = v.nextValue(val)) {
@@ -229,8 +226,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                         break;
                     }
                 }
-                v.updateLowerBound(newLB, this);
-                v.updateUpperBound(newUB, this);
+                v.updateBounds(newLB, newUB, this);
                 if (v.isInstantiated()) {
                     poss.remove(i);
                     nbSure.add(1);

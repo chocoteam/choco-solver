@@ -38,6 +38,9 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+
 /**
  * Channeling constraint between integers and reals, to avoid views
  *
@@ -97,8 +100,7 @@ public class IntEqRealConstraint extends Constraint {
                 IntVar intVar = intVars[i];
                 RealVar realVar = realVars[i];
                 realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, this);
-                intVar.updateLowerBound((int) Math.ceil(realVar.getLB() - epsilon), this);
-                intVar.updateUpperBound((int) Math.floor(realVar.getUB() + epsilon), this);
+                intVar.updateBounds((int) ceil(realVar.getLB() - epsilon), (int) floor(realVar.getUB() + epsilon), this);
                 if (intVar.hasEnumeratedDomain()) {
                     realVar.updateBounds((double) intVar.getLB() - epsilon, (double) intVar.getUB() + epsilon, this);
                 }

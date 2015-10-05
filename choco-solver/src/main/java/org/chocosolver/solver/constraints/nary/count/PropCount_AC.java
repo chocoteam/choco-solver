@@ -142,8 +142,7 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        vars[n].updateLowerBound(mandatories.getSize(), this);
-        vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), this);
+        vars[n].updateBounds(mandatories.getSize(), mandatories.getSize() + possibles.getSize(), this);
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {

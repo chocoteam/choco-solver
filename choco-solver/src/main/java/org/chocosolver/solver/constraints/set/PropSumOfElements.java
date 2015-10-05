@@ -132,8 +132,7 @@ public class PropSumOfElements extends Propagator<Variable> {
             sE += get(j);
         }
         if (notEmpty || set.getKernelSize() > 0) {
-            sum.updateLowerBound(sK, this);
-            sum.updateUpperBound(sE, this);
+            sum.updateBounds(sK, sE, this);
         }
         boolean again = false;
         // filter set

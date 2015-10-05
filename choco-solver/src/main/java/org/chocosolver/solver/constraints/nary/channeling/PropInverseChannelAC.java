@@ -83,10 +83,8 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            X[i].updateLowerBound(minX, this);
-            X[i].updateUpperBound(n - 1 + minX, this);
-            Y[i].updateLowerBound(minY, this);
-            Y[i].updateUpperBound(n - 1 + minY, this);
+            X[i].updateBounds(minX, n - 1 + minX, this);
+            Y[i].updateBounds(minY, n - 1 + minY, this);
         }
         for (int i = 0; i < n; i++) {
             enumeratedFilteringOfX(i);

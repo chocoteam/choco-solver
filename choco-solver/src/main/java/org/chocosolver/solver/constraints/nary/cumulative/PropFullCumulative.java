@@ -149,12 +149,9 @@ public class PropFullCumulative extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             d[i].updateLowerBound(0, this); // should even be 1
             h[i].updateLowerBound(0, this);
-            s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), this);
-            s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), this);
-            e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), this);
-            e[i].updateLowerBound(s[i].getLB() + d[i].getLB(), this);
-            d[i].updateUpperBound(e[i].getUB() - s[i].getLB(), this);
-            d[i].updateLowerBound(e[i].getLB() - s[i].getUB(), this);
+            s[i].updateBounds(e[i].getLB() - d[i].getUB(), e[i].getUB() - d[i].getLB(), this);
+            e[i].updateBounds(s[i].getLB() + d[i].getLB(), s[i].getUB() + d[i].getUB(), this);
+            d[i].updateBounds(e[i].getLB() - s[i].getUB(), e[i].getUB() - s[i].getLB(), this);
         }
     }
 

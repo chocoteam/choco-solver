@@ -838,8 +838,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < nbCounters; i++) {
             IntVar z = this.z[i];
             Bounds bounds = counters.get(i).bounds();
-            z.updateLowerBound(bounds.min.value, this);//, false);
-            z.updateUpperBound(bounds.max.value, this);//, false);
+            z.updateBounds(bounds.min.value, bounds.max.value, this);//, false);
 
         }
     }

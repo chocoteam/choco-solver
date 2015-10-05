@@ -247,8 +247,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
                     break;
                 }
             }
-            v.updateLowerBound(lb, this);
-            v.updateUpperBound(ub, this);
+            v.updateBounds(lb, ub, this);
         }
     }
 

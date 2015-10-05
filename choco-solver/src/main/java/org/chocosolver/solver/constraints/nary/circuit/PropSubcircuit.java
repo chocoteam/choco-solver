@@ -91,8 +91,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-            vars[i].updateLowerBound(offset, this);
-            vars[i].updateUpperBound(n - 1 + offset, this);
+            vars[i].updateBounds(offset, n - 1 + offset, this);
             if (vars[i].isInstantiated() && i + offset != vars[i].getValue()) {
                 fixedVar.add(i);
             }

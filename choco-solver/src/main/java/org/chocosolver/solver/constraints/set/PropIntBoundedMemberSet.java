@@ -45,6 +45,8 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
 
+import static org.chocosolver.solver.variables.SetVar.END;
+
 /**
  * Propagator for Member constraint: iv is in set
  *
@@ -102,11 +104,10 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         }
         int maxVal = set.getEnvelopeFirst();
         int minVal = maxVal;
-        for (int j = maxVal; j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j = maxVal; j != END; j = set.getEnvelopeNext()) {
             maxVal = j;
         }
-        iv.updateUpperBound(maxVal, this);
-        iv.updateLowerBound(minVal, this);
+        iv.updateBounds(minVal, maxVal, this);
         minVal = iv.getLB();
         maxVal = iv.getUB();
         while (minVal <= maxVal && !set.envelopeContains(minVal)) {
@@ -122,7 +123,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         }
         // search for watch literals
         int i = set.getEnvelopeFirst(), wl = 0, cnt = 0;
-        while (i != SetVar.END && wl < 2) {
+        while (i != END && wl < 2) {
             if (!iv.contains(i)) {
                 cnt++;
             } else {

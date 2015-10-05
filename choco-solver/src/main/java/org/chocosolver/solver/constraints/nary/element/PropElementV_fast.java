@@ -44,6 +44,11 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * Fast Element constraint
  *
@@ -74,19 +79,18 @@ public class PropElementV_fast extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateLowerBound(offset, this);
-        index.updateUpperBound(vars.length + offset - 3, this);
+        index.updateBounds(offset, vars.length + offset - 3, this);
         int lb = index.getLB();
         int ub = index.getUB();
-        int min = Integer.MAX_VALUE / 2;
-        int max = Integer.MIN_VALUE / 2;
+        int min = MAX_VALUE / 2;
+        int max = MIN_VALUE / 2;
         // 1. bottom up loop
         for (int i = lb; i <= ub; i = index.nextValue(i)) {
             if (disjoint(var, vars[2 + i - offset])) {
                 index.removeValue(i, this);
             }
-            min = Math.min(min, vars[2 + i - offset].getLB());
-            max = Math.max(max, vars[2 + i - offset].getUB());
+            min = min(min, vars[2 + i - offset].getLB());
+            max = max(max, vars[2 + i - offset].getUB());
         }
         // 2. top-down loop for bounded domains
         if (!index.hasEnumeratedDomain()) {
@@ -98,8 +102,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                 }
             }
         }
-        var.updateLowerBound(min, this);
-        var.updateUpperBound(max, this);
+        var.updateBounds(min, max, this);
         if (index.isInstantiated()) {
             equals(var, vars[2 + index.getValue() - offset]);
         }
@@ -113,10 +116,8 @@ public class PropElementV_fast extends Propagator<IntVar> {
 
     private void equals(IntVar a, IntVar b) throws ContradictionException {
         int s = a.getDomainSize() + b.getDomainSize();
-        a.updateLowerBound(b.getLB(), this);
-        a.updateUpperBound(b.getUB(), this);
-        b.updateLowerBound(a.getLB(), this);
-        b.updateUpperBound(a.getUB(), this);
+        a.updateBounds(b.getLB(), b.getUB(), this);
+        b.updateBounds(a.getLB(), a.getUB(), this);
         if (!fast) {
             if (a.getDomainSize() != b.getDomainSize()) {
                 int lb = a.getLB();

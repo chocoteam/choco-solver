@@ -82,10 +82,8 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
-                X[i].updateLowerBound(minX, this);
-                X[i].updateUpperBound(n - 1 + minX, this);
-                Y[i].updateLowerBound(minY, this);
-                Y[i].updateUpperBound(n - 1 + minY, this);
+                X[i].updateBounds(minX, n - 1 + minX, this);
+                Y[i].updateBounds(minY, n - 1 + minY, this);
             }
             toCompute.clear();
             for (int i = 0; i < n; i++) {

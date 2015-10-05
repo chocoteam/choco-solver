@@ -84,18 +84,15 @@ public class PropMin extends Propagator<IntVar> {
             }
             if (c == vars.length - 2) {
                 filter = false;
-                vars[idx].updateLowerBound(vars[n].getLB(), this);
-                vars[idx].updateUpperBound(vars[n].getUB(), this);
+                vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
                 if (vars[n].isInstantiated()) {
                     setPassive();
                 } else if (vars[idx].hasEnumeratedDomain()) {
                     // for enumerated variables only
                     while (vars[n].getLB() != vars[idx].getLB()
                             || vars[n].getUB() != vars[idx].getUB()) {
-                        vars[n].updateLowerBound(vars[idx].getLB(), this);
-                        vars[n].updateUpperBound(vars[idx].getUB(), this);
-                        vars[idx].updateLowerBound(vars[n].getLB(), this);
-                        vars[idx].updateUpperBound(vars[n].getUB(), this);
+                        vars[n].updateBounds(vars[idx].getLB(), vars[idx].getUB(), this);
+                        vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
                     }
                 }
             }

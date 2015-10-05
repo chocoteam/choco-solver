@@ -64,8 +64,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateLowerBound(offSet, this);
-        vars[n].updateUpperBound(n - 1 + offSet, this);
+        vars[n].updateBounds(offSet, n - 1 + offSet, this);
         for (int i = 0; i < n; i++) {
             if (vars[i].isInstantiated()) {
                 if (vars[i].getValue() == 0) {

@@ -249,8 +249,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
             if (v.getLB() > ub || v.getUB() < lb) {
                 contradiction(v, ""); // v is excluded from [lb;ub]
             } else {
-                v.updateLowerBound(lb, this);
-                v.updateUpperBound(ub, this);
+                v.updateBounds(lb, ub, this);
                 setPassive();
                 return true;
             }

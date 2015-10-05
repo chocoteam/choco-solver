@@ -101,14 +101,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             if (vars[0].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[0], vars[1]);
             } else {
-                vars[0].updateLowerBound(vars[1].getLB() - cste, this);
-                vars[0].updateUpperBound(vars[1].getUB() + cste, this);
+                vars[0].updateBounds(vars[1].getLB() - cste, vars[1].getUB() + cste, this);
             }
             if (vars[1].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[1], vars[0]);
             } else {
-                vars[1].updateLowerBound(vars[0].getLB() - cste, this);
-                vars[1].updateUpperBound(vars[0].getUB() + cste, this);
+                vars[1].updateBounds(vars[0].getLB() - cste, vars[0].getUB() + cste, this);
             }
         } else if (operator == Operator.GT) {
             filterGT();
@@ -273,18 +271,15 @@ public class PropDistanceXYC extends Propagator<IntVar> {
      * In case of a LT
      */
     public void filterLT() throws ContradictionException {
-        vars[0].updateLowerBound(vars[1].getLB() - cste + 1, this);
-        vars[0].updateUpperBound(vars[1].getUB() + cste - 1, this);
-        vars[1].updateLowerBound(vars[0].getLB() - cste + 1, this);
-        vars[1].updateUpperBound(vars[0].getUB() + cste - 1, this);
+        vars[0].updateBounds(vars[1].getLB() - cste + 1, vars[1].getUB() + cste - 1, this);
+        vars[1].updateBounds(vars[0].getLB() - cste + 1, vars[0].getUB() + cste - 1, this);
     }
 
     /**
      * In case of a LT, due to a modification on v0 domain
      */
     public void filterLTonVar(IntVar v0, IntVar v1) throws ContradictionException {
-        v1.updateLowerBound(v0.getLB() - cste + 1, this);
-        v1.updateUpperBound(v0.getUB() + cste - 1, this);
+        v1.updateBounds(v0.getLB() - cste + 1, v0.getUB() + cste - 1, this);
     }
 
     /**
@@ -352,8 +347,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     rit.dispose();
                 }
             } else {
-                v.updateLowerBound(val - cste, this);
-                v.updateUpperBound(val + cste, this);
+                v.updateBounds(val - cste, val + cste, this);
             }
         }
     }

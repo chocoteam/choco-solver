@@ -143,8 +143,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = LB.get();
         int ub = UB.get();
-        vars[nb_vars].updateLowerBound(lb, this);
-        vars[nb_vars].updateUpperBound(ub, this);
+        vars[nb_vars].updateBounds(lb, ub, this);
 
         int min = Math.max(vars[nb_vars].getLB(), lb);
         int max = Math.min(vars[nb_vars].getUB(), ub);

@@ -35,6 +35,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * X*Y=Z filters from left to right
  *
@@ -61,17 +64,14 @@ public class PropTimesXY extends Propagator<IntVar> {
     public final void propagate(int evtmask) throws ContradictionException {
         // sign reasoning
         if (X.getLB() >= 0 && Y.getLB() >= 0) {// Z>=0
-            Z.updateLowerBound(X.getLB() * Y.getLB(), this);
-            Z.updateUpperBound(X.getUB() * Y.getUB(), this);
+            Z.updateBounds(X.getLB() * Y.getLB(), X.getUB() * Y.getUB(), this);
         } else if (X.getUB() < 0 && Y.getUB() < 0) { // Z>0
-            Z.updateLowerBound(X.getUB() * Y.getUB(), this);
-            Z.updateUpperBound(X.getLB() * Y.getLB(), this);
+            Z.updateBounds(X.getUB() * Y.getUB(), X.getLB() * Y.getLB(), this);
         } else if (X.getLB() > 0 && Y.getUB() < 0
                 || X.getUB() < 0 && Y.getLB() > 0) { // Z<0
             int a = X.getLB() * Y.getUB();
             int b = X.getUB() * Y.getLB();
-            Z.updateLowerBound(Math.min(a, b), this);
-            Z.updateUpperBound(Math.max(a, b), this);
+            Z.updateBounds(min(a, b), max(a, b), this);
         }
         // instantiation reasoning
         if (X.isInstantiated()) {
@@ -115,8 +115,7 @@ public class PropTimesXY extends Propagator<IntVar> {
         } else {
             int a = X.getValue() * Y.getLB();
             int b = X.getValue() * Y.getUB();
-            Z.updateLowerBound(Math.min(a, b), this);
-            Z.updateUpperBound(Math.max(a, b), this);
+            Z.updateBounds(min(a, b), max(a, b), this);
         }
     }
 

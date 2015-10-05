@@ -107,8 +107,7 @@ public class PropIntChannel extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < nInts; i++) {
-            ints[i].updateLowerBound(offSet1, this);
-            ints[i].updateUpperBound(nSets - 1 + offSet1, this);
+            ints[i].updateBounds(offSet1, nSets - 1 + offSet1, this);
         }
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();

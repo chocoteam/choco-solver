@@ -95,8 +95,7 @@ public class PropElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateLowerBound(offSet, this);
-        index.updateUpperBound(array.length - 1 + offSet, this);
+        index.updateBounds(offSet, array.length - 1 + offSet, this);
         if (index.isInstantiated()) {
             // filter set and array
             setEq(set, array[index.getValue() - offSet]);

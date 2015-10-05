@@ -146,8 +146,7 @@ public class PropNbEmpty extends Propagator<Variable> {
     public void filter() throws ContradictionException {
         int nbMin = nbAlreadyEmpty.get();
         int nbMax = nbMin + nbMaybeEmpty.get();
-        nbEmpty.updateLowerBound(nbMin, this);
-        nbEmpty.updateUpperBound(nbMax, this);
+        nbEmpty.updateBounds(nbMin, nbMax, this);
         ///////////////////////////////////////
         if (nbEmpty.isInstantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {

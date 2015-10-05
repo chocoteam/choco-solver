@@ -83,9 +83,8 @@ public class PropCircuit_ArboFiltering extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
 		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			for (int i = 0; i < n; i++) {
-				vars[i].updateLowerBound(offSet, this);
-				vars[i].updateUpperBound(n - 1 + offSet, this);
-			}
+                vars[i].updateBounds(offSet, n - 1 + offSet, this);
+            }
 		}
         switch (conf) {
             case FIRST:
