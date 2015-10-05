@@ -311,7 +311,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             return updateUpperBound(from - 1, cause);
         else {
             boolean anyChange = false;
-            int i = from - OFFSET;
+            int i = VALUES.nextSetBit(from - OFFSET);
             to -= OFFSET;
             int count = SIZE.get();
             // the iteration is mandatory for delta and observers

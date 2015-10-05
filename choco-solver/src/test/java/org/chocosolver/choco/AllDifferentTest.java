@@ -176,15 +176,15 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "verylong")
+    @Test(groups = "10s")
     public void test6() {
         Random rand;
-        for (int seed = 0; seed < 4; seed++) {
+        for (int seed = 0; seed < 10; seed++) {
             rand = new Random(seed);
             for (double d = 0.25; d <= 1.0; d += 0.25) {
                 for (int h = 0; h <= 1; h++) {
                     for (int b = 0; b <= 1; b++) {
-                        int n = 1 + rand.nextInt(3);
+                        int n = 1 + rand.nextInt(5);
                         int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2 * n, rand, d, h == 0);
 
                         Solver neqs = alldiffs(domains, 0, b == 0);
@@ -204,7 +204,6 @@ public class AllDifferentTest {
                         ac.findAllSolutions();
                         Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
                         Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
-                        Assert.assertTrue(ac.getMeasures().getFailCount() == 0 || b == 0, "nb nod incorrect" + seed);
                     }
                 }
             }
@@ -309,7 +308,7 @@ public class AllDifferentTest {
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 23);
     }
 
     @Test(groups = "1s")

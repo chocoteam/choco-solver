@@ -76,7 +76,7 @@ import java.util.Arrays;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Solver implements Serializable{
+public class Solver implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -697,7 +697,7 @@ public class Solver implements Serializable{
             idx++;
         }
         // 2. remove it from the network
-        if (idx < cIdx) {
+        while (idx < cIdx) {
             Constraint cm = cstrs[--cIdx];
             cstrs[idx] = cm;
             cstrs[cIdx] = null;
@@ -710,6 +710,11 @@ public class Solver implements Serializable{
                 for (int v = 0; v < prop.getNbVars(); v++) {
                     prop.getVar(v).unlink(prop);
                 }
+            }
+            // the constraint can have been posted more than once "accidentally" (but that's not a big deal, expect for
+            // performance issue) but all occurrences should be removed now.
+            while (idx < cIdx && cstrs[idx] != c) {
+                idx++;
             }
         }
     }
@@ -982,7 +987,7 @@ public class Solver implements Serializable{
      * Presumably, not all variables are instantiated.
      */
     public ESat isSatisfied() {
-        if(isFeasible()!=ESat.FALSE) {
+        if (isFeasible() != ESat.FALSE) {
             int OK = 0;
             for (int c = 0; c < cIdx; c++) {
                 ESat satC = cstrs[c].isSatisfied();
@@ -1087,16 +1092,16 @@ public class Solver implements Serializable{
 
     /**
      * @deprecated To duplicate a model, the variables addition and constraints declaration must be done in a specific
-     *              method called with a solver as parameter:
-     *              <pre> {@code
-     *
+     * method called with a solver as parameter:
+     * <pre> {@code
+     * <p>
      *              public void modelIt(Solver solver){
      *                  // declare variables, for example:
      *                  IntVar a = VF.enumerated("A", 0, 10, solver);
      *                  // post constraints, for example:
      *                  solver.post(ICF.arithm(a, ">=", 3));
      *              }
-     *
+     * <p>
      *              public void main(){
      *                  Solver s = new Solver();
      *                  modelIt(s);
@@ -1104,7 +1109,6 @@ public class Solver implements Serializable{
      *                  modelIt(clone);
      *              }
      *              }</pre>
-     *
      */
     @Deprecated
     public Solver duplicateModel() {

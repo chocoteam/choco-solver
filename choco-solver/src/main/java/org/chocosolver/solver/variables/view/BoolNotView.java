@@ -114,7 +114,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (from <= 1 && to >= 0) {
+        if (from <= to && from <= 1 && to >= 0) {
             if (from == 1) {
                 hasChanged = instantiateTo(1, cause);
             } else if (to == 0) {

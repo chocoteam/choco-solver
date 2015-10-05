@@ -317,6 +317,6 @@ public class RegularTest {
         solver.set(ISF.lexico_LB(CS));
 //        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 15);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 84);
     }
 }
