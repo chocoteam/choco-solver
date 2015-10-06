@@ -638,5 +638,33 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
+    @Test(groups = "1s")
+    public void testJL1() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{0, 1, 100, 200}, s);
+        i.removeValue(100, Cause.Null);
+        i.updateUpperBound(100, Cause.Null);
+        Assert.assertEquals(i.getUB(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void testJL2() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{0, 1, 100, 200}, s);
+        i.removeValue(1, Cause.Null);
+        i.updateLowerBound(1, Cause.Null);
+        Assert.assertEquals(i.getLB(), 100);
+    }
+
+    @Test(groups = "1s")
+    public void testJL3() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{0, 1, 50, 100, 200}, s);
+        i.removeValue(1, Cause.Null);
+        i.removeValue(100, Cause.Null);
+        i.updateBounds(1, 100, Cause.Null);
+        Assert.assertEquals(i.getLB(), 50);
+        Assert.assertEquals(i.getUB(), 50);
+    }
 
 }

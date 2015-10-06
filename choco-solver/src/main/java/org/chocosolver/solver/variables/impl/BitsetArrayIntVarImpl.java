@@ -414,7 +414,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else {
                 IntEventType e = IntEventType.INCLOW;
                 int index = V2I.get(value); // if aValue is known
-                if (index == -1) {
+                if (index == -1 || !INDICES.get(index)) {
                     //otherwise, a dichotomic search of the closest value greater than key
                     index = ArrayUtils.binarySearchInc(VALUES, lb, ub, value, true);
                     if (index < lb || index > ub) {
@@ -480,7 +480,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else {
                 IntEventType e = IntEventType.DECUPP;
                 int index = V2I.get(value);// if aValue is known
-                if (index == -1) {
+                if (index == -1 || !INDICES.get(index)) {
                     //otherwise, a dichotomic search of the closest value smaller than key
                     index = ArrayUtils.binarySearchInc(VALUES, lb, ub, value, false);
                     if (index < lb || index > ub) {
@@ -533,7 +533,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 e = IntEventType.INCLOW;
                 b = LB.get();
                 index = V2I.get(aLB); // if aValue is known
-                if (index == -1) {
+                if (index == -1 || !INDICES.get(index)) {
                     //otherwise, a dichotomic search of the closest value greater than key
                     index = ArrayUtils.binarySearchInc(VALUES, lb, ub, aLB, true);
                     if (index < lb || index > ub) {
@@ -562,7 +562,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 b = UB.get();
                 index = V2I.get(aUB);// if aValue is known
-                if (index == -1) {
+                if (index == -1 || !INDICES.get(index)) {
                     //otherwise, a dichotomic search of the closest value smaller than key
                     index = ArrayUtils.binarySearchInc(VALUES, lb, ub, aUB, false);
                     if (index < lb || index > ub) {
