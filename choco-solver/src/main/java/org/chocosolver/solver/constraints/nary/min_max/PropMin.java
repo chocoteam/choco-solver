@@ -73,6 +73,7 @@ public class PropMin extends Propagator<IntVar> {
             }
             filter |= vars[n].updateLowerBound(lb, this);
             filter |= vars[n].updateUpperBound(ub, this);
+            ub = Math.min(ub, vars[n].getUB()); // to deal with holes in vars[n] or its instantiation
             // back-propagation
             int c = 0, idx = -1;
             for (int i = 0; i < n; i++) {

@@ -30,8 +30,13 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * <br/>
@@ -49,5 +54,20 @@ public class MinTest extends AbstractTernaryTest {
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
         return IntConstraintFactory.minimum(vars[0], vars[1], vars[2]);
+    }
+
+    @Test(groups = "1s")
+    public void test2() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[4];
+        IntVar min = VF.fixed(-5, solver);
+        X[0] = VF.fixed(-3, solver);
+        X[1] = VF.bounded("1", -4, -3, solver);
+        X[2] = VF.bounded("2", -5, -2,solver);
+        X[3] = VF.fixed(-3, solver);
+
+        solver.post(ICF.minimum(min, X));
+        solver.propagate();
+        Assert.assertEquals(X[2].getUB(), -5);
     }
 }

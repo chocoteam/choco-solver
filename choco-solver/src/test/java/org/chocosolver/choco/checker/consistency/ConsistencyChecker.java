@@ -121,7 +121,7 @@ public class ConsistencyChecker {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            System.out.printf("Pas de solution pour ce probleme => rien a tester !");
+//            System.out.printf("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             writeDown(ref);
