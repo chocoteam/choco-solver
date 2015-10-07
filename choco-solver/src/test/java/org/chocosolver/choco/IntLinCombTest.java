@@ -698,4 +698,33 @@ public class IntLinCombTest {
         Assert.assertEquals(X[1].getLB(), 1);
         Assert.assertEquals(X[1].getUB(), 3);
     }
+
+    @Test(groups="1s")
+    public void testJL1(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(3, solver), VF.fixed(-4, solver)}, "<", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
+    @Test(groups="1s")
+    public void testJL2(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(3, solver), VF.fixed(-4, solver)}, "<=", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
+    @Test(groups="1s")
+    public void testJL3(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(-3, solver), VF.fixed(4, solver)}, ">", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
+    @Test(groups="1s")
+    public void testJL4(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(-3, solver), VF.fixed(4, solver)}, ">=", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
 }

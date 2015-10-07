@@ -140,11 +140,11 @@ public class IntLinCombFactory {
                 case NQ:
                     return RESULT != 0 ? SOLVER.TRUE() : SOLVER.FALSE();
                 case LE:
-                    return RESULT <= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
-                case LT:
-                    return RESULT < 0 ? SOLVER.TRUE() : SOLVER.FALSE();
-                case GE:
                     return RESULT >= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case LT:
+                    return RESULT > 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                case GE:
+                    return RESULT <= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
                 case GT:
                     return RESULT < 0 ? SOLVER.TRUE() : SOLVER.FALSE();
             }
