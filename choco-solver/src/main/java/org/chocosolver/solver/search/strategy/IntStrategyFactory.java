@@ -117,14 +117,17 @@ public class IntStrategyFactory {
 
     /**
      * Selects a value at the middle between the variable lower and upper bounds
-     * <p/>
+     * <p>
      * BEWARE: this should not be used within assignments and/or value removals if variables
      * have a bounded domain.
      *
+     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
+     *              set to false, return the closest value greater or equal to the middle value.
+     *              Can lead to infinite loop when not correctly selected.
      * @return a value selector
      */
-    public static IntValueSelector mid_value_selector() {
-        return new IntDomainMiddle();
+    public static IntValueSelector mid_value_selector(boolean floor) {
+        return new IntDomainMiddle(floor);
     }
 
     /**
@@ -149,7 +152,7 @@ public class IntStrategyFactory {
     /**
      * Selects randomly a value in the variable domain.
      * Takes an arbitrary value in [LB,UB]
-     * <p/>
+     * <p>
      * BEWARE: this should not be used within assignments and/or value removals if variables
      * have a bounded domain.
      *
@@ -221,9 +224,9 @@ public class IntStrategyFactory {
      * @return a custom search strategy
      */
     public static IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
-                                                  IntValueSelector VAL_SELECTOR,
-                                                  DecisionOperator<IntVar> DEC_OPERATOR,
-                                                  IntVar... VARS) {
+                                     IntValueSelector VAL_SELECTOR,
+                                     DecisionOperator<IntVar> DEC_OPERATOR,
+                                     IntVar... VARS) {
         return new IntStrategy(VARS, VAR_SELECTOR, VAL_SELECTOR, DEC_OPERATOR);
     }
 
@@ -239,8 +242,8 @@ public class IntStrategyFactory {
      * @return a custom search strategy
      */
     public static IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
-                                                  IntValueSelector VAL_SELECTOR,
-                                                  IntVar... VARS) {
+                                     IntValueSelector VAL_SELECTOR,
+                                     IntVar... VARS) {
         return custom(VAR_SELECTOR, VAL_SELECTOR, assign(), VARS);
     }
 
@@ -271,11 +274,14 @@ public class IntStrategyFactory {
     /**
      * Splits the domain of the first non-instantiated variable.
      *
+     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
+     *              set to false, return the closest value greater or equal to the middle value.
+     *              Can lead to infinite loop when not correctly selected.
      * @param VARS list of variables
      * @return int strategy based on domain splits
      */
-    public static IntStrategy lexico_Split(IntVar... VARS) {
-        return custom(lexico_var_selector(), mid_value_selector(), split(), VARS);
+    public static IntStrategy lexico_Split(boolean floor, IntVar... VARS) {
+        return custom(lexico_var_selector(), mid_value_selector(floor), split(), VARS);
     }
 
     /**
@@ -301,21 +307,27 @@ public class IntStrategyFactory {
     /**
      * Assigns the non-instantiated variable of smallest domain size to a value at the middle of its domain.
      *
+     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
+     *              set to false, return the closest value greater or equal to the middle value.
+     *              Can lead to infinite loop when not correctly selected.
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static IntStrategy minDom_MidValue(IntVar... VARS) {
-        return custom(minDomainSize_var_selector(), mid_value_selector(), VARS);
+    public static IntStrategy minDom_MidValue(boolean floor, IntVar... VARS) {
+        return custom(minDomainSize_var_selector(), mid_value_selector(floor), VARS);
     }
 
     /**
      * Splits the domain of the variable of largest domain
      *
+     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
+     *              set to false, return the closest value greater or equal to the middle value.
+     *              Can lead to infinite loop when not correctly selected.
      * @param VARS list of variables
      * @return an int strategy based on domain splits
      */
-    public static IntStrategy maxDom_Split(IntVar... VARS) {
-        return custom(maxDomainSize_var_selector(), mid_value_selector(), split(), VARS);
+    public static IntStrategy maxDom_Split(boolean floor, IntVar... VARS) {
+        return custom(maxDomainSize_var_selector(), mid_value_selector(floor), split(), VARS);
     }
 
     /**
@@ -338,30 +350,30 @@ public class IntStrategyFactory {
         return custom(maxRegret_var_selector(), min_value_selector(), VARS);
     }
 
-	/**
-	 * Randomly selects a variable and assigns it to a value randomly taken in
-	 * - the domain in case the variable has an enumerated domain
-	 * - {LB,UB} (one of the two bounds) in case the domain is bounded
-	 *
-	 * @param VARS list of variables
-	 * @param SEED a seed for random
-	 * @return assignment strategy
-	 */
-	public static IntStrategy random(IntVar[] VARS, long SEED) {
-		IntValueSelector value = random_value_selector(SEED);
-		IntValueSelector bound = randomBound_value_selector(SEED);
-		IntValueSelector selector = new IntValueSelector() {
-			@Override
-			public int selectValue(IntVar var) {
-				if(var.hasEnumeratedDomain()){
-					return value.selectValue(var);
-				}else{
-					return bound.selectValue(var);
-				}
-			}
-		};
-		return custom(random_var_selector(SEED), selector, VARS);
-	}
+    /**
+     * Randomly selects a variable and assigns it to a value randomly taken in
+     * - the domain in case the variable has an enumerated domain
+     * - {LB,UB} (one of the two bounds) in case the domain is bounded
+     *
+     * @param VARS list of variables
+     * @param SEED a seed for random
+     * @return assignment strategy
+     */
+    public static IntStrategy random(IntVar[] VARS, long SEED) {
+        IntValueSelector value = random_value_selector(SEED);
+        IntValueSelector bound = randomBound_value_selector(SEED);
+        IntValueSelector selector = new IntValueSelector() {
+            @Override
+            public int selectValue(IntVar var) {
+                if (var.hasEnumeratedDomain()) {
+                    return value.selectValue(var);
+                } else {
+                    return bound.selectValue(var);
+                }
+            }
+        };
+        return custom(random_var_selector(SEED), selector, VARS);
+    }
 
     /**
      * Randomly selects a variable and assigns it to a value randomly taken in {LB,UB}
@@ -389,20 +401,20 @@ public class IntStrategyFactory {
 
     /**
      * Randomly selects a variable and assigns it to a value randomly taken in the domain.
-	 * This is dedicated to enumerated domains.
-	 * In case some variables have bounded domains, please use random_valueOrBound instead
+     * This is dedicated to enumerated domains.
+     * In case some variables have bounded domains, please use random_valueOrBound instead
      *
      * @param VARS list of variables
      * @param SEED a seed for random
      * @return assignment strategy
      */
     public static IntStrategy random_value(IntVar[] VARS, long SEED) {
-		for(IntVar v:VARS){
-			if(!v.hasEnumeratedDomain()){
-				throw new UnsupportedOperationException("Some variables have bounded domains, " +
-						"please use random heuristic instead");
-			}
-		}
+        for (IntVar v : VARS) {
+            if (!v.hasEnumeratedDomain()) {
+                throw new UnsupportedOperationException("Some variables have bounded domains, " +
+                        "please use random heuristic instead");
+            }
+        }
         return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
     }
 
@@ -505,7 +517,7 @@ public class IntStrategyFactory {
 
     /**
      * Create an Activity based search strategy.
-     * <p/>
+     * <p>
      * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
      * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
      * <br/>
@@ -520,7 +532,7 @@ public class IntStrategyFactory {
 
     /**
      * Create an Impact-based search strategy.
-     * <p/>
+     * <p>
      * <b>"Impact-Based Search Strategies for Constraint Programming",
      * Philippe Refalo, CP2004.</b>
      *
@@ -537,7 +549,7 @@ public class IntStrategyFactory {
 
     /**
      * Create an Impact-based search strategy.
-     * <p/>
+     * <p>
      * <b>"Impact-Based Search Strategies for Constraint Programming",
      * Philippe Refalo, CP2004.</b>
      * Uses default parameters (ALPHA=2,SPLIT=3,NODEIMPACT=10,INITONLY=true)

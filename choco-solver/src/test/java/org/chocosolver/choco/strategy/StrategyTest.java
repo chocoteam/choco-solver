@@ -33,7 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -369,8 +368,7 @@ public class StrategyTest {
     public void testFH3321() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
-        solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.reverse_split(), X));
-        SMF.limitTime(solver, "1s");
+        solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.split(), X));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
@@ -380,7 +378,6 @@ public class StrategyTest {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(false), ISF.reverse_split(), X));
-        SMF.limitTime(solver, "5s");
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
