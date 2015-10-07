@@ -131,7 +131,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_MidValue(vars));
+        solver.set(IntStrategyFactory.minDom_MidValue(true,vars));
     }
 
     @Override

@@ -575,7 +575,7 @@ public class ExplanationEngineTest {
         solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
         solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
-        solver.set(IntStrategyFactory.minDom_MidValue(vars));
+        solver.set(IntStrategyFactory.minDom_MidValue(true, vars));
 
         configure(solver, a);
         Chatterbox.showShortStatistics(solver);

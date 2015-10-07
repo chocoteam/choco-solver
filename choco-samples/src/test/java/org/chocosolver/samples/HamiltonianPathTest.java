@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
  */
 public class HamiltonianPathTest {
 
-	private final static long TIME_LIMIT = 2000;
+	private final static long TIME_LIMIT = 1000;
 
 	@Test(groups = "1m")
 	public static void test() {
@@ -116,7 +116,8 @@ public class HamiltonianPathTest {
 		solver.findSolution();
 		IMeasures mes = solver.getMeasures();
 		// the problem has at least one solution
-		Assert.assertFalse(mes.getSolutionCount() == 0 && mes.getTimeCount() < TIME_LIMIT/1000);
+		Assert.assertTrue(mes.getSolutionCount() == 1 || solver.hasReachedLimit(),
+				"sol count:"+mes.getSolutionCount()+ ", has reached limit: "+solver.hasReachedLimit());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {
