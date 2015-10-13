@@ -26,31 +26,62 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.strategy.decision;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.PoolManager;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @author Jean-Guillaume Fages
+ * @since Jan. 2013
  */
-public enum SearchLoops {
+public class SetDecision extends Decision<SetVar> {
 
-    BINARY() {
-        @Override
-        public void make(Solver solver) {
-            solver.set(new SearchLoop(solver));
+    int value;
+    DecisionOperator<SetVar> operator;
+    final PoolManager<SetDecision> poolManager;
+
+    public SetDecision(PoolManager<SetDecision> poolManager) {
+        super(2);
+        this.poolManager = poolManager;
+    }
+
+    @Override
+    public Integer getDecisionValue() {
+        return value;
+    }
+
+    @Override
+    public void apply() throws ContradictionException {
+        if (branch == 1) {
+            operator.apply(var, value, this);
+        } else if (branch == 2) {
+            operator.unapply(var, value, this);
         }
-    },
-    DEFAULT() {
-        @Override
-        public void make(Solver solver) {
-            BINARY.make(solver);
-        }
-    };
+    }
 
-    public abstract void make(Solver solver);
+    public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
+        super.set(v, v.getSolver().getEnvironment().getWorldIndex());
+        this.var = v;
+        this.value = value;
+        this.operator = operator;
+    }
 
+    @Override
+    public void reverse() {
+        this.operator = operator.opposite();
+    }
+
+    @Override
+    public void free() {
+        previous = null;
+        poolManager.returnE(this);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), operator.toString(), value, branch);
+    }
 }

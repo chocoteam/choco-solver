@@ -29,7 +29,7 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecisionReal;
+import org.chocosolver.solver.search.strategy.decision.RealDecision;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.RealVar;
@@ -47,7 +47,7 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
 
     RealValueSelector valueIterator;
 
-    PoolManager<FastDecisionReal> decisionPool;
+    PoolManager<RealDecision> decisionPool;
 
     public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
         super(scope);
@@ -67,9 +67,9 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
             return null;
         }
         double value = valueIterator.selectValue(variable);
-        FastDecisionReal d = decisionPool.getE();
+        RealDecision d = decisionPool.getE();
         if (d == null) {
-            d = new FastDecisionReal(decisionPool);
+            d = new RealDecision(decisionPool);
         }
         d.set(variable, value);
         return d;

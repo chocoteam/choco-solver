@@ -39,7 +39,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IVariableMonitor;
@@ -67,7 +67,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
 
     java.util.Random random;
 
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
     IntValueSelector valueSelector;
 
@@ -104,9 +104,9 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
             return null;
         }
         int currentVal = valueSelector.selectValue(variable);
-        FastDecision currrent = decisionPool.getE();
+        IntDecision currrent = decisionPool.getE();
         if (currrent == null) {
-            currrent = new FastDecision(decisionPool);
+            currrent = new IntDecision(decisionPool);
         }
         currrent.set(variable, currentVal, DecisionOperator.int_eq);
         return currrent;

@@ -26,10 +26,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.decision.fast;
+package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.PoolManager;
 
@@ -39,13 +38,14 @@ import org.chocosolver.util.PoolManager;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class FastDecisionReal extends Decision<RealVar> {
+public class RealDecision extends Decision<RealVar> {
 
     double value;
 
-    final PoolManager<FastDecisionReal> poolManager;
+    final PoolManager<RealDecision> poolManager;
 
-    public FastDecisionReal(PoolManager<FastDecisionReal> poolManager) {
+    public RealDecision(PoolManager<RealDecision> poolManager) {
+        super(2);
         this.poolManager = poolManager;
     }
 
@@ -64,7 +64,7 @@ public class FastDecisionReal extends Decision<RealVar> {
     }
 
     public void set(RealVar v, double value) {
-        super.set(v);
+        super.set(v, v.getSolver().getEnvironment().getWorldIndex());
         this.value = value;
     }
 

@@ -40,7 +40,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
@@ -78,7 +78,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     protected int nodeImpact;
 
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
     protected Solver solver;
 
@@ -153,9 +153,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             currentVal = random.nextBoolean() ? lb : ub;
         }
 
-        FastDecision currrent = decisionPool.getE();
+        IntDecision currrent = decisionPool.getE();
         if (currrent == null) {
-            currrent = new FastDecision(decisionPool);
+            currrent = new IntDecision(decisionPool);
         }
         currrent.set(variable, currentVal, DecisionOperator.int_eq);
         //System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);

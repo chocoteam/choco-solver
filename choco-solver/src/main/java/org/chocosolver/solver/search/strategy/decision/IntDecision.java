@@ -26,25 +26,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.decision.fast;
+package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.PoolManager;
 
 /**
- * @author Jean-Guillaume Fages
- * @since Jan. 2013
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 2 juil. 2010
  */
-public class FastDecisionSet extends Decision<SetVar> {
+public class IntDecision extends Decision<IntVar> {
 
     int value;
-    DecisionOperator<SetVar> operator;
-    final PoolManager<FastDecisionSet> poolManager;
 
-    public FastDecisionSet(PoolManager<FastDecisionSet> poolManager) {
+    DecisionOperator<IntVar> assignment;
+
+    final PoolManager<IntDecision> poolManager;
+
+    public IntDecision(PoolManager<IntDecision> poolManager) {
+        super(2);
         this.poolManager = poolManager;
     }
 
@@ -56,22 +62,21 @@ public class FastDecisionSet extends Decision<SetVar> {
     @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
-            operator.apply(var, value, this);
+            assignment.apply(var, value, this);
         } else if (branch == 2) {
-            operator.unapply(var, value, this);
+            assignment.unapply(var, value, this);
         }
     }
 
-    public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
-        super.set(v);
-        this.var = v;
+    public void set(IntVar v, int value, DecisionOperator<IntVar> assignment) {
+        super.set(v, v.getSolver().getEnvironment().getWorldIndex());
         this.value = value;
-        this.operator = operator;
+        this.assignment = assignment;
     }
 
     @Override
     public void reverse() {
-        this.operator = operator.opposite();
+        this.assignment = assignment.opposite();
     }
 
     @Override
@@ -81,7 +86,26 @@ public class FastDecisionSet extends Decision<SetVar> {
     }
 
     @Override
+    public Decision<IntVar> duplicate() {
+        IntDecision d = poolManager.getE();
+        if (d == null) {
+            d = new IntDecision(poolManager);
+        }
+        d.set(var, value, assignment);
+        return d;
+    }
+
+    public DecisionOperator<IntVar> getDecOp() {
+        return assignment;
+    }
+
+    @Override
     public String toString() {
-        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), operator.toString(), value, branch);
+        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        return false;
     }
 }
