@@ -36,7 +36,7 @@ import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -73,7 +73,7 @@ public class RandomNeighborhood4Explanation extends RandomNeighborhood implement
 
     @Override
     protected void impose(int id, ICause cause) throws ContradictionException {
-        FastDecision d = (FastDecision) duplicator.duplicate();
+        IntDecision d = (IntDecision) duplicator.duplicate();
         d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
         last = d;
         imposeDecisionPath(mSolver, d);
@@ -92,7 +92,7 @@ public class RandomNeighborhood4Explanation extends RandomNeighborhood implement
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision()/*.getId()*/ == last/*.getId()*/) {
             mSolver.getSearchLoop().restart();
         }
     }

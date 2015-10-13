@@ -37,7 +37,7 @@ import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -131,7 +131,7 @@ public class HamiltonianPathTest {
 
 	private static class ConstructorIntHeur extends AbstractStrategy<IntVar> {
 		int n, offset;
-		PoolManager<FastDecision> pool;
+		PoolManager<IntDecision> pool;
 
 		public ConstructorIntHeur(IntVar[] v, int off) {
 			super(v);
@@ -149,8 +149,8 @@ public class HamiltonianPathTest {
 					return null;
 				}
 			}
-			FastDecision d = pool.getE();
-			if(d==null)d=new FastDecision(pool);
+			IntDecision d = pool.getE();
+			if(d==null)d=new IntDecision(pool);
 			d.set(vars[x], vars[x].getLB(), DecisionOperator.int_eq);
 			return d;
 		}

@@ -34,7 +34,7 @@ import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
@@ -92,20 +92,20 @@ public class NogoodTest {
         IntVar[] dv = VF.enumeratedArray("d", 7, 1, 2, solver);
         SMF.nogoodRecordingFromRestarts(solver);
 
-        FastDecision d1 = new FastDecision(null);
+        IntDecision d1 = new IntDecision(null);
         d1.set(dv[0], 1, DecisionOperator.int_eq);
         d1.buildNext();
         d1.apply();
         d1.setPrevious(solver.getSearchLoop().getLastDecision());
 
-        FastDecision d2 = new FastDecision(null);
+        IntDecision d2 = new IntDecision(null);
         d2.set(dv[1], 1, DecisionOperator.int_eq);
         d2.buildNext();
         d2.buildNext();
         d2.apply();
         d2.setPrevious(d1);
 
-        FastDecision d3 = new FastDecision(null);
+        IntDecision d3 = new IntDecision(null);
         d3.set(dv[2], 1, DecisionOperator.int_eq);
         d3.buildNext();
         d3.buildNext();
@@ -113,20 +113,20 @@ public class NogoodTest {
         d3.setPrevious(d2);
 
 
-        FastDecision d4 = new FastDecision(null);
+        IntDecision d4 = new IntDecision(null);
         d4.set(dv[3], 1, DecisionOperator.int_eq);
         d4.buildNext();
         d4.apply();
         d4.setPrevious(d3);
 
-        FastDecision d5 = new FastDecision(null);
+        IntDecision d5 = new IntDecision(null);
         d5.set(dv[4], 1, DecisionOperator.int_eq);
         d5.buildNext();
         d5.buildNext();
         d5.apply();
         d5.setPrevious(d4);
 
-        FastDecision d6 = new FastDecision(null);
+        IntDecision d6 = new IntDecision(null);
         d6.set(dv[5], 1, DecisionOperator.int_eq);
         d6.buildNext();
         d6.buildNext();

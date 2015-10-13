@@ -231,7 +231,7 @@ public class Explanation {
             while (decision != RootDecision.ROOT) {
                 if (decisions.get(decision.getWorldIndex())) {
                     assert decision.hasNext();
-                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
+                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue())));
                 }
                 decision = decision.getPrevious();
             }

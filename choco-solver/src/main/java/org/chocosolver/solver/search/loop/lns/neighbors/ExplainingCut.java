@@ -164,7 +164,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision()/*.getId()*/ == last/*.getId()*/) {
             mSolver.getSearchLoop().restart();
         }
     }
