@@ -1,20 +1,20 @@
 /**
  * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ * Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the <organization> nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -118,6 +118,10 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
+    protected Variable[] objectives;
+
+    protected double precision = 0.00D;
+
     protected ISolutionRecorder solutionRecorder;
 
     /**
@@ -184,6 +188,7 @@ public class Solver implements Serializable {
         this.engine = NoPropagationEngine.SINGLETON;
         solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
         set(ObjectiveManager.SAT());
+        this.objectives = null;
     }
 
     /**
@@ -460,6 +465,23 @@ public class Solver implements Serializable {
         return this.eoList;
     }
 
+    /**
+     * Return the objective variables
+     *
+     * @return a variable
+     */
+    public Variable[] getObjectives() {
+        return objectives;
+    }
+
+    /**
+     * In case of real variable to optimize, a precision is required.
+     *
+     * @return the precision used
+     */
+    public double getPrecision() {
+        return precision;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -544,6 +566,24 @@ public class Solver implements Serializable {
      */
     public void set(Settings defaults) {
         this.settings = defaults;
+    }
+
+    /**
+     * Define the variables to optimize
+     *
+     * @param objectives one or more variables
+     */
+    public void setObjectives(Variable... objectives) {
+        this.objectives = objectives;
+    }
+
+    /**
+     * In case of real variable to optimize, a precision is required.
+     *
+     * @param p the precision (default is 0.00D)
+     */
+    public void setPrecision(double p) {
+        this.precision = p;
     }
 
     /**
@@ -841,21 +881,49 @@ public class Solver implements Serializable {
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
      * Restores the best solution found so far (if any)
      *
+     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     */
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+        }
+        if (objectives == null || objectives.length == 0) {
+            throw new SolverException("No objective variable has been defined");
+        }
+        if (!getObjectiveManager().isOptimization()) {
+            if (objectives.length == 1) {
+                if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
+                    set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
+                } else {
+                    set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
+                }
+                set(new LastSolutionRecorder(new Solution(), true, this));
+            } else {
+                // BEWARE the usual optimization manager is only defined for mono-objective optimization
+                // so we use a satisfaction manager by default (it does nothing)
+                if (!getObjectiveManager().isOptimization()) {
+                    set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
+                }
+                IntVar[] _objectives = new IntVar[objectives.length];
+                for (int i = 0; i < objectives.length; i++) {
+                    _objectives[i] = (IntVar) objectives[i];
+                }
+                set(new ParetoSolutionsRecorder(policy, _objectives));
+            }
+        }
+        solve(false);
+    }
+
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Restores the best solution found so far (if any)
+     *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-        }
-        if (objective == null) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (!getObjectiveManager().isOptimization()) {
-            set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
-        }
-        set(new LastSolutionRecorder(new Solution(), true, this));
-        solve(false);
+        setObjectives(objective);
+        findOptimalSolution(policy);
     }
 
     /**
@@ -907,22 +975,8 @@ public class Solver implements Serializable {
      * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
      */
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-        }
-        if (objectives == null || objectives.length == 0) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (objectives.length == 1) {
-            throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
-        }
-        // BEWARE the usual optimization manager is only defined for mono-objective optimization
-        // so we use a satisfaction manager by default (it does nothing)
-        if (getObjectiveManager().isOptimization()) {
-            set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
-        }
-        set(new ParetoSolutionsRecorder(policy, objectives));
-        solve(false);
+        setObjectives(objectives);
+        findOptimalSolution(policy);
     }
 
     /**
@@ -933,17 +987,9 @@ public class Solver implements Serializable {
      * @param objective the variable to optimize
      */
     public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
-        }
-        if (objective == null) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (!getObjectiveManager().isOptimization()) {
-            set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
-        }
-        set(new LastSolutionRecorder(new Solution(), true, this));
-        solve(false);
+        setObjectives(objective);
+        setPrecision(precision);
+        findOptimalSolution(policy);
     }
 
     /**

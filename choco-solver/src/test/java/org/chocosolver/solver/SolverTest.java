@@ -1,20 +1,20 @@
 /**
  * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ * Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the <organization> nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
@@ -38,6 +39,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br/>
@@ -62,6 +65,7 @@ public class SolverTest {
         }
         s.post(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
         s.post(IntConstraintFactory.scalar(objects, energies, power));
+        s.setObjectives(power);
         s.set(IntStrategyFactory.lexico_LB(objects));
         return s;
     }
@@ -242,5 +246,35 @@ public class SolverTest {
         if (s.findSolution()) {
             while (s.nextSolution()) ;
         }
+    }
+
+    @Test(groups = "1s")
+    public void testP1() {
+        int n = 4; // number of solvers to use
+        List<Solver> solvers = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            solvers.add(knapsack());
+        }
+        SMF.shareBestKnownBound(solvers);
+        solvers.parallelStream().forEach(s -> {
+            s.findSolution();
+            System.out.printf("I've found it first !! \n");
+            solvers.forEach(s1 -> s1.getSearchLoop().interrupt("Bye", false));
+        });
+    }
+
+    @Test(groups = "1s")
+    public void testP2() {
+        int n = 4; // number of solvers to use
+        List<Solver> solvers = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            solvers.add(knapsack());
+        }
+        SMF.shareBestKnownBound(solvers);
+        solvers.parallelStream().forEach(s -> {
+            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            System.out.printf("I've found it first !! \n");
+            solvers.forEach(s1 -> s1.getSearchLoop().interrupt("Bye", false));
+        });
     }
 }
