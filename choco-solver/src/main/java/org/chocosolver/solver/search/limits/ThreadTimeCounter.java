@@ -91,10 +91,6 @@ public class ThreadTimeCounter extends Thread implements ICounter, IMonitorOpenN
     }
 
     @Override
-    public void update() {
-    }
-
-    @Override
     public long getLimitValue() {
         return duration;
     }
