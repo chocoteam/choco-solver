@@ -24,6 +24,11 @@ and IntVar#updateBounds(int, int, ICause) (#270)
 - revamp IMeasures to avoid declaring its concret class as monitor
 - AbstractStrategy#init() cannot throw ContradictionException anymore but returns false instead
 - remove deprecated classes: GenerateAndTest, LastConflict_old
+- add new API to Solver to declare eagerly the objective variable(s) and the precision
+- add a search monitor helper for parallel resolution with Java8 lambda
+- Revamp decisions to enable MetaDecision, move FastDecision to ../IntDecision and
+replace Decision#once(boolean) by #setArity(int)
+
 
 Bug fixes: #152, #153, #164, #176, #296, #297, #298, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, #331, #333, #334
 
