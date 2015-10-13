@@ -28,7 +28,6 @@ package org.chocosolver.solver.explanations.strategies;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -184,8 +183,8 @@ public class DynamicBackTracking extends ConflictBackJumping {
         }
 
         @Override
-        public void init() throws ContradictionException {
-            mainStrategy.init();
+        public boolean init(){
+            return mainStrategy.init();
         }
 
         @Override

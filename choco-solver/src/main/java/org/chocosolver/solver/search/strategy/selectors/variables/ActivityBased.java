@@ -181,7 +181,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     @Override
-    public void init() {
+    public boolean init() {
         for (int i = 0; i < vars.length; i++) {
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
@@ -191,6 +191,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i] = new ArrayVal(ampl, vars[i].getLB());
             }
         }
+        return true;
     }
 
     @Override

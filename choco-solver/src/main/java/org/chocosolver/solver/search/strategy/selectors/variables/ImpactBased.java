@@ -195,7 +195,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init(){
         long tl = System.currentTimeMillis() + this.timeLimit;
         // 0. Data structure construction
         Ilabel = new double[vars.length][];
@@ -261,7 +261,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         if (learnsAndFails) {
             // If the initialisation detects a failure, then the problem has no solution!
             learnsAndFails = false;
-            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
+//            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
+            return false;
         } else if (System.currentTimeMillis() > tl) {
             if(solver.getSettings().warnUser()) Chatterbox.out.printf("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
@@ -275,6 +276,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 }
             }
         }
+        return true;
     }
 
 

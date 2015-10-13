@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
-
 import java.io.Serializable;
 
 /**
@@ -37,7 +35,7 @@ import java.io.Serializable;
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
+public interface IMeasures extends Serializable, Cloneable {
 
     /**
      * Clones the IMeasure object (copy every measure)
@@ -86,20 +84,14 @@ public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
      */
     float getTimeCount();
 
+    void startStopwatch();
+
+    void updateTime();
+
     /**
      * @return the reading time count (in sec)
      */
     float getReadingTimeCount();
-
-    /**
-     * @return the initialization time count (in sec)
-     */
-    float getInitialisationTimeCount();
-
-    /**
-     * @return the initial propagation time count (in sec)
-     */
-    float getInitialPropagationTimeCount();
 
     /**
      * set the reading time count
@@ -107,14 +99,14 @@ public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
     void setReadingTimeCount(long time);
 
     /**
-     * Updates the time recorder
-     */
-    void updateTimeCount();
-
-    /**
      * @return the node count
      */
     long getNodeCount();
+
+    /**
+     * increment node counter
+     */
+    void incNodeCount();
 
     /**
      * @return the backtrack count
@@ -122,9 +114,19 @@ public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
     long getBackTrackCount();
 
     /**
+     * increment backtrack counter
+     */
+    void incBackTrackCount();
+
+    /**
      * @return the fail count
      */
     long getFailCount();
+
+    /**
+     * increment fail counter
+     */
+    void incFailCount();
 
     /**
      * @return the restart count
@@ -132,50 +134,29 @@ public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
     long getRestartCount();
 
     /**
+     * increment restart counter
+     */
+    void incRestartCount();
+
+    /**
      * @return the maximum depth of the search tree
      */
     long getMaxDepth();
 
     /**
-     * @return the current depth in the search tree
+     * increment depth counter
      */
-    long getCurrentDepth();
-
-    /**
-     * @return the number of call to event recorder execution
-     * @deprecated
-     */
-    @Deprecated
-    long getPropagationsCount();
-
-    /**
-     * Updates the propagation recorder
-     * @deprecated
-     */
-    @Deprecated
-    void updatePropagationCount();
-
-    /**
-     * @return the fine event count (incremental propagations)
-     * @deprecated
-     */
-    @Deprecated
-    long getEventsCount();
-
-    /**
-     * @return the used memory
-     */
-    long getUsedMemory();
-
-    /**
-     * updates the memory usage count
-     */
-    void updateMemoryUsed();
+    void incDepth();
 
     /**
      * @return the solution count of the measure
      */
     long getSolutionCount();
+
+    /**
+     * increment solution counter
+     */
+    void incSolutionCount();
 
     /**
      * indicates an objective variable
@@ -200,5 +181,5 @@ public interface IMeasures extends ISearchMonitor, Serializable, Cloneable {
     /**
      * @return the objective value of the best solution found (can be Integer or Double)
      */
-    public Number getBestSolutionValue();
+    Number getBestSolutionValue();
 }

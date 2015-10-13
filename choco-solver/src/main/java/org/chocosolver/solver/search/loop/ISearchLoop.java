@@ -44,20 +44,20 @@ import java.io.Serializable;
  */
 public interface ISearchLoop extends Serializable {
 
-    static final int INIT = 0;
-    static final int INITIAL_PROPAGATION = 1;
-    static final int OPEN_NODE = 1 << 1;
-    static final int DOWN_LEFT_BRANCH = 1 << 2;
-    static final int DOWN_RIGHT_BRANCH = 1 << 3;
-    static final int UP_BRANCH = 1 << 4;
-    static final int RESTART = 1 << 5;
+    int INIT = 0;
+    int INITIAL_PROPAGATION = 1;
+    int OPEN_NODE = 1 << 1;
+    int DOWN_LEFT_BRANCH = 1 << 2;
+    int DOWN_RIGHT_BRANCH = 1 << 3;
+    int UP_BRANCH = 1 << 4;
+    int RESTART = 1 << 5;
 
-    static final String MSG_LIMIT = "a limit has been reached";
-    static final String MSG_ROOT = "the entire search space has been explored";
-    static final String MSG_CUT = "applying the cut leads to a failure";
-    static final String MSG_FIRST_SOL = "stop at first solution";
-    static final String MSG_INIT = "failure encountered during initial propagation";
-    static final String MSG_SEARCH_INIT = "search strategy detects inconsistency";
+    String MSG_LIMIT = "a limit has been reached";
+    String MSG_ROOT = "the entire search space has been explored";
+    String MSG_CUT = "applying the cut leads to a failure";
+    String MSG_FIRST_SOL = "stop at first solution";
+    String MSG_INIT = "failure encountered during initial propagation";
+    String MSG_SEARCH_INIT = "search strategy detects inconsistency";
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RESOLUTION /////////////////////////////////////////////////////////////////

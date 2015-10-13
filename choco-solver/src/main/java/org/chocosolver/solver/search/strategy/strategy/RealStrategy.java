@@ -57,7 +57,8 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
     }
 
     @Override
-    public void init() {
+    public boolean init() {
+        return true;
     }
 
     @Override

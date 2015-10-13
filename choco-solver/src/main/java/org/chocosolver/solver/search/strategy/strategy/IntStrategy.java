@@ -93,7 +93,9 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
     }
 
     @Override
-    public void init() {}
+    public boolean init() {
+        return true;
+    }
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {

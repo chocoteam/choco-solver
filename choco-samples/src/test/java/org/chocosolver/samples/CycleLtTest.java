@@ -99,8 +99,6 @@ public class CycleLtTest {
                 rand.set(nset);
                 PropagationEngineFactory.values()[j].make(rand);
                 rand.findAllSolutions();
-                st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
-                times[i] = rand.getMeasures().getInitialPropagationTimeCount();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
                 st.setLength(0);

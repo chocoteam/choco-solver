@@ -21,6 +21,9 @@ NEXT MILESTONE
 and IntVar#updateBounds(int, int, ICause) (#270)
 - revamp scalar and sum (#324)
 - simplify and improve basic element propagator (#325)
+- revamp IMeasures to avoid declaring its concret class as monitor
+- AbstractStrategy#init() cannot throw ContradictionException anymore but returns false instead
+- remove deprecated classes: GenerateAndTest, LastConflict_old
 
 Bug fixes: #152, #153, #164, #176, #296, #297, #298, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, #331, #333, #334
 

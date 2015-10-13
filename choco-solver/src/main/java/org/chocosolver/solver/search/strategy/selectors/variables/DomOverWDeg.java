@@ -36,7 +36,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -86,7 +85,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
     }
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init(){
         IEnvironment env = vars[0].getSolver().getEnvironment();
         for (int i = 0; i < variables.length; i++) {
             variables[i].addMonitor(this);
@@ -95,6 +94,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
                 pid2ari.putIfAbsent(props[j].getId(), env.makeInt(props[j].arity()));
             }
         }
+        return true;
     }
 
 

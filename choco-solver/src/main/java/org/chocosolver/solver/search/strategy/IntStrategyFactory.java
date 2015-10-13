@@ -605,9 +605,11 @@ public class IntStrategyFactory {
      * @param SOLVER the solver
      * @return a Generate-And-Test search strategy
      * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#generateAndTest(org.chocosolver.solver.Solver, org.chocosolver.solver.search.strategy.strategy.AbstractStrategy, int)
+     * @deprecated may be removed in the next releases
      */
+    @Deprecated
     public static AbstractStrategy<IntVar> generateAndTest(Solver SOLVER) {
-        return new GenerateAndTest(SOLVER);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -625,8 +627,10 @@ public class IntStrategyFactory {
      * @param searchSpaceLimit the size of search space which triggers the Generate-And-Test strategy.
      * @return a Generate-And-Test search strategy
      * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#generateAndTest(org.chocosolver.solver.Solver)
+     * @deprecated may be removed in the next releases
      */
+    @Deprecated
     public static AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy, int searchSpaceLimit) {
-        return new GenerateAndTest(SOLVER, mainStrategy, searchSpaceLimit);
+        throw new UnsupportedOperationException();
     }
 }

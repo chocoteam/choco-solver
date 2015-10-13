@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
@@ -73,9 +72,8 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 	//***********************************************************************************
 
 	@Override
-	public void init() throws ContradictionException {
-		find.init();
-		prove.init();
+	public boolean init(){
+		return find.init() & prove.init();
 	}
 
 	@Override

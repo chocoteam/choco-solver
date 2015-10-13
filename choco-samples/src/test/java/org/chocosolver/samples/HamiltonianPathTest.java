@@ -32,7 +32,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.graph.input.GraphGenerator;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -140,9 +139,6 @@ public class HamiltonianPathTest {
 			n = v.length;
 			pool = new PoolManager<>();
 		}
-
-		@Override
-		public void init() throws ContradictionException {}
 
 		@Override
 		public Decision<IntVar> getDecision() {

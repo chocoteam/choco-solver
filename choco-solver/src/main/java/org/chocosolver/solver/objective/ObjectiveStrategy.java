@@ -149,11 +149,10 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     // METHODS
     //***********************************************************************************
 
-    @Override
-    public void init() {
+    public boolean init() {
         decOperator = getOperator(optPolicy, solver.getObjectiveManager().getPolicy());
+        return true;
     }
-
     @Override
     public Decision getDecision() {
         if (solver.getMeasures().getSolutionCount() == 0

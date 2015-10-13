@@ -144,7 +144,6 @@ public class SearchLoop implements ISearchLoop {
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
         smList = new SearchMonitorList();
-        smList.add(this.measures);
         this.nextState = INIT;
         rootWorldIndex = -1;
         bkill = bresum = true;
@@ -214,7 +213,7 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public final void interrupt(String message, boolean voidable) {
-        if(!voidable){
+        if (!voidable) {
             bresum = false;
         }
         if (alive) {
@@ -304,6 +303,7 @@ public class SearchLoop implements ISearchLoop {
      * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
      */
     private void initialPropagation() {
+        solver.getMeasures().startStopwatch();
         this.env.worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             solver.getEngine().propagate();
@@ -312,8 +312,10 @@ public class SearchLoop implements ISearchLoop {
             solver.setFeasible(FALSE);
             interrupt(MSG_INIT, true);
             bcomp = true;
+            solver.getMeasures().incFailCount();
             smList.onContradiction(e);
             this.env.worldPop();
+            solver.getMeasures().updateTime();
             return;
         }
         this.env.worldPush(); // store state after initial propagation; w = 1 -> 2
@@ -332,22 +334,23 @@ public class SearchLoop implements ISearchLoop {
             solver.set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
         }
 
-        try {
-            strategy.init(); // the initialisation of the strategy can detect inconsistency
-        } catch (ContradictionException cex) {
+        if (!strategy.init()) { // the initialisation of the strategy can detect inconsistency
             this.env.worldPop();
             solver.setFeasible(FALSE);
             solver.getEngine().flush();
-            interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage(), true);
+            solver.getMeasures().incFailCount();
+            interrupt(MSG_SEARCH_INIT, true);
             bcomp = true;
         }
         moveTo(OPEN_NODE);
+        solver.getMeasures().updateTime();
     }
 
     /**
      * Opens a new node in the tree search : compute the next decision or store a solution.
      */
     private void openNode() {
+        solver.getMeasures().incNodeCount();
         Decision tmp = decision;
         decision = strategy.getDecision();
         if (decision != null) { // null means there is no more decision
@@ -368,6 +371,8 @@ public class SearchLoop implements ISearchLoop {
             interrupt(MSG_FIRST_SOL, true);
         }
         moveTo(UP_BRANCH);
+        solver.getMeasures().incSolutionCount();
+        solver.getMeasures().updateTime();
         smList.onSolution();
     }
 
@@ -383,6 +388,7 @@ public class SearchLoop implements ISearchLoop {
     }
 
     private void downBranch() {
+        solver.getMeasures().incDepth();
         env.worldPush();
         try {
             decision.buildNext();
@@ -395,6 +401,7 @@ public class SearchLoop implements ISearchLoop {
             solver.getEngine().flush();
             moveTo(UP_BRANCH);
             jumpTo = 1;
+            solver.getMeasures().incFailCount();
             smList.onContradiction(e);
         }
     }
@@ -407,6 +414,7 @@ public class SearchLoop implements ISearchLoop {
      * Otherwise, gets the opposite decision, applies it and calls the propagation.
      */
     private void upBranch() {
+        solver.getMeasures().incBackTrackCount();
         env.worldPop();
         if (decision == ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
@@ -436,6 +444,7 @@ public class SearchLoop implements ISearchLoop {
         } catch (ContradictionException e) {
             interrupt(MSG_CUT, true);
         }
+        solver.getMeasures().incRestartCount();
     }
 
     /**
@@ -443,6 +452,7 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
+        solver.getMeasures().updateTime();
         bcomp = (decision == ROOT);
         bkill = false;
         ESat sat = FALSE;

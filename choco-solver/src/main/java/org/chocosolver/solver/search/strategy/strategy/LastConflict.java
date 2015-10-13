@@ -75,8 +75,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     //***********************************************************************************
 
     @Override
-    public void init() throws ContradictionException {
-        mainStrategy.init();
+    public boolean init(){
+        return mainStrategy.init();
     }
 
     @Override

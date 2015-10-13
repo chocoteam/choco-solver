@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.fast.FastDecisionSet;
@@ -79,7 +78,8 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
     //***********************************************************************************
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init(){
+        return true;
     }
 
     @Override
