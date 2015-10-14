@@ -39,8 +39,6 @@ import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
-import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -55,7 +53,7 @@ import org.chocosolver.solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 03/07/13
  */
-public class ExplainingObjective extends ExplainingCut implements IMonitorInitPropagation, IMonitorUpBranch {
+public class ExplainingObjective extends ExplainingCut{
 
     private ObjectiveManager<IntVar, Integer> om;
     private IntVar objective;
@@ -127,13 +125,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
 
 
     @Override
-    public void beforeInitialPropagation() {
-        // nothing to do
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void afterInitialPropagation() {
+    public void init() {
         om = mSolver.getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
@@ -147,18 +139,6 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         }
         if (mExplanationEngine.getCstrat() == null) {
             new ConflictBackJumping(mExplanationEngine, mSolver, false);
-        }
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-        // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().getLastDecision()/*.getId()*/ == last/*.getId()*/) {
-            mSolver.getSearchLoop().restart();
         }
     }
 

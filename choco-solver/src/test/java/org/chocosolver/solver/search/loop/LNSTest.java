@@ -114,7 +114,7 @@ public class LNSTest {
                 SequenceNeighborhood ngb = new SequenceNeighborhood(
                         new ExplainingObjective(solver, 200, 123456L),
                         new ExplainingCut(solver, 200, 123456L),
-                        new RandomNeighborhood4Explanation(solver, objects, 200, 123456L));
+                        new RandomNeighborhood(solver, objects, 200, 123456L));
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver, ngb, true));
                 SearchMonitorFactory.limitThreadTime(solver, 10000);
                 break;
