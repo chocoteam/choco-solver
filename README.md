@@ -1,8 +1,6 @@
 ![logo](http://choco-solver.org/sites/default/files/ChocoLogo-160x135.png)
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco3?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
-[![Build Status](https://travis-ci.org/chocoteam/choco3.svg)](https://travis-ci.org/chocoteam/choco3)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco3?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/chocoteam/choco3.svg)](https://travis-ci.org/chocoteam/choco3)
 
 * [Documentation, Support and Issues](#doc)
 * [Contributing](#con)
