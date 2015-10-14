@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -83,20 +81,6 @@ public class PropTimesNaive extends Propagator<IntVar> {
             return ESat.eval(v0.getValue() * v1.getValue() == v2.getValue());
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-            this.vars[2].duplicate(solver, identitymap);
-            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
-
-            identitymap.put(this, new PropTimesNaive(X, Y, Z));
-        }
     }
 
     private boolean div(IntVar var, int a, int b, int c, int d) throws ContradictionException {

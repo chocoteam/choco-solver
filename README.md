@@ -1,4 +1,10 @@
-## Choco3 ##
+![logo](http://choco-solver.org/sites/default/files/ChocoLogo-160x135.png)
+
+[![Build Status](https://travis-ci.org/chocoteam/choco3.svg)](https://travis-ci.org/chocoteam/choco3)
+
+* [Documentation, Support and Issues](#doc)
+* [Contributing](#con)
+* [Download and installation](#dow)
 
 Choco3 is an open-source Java library for Constraint Programming.
 
@@ -18,8 +24,7 @@ Choco3 is distributed under BSD licence (Copyright (c) 1999-2015, Ecole des Mine
 
 Contact: choco@mines-nantes.fr
 
-## Overview ##
-
+### Overview
 
 ```java
 // 1. Create a Solver
@@ -37,36 +42,45 @@ solver.findSolution();
 Chatterbox.printStatistics(solver);
 ```
 
+<a name="doc"></a>
+## Documentation, Support and Issues
+
+The archive file downloaded from the [official website](http://choco-solver.org/?q=Download) contains
+both the user guide (pdf) and the apidocs (zip).
+
+You can get help on our [forum](http://choco-solver.org/?q=Forum).
+Most support requests are answered very fast.
+
+Use the [issue tracker](https://github.com/chocoteam/choco3/issues) here on GitHub to report issues.
+As far as possible, provide a [Minimal Working Example](https://en.wikipedia.org/wiki/Minimal_Working_Example).
+
+<a name="con"></a>
+## Contributing
+
+Anyone can contribute to the project, from the source code to the documentation.
+In order to ease the process, we established a [contribution guide](CONTRIBUTION.md)
+that should be reviewed before starting any contribution as
+it lists the requirements and good practices to ease the contribution process.
+
+
+<a name="dow"></a>
 ## Download and installation ##
 
 Requirements:
 * JDK 8+ (JDK 7 compliant jars are also available)
 * maven 3+
 
+Choco3 is available on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver),
+or directly from the [official website](http://choco-solver.org/?q=Download).
+
 In the following, we distinguish two usages of Choco:
 
-- as a standalone application: the jar file includes all required dependencies and configuration file (that is, `logback.xml`),
-- as a library: the jar file excludes all dependencies and configuration file (that is, `logback.xml`).
+- as a standalone application: the jar file includes all required dependencies,
+- as a library: the jar file excludes all dependencies.
 
 The name of the jar file terms the packaging: `choco-solver-3.3.1-with-dependencies.jar` or `choco-solver-3.3.1.jar`.
 
-The jar files can be downloaded from this URL:
-
-* http://choco-solver.org/?q=Download
-
-### As a stand-alone application ###
-
-The jar file contains all required dependencies (including SLF4J, Logback and logback.xml).
-The next step is simply to add the jar file to your classpath of your application.
-Note that if your program depends on dependencies declared in the jar file,
-you should consider using choco as a library.
-
-### As a library ###
-
-The jar file does not contains any dependencies or Logback configuration file,
-as of being used as a dependency of another application.
-The next step is to add the jar file to your classpath of your application and add also add the required dependencies.
-
+A [Changelog file](./CHANGES.md) is maintained for each release.
 
 ### Inside a maven project ###
 
@@ -80,6 +94,20 @@ So you only have to edit your `pom.xml` to declare the following library depende
    <version>3.3.1</version>
 </dependency>
 ```
+
+### As a stand-alone application ###
+
+The jar file contains all required dependencies.
+The next step is simply to add the jar file to your classpath of your application.
+Note that if your program depends on dependencies declared in the jar file,
+you should consider using choco as a library.
+
+### As a library ###
+
+The jar file does not contains any dependencies,
+as of being used as a dependency of another application.
+The next step is to add the jar file to your classpath of your application and also add the required dependencies.
+
 
 ### Dependencies ###
 
@@ -106,7 +134,6 @@ to make the jar:
 If the build succeeded, the resulting jar will be automatically
 installed in your local maven repository and available in the `target` sub-folders.
 
+
 ===================
 The Choco3 dev team.
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/5206b49e3dad062b919d632d75825479 "githalytics.com")](http://githalytics.com/chocoteam/choco3)

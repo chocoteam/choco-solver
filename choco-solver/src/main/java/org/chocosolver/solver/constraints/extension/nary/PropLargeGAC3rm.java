@@ -28,12 +28,12 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -59,6 +59,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     protected DisposableValueIterator[] seekIter;
 
+    protected final IntIterableSet vrms;
+
 
     private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);
@@ -82,6 +84,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             seekIter[i] = vars[i].getValueIterator(true);
         }
         Arrays.fill(supports, Integer.MIN_VALUE);
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {
@@ -138,8 +141,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         int val;
         if (vars[indexVar].hasEnumeratedDomain()) {
             DisposableValueIterator it = vars[indexVar].getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[indexVar].getLB());
             try {
                 while (it.hasNext()) {
                     val = it.next();
@@ -148,17 +151,12 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
                         if (currentSupport != null) {
                             setSupport(currentSupport);
                         } else {
-                            if (val == right + 1) {
-                                right = val;
-                            } else {
-                                vars[indexVar].removeInterval(left, right, this);
-                                left = right = val;
-                            }
+                            vrms.add(val);
                             //                        vars[indexVar].removeVal(val, this, false);
                         }
                     }
                 }
-                vars[indexVar].removeInterval(left, right, this);
+                vars[indexVar].removeValues(vrms, this);
             } finally {
                 it.dispose();
             }
@@ -189,8 +187,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         int val;
         if (vars[indexVar].hasEnumeratedDomain()) {
             DisposableValueIterator it = vars[indexVar].getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[indexVar].getLB());
             try {
                 while (it.hasNext()) {
                     val = it.next();
@@ -199,17 +197,12 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
                         if (currentSupport != null) {
                             setSupport(currentSupport);
                         } else {
-                            if (val == right + 1) {
-                                right = val;
-                            } else {
-                                vars[indexVar].removeInterval(left, right, this);
-                                left = right = val;
-                            }
+                            vrms.add(val);
                             //                            vars[indexVar].removeVal(val, this, false);
                         }
                     }
                 }
-                vars[indexVar].removeInterval(left, right, this);
+                vars[indexVar].removeValues(vrms, this);
             } finally {
                 it.dispose();
             }
@@ -330,16 +323,4 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         return null;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeGAC3rm(aVars, relation.duplicate()));
-        }
-    }
 }

@@ -55,9 +55,8 @@ public class LogStatEveryXXms implements IMonitorInitPropagation, IMonitorClose 
                     sleep(duration);
                     //noinspection InfiniteLoopStatement
                     do {
-                        solver.getMeasures().updateTimeCount();
-                        solver.getMeasures().updatePropagationCount();
-                        System.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
+                        solver.getMeasures().updateTime();
+                        Chatterbox.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
                         sleep(duration);
                     } while (alive);
                 } catch (InterruptedException ignored) {

@@ -5,7 +5,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>3.3.1</version>
+    <version>3.3.2-SNAPSHOT</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://choco-solver.org/</url>
     <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
@@ -64,17 +64,6 @@
             <artifactId>trove4j</artifactId>
             <version>3.0.3</version>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.12</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.3</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <distributionManagement>
@@ -131,7 +120,6 @@
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
-                                <phase>verify</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>

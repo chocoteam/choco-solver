@@ -28,21 +28,22 @@
  */
 package org.chocosolver.solver.search.solution;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * Class which stores the value of each variable in a solution
@@ -52,17 +53,23 @@ import java.util.HashMap;
  * @author Charles Prud'homme
  * @since 05/06/2013
  */
-public class Solution implements Serializable {
+public class Solution implements Serializable, ICause {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Solution.class);
+    private static final int NO_ENTRY = Integer.MAX_VALUE;
 
-    HashMap<IntVar, Integer> intmap = new HashMap<>();
-    HashMap<RealVar, double[]> realmap = new HashMap<>();
-    HashMap<SetVar, int[]> setmap = new HashMap<>();
-    TIntHashSet dvars = new TIntHashSet(16, .5f, -1);
-    boolean empty = true;
+    TIntIntHashMap intmap;
+    TIntObjectHashMap<double[]> realmap;
+    TIntObjectHashMap<int[]> setmap;
+    TIntHashSet dvars;
+    boolean empty;
 
+    @SuppressWarnings("unchecked")
     public Solution() {
+        intmap = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+        realmap = new TIntObjectHashMap(16, 05f, NO_ENTRY);
+        setmap = new TIntObjectHashMap(16, 05f, NO_ENTRY);
+        dvars = new TIntHashSet(16, .5f, -1);
+        empty = true;
     }
 
     /**
@@ -85,33 +92,35 @@ public class Solution implements Serializable {
         setmap.clear();
         Variable[] vars = solver.getVars();
         for (int i = 0; i < vars.length; i++) {
-            int kind = vars[i].getTypeAndKind() & Variable.KIND;
-            if (!vars[i].isInstantiated()) {
-                if (dvars.contains(vars[i].getId())) {
-                    throw new SolverException(vars[i] + " is not instantiated when recording a solution.");
+            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                if (!vars[i].isInstantiated()) {
+                    if (dvars.contains(vars[i].getId())) {
+                        throw new SolverException(vars[i] + " is not instantiated when recording a solution.");
+                    } else {
+                        warn = true;
+                    }
                 } else {
-                    warn = true;
-                }
-            } else {
-                switch (kind) {
-                    case Variable.INT:
-                    case Variable.BOOL:
-                        IntVar v = (IntVar) vars[i];
-                        intmap.put(v, v.getValue());
-                        break;
-                    case Variable.REAL:
-                        RealVar r = (RealVar) vars[i];
-                        realmap.put(r, new double[]{r.getLB(), r.getUB()});
-                        break;
-                    case Variable.SET:
-                        SetVar s = (SetVar) vars[i];
-                        setmap.put(s, s.getValues());
-                        break;
+                    switch (kind) {
+                        case Variable.INT:
+                        case Variable.BOOL:
+                            IntVar v = (IntVar) vars[i];
+                            intmap.put(v.getId(), v.getValue());
+                            break;
+                        case Variable.REAL:
+                            RealVar r = (RealVar) vars[i];
+                            realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
+                            break;
+                        case Variable.SET:
+                            SetVar s = (SetVar) vars[i];
+                            setmap.put(s.getId(), s.getValues());
+                            break;
+                    }
                 }
             }
         }
-        if (warn && LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Some non decision variables are not instantiated in the current solution.");
+        if (warn && solver.getSettings().warnUser()) {
+            Chatterbox.out.printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
 
@@ -122,36 +131,66 @@ public class Solution implements Serializable {
      * <p>
      * BEWARE: A restart might be required so that domains contain the solution values
      */
-    public void restore() throws ContradictionException {
+    public void restore(Solver solver) throws ContradictionException {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        for (IntVar i : intmap.keySet()) {
-            i.instantiateTo(intmap.get(i), Cause.Null);
-        }
-        for (SetVar s : setmap.keySet()) {
-            s.instantiateTo(setmap.get(s), Cause.Null);
-        }
-        for (RealVar r : realmap.keySet()) {
-            double[] bounds = realmap.get(r);
-            r.updateBounds(bounds[0], bounds[1], Cause.Null);
+        Variable[] vars = solver.getVars();
+        for (int i = 0; i < vars.length; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                    case Variable.BOOL:
+                        IntVar v = (IntVar) vars[i];
+                        int value = intmap.get(v.getId());
+                        if(value != NO_ENTRY){
+                            v.instantiateTo(value, this);
+                        } // otherwise, this is not a decision variable
+                        break;
+                    case Variable.REAL:
+                        RealVar r = (RealVar) vars[i];
+                        double[] bounds = realmap.get(r.getId());
+                        if(bounds != null){
+                            r.updateBounds(bounds[0], bounds[1], this);
+                        }  // otherwise, this is not a decision variable
+                        break;
+                    case Variable.SET:
+                        SetVar s = (SetVar) vars[i];
+                        int[]values = setmap.get(s.getId());
+                        if(values != null){
+                            s.instantiateTo(values, Cause.Null);
+                        } // otherwise, this is not a decision variable
+                        break;
+                }
+            }
         }
     }
 
-    @Override
-    public String toString() {
+    public String toString(Solver solver) {
+        Variable[] vars = solver.getVars();
         StringBuilder st = new StringBuilder("Solution: ");
-        for (IntVar i : intmap.keySet()) {
-            st.append(i.getName()).append("=").append(intmap.get(i)).append(", ");
+        for (int i = 0; i < vars.length; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                    case Variable.BOOL:
+                        IntVar v = (IntVar) vars[i];
+                        st.append(v.getName()).append("=").append(intmap.get(v.getId())).append(", ");
+                        break;
+                    case Variable.REAL:
+                        RealVar r = (RealVar) vars[i];
+                        double[] bounds = realmap.get(r.getId());
+                        st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
+                        break;
+                    case Variable.SET:
+                        SetVar s = (SetVar) vars[i];
+                        st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s.getId()))).append(", ");
+                        break;
+                }
+            }
         }
-        for (SetVar s : setmap.keySet()) {
-            st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s))).append(", ");
-        }
-        for (RealVar r : realmap.keySet()) {
-            double[] bounds = realmap.get(r);
-            st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
-        }
-
         return st.toString();
     }
 
@@ -165,10 +204,14 @@ public class Solution implements Serializable {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        if (intmap.containsKey(v)) {
-            return intmap.get(v);
+        if (intmap.containsKey(v.getId())) {
+            return intmap.get(v.getId());
         } else {
-            return null;
+            if ((v.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
+                return v.getValue();
+            } else {
+                return null;
+            }
         }
     }
 
@@ -182,10 +225,13 @@ public class Solution implements Serializable {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        if (setmap.containsKey(s)) {
-            return setmap.get(s);
-        } else
+        if (setmap.containsKey(s.getId())) {
+            return setmap.get(s.getId());
+        } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
+            return s.getValues();
+        } else {
             return null;
+        }
     }
 
     /**
@@ -198,14 +244,21 @@ public class Solution implements Serializable {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        if (realmap.containsKey(r)) {
-            return realmap.get(r);
-        } else return null;
+        if (realmap.containsKey(r.getId())) {
+            return realmap.get(r.getId());
+        } else {
+            if ((r.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
+                return new double[]{r.getLB(), r.getUB()};
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
      * @return true iff this is a valid solution
      */
+
     public boolean hasBeenFound() {
         return !empty;
     }

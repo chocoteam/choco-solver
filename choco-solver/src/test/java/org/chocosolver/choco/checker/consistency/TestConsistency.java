@@ -424,6 +424,76 @@ public class TestConsistency {
         }
     }
 
+    @Test(groups = "consistency.1m")
+    public void testIVPC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelivpcAC, 5, -5, 5, null, seed + i, "ac");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testIVPC2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelivpcAC, 10, -2, 3, null, seed + i, "ac");
+    }
+
+    @Test(groups = "consistency.1m")
+     public void testMAX1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbc, 5, -5, 5, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMAX2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbc, 10, -2, 3, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMIN1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbc, 5, -5, 5, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMIN2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbc, 10, -2, 3, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMAXB1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbbc, 5, 0, 1, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMAXB2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbbc, 10, 0, 1, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMINB1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbbc, 5, 0, 1, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMINB2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbbc, 10, 0, 1, null, seed + i, "bc");
+    }
+
     /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/kyzrsoze/Sources/Choco3/SOLVER_ERROR.ser");

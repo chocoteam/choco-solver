@@ -94,7 +94,7 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(new IntStrategy(vars, new InputOrder<>(), new IntDomainMiddle()));
+        solver.set(new IntStrategy(vars, new InputOrder<>(), new IntDomainMiddle(true)));
     }
 
     @Override

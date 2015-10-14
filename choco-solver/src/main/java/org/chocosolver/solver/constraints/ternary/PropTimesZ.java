@@ -28,14 +28,14 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import static java.lang.Math.ceil;
 
 /**
  * X*Y=Z filters from right to left
@@ -48,7 +48,7 @@ public class PropTimesZ extends Propagator<IntVar> {
     IntVar X, Y, Z;
 
     public PropTimesZ(IntVar x, IntVar y, IntVar z) {
-        super(new IntVar[]{x, y, z}, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{z}, PropagatorPriority.UNARY, false);
         this.X = vars[0];
         this.Y = vars[1];
         this.Z = vars[2];
@@ -56,7 +56,6 @@ public class PropTimesZ extends Propagator<IntVar> {
 
     @Override
     public final int getPropagationConditions(int vIdx) {
-        if (vIdx != 2) return 0;
         return IntEventType.boundAndInst();
     }
 
@@ -105,31 +104,31 @@ public class PropTimesZ extends Propagator<IntVar> {
 
     private void positiveOrNul() throws ContradictionException {
         if (X.getUB() < 0) {
-            Y.updateUpperBound(0, aCause);
+            Y.updateUpperBound(0, this);
         } else if (X.getLB() > 0) {
-            Y.updateLowerBound(0, aCause);
+            Y.updateLowerBound(0, this);
         } else {
             if (Y.getUB() < 0) {
-                X.updateUpperBound(0, aCause);
+                X.updateUpperBound(0, this);
             } else if (Y.getLB() > 0) {
-                X.updateLowerBound(0, aCause);
+                X.updateLowerBound(0, this);
             }
         }
     }
 
     private void positiveStrict() throws ContradictionException {
         if (X.getUB() < 0) {
-            Y.updateUpperBound(-1, aCause);
+            Y.updateUpperBound(-1, this);
         } else {
             if (X.getLB() >= 0) {
-                X.updateLowerBound(1, aCause);
-                Y.updateLowerBound(1, aCause);
+                X.updateLowerBound(1, this);
+                Y.updateLowerBound(1, this);
             } else {
                 if (Y.getUB() < 0) {
-                    X.updateUpperBound(-1, aCause);
+                    X.updateUpperBound(-1, this);
                 } else if (Y.getLB() >= 0) {
-                    X.updateLowerBound(1, aCause);
-                    Y.updateLowerBound(1, aCause);
+                    X.updateLowerBound(1, this);
+                    Y.updateLowerBound(1, this);
                 }
             }
         }
@@ -137,17 +136,17 @@ public class PropTimesZ extends Propagator<IntVar> {
 
     private void negativeStrict() throws ContradictionException {
         if (X.getUB() < 0) {
-            Y.updateLowerBound(1, aCause);
+            Y.updateLowerBound(1, this);
         } else {
             if (X.getLB() >= 0) {
-                X.updateLowerBound(1, aCause);
-                Y.updateUpperBound(-1, aCause);
+                X.updateLowerBound(1, this);
+                Y.updateUpperBound(-1, this);
             } else {
                 if (Y.getUB() < 0) {
-                    X.updateLowerBound(1, aCause);
+                    X.updateLowerBound(1, this);
                 } else if (Y.getLB() >= 0) {
-                    X.updateUpperBound(-1, aCause);
-                    Y.updateLowerBound(1, aCause);
+                    X.updateUpperBound(-1, this);
+                    Y.updateLowerBound(1, this);
                 }
             }
         }
@@ -155,11 +154,11 @@ public class PropTimesZ extends Propagator<IntVar> {
 
     private void nul() throws ContradictionException {
         if (!X.contains(0)) {
-            Y.instantiateTo(0, aCause);
+            Y.instantiateTo(0, this);
         } else if (!Y.contains(0)) {
-            X.instantiateTo(0, aCause);
+            X.instantiateTo(0, this);
         } else if (X == Y) {
-            Y.instantiateTo(0, aCause);
+            Y.instantiateTo(0, this);
         }
     }
 
@@ -178,7 +177,7 @@ public class PropTimesZ extends Propagator<IntVar> {
                 if (Math.abs(a - Math.round(a)) > 0.001) {
                     contradiction(Z, "");                        // not integer
                 }
-                Y.instantiateTo((int) Math.round(a), aCause);        // fix v1
+                Y.instantiateTo((int) Math.round(a), this);        // fix v1
                 setPassive();
             }
         } else {
@@ -187,27 +186,23 @@ public class PropTimesZ extends Propagator<IntVar> {
                 if (X.getLB() > 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateUpperBound((int) a, aCause);
-                    Y.updateLowerBound((int) Math.ceil(b), aCause);
+                    Y.updateBounds((int) ceil(b), (int) a, this);
                 }
                 if (X.getUB() < 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateUpperBound((int) a, aCause);
-                    Y.updateLowerBound((int) b, aCause);
+                    Y.updateBounds((int) b, (int) a, this);
                 }
             } else {
                 if (X.getLB() > 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateLowerBound((int) a, aCause);
-                    Y.updateUpperBound((int) b, aCause);
+                    Y.updateBounds((int) a, (int) b, this);
                 }
                 if (X.getUB() < 0) {
                     double a = z / (double) X.getLB();
                     double b = z / (double) X.getUB();
-                    Y.updateLowerBound((int) a, aCause);
-                    Y.updateUpperBound((int) b, aCause);
+                    Y.updateBounds((int) a, (int) b, this);
                 }
             }
         }
@@ -220,24 +215,12 @@ public class PropTimesZ extends Propagator<IntVar> {
         while (lb <= ub && (!Z.contains(value * lb))) {
             lb = v2.nextValue(lb);
         }
-        v2.updateLowerBound(lb, aCause);
+        v2.updateLowerBound(lb, this);
         while (lb <= ub && (!Z.contains(value * ub))) {
             ub = v2.previousValue(ub);
         }
-        v2.updateUpperBound(ub, aCause);
+        v2.updateUpperBound(ub, this);
 
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = vars.length;
-            IntVar[] ivars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                vars[i].duplicate(solver, identitymap);
-                ivars[i] = (IntVar) identitymap.get(vars[i]);
-            }
-            identitymap.put(this, new PropTimesZ(ivars[0], ivars[1], ivars[2]));
-        }
-    }
 }

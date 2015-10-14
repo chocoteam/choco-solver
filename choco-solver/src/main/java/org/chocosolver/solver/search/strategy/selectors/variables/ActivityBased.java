@@ -40,7 +40,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
@@ -133,7 +133,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     java.util.Random random; //  a random object for the sampling phase
 
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
     int currentVar = -1, currentVal = -1;
 
@@ -181,7 +181,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     @Override
-    public void init() {
+    public boolean init() {
         for (int i = 0; i < vars.length; i++) {
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
@@ -191,6 +191,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i] = new ArrayVal(ampl, vars[i].getLB());
             }
         }
+        return true;
     }
 
     @Override
@@ -245,9 +246,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                         lb : ub;
             }
         }
-        FastDecision currrent = decisionPool.getE();
+        IntDecision currrent = decisionPool.getE();
         if (currrent == null) {
-            currrent = new FastDecision(decisionPool);
+            currrent = new IntDecision(decisionPool);
         }
         currrent.set(variable, currentVal, DecisionOperator.int_eq);
 //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
@@ -401,7 +402,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static interface IVal {
+    private interface IVal {
 
         double activity(int value);
 

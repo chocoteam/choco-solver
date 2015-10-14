@@ -42,8 +42,9 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 
@@ -64,7 +65,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private IntVar obj;
     private long nbSols;
     private Solver solver;
-    private PoolManager<FastDecision> pool;
+    private PoolManager<IntDecision> pool;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private OptimizationPolicy optPolicy;
@@ -148,11 +149,10 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     // METHODS
     //***********************************************************************************
 
-    @Override
-    public void init() {
+    public boolean init() {
         decOperator = getOperator(optPolicy, solver.getObjectiveManager().getPolicy());
+        return true;
     }
-
     @Override
     public Decision getDecision() {
         if (solver.getMeasures().getSolutionCount() == 0
@@ -176,15 +176,18 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (globalLB > globalUB) {
             return null;
         }
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("% objective in [" + globalLB + ", " + globalUB + "]");
+
+        if(solver.getSettings().warnUser()){
+            Chatterbox.out.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
+        }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
-        FastDecision dec = pool.getE();
-        if (dec == null) dec = new FastDecision(pool);
+        IntDecision dec = pool.getE();
+        if (dec == null) dec = new IntDecision(pool);
         dec.set(obj, target, decOperator);
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("% trying " + obj+" "+(decOperator==decUB?"<=":">=")+" "+target);
+        if(solver.getSettings().warnUser()){
+            Chatterbox.out.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
+        }
         return dec;
     }
 

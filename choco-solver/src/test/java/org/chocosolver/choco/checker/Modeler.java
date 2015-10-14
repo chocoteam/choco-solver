@@ -38,12 +38,11 @@ import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -761,7 +760,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram)parameters));
+            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram) parameters));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -769,6 +768,113 @@ public interface Modeler {
         @Override
         public String name() {
             return "modelmddAC";
+        }
+    };
+
+    Modeler modelivpcAC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("ivpc" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.int_value_precede_chain(vars, 1, 2));
+            s.set(ISF.random_value(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelivpcAC";
+        }
+    };
+
+    Modeler modelmaxbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("max" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.maximum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
+        }
+    };
+
+    Modeler modelminbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("min" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.minimum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
+        }
+    };
+
+    Modeler modelmaxbbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("maxb" + n);
+            BoolVar[] vars = new BoolVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = domains[i].length > 1 ? VariableFactory.bool("X_" + i, s) :
+                        domains[i][0] == 0 ? VF.fixed(false, s) : VF.fixed(true, s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.maximum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
+        }
+    };
+
+    Modeler modelminbbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("minb" + n);
+            BoolVar[] vars = new BoolVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = domains[i].length > 1 ? VariableFactory.bool("X_" + i, s) :
+                        domains[i][0] == 0 ? VF.fixed(false, s) : VF.fixed(true, s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.minimum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
         }
     };
 }

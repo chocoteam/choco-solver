@@ -184,16 +184,16 @@ public enum Attribute {
     public static void printAll(Solver solver) {
         printSuccint(solver);
         for (Attribute a : Attribute.values()) {
-            System.out.printf("\t%s : %.3f\n", a.description(), a.evaluate(solver));
+            Chatterbox.out.printf("\t%s : %.3f\n", a.description(), a.evaluate(solver));
         }
     }
 
     public static void printSuccint(Solver solver) {
-        System.out.printf("- Solver features:\n");
-        System.out.printf("\tVariables : %d\n", solver.getNbVars());
-        System.out.printf("\tConstraints : %d\n", solver.getNbCstrs());
-        System.out.printf("\tDefault search strategy : %s\n", solver.getSearchLoop().isDefaultSearchUsed()?"yes":"no");
-        System.out.printf("\tCompleted search strategy : %s\n", solver.getSearchLoop().isSearchCompleted()?"yes":"no");
+        Chatterbox.out.printf("- Solver features:\n");
+        Chatterbox.out.printf("\tVariables : %d\n", solver.getNbVars());
+        Chatterbox.out.printf("\tConstraints : %d\n", solver.getNbCstrs());
+        Chatterbox.out.printf("\tDefault search strategy : %s\n", solver.getSearchLoop().isDefaultSearchUsed()?"yes":"no");
+        Chatterbox.out.printf("\tCompleted search strategy : %s\n", solver.getSearchLoop().isSearchCompleted()?"yes":"no");
     }
 
 }

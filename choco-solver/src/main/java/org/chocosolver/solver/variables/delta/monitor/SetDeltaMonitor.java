@@ -61,11 +61,15 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
     @Override
     public void freeze() {
 		if (needReset()) {
+            delta.lazyClear();
 			for (int i = 0; i < 2; i++) {
 				this.first[i] = last[i] = 0;
 			}
 			resetStamp();
 		}
+        assert this.getTimeStamp() == ((TimeStampedObject)delta).getTimeStamp()
+                        :"Delta and monitor desynchronized. deltamonitor.freeze() is called" +
+                        "but no value has been removed since the last call.";
         for (int i = 0; i < 2; i++) {
             this.frozenFirst[i] = first[i]; // freeze indices
             this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);

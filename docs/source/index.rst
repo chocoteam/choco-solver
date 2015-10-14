@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 .. warning::
-  This is a work-in-progress documentation. If you have any questions, suggestions or requests, please send an email to choco@mines-nantes.fr.
+  This is a work-in-progress documentation. If you have any questions, suggestions or requests, please send an email to choco3-support@mines-nantes.fr.
 
 .. _index:
 

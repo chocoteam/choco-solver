@@ -36,8 +36,6 @@
 package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -97,8 +95,7 @@ public class PropElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateLowerBound(offSet, aCause);
-        index.updateUpperBound(array.length - 1 + offSet, aCause);
+        index.updateBounds(offSet, array.length - 1 + offSet, this);
         if (index.isInstantiated()) {
             // filter set and array
             setEq(set, array[index.getValue() - offSet]);
@@ -109,7 +106,7 @@ public class PropElement extends Propagator<Variable> {
             boolean noEmptyKer = true;
             for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
                 if (disjoint(set, array[i - offSet]) || disjoint(array[i - offSet], set)) {// array[i] != set
-                    index.removeValue(i, aCause);
+                    index.removeValue(i, this);
                 } else {
                     if (array[i - offSet].getKernelSize() == 0) {
                         noEmptyKer = false;
@@ -137,7 +134,7 @@ public class PropElement extends Propagator<Variable> {
                 }
                 for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
                     int j = constructiveDisjunction.get(cd);
-                    set.addToKernel(j, aCause);
+                    set.addToKernel(j, this);
                 }
             }
             if (!set.isInstantiated()) {// from env
@@ -150,7 +147,7 @@ public class PropElement extends Propagator<Variable> {
                         }
                     }
                     if (!valueExists) {
-                        set.removeFromEnvelope(j, aCause);
+                        set.removeFromEnvelope(j, this);
                     }
                 }
             }
@@ -159,11 +156,11 @@ public class PropElement extends Propagator<Variable> {
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
         for (int j = s2.getKernelFirst(); j != SetVar.END; j = s2.getKernelNext()) {
-            s1.addToKernel(j, aCause);
+            s1.addToKernel(j, this);
         }
         for (int j = s1.getEnvelopeFirst(); j != SetVar.END; j = s1.getEnvelopeNext()) {
             if (!s2.envelopeContains(j)) {
-                s1.removeFromEnvelope(j, aCause);
+                s1.removeFromEnvelope(j, this);
             }
         }
     }
@@ -193,22 +190,4 @@ public class PropElement extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 2;
-            SetVar[] aVars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            index.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(index);
-
-            identitymap.put(this, new PropElement(I, aVars, offSet, S));
-        }
-    }
 }

@@ -46,7 +46,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -59,6 +58,13 @@ import java.util.Arrays;
 public class ExplanationEngineTest {
 
 
+    public void model1(Solver solver, int n) {
+        IntVar[] vs = VF.enumeratedArray("V", n, 1, n - 1, solver);
+        for (int i = 0; i < n - 1; i++) {
+            solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
+        }
+    }
+
     /**
      * This test evaluates the case where half of the generated events are useless.
      * Only one branch is evaluated.
@@ -68,11 +74,9 @@ public class ExplanationEngineTest {
         for (int n = 6; n < 1001; n *= 2) {
             System.out.printf("n = %d : ", n);
             Solver solver = new Solver();
-            IntVar[] vs = VF.enumeratedArray("V", n, 1, n - 1, solver);
-            for (int i = 0; i < n - 1; i++) {
-                solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
-            }
-            Solver expl = solver.duplicateModel();
+            model1(solver, n);
+            Solver expl = new Solver();
+            model1(expl, n);
 
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
@@ -87,6 +91,12 @@ public class ExplanationEngineTest {
         }
     }
 
+    private void model2(Solver solver, int n) {
+        IntVar[] vs = VF.enumeratedArray("V", 2, 0, n, solver);
+        solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
+        solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
+    }
+
     /**
      * This test evaluates the case where only two constraints are in conflict, the remaining ones are useless.
      */
@@ -95,12 +105,10 @@ public class ExplanationEngineTest {
         for (int n = 100; n < 12801; n *= 2) {
             System.out.printf("n = %d : ", n);
             Solver solver = new Solver();
-            IntVar[] vs = VF.enumeratedArray("V", 2, 0, n, solver);
-            solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
-            solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
+            model2(solver, n);
 
-            Solver expl = solver.duplicateModel();
-
+            Solver expl = new Solver();
+            model2(expl, n);
 
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
@@ -115,6 +123,12 @@ public class ExplanationEngineTest {
         }
     }
 
+    private void model3(Solver solver, int n) {
+        IntVar[] vs = VF.boundedArray("V", n, 2, n + 2, solver);
+        solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
+        solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
+    }
+
     /**
      * This test evaluates the case where a subset of the constraints are in conflict
      */
@@ -123,11 +137,9 @@ public class ExplanationEngineTest {
         for (int n = 3; n < 64000; n *= 2) {
             System.out.printf("n = %d : ", n);
             Solver solver = new Solver();
-            IntVar[] vs = VF.boundedArray("V", n, 2, n + 2, solver);
-            solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
-            solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
-
-            Solver expl = solver.duplicateModel();
+            model3(solver, n);
+            Solver expl = new Solver();
+            model3(expl, n);
 
             IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
@@ -192,7 +204,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
             Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
@@ -211,7 +222,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
             Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
@@ -230,7 +240,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
@@ -250,7 +259,6 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(solver, false, true);
             new ConflictBackJumping(ee, solver, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
@@ -567,7 +575,7 @@ public class ExplanationEngineTest {
         solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
         solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
-        solver.set(IntStrategyFactory.minDom_MidValue(vars));
+        solver.set(IntStrategyFactory.minDom_MidValue(true, vars));
 
         configure(solver, a);
         Chatterbox.showShortStatistics(solver);

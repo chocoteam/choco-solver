@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
@@ -37,12 +36,18 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 import java.io.Serializable;
 
 /**
+ *
+ * To developers: any constructor of variable must pass in parameter
+ * the back-end ISolver, that is, in decreasing order:
+ * - the solver portfolio,
+ * - the solver (or portfolio workers but fes).
  * Created by IntelliJ IDEA.
- * User: xlorca
+ * User: xlorca, Charles Prud'homme
  */
 public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
@@ -58,7 +63,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     public static final int BOOL = INT | (1 << 4);
     public static final int SET = 1 << 5;
     public static final int REAL = 1 << 6;
-    public static final int KIND = (1 << 7) - 1 - TYPE;
+    public static final int KIND = (1 << 10) - 1 - TYPE;
 
     /**
      * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
@@ -97,6 +102,8 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     int getNbProps();
 
     int[] getPIndices();
+
+    int getDindex(int i);
 
     /**
      * Return the position of the variable in the propagator at position pidx
@@ -240,9 +247,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     <V extends Variable> V duplicate();
 
     /**
-     * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
-     * @param solver target solver
-     * @param identitymap a map to guarantee uniqueness of objects
+     * For scheduling purpose only
      */
-    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
+    EvtScheduler _schedIter();
 }

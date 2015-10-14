@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.variables.view;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
@@ -38,6 +36,7 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 
 /**
@@ -51,8 +50,8 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     protected final BoolVar var;
 
-    public BoolNotView(BoolVar var, Solver solver) {
-        super("not(" + var.getName() + ")", var, solver);
+    public BoolNotView(BoolVar var) {
+        super("not(" + var.getName() + ")", var);
         this.var = var;
     }
 
@@ -89,20 +88,42 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
-        else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
-        else if (hasEnumeratedDomain()) {
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
-            }
-            return anyChange;
-        } else {
-            return false;
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
         }
+        if (values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (!values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        if (!values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (from <= to && from <= 1 && to >= 0) {
+            if (from == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (to == 0) {
+                hasChanged = instantiateTo(0, cause);
+            } else {
+                instantiateTo(2, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override
@@ -134,6 +155,23 @@ public final class BoolNotView extends IntView implements BoolVar {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (lb > 1) {
+            var.instantiateTo(-1, cause);
+        } else if (ub < 0) {
+            var.instantiateTo(2, cause);
+        } else {
+            if (lb == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (ub == 0) {
+                hasChanged = instantiateTo(0, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override
@@ -204,18 +242,6 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public BoolVar duplicate() {
         return VariableFactory.not(this.var);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.var.duplicate(solver, identitymap);
-            BoolNotView clone = new BoolNotView((BoolVar) identitymap.get(this.var), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     @Override

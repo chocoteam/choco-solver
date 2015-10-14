@@ -53,11 +53,6 @@ public class IntDomainMiddle implements IntValueSelector {
 	public final static boolean CEIL = !FLOOR;
 	protected final boolean roundingPolicy;
 
-	// CONSTRUCTORS
-	public IntDomainMiddle(){
-		this(FLOOR);
-	}
-
 	/**Selects the middle value
 	 * @param roundingPolicy should be either FLOOR or CEIL
 	 */

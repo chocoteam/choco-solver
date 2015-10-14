@@ -41,7 +41,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -70,7 +69,7 @@ public class ExplanationTest {
                     solver.set(ISF.lexico_LB(vars));
                     engines[e].plugin(solver, ng == 1, false);
                     Assert.assertFalse(solver.findSolution());
-                    LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
+                    System.out.printf("\t%s", solver.getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
                     if (e > 0) {
                         Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);

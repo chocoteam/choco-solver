@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -73,8 +71,8 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, aCause);
-        y.updateUpperBound(x.getUB() - this.cste, aCause);
+        x.updateLowerBound(y.getLB() + this.cste, this);
+        y.updateUpperBound(x.getUB() - this.cste, this);
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
         }
@@ -83,9 +81,9 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-            y.updateUpperBound(x.getUB() - this.cste, aCause);
+            y.updateUpperBound(x.getUB() - this.cste, this);
         } else {
-            x.updateLowerBound(y.getLB() + this.cste, aCause);
+            x.updateLowerBound(y.getLB() + this.cste, this);
         }
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
@@ -121,15 +119,4 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
         return newrules;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropGreaterOrEqualX_YC(new IntVar[]{X, Y}, this.cste));
-        }
-    }
 }

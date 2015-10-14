@@ -44,9 +44,8 @@ import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -74,8 +73,6 @@ import java.util.List;
  * @since 05/07/12
  */
 public class TwoBucketPropagationEngine implements IPropagationEngine {
-
-    final Logger LOGGER = LoggerFactory.getLogger(TwoBucketPropagationEngine.class);
 
     private static final int WORD_MASK = 0xffffffff;
 
@@ -252,9 +249,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             while (!evtset.isEmpty()) {
                 int v = evtset.pollFirst();
                 assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                if (LOGGER.isDebugEnabled()) {
-                    Trace.printPropagation(lastProp.getVar(v), lastProp);
-                }
                 // clear event
                 int mask = eventmasks[aid][v];
                 eventmasks[aid][v] = 0;
@@ -263,9 +257,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             }
         } else if (lastProp.isActive()) { // need to be checked due to views
             //assert lastProp.isActive() : "propagator is not active:" + lastProp;
-            if (LOGGER.isDebugEnabled()) {
-                Trace.printPropagation(null, lastProp);
-            }
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
         // This part is for debugging only!!
@@ -283,9 +274,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         PropagatorEventType evt = event_c[aid];
         event_c[aid] = PropagatorEventType.VOID;
         assert lastProp.isActive() : "propagator is not active:" + lastProp;
-        if (LOGGER.isDebugEnabled()) {
-            Trace.printPropagation(null, lastProp);
-        }
         lastProp.propagate(evt.getStrengthenedMask());
     }
 
@@ -332,38 +320,34 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        if (LOGGER.isDebugEnabled()) {
-            Trace.printModification(variable, type, cause);
-        }
-        int nbp = variable.getNbProps();
-        for (int p = 0; p < nbp; p++) {
-            Propagator prop = variable.getPropagator(p);
-            int pindice = variable.getIndexInPropagator(p);
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
-                int aid = p2i.get(prop.getId());
-                if (prop.reactToFineEvent()) {
-                    boolean needSched = (eventmasks[aid][pindice] == 0);
-                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
-                    if (needSched) {
-                        //assert !event_f[aid].get(pindice);
-                        if (LOGGER.isDebugEnabled()) {
-                            Trace.printSchedule(prop);
+        EvtScheduler si = variable._schedIter();
+        si.init(type);
+        while (si.hasNext()) {
+            int p = variable.getDindex(si.next());
+            int t = variable.getDindex(si.next());
+            for (; p < t; p++) {
+                Propagator prop = variable.getPropagator(p);
+                int pindice = variable.getIndexInPropagator(p);
+                if (cause != prop && prop.isActive()) {
+                    int aid = p2i.get(prop.getId());
+                    if (prop.reactToFineEvent()) {
+                        boolean needSched = (eventmasks[aid][pindice] == 0);
+                        eventmasks[aid][pindice] |= type.getStrengthenedMask();
+                        if (needSched) {
+                            //assert !event_f[aid].get(pindice);
+                            event_f[aid].addLast(pindice);
                         }
-                        event_f[aid].addLast(pindice);
-                    } else if (LOGGER.isDebugEnabled()) {
-                        Trace.printAlreadySchedule(prop);
                     }
-                }
-                if (!schedule_f[aid]) {
-                    PropagatorPriority prio = prop.getPriority();
-                    int q = match_f[prio.priority - 1];
-                    pro_queue_f[q].addLast(prop);
-                    schedule_f[aid] = true;
-                    notEmpty = notEmpty | (1 << q);
+                    if (!schedule_f[aid]) {
+                        PropagatorPriority prio = prop.getPriority();
+                        int q = match_f[prio.priority - 1];
+                        pro_queue_f[q].addLast(prop);
+                        schedule_f[aid] = true;
+                        notEmpty = notEmpty | (1 << q);
+                    }
                 }
             }
         }
-
     }
 
     @Override

@@ -28,12 +28,10 @@
  */
 package org.chocosolver.solver.constraints.nary.automata;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBool;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -48,6 +46,9 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
+
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
 
 /**
  * <br/>
@@ -89,7 +90,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return (vIdx != zIdx ? IntEventType.all() : IntEventType.boundAndInst());
+        return (vIdx != vars.length - 1 ? IntEventType.all() : IntEventType.boundAndInst());
     }
 
     /**
@@ -99,8 +100,7 @@ public class PropCostRegular extends Propagator<IntVar> {
      */
     protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
-        vars[zIdx].updateLowerBound(bounds.min.value, aCause);
-        vars[zIdx].updateUpperBound(bounds.max.value, aCause);
+        vars[zIdx].updateBounds(bounds.min.value, bounds.max.value, this);
         this.prefilter();
     }
 
@@ -164,8 +164,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), aCause);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), aCause);
+        vars[zIdx].updateBounds((int) ceil(zinf), (int) floor(zsup), this);
 
         DisposableIntIterator it = this.graph.inGraph.getIterator();
         //for (int id = this.graph.inGraph.nextSetBit(0) ; id >=0 ; id = this.graph.inGraph.nextSetBit(id+1))  {
@@ -196,7 +195,7 @@ public class PropCostRegular extends Propagator<IntVar> {
                 while (toRemove.size() > 0) {
                     int id = toRemove.pop();
                     // toRemove.removeLast();
-                    this.graph.removeArc(id, toRemove, this, aCause);
+                    this.graph.removeArc(id, toRemove, this, this);
                 }
                 while (this.graph.toUpdateLeft.size() > 0) {
                     this.graph.updateLeft(this.graph.toUpdateLeft.pop(), toRemove, this);
@@ -262,7 +261,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             while (toRemove.size() > 0) {
                 int id = toRemove.pop();
                 // toRemove.removeLast();
-                this.graph.removeArc(id, toRemove, this, aCause);
+                this.graph.removeArc(id, toRemove, this, this);
             }
             while (this.graph.toUpdateLeft.size() > 0) {
                 this.graph.updateLeft(this.graph.toUpdateLeft.pop(), toRemove, this);
@@ -277,8 +276,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), aCause);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), aCause);
+        vars[zIdx].updateBounds((int) ceil(zinf), (int) floor(zsup), this);
     }
 
 
@@ -315,21 +313,4 @@ public class PropCostRegular extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vars.length];
-            for (int i = 0; i < this.vars.length; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            ICostAutomaton nauto = null;
-            try {
-                nauto = (ICostAutomaton) cautomaton.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            identitymap.put(this, new PropCostRegular(aVars, nauto, graph.duplicate(solver)));
-        }
-    }
 }

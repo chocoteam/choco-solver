@@ -49,8 +49,6 @@ public interface ICounter extends Serializable, ISearchMonitor {
 
     boolean isReached();
 
-    void update();
-
     long getLimitValue();
 
     void reset();

@@ -28,6 +28,7 @@
  */
 package org.chocosolver.memory.structure;
 
+import java.util.Arrays;
 import org.chocosolver.memory.EnvironmentException;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
@@ -72,6 +73,11 @@ public class IndexedBipartiteSet extends IStateIntVector {
             }
         }
         this.position = new int[maxElt + 1];
+        // Use Integer.MAX_VALUE to denote missing value.
+        // list cannot contain Integer.MAX_VALUE because maxElt + 1 would overflow
+        // so the above statement will fail.
+        // Therefore it is safe to use Integer.MAX_VALUE to denote missing value.
+        Arrays.fill(position, Integer.MAX_VALUE);
         for (int i = 0; i < values.length; i++) {
             position[values[i]] = i;
         }
@@ -119,6 +125,7 @@ public class IndexedBipartiteSet extends IStateIntVector {
             }
         }
         final int[] newPosition = new int[maxElt + 1];
+        Arrays.fill(newPosition, Integer.MAX_VALUE);
         for (int i = 0; i < newList.length; i++) {
             newPosition[newList[i]] = i;
         }
@@ -211,6 +218,8 @@ public class IndexedBipartiteSet extends IStateIntVector {
     //It basically means that a was the k element to be removed
 
     public final int findIndexOfInt(final int a) {
-        return list.length - position[a];
+        return position[a] == Integer.MAX_VALUE
+                ? -1
+                : list.length - position[a];
     }
 }

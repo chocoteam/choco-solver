@@ -30,8 +30,6 @@ package org.chocosolver.solver.search.strategy.decision;
 
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.variables.Variable;
 
 /**
  * <br/>
@@ -42,53 +40,23 @@ import org.chocosolver.solver.variables.Variable;
 public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
 
+    public RootDecision() {
+        super(0);
+    }
+
     // FOR SERIALIZATION
     private Object readResolve() {
         return ROOT;
     }
-
-    @Override
-    public Variable getDecisionVariable() {
-        return null;
-    }
-
     @Override
     public Object getDecisionValue() {
         return null;
-    }
-
-    @Override
-    public DecisionOperator getDecisionOperator() {
-        return null;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    @Override
-    public void buildNext() {
-    }
-
-    @Override
-    public void rewind() {
     }
 
 
     @Override
     public void apply() throws ContradictionException {
     }
-
-    @Override
-    public void setPrevious(Decision decision) {
-    }
-
-    @Override
-    public Decision getPrevious() {
-        return null;
-    }
-
 
     @Override
     public void free() {

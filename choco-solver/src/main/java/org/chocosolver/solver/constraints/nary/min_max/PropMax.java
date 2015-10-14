@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -61,29 +59,45 @@ public class PropMax extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int idx = -1;
-        int lb = vars[n].getLB() - 1;
-        int ub = lb;
-        // update max
-        for (int i = 0; i < n; i++) {
-            lb = Math.max(lb, vars[i].getLB());
-            ub = Math.max(ub, vars[i].getUB());
-        }
-        vars[n].updateLowerBound(lb, aCause);
-        vars[n].updateUpperBound(ub, aCause);
-        ub = vars[n].getUB();
-        // back-propagation
-        for (int i = 0; i < n; i++) {
-            if (vars[i].getUB() >= lb) {
-                idx = idx == -1 ? i : -2;
-                vars[i].updateUpperBound(ub, aCause);
+        boolean filter;
+        do {
+            filter = false;
+            int lb = Integer.MIN_VALUE;
+            int ub = Integer.MIN_VALUE;
+            int max = vars[n].getUB();
+            // update max
+            for (int i = 0; i < n; i++) {
+                filter |= vars[i].updateUpperBound(max, this);
+                lb = Math.max(lb, vars[i].getLB());
+                ub = Math.max(ub, vars[i].getUB());
             }
-        }
-        if (idx >= 0) {
-            if (vars[idx].updateLowerBound(lb, aCause) && lb == ub) { // entailed
-                setPassive();
+            filter |= vars[n].updateLowerBound(lb, this);
+            filter |= vars[n].updateUpperBound(ub, this);
+            lb = Math.max(lb, vars[n].getLB());
+            // back-propagation
+            int c = 0, idx = -1;
+            for (int i = 0; i < n; i++) {
+                if (vars[i].getUB() < lb) {
+                    c++;
+                } else {
+                    idx = i;
+                }
             }
-        }
+            if (c == vars.length - 2) {
+                filter = false;
+                vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
+                if (vars[n].isInstantiated()) {
+                    setPassive();
+                } else if (vars[idx].hasEnumeratedDomain()) {
+                    // for enumerated variables only
+                    while (vars[n].getLB() != vars[idx].getLB()
+                            || vars[n].getUB() != vars[idx].getUB()) {
+                        vars[n].updateBounds(vars[idx].getLB(), vars[idx].getUB(), this);
+                        vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
+                    }
+                }
+            }
+        } while (filter);
     }
 
     @Override
@@ -123,18 +137,4 @@ public class PropMax extends Propagator<IntVar> {
 
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar M = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropMax(aVars, M));
-        }
-    }
 }

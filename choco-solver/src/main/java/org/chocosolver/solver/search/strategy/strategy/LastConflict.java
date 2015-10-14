@@ -75,8 +75,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     //***********************************************************************************
 
     @Override
-    public void init() throws ContradictionException {
-        mainStrategy.init();
+    public boolean init(){
+        return mainStrategy.init();
     }
 
     @Override
@@ -101,7 +101,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Variable curDecVar = solver.getSearchLoop().getLastDecision().getDecisionVariable();
+        Variable curDecVar = (Variable) solver.getSearchLoop().getLastDecision().getDecisionVariables();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
         if (inScope(curDecVar)) {
             if (nbCV < conflictingVariables.length) {

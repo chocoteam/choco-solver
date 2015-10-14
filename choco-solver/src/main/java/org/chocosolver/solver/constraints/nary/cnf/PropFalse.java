@@ -28,13 +28,11 @@
  */
 package org.chocosolver.solver.constraints.nary.cnf;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
@@ -51,7 +49,7 @@ public class PropFalse extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        this.contradiction(null, "FALSE");
+        fails();
     }
 
     @Override
@@ -61,7 +59,7 @@ public class PropFalse extends Propagator<BoolVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return PropagatorEventType.VOID.getMask();
+        return IntEventType.all();
     }
 
     @Override
@@ -74,10 +72,4 @@ public class PropFalse extends Propagator<BoolVar> {
         return ESat.FALSE;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            identitymap.put(this, new PropFalse(solver.ZERO));
-        }
-    }
 }

@@ -28,12 +28,12 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 
 /**
@@ -45,10 +45,12 @@ import org.chocosolver.util.ESat;
 public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     protected final int[] currentTuple;
+    protected final IntIterableSet vrms;
 
     private PropLargeFC(IntVar[] vars, LargeRelation relation) {
         super(vars, relation);
         this.currentTuple = new int[vars.length];
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeFC(IntVar[] vars, Tuples tuples) {
@@ -127,40 +129,23 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
         }
         if (!stop) {
             if (nbUnassigned == 1) {
-                int left = Integer.MIN_VALUE;
-                int right = left;
+                vrms.clear();
+                vrms.setOffset(vars[index].getLB());
 
                 int ub = vars[index].getUB();
                 for (int val = vars[index].getLB(); val <= ub; val = vars[index].nextValue(val)) {
                     currentTuple[index] = val;
                     if (!relation.isConsistent(currentTuple)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            vars[index].removeInterval(left, right, aCause);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                     }
                 }
-                vars[index].removeInterval(left, right, aCause);
+                vars[index].removeValues(vrms, this);
             } else {
                 if (!relation.isConsistent(currentTuple)) {
-                    this.contradiction(null, "not consistent");
+                    fails();
                 }
             }
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeFC(aVars, relation.duplicate()));
-        }
-    }
 }

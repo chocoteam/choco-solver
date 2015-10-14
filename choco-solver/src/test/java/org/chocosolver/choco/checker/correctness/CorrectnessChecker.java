@@ -33,8 +33,6 @@ import org.chocosolver.choco.checker.Modeler;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +52,6 @@ import static org.testng.Assert.fail;
  */
 public class CorrectnessChecker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
@@ -89,32 +86,32 @@ public class CorrectnessChecker {
                             Solver test = modeler.model(nbVar, _domains, null, parameters);
                             try {
                                 if (test.findSolution()) {
-                                    LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                            ds, ide, h, rvars[d], val, loop, seed);
-                                    LOGGER.error("REF:\n{}\n", ref);
+                                    System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
+                                            ds, ide, h, rvars[d], val, loop, seed));
+                                    System.out.println(String.format("REF:\n%s\n", ref));
                                     ref.getEnvironment().worldPop();
-                                    LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                                    System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
                                     File f = new File("SOLVER_ERROR.ser");
                                     try {
                                         writeInFile(ref, f);
                                     } catch (IOException ee) {
                                         ee.printStackTrace();
                                     }
-                                    LOGGER.error("{}", f.getAbsolutePath());
+                                    System.out.println("" + f.getAbsolutePath());
                                     fail("one solution found");
                                 }
                             } catch (Exception e) {
-                                LOGGER.error(e.getMessage());
-                                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                        ds, ide, h, rvars[d], val, loop, seed);
-                                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                                System.out.println(e.getMessage());
+                                System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
+                                        ds, ide, h, rvars[d], val, loop, seed));
+                                System.out.println("REF:\n" + ref + "\nTEST:\n" + test);
                                 File f = new File("SOLVER_ERROR.ser");
                                 try {
                                     writeInFile(ref, f);
                                 } catch (IOException ee) {
                                     ee.printStackTrace();
                                 }
-                                LOGGER.error("{}", f.getAbsolutePath());
+                                System.out.println("" + f.getAbsolutePath());
                                 fail();
                             }
                         }
@@ -131,7 +128,7 @@ public class CorrectnessChecker {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LOGGER.debug("Pas de solution pour ce probleme => rien a tester !");
+//            System.out.println("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
@@ -140,9 +137,9 @@ public class CorrectnessChecker {
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-            LOGGER.error(e.getMessage());
-            LOGGER.error("REF:\n{}\n", ref);
-            LOGGER.error("{}", f.getAbsolutePath());
+            System.out.println(e.getMessage());
+            System.out.println("REF:\n" + ref + "\n");
+            System.out.println("" + f.getAbsolutePath());
             fail();
         }
         return ref;

@@ -33,8 +33,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -150,7 +150,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart2() {
         Solver solver = buildQ(8);
-        SearchMonitorFactory.geometrical(solver, 10, 1.2, new TimeCounter(solver, 10), 2);
+        SearchMonitorFactory.geometrical(solver, 10, 1.2, new FailCounter(10), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.graph.G;
@@ -80,7 +78,7 @@ public class PropAMNV extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    protected int getPropagationConditions(int i) {
+    public int getPropagationConditions(int i) {
         return IntEventType.all();
     }
 
@@ -93,7 +91,7 @@ public class PropAMNV extends Propagator<IntVar> {
         do {
             heur.computeMIS();
             for (R rule : rules) {
-                rule.filter(vars, graph, heur, aCause);
+                rule.filter(vars, graph, heur, this);
             }
         } while (heur.hasNextMIS());
     }
@@ -116,30 +114,4 @@ public class PropAMNV extends Propagator<IntVar> {
         return ESat.TRUE;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-
-            // First duplicate graph
-            graph.duplicate(solver, identitymap);
-            G g = (G) identitymap.get(graph);
-            // Then the heuristic
-            heur.duplicate(solver, identitymap);
-            F h = (F) identitymap.get(heur);
-            // And the rules
-            R[] nrules = new R[rules.length];
-            for (int i = 0; i < nrules.length; i++) {
-                nrules[i] = rules[i].duplicate(solver);
-            }
-            identitymap.put(this, new PropAMNV(aVars, aVar, g, h, nrules));
-        }
-    }
 }

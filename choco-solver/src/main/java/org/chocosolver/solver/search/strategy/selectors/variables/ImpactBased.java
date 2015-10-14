@@ -40,8 +40,9 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -77,7 +78,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     protected int nodeImpact;
 
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
     protected Solver solver;
 
@@ -152,9 +153,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             currentVal = random.nextBoolean() ? lb : ub;
         }
 
-        FastDecision currrent = decisionPool.getE();
+        IntDecision currrent = decisionPool.getE();
         if (currrent == null) {
-            currrent = new FastDecision(decisionPool);
+            currrent = new IntDecision(decisionPool);
         }
         currrent.set(variable, currentVal, DecisionOperator.int_eq);
         //System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
@@ -194,7 +195,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init(){
         long tl = System.currentTimeMillis() + this.timeLimit;
         // 0. Data structure construction
         Ilabel = new double[vars.length][];
@@ -260,9 +261,10 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         if (learnsAndFails) {
             // If the initialisation detects a failure, then the problem has no solution!
             learnsAndFails = false;
-            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
+//            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
+            return false;
         } else if (System.currentTimeMillis() > tl) {
-            LOGGER.debug("impact Search stops its init phase -- reach time limit!");
+            if(solver.getSettings().warnUser()) Chatterbox.out.printf("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();
@@ -274,6 +276,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 }
             }
         }
+        return true;
     }
 
 

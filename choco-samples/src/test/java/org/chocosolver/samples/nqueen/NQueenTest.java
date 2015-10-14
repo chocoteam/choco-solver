@@ -34,7 +34,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -90,7 +89,6 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testBinary() {
-        LoggerFactory.getLogger("test").info("modelBinary {}", parameters());
         Solver s = modeler(new NQueenBinary(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -98,7 +96,6 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testLinBinary() {
-        LoggerFactory.getLogger("test").info("modelBinary {}", parameters());
         Solver s = modeler(new NQueenLinearBinary(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -107,7 +104,6 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testGlobalBinary() {
-        LoggerFactory.getLogger("test").info("modelBinaryGlobal {}", parameters());
         Solver s = modeler(new NQueenBinaryGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -115,7 +111,6 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testGlobal() throws ContradictionException {
-        LoggerFactory.getLogger("test").info("modelGlobal {}", parameters());
         Solver s = modeler(new NQueenGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -123,7 +118,6 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testDualBinary() {
-        LoggerFactory.getLogger("test").info("modelDualBinary {}", parameters());
         Solver s = modeler(new NQueenDualBinary(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -132,7 +126,6 @@ public class NQueenTest {
 
     @Test(groups = "1m")
     public void testDualGlobal() {
-        LoggerFactory.getLogger("test").info("modelDualGlobal {}", parameters());
         Solver s = modeler(new NQueenDualGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
@@ -193,7 +186,6 @@ public class NQueenTest {
         ((IntVar) vars[5+offset]).instantiateTo(16, Cause.Null);
         ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
         solver.propagate();
-        LoggerFactory.getLogger("test").error("*******************************************");
 //        System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {

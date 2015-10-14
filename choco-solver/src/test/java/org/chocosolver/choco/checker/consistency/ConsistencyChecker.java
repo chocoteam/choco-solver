@@ -33,8 +33,6 @@ import org.chocosolver.choco.checker.Modeler;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,8 +56,6 @@ public class ConsistencyChecker {
     enum Consistency {
         ac, bc
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
@@ -98,18 +94,16 @@ public class ConsistencyChecker {
                             Solver test = modeler.model(nbVar, _domains, map, parameters);
                             try {
                                 if (!test.findSolution()) {
-                                    LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                            ds, ide, h, rvars[d], val, loop, seed);
-                                    LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                                    System.out.println(
+                                            String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
+                                            ds, ide, h, rvars[d], val, loop, seed));
+                                    System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
                                     writeDown(ref);
                                     fail("no solution found");
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                LOGGER.error(e.getMessage());
-                                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                        ds, ide, h, rvars[d], val, loop, seed);
-                                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                                System.out.println(e.getMessage());
                                 writeDown(ref);
                                 fail();
                             }
@@ -127,12 +121,12 @@ public class ConsistencyChecker {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LOGGER.debug("Pas de solution pour ce probleme => rien a tester !");
+//            System.out.printf("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             writeDown(ref);
-            LOGGER.error(e.getMessage());
-            LOGGER.error("REF:\n{}\n", ref);
+            System.out.println(e.getMessage());
+            System.out.println(String.format("REF:\n%s\n", ref));
             fail();
         }
         return ref;
@@ -160,6 +154,6 @@ public class ConsistencyChecker {
         } catch (IOException ee) {
             ee.printStackTrace();
         }
-        LOGGER.error("{}", f.getAbsolutePath());
+        System.out.println(""+ f.getAbsolutePath());
     }
 }

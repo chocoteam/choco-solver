@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.tree;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -98,9 +96,8 @@ public class PropAntiArborescences extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
 		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			for (int i = 0; i < n; i++) {
-				vars[i].updateLowerBound(offSet, aCause);
-				vars[i].updateUpperBound(n - 1 + offSet, aCause);
-			}
+                vars[i].updateBounds(offSet, n - 1 + offSet, this);
+            }
 		}
         structuralPruning();
     }
@@ -126,13 +123,14 @@ public class PropAntiArborescences extends Propagator<IntVar> {
                 for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
                     if (x != y) {
                         if (domFinder.isDomminatedBy(y - offSet, x)) {
-                            vars[x].removeValue(y, aCause);
+                            vars[x].removeValue(y, this);
                         }
                     }
                 }
             }
         } else {
-            contradiction(vars[0], "the source cannot reach all nodes");
+            // the source cannot reach all nodes
+            fails();
         }
     }
 
@@ -166,16 +164,4 @@ public class PropAntiArborescences extends Propagator<IntVar> {
         return false;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAntiArborescences(aVars, this.offSet, (this.domFinder instanceof AlphaDominatorsFinder)));
-        }
-    }
 }

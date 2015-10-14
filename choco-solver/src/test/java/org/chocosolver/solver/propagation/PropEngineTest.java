@@ -68,6 +68,6 @@ public class PropEngineTest {
         solver.getSearchLoop().reset();
         solver.unpost(CSTR);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
 }

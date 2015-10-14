@@ -1,20 +1,20 @@
 /**
  * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
+ * Jean-Guillaume Fages (COSLING S.A.S.).
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the <organization> nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
@@ -119,6 +118,10 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
+    protected Variable[] objectives;
+
+    protected double precision = 0.00D;
+
     protected ISolutionRecorder solutionRecorder;
 
     /**
@@ -141,16 +144,26 @@ public class Solver implements Serializable {
     /**
      * Two basic constraints TRUE and FALSE, cached to avoid multiple useless occurrences
      */
-    public final Constraint TRUE, FALSE;
+    private Constraint TRUE, FALSE;
 
     /**
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
-    public final BoolVar ZERO, ONE;
+    private BoolVar ZERO, ONE;
 
-
+    /**
+     * A MiniSat instance, useful to deal with clauses
+     */
     protected SatConstraint minisat;
+
+    /**
+     * A MiniSat instance adapted to nogood management
+     */
     protected NogoodConstraint nogoods;
+
+    /**
+     * An Ibex (continuous constraint solver) instance
+     */
     private Ibex ibex;
 
     /**
@@ -173,18 +186,15 @@ public class Solver implements Serializable {
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        ZERO = (BoolVar) VF.fixed(0, this);
-        ONE = (BoolVar) VF.fixed(1, this);
-        ZERO._setNot(ONE);
-        ONE._setNot(ZERO);
-        TRUE = new Constraint("TRUE cstr", new PropTrue(ONE));
-        FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO));
         solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
         set(ObjectiveManager.SAT());
+        this.objectives = null;
     }
 
     /**
      * Create a solver object with default parameters.
+     *
+     * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
      */
     public Solver() {
         this(Environments.DEFAULT.make(), "");
@@ -192,6 +202,8 @@ public class Solver implements Serializable {
 
     /**
      * Create a solver object with default parameters, named <code>name</code>.
+     *
+     * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
      */
     public Solver(String name) {
         this(Environments.DEFAULT.make(), name);
@@ -200,6 +212,60 @@ public class Solver implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The basic constant "0"
+     *
+     * @return a boolean variable set to 0
+     */
+    public BoolVar ZERO() {
+        if (ZERO == null) {
+            ZERO = (BoolVar) VF.fixed(0, this);
+            ONE = (BoolVar) VF.fixed(1, this);
+            ZERO._setNot(ONE);
+            ONE._setNot(ZERO);
+        }
+        return ZERO;
+    }
+
+    /**
+     * The basic constant "1"
+     *
+     * @return a boolean variable set to 1
+     */
+    public BoolVar ONE() {
+        if (ONE == null) {
+            ZERO = (BoolVar) VF.fixed(0, this);
+            ONE = (BoolVar) VF.fixed(1, this);
+            ZERO._setNot(ONE);
+            ONE._setNot(ZERO);
+        }
+        return ONE;
+    }
+
+    /**
+     * The basic "true" constraint
+     *
+     * @return a "true" constraint
+     */
+    public Constraint TRUE() {
+        if (TRUE == null) {
+            TRUE = new Constraint("TRUE cstr", new PropTrue(ONE()));
+        }
+        return TRUE;
+    }
+
+    /**
+     * The basic "false" constraint
+     *
+     * @return a "false" constraint
+     */
+    public Constraint FALSE() {
+        if (FALSE == null) {
+            FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO()));
+        }
+        return FALSE;
+    }
 
 
     /**
@@ -399,6 +465,23 @@ public class Solver implements Serializable {
         return this.eoList;
     }
 
+    /**
+     * Return the objective variables
+     *
+     * @return a variable
+     */
+    public Variable[] getObjectives() {
+        return objectives;
+    }
+
+    /**
+     * In case of real variable to optimize, a precision is required.
+     *
+     * @return the precision used
+     */
+    public double getPrecision() {
+        return precision;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -486,6 +569,24 @@ public class Solver implements Serializable {
     }
 
     /**
+     * Define the variables to optimize
+     *
+     * @param objectives one or more variables
+     */
+    public void setObjectives(Variable... objectives) {
+        this.objectives = objectives;
+    }
+
+    /**
+     * In case of real variable to optimize, a precision is required.
+     *
+     * @param p the precision (default is 0.00D)
+     */
+    public void setPrecision(double p) {
+        this.precision = p;
+    }
+
+    /**
      * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
      * <p>
      * Erase the current event observer if any.
@@ -503,7 +604,7 @@ public class Solver implements Serializable {
      *
      * @param isComplete completeness of the declared search strategy
      */
-    public void makeCompleteSearch(boolean isComplete){
+    public void makeCompleteSearch(boolean isComplete) {
         this.search.makeCompleteStrategy(isComplete);
     }
 
@@ -636,7 +737,7 @@ public class Solver implements Serializable {
             idx++;
         }
         // 2. remove it from the network
-        if (idx < cIdx) {
+        while (idx < cIdx) {
             Constraint cm = cstrs[--cIdx];
             cstrs[idx] = cm;
             cstrs[cIdx] = null;
@@ -649,6 +750,11 @@ public class Solver implements Serializable {
                 for (int v = 0; v < prop.getNbVars(); v++) {
                     prop.getVar(v).unlink(prop);
                 }
+            }
+            // the constraint can have been posted more than once "accidentally" (but that's not a big deal, expect for
+            // performance issue) but all occurrences should be removed now.
+            while (idx < cIdx && cstrs[idx] != c) {
+                idx++;
             }
         }
     }
@@ -753,8 +859,11 @@ public class Solver implements Serializable {
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
     public boolean nextSolution() {
+        if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
+            throw new SolverException("Solver.findSolution() must be called once before calling Solver.nextSolution()");
+        }
         long nbsol = measures.getSolutionCount();
-        search.resume();
+        search.launch(true);
         return (measures.getSolutionCount() - nbsol) > 0;
     }
 
@@ -772,21 +881,49 @@ public class Solver implements Serializable {
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
      * Restores the best solution found so far (if any)
      *
+     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     */
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+        }
+        if (objectives == null || objectives.length == 0) {
+            throw new SolverException("No objective variable has been defined");
+        }
+        if (!getObjectiveManager().isOptimization()) {
+            if (objectives.length == 1) {
+                if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
+                    set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
+                } else {
+                    set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
+                }
+                set(new LastSolutionRecorder(new Solution(), true, this));
+            } else {
+                // BEWARE the usual optimization manager is only defined for mono-objective optimization
+                // so we use a satisfaction manager by default (it does nothing)
+                if (!getObjectiveManager().isOptimization()) {
+                    set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
+                }
+                IntVar[] _objectives = new IntVar[objectives.length];
+                for (int i = 0; i < objectives.length; i++) {
+                    _objectives[i] = (IntVar) objectives[i];
+                }
+                set(new ParetoSolutionsRecorder(policy, _objectives));
+            }
+        }
+        solve(false);
+    }
+
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Restores the best solution found so far (if any)
+     *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-        }
-        if (objective == null) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (!getObjectiveManager().isOptimization()) {
-            set(new ObjectiveManager<IntVar, Integer>(objective, policy, true));
-        }
-        set(new LastSolutionRecorder(new Solution(), true, this));
-        solve(false);
+        setObjectives(objective);
+        findOptimalSolution(policy);
     }
 
     /**
@@ -838,22 +975,8 @@ public class Solver implements Serializable {
      * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
      */
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findParetoFront(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-        }
-        if (objectives == null || objectives.length == 0) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (objectives.length == 1) {
-            throw new SolverException("Only one objective variable has been defined. Pareto is relevant with >1 objective");
-        }
-        // BEWARE the usual optimization manager is only defined for mono-objective optimization
-        // so we use a satisfaction manager by default (it does nothing)
-        if (getObjectiveManager().isOptimization()) {
-            set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
-        }
-        set(new ParetoSolutionsRecorder(policy, objectives));
-        solve(false);
+        setObjectives(objectives);
+        findOptimalSolution(policy);
     }
 
     /**
@@ -864,17 +987,9 @@ public class Solver implements Serializable {
      * @param objective the variable to optimize
      */
     public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
-        }
-        if (objective == null) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (!getObjectiveManager().isOptimization()) {
-            set(new ObjectiveManager<RealVar, Double>(objective, policy, precision, true));
-        }
-        set(new LastSolutionRecorder(new Solution(), true, this));
-        solve(false);
+        setObjectives(objective);
+        setPrecision(precision);
+        findOptimalSolution(policy);
     }
 
     /**
@@ -884,7 +999,7 @@ public class Solver implements Serializable {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
-        if(!engine.isInitialized()){
+        if (!engine.isInitialized()) {
             engine.initialize();
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
@@ -901,7 +1016,7 @@ public class Solver implements Serializable {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(this));
         }
-        if(!engine.isInitialized()){
+        if (!engine.isInitialized()) {
             engine.initialize();
         }
         engine.propagate();
@@ -918,21 +1033,24 @@ public class Solver implements Serializable {
      * Presumably, not all variables are instantiated.
      */
     public ESat isSatisfied() {
-        int OK = 0;
-        for (int c = 0; c < cIdx; c++) {
-            ESat satC = cstrs[c].isSatisfied();
-            if (ESat.FALSE == satC) {
-                System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
-                return ESat.FALSE;
-            } else if (ESat.TRUE == satC) {
-                OK++;
+        if (isFeasible() != ESat.FALSE) {
+            int OK = 0;
+            for (int c = 0; c < cIdx; c++) {
+                ESat satC = cstrs[c].isSatisfied();
+                if (ESat.FALSE == satC) {
+                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
+                    return ESat.FALSE;
+                } else if (ESat.TRUE == satC) {
+                    OK++;
+                }
+            }
+            if (OK == cIdx) {
+                return ESat.TRUE;
+            } else {
+                return ESat.UNDEFINED;
             }
         }
-        if (OK == cIdx) {
-            return ESat.TRUE;
-        } else {
-            return ESat.UNDEFINED;
-        }
+        return ESat.FALSE;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1019,46 +1137,29 @@ public class Solver implements Serializable {
 
 
     /**
-     * Duplicate the model declares within <code>this</code>, ie only variables and constraints.
-     * Some parameters are reset to default value: search loop (set to binary), explanation engine (set to NONE),
-     * propagation engine (set to NONE), objective manager (set to SAT), solution recorder (set to LastSolutionRecorder) and
-     * feasibility (set to UNDEFINED).
-     * The search strategies and search monitors are simply not reported in the copy.
+     * @deprecated To duplicate a model, the variables addition and constraints declaration must be done in a specific
+     * method called with a solver as parameter:
+     * <pre> {@code
      * <p>
-     * Note that a new instance of the environment is made, preserving the initial choice.
+     *              public void modelIt(Solver solver){
+     *                  // declare variables, for example:
+     *                  IntVar a = VF.enumerated("A", 0, 10, solver);
+     *                  // post constraints, for example:
+     *                  solver.post(ICF.arithm(a, ">=", 3));
+     *              }
      * <p>
-     * Duplicating a solver is only possible before any resolution process began.
-     * This is a strong restriction which may be removed in the future.
-     * Indeed, duplicating a solver should only be considered while dealing with multi-threading.
-     *
-     * @return a copy of <code>this</code>
-     * @throws org.chocosolver.solver.exception.SolverException if the search has already begun.
+     *              public void main(){
+     *                  Solver s = new Solver();
+     *                  modelIt(s);
+     *                  Solver clone = new Solver();
+     *                  modelIt(clone);
+     *              }
+     *              }</pre>
      */
+    @Deprecated
     public Solver duplicateModel() {
-        if (environment.getWorldIndex() > 0) {
-            throw new SolverException("Duplicating a solver cannot be achieved once the resolution has begun.");
-        }
-        // Create a fresh solver
-        Solver clone;
-        try {
-            clone = new Solver(this.environment.getClass().newInstance(), this.name);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new SolverException("The current solver cannot be duplicated:\n" + e.getMessage());
-        }
-
-        THashMap<Object, Object> identitymap = new THashMap<>();
-        // duplicate variables
-        for (int i = 0; i < this.vIdx; i++) {
-            this.vars[i].duplicate(clone, identitymap);
-        }
-        // duplicate constraints
-        for (int i = 0; i < this.cIdx; i++) {
-            this.cstrs[i].duplicate(clone, identitymap);
-            //TODO How to deal with temporary constraints ?
-            clone.post((Constraint) identitymap.get(this.cstrs[i]));
-        }
-
-        return clone;
+        throw new SolverException("To duplicate a model, the variables addition and constraints declaration must be done in a specific\n" +
+                "method called with a solver as parameter.");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

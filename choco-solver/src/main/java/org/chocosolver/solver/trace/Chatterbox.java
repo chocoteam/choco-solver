@@ -36,6 +36,8 @@ import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.Variable;
 
+import java.io.PrintStream;
+
 import static org.chocosolver.util.tools.StringUtils.pad;
 
 /**
@@ -53,12 +55,41 @@ public class Chatterbox {
     }
 
     /**
+     * The standard output stream (default: System.out)
+     */
+    public static PrintStream out = System.out;
+
+    /**
+     * The standard error stream (default: System.err)
+     */
+    public static PrintStream err = System.err;
+
+    /**
+     * Set the current output stream (default is System.out)
+     *
+     * @param printStream a print stream
+     */
+    public static void setOut(PrintStream printStream) {
+        out = printStream;
+    }
+
+    /**
+     * Set the current error stream (default is System.err)
+     *
+     * @param printStream a print stream
+     */
+    public static void setErr(PrintStream printStream) {
+        err = printStream;
+    }
+
+
+    /**
      * Print the version message.
      *
      * @param solver the solver
      */
     public static void printVersion(Solver solver) {
-        System.out.println(solver.getSettings().getWelcomeMessage());
+        out.println(solver.getSettings().getWelcomeMessage());
     }
 
     /**
@@ -86,13 +117,15 @@ public class Chatterbox {
      * <p>
      * Equivalent to:
      * <pre>
-     *     System.out.println(solver.getMeasures().toString());
+     *     out.println(solver.getMeasures().toString());
      * </pre>
      *
      * @param solver the solver to evaluate
      */
     public static void printStatistics(Solver solver) {
-        System.out.println(solver.getMeasures().toString());
+        printVersion(solver);
+        printFeatures(solver);
+        out.println(solver.getMeasures().toString());
     }
 
     /**
@@ -102,13 +135,13 @@ public class Chatterbox {
      * <p>
      * Equivalent to:
      * <pre>
-     *     System.out.println(solver.getMeasures().toOneLineString());
+     *     out.println(solver.getMeasures().toOneLineString());
      * </pre>
      *
      * @param solver the solver to evaluate
      */
     public static void printShortStatistics(Solver solver) {
-        System.out.println(solver.getMeasures().toOneLineString());
+        out.println(solver.getMeasures().toOneLineString());
     }
 
     /**
@@ -120,13 +153,13 @@ public class Chatterbox {
      * <p>
      * Equivalent to:
      * <pre>
-     *     System.out.println(solver.getMeasures().toCSV());
+     *     out.println(solver.getMeasures().toCSV());
      * </pre>
      *
      * @param solver the solver to evaluate
      */
     public static void printCSVStatistics(Solver solver) {
-        System.out.println(solver.getMeasures().toCSV());
+        out.println(solver.getMeasures().toCSV());
     }
 
 
@@ -142,8 +175,8 @@ public class Chatterbox {
         ISolutionRecorder solrec = solver.getSolutionRecorder();
         for (Solution sol : solrec.getSolutions()) {
             try {
-                sol.restore();
-                System.out.println(message.print());
+                sol.restore(solver);
+                out.println(message.print());
             } catch (ContradictionException e) {
                 throw new SolverException("Unable to restore a found solution");
             }
@@ -186,12 +219,11 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                printStatistics(solver);
             }
 
             @Override
             public void afterClose() {
-
+                out.println(solver.getMeasures().toString());
             }
         });
     }
@@ -207,7 +239,7 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                System.out.println(solver.getMeasures().toOneShortLineString());
+                out.println(solver.getMeasures().toOneShortLineString());
             }
 
             @Override
@@ -225,7 +257,7 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showSolutions(Solver solver, final IMessage message) {
-        solver.plugMonitor((IMonitorSolution) () -> System.out.println(message.print()));
+        solver.plugMonitor((IMonitorSolution) () -> out.println(message.print()));
     }
 
     /**
@@ -252,7 +284,7 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownLeftBranch() {
-                System.out.println(String.format("%s[L]%s //%s",
+                out.println(String.format("%s[L]%s //%s",
                         pad("", solver.getEnvironment().getWorldIndex(), "."),
                         solver.getSearchLoop().getLastDecision().toString(),
                         message.print()));
@@ -264,7 +296,7 @@ public class Chatterbox {
 
             @Override
             public void beforeDownRightBranch() {
-                System.out.println(String.format("%s[R]%s //%s",
+                out.println(String.format("%s[R]%s //%s",
                         pad("", solver.getEnvironment().getWorldIndex(), "."),
                         solver.getSearchLoop().getLastDecision().toString(),
                         message.print()));
@@ -294,7 +326,7 @@ public class Chatterbox {
      * @param solver the solver to evaluate
      */
     public static void showContradiction(Solver solver) {
-        solver.plugMonitor((IMonitorContradiction) cex -> System.out.println(String.format("\t/!\\ %s", cex.toString())));
+        solver.plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**

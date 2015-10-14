@@ -29,7 +29,6 @@ package org.chocosolver.solver.explanations;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
-import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -41,15 +40,16 @@ import java.util.BitSet;
 public class Rules {
 
     private static final int NO_ENTRY = Integer.MIN_VALUE;
-    private final BitSet paRules; // rules for propagator activation
-    private final int[] vmRules;    // rules for variable modification
-    private final TIntSet[] vmRemval;    // store value removal when necessary
+    private BitSet paRules; // rules for propagator activation
+    private BitSet vmRules; // rules for propagator activation
+    private int[] vmMasks;    // rules for variable modification
+    private NoIteratorIntHashSet[] remVal;    // store value removal when necessary
 
-    public Rules(int maxPid, int maxVid) {
-        this.paRules = new BitSet(maxPid);
-        this.vmRules = new int[maxVid];
-        Arrays.fill(vmRules, NO_ENTRY);
-        this.vmRemval = new TIntSet[maxVid];
+    public Rules(int i1, int i2) {
+        this.paRules = new BitSet();
+        this.vmRules = new BitSet();
+        this.vmMasks = new int[i1];
+        this.remVal = new NoIteratorIntHashSet[i2];
     }
 
     /**
@@ -87,7 +87,19 @@ public class Rules {
      * @return the mask of rules
      */
     public int getVmRules(int vid) {
-        return vmRules[vid];
+        if (vid < vmMasks.length && vmRules.get(vid)) {
+            return vmMasks[vid];
+        }
+        return NO_ENTRY;
+    }
+
+    private void ensureRemvalCapacity(int size) {
+        if (size >= remVal.length) {
+            int nsize = Math.max(size, remVal.length * 3 / 2 + 1);
+            TIntSet[] tmp = remVal;
+            remVal = new NoIteratorIntHashSet[nsize];
+            System.arraycopy(tmp, 0, remVal, 0, tmp.length);
+        }
     }
 
     /**
@@ -97,12 +109,22 @@ public class Rules {
      * @return the set of removed values up to now
      */
     public TIntSet getVmRemval(int vid) {
-        TIntSet remvals = vmRemval[vid];
+        ensureRemvalCapacity(vid + 1);
+        NoIteratorIntHashSet remvals = remVal[vid];
         if (remvals == null) {
-            remvals = new TIntHashSet(16, .5f, NO_ENTRY);
-            vmRemval[vid] = remvals;
+            remvals = new NoIteratorIntHashSet(16, .5f, NO_ENTRY);
+            remVal[vid] = remvals;
         }
-        return vmRemval[vid];
+        return remVal[vid];
+    }
+
+    private void ensureRulesCapacity(int size) {
+        if (size >= vmMasks.length) {
+            int nsize = Math.max(size, vmMasks.length * 3 / 2 + 1);
+            int[] tmp = vmMasks;
+            vmMasks = new int[nsize];
+            System.arraycopy(tmp, 0, vmMasks, 0, tmp.length);
+        }
     }
 
     /**
@@ -113,13 +135,15 @@ public class Rules {
      * @return true if the mask has been updated (false = already existing mask)
      */
     public boolean putMask(int vid, int mask) {
-        int cmask = vmRules[vid];
-        if (cmask == NO_ENTRY) {
-            vmRules[vid] = mask;
+        ensureRulesCapacity(vid + 1);
+        int cmask = vmMasks[vid];
+        if (!vmRules.get(vid)) {
+            vmMasks[vid] = mask;
+            vmRules.set(vid);
             return true;
         } else {
             int amount = (cmask | mask) - cmask;
-            vmRules[vid] += amount;
+            vmMasks[vid] += amount;
             return amount > 0;
         }
     }
@@ -129,10 +153,10 @@ public class Rules {
      */
     public void clear() {
         paRules.clear();
-        Arrays.fill(vmRules, NO_ENTRY);
-        for (int k = vmRemval.length - 1; k >= 0; k--) {
-            if (vmRemval[k] != null) vmRemval[k].clear();
+        for (int i = vmRules.nextSetBit(0); i > -1; i = vmRules.nextSetBit(i + 1)) {
+            if (i < remVal.length && remVal[i] != null) remVal[i].clear();
         }
+        vmRules.clear();
     }
 
     /**
@@ -143,7 +167,8 @@ public class Rules {
      * @param vid variable id
      */
     public boolean intersect(int i1, int i2, int vid) {
-        while (i1 <= i2 && !vmRemval[vid].contains(i1)) {
+        assert vid < remVal.length && remVal[vid].size() > 0;
+        while (i1 <= i2 && !remVal[vid].contains(i1)) {
             i1++;
         }
         return i1 <= i2;
@@ -155,10 +180,16 @@ public class Rules {
      * @return a copy of the current object
      */
     public Rules duplicate() {
-        Rules nrules = new Rules(paRules.length(), vmRemval.length);
+        Rules nrules = new Rules(this.vmMasks.length, this.remVal.length);
         nrules.paRules.or(this.paRules);
-        System.arraycopy(this.vmRules, 0, nrules.vmRules, 0, nrules.vmRules.length);
-        System.arraycopy(this.vmRemval, 0, nrules.vmRemval, 0, nrules.vmRemval.length);
+        for (int i = vmRules.nextSetBit(0); i > -1; i = vmRules.nextSetBit(i + 1)) {
+            nrules.vmRules.set(i);
+            nrules.vmMasks[i] = this.vmMasks[i];
+            if (this.remVal[i] != null && this.remVal[i].size() > 0) {
+                nrules.remVal[i] = new NoIteratorIntHashSet(16, .5f, NO_ENTRY);
+                this.remVal[i].addAllIn(nrules.remVal[i]);
+            }
+        }
         return nrules;
     }
 
@@ -170,14 +201,42 @@ public class Rules {
     public void or(Rules rules) {
         if (rules != null) {
             this.paRules.or(rules.paRules);
-            for (int i = vmRules.length - 1; i >= 0; i--) {
-                if (rules.vmRules[i] != NO_ENTRY) {
-                    putMask(i, rules.vmRules[i]);
-                    if (rules.vmRemval[i] != null && rules.vmRemval[i].size() > 0) {
-                        getVmRemval(i).addAll(rules.vmRemval[i]);
+            for (int i = rules.vmRules.nextSetBit(0); i > -1; i = rules.vmRules.nextSetBit(i + 1)) {
+                putMask(i, rules.vmMasks[i]);
+                if (i < rules.remVal.length
+                        && rules.remVal[i] != null
+                        && rules.remVal[i].size() > 0) {
+                    ensureRemvalCapacity(i + 1);
+                    if (remVal[i] == null) {
+                        remVal[i] = new NoIteratorIntHashSet(16, .5f, NO_ENTRY);
                     }
+                    rules.remVal[i].addAllIn(remVal[i]);
                 }
             }
         }
+    }
+
+    /**
+     * An extension of TIntHashSet enabling addAll() operation without creating iterator
+     */
+    private static class NoIteratorIntHashSet extends TIntHashSet {
+
+        public NoIteratorIntHashSet(int initial_capacity, float load_factor, int no_entry_value) {
+            super(initial_capacity, load_factor, no_entry_value);
+        }
+
+        /**
+         * Main reason this class exists
+         * @param aset another NoIteratorIntHashSet to merge with
+         */
+        public void addAllIn(NoIteratorIntHashSet aset) {
+            int i = _states.length;
+            while (i-- > 0) {
+                if (_states[i] == 1) {
+                    aset.add(_set[i]);
+                }
+            }
+        }
+
     }
 }

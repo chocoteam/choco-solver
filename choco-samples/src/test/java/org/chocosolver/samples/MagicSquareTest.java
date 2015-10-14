@@ -35,7 +35,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -87,7 +86,7 @@ public class MagicSquareTest {
         Solver solver = modeler(4);
         Variable[] vars = solver.getVars();
         solver.propagate();
-		int offset = 2;
+		int offset = 0;
         ((IntVar) vars[offset]).instantiateTo(3, Cause.Null);
         ((IntVar) vars[15+offset]).instantiateTo(4, Cause.Null);
         ((IntVar) vars[5+offset]).removeInterval(11, 15, Cause.Null);
@@ -96,15 +95,12 @@ public class MagicSquareTest {
         ((IntVar) vars[13+offset]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[1+offset]).instantiateTo(6, Cause.Null);
         solver.propagate();
-        LoggerFactory.getLogger("test").error("************************");
         ((IntVar) vars[2+offset]).instantiateTo(12, Cause.Null);
         try {
             solver.propagate();
-            LoggerFactory.getLogger("test").error("************************");
             Assert.fail("should fail");
         } catch (ContradictionException ignored) {
         }
-        LoggerFactory.getLogger("test").error("************************");
     }
 
     @Test(groups = "1s")
@@ -116,7 +112,7 @@ public class MagicSquareTest {
         //[R]!square3,0  ==  14 (1)
         Solver solver = modeler(4);
         solver.propagate();
-		int offset = 2;
+		int offset = 0;
         Variable[] vars = solver.getVars();
         ((IntVar) vars[offset]).instantiateTo(2, Cause.Null);
         solver.propagate();

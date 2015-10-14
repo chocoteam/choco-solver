@@ -36,8 +36,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.ternary.Max;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.lns.LNSFactory;
+import org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -197,7 +197,9 @@ public class AirPlaneLanding extends AbstractProblem {
     @Override
     public void solve() {
         IntVar[] ivars = solver.retrieveIntVars();
-        LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
+//        LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
+        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, new RandomNeighborhood(solver, ivars, 20, 0), true);
+        solver.getSearchLoop().plugSearchMonitor(lns);
         SMF.limitTime(solver, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }

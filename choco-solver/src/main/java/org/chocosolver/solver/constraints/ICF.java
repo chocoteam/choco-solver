@@ -29,7 +29,7 @@
 package org.chocosolver.solver.constraints;
 
 /**
- * A short-named version of {@code IntConstraintFactory}
+ * A short-name version of {@code IntConstraintFactory}
  * <br/>
  *
  * @author Charles Prud'homme

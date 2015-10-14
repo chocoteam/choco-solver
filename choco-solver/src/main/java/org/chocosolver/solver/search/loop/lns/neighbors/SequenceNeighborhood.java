@@ -28,9 +28,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 
 /**
  * <br/>
@@ -38,7 +36,7 @@ import org.chocosolver.solver.search.limits.ACounter;
  * @author Charles Prud'homme
  * @since 18/06/13
  */
-public class SequenceNeighborhood extends ANeighbor {
+public class SequenceNeighborhood implements INeighbor {
 
 
     protected int who;
@@ -47,7 +45,6 @@ public class SequenceNeighborhood extends ANeighbor {
     protected int[] counters;
 
     public SequenceNeighborhood(INeighbor... neighbors) {
-        super(null);
         this.neighbors = neighbors;
         who = 0;
         count = neighbors.length;
@@ -66,10 +63,10 @@ public class SequenceNeighborhood extends ANeighbor {
     }
 
     @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
+    public Decision fixSomeVariables(){
         nextNeighbor();
         if (who == count) who = 0;
-        neighbors[who].fixSomeVariables(cause);
+        return neighbors[who].fixSomeVariables();
     }
 
     @Override
@@ -87,16 +84,9 @@ public class SequenceNeighborhood extends ANeighbor {
     }
 
     @Override
-    public void activeFastRestart() {
+    public void init() {
         for (int i = 0; i < count; i++) {
-            neighbors[i].activeFastRestart();
-        }
-    }
-
-    @Override
-    public void fastRestart(ACounter counter) {
-        for (int i = 0; i < count; i++) {
-            neighbors[i].fastRestart(counter);
+            neighbors[i].init();
         }
     }
 

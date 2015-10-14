@@ -28,12 +28,12 @@
  */
 package org.chocosolver.solver.constraints.nary.count;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
@@ -70,8 +70,8 @@ public class PropCount_AC extends Propagator<IntVar> {
      * Propagator for Count Constraint for integer variables
      * Performs Arc Consistency
      *
-     * @param decvars array of integer variables
-     * @param restrictedValue int
+     * @param decvars          array of integer variables
+     * @param restrictedValue  int
      * @param valueCardinality integer variable
      */
     public PropCount_AC(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
@@ -143,18 +143,17 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        vars[n].updateLowerBound(mandatories.getSize(), aCause);
-        vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), aCause);
+        vars[n].updateBounds(mandatories.getSize(), mandatories.getSize() + possibles.getSize(), this);
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    vars[j].instantiateTo(value, aCause);
+                    vars[j].instantiateTo(value, this);
                 }
                 setPassive();
             } else if (mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    if (vars[j].removeValue(value, aCause)) {
+                    if (vars[j].removeValue(value, this)) {
                         possibles.remove(j);
                     }
                 }
@@ -172,7 +171,7 @@ public class PropCount_AC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx >= n) {// cardinality variables
+        if (vIdx == vars.length - 1) {// cardinality variables
             return IntEventType.boundAndInst();
         }
         return IntEventType.all();
@@ -204,17 +203,33 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == vars[n]) {
+            boolean isDecUpp = evt == IntEventType.DECUPP;
+            for (int i = 0; i < n; i++) {
+                if (vars[i].contains(value)) {
+                    if (vars[i].isInstantiated()) {
+                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
+                } else if (isDecUpp) {
+                    nrules |= ruleStore.addRemovalRule(vars[i], value);
+                }
             }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropCount_AC(aVars, this.value, aVar));
+        } else {
+            nrules |= ruleStore.addBoundsRule(vars[n]);
+            if (evt == IntEventType.REMOVE) {
+                for (int i = 0; i < n; i++) {
+                    if (vars[i].isInstantiatedTo(value)) {
+                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
+                }
+            } else {
+                for (int i = 0; i < n; i++) {
+                    nrules |= ruleStore.addFullDomainRule(vars[i]);
+                }
+            }
         }
+        return nrules;
     }
 }

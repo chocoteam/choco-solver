@@ -45,6 +45,10 @@ public class TimeCounter extends ACounter implements IMonitorOpenNode {
 
     private long offset;
 
+    /**
+     * @param solver a solver
+     * @param timeLimit in millisecond
+     */
     public TimeCounter(Solver solver, long timeLimit) {
         super(timeLimit);
         this.solver = solver;
@@ -53,8 +57,8 @@ public class TimeCounter extends ACounter implements IMonitorOpenNode {
 
     @Override
     public void init() {
-        solver.getMeasures().updateTimeCount();
-        long time = (long) (solver.getMeasures().getTimeCount());
+        solver.getMeasures().updateTime();
+        long time = (long) (solver.getMeasures().getTimeCount()*1000f);
         offset = System.currentTimeMillis() - time;
     }
 

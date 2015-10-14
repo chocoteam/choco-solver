@@ -29,7 +29,6 @@
 package org.chocosolver.solver.constraints;
 
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -43,8 +42,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -100,7 +97,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     //***********************************************************************************
 
     private static final long serialVersionUID = 2L;
-    protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
 
     // propagator attributes
@@ -108,7 +104,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private short state;  // 0 : new -- 1 : active -- 2 : passive
     private Operation[] operations; // propagator state operations
     private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
-    protected Propagator aCause; // cause of variable modifications. The default value is 'this"
     protected final PropagatorPriority priority;
     protected final boolean reactToFineEvt;
     // references
@@ -140,14 +135,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
-        this.aCause = this;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
         this.vars = vars;
         this.vindices = new int[vars.length];
-        for (int v = 0; v < vars.length; v++) {
-            vindices[v] = vars[v].link(this, v);
-        }
+        this.linkVariables();
         ID = solver.nextId();
         operations = new Operation[]{
                 new Operation() {
@@ -197,7 +189,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected final void addVariable(V... nvars) {
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
-        arraycopy(tmp, 0, vars, 0, tmp.length);
         arraycopy(nvars, 0, vars, tmp.length, nvars.length);
         int[] itmp = this.vindices;
         vindices = new int[vars.length];
@@ -212,6 +203,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             for (int v = tmp.length; v < vars.length; v++) {
                 vars[v].recordMask(getPropagationConditions(v));
             }
+        }
+    }
+
+    protected void linkVariables(){
+        for (int v = 0; v < vars.length; v++) {
+            vindices[v] = vars[v].link(this, v);
         }
     }
 
@@ -235,7 +232,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
-    protected int getPropagationConditions(int vIdx) {
+    public int getPropagationConditions(int vIdx) {
         return ALL_EVENTS;
     }
 
@@ -252,21 +249,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
     public abstract void propagate(int evtmask) throws ContradictionException;
-
-    /**
-     * Advise a propagator of a modification occurring on one of its variables,
-     * and decide if <code>this</code> should be scheduled.
-     * At least, this method SHOULD check the propagation condition of the event received.
-     * In addition, this method can be used to update internal state of <code>this</code>.
-     * This method can returns <code>true</code> even if the propagator is already scheduled.
-     *
-     * @param idxVarInProp index of the modified variable
-     * @param mask         modification event mask
-     * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
-     */
-    public boolean advise(int idxVarInProp, int mask) {
-        return (mask & getPropagationConditions(idxVarInProp)) != 0;
-    }
 
     /**
      * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable
@@ -422,6 +404,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
+     * Throws a contradiction exception
+     *
+     * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
+     */
+    public void fails() throws ContradictionException {
+        solver.getEngine().fails(this, null, null);
+    }
+
+    /**
      * Throws a contradiction exception based on <variable, message>
      *
      * @param variable involved variable
@@ -429,7 +420,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(aCause, variable, message);
+        solver.getEngine().fails(this, variable, message);
     }
 
     @Override
@@ -585,18 +576,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         st.append(')');
 
         return st.toString();
-    }
-
-    /**
-     * Duplicate the current propagator.
-     * A restriction is that the resolution process should have not begun yet.
-     * That's why state of the propagator may not be duplicated.
-     *
-     * @param solver      the target solver
-     * @param identitymap a map to ensure uniqueness of objects
-     */
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
     }
 
     @Override

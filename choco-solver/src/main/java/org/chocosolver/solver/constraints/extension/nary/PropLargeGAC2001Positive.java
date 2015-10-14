@@ -28,13 +28,13 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
@@ -65,6 +65,8 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
+
+    protected final IntIterableSet vrms;
 
     private PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
         super(vs, relation);
@@ -107,6 +109,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         if (fastBooleanValidCheckAllowed) {
             valcheck = new FastBooleanValidityChecker(arity, vars);
         } else valcheck = new ValidityChecker(arity, vars);
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeGAC2001Positive(IntVar[] vs, Tuples tuples) {
@@ -141,8 +144,8 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      */
     public void reviseVar(int indexVar) throws ContradictionException {
         DisposableValueIterator itv = vars[indexVar].getValueIterator(true);
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[indexVar].getLB());
         try {
             while (itv.hasNext()) {
                 int val = itv.next();
@@ -150,18 +153,13 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
                 int currentIdxSupport = getUBport(indexVar, val);
                 currentIdxSupport = seekNextSupport(indexVar, nva, currentIdxSupport);
                 if (currentIdxSupport == NO_SUPPORT) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        vars[indexVar].removeInterval(left, right, aCause);
-                        left = right = val;
-                    }
+                    vrms.add(val);
                     //                    vars[indexVar].removeVal(val, this, false);
                 } else {
                     setSupport(indexVar, val, currentIdxSupport);
                 }
             }
-            vars[indexVar].removeInterval(left, right, aCause);
+            vars[indexVar].removeValues(vrms, this);
         } finally {
             itv.dispose();
         }
@@ -251,16 +249,4 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         return false;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeGAC2001Positive(aVars, (IterTuplesTable) relation.duplicate()));
-        }
-    }
 }

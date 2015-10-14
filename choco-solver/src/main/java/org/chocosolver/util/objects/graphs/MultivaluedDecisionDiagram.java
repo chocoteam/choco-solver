@@ -32,8 +32,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -45,8 +43,6 @@ import java.util.Arrays;
  * Created by cprudhom on 30/10/14.
  */
 public class MultivaluedDecisionDiagram implements Serializable {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(MultivaluedDecisionDiagram.class);
 
     /**
      * The terminal node. An extreme (likely unused) value is set
@@ -194,9 +190,6 @@ public class MultivaluedDecisionDiagram implements Serializable {
         _identicalNodes = new ArrayList[nbLayers][];
         _nodeId = new TIntArrayList[nbLayers][];
 
-        if(LOGGER.isDebugEnabled()){
-            LOGGER.debug("Add {} tuples", TUPLES.nbTuples());
-        }
         // Then add tuples
         if (TUPLES.nbTuples() > 0) {
             addTuples(TUPLES);
@@ -224,9 +217,6 @@ public class MultivaluedDecisionDiagram implements Serializable {
      * @param TUPLE tuple to add
      */
     public void addTuple(int[] TUPLE) {
-        if(LOGGER.isDebugEnabled()){
-            LOGGER.debug("Add: {}", Arrays.toString(TUPLE));
-        }
         for (int i = 0; i < nbLayers; i++) {
             // get the position of the value relatively to the offset of each variable
             _pos[i] = TUPLE[i] - offsets[i];

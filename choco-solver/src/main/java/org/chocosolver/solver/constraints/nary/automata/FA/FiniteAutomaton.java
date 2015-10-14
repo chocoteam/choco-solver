@@ -76,7 +76,7 @@ public class FiniteAutomaton implements IAutomaton {
         if (c > -1) {
             return (char) charFromIntMap.get(i);
         } else {
-            throw new SolverException("Unknwon value \"" + i + "\". Note that only integers in [" +
+            throw new SolverException("Unknown value \"" + i + "\". Note that only integers in [" +
                     (int) Character.MIN_VALUE + "," + (int) (Character.MAX_VALUE) + "] are allowed by FiniteAutomaton.");
         }
     }

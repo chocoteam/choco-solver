@@ -30,7 +30,6 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -75,10 +74,12 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
 	}
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init() {
+        boolean ok = true;
         for (int i = 0; i < strategies.length; i++) {
-            strategies[i].init();
+            ok &= strategies[i].init();
         }
+        return ok;
     }
 
     @Override

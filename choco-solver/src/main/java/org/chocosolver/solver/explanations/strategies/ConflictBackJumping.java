@@ -37,8 +37,6 @@ import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
@@ -49,8 +47,6 @@ import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
  * Project: choco.
  */
 public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolution, ConflictStrategy {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConflictBackJumping.class);
 
     // The explanation engine
     final ExplanationEngine mExplainer;
@@ -78,9 +74,6 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("ConflictBackJumping>> explanation of " + cex.toString() + " is " + lastExplanation);
-        }
         if (this.nogoodFromConflict) {
             lastExplanation.postNogood(ngstore, ps);
         }
@@ -100,7 +93,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
             dec = dec.getPrevious();
         }
         if (dec != ROOT) {
-            Explanation explanation = new Explanation(saveCauses);
+            Explanation explanation = mExplainer.makeExplanation(saveCauses);
             // 1. skip the current one which is refuted...
             Decision d = dec.getPrevious();
             while ((d != ROOT)) {
@@ -136,7 +129,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
     void identifyRefutedDecision(int nworld, ICause cause) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
-            mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
+            mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
             dec = dec.getPrevious();
             nworld--;
         }
@@ -146,9 +139,6 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
             }
             lastExplanation.remove(dec);
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("ConflictBackJumping>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }
 

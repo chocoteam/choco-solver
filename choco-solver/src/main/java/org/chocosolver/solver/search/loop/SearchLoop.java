@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
@@ -43,8 +42,6 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
@@ -93,8 +90,6 @@ public class SearchLoop implements ISearchLoop {
 
     //***********************************************************************************
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(SearchLoop.class);
-
     /* Reference to the solver */
     final Solver solver;
 
@@ -124,10 +119,6 @@ public class SearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    boolean hasReachedLimit = false;
-
-    boolean hasEndedUnexpectedly = true; // to capture external shut down
-
     public SearchMonitorList smList;
 
     /**
@@ -135,7 +126,7 @@ public class SearchLoop implements ISearchLoop {
      */
     ObjectiveManager objectivemanager;
 
-    private boolean alive;
+    boolean bkill, bresum, blimit, bcomp, alive;
 
     public Decision decision = ROOT;
 
@@ -153,9 +144,10 @@ public class SearchLoop implements ISearchLoop {
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
         smList = new SearchMonitorList();
-        smList.add(this.measures);
         this.nextState = INIT;
         rootWorldIndex = -1;
+        bkill = bresum = true;
+        blimit = bcomp = false;
     }
 
     //***********************************************************************************
@@ -179,30 +171,17 @@ public class SearchLoop implements ISearchLoop {
             measures.reset();
             objectivemanager = SAT();
             solver.set(SINGLETON);
+            bkill = bresum = true;
+            blimit = bcomp = false;
         }
     }
 
     @Override
     public void launch(boolean stopatfirst) {
-        if (nextState != INIT) {
-            throw new SolverException("!! The search has not been initialized.\n" +
-                    "!! Be sure you are respecting one of these call configurations :\n " +
-                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+        if (!bcomp && bresum) {
+            this.stopAtFirstSolution = stopatfirst;
+            loop();
         }
-        this.stopAtFirstSolution = stopatfirst;
-        loop();
-    }
-
-    @Override
-    public void resume() {
-        if (nextState == INIT) {
-            throw new SolverException("the search loop has not been initialized.\n " +
-                    "This appears when 'nextSolution' is called before 'findSolution'.");
-        } else if (nextState != RESUME) {
-            throw new SolverException("The search cannot be resumed.");
-        }
-        moveTo(UP_BRANCH);
-        loop();
     }
 
     /**
@@ -233,15 +212,19 @@ public class SearchLoop implements ISearchLoop {
     }
 
     @Override
-    public final void interrupt(String message) {
-        nextState = RESUME;
-        alive = false;
-        smList.afterInterrupt();
+    public final void interrupt(String message, boolean voidable) {
+        if (!voidable) {
+            bresum = false;
+        }
+        if (alive) {
+            alive = false;
+            smList.afterInterrupt();
+        }
     }
 
     @Override
     public final void forceAlive(boolean bvalue) {
-        alive = bvalue;
+        bresum = alive = bvalue;
     }
 
     @Override
@@ -255,7 +238,7 @@ public class SearchLoop implements ISearchLoop {
      * Main loop. Flatten representation of recursive tree search.
      */
     private void loop() {
-        alive = true;
+        alive = bresum;
         while (alive) {
             switch (nextState) {
                 // INITIALIZE THE SEARCH LOOP
@@ -311,6 +294,7 @@ public class SearchLoop implements ISearchLoop {
      * Initializes the measures, just before the beginning of the search
      */
     private void initialize() {
+        solver.getMeasures().startStopwatch();
         this.rootWorldIndex = env.getWorldIndex();
         this.nextState = INITIAL_PROPAGATION;
         this.env.buildFakeHistoryOn(solver.getSettings().getEnvironmentHistorySimulationCondition());
@@ -326,9 +310,12 @@ public class SearchLoop implements ISearchLoop {
         } catch (ContradictionException e) {
             solver.getEngine().flush();
             solver.setFeasible(FALSE);
-            interrupt(MSG_INIT);
+            interrupt(MSG_INIT, true);
+            bcomp = true;
+            solver.getMeasures().incFailCount();
             smList.onContradiction(e);
             this.env.worldPop();
+            solver.getMeasures().updateTime();
             return;
         }
         this.env.worldPush(); // store state after initial propagation; w = 1 -> 2
@@ -347,21 +334,23 @@ public class SearchLoop implements ISearchLoop {
             solver.set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
         }
 
-        try {
-            strategy.init(); // the initialisation of the strategy can detect inconsistency
-        } catch (ContradictionException cex) {
+        if (!strategy.init()) { // the initialisation of the strategy can detect inconsistency
             this.env.worldPop();
             solver.setFeasible(FALSE);
             solver.getEngine().flush();
-            interrupt(MSG_SEARCH_INIT + ": " + cex.getMessage());
+            solver.getMeasures().incFailCount();
+            interrupt(MSG_SEARCH_INIT, true);
+            bcomp = true;
         }
         moveTo(OPEN_NODE);
+        solver.getMeasures().updateTime();
     }
 
     /**
      * Opens a new node in the tree search : compute the next decision or store a solution.
      */
     private void openNode() {
+        solver.getMeasures().incNodeCount();
         Decision tmp = decision;
         decision = strategy.getDecision();
         if (decision != null) { // null means there is no more decision
@@ -379,10 +368,11 @@ public class SearchLoop implements ISearchLoop {
         assert (TRUE.equals(solver.isSatisfied())) : fullReport(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
-            interrupt(MSG_FIRST_SOL);
-        } else {
-            moveTo(UP_BRANCH);
+            interrupt(MSG_FIRST_SOL, true);
         }
+        moveTo(UP_BRANCH);
+        solver.getMeasures().incSolutionCount();
+        solver.getMeasures().updateTime();
         smList.onSolution();
     }
 
@@ -398,6 +388,7 @@ public class SearchLoop implements ISearchLoop {
     }
 
     private void downBranch() {
+        solver.getMeasures().incDepth();
         env.worldPush();
         try {
             decision.buildNext();
@@ -410,6 +401,7 @@ public class SearchLoop implements ISearchLoop {
             solver.getEngine().flush();
             moveTo(UP_BRANCH);
             jumpTo = 1;
+            solver.getMeasures().incFailCount();
             smList.onContradiction(e);
         }
     }
@@ -422,10 +414,11 @@ public class SearchLoop implements ISearchLoop {
      * Otherwise, gets the opposite decision, applies it and calls the propagation.
      */
     private void upBranch() {
+        solver.getMeasures().incBackTrackCount();
         env.worldPop();
         if (decision == ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
-            interrupt(MSG_ROOT);
+            interrupt(MSG_ROOT, true);
         } else {
             jumpTo--;
             if (jumpTo <= 0 && decision.hasNext()) {
@@ -449,8 +442,9 @@ public class SearchLoop implements ISearchLoop {
             solver.getEngine().propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
-            interrupt(MSG_CUT);
+            interrupt(MSG_CUT, true);
         }
+        solver.getMeasures().incRestartCount();
     }
 
     /**
@@ -458,14 +452,16 @@ public class SearchLoop implements ISearchLoop {
      * and set the feasibility and optimality variables.
      */
     private void close() {
-        hasEndedUnexpectedly = false;
+        solver.getMeasures().updateTime();
+        bcomp = (decision == ROOT);
+        bkill = false;
         ESat sat = FALSE;
         if (measures.getSolutionCount() > 0) {
             sat = TRUE;
             if (objectivemanager.isOptimization()) {
-                measures.setObjectiveOptimal(!hasReachedLimit);
+                measures.setObjectiveOptimal(!blimit);
             }
-        } else if (hasReachedLimit) {
+        } else if (blimit) {
             measures.setObjectiveOptimal(false);
             sat = UNDEFINED;
         }
@@ -478,8 +474,6 @@ public class SearchLoop implements ISearchLoop {
     public void plugSearchMonitor(ISearchMonitor sm) {
         if (!smList.contains(sm)) {
             smList.add(sm);
-        } else {
-            LOGGER.debug("The search monitor already exists and is ignored");
         }
     }
 
@@ -506,9 +500,9 @@ public class SearchLoop implements ISearchLoop {
     }
 
     @Override
-    public final void reachLimit() {
-        hasReachedLimit = true;
-        interrupt(MSG_LIMIT);
+    public final void reachLimit(boolean voidable) {
+        blimit = true;
+        interrupt(MSG_LIMIT, voidable);
     }
 
     @Override
@@ -543,12 +537,22 @@ public class SearchLoop implements ISearchLoop {
 
     @Override
     public boolean hasReachedLimit() {
-        return hasReachedLimit;
+        return blimit;
     }
 
     @Override
     public boolean hasEndedUnexpectedly() {
-        return hasEndedUnexpectedly;
+        return bkill;
+    }
+
+    @Override
+    public boolean isComplete() {
+        return bcomp;
+    }
+
+    @Override
+    public boolean canBeResumed() {
+        return bresum;
     }
 
     @Override

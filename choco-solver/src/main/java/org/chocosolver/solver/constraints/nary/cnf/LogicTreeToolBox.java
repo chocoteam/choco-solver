@@ -158,7 +158,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return solver.ONE;
+                        return solver.ONE();
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -174,7 +174,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return solver.ZERO;
+                        return solver.ZERO();
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -198,7 +198,7 @@ public class LogicTreeToolBox {
         ILogical[] children = t.getChildren();
         ArrayList<ILogical> toRemove = new ArrayList<>();
         for (int i = 0; i < children.length; i++) {
-            if (solver.ONE.equals(children[i])) {
+            if (solver.ONE().equals(children[i])) {
                 toRemove.add(children[i]);
             }
         }

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -67,8 +65,8 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateUpperBound(this.cste - y.getLB(), aCause);
-        y.updateUpperBound(this.cste - x.getLB(), aCause);
+        x.updateUpperBound(this.cste - y.getLB(), this);
+        y.updateUpperBound(this.cste - x.getLB(), this);
         if (x.getUB() + y.getUB() <= this.cste) {
             this.setPassive();
         }
@@ -77,9 +75,9 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-            y.updateUpperBound(this.cste - x.getLB(), aCause);
+            y.updateUpperBound(this.cste - x.getLB(), this);
         } else {
-            x.updateUpperBound(this.cste - y.getLB(), aCause);
+            x.updateUpperBound(this.cste - y.getLB(), this);
         }
         if (x.getUB() + y.getUB() <= this.cste) {
             this.setPassive();
@@ -108,22 +106,11 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
         if (var.equals(x)) {
             newrules |=ruleStore.addLowerBoundRule(y);
         } else if (var.equals(y)) {
-            newrules |=ruleStore.addUpperBoundRule(y);
+            newrules |=ruleStore.addLowerBoundRule(x);
         } else {
             newrules |=super.why(ruleStore, var, evt, value);
         }
         return newrules;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropLessOrEqualXY_C(new IntVar[]{X, Y}, this.cste));
-        }
-    }
 }

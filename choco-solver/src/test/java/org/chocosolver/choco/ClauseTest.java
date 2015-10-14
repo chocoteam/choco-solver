@@ -40,7 +40,6 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -77,7 +76,6 @@ public class ClauseTest {
                 }
 
                 LogOp or = LogOp.or(bs);
-                LoggerFactory.getLogger("test").info(or.toString());
                 SatFactory.addClauses(or, s);
                 s.set(IntStrategyFactory.lexico_LB(bs));
 

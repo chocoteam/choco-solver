@@ -28,11 +28,9 @@
  */
 package org.chocosolver.solver.constraints.nary.among;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -143,10 +141,10 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                 if (nb == var.getDomainSize()) {
                     nbSure.add(1);
                     poss.remove(vidx);
-                    vars[nb_vars].updateLowerBound(nbSure.get(), aCause);
+                    vars[nb_vars].updateLowerBound(nbSure.get(), this);
                 } else if (nb == 0) {
                     poss.remove(vidx);
-                    vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), aCause);
+                    vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), this);
                 }
             }
             forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
@@ -156,8 +154,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = nbSure.get();
         int ub = poss.getSize() + lb;
-        vars[nb_vars].updateLowerBound(lb, aCause);
-        vars[nb_vars].updateUpperBound(ub, aCause);
+        vars[nb_vars].updateBounds(lb, ub, this);
         if (vars[nb_vars].isInstantiated() && lb < ub) {
             if (vars[nb_vars].getValue() == lb) {
                 backPropRemPoss();
@@ -192,8 +189,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                         break;
                     }
                 }
-                v.updateLowerBound(newLB, this);
-                v.updateUpperBound(newUB, this);
+                v.updateBounds(newLB, newUB, this);
                 if (newLB > values[values.length - 1] || newUB < values[0]) {
                     poss.remove(i);
                 }
@@ -213,8 +209,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                 poss.remove(i);
                 nbSure.add(1);
             } else {
-                v.updateLowerBound(values[0], this);
-                v.updateUpperBound(values[values.length - 1], this);
+                v.updateBounds(values[0], values[values.length - 1], this);
                 int newLB = v.getLB();
                 int newUB = v.getUB();
                 for (int val = v.getLB(); val <= newUB; val = v.nextValue(val)) {
@@ -231,8 +226,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                         break;
                     }
                 }
-                v.updateLowerBound(newLB, this);
-                v.updateUpperBound(newUB, this);
+                v.updateBounds(newLB, newUB, this);
                 if (v.isInstantiated()) {
                     poss.remove(i);
                     nbSure.add(1);
@@ -293,16 +287,4 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAmongGAC_GoodImpl(aVars, this.values));
-        }
-    }
 }

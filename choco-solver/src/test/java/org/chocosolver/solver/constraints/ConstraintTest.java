@@ -30,7 +30,9 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
@@ -54,6 +56,33 @@ public class ConstraintTest {
         solver.post(LCF.or(SCF.all_equal(new SetVar[]{s1, s2}), SCF.bool_channel(bs, s1, 0)));
         solver.findAllSolutions();
         Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void testDependencyConditions() {
+        Solver solver = new Solver();
+        IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
+        solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
+        solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
+        solver.post(ICF.arithm(ivs[0], ">=", ivs[2])); // INST + UB or INST + LB
+        solver.post(ICF.arithm(ivs[0], "!=", ivs[3])); // instantiation()
+
+        solver.set(ISF.random_value(ivs, 0));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 48);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 100);
+    }
+
+    @Test(groups = "1s")
+    public void testDependencyConditions2() {
+        Solver solver = new Solver();
+        IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
+        solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
+        solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
+        Constraint cr = ICF.arithm(ivs[0], ">=", ivs[2]);
+        solver.post(cr); // INST + UB or INST + LB
+        solver.post(ICF.arithm(ivs[0], "!=", ivs[3])); // instantiation()
+        solver.unpost(cr);
     }
 
 }

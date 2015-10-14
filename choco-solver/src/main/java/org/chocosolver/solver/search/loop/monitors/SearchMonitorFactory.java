@@ -34,6 +34,7 @@ import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,7 +94,7 @@ public class SearchMonitorFactory {
      */
     public static void limitNode(Solver solver, long limit) {
         NodeCounter counter = new NodeCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -105,7 +106,7 @@ public class SearchMonitorFactory {
      */
     public static void limitSolution(Solver solver, long limit) {
         SolutionCounter counter = new SolutionCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -123,7 +124,7 @@ public class SearchMonitorFactory {
      */
     public static void limitTime(Solver solver, long limit) {
         TimeCounter counter = new TimeCounter(solver, limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -154,7 +155,7 @@ public class SearchMonitorFactory {
      */
     public static void limitThreadTime(Solver solver, long limit) {
         ThreadTimeCounter counter = new ThreadTimeCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -226,7 +227,7 @@ public class SearchMonitorFactory {
 
     public static void limitFail(Solver solver, long limit) {
         FailCounter counter = new FailCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -238,7 +239,7 @@ public class SearchMonitorFactory {
      */
     public static void limitBacktrack(Solver solver, long limit) {
         BacktrackCounter counter = new BacktrackCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop()));
+        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
         solver.plugMonitor(counter);
     }
 
@@ -270,6 +271,52 @@ public class SearchMonitorFactory {
      */
     public static void nogoodRecordingFromRestarts(final Solver solver) {
         solver.plugMonitor(new NogoodFromRestarts(solver));
+    }
+
+    /**
+     * A method which prepares the solvers in the list to be run in parallel.
+     * It plugs tools to share between solvers the best known bound when dealing with an optimization problem.
+     * <p>
+     * The expected use is the following:
+     * <pre> {@code
+     * <p>
+     * int n =4; // number of solvers to use
+     * List<Solver> solvers = new ArrayList<>();
+     * for(int i = 0 ; i < n; i++){
+     *     Solver solver = new Solver();
+     *     solvers.add(solver);
+     *     readModel(solver); // a dedicated method that declares variables and constraints
+     *     // the search should also be declared here
+     * }
+     * Solver.setUpParallelization(solvers);
+     * Solver.setUpParallelization(solvers);
+     * solvers.parallelStream().forEach(s -> {
+     *      s.findSolution();
+     *      solvers.forEach(s1 -> s1.getSearchLoop().interrupt("Bye", false));
+     * });
+     * }
+     *
+     * @param solvers a list of {@code Solver}
+     */
+    public static void shareBestKnownBound(List<Solver> solvers) {
+        if (solvers.get(0).getObjectives() != null &&
+                solvers.get(0).getObjectives().length > 0) {
+            // share the best known bound
+            solvers.stream().forEach(s -> s.plugMonitor(
+                    (IMonitorSolution) () -> {
+                        switch (s.getObjectiveManager().getPolicy()) {
+                            case MAXIMIZE:
+                                int lb = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
+                                break;
+                            case MINIMIZE:
+                                int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
+                                break;
+                        }
+                    }
+            ));
+        }
     }
 
 }

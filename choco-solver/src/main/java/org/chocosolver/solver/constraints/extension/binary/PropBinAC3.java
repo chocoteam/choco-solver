@@ -28,11 +28,11 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 /**
@@ -43,12 +43,15 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class PropBinAC3 extends PropBinCSP {
 
+    protected final IntIterableSet vrms;
+
     public PropBinAC3(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
     }
 
     private PropBinAC3(IntVar x, IntVar y, CouplesBitSetTable table) {
         super(x, y, table);
+        vrms = new IntIterableBitSet();
     }
 
     @Override
@@ -65,18 +68,6 @@ public class PropBinAC3 extends PropBinCSP {
             reviseV0();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropBinAC3(X, Y, (CouplesBitSetTable) relation.duplicate()));
-        }
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,8 +77,8 @@ public class PropBinAC3 extends PropBinCSP {
      */
     private void reviseV1() throws ContradictionException {
         int nbs = 0;
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(v1.getLB());
         DisposableValueIterator itv1 = v1.getValueIterator(true);
         while (itv1.hasNext()) {
             int val1 = itv1.next();
@@ -101,16 +92,11 @@ public class PropBinAC3 extends PropBinCSP {
             }
             itv0.dispose();
             if (nbs == 0) {
-                if (val1 == right + 1) {
-                    right = val1;
-                } else {
-                    v1.removeInterval(left, right, this);
-                    left = right = val1;
-                }
+                vrms.add(val1);
             }
             nbs = 0;
         }
-        v1.removeInterval(left, right, this);
+        v1.removeValues(vrms, this);
         itv1.dispose();
     }
 
@@ -119,8 +105,8 @@ public class PropBinAC3 extends PropBinCSP {
      */
     private void reviseV0() throws ContradictionException {
         int nbs = 0;
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(v0.getLB());
         DisposableValueIterator itv0 = v0.getValueIterator(true);
         while (itv0.hasNext()) {
             int val0 = itv0.next();
@@ -134,16 +120,11 @@ public class PropBinAC3 extends PropBinCSP {
             }
             itv1.dispose();
             if (nbs == 0) {
-                if (val0 == right + 1) {
-                    right = val0;
-                } else {
-                    v0.removeInterval(left, right, this);
-                    left = right = val0;
-                }
+                vrms.add(val0);
             }
             nbs = 0;
         }
-        v0.removeInterval(left, right, this);
+        v0.removeValues(vrms, this);
         itv0.dispose();
     }
 

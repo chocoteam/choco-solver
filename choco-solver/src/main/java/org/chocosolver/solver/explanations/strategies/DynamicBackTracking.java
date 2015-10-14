@@ -28,11 +28,9 @@ package org.chocosolver.solver.explanations.strategies;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.explanations.Rules;
 import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -40,8 +38,6 @@ import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.BitSet;
@@ -54,7 +50,6 @@ import java.util.BitSet;
  */
 public class DynamicBackTracking extends ConflictBackJumping {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicBackTracking.class);
 
     final DBTstrategy dbTstrategy;
     final RuleStore mRuleStore;  // required to continue the computation of the explanations
@@ -87,9 +82,6 @@ public class DynamicBackTracking extends ConflictBackJumping {
             myworld--;
         }
         Decision jmpBck = dec;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
-        }
 
         // now we can explicitly enforce the jump
         dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
@@ -106,7 +98,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
                 // on a right branch, necessarily have an explanation (it is a refutation)
                 Explanation anExplanation = mExplainer.getDecisionRefutationExplanation(dec);
                 // if the explication of the refutation
-                if (anExplanation.getRules() != null) {
+                if (anExplanation.getEvtstrIdx() > 0) {
                     keepUp(anExplanation, decIdx);
                 }
 
@@ -121,7 +113,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
                     dbTstrategy.add(dup);
                 } else {
                     // else  we need to forget everything and start from scratch on this decision
-                    mExplainer.storeDecisionExplanation(dec, null); // not mandatory, but the explanation can be forgotten
+                    mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
                 }
             }
             // get the previous
@@ -135,9 +127,6 @@ public class DynamicBackTracking extends ConflictBackJumping {
             lastExplanation.remove(dec);
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("DynamicBackTracking>> BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
-        }
     }
 
     /**
@@ -147,9 +136,10 @@ public class DynamicBackTracking extends ConflictBackJumping {
      * @param decIdx        index, in the event store, of the decision to refute
      */
     private void keepUp(Explanation anExplanation, int decIdx) {
-        Rules oRules = mRuleStore.getRules(); // temporary store the set of rules of the rule store
+        //Rules oRules = mRuleStore.getRules(); // temporary store the set of rules of the rule store
         int i = anExplanation.getEvtstrIdx() - 1; // skip the last known one
-        mRuleStore.setRules(anExplanation.getRules()); // replace the rules by the one related to the explanation
+//        mRuleStore.setRules(anExplanation.getRules()); // replace the rules by the one related to the explanation
+        mRuleStore.init(anExplanation);
         // while (i > -1) { // force to compute entirely the explanation, but inefficient in practice
         while (i >= decIdx) { // we continue while we did not reach at least 'decIdx'
             if (mRuleStore.match(i, mEventStore)) {
@@ -161,7 +151,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
         if (i == 0) {
             anExplanation.getRules().clear(); // only if we're sure the explanation is complete
         }
-        mRuleStore.setRules(oRules); // store the set of rules of the rule store
+//        mRuleStore.setRules(oRules); // store the set of rules of the rule store
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,8 +183,8 @@ public class DynamicBackTracking extends ConflictBackJumping {
         }
 
         @Override
-        public void init() throws ContradictionException {
-            mainStrategy.init();
+        public boolean init(){
+            return mainStrategy.init();
         }
 
         @Override

@@ -28,11 +28,11 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 
 /**
  * <br/>
@@ -68,6 +68,8 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
+    protected final IntIterableSet vrms;
+
     private PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
         super(vars, relation);
         this.arity = vars.length;
@@ -97,6 +99,8 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
         if (fastBooleanValidCheckAllowed) {
             valcheck = new FastBooleanValidityChecker(arity, vars);
         } else valcheck = new ValidityChecker(arity, vars);
+
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeGAC3rmPositive(IntVar[] vars, Tuples tuples) {
@@ -129,23 +133,18 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      */
     protected void initSupports() throws ContradictionException {
         for (int i = 0; i < vars.length; i++) {
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[i].getLB());
             int ubi = vars[i].getUB();
             for (int val = vars[i].getLB(); val <= ubi; val = vars[i].nextValue(val)) {
                 int nva = val - relation.getRelationOffset(i);
                 if (tab[i][nva].length == 0) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        vars[i].removeInterval(left, right, aCause);
-                        left = right = val;
-                    }
+                    vrms.add(val);
                 } else {
                     setSupport(tab[i][nva][0]);
                 }
             }
-            vars[i].removeInterval(left, right, aCause);
+            vars[i].removeValues(vrms, this);
         }
     }
 
@@ -174,8 +173,8 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      * @throws ContradictionException
      */
     protected void reviseVar(final int indexVar) throws ContradictionException {
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(vars[indexVar].getLB());
         int ub = vars[indexVar].getUB();
         for (int val = vars[indexVar].getLB(); val <= ub; val = vars[indexVar].nextValue(val)) {
             int nva = val - relation.getRelationOffset(indexVar);
@@ -185,18 +184,13 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
                 //the residual support is not valid anymore, seek a new one
                 currentIdxSupport = seekNextSupport(indexVar, nva);
                 if (currentIdxSupport == NO_SUPPORT) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        vars[indexVar].removeInterval(left, right, aCause);
-                        left = right = val;
-                    }
+                    vrms.add(val);
                 } else {
                     setSupport(currentIdxSupport);
                 }
             }
         }
-        vars[indexVar].removeInterval(left, right, aCause);
+        vars[indexVar].removeValues(vrms, this);
     }
 
 
@@ -227,16 +221,4 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeGAC3rmPositive(aVars, (IterTuplesTable) relation.duplicate()));
-        }
-    }
 }

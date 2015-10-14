@@ -29,16 +29,16 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StatisticUtils;
 
 import java.util.ArrayList;
@@ -60,8 +60,11 @@ import java.util.Random;
  *
  * @author Charles Prud'homme
  * @since 03/07/13
+ *
+ * TODO: fix some variables
+ * TODO: catch up case when the sub tree is closed and this imposes a fragment
  */
-public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
+public class ExplainingCut implements INeighbor {
 
     protected ExplanationEngine mExplanationEngine; // the explanation engine -- it works faster when it's a lazy one
     protected final Random random;
@@ -80,16 +83,24 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
     Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
 
+    Solver mSolver;
+
+    IntMetaDecision decision;
 
     public ExplainingCut(Solver aSolver, int level, long seed) {
-        super(aSolver);
+        this.mSolver = aSolver;
         this.level = level;
         this.random = new Random(seed);
         path = new ArrayList<>(16);
         related = new BitSet(16);
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
-        mSolver.getSearchLoop().plugSearchMonitor(this);
+        this.decision = new IntMetaDecision();
+    }
+
+    @Override
+    public void init() {
+
     }
 
     @Override
@@ -108,7 +119,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     }
 
     @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
+    public Decision fixSomeVariables() {
         // this is called after restart
         // if required, force the cut and explain the cut
         if (forceCft) {
@@ -123,12 +134,14 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         last = null;
         int wi = path.get(0).getWorldIndex();
 //        LOGGER.debug("relax cut {}", notFrozen.cardinality());
+        decision.free();
         for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
 //            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
             assert path.get(id - wi).hasNext();
             last = path.get(id - wi).duplicate();
-            imposeDecisionPath(mSolver, last);
+            decision.add((IntVar)last.getDecisionVariables(), (int)last.getDecisionValue());
         }
+        return decision;
     }
 
     protected void _fixVar() {
@@ -155,18 +168,6 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     @Override
     public boolean isSearchComplete() {
         return isTerminated;
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-        // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
-            mSolver.getSearchLoop().restart();
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,6 +256,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
                 related.clear();
                 related.or(explanation.getDecisions());
+                explanation.recycle();
 
                 unrelated.clear();
                 unrelated.or(related);

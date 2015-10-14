@@ -28,29 +28,19 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
 /**
- * An <code>AbstractStrategy</code> does <b>not</b> implicitly advance to the next decision on
- * <code>getDecision()</code> (or <code>getOppositeDecision()</code>) invokation.
- * <br/>
- * See also Gamma et al. "Design Patterns: Elements of Reusable Object-Oriented Software",
- * Behavioral patterns : Command, Iterator.
- * todo: comment
- * <br/>
+ * A search strategy provides decisions to go down in the search space.
+ * The main method is {@link #computeDecision(Variable)} which returns the next decision to apply.
  *
  * @author Charles Prud'homme
  * @since 1 juil. 2010
  */
 public abstract class AbstractStrategy<V extends Variable> implements Serializable {
-
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     protected final V[] vars;
 
@@ -60,8 +50,9 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
 
     /**
      * Prepare <code>this</code> to be used in a search loop
+     * The initialization can detect inconsistency, in that case, it returns false
      */
-    public abstract void init() throws ContradictionException;
+    public boolean init(){return true;}
 
     /**
      * Provides access to the current decision in the strategy.
@@ -91,7 +82,7 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
      * @param var a variable
      * @return a decision to be applied to variable var
      */
-    public Decision<V> computeDecision(V var) {
+    protected Decision<V> computeDecision(V var) {
         return null;
     }
 

@@ -26,9 +26,7 @@
  */
 package org.chocosolver.solver.constraints.nary.channeling;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -140,7 +138,7 @@ public class PropClauseChanneling extends Propagator<IntVar> {
         UB.set(ub);
 
         // finally delta monitor
-        dm.freeze();
+        dm.unfreeze();
     }
 
     @Override
@@ -325,25 +323,6 @@ public class PropClauseChanneling extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            iv.duplicate(solver, identitymap);
-            IntVar div = (IntVar) identitymap.get(this.iv);
-
-            BoolVar[] deqs = new BoolVar[LENGTH];
-            BoolVar[] dlqs = new BoolVar[LENGTH];
-            for (int i = 0; i < LENGTH; i++) {
-                this.eqs[i].duplicate(solver, identitymap);
-                deqs[i] = (BoolVar) identitymap.get(this.eqs[i]);
-
-                this.lqs[i].duplicate(solver, identitymap);
-                dlqs[i] = (BoolVar) identitymap.get(this.lqs[i]);
-            }
-            identitymap.put(this, new PropClauseChanneling(div, deqs, dlqs));
-        }
     }
 
     @Override

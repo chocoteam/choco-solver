@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
@@ -192,18 +191,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public RealVar duplicate() {
-        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            RealVarImpl clone = new RealVarImpl(this.name, this.LB.get(), this.UB.get(), this.precision, solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, solver);
     }
 
     @Override

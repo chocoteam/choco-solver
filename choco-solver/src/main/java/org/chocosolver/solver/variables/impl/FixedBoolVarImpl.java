@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -119,14 +118,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public IntVar duplicate() {
-        return VF.fixed(StringUtils.randomName(), this.constante, this.getSolver());
+        return VF.fixed(StringUtils.randomName(), this.constante, solver);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            identitymap.put(this, VF.fixed(this.name, this.constante, solver));
-            assert mIdx == 0;
-        }
-    }
 }

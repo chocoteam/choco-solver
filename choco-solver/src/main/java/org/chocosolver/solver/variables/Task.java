@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.variables;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -154,19 +152,6 @@ public class Task {
         }
 
         @Override
-        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-            if (!identitymap.containsKey(this)) {
-                S.duplicate(solver, identitymap);
-                IntVar s = (IntVar) identitymap.get(this.S);
-                D.duplicate(solver, identitymap);
-                IntVar d = (IntVar) identitymap.get(this.D);
-                E.duplicate(solver, identitymap);
-                IntVar e = (IntVar) identitymap.get(this.E);
-                identitymap.put(this, new TaskMonitorEnum(s, d, e));
-            }
-        }
-
-        @Override
         public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
             boolean nrules = false;
             if (var == S) {
@@ -221,27 +206,11 @@ public class Task {
         @Override
         public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
             // start
-            S.updateLowerBound(E.getLB() - D.getUB(), this);
-            S.updateUpperBound(E.getUB() - D.getLB(), this);
+            S.updateBounds(E.getLB() - D.getUB(), E.getUB() - D.getLB(), this);
             // end
-            E.updateLowerBound(S.getLB() + D.getLB(), this);
-            E.updateUpperBound(S.getUB() + D.getUB(), this);
+            E.updateBounds(S.getLB() + D.getLB(), S.getUB() + D.getUB(), this);
             // duration
-            D.updateLowerBound(E.getLB() - S.getUB(), this);
-            D.updateUpperBound(E.getUB() - S.getLB(), this);
-        }
-
-        @Override
-        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-            if (!identitymap.containsKey(this)) {
-                S.duplicate(solver, identitymap);
-                IntVar s = (IntVar) identitymap.get(this.S);
-                D.duplicate(solver, identitymap);
-                IntVar d = (IntVar) identitymap.get(this.D);
-                E.duplicate(solver, identitymap);
-                IntVar e = (IntVar) identitymap.get(this.E);
-                identitymap.put(this, new TaskMonitorEnum(s, d, e));
-            }
+            D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
         }
 
         @Override

@@ -33,8 +33,8 @@ import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.queues.CircularQueue;
 
@@ -93,16 +93,16 @@ public class NogoodFromRestarts implements IMonitorRestart {
         int i = 0;
         while (!decisions.isEmpty()) {
             decision = decisions.pollLast();
-            assert decision instanceof FastDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
+            assert decision instanceof IntDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
             assert decision.toString().contains(DecisionOperator.int_eq.toString()) : "NogoodStoreFromRestarts is only valid for assignment decisions";
             if (decision.hasNext()) {
-                lits[i++] = SatSolver.negated(png.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue()));
+                lits[i++] = SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue()));
             } else {
                 if (i == 0) {
                     // value can be removed permanently from var!
-                    png.addLearnt(SatSolver.negated(png.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
+                    png.addLearnt(SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue())));
                 } else {
-                    lits[i] = SatSolver.negated(png.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue()));
+                    lits[i] = SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue()));
                     png.addLearnt(Arrays.copyOf(lits, i + 1));
                 }
             }

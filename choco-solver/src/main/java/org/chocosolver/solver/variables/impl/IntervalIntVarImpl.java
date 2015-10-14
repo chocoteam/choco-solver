@@ -28,7 +28,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
@@ -42,6 +41,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueBoundIterator;
@@ -109,7 +109,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             }
             this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
-			IntEventType e;
+            IntEventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
@@ -142,6 +142,44 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        if (nlb > oub || nub < olb) {
+            return false;
+        }
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(olb - 1);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(oub + 1);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+        }
+        // the new bounds are now known, delegate to the right method
+        return updateBounds(olb, oub, cause);
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        // the new bounds are now known, delegate to the right method
+        return updateBounds(nlb, nub, cause);
     }
 
     /**
@@ -186,7 +224,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             }
             return false;
         } else if (contains(value)) {
-			IntEventType e = IntEventType.INSTANTIATE;
+            IntEventType e = IntEventType.INSTANTIATE;
 
             int lb = 0;
             int ub = 0;
@@ -246,7 +284,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
             } else {
-				IntEventType e = IntEventType.INCLOW;
+                IntEventType e = IntEventType.INCLOW;
 
                 if (reactOnRemoval) {
                     if (old <= value - 1) delta.add(old, value - 1, cause);
@@ -297,7 +335,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
             } else {
-				IntEventType e = IntEventType.DECUPP;
+                IntEventType e = IntEventType.DECUPP;
 
                 if (reactOnRemoval) {
                     if (value + 1 <= old) delta.add(value + 1, old, cause);
@@ -318,6 +356,60 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return false;
     }
 
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = this.getLB();
+        int oub = this.getUB();
+        boolean update = false;
+        if (olb < lb || ub < oub) {
+            if (oub >= lb && olb <= ub) {
+                int d = 0;
+                IntEventType e = null;
+                if (olb < lb) {
+                    if (reactOnRemoval) {
+                        if (olb <= lb - 1) delta.add(olb, lb - 1, cause);
+                    }
+                    d += olb - lb;
+                    LB.set(lb);
+                    e = IntEventType.INCLOW;
+                }
+                if (ub < oub) {
+                    if (reactOnRemoval) {
+                        if (ub + 1 <= oub) delta.add(ub + 1, oub, cause);
+                    }
+                    d += ub - oub;
+                    UB.set(ub);
+                    e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                }
+                SIZE.add(d);
+                if (isInstantiated()) {
+                    e = IntEventType.INSTANTIATE;
+                }
+                this.notifyPropagators(e, cause);
+
+                if (_plugexpl) {
+                    if (olb < lb) solver.getEventObserver().updateLowerBound(this, lb, olb, cause);
+                    if (oub > ub) solver.getEventObserver().updateUpperBound(this, ub, oub, cause);
+                }
+                update = true;
+            } else { // fails
+                if (oub < lb) {
+                    if (_plugexpl) {
+                        solver.getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
+                    }
+                    this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
+                } else {
+                    //if (olb > ub) {
+                    if (_plugexpl) {
+                        solver.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
+                    }
+                    this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
+                }
+            }
+        }
+        return update;
+    }
 
     @Override
     public boolean isInstantiated() {
@@ -453,18 +545,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public IntVar duplicate() {
-        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.getSolver());
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntervalIntVarImpl clone = new IntervalIntVarImpl(this.name, this.LB.get(), this.UB.get(), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

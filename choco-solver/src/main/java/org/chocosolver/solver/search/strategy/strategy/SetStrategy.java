@@ -28,10 +28,9 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecisionSet;
+import org.chocosolver.solver.search.strategy.decision.SetDecision;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.SetVar;
@@ -49,7 +48,7 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    protected PoolManager<FastDecisionSet> pool;
+    protected PoolManager<SetDecision> pool;
     protected VariableSelector<SetVar> varSelector;
     protected SetValueSelector valSelector;
     protected DecisionOperator<SetVar> operator;
@@ -79,7 +78,8 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
     //***********************************************************************************
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init(){
+        return true;
     }
 
     @Override
@@ -94,9 +94,9 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
             return null;
         }
         assert !s.isInstantiated();
-        FastDecisionSet d = pool.getE();
+        SetDecision d = pool.getE();
         if (d == null) {
-            d = new FastDecisionSet(pool);
+            d = new SetDecision(pool);
         }
         d.set(s, valSelector.selectValue(s), operator);
         return d;

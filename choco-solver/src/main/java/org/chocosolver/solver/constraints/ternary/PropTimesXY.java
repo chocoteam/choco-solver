@@ -28,14 +28,15 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * X*Y=Z filters from left to right
@@ -48,7 +49,7 @@ public class PropTimesXY extends Propagator<IntVar> {
     IntVar X, Y, Z;
 
     public PropTimesXY(IntVar x, IntVar y, IntVar z) {
-        super(new IntVar[]{x, y, z}, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{x, y}, PropagatorPriority.UNARY, false);
         this.X = vars[0];
         this.Y = vars[1];
         this.Z = vars[2];
@@ -56,7 +57,6 @@ public class PropTimesXY extends Propagator<IntVar> {
 
     @Override
     public final int getPropagationConditions(int vIdx) {
-        if (vIdx == 2) return 0;
         return IntEventType.boundAndInst();
     }
 
@@ -64,17 +64,14 @@ public class PropTimesXY extends Propagator<IntVar> {
     public final void propagate(int evtmask) throws ContradictionException {
         // sign reasoning
         if (X.getLB() >= 0 && Y.getLB() >= 0) {// Z>=0
-            Z.updateLowerBound(X.getLB() * Y.getLB(), aCause);
-            Z.updateUpperBound(X.getUB() * Y.getUB(), aCause);
+            Z.updateBounds(X.getLB() * Y.getLB(), X.getUB() * Y.getUB(), this);
         } else if (X.getUB() < 0 && Y.getUB() < 0) { // Z>0
-            Z.updateLowerBound(X.getUB() * Y.getUB(), aCause);
-            Z.updateUpperBound(X.getLB() * Y.getLB(), aCause);
+            Z.updateBounds(X.getUB() * Y.getUB(), X.getLB() * Y.getLB(), this);
         } else if (X.getLB() > 0 && Y.getUB() < 0
                 || X.getUB() < 0 && Y.getLB() > 0) { // Z<0
             int a = X.getLB() * Y.getUB();
             int b = X.getUB() * Y.getLB();
-            Z.updateLowerBound(Math.min(a, b), aCause);
-            Z.updateUpperBound(Math.max(a, b), aCause);
+            Z.updateBounds(min(a, b), max(a, b), this);
         }
         // instantiation reasoning
         if (X.isInstantiated()) {
@@ -103,36 +100,23 @@ public class PropTimesXY extends Propagator<IntVar> {
 
     private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
         if (X.getValue() == 0) {
-            Z.instantiateTo(0, aCause);
+            Z.instantiateTo(0, this);
             setPassive();
         } else if (Y.isInstantiated()) {
-            Z.instantiateTo(X.getValue() * Y.getValue(), aCause);    // fix Z
+            Z.instantiateTo(X.getValue() * Y.getValue(), this);    // fix Z
             setPassive();
         } else if (Z.isInstantiated()) {
             double a = (double) Z.getValue() / (double) X.getValue();
             if (Math.abs(a - Math.round(a)) > 0.001) {
                 contradiction(Z, "");                        // not integer
             }
-            Y.instantiateTo((int) Math.round(a), aCause);        // fix Y
+            Y.instantiateTo((int) Math.round(a), this);        // fix Y
             setPassive();
         } else {
             int a = X.getValue() * Y.getLB();
             int b = X.getValue() * Y.getUB();
-            Z.updateLowerBound(Math.min(a, b), aCause);
-            Z.updateUpperBound(Math.max(a, b), aCause);
+            Z.updateBounds(min(a, b), max(a, b), this);
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = vars.length;
-            IntVar[] ivars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                vars[i].duplicate(solver, identitymap);
-                ivars[i] = (IntVar) identitymap.get(vars[i]);
-            }
-            identitymap.put(this, new PropTimesXY(ivars[0], ivars[1], ivars[2]));
-        }
-    }
 }

@@ -35,8 +35,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -46,6 +44,8 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+
+import static org.chocosolver.solver.variables.SetVar.END;
 
 /**
  * Propagator for Member constraint: iv is in set
@@ -98,17 +98,16 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
         int maxVal = set.getEnvelopeFirst();
         int minVal = maxVal;
-        for (int j = maxVal; j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j = maxVal; j != END; j = set.getEnvelopeNext()) {
             maxVal = j;
         }
-        iv.updateUpperBound(maxVal, aCause);
-        iv.updateLowerBound(minVal, aCause);
+        iv.updateBounds(minVal, maxVal, this);
         minVal = iv.getLB();
         maxVal = iv.getUB();
         while (minVal <= maxVal && !set.envelopeContains(minVal)) {
@@ -118,13 +117,13 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
             iv.updateUpperBound(--maxVal, this);
         }
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
         // search for watch literals
         int i = set.getEnvelopeFirst(), wl = 0, cnt = 0;
-        while (i != SetVar.END && wl < 2) {
+        while (i != END && wl < 2) {
             if (!iv.contains(i)) {
                 cnt++;
             } else {
@@ -145,7 +144,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 1) {
             if (iv.isInstantiated()) {
-                set.addToKernel(iv.getValue(), aCause);
+                set.addToKernel(iv.getValue(), this);
                 setPassive();
             } else if (!iv.contains(watchLit1)) {
                 setWatchLiteral(watchLit2);
@@ -185,8 +184,8 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         if (cnt == set.getEnvelopeSize()) {
             this.contradiction(iv, "Inconsistent");
         }
-        set.addToKernel(otherWL, aCause);
-        iv.instantiateTo(otherWL, aCause);
+        set.addToKernel(otherWL, this);
+        iv.instantiateTo(otherWL, this);
         setPassive();
     }
 
@@ -224,16 +223,4 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            iv.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(iv);
-
-            identitymap.put(this, new PropIntBoundedMemberSet(S, I));
-        }
-    }
 }

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -70,8 +68,8 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB(), aCause);
-        y.updateUpperBound(x.getUB(), aCause);
+        x.updateLowerBound(y.getLB(), this);
+        y.updateUpperBound(x.getUB(), this);
         if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
@@ -80,9 +78,9 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) {
-            y.updateUpperBound(x.getUB(), aCause);
+            y.updateUpperBound(x.getUB(), this);
         } else {
-            x.updateLowerBound(y.getLB(), aCause);
+            x.updateLowerBound(y.getLB(), this);
         }
         if (x.getLB() >= y.getUB()) {
             this.setPassive();
@@ -118,15 +116,4 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
         return newrules;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropGreaterOrEqualX_Y(new IntVar[]{X, Y}));
-        }
-    }
 }

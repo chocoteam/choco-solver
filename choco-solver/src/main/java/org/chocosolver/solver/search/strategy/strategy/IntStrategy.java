@@ -30,7 +30,7 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.IntVar;
@@ -51,7 +51,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 	DecisionOperator<IntVar> decisionOperator;
 
 	// object recycling management
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
 	/**
 	 * Creates a search strategy which selects a variable X and a value V to perform
@@ -93,7 +93,9 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
     }
 
     @Override
-    public void init() {}
+    public boolean init() {
+        return true;
+    }
 
     @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
@@ -101,9 +103,9 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
             return null;
         }
         int value = valueSelector.selectValue(variable);
-        FastDecision d = decisionPool.getE();
+        IntDecision d = decisionPool.getE();
         if (d == null) {
-            d = new FastDecision(decisionPool);
+            d = new IntDecision(decisionPool);
         }
         d.set(variable, value, decisionOperator);
         return d;

@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.D;
 import org.chocosolver.solver.variables.IntVar;
@@ -81,17 +79,4 @@ public class Gci extends Gi {
         return !D.mustBeDifferent(i, j) && super.intersect(i, j);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            D d = D.duplicate(solver, identitymap);
-            int size = this.X.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.X[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.X[i]);
-            }
-            identitymap.put(this, new Gci(aVars, d));
-        }
-    }
 }

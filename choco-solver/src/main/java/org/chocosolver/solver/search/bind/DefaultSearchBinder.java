@@ -36,8 +36,8 @@ import org.chocosolver.solver.search.strategy.RSF;
 import org.chocosolver.solver.search.strategy.RealStrategyFactory;
 import org.chocosolver.solver.search.strategy.SSF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,8 +56,9 @@ public class DefaultSearchBinder implements ISearchBinder {
 
     @Override
     public void configureSearch(Solver solver) {
-        LoggerFactory.getLogger(ISearchBinder.class).warn("No search strategies defined");
-        LoggerFactory.getLogger(ISearchBinder.class).warn("Set to default ones");
+        if(solver.getSettings().warnUser()) {
+            Chatterbox.out.printf("No search strategies defined.\nSet to default ones.");
+        }
 
         solver.set(getDefault(solver));
         // + last conflict
@@ -170,7 +171,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            strats[nb++] = ISF.minDom_LB(solver.ONE);
+            strats[nb++] = ISF.minDom_LB(solver.ONE());
         }
         return Arrays.copyOf(strats, nb);
     }

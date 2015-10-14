@@ -35,7 +35,7 @@ import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingObjective;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood4Explanation;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -68,7 +68,7 @@ public class ELNSTest {
                         new SequenceNeighborhood(
                                 new ExplainingObjective(solver, 200, 123456L),
                                 new ExplainingCut(solver, 200, 123456L),
-                                new RandomNeighborhood4Explanation(solver, vars, 200, 123456L)), true));
+                                new RandomNeighborhood(solver, vars, 200, 123456L)), true));
         solver.set(IntStrategyFactory.random_bound(vars, seed));
 
 

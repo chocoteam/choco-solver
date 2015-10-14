@@ -39,6 +39,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInterruption;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -47,7 +48,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
  * How to branch a Large Neighborhood Search ?
  * This class provides services to plug a LNS, it relies on a Neighbor computation, and enables fast restarts.
  */
-public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonitorInterruption, IMonitorRestart {
+public class LargeNeighborhoodSearch implements ICause, IMonitorInitPropagation, IMonitorSolution, IMonitorInterruption, IMonitorRestart {
 
     //***********************************************************************************
     // VARIABLES
@@ -64,8 +65,8 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public LargeNeighborhoodSearch(final Solver solver, INeighbor neighbor, final boolean restartAfterEachSolution) {
         this.solver = solver;
         this.neighbor = neighbor;
-		solver.plugMonitor((IMonitorSolution) () -> {
-            if(restartAfterEachSolution){
+        solver.plugMonitor((IMonitorSolution) () -> {
+            if (restartAfterEachSolution) {
                 solver.getSearchLoop().restart();
             }
         });
@@ -77,16 +78,16 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
 
     @Override
     public void onSolution() {
-        // the fast restart policy is plugged when the first solution has been found
-        if (solver.getMeasures().getSolutionCount() == 1) {
-            neighbor.activeFastRestart();
-        }
         neighbor.recordSolution();
     }
 
     @Override
     public void afterInterrupt() {
-        if (hasAppliedNeighborhood && solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
+        if (hasAppliedNeighborhood
+                && solver.getMeasures().getSolutionCount() > 0
+                && solver.getSearchLoop().canBeResumed()
+                && !solver.getSearchLoop().hasReachedLimit()
+                && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
             solver.getSearchLoop().forceAlive(true);
             solver.getSearchLoop().restart();
@@ -106,7 +107,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
             try {
-                neighbor.fixSomeVariables(this);
+//                neighbor.fixSomeVariables(this);
                 hasAppliedNeighborhood = true;
                 solver.getEngine().propagate();
             } catch (ContradictionException e) {
@@ -117,4 +118,13 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
         }
     }
 
+    @Override
+    public void beforeInitialPropagation() {
+
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+        neighbor.init();
+    }
 }

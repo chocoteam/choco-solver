@@ -52,10 +52,6 @@ public abstract class ACounter implements ICounter, IMonitorInitialize {
     }
 
     @Override
-    public void update() {
-    }
-
-    @Override
     public final void overrideLimit(long newLimit) {
         max = newLimit;
     }

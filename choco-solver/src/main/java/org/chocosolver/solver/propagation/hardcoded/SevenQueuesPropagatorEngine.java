@@ -42,10 +42,9 @@ import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.queues.CircularQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +60,6 @@ import java.util.List;
  * @since 05/07/12
  */
 public class SevenQueuesPropagatorEngine implements IPropagationEngine {
-
-    final Logger LOGGER = LoggerFactory.getLogger(SevenQueuesPropagatorEngine.class);
 
     private static final int WORD_MASK = 0xffffffff;
 
@@ -172,9 +169,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     while (evtset.size() > 0) {
                         int v = evtset.pollFirst();
                         assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                        if (LOGGER.isDebugEnabled()) {
-                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
-                        }
                         // clear event
                         mask = eventmasks[aid][v];
                         eventmasks[aid][v] = 0;
@@ -184,9 +178,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     }
                 } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                    if (LOGGER.isDebugEnabled()) {
-                        IPropagationEngine.Trace.printPropagation(null, lastProp);
-                    }
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 // This part is for debugging only!!
@@ -246,39 +237,35 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        if (LOGGER.isDebugEnabled()) {
-            IPropagationEngine.Trace.printModification(variable, type, cause);
-        }
         Propagator[] vpropagators = variable.getPropagators();
-        int nbp = vpropagators.length;
         int[] vindices = variable.getPIndices();
         Propagator prop;
         int pindice;
-
-        for (int p = nbp - 1; p >= 0; p--) {
-            prop = vpropagators[p];
-            pindice = vindices[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
-                int aid = p2i.get(prop.getId());
-                if (prop.reactToFineEvent()) {
-                    boolean needSched = (eventmasks[aid][pindice] == 0);
-                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
-                    if (needSched) {
-                        if (LOGGER.isDebugEnabled()) {
-                            IPropagationEngine.Trace.printSchedule(prop);
+        EvtScheduler si = variable._schedIter();
+        si.init(type);
+        while (si.hasNext()) {
+            int p = variable.getDindex(si.next());
+            int t = variable.getDindex(si.next());
+            for (; p < t; p++) {
+                prop = vpropagators[p];
+                pindice = vindices[p];
+                if (prop.isActive() && cause != prop) {
+                    int aid = p2i.get(prop.getId());
+                    if (prop.reactToFineEvent()) {
+                        boolean needSched = (eventmasks[aid][pindice] == 0);
+                        eventmasks[aid][pindice] |= type.getStrengthenedMask();
+                        if (needSched) {
+                            prop.incNbPendingEvt();
+                            eventsets[aid].addLast(pindice);
                         }
-                        prop.incNbPendingEvt();
-                        eventsets[aid].addLast(pindice);
-                    } else if (LOGGER.isDebugEnabled()) {
-                        IPropagationEngine.Trace.printAlreadySchedule(prop);
                     }
-                }
-                if (scheduled[aid] == 0) {
-                    int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
-                    pro_queue[prio].addLast(prop);
-                    scheduled[aid] = (short) (prio + 1);
+                    if (scheduled[aid] == 0) {
+                        int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
+                        pro_queue[prio].addLast(prop);
+                        scheduled[aid] = (short) (prio + 1);
 //                    notEmpty.set(prio);
-                    notEmpty = notEmpty | (1 << prio);
+                        notEmpty = notEmpty | (1 << prio);
+                    }
                 }
             }
         }
@@ -287,9 +274,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         if (propagator.getNbPendingEvt() == 0) {
-            if (LOGGER.isDebugEnabled()) {
-                IPropagationEngine.Trace.printPropagation(null, propagator);
-            }
             propagator.propagate(type.getStrengthenedMask());
         }
     }

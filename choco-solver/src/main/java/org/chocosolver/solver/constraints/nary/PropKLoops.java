@@ -28,10 +28,8 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -106,12 +104,11 @@ public class PropKLoops extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         int nbMin = nbMinLoops.get();
         int nbMax = nbMin + possibleLoops.getSize();
-        vars[n].updateLowerBound(nbMin, aCause);
-        vars[n].updateUpperBound(nbMax, aCause);
+        vars[n].updateBounds(nbMin, nbMax, this);
         if (vars[n].isInstantiated() && nbMin != nbMax) {
             if (vars[n].getValue() == nbMax) {
                 for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
-                    vars[i].instantiateTo(i + offSet, aCause);
+                    vars[i].instantiateTo(i + offSet, this);
                     assert vars[i].isInstantiatedTo(i + offSet);
                     nbMinLoops.add(1);
                 }
@@ -119,7 +116,7 @@ public class PropKLoops extends Propagator<IntVar> {
                 setPassive();
             } else if (vars[n].getValue() == nbMin) {
                 for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
-                    if (vars[i].removeValue(i + offSet, aCause)) {
+                    if (vars[i].removeValue(i + offSet, this)) {
                         possibleLoops.remove(i);
                     }
                 }
@@ -168,18 +165,4 @@ public class PropKLoops extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropKLoops(aVars, this.offSet, aVar));
-        }
-    }
 }

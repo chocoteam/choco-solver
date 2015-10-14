@@ -28,8 +28,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -83,7 +81,7 @@ public class
         switch (c) {
             case 7: // everything is instantiated
             case 6:// Z and Y are instantiated
-                vars[0].instantiateTo(Math.min(vars[1].getValue(), vars[2].getValue()), aCause);
+                vars[0].instantiateTo(Math.min(vars[1].getValue(), vars[2].getValue()), this);
                 setPassive();
                 break;
             case 5: //  X and Z are instantiated
@@ -91,12 +89,12 @@ public class
                 int best = vars[0].getValue();
                 int val2 = vars[2].getValue();
                 if (best < val2) {
-                    vars[1].instantiateTo(best, aCause);
+                    vars[1].instantiateTo(best, this);
                     setPassive();
                 } else if (best > val2) {
                     contradiction(vars[2], "wrong min selected");
                 } else { // X = Z
-                    vars[1].updateLowerBound(best, aCause);
+                    vars[1].updateLowerBound(best, this);
                 }
             }
             break;
@@ -104,7 +102,7 @@ public class
             {
                 int val = vars[2].getValue();
                 if (val < vars[1].getLB()) { // => X = Z
-                    vars[0].instantiateTo(val, aCause);
+                    vars[0].instantiateTo(val, this);
                     setPassive();
                 } else {
                     _filter();
@@ -116,12 +114,12 @@ public class
                 int best = vars[0].getValue();
                 int val1 = vars[1].getValue();
                 if (best < val1) {
-                    vars[2].instantiateTo(best, aCause);
+                    vars[2].instantiateTo(best, this);
                     setPassive();
                 } else if (best > val1) {
                     contradiction(vars[1], "");
                 } else { // X = Y
-                    vars[2].updateLowerBound(best, aCause);
+                    vars[2].updateLowerBound(best, this);
                 }
             }
             break;
@@ -129,7 +127,7 @@ public class
             {
                 int val = vars[1].getValue();
                 if (val < vars[2].getLB()) { // => X = Y
-                    vars[0].instantiateTo(val, aCause);
+                    vars[0].instantiateTo(val, this);
                     setPassive();
                 } else { // val in Z
                     _filter();
@@ -143,13 +141,13 @@ public class
                     contradiction(vars[0], null);
                 }
                 if (vars[1].getLB() > best) {
-                    vars[2].instantiateTo(best, aCause);
+                    vars[2].instantiateTo(best, this);
                     setPassive();
                 } else if (vars[2].getLB() > best) {
-                    vars[1].instantiateTo(best, aCause);
+                    vars[1].instantiateTo(best, this);
                     setPassive();
                 } else {
-                    if (vars[1].updateLowerBound(best, aCause) | vars[2].updateLowerBound(best, aCause)) {
+                    if (vars[1].updateLowerBound(best, this) | vars[2].updateLowerBound(best, this)) {
                         filter(); // to ensure idempotency for "free"
                     }
                 }
@@ -165,15 +163,15 @@ public class
     private void _filter() throws ContradictionException {
         boolean change;
         do {
-            change = vars[0].updateLowerBound(Math.min(vars[1].getLB(), vars[2].getLB()), aCause);
-            change |= vars[0].updateUpperBound(Math.min(vars[1].getUB(), vars[2].getUB()), aCause);
-            change |= vars[1].updateLowerBound(vars[0].getLB(), aCause);
-            change |= vars[2].updateLowerBound(vars[0].getLB(), aCause);
+            change = vars[0].updateLowerBound(Math.min(vars[1].getLB(), vars[2].getLB()), this);
+            change |= vars[0].updateUpperBound(Math.min(vars[1].getUB(), vars[2].getUB()), this);
+            change |= vars[1].updateLowerBound(vars[0].getLB(), this);
+            change |= vars[2].updateLowerBound(vars[0].getLB(), this);
             if (vars[2].getLB() > vars[0].getUB()) {
-                change |= vars[1].updateUpperBound(vars[0].getUB(), aCause);
+                change |= vars[1].updateUpperBound(vars[0].getUB(), this);
             }
             if (vars[1].getLB() > vars[0].getUB()) {
-                change |= vars[2].updateUpperBound(vars[0].getUB(), aCause);
+                change |= vars[2].updateUpperBound(vars[0].getUB(), this);
             }
         } while (change);
     }
@@ -196,28 +194,17 @@ public class
     }
 
     @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-            this.vars[2].duplicate(solver, identitymap);
-            IntVar Z = (IntVar) identitymap.get(this.vars[2]);
-
-            identitymap.put(this, new PropMinBC(X, Y, Z));
-        }
-    }
-
-    @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         if (var == vars[0]) {
             if (IntEventType.isInstantiate(evt.getMask())) {
-                for (int i = 1; i < 3; i++) {
-                    if (vars[i].isInstantiatedTo(var.getValue())) {
-                        newrules |= ruleStore.addFullDomainRule(vars[i]);
-                    }
+                if (vars[1].isInstantiated()) {
+                    newrules |= ruleStore.addFullDomainRule(vars[1]);
+                    newrules |= ruleStore.addLowerBoundRule(vars[2]);
+                }
+                if (vars[2].isInstantiated()) {
+                    newrules |= ruleStore.addLowerBoundRule(vars[1]);
+                    newrules |= ruleStore.addFullDomainRule(vars[2]);
                 }
             } else {
                 if (IntEventType.isInclow(evt.getMask())) {
@@ -230,14 +217,30 @@ public class
                 }
             }
         } else {
+            int i = var == vars[1] ? 2 : 1;
             if (IntEventType.isInstantiate(evt.getMask())) {
                 newrules |= ruleStore.addFullDomainRule(vars[0]);
+                if (vars[i].isInstantiated()) {
+                    newrules |= ruleStore.addFullDomainRule(vars[i]);
+                } else {
+                    newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                }
             } else {
                 if (IntEventType.isInclow(evt.getMask())) {
-                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                    if (vars[0].isInstantiated()) {
+                        newrules |= ruleStore.addFullDomainRule(vars[0]);
+                    } else {
+                        newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                    }
+                    if (vars[i].isInstantiated()) {
+                        newrules |= ruleStore.addFullDomainRule(vars[i]);
+                    } else {
+                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
+                    }
                 }
                 if (IntEventType.isDecupp(evt.getMask())) {
                     newrules |= ruleStore.addUpperBoundRule(vars[0]);
+                    newrules |= ruleStore.addLowerBoundRule(vars[i]);
                 }
             }
         }
