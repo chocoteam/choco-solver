@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.4</version>
+            <version>6.9.8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -144,22 +144,22 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
-                <version>1.10.b1</version>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.11</version>
                 <configuration>
+                    <mapping>
+                        <template>JAVADOC_STYLE</template>
+                    </mapping>
                     <header>LICENSE</header>
-                    <failIfMissing>false</failIfMissing>
-                    <strictCheck>true</strictCheck>
-                    <aggregate>true</aggregate>
-                    <!--<properties>-->
-                        <!--<owner1>Charles Prud'homme (TASC, ARMINES, INRIA Rennes, LINA CNRS UMR 6241)</owner1>-->
-                        <!--<owner2>Jean-Guillaume Fages (COSLING S.A.S.)</owner2>-->
-                        <!--<email>choco@mines-nantes.fr</email>-->
-                        <!--<year>2014</year>-->
-                    <!--</properties>-->
+                    <properties>
+                        <year>2015</year>
+                        <owner>Ecole des Mines de Nantes</owner>
+                    </properties>
                     <includes>
                         <include>**/*.java</include>
+                        <include>**/*.template</include>
+                       <!-- <include>**/*.xml</include>-->
                     </includes>
                     <headerDefinitions>
                         <headerDefinition>src/etc/old.xml</headerDefinition>
@@ -196,11 +196,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18</version>
-                <configuration>
-                    <!--<groups>1s,10s,1m,10m,30m</groups>-->
+                <!--<configuration>
+                    &lt;!&ndash;<groups>1s,10s,1m,10m,30m</groups>&ndash;&gt;
                     <parallel>methods</parallel>
                     <threadCount>4</threadCount>
-                </configuration>
+                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

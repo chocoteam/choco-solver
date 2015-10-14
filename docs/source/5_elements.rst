@@ -868,6 +868,84 @@ It also automatically imposes one `alldifferent` constraints on each array of va
    - `X[0] = 2, X[1] = 0, X[2] = 1, Y[0] = 2, Y[1] = 3, Y[2] = 1`
    - `X[0] = 2, X[1] = 1, X[2] = 0, Y[0] = 3, Y[1] = 2, Y[2] = 1`
 
+.. _51_icstr_nvpc
+
+int_value_precede_chain
+=======================
+
+The `int_value_precede_chain` constraint involves an array of integer variables `X` and
+
+- either two integers `S` and `T`
+- or an array of distinct integers.
+
+It ensures that if there exists j such that X[j] = T, then, there must exist i < j such that X[i] = S.
+Or it ensures that, for each pair of V[k] and V[l] of values in V, such that k < l, if there exists j such that
+X[j] = V[l], then, there must exist i < j such that X[i] = V[k].
+
+**See also**: `int_value_precede <http://sofdem.github.io/gccat/gccat/Cint_value_precede.htmll>`_ in the Global Constraint Catalog.
+
+**Implementation based on**: :cite:`YatChiuLawJimmyLee04`.
+
+** API**: ::
+
+    Constraint int_value_precede_chain(IntVar[] X, int S, int T)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
+          :language: java
+          :lines: 86-88,90
+          :emphasize-lines: 88
+          :linenos:
+
+   The solutions of the problems are:
+
+   - `X[0] = 2 X[1] = 2 X[2] = 2`
+   - `X[0] = 2 X[1] = 2 X[2] = 3`
+   - `X[0] = 2 X[1] = 3 X[2] = 1`
+   - `X[0] = 2 X[1] = 3 X[2] = 2`
+   - `X[0] = 2 X[1] = 3 X[2] = 3`
+
+
+.. _51_icstr_ksor:
+
+keysorting
+==========
+
+The `keysorting` constraint involves three matrices of integer variables `VARS` and `SORTEDVARS`,
+an array of integer variables `PERMVARS` and an integer `K`.
+It ensures that the variables of `SORTEDVARS` correspond to the variables of `VARS` according to a permutation.
+Moreover, the variable of `SORTEDVARS` are sorted in increasing order wrt to K-tuple and PERMVARS store the permutations.
+
+.. **See also**: `sort <http://sofdem.github.io/gccat/gccat/Csort.html>`_ in the Global Constraint Catalog.
+
+.. **Implementation based on**: :cite:`MehlhornT00`.
+
+**API**: ::
+
+    Constraint keysorting(IntVar[][] VARS, IntVar[] PERMVARS, IntVar[][] SORTEDVARS, int K)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
+          :language: java
+          :lines: 77-81,83
+          :emphasize-lines: 81
+          :linenos:
+
+    Some solutions of the problem are :
+
+     - `X[0][0] = 2 X[0][1] = 1 X[0][2] = 1 X[1][0] = 1 X[1][1] = 1 X[1][2] = 1`
+     `Y[0][0] = 1 Y[0][1] = 1 Y[0][2] = 1 Y[1][0] = 2 Y[1][1] = 1 Y[1][2] = 1`
+     `P[0] = 2 P[1] = 1 P[2] = 0`
+
+     - `X[0][0] = 2 X[0][1] = 1 X[0][2] = 1 X[1][0] = 1 X[1][1] = 3 X[1][2] = 2`
+     `Y[0][0] = 1 Y[0][1] = 3 Y[0][2] = 2 Y[1][0] = 2 Y[1][1] = 1 Y[1][2] = 1`
+     `P[0] = 2 P[1] = 1 P[2] = 2`
+
+     - `X[0][0] = 2 X[0][1] = 1 X[0][2] = 3 X[1][0] = 1 X[1][1] = 1 X[1][2] = 2`
+     `Y[0][0] = 1 Y[0][1] = 1 Y[0][2] = 2 Y[1][0] = 2 Y[1][1] = 1 Y[1][2] = 3`
+     `P[0] = 2 P[1] = 1 P[2] = 1`
 
 .. _51_icstr_kna:
 
@@ -3066,9 +3144,9 @@ mid_value_selector
 ==================
 
 A built-in value selector which selects the value in the variable domain closest to the mean of its current bounds.
-It computes the middle value of the domain. Then checks if the mean is contained in the domain.
-If not, the closest value to the middle is chosen.
-Rounding policy is floor. It could be override by creating a new instance of ``IntDomainMiddle`` with ``false`` as parameter.
+It computes the middle value of the domain. Then checks if the value is contained in the domain.
+If not and if ``floor`` is set to ``true`` (resp. ``false``)
+the closest integer larger (resp. smaller) than the value is selected.
 
 .. important::
 
@@ -3081,7 +3159,7 @@ Rounding policy is floor. It could be override by creating a new instance of ``I
 
 **API**: ::
 
-    IntValueSelector mid_value_selector()
+    IntValueSelector mid_value_selector(boolean floor)
 
 .. _51_svalsel_maxv:
 
@@ -3322,6 +3400,9 @@ lexico_Split
 ============
 
 A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and removes the second half of its domain.
+When ``floor`` is set to true, it selects the closest value less than or equal to the middle value.
+Set to false, it selects the closest value greater or equal to the middle value.
+
 
 **Scope**: ``IntVar``
 
@@ -3329,7 +3410,7 @@ A built-in strategy which chooses the first non-instantiated variable, regarding
 
 **API**: ::
 
-    IntStrategy lexico_Split(IntVar... VARS)
+    IntStrategy lexico_Split(boolean floor, IntVar... VARS)
 
 .. _51_sstrat_lexub:
 
@@ -3367,6 +3448,8 @@ minDom_MidValue
 ===============
 
 A built-in strategy which chooses the first non-instantiated variable with the smallest domain size, and assigns it to the value closest to its middle of its domain.
+When ``floor`` is set to true, it selects the closest value less than or equal to the middle value.
+Set to false, it selects the closest value greater or equal to the middle value.
 
 **Scope**: ``IntVar``
 
@@ -3374,7 +3457,7 @@ A built-in strategy which chooses the first non-instantiated variable with the s
 
 **API**: ::
 
-    IntStrategy minDom_MidValue(IntVar... VARS)
+    IntStrategy minDom_MidValue(boolean floor, IntVar... VARS)
 
 .. _51_sstrat_maxspl:
 
@@ -3382,6 +3465,8 @@ maxDom_Split
 ============
 
 A built-in strategy which chooses the first non-instantiated variable with largest domain size, and removes the second half of its domain.
+When ``floor`` is set to true, it selects the closest value less than or equal to the middle value.
+Set to false, it selects the closest value greater or equal to the middle value.
 
 **Scope**: ``IntVar``
 
@@ -3389,7 +3474,7 @@ A built-in strategy which chooses the first non-instantiated variable with large
 
 **API**: ::
 
-    IntStrategy maxDom_Split(IntVar... VARS)
+    IntStrategy maxDom_Split(boolean floor, IntVar... VARS)
 
 .. _51_sstrat_minub:
 
@@ -3572,28 +3657,6 @@ After each conflict, the last assigned variable is selected in priority, so long
     AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT)
     AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT)
 
-.. _51_sstrat_gat:
-
-generateAndTest
-===============
-
-A strategy that simulate a `Generate and Test` behavior through a specific internal decision.
-The main idea is, from all the variables of a problem,  to generate and test the satisfiability of a complete instantiation.
-The process does not rely on propagation anymore, but on satisfaction only.
-
-Such strategy can be triggered when the search space reached a given limit.
-
-
-**Scope**: ``IntVar``
-
-**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
-
-**API**: ::
-
-    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER)
-    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy,
-                                             int searchSpaceLimit)
-
 
 
 .. _55_smf:
@@ -3770,3 +3833,14 @@ Record nogoods from restarts, that is, anytime the search restarts, one or more 
 
     void nogoodRecordingFromRestarts(Solver solver)
 
+shareBestKnownBound
+===================
+
+A method which prepares the solvers in the list to be run in parallel.
+It plugs tools to share between solvers the best known bound when dealing with an optimization problem.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void shareBestKnownBound(List<Solver> solvers)

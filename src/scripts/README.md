@@ -15,11 +15,11 @@ This document reports the release process.
 
 And update README.md with the correct versions of dependencies
 
-    $ mvn dependency:list | grep :compile
+    $ cd choco-solver/ && mvn dependency:list | grep :compile | cut -c11- | cut -d : -f1-2,4
 
 And run license check:
 
-    $ mvn license:format
+    $ mvn license:format -Dyear=2015
 
 3. Generate PDF documentation
 

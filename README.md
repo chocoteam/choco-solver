@@ -113,11 +113,11 @@ The next step is to add the jar file to your classpath of your application and a
 
 The required dependencies for compilation are:
 
-    org.javabits.jgrapht:jgrapht-core:jar:0.9.3
-    dk.brics.automaton:automaton:jar:1.11-8
-    args4j:args4j:jar:2.32
-    net.sf.trove4j:trove4j:jar:3.0.3
-    org.slf4j:slf4j-api:jar:1.7.13
+    dk.brics.automaton:automaton:1.11-8
+    args4j:args4j:2.32
+    org.javabits.jgrapht:jgrapht-core:0.9.3
+    net.sf.trove4j:trove4j:3.0.3
+
 
 They are available on Maven Repository (http://mvnrepository.com/).
 

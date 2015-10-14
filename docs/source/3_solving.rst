@@ -629,17 +629,14 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
      [  Maximize = {1}  ]
      [  Minimize = {2}  ]
         Building time : {3}s
-        Initialisation : {4}s
-        Initial propagation : {5}s
         Resolution : {6}s
-        Nodes: {7}
+        Nodes: {7} ({7}/{6} n/s)
         Backtracks: {8}
         Fails: {9}
         Restarts: {10}
         Max depth: {11}
-        Memory: {12}mb
-        Variables: {13}
-        Constraints: {14}
+        Variables: {12}
+        Constraints: {13}
 
 Curly brackets *{instruction | }* indicate alternative instructions
 
@@ -662,9 +659,8 @@ Curly braces *{value}* indicate search statistics:
 9. number of failures that occurred
 10. number of restarts operated
 11. maximum depth reached in the binary tree search
-12. estimation of the memory used
-13. number of variables in the model
-14. number of constraints in the model
+12. number of variables in the model
+13. number of constraints in the model
 
 
 If the resolution process reached a limit before ending *naturally*, the title of the message is set to :

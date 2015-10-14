@@ -6,32 +6,56 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
-- Add keysorting() constraint, int_value_precede_chain() constraint
-- Add a solver interface (ISolver), a solver factory (SolverFactory) and a solver portfolio (Portfolio) + tests (#293)
-- Add Portfolio solver simulating kind of mono-core, multi-threads resolutions
-- Update Variable and VariableFactory to deal with ISolver (#293)
-- Remove MasterSolver and SlaveSolver (#293)
-- Add unplugSearchMonitor() to SearchLoop, Solver and SearchMonitorList (#300)
-- Modify 'ISearchLoop.interrupt()', add new parameter 'voidable' to qualify the strength of the interruption (#304)
+
+#### Solver: 
+
+- remove MasterSolver and SlaveSolver (#293)
+- remove duplicate methods
+- add a search monitor helper for parallel resolution with Java8 lambda (#293)
 - lazy creation of ZERO, ONE, TRUE and FALSE through methods of Solver (#293)
-- Refactor Solution (#306)
-- Improve propagator iteration in propagation engine
-- add UCB1 option for ICF.alldifferent()
-- add IntVar#removeValues(IntIterableSet, ICause), IntVar#removeAllValuesBut(IntIterableSet, ICause)
-and IntVar#updateBounds(int, int, ICause) (#270)
-- revamp scalar and sum (#324)
-- simplify and improve basic element propagator (#325)
-- revamp IMeasures to avoid declaring its concret class as monitor
-- AbstractStrategy#init() cannot throw ContradictionException anymore but returns false instead
+- refactor Solution (#306)
+- improve propagator iteration in propagation engine
+- revamp IMeasures to avoid declaring its concrete class as monitor
 - remove deprecated classes: GenerateAndTest, LastConflict_old
 - add new API to Solver to declare eagerly the objective variable(s) and the precision
-- add a search monitor helper for parallel resolution with Java8 lambda
-- Revamp decisions to enable MetaDecision, move FastDecision to ../IntDecision and
-replace Decision#once(boolean) by #setArity(int)
+
+#### Search:
+
+- modify 'ISearchLoop.interrupt()', add new parameter 'voidable' to qualify the strength of the interruption (#304)
+- AbstractStrategy#init() cannot throw ContradictionException anymore but returns false instead
+- revamp decisions to enable MetaDecision 
+- move FastDecision to ../IntDecision
+
+#### Variables:
+
+- add IntVar#removeValues(IntIterableSet, ICause), IntVar#removeAllValuesBut(IntIterableSet, ICause)
+and IntVar#updateBounds(int, int, ICause) (#270)
+- improve IntVar#removeInterval(int, int, ICause) for enumerated domain integer variables
+- prevent the user from using random_value on bounded vars
+
+#### Constraints:
+
+- add keysorting() constraint, 
+- add int_value_precede_chain() constraint
+- add UCB1 option for ICF.alldifferent()
+- revamp scalar and sum (#324)
+- fix lack of filtering in PropMin
+- simplify and improve basic element propagator (#325)
+- remove aCause from Propagator
+- simplify Propagation.contradiction(...)
 
 
-Bug fixes: #152, #153, #164, #176, #296, #297, #298, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, #331, 
-\#333, #334, #337, #338
+#### Explanations: 
+
+- add PoolManager for Rules and Propagators
+- explain PropCount_AC
+- fix lack of explanations in SatSolver
+- fix PropLessOrEqualXY_C to add the right rule
+
+#### Bug fixes: 
+
+\#152, #153, #164, #176, #296, #297, #298, #301, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, 
+\#331, #333, #334, #337, #338
 
 3.3.1 - 11 May 2015
 -------------------
