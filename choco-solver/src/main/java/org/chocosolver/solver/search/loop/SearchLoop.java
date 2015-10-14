@@ -294,6 +294,7 @@ public class SearchLoop implements ISearchLoop {
      * Initializes the measures, just before the beginning of the search
      */
     private void initialize() {
+        solver.getMeasures().startStopwatch();
         this.rootWorldIndex = env.getWorldIndex();
         this.nextState = INITIAL_PROPAGATION;
         this.env.buildFakeHistoryOn(solver.getSettings().getEnvironmentHistorySimulationCondition());
@@ -303,7 +304,6 @@ public class SearchLoop implements ISearchLoop {
      * Runs the initial propagation, awaking each constraints and call filter on the initial state of variables.
      */
     private void initialPropagation() {
-        solver.getMeasures().startStopwatch();
         this.env.worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             solver.getEngine().propagate();
