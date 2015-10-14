@@ -319,4 +319,18 @@ public class RegularTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 84);
     }
+
+
+    @Test(groups = "1s")
+    public void testregExp8() {
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 3, new int[]{43, 59, 117}, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("<43><59><117>")));
+        solver.set(ISF.lexico_LB(CS));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+
+    }
+
+
 }

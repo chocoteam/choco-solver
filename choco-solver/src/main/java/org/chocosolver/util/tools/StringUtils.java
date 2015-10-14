@@ -81,7 +81,7 @@ public class StringUtils {
             if (c == '<') {
                 int out = strRegExp.indexOf('>', i + 1);
                 int tmp = Integer.parseInt(strRegExp.substring(i + 1, out));
-                b.append(FiniteAutomaton.getCharFromInt(tmp));
+                b.append('\\').append(FiniteAutomaton.getCharFromInt(tmp));
                 i = out;
             } else if (Character.isDigit(c)) {
                 b.append(FiniteAutomaton.getCharFromInt(Character.getNumericValue(c)));
