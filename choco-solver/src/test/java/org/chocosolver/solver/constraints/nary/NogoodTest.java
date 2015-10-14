@@ -31,7 +31,10 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
+import org.chocosolver.solver.search.loop.SDF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.loop.plm.SearchDriver;
+import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
@@ -52,19 +55,18 @@ public class NogoodTest {
     public void test1() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
-        SMF.nogoodRecordingFromRestarts(solver);
-        solver.set(ISF.random_value(vars, 29091981L));
-        final BacktrackCounter sc = new BacktrackCounter(30);
-        sc.setAction(() -> {
-            solver.getSearchLoop().restart();
-            sc.reset();
-        });
-        solver.getSearchLoop().plugSearchMonitor(sc);
-        SMF.limitTime(solver, 200000);
+        SearchDriver searchDriver =
+                SDF.learnNogoodFromRestarts(
+                        SDF.restart(SDF.dfs(solver, ISF.random_value(vars, 29091981L)),
+                                limit -> solver.getMeasures().getBackTrackCount() >= limit,
+                                new GeometricalRestartStrategy(2,1.1),
+                                20));
+        searchDriver.setStopCriterion(() -> solver.getMeasures().getTimeCount() > 200000);
+        solver.set(searchDriver);
 //        Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 29);
-        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 53);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 110);
+        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 182);
     }
 
     @Test(groups = "1s")

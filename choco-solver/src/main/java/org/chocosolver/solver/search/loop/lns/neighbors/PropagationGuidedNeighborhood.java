@@ -28,10 +28,11 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -41,14 +42,14 @@ import java.util.TreeMap;
 
 /**
  * A Propagation Guided LNS
- * <p/>
+ * <p>
  * Based on "Propagation Guided Large Neighborhood Search", Perron et al. CP2004.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 08/04/13
  */
-public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitorInitPropagation {
+public class PropagationGuidedNeighborhood implements INeighbor {
 
     protected final int n;
     protected final IntVar[] vars;
@@ -63,10 +64,12 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
     protected SortedMap<Integer, Integer> all;
     protected SortedMap<Integer, Integer> candidate;
     BitSet fragment;  // index of variable to set unfrozen
+    IntMetaDecision decision;
+    Solver mSolver;
 
 
     public PropagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
-        super(solver);
+        this.mSolver = solver;
 
         this.n = vars.length;
         this.vars = vars.clone();
@@ -79,7 +82,6 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
         this.all = new TreeMap<>();
         this.candidate = new TreeMap<>();
         this.fragment = new BitSet(n);
-        solver.plugMonitor(this);
     }
 
     @Override
@@ -95,7 +97,8 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
     }
 
     @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
+    public Decision fixSomeVariables() {
+        decision.free();
         logSum = 0.;
         for (int i = 0; i < n; i++) {
             int ds = vars[i].getDomainSize();
@@ -103,11 +106,18 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
         }
         fgmtSize = (int) (30 * (1 + epsilon));
         fragment.set(0, n); // all variables are frozen
-        update(cause);
+        mSolver.getEnvironment().worldPush();
+        try {
+            update();
+        } catch (ContradictionException cex) {
+            mSolver.getEngine().flush();
+        }
+        mSolver.getEnvironment().worldPop();
         epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
+        return decision;
     }
 
-    protected void update(ICause cause) throws ContradictionException {
+    protected void update() throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
             all.clear();
             // 1. pick a variable
@@ -115,7 +125,7 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
 
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                impose(id, cause);
+                impose(id);
                 mSolver.propagate();
                 fragment.clear(id);
 
@@ -147,8 +157,9 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
         }
     }
 
-    protected void impose(int id, ICause cause) throws ContradictionException {
-        vars[id].instantiateTo(bestSolution[id], cause);
+    protected void impose(int id) throws ContradictionException {
+        decision.add(vars[id], bestSolution[id]);
+        vars[id].instantiateTo(bestSolution[id], Cause.Null);
     }
 
 
@@ -172,11 +183,7 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
     }
 
     @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
+    public void init() {
         // todo plug search monitor
         this.dsize = new int[n];
         for (int i = 0; i < n; i++) {
