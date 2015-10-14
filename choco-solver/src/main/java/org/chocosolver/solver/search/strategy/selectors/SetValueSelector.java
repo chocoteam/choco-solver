@@ -44,6 +44,6 @@ public interface SetValueSelector {
 	 * @return an integer i of v's envelope, which is not included in v's kernel
 	 * so that a decision (forcing/removing i) can be applied on v
 	 */
-	public int selectValue(SetVar v);
+	int selectValue(SetVar v);
 
 }

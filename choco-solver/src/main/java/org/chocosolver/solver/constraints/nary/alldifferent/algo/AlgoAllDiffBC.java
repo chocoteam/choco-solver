@@ -88,7 +88,7 @@ public class AlgoAllDiffBC {
 	//****************************************************************************************************************//
 	//****************************************************************************************************************//
 
-	static enum SORT implements Comparator<Interval> {
+	enum SORT implements Comparator<Interval> {
 		MAX {
 			@Override
 			public final int compare(Interval o1, Interval o2) {

@@ -46,7 +46,7 @@ public interface IDeltaMonitor extends Serializable {
 
     void unfreeze();
 
-    public static enum Default implements IDeltaMonitor {
+    enum Default implements IDeltaMonitor {
         NONE() {
 
             @Override

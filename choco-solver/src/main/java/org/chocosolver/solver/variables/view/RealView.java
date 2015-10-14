@@ -169,7 +169,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         solver.getEngine().fails(cause, this, message);
     }
 

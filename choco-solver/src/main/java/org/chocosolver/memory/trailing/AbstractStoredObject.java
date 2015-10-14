@@ -39,7 +39,7 @@ public class AbstractStoredObject implements Serializable {
     protected final EnvironmentTrailing environment;
 
     /**
-     * The last world the search was moidified in.
+     * The last world the search was modified in.
      */
     public int worldStamp;
 

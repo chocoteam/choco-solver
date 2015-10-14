@@ -48,7 +48,7 @@ public enum PropagatorEventType implements IEventType {
 	private final int mask;
 	private final int strengthened_mask;
 
-	private PropagatorEventType(int mask, int fullmask) {
+	PropagatorEventType(int mask, int fullmask) {
 		this.mask = mask;
 		this.strengthened_mask = fullmask;
 	}

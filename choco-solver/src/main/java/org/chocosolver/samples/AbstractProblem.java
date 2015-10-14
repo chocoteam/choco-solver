@@ -98,7 +98,6 @@ public abstract class AbstractProblem {
 
     public final boolean readArgs(String... args) {
         CmdLineParser parser = new CmdLineParser(this);
-        parser.setUsageWidth(160);
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {

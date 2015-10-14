@@ -149,7 +149,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         assert cause != null;
         if (element < min || element > max || !envelope.contain(element - min)) {
-            contradiction(cause, null, "");
+            contradiction(cause, "");
             return true;
         }
         if (kernel.contain(element - min)) {
@@ -169,7 +169,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         assert cause != null;
         if (element < min || element > max) return false;
         if (kernel.contain(element - min)) {
-            contradiction(cause, SetEventType.REMOVE_FROM_ENVELOPE, "");
+            contradiction(cause, "");
             return true;
         }
         if (!envelope.remove(element - min)) {
@@ -190,7 +190,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
             addToKernel(i, cause);
         }
         if (kernel.getSize() != value.length) {
-            contradiction(cause, null, "");
+            contradiction(cause, "");
         }
         if (envelope.getSize() != value.length) {
             for (int i = getEnvelopeFirst(); i != END; i = getEnvelopeNext()) {
@@ -337,7 +337,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }

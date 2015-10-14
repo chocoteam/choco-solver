@@ -125,7 +125,7 @@ public class FiniteAutomaton implements IAutomaton {
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
      *
-     * @param regexp
+     * @param regexp the regular expression
      */
     public FiniteAutomaton(String regexp) {
         this(regexp, Character.MIN_VALUE, Character.MAX_VALUE);

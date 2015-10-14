@@ -43,7 +43,7 @@ public interface TupleValidator {
      * @param values tuple to valid
      * @return a boolean
      */
-    public boolean valid(int... values);
+    boolean valid(int... values);
 
-	public static TupleValidator TRUE = values -> true;
+	TupleValidator TRUE = values -> true;
 }

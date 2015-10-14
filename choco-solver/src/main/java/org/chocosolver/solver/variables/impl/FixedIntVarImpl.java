@@ -40,7 +40,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -76,7 +75,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value == constante) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
+            this.contradiction(cause, "unique value removal");
         }
         return false;
     }
@@ -86,7 +85,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (values.contains(constante)) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
+            this.contradiction(cause, "unique value removal");
         }
         return false;
     }
@@ -96,7 +95,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (!values.contains(constante)) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
+            this.contradiction(cause, "unique value removal");
         }
         return false;
     }
@@ -106,7 +105,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (from <= constante && constante <= to) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.REMOVE, "unique value removal");
+            this.contradiction(cause, "unique value removal");
         }
         return false;
     }
@@ -116,7 +115,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value != constante) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.INSTANTIATE, "outside domain instantitation");
+            this.contradiction(cause, "outside domain instantitation");
         }
         return false;
     }
@@ -126,7 +125,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value > constante) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.INCLOW, "outside domain update bound");
+            this.contradiction(cause, "outside domain update bound");
         }
         return false;
     }
@@ -136,7 +135,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (value < constante) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.DECUPP, "outside domain update bound");
+            this.contradiction(cause, "outside domain update bound");
         }
         return false;
     }
@@ -146,7 +145,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (lb > constante || ub < constante) {
             assert cause != null;
             if (_plugexpl) solver.getEventObserver().removeValue(this, constante, cause);
-            this.contradiction(cause, IntEventType.INCLOW, "outside domain update bound");
+            this.contradiction(cause, "outside domain update bound");
         }
         return false;
     }
@@ -253,7 +252,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         this.empty.set(true);
         solver.getEngine().fails(cause, this, message);
     }

@@ -185,8 +185,8 @@ public class CodeGenerator {
         // indicates a replication-only class.
         if (file_name.contains("_E_")) {
             processEMarkers(content, output_directory, file_name);
-        } else {
-            return;
+        }
+//        else {
 //            if (input_file.lastModified() < output_file.lastModified()) {
 //                System.out.println("File " + output_file + " up to date, not processing input");
 //                return;
@@ -202,7 +202,7 @@ public class CodeGenerator {
 //            }
 //
 //            writeFile(content, output_file);
-        }
+//        }
     }
 
 

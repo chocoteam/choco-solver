@@ -84,7 +84,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (old < value) {
             if (this.getUB() < value) {
 //                TODO solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                this.contradiction(cause, RealEventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, MSG_LOW);
             } else {
                 LB.set(value);
                 this.notifyPropagators(RealEventType.INCLOW, cause);
@@ -104,7 +104,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (old > value) {
             if (this.getLB() > value) {
 //                TODO solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, RealEventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, MSG_UPP);
             } else {
                 UB.set(value);
                 this.notifyPropagators(RealEventType.DECUPP, cause);
@@ -124,7 +124,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (oldlb < lowerbound || oldub > upperbound) {
             if (oldub < lowerbound || oldlb > upperbound) {
 //                TODO solver.getExplainer()...
-                this.contradiction(cause, RealEventType.BOUND, MSG_BOUND);
+                this.contradiction(cause, MSG_BOUND);
             } else {
 				RealEventType e = RealEventType.VOID;
                 if (oldlb < lowerbound) {
@@ -180,7 +180,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }

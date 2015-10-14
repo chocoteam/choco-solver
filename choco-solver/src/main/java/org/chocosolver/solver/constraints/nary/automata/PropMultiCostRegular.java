@@ -946,10 +946,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                if(DEBUG) Chatterbox.out.printf(String.format("z[" + i + "] in MCR should be instantiated : " + z[i]));
+                if(DEBUG) Chatterbox.out.printf("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
-                if(DEBUG)Chatterbox.out.printf(String.format("cost: " + gcost[i] + " != z:" + z[i].getValue()));
+                if(DEBUG)Chatterbox.out.printf("cost: " + gcost[i] + " != z:" + z[i].getValue());
                 return false;
             }
 

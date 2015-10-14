@@ -50,6 +50,6 @@ public interface VariableSelector<V extends Variable> extends Serializable {
      *
      * @return the current selected variable if any, {@code null} otherwise.
      */
-    public V getVariable(V[] variables);
+    V getVariable(V[] variables);
 
 }

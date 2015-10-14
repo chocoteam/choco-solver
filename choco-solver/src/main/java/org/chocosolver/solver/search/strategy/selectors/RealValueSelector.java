@@ -49,6 +49,6 @@ public interface RealValueSelector extends Serializable {
      *
      * @return the value, based on the domain of variable
      */
-    public double selectValue(RealVar var);
+    double selectValue(RealVar var);
 
 }

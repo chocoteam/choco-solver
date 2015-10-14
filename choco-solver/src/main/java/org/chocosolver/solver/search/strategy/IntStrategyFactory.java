@@ -363,14 +363,11 @@ public class IntStrategyFactory {
     public static IntStrategy random(IntVar[] VARS, long SEED) {
         IntValueSelector value = random_value_selector(SEED);
         IntValueSelector bound = randomBound_value_selector(SEED);
-        IntValueSelector selector = new IntValueSelector() {
-            @Override
-            public int selectValue(IntVar var) {
-                if (var.hasEnumeratedDomain()) {
-                    return value.selectValue(var);
-                } else {
-                    return bound.selectValue(var);
-                }
+        IntValueSelector selector = (IntValueSelector) var -> {
+            if (var.hasEnumeratedDomain()) {
+                return value.selectValue(var);
+            } else {
+                return bound.selectValue(var);
             }
         };
         return custom(random_var_selector(SEED), selector, VARS);

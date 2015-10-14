@@ -43,20 +43,20 @@ import java.util.BitSet;
 public interface F {
 
 	/** Potentially performs some calculation before computing independent sets */
-	public void prepare();
+	void prepare();
 
 	/** Computes an Independent Set as large as possible, although it is not necessarily maximum */
-	public void computeMIS();
+	void computeMIS();
 
 	/**
 	 * @return true iff the heuristic can compute another independent set
 	 */
-	public boolean hasNextMIS();
+	boolean hasNextMIS();
 
 	/**
 	 * @return a BitSet representing vertices that belong to the independent set
 	 */
-	public BitSet getMIS();
+	BitSet getMIS();
 
-	public void duplicate(Solver solver, THashMap<Object, Object> identitymap);
+	void duplicate(Solver solver, THashMap<Object, Object> identitymap);
 }

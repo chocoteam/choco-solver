@@ -39,11 +39,11 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public interface IPenaltyFunction {
 
-    public int penalty(int value);
+    int penalty(int value);
 
-    public double minGHat(double lambda, IntVar var);
+    double minGHat(double lambda, IntVar var);
 
-    public double maxGHat(double lambda, IntVar var);
+    double maxGHat(double lambda, IntVar var);
 
 
 }

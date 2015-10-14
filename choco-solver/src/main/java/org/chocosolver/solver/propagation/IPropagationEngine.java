@@ -100,7 +100,7 @@ public interface IPropagationEngine extends Serializable {
      * @param type     type of modification event
      * @throws ContradictionException
      */
-    default void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
+    default void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
     }
 
     default void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {

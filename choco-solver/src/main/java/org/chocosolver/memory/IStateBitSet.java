@@ -111,7 +111,7 @@ public interface IStateBitSet extends Serializable {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      * @since 1.4
      */
-    public int nextClearBit(int fromIndex);
+    int nextClearBit(int fromIndex);
 
     /**
      * Returns the index of the first bit that is set to <code>true</code>
@@ -136,7 +136,7 @@ public interface IStateBitSet extends Serializable {
      * @throws IndexOutOfBoundsException if the specified index is
      *                                   negative or too large
      */
-    public int prevClearBit(int fromIndex);
+    int prevClearBit(int fromIndex);
 
     int capacity();
 

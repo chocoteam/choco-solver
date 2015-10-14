@@ -48,7 +48,7 @@ public enum RealEventType implements IEventType {
 
     private final int mask;
 
-	private RealEventType(int mask) {
+	RealEventType(int mask) {
         this.mask = mask;
     }
 

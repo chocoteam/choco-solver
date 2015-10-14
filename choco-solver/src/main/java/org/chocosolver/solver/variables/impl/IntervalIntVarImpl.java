@@ -108,7 +108,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             if (_plugexpl) {
                 solver.getEventObserver().removeValue(this, value, cause);
             }
-            this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
+            this.contradiction(cause, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             IntEventType e;
             if (value == inf) {
@@ -135,7 +135,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (_plugexpl) {
                     solver.getEventObserver().removeValue(this, value, cause);
                 }
-                this.contradiction(cause, IntEventType.REMOVE, MSG_EMPTY);
+                this.contradiction(cause, MSG_EMPTY);
             }
             if (_plugexpl) {
                 solver.getEventObserver().removeValue(this, value, cause);
@@ -221,7 +221,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -251,7 +251,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             if (_plugexpl) {
                 solver.getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
-            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+            this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
     }
@@ -283,7 +283,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (_plugexpl) {
                     solver.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
-                this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, MSG_LOW);
             } else {
                 IntEventType e = IntEventType.INCLOW;
 
@@ -334,7 +334,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 if (_plugexpl) {
                     solver.getEventObserver().updateUpperBound(this, olb - 1, old, cause);
                 }
-                this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, MSG_UPP);
             } else {
                 IntEventType e = IntEventType.DECUPP;
 
@@ -399,13 +399,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     if (_plugexpl) {
                         solver.getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
                     }
-                    this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
+                    this.contradiction(cause, MSG_LOW);
                 } else {
                     //if (olb > ub) {
                     if (_plugexpl) {
                         solver.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
                     }
-                    this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
+                    this.contradiction(cause, MSG_UPP);
                 }
             }
         }
@@ -533,7 +533,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);

@@ -56,7 +56,7 @@ class FakeEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         throw new SolverException("The Propagator " + cause + " is not idempotent!");
     }
 

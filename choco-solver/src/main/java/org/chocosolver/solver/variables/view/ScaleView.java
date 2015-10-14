@@ -197,7 +197,7 @@ public final class ScaleView extends IntView {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (value % cste != 0) {
-            contradiction(cause, IntEventType.INSTANTIATE, "Not a multiple of " + cste);
+            contradiction(cause, "Not a multiple of " + cste);
         }
         boolean done = var.instantiateTo(value / cste, this);
         if (done) {

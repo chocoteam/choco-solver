@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class AllDifferent extends Constraint {
 
-    public static enum Type {
+    public enum Type {
         AC, BC, FC, NEQS, DEFAULT, UCB1
     }
 

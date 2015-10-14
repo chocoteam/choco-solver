@@ -48,7 +48,7 @@ public enum SetEventType implements IEventType {
 	private final int mask;
 	private final int strengthened_mask;
 
-	private SetEventType(int mask) {
+	SetEventType(int mask) {
 		this.mask = mask;
 		this.strengthened_mask = mask;
 	}

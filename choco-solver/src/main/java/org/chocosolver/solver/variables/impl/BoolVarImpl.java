@@ -166,7 +166,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+                this.contradiction(cause, MSG_UNKNOWN);
 
             }
         }
@@ -200,7 +200,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, MSG_INST);
             }
             return false;
         } else {
@@ -221,7 +221,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+                this.contradiction(cause, MSG_UNKNOWN);
                 return false;
             }
         }
@@ -280,7 +280,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             if (_plugexpl) {
                 solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
             }
-            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+            this.contradiction(cause, MSG_UNKNOWN);
         } else {
             if (lb == 1) {
                 hasChanged = instantiateTo(1, cause);
@@ -434,7 +434,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);

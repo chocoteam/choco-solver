@@ -36,6 +36,6 @@ package org.chocosolver.solver;
  * @since 26/08/11
  */
 public enum Cause implements ICause {
-    Null;
+    Null
 
 }

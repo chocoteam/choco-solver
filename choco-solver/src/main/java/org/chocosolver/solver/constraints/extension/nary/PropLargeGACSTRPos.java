@@ -164,14 +164,13 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
 
     public void pruningPhase() throws ContradictionException {
         for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
-            int vIdx = i;
-            IntVar v = vars[vIdx];
+            IntVar v = vars[i];
             DisposableValueIterator it3 = v.getValueIterator(true);
             vrms.clear();
             try {
                 while (it3.hasNext()) {
                     int val = it3.next();
-                    if (!gacValues[vIdx].get(val - offsets[vIdx])) {
+                    if (!gacValues[i].get(val - offsets[i])) {
                         vrms.add(val);
                         //                        v.removeVal(val, this, false);
                     }
@@ -200,11 +199,10 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
             if (valcheck.isValid(tuple/*,idx*/)) {
                 //extract the supports
                 for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
-                    int vIdx = i;
-                    if (!gacValues[vIdx].get(tuple[vIdx] - offsets[vIdx])) {
-                        gacValues[vIdx].set(tuple[vIdx] - offsets[vIdx]);
-                        nbGacValues[vIdx]++;
-                        if (nbGacValues[vIdx] == vars[vIdx].getDomainSize()) {
+                    if (!gacValues[i].get(tuple[i] - offsets[i])) {
+                        gacValues[i].set(tuple[i] - offsets[i]);
+                        nbGacValues[i]++;
+                        if (nbGacValues[i] == vars[i].getDomainSize()) {
                             futureVars.clear(i);
                         }
                     }

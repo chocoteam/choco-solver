@@ -53,7 +53,7 @@ public enum IntEventType implements IEventType {
 	private final int mask;
 	private final int strengthened_mask;
 
-	private IntEventType(int mask, int fullmask) {
+	IntEventType(int mask, int fullmask) {
 		this.mask = mask;
 		this.strengthened_mask = fullmask;
 	}

@@ -47,10 +47,10 @@ public interface Condition {
 	 * @param x an Integer Variable
 	 * @return true iff x satisfies this condition
 	 */
-	public boolean holdOnVar(IntVar x);
+	boolean holdOnVar(IntVar x);
 
 	/** True condition, always satisfied */
-	public final static Condition TRUE = new Condition() {
+	Condition TRUE = new Condition() {
 		@Override
 		public boolean holdOnVar(IntVar x) {
 			return true;
@@ -61,7 +61,7 @@ public interface Condition {
 		}
 	};
 	/** Satisfied iff the variable cannot take value 0*/
-	public final static Condition EXCEPT_0 = new Condition() {
+	Condition EXCEPT_0 = new Condition() {
 		@Override
 		public boolean holdOnVar(IntVar x) {
 			return !x.contains(0);

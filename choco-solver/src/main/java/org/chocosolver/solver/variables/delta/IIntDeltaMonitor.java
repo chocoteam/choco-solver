@@ -45,7 +45,7 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
 
     void forEachRemVal(IntProcedure proc) throws ContradictionException;
 
-    public static enum Default implements IIntDeltaMonitor {
+    enum Default implements IIntDeltaMonitor {
         NONE() {
             @Override
             public void freeze() {}

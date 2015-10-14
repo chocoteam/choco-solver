@@ -70,7 +70,7 @@ public interface ValueIterator {
      *
      * @return <tt>true</tt> if the getIterator has more values.
      */
-    abstract boolean hasNext();
+    boolean hasNext();
 
     /**
      * Returns <tt>true</tt> if the iteration has more ranges. (In other
@@ -78,20 +78,20 @@ public interface ValueIterator {
      *
      * @return <tt>true</tt> if the getIterator has more values.
      */
-    abstract boolean hasPrevious();
+    boolean hasPrevious();
 
     /**
      * Compute and return the next value.
      *
      * @return the next element in the iteration.
      */
-    abstract int next();
+    int next();
 
     /**
      * Compute and return the next value.
      *
      * @return the previous element in the iteration.
      */
-    abstract int previous();
+    int previous();
 
 }

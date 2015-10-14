@@ -56,5 +56,5 @@ public interface VariableEvaluator<V extends Variable> {
      * @param variable array of variable
      * @return the result of the evaluation, to minimize
      */
-    public abstract double evaluate(V variable);
+    double evaluate(V variable);
 }

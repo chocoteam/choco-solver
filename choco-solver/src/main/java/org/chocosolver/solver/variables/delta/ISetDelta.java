@@ -37,8 +37,8 @@ import org.chocosolver.solver.ICause;
  */
 public interface ISetDelta extends IDelta {
 
-	public final static int KERNEL = 0;
-	public final static int ENVELOP = 1;
+	int KERNEL = 0;
+	int ENVELOP = 1;
 
 	int getSize(int kerOrEnv);
 

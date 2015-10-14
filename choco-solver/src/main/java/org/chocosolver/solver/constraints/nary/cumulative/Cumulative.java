@@ -114,7 +114,7 @@ public class Cumulative extends Constraint {
 	/**
 	 * Filtering algorithms for Cumulative constraint
 	 */
-	public static enum Filter {
+	public enum Filter {
 		/**
 		 * filters height variables only (sweep-based algorithm)
 		 * idempotent (on the given set of variables only)

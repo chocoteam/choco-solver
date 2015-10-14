@@ -56,19 +56,19 @@ public interface IAutomaton extends Cloneable {
     boolean run(int[] str);
 
 
-    public static class StateNotInAutomatonException extends Exception {
+    class StateNotInAutomatonException extends Exception {
         public StateNotInAutomatonException(int state) {
             super("State " + state + " is not in the automaton, please add it using addState");
         }
     }
 
-    public static class NonDeterministicOperationException extends Exception {
+    class NonDeterministicOperationException extends Exception {
         public NonDeterministicOperationException() {
             super("This operation can oly be called on a determinitic automaton, please use determinize()");
         }
     }
 
-    public static class Triple {
+    class Triple {
         int a;
         int b;
         int c;

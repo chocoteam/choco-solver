@@ -40,7 +40,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.tools.StringUtils;
 
@@ -117,7 +116,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         if (!kernelContains(element)) {
-            contradiction(cause, SetEventType.ADD_TO_KER, "");
+            contradiction(cause, "");
         }
         return false;
     }
@@ -125,7 +124,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
         if (envelopeContains(element)) {
-            contradiction(cause, SetEventType.REMOVE_FROM_ENVELOPE, "");
+            contradiction(cause, "");
         }
         return false;
     }
@@ -133,11 +132,11 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
         if (value.length != this.values.length) {
-            contradiction(cause, null, "");
+            contradiction(cause, "");
         }
         for (int v : value) {
             if (!kernelContains(v)) {
-                contradiction(cause, null, "");
+                contradiction(cause, "");
             }
         }
         return false;
@@ -196,7 +195,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         solver.getEngine().fails(cause, this, message);
     }
 

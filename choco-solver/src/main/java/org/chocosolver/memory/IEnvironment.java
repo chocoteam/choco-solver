@@ -125,9 +125,9 @@ public interface IEnvironment extends Serializable {
 
     IStateDouble makeFloat(double initialValue);
 
-    public IStateLong makeLong();
+    IStateLong makeLong();
 
-    public IStateLong makeLong(long init);
+    IStateLong makeLong(long init);
 
     /**
      * Factory pattern: new IStateBitSet objects are created by the environment

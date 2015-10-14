@@ -46,13 +46,13 @@ public interface IntIterableSet {
 
     /**
      * @param aValue (exclusive)
-     * @return
+     * @return the value after aValue
      */
     int nextValue(int aValue);
 
     /**
      * @param aValue (exclusive)
-     * @return
+     * @return the value before aValue
      */
     int previousValue(int aValue);
 
@@ -62,7 +62,7 @@ public interface IntIterableSet {
 
     /**
      * Return the number of elements
-     * @return
+     * @return the number of elements
      */
     int size();
 

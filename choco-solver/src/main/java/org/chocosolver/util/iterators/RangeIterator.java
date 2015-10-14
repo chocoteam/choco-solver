@@ -82,7 +82,7 @@ public interface RangeIterator {
      *
      * @return <tt>true</tt> if the getIterator has more ranges.
      */
-    abstract boolean hasNext();
+    boolean hasNext();
 
     /**
      * Returns <tt>true</tt> if the iteration has more ranges. (In other
@@ -90,29 +90,29 @@ public interface RangeIterator {
      *
      * @return <tt>true</tt> if the getIterator has more ranges.
      */
-    abstract boolean hasPrevious();
+    boolean hasPrevious();
 
     /**
      * Compute the next range.
      */
-    abstract void next();
+    void next();
 
     /**
      * Compute the previous range.
      */
-    abstract void previous();
+    void previous();
 
     /**
      * Return the lower bound of the current range (inclusive)
      *
      * @return lower bound of the current range
      */
-    abstract int min();
+    int min();
 
     /**
      * Return the upper bound of the current range (inclusive)
      *
      * @return upper bound of the current range
      */
-    abstract int max();
+    int max();
 }

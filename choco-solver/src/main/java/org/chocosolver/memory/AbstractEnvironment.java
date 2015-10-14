@@ -75,7 +75,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
     /**
      * Factory pattern: new IStateBitSet objects are created by the environment
      *
-     * @param size initail size of the IStateBitSet
+     * @param size initial size of the IStateBitSet
      * @return IStateBitSet
      */
     @Override

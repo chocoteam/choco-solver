@@ -237,7 +237,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
         Propagator prop;

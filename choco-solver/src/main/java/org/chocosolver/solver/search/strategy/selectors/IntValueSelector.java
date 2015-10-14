@@ -49,6 +49,6 @@ public interface IntValueSelector extends Serializable {
      *
      * @return the value, based on the domain of variable
      */
-    public int selectValue(IntVar var);
+    int selectValue(IntVar var);
 
 }

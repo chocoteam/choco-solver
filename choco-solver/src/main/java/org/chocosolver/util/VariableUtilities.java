@@ -85,7 +85,7 @@ public enum VariableUtilities {
     }
 
     public static IntVar[] extractIntVar(Variable[] vars, boolean bool2) {
-        ArrayList<IntVar> to = new ArrayList<IntVar>();
+        ArrayList<IntVar> to = new ArrayList<>();
         for (int i = 0; i < vars.length; i++) {
             if ((vars[i].getTypeAndKind() & Variable.INT) != 0
                     || (bool2 && (vars[i].getTypeAndKind() & Variable.BOOL) != 0)) {

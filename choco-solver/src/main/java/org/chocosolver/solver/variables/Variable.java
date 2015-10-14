@@ -55,16 +55,16 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
     // TYPE (exclusive)
-    public static final int VAR = 1;
-    public static final int CSTE = 1 << 1;
-    public static final int VIEW = 1 << 2;
-    public static final int TYPE = (1 << 3) - 1;
+    int VAR = 1;
+    int CSTE = 1 << 1;
+    int VIEW = 1 << 2;
+    int TYPE = (1 << 3) - 1;
     // KIND (exclusive)
-    public static final int INT = 1 << 3;
-    public static final int BOOL = INT | (1 << 4);
-    public static final int SET = 1 << 5;
-    public static final int REAL = 1 << 6;
-    public static final int KIND = (1 << 10) - 1 - TYPE;
+    int INT = 1 << 3;
+    int BOOL = INT | (1 << 4);
+    int SET = 1 << 5;
+    int REAL = 1 << 6;
+    int KIND = (1 << 10) - 1 - TYPE;
 
     /**
      * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
@@ -200,11 +200,10 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
     /**
      * Throws a contradiction exception based on <cause, message>
-     *  @param cause   ICause causing the exception
-     * @param event   event causing the contradiction
-	 * @param message the detailed message  @throws ContradictionException expected behavior
-	 */
-    void contradiction(ICause cause, IEventType event, String message) throws ContradictionException;
+     * @param cause   ICause causing the exception
+     * @param message the detailed message  @throws ContradictionException expected behavior
+     */
+    void contradiction(ICause cause, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

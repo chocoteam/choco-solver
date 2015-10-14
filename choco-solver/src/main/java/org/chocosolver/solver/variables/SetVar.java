@@ -53,7 +53,7 @@ public interface SetVar extends Variable {
 	 *     // something
 	 * }</code>
 	 */
-	public final static int END = Integer.MIN_VALUE;
+	int END = Integer.MIN_VALUE;
 
 	/**
 	 * Get the first element currently in the kernel domain of <code>this</code>.
@@ -66,7 +66,7 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the first element in the kernel or <code>END</code> if it is empty.
 	 */
-	public int getKernelFirst();
+	int getKernelFirst();
 
 	/**
 	 * Get the next element in the kernel domain of <code>this</code>.
@@ -78,21 +78,21 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the next element in the kernel, if any, or <code>END</code> otherwise.
 	 */
-	public int getKernelNext();
+	int getKernelNext();
 
 	/**
 	 * Get the number of elements in the kernel domain of <code>this</code>.
 	 *
 	 * @return the number of elements currently present in the kernel.
 	 */
-	public int getKernelSize();
+	int getKernelSize();
 
 	/**
 	 * Test whether element is present or not in the kernel
 	 * @param element value to test
 	 * @return true iff element is present in the kernel
 	 */
-	public boolean kernelContains(int element);
+	boolean kernelContains(int element);
 
 	/**
 	 * Get the first element currently in the envelope domain of <code>this</code>.
@@ -106,7 +106,7 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the first element in the envelope or <code>END</code> if it is empty.
 	 */
-	public int getEnvelopeFirst();
+	int getEnvelopeFirst();
 
 	/**
 	 * Get the next element in the envelope domain of <code>this</code>.
@@ -119,21 +119,21 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the next element in the envelope, if any, or <code>END</code> otherwise.
 	 */
-	public int getEnvelopeNext();
+	int getEnvelopeNext();
 
 	/**
 	 * Get the number of elements in the envelope domain of <code>this</code>.
 	 *
 	 * @return the number of elements currently present in the envelope.
 	 */
-	public int getEnvelopeSize();
+	int getEnvelopeSize();
 
 	/**
 	 * Test whether element is present or not in the envelope
 	 * @param element value to test
 	 * @return true iff element is present in the envelope
 	 */
-	public boolean envelopeContains(int element);
+	boolean envelopeContains(int element);
 
     /**
      * Adds element to the kernel, i.e. enforces that the set variable
@@ -179,5 +179,5 @@ public interface SetVar extends Variable {
      * @param propagator observer
      * @return a new SetDeltaMonitor
      */
-    public ISetDeltaMonitor monitorDelta(ICause propagator);
+	ISetDeltaMonitor monitorDelta(ICause propagator);
 }

@@ -568,7 +568,7 @@ public class SatSolver {
      * @author Charles Prud'homme, Laurent Perron
      * @since 12/07/13
      */
-    static enum Boolean {
+    enum Boolean {
 
         kTrue((byte) 0),
         kFalse((byte) 1),
