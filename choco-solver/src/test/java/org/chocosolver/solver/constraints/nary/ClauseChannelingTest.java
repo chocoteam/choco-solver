@@ -102,7 +102,6 @@ public class ClauseChannelingTest {
                     sr.set(ISF.random_value(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
                     sr.findAllSolutions();
                 }
-                System.out.printf("\n");
                 {
                     IntVar iv = VF.enumerated("iv", 1, i, sc);
                     BoolVar[] eqs = VF.boolArray("eq", i, sc);
@@ -142,7 +141,6 @@ public class ClauseChannelingTest {
                     sr.set(ISF.random_bound(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
                     sr.findAllSolutions();
                 }
-                System.out.printf("\n");
                 {
                     IntVar iv = VF.bounded("iv", 1, i, sc);
                     BoolVar[] eqs = VF.boolArray("eq", i, sc);
@@ -155,9 +153,6 @@ public class ClauseChannelingTest {
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
                 Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);
-                System.out.printf("%s\n", sr.getMeasures().toOneShortLineString());
-                System.out.printf("%s\n", sc.getMeasures().toOneShortLineString());
-                System.out.printf("\n");
                 Assert.assertEquals(sc.getMeasures().getNodeCount(), sr.getMeasures().getNodeCount());
 
             }

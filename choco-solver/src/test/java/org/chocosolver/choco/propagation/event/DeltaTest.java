@@ -165,18 +165,16 @@ public class DeltaTest {
             if (idxVarInProp == 0) {
                 iD.freeze();
                 iD.forEachRemVal((IntProcedure) x -> {
-                    System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable i");
                     if (i.contains(x)) {
-                        throw new Error("Delta monitor lied to me.");
+                        Assert.fail();
                     }
                 });
                 iD.unfreeze();
             } else {
                 jD.freeze();
                 jD.forEachRemVal((IntProcedure) x -> {
-                    System.out.println("Delta monitor for variable says that the value " + x + " is removed from variable j");
                     if (j.contains(x)) {
-                        throw new Error("Delta monitor lied to me.");
+                        Assert.fail();
                     }
                 });
                 jD.unfreeze();

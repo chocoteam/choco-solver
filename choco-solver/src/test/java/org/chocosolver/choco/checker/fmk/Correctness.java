@@ -142,7 +142,7 @@ public class Correctness {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            System.out.println("Pas de solution pour ce probleme => rien a tester !");
+//            System.out.println("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");

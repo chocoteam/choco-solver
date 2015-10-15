@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -235,7 +235,12 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      * @param lb lower bound
      */
     public void updateBestLB(N lb) {
-        assert isOptimization();
+        assert isOptimization() : "No reason to update LB when dealing with satisfaction problem";
+        // this may happen with multi-thread resolution
+        // when one thread find a solver before one other is being launched
+        if (bestProvedLB == null) {
+            bestProvedLB = lb;
+        }
         if (lb.doubleValue() > bestProvedLB.doubleValue()) {
             bestProvedLB = lb;
         }
@@ -247,7 +252,12 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      * @param ub upper bound
      */
     public void updateBestUB(N ub) {
-        assert isOptimization();
+        assert isOptimization() : "No reason to update UB when dealing with satisfaction problem";
+        // this may happen with multi-thread resolution
+        // when one thread find a solver before one other is being launched
+        if (bestProvedUB == null) {
+            bestProvedUB = ub;
+        }
         if (ub.doubleValue() < bestProvedUB.doubleValue()) {
             bestProvedUB = ub;
         }
@@ -257,9 +267,17 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     private N getObjLB() {
         assert isOptimization();
         if (intOrReal) {
-            return (N) new Integer(((IntVar) objective).getLB());
+            Integer lb = ((IntVar) objective).getLB();
+            if (bestProvedLB != null && bestProvedLB.intValue() > lb) {
+                lb = bestProvedLB.intValue();
+            }
+            return (N) lb;
         } else {
-            return (N) new Double(((RealVar) objective).getLB());
+            Double lb = ((RealVar) objective).getLB();
+            if (bestProvedLB != null && bestProvedLB.doubleValue() > lb) {
+                lb = bestProvedLB.doubleValue();
+            }
+            return (N) lb;
         }
     }
 
@@ -267,9 +285,17 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     private N getObjUB() {
         assert isOptimization();
         if (intOrReal) {
-            return (N) new Integer(((IntVar) objective).getUB());
+            Integer ub = ((IntVar) objective).getUB();
+            if (bestProvedUB != null && bestProvedUB.intValue() < ub) {
+                ub = bestProvedUB.intValue();
+            }
+            return (N) ub;
         } else {
-            return (N) new Double(((RealVar) objective).getUB());
+            Double ub = ((RealVar) objective).getUB();
+            if (bestProvedUB != null && bestProvedUB.doubleValue() < ub) {
+                ub = bestProvedUB.doubleValue();
+            }
+            return (N) ub;
         }
     }
 
