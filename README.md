@@ -73,6 +73,8 @@ Requirements:
 Choco3 is available on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver),
 or directly from the [official website](http://choco-solver.org/?q=Download).
 
+[Snapshot releases](https://oss.sonatype.org/content/repositories/snapshots/org/choco-solver/choco-solver/) are also available for curious.
+
 In the following, we distinguish two usages of Choco:
 
 - as a standalone application: the jar file includes all required dependencies,

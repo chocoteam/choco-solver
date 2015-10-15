@@ -89,7 +89,7 @@ public class Chatterbox {
      *
      * @param solver the solver
      */
-    private static void printVersion(Solver solver) {
+    public static void printVersion(Solver solver) {
         out.println(solver.getSettings().getWelcomeMessage());
     }
 
@@ -98,7 +98,7 @@ public class Chatterbox {
      *
      * @param solver a solver
      */
-    private static void printFeatures(Solver solver) {
+    public static void printFeatures(Solver solver) {
         Attribute.printSuccint(solver);
     }
 
@@ -172,7 +172,7 @@ public class Chatterbox {
      * @param solver  the solver to print solutions from
      * @param message the message to print per solution
      */
-    private static void printSolutions(Solver solver, IMessage message) {
+    public static void printSolutions(Solver solver, IMessage message) {
         ISolutionRecorder solrec = solver.getSolutionRecorder();
         for (Solution sol : solrec.getSolutions()) {
             try {
@@ -281,7 +281,7 @@ public class Chatterbox {
      * @param solver  the solver to evaluate
      * @param message the message to print.
      */
-    private static void showDecisions(final Solver solver, final IMessage message) {
+    public static void showDecisions(final Solver solver, final IMessage message) {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownLeftBranch() {

@@ -112,10 +112,10 @@ public class PropElement extends Propagator<IntVar> {
             int i = index.getLB();
             int val = values[i - offset];
             while (i <= ub && val == res) {
-                i = index.nextValue(i);
                 val = values[i - offset];
+                i = index.nextValue(i);
             }
-            return ESat.eval(i == ub);
+            return ESat.eval(i == Integer.MAX_VALUE);
         }
         return ESat.UNDEFINED;
     }
