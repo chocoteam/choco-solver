@@ -152,10 +152,6 @@
                         <template>JAVADOC_STYLE</template>
                     </mapping>
                     <header>LICENSE</header>
-                    <properties>
-                        <year>2015</year>
-                        <owner>Ecole des Mines de Nantes</owner>
-                    </properties>
                     <includes>
                         <include>**/*.java</include>
                         <include>**/*.template</include>
