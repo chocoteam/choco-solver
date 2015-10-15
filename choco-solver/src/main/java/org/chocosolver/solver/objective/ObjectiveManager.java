@@ -235,10 +235,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      * @param lb lower bound
      */
     public void updateBestLB(N lb) {
-        assert isOptimization() : "No reason to update LB when dealing with satisfaction problem";
-        // this may happen with multi-thread resolution
-        // when one thread find a solver before one other is being launched
         if (bestProvedLB == null) {
+            // this may happen with multi-thread resolution
+            // when one thread find a solver before one other is being launched
             bestProvedLB = lb;
         }
         if (lb.doubleValue() > bestProvedLB.doubleValue()) {
@@ -252,10 +251,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      * @param ub upper bound
      */
     public void updateBestUB(N ub) {
-        assert isOptimization() : "No reason to update UB when dealing with satisfaction problem";
-        // this may happen with multi-thread resolution
-        // when one thread find a solver before one other is being launched
         if (bestProvedUB == null) {
+            // this may happen with multi-thread resolution
+            // when one thread find a solver before one other is being launched
             bestProvedUB = ub;
         }
         if (ub.doubleValue() < bestProvedUB.doubleValue()) {
