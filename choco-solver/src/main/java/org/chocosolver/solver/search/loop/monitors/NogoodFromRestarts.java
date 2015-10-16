@@ -95,7 +95,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
         while (!decisions.isEmpty()) {
             decision = decisions.pollLast();
             assert decision instanceof IntDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
-            assert decision.toString().contains(DecisionOperator.int_eq.toString()) : "NogoodStoreFromRestarts is only valid for assignment decisions";
+            assert ((IntDecision) decision).getDecOp() == DecisionOperator.int_eq : "NogoodStoreFromRestarts is only valid for assignment decisions";
             if (decision.hasNext()) {
                 lits[i++] = SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue()));
             } else {

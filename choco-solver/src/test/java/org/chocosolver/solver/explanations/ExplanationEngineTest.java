@@ -43,6 +43,7 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
+import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -870,6 +871,23 @@ public class ExplanationEngineTest {
         // If the problem has no solution, the end-user explanation can be retrieved
         System.out.println(cbj.getLastExplanation());
         Assert.assertEquals(cbj.getLastExplanation().nbCauses(), 3);
+    }
+
+
+    @Test(groups="1s")
+    public void testOnce1(){
+        Solver solver = new Solver();
+        int n = 4;
+        IntVar[] X = VF.enumeratedArray("X", 4, 1, 2, solver);
+        BoolVar[] B = VF.boolArray("B", 4, solver);
+        for(int i = 0 ; i < n; i++){
+            ICF.arithm(X[i], ">", i).reifyWith(B[i]);
+        }
+        ExplanationFactory.CBJ.plugin(solver, false, false);
+        solver.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
+        Chatterbox.showDecisions(solver);
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
     }
 
 }

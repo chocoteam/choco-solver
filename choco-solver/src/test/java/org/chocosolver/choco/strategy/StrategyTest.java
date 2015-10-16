@@ -47,6 +47,7 @@ import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
 import org.chocosolver.solver.search.strategy.strategy.Once;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.VF;
@@ -370,6 +371,7 @@ public class StrategyTest {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.split(), X));
+        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
@@ -379,6 +381,28 @@ public class StrategyTest {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(false), ISF.reverse_split(), X));
+        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+    }
+
+
+    @Test(groups = "1s")
+    public void testFH33232() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        solver.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), true, X));
+        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+    }
+
+    @Test(groups = "1s")
+    public void testFH3324() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        solver.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), false, X));
+        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }

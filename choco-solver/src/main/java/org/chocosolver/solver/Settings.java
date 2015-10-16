@@ -178,7 +178,7 @@ public interface Settings extends Serializable {
      * @return enable output with colors
      */
     default boolean outputWithANSIColors(){
-        return true;
+        return false;
     }
 
 }

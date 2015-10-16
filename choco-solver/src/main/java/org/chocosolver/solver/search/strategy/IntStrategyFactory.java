@@ -248,6 +248,25 @@ public class IntStrategyFactory {
         return custom(VAR_SELECTOR, VAL_SELECTOR, assign(), VARS);
     }
 
+    /**
+     * Create a search strategy which selects the variables to branch on with <code>VAR_SELECTOR</code>,
+     * then select the value closest to the middle value of its domain,
+     * and split its domain into two intervals (binary decisions will be used).
+     * If <code>LOWERFIRST</code> is set to true, the domain is restricted to the left interval first.
+     * If <code>LOWERFIRST</code> is set to false, the domain is restricted to the right interval first.
+     * @param VAR_SELECTOR a variable selector
+     * @param LOWERFIRST set to true to select first the left interval, false otherwise
+     * @param VARS variables to branch on
+     * @return
+     */
+    public static IntStrategy dichotomic(VariableSelector<IntVar> VAR_SELECTOR, boolean LOWERFIRST, IntVar... VARS){
+        if(LOWERFIRST){
+            return custom(VAR_SELECTOR, ISF.mid_value_selector(LOWERFIRST), DecisionOperator.int_split, VARS);
+        }else{
+            return custom(VAR_SELECTOR, ISF.mid_value_selector(LOWERFIRST), DecisionOperator.int_reverse_split, VARS);
+        }
+    }
+
     // ************************************************************************************
     // SOME EXAMPLES OF STRATEGIES YOU CAN BUILD
     // ************************************************************************************
@@ -273,16 +292,13 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Splits the domain of the first non-instantiated variable.
-     *
-     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
-     *              set to false, return the closest value greater or equal to the middle value.
-     *              Can lead to infinite loop when not correctly selected.
+     * Splits the domain of the first non-instantiated variable in the middle and
+     * branch first on the left interval
      * @param VARS list of variables
      * @return int strategy based on domain splits
      */
-    public static IntStrategy lexico_Split(boolean floor, IntVar... VARS) {
-        return custom(lexico_var_selector(), mid_value_selector(floor), split(), VARS);
+    public static IntStrategy lexico_Split(IntVar... VARS) {
+        return dichotomic(ISF.lexico_var_selector(), true, VARS);
     }
 
     /**
@@ -321,14 +337,11 @@ public class IntStrategyFactory {
     /**
      * Splits the domain of the variable of largest domain
      *
-     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
-     *              set to false, return the closest value greater or equal to the middle value.
-     *              Can lead to infinite loop when not correctly selected.
      * @param VARS list of variables
      * @return an int strategy based on domain splits
      */
-    public static IntStrategy maxDom_Split(boolean floor, IntVar... VARS) {
-        return custom(maxDomainSize_var_selector(), mid_value_selector(floor), split(), VARS);
+    public static IntStrategy maxDom_Split(IntVar... VARS) {
+        return dichotomic(maxDomainSize_var_selector(), true, VARS);
     }
 
     /**

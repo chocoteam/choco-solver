@@ -417,6 +417,7 @@ Choco |version| : changes
     - :ref:`51_icstr_nvpc`
     - :ref:`51_icstr_ksor`
     - :ref:`55_smf`
+    - :ref:`51_sstrat_dic`
 
 -  Major modification:
     - :ref:`44_multithreading_label`

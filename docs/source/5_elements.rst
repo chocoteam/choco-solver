@@ -3299,9 +3299,9 @@ custom
 ======
 
 To build a specific strategy based on ``IntVar`` or ``SetVar``.
-A strategy is based on a variable selector, a value selector and an optional decision operator.
+A strategy is based on a variable selector, a value selector, an optional decision operator and a set of variables.
 
-**Scope**: ``IntVar``
+**Scope**: ``IntVar``, ``SetVar``
 
 **Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
@@ -3318,6 +3318,29 @@ A strategy is based on a variable selector, a value selector and an optional dec
 
     SetStrategy custom(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst,
                        SetVar... sets)
+
+
+.. _51_sstrat_dic:
+
+dichtotomic
+===========
+
+To build a specific strategy based on ``IntVar``.
+A strategy is based on a variable selector, a boolean and a set of variables.
+It builds a dichotomic search strategy which selects a variable thanks to VAR_SELECTOR,
+selects the value closest to the middle of the domain and either removes the second half interval (if LOWERFIRST is true)
+or the first half interval (otherwise).
+
+**Scope**: ``IntVar``
+
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy dichotomic(VariableSelector<IntVar> VAR_SELECTOR,
+                                                        boolean LOWERFIRST,
+                                                        IntVar... VARS)
+
 
 .. _51_sstrat_lexfi:
 
@@ -3400,9 +3423,6 @@ lexico_Split
 ============
 
 A built-in strategy which chooses the first non-instantiated variable, regarding the lexicographic order, and removes the second half of its domain.
-When ``floor`` is set to true, it selects the closest value less than or equal to the middle value.
-Set to false, it selects the closest value greater or equal to the middle value.
-
 
 **Scope**: ``IntVar``
 
@@ -3410,7 +3430,7 @@ Set to false, it selects the closest value greater or equal to the middle value.
 
 **API**: ::
 
-    IntStrategy lexico_Split(boolean floor, IntVar... VARS)
+    IntStrategy lexico_Split(IntVar... VARS)
 
 .. _51_sstrat_lexub:
 
@@ -3465,8 +3485,6 @@ maxDom_Split
 ============
 
 A built-in strategy which chooses the first non-instantiated variable with largest domain size, and removes the second half of its domain.
-When ``floor`` is set to true, it selects the closest value less than or equal to the middle value.
-Set to false, it selects the closest value greater or equal to the middle value.
 
 **Scope**: ``IntVar``
 
@@ -3474,7 +3492,7 @@ Set to false, it selects the closest value greater or equal to the middle value.
 
 **API**: ::
 
-    IntStrategy maxDom_Split(boolean floor, IntVar... VARS)
+    IntStrategy maxDom_Split(IntVar... VARS)
 
 .. _51_sstrat_minub:
 
