@@ -32,6 +32,7 @@ package org.chocosolver.solver.propagation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -47,6 +48,62 @@ import java.io.Serializable;
  */
 public interface IPropagationEngine extends Serializable {
 
+    enum Trace {;
+
+        public static void printFirstPropagation(Propagator p, boolean COLOR) {
+            Chatterbox.out.printf("[A] %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    p,
+                    COLOR?Chatterbox.ANSI_RESET:""
+            );
+        }
+
+        public static void printPropagation(Variable v, Propagator p, boolean COLOR) {
+            if (v == null) {
+                Chatterbox.out.printf("[P] %s%s%s\n",
+                        COLOR?Chatterbox.ANSI_PURPLE:"",
+                        p,
+                        COLOR?Chatterbox.ANSI_RESET:""
+                );
+            } else {
+                Chatterbox.out.printf("[P] %s%s%s on %s%s%s\n",
+                        COLOR?Chatterbox.ANSI_BLUE:"",
+                        v,
+                        COLOR?Chatterbox.ANSI_RESET:"",
+                        Chatterbox.ANSI_PURPLE,
+                        p,
+                        COLOR?Chatterbox.ANSI_RESET:""
+                );
+            }
+        }
+
+        public static void printModification(Variable v, IEventType e, ICause c, boolean COLOR) {
+            Chatterbox.out.printf("\t[M] %s%s%s %s b/c %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_BLUE:"",
+                    v,
+                    COLOR?Chatterbox.ANSI_RESET:"",
+                    e,
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    c,
+                    COLOR?Chatterbox.ANSI_RESET:""
+            );
+        }
+
+
+        public static void printFineSchedule(Propagator p, boolean COLOR) {
+            Chatterbox.out.printf("\t\t[FS] %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    p,
+                    COLOR?Chatterbox.ANSI_RESET:"");
+        }
+
+        public static void printCoarseSchedule(Propagator p, boolean COLOR) {
+            Chatterbox.out.printf("\t\t[CS] %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    p,
+                    COLOR?Chatterbox.ANSI_RESET:"");
+        }
+    }
 
     /**
      * Build up internal structure, if not yet done, in order to allow propagation.

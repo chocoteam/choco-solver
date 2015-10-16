@@ -81,7 +81,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected Propagator[] propagators;
-
+    private final boolean DEBUG,COLOR;
+    
 
     private final short[] match_f;
     private final short[] match_c;
@@ -118,6 +119,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         match_f = solver.getSettings().getFineEventPriority();
         match_c = solver.getSettings().getCoarseEventPriority();
 
+        this.DEBUG = solver.getSettings().debugPropagation();
+        this.COLOR = solver.getSettings().outputWithANSIColors();
     }
 
     @Override
@@ -250,6 +253,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             while (!evtset.isEmpty()) {
                 int v = evtset.pollFirst();
                 assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                if (DEBUG) {
+                    IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp, COLOR);
+                }
                 // clear event
                 int mask = eventmasks[aid][v];
                 eventmasks[aid][v] = 0;
@@ -258,6 +264,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             }
         } else if (lastProp.isActive()) { // need to be checked due to views
             //assert lastProp.isActive() : "propagator is not active:" + lastProp;
+            if (DEBUG) {
+                IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+            }
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
         // This part is for debugging only!!
@@ -275,6 +284,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         PropagatorEventType evt = event_c[aid];
         event_c[aid] = PropagatorEventType.VOID;
         assert lastProp.isActive() : "propagator is not active:" + lastProp;
+        if (DEBUG) {
+            IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+        }
         lastProp.propagate(evt.getStrengthenedMask());
     }
 
@@ -321,6 +333,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
+        if (DEBUG) {
+            IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
+        }
         EvtScheduler si = variable._schedIter();
         si.init(type);
         while (si.hasNext()) {
@@ -336,6 +351,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                         eventmasks[aid][pindice] |= type.getStrengthenedMask();
                         if (needSched) {
                             //assert !event_f[aid].get(pindice);
+                            if (DEBUG) {
+                                IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
+                            }
                             event_f[aid].addLast(pindice);
                         }
                     }
@@ -345,6 +363,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                         pro_queue_f[q].addLast(prop);
                         schedule_f[aid] = true;
                         notEmpty = notEmpty | (1 << q);
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printCoarseSchedule(prop, COLOR);
+                        }
                     }
                 }
             }

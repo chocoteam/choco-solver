@@ -163,6 +163,17 @@ public interface Settings extends Serializable {
         return false;
     }
 
+    /**
+     * When this setting returns true, a complete trace of the events is output.
+     * This can be quite big, though, and it slows down the overall process.
+     *
+     * Note that this parameter is read once at propagation engine creation and set in a final variable.
+     * Note that enabling colors may be helpful (see {@link #outputWithANSIColors()})
+     * @return true if all events are output in the console
+     */
+    default boolean debugPropagation(){
+        return false;
+    }
 
     /**
      * Return true if the incrementality is enabled on boolean sum, based on the number of variables involved.
@@ -180,5 +191,4 @@ public interface Settings extends Serializable {
     default boolean outputWithANSIColors(){
         return false;
     }
-
 }

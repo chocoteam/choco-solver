@@ -68,6 +68,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     protected final IEnvironment environment; // environment of backtrackable objects
     private final Solver solver;
     protected Propagator[] propagators;
+    private final boolean DEBUG,COLOR;
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
@@ -90,6 +91,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
         this.solver = solver;
         pro_queue = new CircularQueue[8];
+        this.DEBUG = solver.getSettings().debugPropagation();
+        this.COLOR = solver.getSettings().outputWithANSIColors();
 
     }
 
@@ -170,6 +173,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     while (evtset.size() > 0) {
                         int v = evtset.pollFirst();
                         assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp, COLOR);
+                        }
                         // clear event
                         mask = eventmasks[aid][v];
                         eventmasks[aid][v] = 0;
@@ -179,6 +185,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     }
                 } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                    if (DEBUG) {
+                        IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+                    }
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 // This part is for debugging only!!
@@ -238,6 +247,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
+        if (DEBUG) {
+            IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
+        }
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
         Propagator prop;
@@ -256,6 +268,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         boolean needSched = (eventmasks[aid][pindice] == 0);
                         eventmasks[aid][pindice] |= type.getStrengthenedMask();
                         if (needSched) {
+                            if (DEBUG) {
+                                IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
+                            }
                             prop.incNbPendingEvt();
                             eventsets[aid].addLast(pindice);
                         }
@@ -266,6 +281,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         scheduled[aid] = (short) (prio + 1);
 //                    notEmpty.set(prio);
                         notEmpty = notEmpty | (1 << prio);
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printCoarseSchedule(prop, COLOR);
+                        }
                     }
                 }
             }
@@ -275,6 +293,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         if (propagator.getNbPendingEvt() == 0) {
+            if (DEBUG) {
+                IPropagationEngine.Trace.printPropagation(null, propagator, COLOR);
+            }
             propagator.propagate(type.getStrengthenedMask());
         }
     }

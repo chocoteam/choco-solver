@@ -56,6 +56,7 @@ public class PropagationTrigger implements Serializable {
     final IPropagationEngine engine; // wrapped engine
     final IEnvironment environment;
     final Solver solver;
+    private final boolean DEBUG, COLOR;
 
     // stores the static propagators
     ArrayList<Propagator> sta_propagators = new ArrayList<>();
@@ -71,6 +72,8 @@ public class PropagationTrigger implements Serializable {
         this.environment = solver.getEnvironment();
         this.solver = solver;
         size = 0;
+        this.DEBUG = solver.getSettings().debugPropagation();
+        this.COLOR = solver.getSettings().outputWithANSIColors();
     }
 
     public void addAll(Propagator... propagators) {
@@ -140,6 +143,9 @@ public class PropagationTrigger implements Serializable {
     public void propagate() throws ContradictionException {
         if (sta_propagators.size() > 0) {
             for (int p = 0; p < sta_propagators.size(); p++) {
+                if (DEBUG) {
+                    IPropagationEngine.Trace.printFirstPropagation(sta_propagators.get(p), COLOR);
+                }
                 execute(sta_propagators.get(p), engine);
             }
             size -= sta_propagators.size();

@@ -682,6 +682,9 @@ public class Solver implements Serializable {
                     "A call to Solver.post(Constraint) is more appropriate.");
         }
         for (Propagator propagator : c.getPropagators()) {
+            if(settings.debugPropagation()){
+                IPropagationEngine.Trace.printFirstPropagation(propagator, settings.outputWithANSIColors());
+            }
             PropagationTrigger.execute(propagator, engine);
         }
     }
