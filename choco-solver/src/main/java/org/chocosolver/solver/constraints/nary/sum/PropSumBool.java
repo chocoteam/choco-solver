@@ -354,7 +354,9 @@ public class PropSumBool extends Propagator<IntVar> {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // 1. find the pos of var in vars
         boolean ispos;
-        if (pos < ((l + 1) / 2)) {
+        if(var == vars[l]){ // deal with result variable
+            ispos = false;
+        }else if (pos < ((l + 1) / 2)) {
             int i;
             i = 0;
             while (i < pos && vars[i] != var) {

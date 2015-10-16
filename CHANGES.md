@@ -50,6 +50,7 @@ and IntVar#updateBounds(int, int, ICause) (#270)
 
 #### Explanations: 
 
+- deal with unary decision (when once is set to true)
 - add PoolManager for Rules and Propagators
 - explain PropCount_AC
 - fix lack of explanations in SatSolver

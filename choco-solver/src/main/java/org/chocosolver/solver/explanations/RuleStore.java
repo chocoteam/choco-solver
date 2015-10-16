@@ -223,7 +223,7 @@ public class RuleStore {
                     if (preemptedStop |= enablePartialExplanation) {
                         explanation.setEvtstrIdx(idx);
                     }
-                } else {
+                } else if (decision.getArity() > 1) { //  to deal with unary decision (once = true)
                     // Otherwise, get the explanation of the refutation
                     Explanation drr = getDecisionRefutation(decision);
                     assert drr != null : "No explanation for decision refutation :" + decision.toString();
