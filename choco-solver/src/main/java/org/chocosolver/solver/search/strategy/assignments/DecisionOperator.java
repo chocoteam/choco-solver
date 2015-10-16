@@ -43,15 +43,15 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public abstract class DecisionOperator<V extends Variable> implements Serializable {
+public interface DecisionOperator<V extends Variable> extends Serializable {
 
-    public abstract void apply(V var, int value, ICause cause) throws ContradictionException;
+    void apply(V var, int value, ICause cause) throws ContradictionException;
 
-    public abstract void unapply(V var, int value, ICause cause) throws ContradictionException;
+    void unapply(V var, int value, ICause cause) throws ContradictionException;
 
-    public abstract DecisionOperator opposite();
+    DecisionOperator opposite();
 
-    public abstract String toString();
+    String toString();
 
     /**
      * Evaluate the possible effect of the decision and return a boolean indicating whether or not
@@ -61,10 +61,10 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
      * @param value a value
      * @return true if this has an effect on var
      */
-    public abstract boolean isValid(V var, int value);
+    boolean isValid(V var, int value);
 
     // INTEGERS
-    public static DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -92,7 +92,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         }
     };
 
-    public static DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -120,7 +120,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         }
     };
 
-    public static DecisionOperator<IntVar> int_split = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_split = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -149,7 +149,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
     };
 
-    public static DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -179,7 +179,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
 
     // SETS
-    public static DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
+    DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
@@ -207,7 +207,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         }
     };
 
-    public static DecisionOperator<SetVar> set_remove = new DecisionOperator<SetVar>() {
+    DecisionOperator<SetVar> set_remove = new DecisionOperator<SetVar>() {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {

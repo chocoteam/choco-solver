@@ -18,6 +18,7 @@ NEXT MILESTONE
 - revamp IMeasures to avoid declaring its concrete class as monitor
 - remove deprecated classes: GenerateAndTest, LastConflict_old
 - add new API to Solver to declare eagerly the objective variable(s) and the precision
+- enable printing decisions and solutions in ANSI colors (see Settings.outputWithANSIColors())
 
 #### Search:
 
@@ -25,6 +26,8 @@ NEXT MILESTONE
 - AbstractStrategy#init() cannot throw ContradictionException anymore but returns false instead
 - revamp decisions to enable MetaDecision 
 - move FastDecision to ../IntDecision
+- revamp IntDecision.toString()
+- set DecisionOperator as an interface (instead of an abstract class)
 
 #### Variables:
 

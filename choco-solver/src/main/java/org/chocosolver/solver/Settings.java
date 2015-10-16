@@ -173,5 +173,12 @@ public interface Settings extends Serializable {
         return nbvars > 10;
     }
 
+    /**
+     * If your terminal support ANSI colors (Windows terminals don't), you can set this to true.
+     * @return enable output with colors
+     */
+    default boolean outputWithANSIColors(){
+        return true;
+    }
 
 }

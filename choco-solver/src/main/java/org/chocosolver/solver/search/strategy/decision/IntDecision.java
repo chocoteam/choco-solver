@@ -102,7 +102,39 @@ public class IntDecision extends Decision<IntVar> {
 
     @Override
     public String toString() {
-        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
+        if (assignment.equals(DecisionOperator.int_eq)) {
+            return String.format("%s%s{%d} (%d/%d)",
+                    var.getName(),
+                    branch < 1 ? "=":'\\',
+                    value,
+                    branch + 1, max_branching);
+        } else if (assignment.equals(DecisionOperator.int_neq)) {
+            return String.format("%s%s{%d} (%d/%d)",
+                    var.getName(),
+                    branch < 1 ? '\\':"=",
+                    value,
+                    branch + 1, max_branching);
+        } else if (assignment.equals(DecisionOperator.int_split)) {
+            return String.format("%s in %s%d,%d] (%d/%d)",
+                    var.getName(),
+                    branch < 1 ? '[' : ']',
+                    branch < 1 ? var.getLB() : value,
+                    branch < 1 ? value : var.getUB(),
+                    branch + 1, max_branching);
+        } else if (assignment.equals(DecisionOperator.int_reverse_split)) {
+            return String.format("%s in [%d,%d%s (%d/%d)",
+                    var.getName(),
+                    branch < 1 ? value : var.getLB(),
+                    branch < 1 ? var.getUB() : value,
+                    branch < 1 ? ']' : '[',
+                    branch + 1, max_branching);
+        } else {
+            return String.format("%s%s{%s} (%d/%d)",
+                    var.getName(),
+                    branch < 1 ? assignment.toString(): assignment.opposite().toString(),
+                    value,
+                    branch + 1, max_branching);
+        }
     }
 
     @Override

@@ -113,6 +113,10 @@ public abstract class Decision<E> implements ICause {
         max_branching = once ? 1 : 2;
     }
 
+    public final int getArity(){
+        return max_branching;
+    }
+
     /**
      * Apply the current decision
      *

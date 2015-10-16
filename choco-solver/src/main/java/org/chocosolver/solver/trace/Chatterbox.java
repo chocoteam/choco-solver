@@ -52,6 +52,14 @@ import static org.chocosolver.util.tools.StringUtils.pad;
  * @since 12/11/14
  */
 public class Chatterbox {
+
+    // http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_GRAY = "\u001B[37m";
+
     private Chatterbox() {
     }
 
@@ -285,10 +293,11 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownLeftBranch() {
-                out.println(String.format("%s[L]%s //%s",
-                        pad("", solver.getEnvironment().getWorldIndex(), "."),
-                        solver.getSearchLoop().getLastDecision().toString(),
-                        message.print()));
+                out.printf("%s[L] %s%s ", pad("", solver.getEnvironment().getWorldIndex(), "."),
+                        solver.getSettings().outputWithANSIColors()?ANSI_BLUE:"",
+                        solver.getSearchLoop().getLastDecision().toString());
+                out.printf("%s // %s %s\n", solver.getSettings().outputWithANSIColors()?ANSI_GRAY:"",
+                        message.print(), solver.getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }
 
             @Override
@@ -297,10 +306,12 @@ public class Chatterbox {
 
             @Override
             public void beforeDownRightBranch() {
-                out.println(String.format("%s[R]%s //%s",
+                out.printf("%s[R] %s%s ",
                         pad("", solver.getEnvironment().getWorldIndex(), "."),
-                        solver.getSearchLoop().getLastDecision().toString(),
-                        message.print()));
+                        solver.getSettings().outputWithANSIColors()?ANSI_PURPLE:"",
+                        solver.getSearchLoop().getLastDecision().toString());
+                out.printf("%s // %s %s\n", solver.getSettings().outputWithANSIColors()?ANSI_GRAY:"", message.print(),
+                        solver.getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }
 
             @Override
@@ -358,10 +369,12 @@ public class Chatterbox {
 
         @Override
         public String print() {
-            return String.format("- Solution #%s found. %s \n\t%s.",
+            return String.format("%s- Solution #%s found. %s \n\t%s.%s",
+                    solver.getSettings().outputWithANSIColors()?ANSI_GREEN:"",
                     solver.getMeasures().getSolutionCount(),
                     solver.getMeasures().toOneShortLineString(),
-                    print(solver.getStrategy().getVariables())
+                    print(solver.getStrategy().getVariables()),
+                    solver.getSettings().outputWithANSIColors()?ANSI_RESET:""
             );
         }
 
