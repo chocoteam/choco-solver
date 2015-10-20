@@ -29,12 +29,12 @@
  */
 package org.chocosolver.solver.propagation;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.objects.IntList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class PropagationTrigger implements Serializable {
     // stores the dynamic propagators, ie cut
     ArrayList<Propagator> perm_propagators = new ArrayList<>();
     // stores the world of the last propagation of the cuts
-    TIntArrayList perm_world = new TIntArrayList();
+    IntList perm_world = new IntList();
 
     int size;
 
@@ -156,7 +156,7 @@ public class PropagationTrigger implements Serializable {
             for (int p = 0; p < perm_propagators.size(); p++) {
                 if (perm_world.getQuick(p) >= cw) {
                     execute(perm_propagators.get(p), engine);
-                    perm_world.replace(p, cw);
+                    perm_world.set(p, cw);
                     // TODO: add a test on the root world to clear the list
                 }
             }

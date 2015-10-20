@@ -38,13 +38,12 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.propagation.hardcoded.util.IId2AbId;
-import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
+import org.chocosolver.util.objects.IntHash;
 import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected IId2AbId p2i; // mapping between propagator ID and its absolute index
+    protected IntHash p2i; // mapping between propagator ID and its absolute index
     protected int notEmpty; // point out the no empty queues
     protected short[] scheduled; // also maintains the index of the queue!
     protected IntCircularQueue[] eventsets;
@@ -112,23 +111,18 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = solver.getCstrs();
             int nbProp = 0;
-            int m = Integer.MAX_VALUE, M = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();
                 for (int j = 0; j < cprops.length; j++, nbProp++) {
                     _propagators.add(cprops[j]);
-                    int id = cprops[j].getId();
-                    m = Math.min(m, id);
-                    M = Math.max(M, id);
                 }
             }
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
             trigger.addAll(propagators);
 
-            //p2i = new AId2AbId(m, M, -1);
-            p2i = new MId2AbId(M - m + 1, -1);
+            p2i = new IntHash(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
-                p2i.set(propagators[j].getId(), j);
+                p2i.put(propagators[j].getId(), j);
             }
             for (int i = 0; i < 8; i++) {
                 pro_queue[i] = new CircularQueue<>(16);
@@ -210,39 +204,31 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
-        int aid;
-        IntCircularQueue evtset;
         if (lastProp != null) {
-            aid = p2i.get(lastProp.getId());
-            if (lastProp.reactToFineEvent()) {
-                evtset = eventsets[aid];
-                while (evtset.size() > 0) {
-                    int v = evtset.pollFirst();
-                    eventmasks[aid][v] = 0;
-                }
-                evtset.clear();
-                lastProp.flushPendingEvt();
-            }
-            scheduled[aid] = 0;
+            flush(p2i.get(lastProp.getId()));
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
                 lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
-                aid = p2i.get(lastProp.getId());
-                if (lastProp.reactToFineEvent()) {
-                    evtset = eventsets[aid];
-                    while (evtset.size() > 0) {
-                        int v = evtset.pollFirst();
-                        eventmasks[aid][v] = 0;
-                    }
-                    evtset.clear();
-                    lastProp.flushPendingEvt();
-                }
-                scheduled[aid] = 0;
+                flush(p2i.get(lastProp.getId()));
             }
             notEmpty = notEmpty & ~(1 << i);
         }
+    }
+
+    private void flush(int aid) {
+        IntCircularQueue evtset;
+        if (lastProp.reactToFineEvent()) {
+            evtset = eventsets[aid];
+            while (evtset.size() > 0) {
+                int v = evtset.pollFirst();
+                eventmasks[aid][v] = 0;
+            }
+            evtset.clear();
+            lastProp.flushPendingEvt();
+        }
+        scheduled[aid] = 0;
     }
 
     @Override
@@ -349,7 +335,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(_propagators, 0, propagators, 0, osize);
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
-            p2i.set(propagators[j].getId(), j);
+            p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
         }
 
@@ -431,7 +417,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             // 4. copy data
             if (idtd < nsize) {
                 propagators[idtd] = toMove;
-                p2i.set(toMove.getId(), idtd);
+                p2i.put(toMove.getId(), idtd);
                 scheduled[idtd] = stm;
                 eventsets[idtd] = estm;
                 eventmasks[idtd] = emtm;

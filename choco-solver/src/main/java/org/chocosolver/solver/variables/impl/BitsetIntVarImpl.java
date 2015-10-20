@@ -156,7 +156,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (_plugexpl) {
                     solver.getEventObserver().removeValue(this, value, cause);
                 }
-//            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, MSG_REMOVE);
             }
             IntEventType e = IntEventType.REMOVE;
