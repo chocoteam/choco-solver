@@ -29,8 +29,6 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
@@ -47,6 +45,7 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.IntList;
 
 import java.util.Random;
 
@@ -73,7 +72,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     protected int currentVar = -1, currentVal = -1;
 
-    TIntList bests = new TIntArrayList();
+    IntList bests = new IntList();
 
     java.util.Random random; //  a random object to break ties
 

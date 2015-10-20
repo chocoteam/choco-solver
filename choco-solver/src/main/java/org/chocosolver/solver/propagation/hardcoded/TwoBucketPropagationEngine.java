@@ -40,13 +40,12 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.propagation.hardcoded.util.IId2AbId;
-import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
+import org.chocosolver.util.objects.IntHash;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private short max_f;
     private short max_c;
 
-    protected IId2AbId p2i; // mapping between propagator ID and its absolute index
+    protected IntHash p2i; // mapping between propagator ID and its absolute index
 
     protected Propagator lastProp;
     protected int notEmpty; // point out the no empty queues
@@ -129,21 +128,17 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = solver.getCstrs();
             int nbProp = 0;
-            int m = Integer.MAX_VALUE, M = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();
                 for (int j = 0; j < cprops.length; j++, nbProp++) {
                     _propagators.add(cprops[j]);
                     int id = cprops[j].getId();
-                    m = Math.min(m, id);
-                    M = Math.max(M, id);
                 }
             }
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-            //p2i = new AId2AbId(m, M, -1);
-            p2i = new MId2AbId(M - m + 1, -1);
+            p2i = new IntHash(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
-                p2i.set(propagators[j].getId(), j);
+                p2i.put(propagators[j].getId(), j);
             }
             trigger.addAll(propagators);
 
@@ -428,7 +423,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         System.arraycopy(_propagators, 0, propagators, 0, osize);
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
-            p2i.set(propagators[j].getId(), j);
+            p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
         }
 
@@ -533,7 +528,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             // 6. copy data
             if (idtd < nsize) {
                 propagators[idtd] = toMove;
-                p2i.set(toMove.getId(), idtd);
+                p2i.put(toMove.getId(), idtd);
                 schedule_f[idtd] = sftm;
                 schedule_c[idtd] = sctm;
                 event_f[idtd] = icqtm;

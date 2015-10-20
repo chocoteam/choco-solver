@@ -27,25 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.propagation.hardcoded.util;
+package org.chocosolver.solver.search.loop;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-
-public class MId2AbId implements IId2AbId {
-
-    final TIntIntHashMap map;
-
-    public MId2AbId(int size, int noValue) {
-        this.map = new TIntIntHashMap(size, 0.5f, noValue, noValue);
-    }
-
-    @Override
-    public int get(int key) {
-        return map.get(key);
-    }
-
-    @Override
-    public void set(int key, int value) {
-        map.put(key, value);
+/**
+ * A short-name version of {@code SearchDriverFactory}
+ *
+ * Created by cprudhom on 06/10/15.
+ * Project: choco.
+ */
+public class SDF extends SearchDriverFactory {
+    SDF() {
     }
 }

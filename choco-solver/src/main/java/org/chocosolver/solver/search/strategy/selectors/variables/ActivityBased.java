@@ -33,7 +33,6 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
@@ -48,6 +47,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.IntHash;
 
 import java.util.BitSet;
 import java.util.Comparator;
@@ -113,7 +113,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     //////////////////////////////
 
     final Solver solver;
-    final TIntIntHashMap v2i;
+    final IntHash v2i;
     final IntVar[] vars;
 
     final double[] A; // activity of all variables
@@ -152,7 +152,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         vAct = new IVal[vars.length];
         affected = new BitSet(vars.length);
 
-        this.v2i = new TIntIntHashMap(vars.length);
+        this.v2i = new IntHash(vars.length);
         for (int i = 0; i < vars.length; i++) {
             v2i.put(vars[i].getId(), i);
             vars[i].addMonitor(this);
@@ -301,7 +301,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     public double getActivity(IntVar var) {
-        if (v2i.contains(var.getId())) {
+        if (v2i.containsKey(var.getId())) {
             return A[v2i.get(var.getId())] / var.getDomainSize();
         } else {
             return 0.0d;

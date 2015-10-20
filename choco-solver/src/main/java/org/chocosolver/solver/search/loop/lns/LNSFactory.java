@@ -55,10 +55,11 @@ public class LNSFactory {
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
      * @return a random neighborhood
+     * @deprecated
      */
+    @Deprecated
     public static INeighbor random(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
         INeighbor neighbor = new RandomNeighborhood(solver, vars, level, seed);
-        neighbor.fastRestart(frcounter);
         return neighbor;
     }
 
@@ -72,10 +73,11 @@ public class LNSFactory {
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
      * @return a propagation-guided neighborhood
+     * @deprecated
      */
+    @Deprecated
     public static INeighbor pg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
         INeighbor neighbor = new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
-        neighbor.fastRestart(frcounter);
         return neighbor;
     }
 
@@ -89,10 +91,11 @@ public class LNSFactory {
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
      * @return a reverse propagation-guided neighborhood
+     * @deprecated
      */
+    @Deprecated
     public static INeighbor rpg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
         INeighbor neighbor = new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
-        neighbor.fastRestart(frcounter);
         return neighbor;
     }
 
@@ -107,7 +110,9 @@ public class LNSFactory {
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
      * @return a Random LNS
+     * @deprecated
      */
+    @Deprecated
     public static LargeNeighborhoodSearch rlns(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
         INeighbor neighbor = random(solver, vars, level, seed, frcounter);
         LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
@@ -126,7 +131,9 @@ public class LNSFactory {
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
      * @return a Propagation-Guided LNS
+     * @deprecated
      */
+    @Deprecated
     public static LargeNeighborhoodSearch pglns(Solver solver, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
         INeighbor neighbor = new SequenceNeighborhood(
                 pg(solver, vars, fgmtSize, listSize, seed, frcounter),
@@ -149,15 +156,14 @@ public class LNSFactory {
      * @param fr4exp a fast restart counter (can be null) for explained neighborhoods
      * @param fr4rnd a fast restart counter (can be null) for random neighborhoods
      * @return an Explanation based LNS
+     * @deprecated
      */
+    @Deprecated
     public static LargeNeighborhoodSearch elns(Solver solver, IntVar[] vars, int level, long seed,
                                                ACounter fr4exp, ACounter fr4rnd) {
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new ExplainingCut(solver, level, seed);
-        neighbor2.fastRestart(fr4exp);
-        INeighbor neighbor3 = new RandomNeighborhood4Explanation(solver, vars, level, seed);
-        neighbor3.fastRestart(fr4rnd);
+        INeighbor neighbor3 = new RandomNeighborhood(solver, vars, level, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
         LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
@@ -177,20 +183,17 @@ public class LNSFactory {
      * @param fr4exp   a fast restart counter (can be null) for explained neighborhoods
      * @param fr4rnd   a fast restart counter (can be null) for random neighborhoods
      * @return an Explanation based LNS
+     * @deprecated
      */
+    @Deprecated
     public static LargeNeighborhoodSearch pgelns(Solver solver, IntVar[] vars, int level, long seed,
                                                  int fgmtSize, int listSize,
                                                  ACounter fr4exp, ACounter fr4rnd) {
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        neighbor1.fastRestart(fr4exp);
-        INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor2.fastRestart(fr4rnd);
-        INeighbor neighbor3 = new RPGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor3.fastRestart(fr4rnd);
+        INeighbor neighbor2 = new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
+        INeighbor neighbor3 = new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
         INeighbor neighbor4 = new ExplainingCut(solver, level, seed);
-        neighbor4.fastRestart(fr4exp);
-        INeighbor neighbor5 = new PGN4Explanation(solver, vars, seed, fgmtSize, 0);
-        neighbor5.fastRestart(fr4rnd);
+        INeighbor neighbor5 = new RandomNeighborhood(solver, vars, fgmtSize, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
         LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
@@ -210,20 +213,17 @@ public class LNSFactory {
      * @param fr4exp   a fast restart counter (can be null) for explained neighborhoods
      * @param fr4rnd   a fast restart counter (can be null) for random neighborhoods
      * @return an Explanation based LNS
+     * @deprecated
      */
+    @Deprecated
     public static LargeNeighborhoodSearch apgelns(Solver solver, IntVar[] vars, int level, long seed,
                                                   int fgmtSize, int listSize,
                                                   ACounter fr4exp, ACounter fr4rnd) {
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        neighbor1.fastRestart(fr4exp);
-        INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor2.fastRestart(fr4rnd);
-        INeighbor neighbor3 = new RPGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor3.fastRestart(fr4rnd);
+        INeighbor neighbor2 = new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
+        INeighbor neighbor3 = new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
         INeighbor neighbor4 = new ExplainingCut(solver, level, seed);
-        neighbor4.fastRestart(fr4exp);
-        INeighbor neighbor5 = new PGN4Explanation(solver, vars, seed, fgmtSize, 0);
-        neighbor5.fastRestart(fr4rnd);
+        INeighbor neighbor5 = new RandomNeighborhood(solver, vars, fgmtSize, seed);
 
         INeighbor neighbor = new AdaptiveNeighborhood(seed, neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
         LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);

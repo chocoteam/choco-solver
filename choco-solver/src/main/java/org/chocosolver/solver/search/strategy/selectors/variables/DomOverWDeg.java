@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
@@ -48,6 +47,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.PoolManager;
+import org.chocosolver.util.objects.IntHash;
 
 /**
  * <br/>
@@ -63,7 +63,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
     FailPerPropagator counter;
 
     TIntObjectHashMap<IStateInt> pid2ari;
-    TIntIntHashMap pid2arity;
+    IntHash pid2arity;
     TIntList bests;
 
     java.util.Random random;
@@ -78,7 +78,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         Solver solver = variables[0].getSolver();
         counter = new FailPerPropagator(solver.getCstrs(), solver);
         pid2ari = new TIntObjectHashMap<>();
-        pid2arity = new TIntIntHashMap(10, 0.5F, -1, -1);
+        pid2arity = new IntHash();
         bests = new TIntArrayList();
         this.valueSelector = valueSelector;
         decisionPool = new PoolManager<>();

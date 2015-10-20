@@ -78,10 +78,6 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
 
     @Override
     public void onSolution() {
-        // the fast restart policy is plugged when the first solution has been found
-        if (solver.getMeasures().getSolutionCount() == 1) {
-            neighbor.activeFastRestart();
-        }
         neighbor.recordSolution();
     }
 
@@ -111,7 +107,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
             try {
-                neighbor.fixSomeVariables(this);
+//                neighbor.fixSomeVariables(this);
                 hasAppliedNeighborhood = true;
                 solver.getEngine().propagate();
             } catch (ContradictionException e) {

@@ -220,6 +220,47 @@ public class SearchMonitorFactory {
     }
 
     /**
+     * Convert a string which represents a duration. It can be composed of days, hours, minutes and seconds.
+     * Examples:
+     * <p>
+     * - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
+     * - "2h30m": two hours and 30 minutes<p/>
+     * - "30.5s": 30 seconds and 500 ms<p/>
+     * - "180s": three minutes
+     *
+     * @param duration a String which describes the duration
+     * @return the duration in seconds
+     */
+    public static long convertInSeconds(String duration) {
+        long milliseconds = 0;
+        duration = duration.replaceAll("\\s+", "");
+        Matcher matcher = Dp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            int days = Integer.parseInt(matcher.group(1));
+            milliseconds += TimeUnit.SECONDS.convert(days, TimeUnit.DAYS);
+        }
+        matcher = Hp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            int hours = Integer.parseInt(matcher.group(1));
+            milliseconds += TimeUnit.SECONDS.convert(hours, TimeUnit.HOURS);
+        }
+        matcher = Mp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            int minutes = Integer.parseInt(matcher.group(1));
+            milliseconds += TimeUnit.SECONDS.convert(minutes, TimeUnit.MINUTES);
+        }
+        matcher = Sp.matcher(duration);
+        if (matcher.find() && matcher.groupCount() == 2) {
+            double seconds = Double.parseDouble(matcher.group(1));
+            milliseconds += (int) (seconds);
+        }
+        if (milliseconds == 0) {
+            milliseconds = Long.parseLong(duration);
+        }
+        return milliseconds;
+    }
+
+    /**
      * Defines a limit over the number of fails allowed during the resolution.
      * WHen the limit is reached, the resolution is stopped.
      *

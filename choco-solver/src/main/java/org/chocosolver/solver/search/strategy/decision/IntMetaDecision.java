@@ -41,8 +41,8 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class IntMetaDecision extends Decision<IntVar[]> {
 
-    int idx;
-    int[] val;
+    protected int idx;
+    protected int[] val;
 
     public IntMetaDecision() {
         super(1);

@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -300,17 +299,14 @@ public class DynamicPostTest {
 		solver.post(ICF.alldifferent(vectors, "BC"));
 		// symmetry-breaking
 		solver.post(ICF.arithm(vars[0],"<",vars[n-1]));
-		SMF.limitTime(solver, 20000);
+//		SMF.limitTime(solver, 20000);
 		solver.set(ISF.domOverWDeg(vectors,0));
 
 		if(dynamic){
 			// should not change anything (the constraint is already posted)
-			solver.plugMonitor(new IMonitorSolution(){
-				@Override
-				public void onSolution() {
-					solver.post(ICF.alldifferent(vectors,"BC"));
-				}
-			});
+			solver.plugMonitor((IMonitorSolution) () -> {
+                solver.post(ICF.alldifferent(vectors,"BC"));
+            });
 		}
 		return solver;
 	}

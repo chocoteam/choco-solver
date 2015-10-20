@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.util.objects.IntHash;
 
 /**
  * <br/>
@@ -43,11 +43,11 @@ import org.chocosolver.solver.exception.ContradictionException;
  */
 public class FailPerPropagator implements IMonitorContradiction {
 
-    protected TIntIntHashMap p2w;
+    protected IntHash p2w;
 
 
     public FailPerPropagator(Constraint[] constraints, Solver solver) {
-        p2w = new TIntIntHashMap();
+        p2w = new IntHash();
         init(constraints);
         solver.plugMonitor(this);
     }
@@ -57,7 +57,6 @@ public class FailPerPropagator implements IMonitorContradiction {
             Propagator[] propagators = constraints[c].getPropagators();
             for (int p = 0; p < propagators.length; p++) {
                 p2w.put(propagators[p].getId(), 0);
-
             }
         }
     }
@@ -65,7 +64,7 @@ public class FailPerPropagator implements IMonitorContradiction {
     @Override
     public void onContradiction(ContradictionException cex) {
         if (cex.c != null && cex.c instanceof Propagator) {
-            p2w.adjustOrPutValue(((Propagator) cex.c).getId(), 1, 1);
+            p2w.putOrAdjust(((Propagator) cex.c).getId(), 1);
         }
     }
 

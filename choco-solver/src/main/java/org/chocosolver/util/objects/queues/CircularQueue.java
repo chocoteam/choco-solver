@@ -142,17 +142,7 @@ public class CircularQueue<E> implements AQueue<E>, Serializable {
      * but also allows you to remove in the middle of the list.
      */
     public E pollFirst() {
-        int pos = convert(head, 0);
-        // an interesting application of try/finally is to avoid
-        // having to use local variables
-        E tmp = elementData[pos];
-        // optimized for FIFO access, i.e. adding to back and
-        // removing from front
-        if (pos == head) {
-            head = convert(head, 1);
-        }
-        size--;
-        return tmp;
+        return pollAndClean(false);
     }
 
     /**
@@ -180,11 +170,17 @@ public class CircularQueue<E> implements AQueue<E>, Serializable {
      * but also allows you to remove in the middle of the list.
      */
     public E remove() {
+        return pollAndClean(false);
+    }
+
+    private E pollAndClean(boolean clean){
         int pos = convert(head, 0);
         // an interesting application of try/finally is to avoid
         // having to use local variables
         E tmp = elementData[pos];
-//        elementData[pos] = null; // Let gc do its work
+        if(clean){
+            elementData[pos] = null; // Let gc do its work
+        }
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
         if (pos == head) {
