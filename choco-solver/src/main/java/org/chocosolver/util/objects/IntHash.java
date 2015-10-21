@@ -56,7 +56,7 @@ public class IntHash implements Serializable{
     /**
      * No entry key
      */
-    private static final int FREE = -1;
+    private final int FREE;
 
     /**
      * The array buffer into which the elements of the values are stored.
@@ -70,11 +70,16 @@ public class IntHash implements Serializable{
 
 
     public IntHash() {
-        this(DEFAULT_CAPACITY);
+        this(DEFAULT_CAPACITY, -1);
     }
 
     public IntHash(int initialCapacity) {
+        this(initialCapacity, -1);
+    }
+
+    public IntHash(int initialCapacity, int no_value) {
         this.elements = new int[initialCapacity];
+        this.FREE = no_value;
         Arrays.fill(elements, FREE);
     }
 
@@ -137,15 +142,14 @@ public class IntHash implements Serializable{
      * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
      */
-    public void putOrAdjust(int key, int value) {
+    public void putOrAdjust(int key, int value, int inc) {
         ensureCapacity(key + 1);
         if (elements[key] == FREE) {
             size++;
             elements[key] = value;
         } else {
-            elements[key] += value;
+            elements[key] += inc;
         }
-
     }
 
     /**
