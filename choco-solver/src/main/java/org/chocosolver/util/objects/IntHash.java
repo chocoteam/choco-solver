@@ -141,6 +141,7 @@ public class IntHash implements Serializable{
      *
      * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
+     * @param inc increment to add to the value associated with the key
      */
     public void putOrAdjust(int key, int value, int inc) {
         ensureCapacity(key + 1);
