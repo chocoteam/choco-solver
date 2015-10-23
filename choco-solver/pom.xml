@@ -54,6 +54,11 @@
             <artifactId>args4j</artifactId>
             <version>2.32</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.cp-profiler</groupId>
+            <artifactId>cpprof-java</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
