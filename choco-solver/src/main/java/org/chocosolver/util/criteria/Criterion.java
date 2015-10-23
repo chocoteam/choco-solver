@@ -27,18 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.util.criteria;
 
 /**
- * An interface to monitor restart instruction in the search loop
- * <br/>
+ * An interface which defines a criterion with lambda
  *
- * @author Charles Prud'homme
- * @since 13/12/12
+ * Created by cprudhom on 04/09/15.
+ * Project: choco.
  */
-public interface IMonitorRestart extends ISearchMonitor {
+public interface Criterion {
 
-    default void beforeRestart(){}
-
-    default void afterRestart(){}
+    boolean isMet();
 }

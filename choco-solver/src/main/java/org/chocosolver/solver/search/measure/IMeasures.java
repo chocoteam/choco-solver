@@ -85,6 +85,12 @@ public interface IMeasures extends Serializable, Cloneable {
      */
     float getTimeCount();
 
+    /**
+     * Returns the elapsed time in nanoseconds
+     * @return the elapsed time in nanoseconds
+     */
+    long getElapsedTimeInNanoseconds();
+
     void startStopwatch();
 
     void updateTime();
@@ -138,16 +144,6 @@ public interface IMeasures extends Serializable, Cloneable {
      * increment restart counter
      */
     void incRestartCount();
-
-    /**
-     * @return the maximum depth of the search tree
-     */
-    long getMaxDepth();
-
-    /**
-     * increment depth counter
-     */
-    void incDepth();
 
     /**
      * @return the solution count of the measure

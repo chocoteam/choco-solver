@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.Solver;
 
 /**
  * Set a limit over the number of found solutions allowed during the search.
@@ -40,15 +40,14 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public class SolutionCounter extends ACounter implements IMonitorSolution {
+public class SolutionCounter extends ACounter{
 
-    public SolutionCounter(long solutionlimit) {
-        super(solutionlimit);
+    public SolutionCounter(Solver solver, long solutionlimit) {
+        super(solver, solutionlimit);
     }
 
-
     @Override
-    public void onSolution() {
-        incCounter();
+    public long currentValue() {
+        return measures.getSolutionCount();
     }
 }

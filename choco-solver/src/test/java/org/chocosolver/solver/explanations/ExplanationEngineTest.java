@@ -37,7 +37,8 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
+import org.chocosolver.solver.search.loop.LearnCBJ;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -205,8 +206,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
@@ -223,8 +223,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
@@ -241,8 +240,7 @@ public class ExplanationEngineTest {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
@@ -260,8 +258,7 @@ public class ExplanationEngineTest {
             }
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
@@ -285,8 +282,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
             solver.set(ISF.random_value(p, seed));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
 
             Chatterbox.showShortStatistics(solver);
             Assert.assertFalse(solver.findSolution());
@@ -308,8 +304,7 @@ public class ExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-        new ConflictBackJumping(ee, solver, false);
+        SLF.learnCBJ(solver, false, false);
 
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -333,8 +328,7 @@ public class ExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-        new ConflictBackJumping(ee, solver, false);
+        SLF.learnCBJ(solver, false, false);
 
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -864,8 +858,8 @@ public class ExplanationEngineTest {
         Constraint xE1 = ICF.arithm(x, "=", one);
         s.post(xE1);
 
-        ExplanationEngine ee = new ExplanationEngine(s, true, true);
-        ConflictBackJumping cbj = new ConflictBackJumping(ee, s, false);
+        SLF.learnCBJ(s, false, true);
+        LearnCBJ cbj = (LearnCBJ)s.getSearchLoop().getLearn();
         Chatterbox.showDecisions(s);
         Assert.assertFalse(s.findSolution());
         // If the problem has no solution, the end-user explanation can be retrieved

@@ -27,18 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.search.loop;
 
 /**
- * An interface to monitor restart instruction in the search loop
- * <br/>
+ * A short-name version of {@code SearchLoopFactory}
  *
- * @author Charles Prud'homme
- * @since 13/12/12
+ * Created by cprudhom on 06/10/15.
+ * Project: choco.
  */
-public interface IMonitorRestart extends ISearchMonitor {
-
-    default void beforeRestart(){}
-
-    default void afterRestart(){}
+public class SLF extends SearchLoopFactory {
+    SLF() {
+    }
 }

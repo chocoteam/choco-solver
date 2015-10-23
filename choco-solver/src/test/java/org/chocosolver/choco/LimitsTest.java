@@ -83,7 +83,7 @@ public class LimitsTest {
     public void testThreadTime() {
         Solver s = modelit();
         long tl = 500;
-        SearchMonitorFactory.limitThreadTime(s, tl);
+        SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
         int tc = (int)(s.getMeasures().getTimeCount()*1000);
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);

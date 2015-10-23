@@ -27,29 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
 /**
- * A conflict-based Back-jumping strategy that relies on an explanation engine.
- * <p>
- * Created by cprudhom on 11/12/14.
+ * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolution, ConflictStrategy {
+public class LearnCBJ implements Learn {
 
     // The explanation engine
     final ExplanationEngine mExplainer;
@@ -57,39 +52,37 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
     private final boolean saveCauses, nogoodFromConflict;
     private final PropNogoods ngstore;
     private TIntList ps;
+    private long nbsol = 0;
 
     // The last explanation computed, for user only
     Explanation lastExplanation;
 
-    public ConflictBackJumping(ExplanationEngine mExplainer, Solver mSolver, boolean nogoodFromConflict) {
-        this.mExplainer = mExplainer;
+    public LearnCBJ(Solver mSolver, boolean nogoodFromConflict) {
         this.mSolver = mSolver;
+        this.mExplainer = mSolver.getExplainer();
         this.saveCauses = mExplainer.isSaveCauses();
         this.nogoodFromConflict = nogoodFromConflict;
         this.ngstore = mSolver.getNogoodStore().getPropNogoods();
         this.ps = new TIntArrayList();
-        this.mExplainer.setCstrat(this);
-        this.mSolver.plugMonitor(this);
     }
 
-    @Override
-    public void onContradiction(ContradictionException cex) {
-        assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
-        lastExplanation = mExplainer.explain(cex);
 
-        if (this.nogoodFromConflict) {
-            lastExplanation.postNogood(ngstore, ps);
+    @Override
+    public void record(SearchLoop searchLoop) {
+        if (nbsol == searchLoop.mSolver.getMeasures().getSolutionCount()) {
+            onFailure(searchLoop);
+        } else {
+            nbsol++;
+            onSolution(searchLoop);
         }
-
-        int upto = compute(mSolver.getEnvironment().getWorldIndex());
-        assert upto > 0;
-        mSolver.getSearchLoop().overridePreviousWorld(upto);
-
-        identifyRefutedDecision(upto, cex.c);
     }
 
     @Override
-    public void onSolution() {
+    public void forget(SearchLoop searchLoop) {
+        // TODO: forget some learnt nogoods
+    }
+
+    private void onSolution(SearchLoop searchLoop) {
         // we need to prepare a "false" backtrack on this decision
         Decision dec = mSolver.getSearchLoop().getLastDecision();
         while ((dec != ROOT) && (!dec.hasNext())) {
@@ -107,29 +100,31 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
             }
             mExplainer.storeDecisionExplanation(dec, explanation);
         }
-        mSolver.getSearchLoop().overridePreviousWorld(1);
+        searchLoop.jumpTo = 1;
     }
 
-//    /**
-//     * Compute the jump naturally made by standard backtrack algorithm
-//     * @param currentWorldIndex current world index
-//     */
-//    int easyNegDec(int currentWorldIndex) {
-//        Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
-//        int dworld = dec.getWorldIndex() + 1;
-//        while (dec != ROOT && !dec.hasNext()) {
-//            dec = dec.getPrevious();
-//            dworld = dec.getWorldIndex() + 1;
-//        }
-//        return 1 + (currentWorldIndex - dworld);
-//    }
+    private void onFailure(SearchLoop searchLoop) {
+        ContradictionException cex = mSolver.getEngine().getContradictionException();
+        assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
+        lastExplanation = mExplainer.explain(cex);
+
+        if (this.nogoodFromConflict) {
+            lastExplanation.postNogood(ngstore, ps);
+        }
+
+        int upto = compute(mSolver.getEnvironment().getWorldIndex());
+        assert upto > 0;
+        searchLoop.jumpTo = upto;
+
+        identifyRefutedDecision(upto);
+    }
 
     /**
      * Identify the decision to reconsider, and explain its refutation in the explanation data base
      *
      * @param nworld index of the world to backtrack to
      */
-    void identifyRefutedDecision(int nworld, ICause cause) {
+    void identifyRefutedDecision(int nworld) {
         Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
             mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
@@ -138,7 +133,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         }
         if (dec != ROOT) {
             if (!dec.hasNext()) {
-                throw new UnsupportedOperationException("ConflictBackJumping.identifyRefutedDecision should get to a LEFT decision:" + dec);
+                throw new UnsupportedOperationException("LearnCBJ.identifyRefutedDecision should get to a LEFT decision:" + dec);
             }
             lastExplanation.remove(dec);
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
@@ -157,6 +152,7 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
         return currentWorldIndex - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
     }
 
+
     /**
      * Return the explanation of the last conflict
      *
@@ -165,5 +161,4 @@ public class ConflictBackJumping implements IMonitorContradiction, IMonitorSolut
     public Explanation getLastExplanation() {
         return lastExplanation;
     }
-
 }

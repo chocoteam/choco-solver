@@ -29,9 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 
 /**
  * An interface defining services required for the LNS to select variables to freeze-unfreeze.
@@ -42,6 +40,7 @@ import org.chocosolver.solver.search.limits.ACounter;
  */
 public interface INeighbor {
 
+    void init();
 
     /**
      * Record values of decision variables to freeze some ones during the next LNS run
@@ -51,14 +50,8 @@ public interface INeighbor {
     /**
      * Freezes some variables in order to have a fast computation
      *
-     * @param cause the LNS
-     * @throws org.chocosolver.solver.exception.ContradictionException
-     *          if variables have been fixed to inconsistent values
-     *          this can happen if fixed variables cannot yield to a better solution than the last one
-     *          a contradiction is raised because a cut has been posted on the objective function
-     *          Notice that it could be used to generate a no-good
      */
-    void fixSomeVariables(ICause cause) throws ContradictionException;
+    Decision fixSomeVariables();
 
     /**
      * Use less restriction at the beginning of a LNS run
@@ -67,22 +60,8 @@ public interface INeighbor {
      */
     void restrictLess();
 
-
     /**
      * @return true iff the search is in a complete mode (no fixed variable)
      */
     boolean isSearchComplete();
-
-    /**
-     * Plug a fast restart strategy to the neighborhood
-     *
-     * @param counter a counter
-     */
-    void fastRestart(ACounter counter);
-
-    /**
-     * This method is called by {@link org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch} on the first solution,
-     * it activates the fast restart strategy
-     */
-    void activeFastRestart();
 }

@@ -35,6 +35,7 @@ import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -115,7 +116,7 @@ public class DynamicPostTest {
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
         final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
         final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
+        solver.plugMonitor(new IMonitorOpenNode() {
             @Override
             public void beforeOpenNode() {
             }
@@ -128,6 +129,8 @@ public class DynamicPostTest {
                 }
             }
         });
+        Chatterbox.showDecisions(solver);
+        Chatterbox.showSolutions(solver);
         solver.set(engine.make(solver));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -304,9 +307,7 @@ public class DynamicPostTest {
 
 		if(dynamic){
 			// should not change anything (the constraint is already posted)
-			solver.plugMonitor((IMonitorSolution) () -> {
-                solver.post(ICF.alldifferent(vectors,"BC"));
-            });
+			solver.plugMonitor((IMonitorSolution) () -> solver.post(ICF.alldifferent(vectors,"BC")));
 		}
 		return solver;
 	}

@@ -29,8 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.Solver;
 
 /**
  * Set a limit over the number of fails allowed during the search.
@@ -40,14 +39,14 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public final class FailCounter extends ACounter implements IMonitorContradiction {
+public final class FailCounter extends ACounter{
 
-    public FailCounter(long faillimit) {
-        super(faillimit);
+    public FailCounter(Solver solver, long faillimit) {
+        super(solver, faillimit);
     }
 
     @Override
-    public void onContradiction(ContradictionException cex) {
-        incCounter();
+    public long currentValue() {
+        return measures.getFailCount();
     }
 }

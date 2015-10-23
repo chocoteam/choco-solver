@@ -39,5 +39,6 @@ import org.chocosolver.solver.exception.ContradictionException;
  * @since 13/12/12
  */
 public interface IMonitorContradiction extends ISearchMonitor {
+
     void onContradiction(ContradictionException cex);
 }

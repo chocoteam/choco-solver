@@ -35,10 +35,14 @@ package org.chocosolver.solver.search.loop.monitors;
  *
  * @author Charles Prud'homme
  * @since 13/12/12
+ * @deprecated see {@code org.chocosolver.solver.search.loop.monitors.IMonitorInitialize} instead
  */
+@Deprecated
 public interface IMonitorInitPropagation extends ISearchMonitor {
 
-    void beforeInitialPropagation();
+    @Deprecated
+    default void beforeInitialPropagation(){}
 
-    void afterInitialPropagation();
+    @Deprecated
+    default void afterInitialPropagation(){}
 }

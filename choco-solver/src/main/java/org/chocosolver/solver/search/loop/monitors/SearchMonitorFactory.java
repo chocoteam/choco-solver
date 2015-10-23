@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,12 +31,18 @@ package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.*;
+import org.chocosolver.solver.search.loop.SLF;
+import org.chocosolver.solver.search.loop.SearchLoopFactory;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
+import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.criteria.LongCriterion;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +56,7 @@ public class SearchMonitorFactory {
     SearchMonitorFactory() {
     }
 
+    private static final long MILLISECONDS_IN_NANOSECONDS = 1000 * 1000;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -61,13 +68,12 @@ public class SearchMonitorFactory {
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
+     * @see SearchLoopFactory#restart(Solver, LongCriterion, IRestartStrategy, int)
      */
     public static void luby(Solver solver, int scaleFactor, int geometricalFactor,
                             ICounter restartStrategyLimit, int restartLimit) {
-        solver.plugMonitor(new RestartManager(
-                new LubyRestartStrategy(scaleFactor, geometricalFactor),
-                restartStrategyLimit, solver.getSearchLoop(), restartLimit
-        ));
+        SLF.restart(solver, restartStrategyLimit,
+                new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
@@ -78,37 +84,37 @@ public class SearchMonitorFactory {
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
+     * @see SearchLoopFactory#restart(Solver, LongCriterion, IRestartStrategy, int)
      */
     public static void geometrical(Solver solver, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        solver.plugMonitor(new RestartManager(
+        SLF.restart(solver, restartStrategyLimit,
                 new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
-                restartStrategyLimit, solver.getSearchLoop(), restartLimit
-        ));
+                restartLimit);
     }
 
     /**
      * Defines a limit on the number of nodes allowed in the tree search.
      * When the limit is reached, the resolution is stopped.
      *
+     * @param solver the solver to instrument
      * @param limit maximal number of nodes to open
      */
     public static void limitNode(Solver solver, long limit) {
-        NodeCounter counter = new NodeCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
-        solver.plugMonitor(counter);
+        NodeCounter counter = new NodeCounter(solver, limit);
+        solver.addStopCriterion(counter);
     }
 
     /**
      * Defines a limit over the number of solutions found during the resolution.
      * WHen the limit is reached, the resolution is stopped.
      *
+     * @param solver the solver to instrument
      * @param limit maximal number of solutions
      */
     public static void limitSolution(Solver solver, long limit) {
-        SolutionCounter counter = new SolutionCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
-        solver.plugMonitor(counter);
+        SolutionCounter counter = new SolutionCounter(solver, limit);
+        solver.addStopCriterion(counter);
     }
 
 
@@ -124,9 +130,8 @@ public class SearchMonitorFactory {
      * @see SearchMonitorFactory#limitThreadTime(org.chocosolver.solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
-        TimeCounter counter = new TimeCounter(solver, limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
-        solver.plugMonitor(counter);
+        TimeCounter counter = new TimeCounter(solver, limit * MILLISECONDS_IN_NANOSECONDS);
+        solver.addStopCriterion(counter);
     }
 
     /**
@@ -138,6 +143,7 @@ public class SearchMonitorFactory {
      * <p>
      * Based on {@code SearchMonitorFactory.convertInMilliseconds(String duration)}
      *
+     * @param solver the solver to instrument
      * @param duration a String which states the duration like "WWd XXh YYm ZZs".
      * @see SearchMonitorFactory#limitThreadTime(org.chocosolver.solver.Solver, long)
      * @see SearchMonitorFactory#convertInMilliseconds(String)
@@ -153,11 +159,11 @@ public class SearchMonitorFactory {
      * @param limit maximal resolution time in millisecond
      * @see SearchMonitorFactory#limitTime(org.chocosolver.solver.Solver, long)
      * @see SearchMonitorFactory#convertInMilliseconds(String)
+     * @deprecated use {@link #limitTime(Solver, long)} instead. Will removed in release > 3.2.2.
      */
+    @Deprecated
     public static void limitThreadTime(Solver solver, long limit) {
-        ThreadTimeCounter counter = new ThreadTimeCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
-        solver.plugMonitor(counter);
+        limitTime(solver, limit);
     }
 
     /**
@@ -167,9 +173,11 @@ public class SearchMonitorFactory {
      * @param duration a String which states the duration like "WWd XXh YYm ZZs".
      * @see SearchMonitorFactory#limitTime(org.chocosolver.solver.Solver, String)
      * @see SearchMonitorFactory#convertInMilliseconds(String)
+     * @deprecated  {@link #limitTime(Solver, String)} instead. Will removed in release > 3.2.2.
      */
+    @Deprecated
     public static void limitThreadTime(Solver solver, String duration) {
-        limitThreadTime(solver, convertInMilliseconds(duration));
+        limitTime(solver, convertInMilliseconds(duration));
     }
 
     private static Pattern Dp = Pattern.compile("(\\d+)d");
@@ -263,35 +271,47 @@ public class SearchMonitorFactory {
     /**
      * Defines a limit over the number of fails allowed during the resolution.
      * WHen the limit is reached, the resolution is stopped.
-     *
+     * @param solver the solver to instrument
      * @param limit maximal number of fails
      */
 
     public static void limitFail(Solver solver, long limit) {
-        FailCounter counter = new FailCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
-        solver.plugMonitor(counter);
+        FailCounter counter = new FailCounter(solver, limit);
+        solver.addStopCriterion(counter);
     }
 
     /**
      * Defines a limit over the number of backtracks allowed during the resolution.
      * WHen the limit is reached, the resolution is stopped.
      *
+     * @param solver the solver to instrument
      * @param limit maximal number of backtracks
      */
     public static void limitBacktrack(Solver solver, long limit) {
-        BacktrackCounter counter = new BacktrackCounter(limit);
-        counter.setAction(ActionCounterFactory.interruptSearch(solver.getSearchLoop(), false));
-        solver.plugMonitor(counter);
+        BacktrackCounter counter = new BacktrackCounter(solver, limit);
+        solver.addStopCriterion(counter);
+    }
+
+    /**
+     * Limit the exploration of the search space with the help of a <code>aStopCriterion</code>.
+     * When the condition depicted in the criterion is met,
+     * the search stops.
+     *
+     * @param solver the solver to instrument
+     * @param aStopCriterion the stop criterion which, when met, stops the search.
+     */
+    public static void limitSearch(Solver solver, Criterion aStopCriterion) {
+        solver.addStopCriterion(aStopCriterion);
     }
 
     /**
      * Force the resolution to restart at root node after each solution.
      *
      * @param solver main solver
+     *                  @deprecated see {@link SearchLoopFactory#restartOnSolutions(Solver)}
      */
     public static void restartAfterEachSolution(final Solver solver) {
-        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+        SLF.restartOnSolutions(solver);
     }
 
     /**
@@ -318,6 +338,7 @@ public class SearchMonitorFactory {
     /**
      * A method which prepares the solvers in the list to be run in parallel.
      * It plugs tools to share between solvers the best known bound when dealing with an optimization problem.
+     * It also plugs a flag which
      * <p>
      * The expected use is the following:
      * <pre> {@code
@@ -330,16 +351,14 @@ public class SearchMonitorFactory {
      *     readModel(solver); // a dedicated method that declares variables and constraints
      *     // the search should also be declared here
      * }
-     * SMF.shareBestKnownBound(solvers);
-     * solvers.parallelStream().forEach(s -> {
-     *      s.findSolution();
-     *      solvers.forEach(s1 -> s1.getSearchLoop().interrupt("Bye", false));
-     * });
+     * SMF.prepareForParallelResolution(solvers);
+     * solvers.parallelStream().forEach(Solver::findSolution);
+     * // or solvers.parallelStream().forEach(s -> s.findOptimalSolution(ResolutionPolicy.MAXIMIZE));
      * }
      *
      * @param solvers a list of {@code Solver}
      */
-    public static void shareBestKnownBound(List<Solver> solvers) {
+    public static void prepareForParallelResolution(List<Solver> solvers) {
         if (solvers.get(0).getObjectives() != null &&
                 solvers.get(0).getObjectives().length == 1) {
             // share the best known bound
@@ -358,6 +377,26 @@ public class SearchMonitorFactory {
                     }
             ));
         }
+        AtomicInteger finishers = new AtomicInteger(0);
+        solvers.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
+        solvers.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
+            @Override
+            public void afterClose() {
+                int count = finishers.addAndGet(1);
+                if(count == solvers.size()){
+                    finishers.set(0); //reset the counter to 0
+                }
+            }
+        }));
+    }
+
+    /**
+     * Connect and send data to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
+     * This requires to have installed the library and to start it before launching the resolution.
+     * @param aSolver solver to visualize
+     */
+    public static void connectocpprofiler(Solver aSolver){
+        aSolver.plugMonitor(new CPProfiler(aSolver));
     }
 
 }

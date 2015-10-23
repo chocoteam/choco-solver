@@ -30,8 +30,7 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
-import org.chocosolver.solver.explanations.strategies.DynamicBackTracking;
+import org.chocosolver.solver.search.loop.SLF;
 
 /**
  * A non exhaustive list of ways to plug and exploit explanations.
@@ -53,34 +52,23 @@ public enum ExplanationFactory {
     /**
      * add a Conflict-based jumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnCBJ(Solver, boolean, boolean)
      */
     CBJ {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            if (solver.getExplainer() == null) {
-                solver.set(new ExplanationEngine(solver, userFeedbackOn, !nogoodsOn));
-            }
-            if (solver.getExplainer().getCstrat() == null
-                    || !(solver.getExplainer().getCstrat() instanceof ConflictBackJumping)) {
-                new ConflictBackJumping(solver.getExplainer(), solver, nogoodsOn);
-            }
+            SLF.learnCBJ(solver, nogoodsOn, userFeedbackOn);
         }
     },
     /**
      * add a Dynamic-Backtracking policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation.
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnDBT(Solver, boolean, boolean)
      */
     DBT {
         @Override
         public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            if (solver.getExplainer() == null) {
-//                solver.set(new ExplanationEngine(solver, userFeedbackOn, false));
-                solver.set(new ExplanationEngine(solver, userFeedbackOn, !nogoodsOn));
-            }
-            if (solver.getExplainer().getCstrat() == null
-                    || !(solver.getExplainer().getCstrat() instanceof DynamicBackTracking)) {
-                new DynamicBackTracking(solver.getExplainer(), solver, nogoodsOn);
-            }
+            SLF.learnDBT(solver, nogoodsOn, userFeedbackOn);
         }
     };
 

@@ -27,18 +27,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.search.loop;
+
+import org.chocosolver.solver.exception.ContradictionException;
+
+import java.io.Serializable;
 
 /**
- * An interface to monitor restart instruction in the search loop
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 13/12/12
+ * The "Propagate" component
+ * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
+ * <p>
+ * The aim of the component is to propagate information throughout the constraint network when a decision is made.
+ * <p>
+ * Created by cprudhom on 01/09/15.
+ * Project: choco.
  */
-public interface IMonitorRestart extends ISearchMonitor {
+public interface Propagate extends Serializable{
 
-    default void beforeRestart(){}
-
-    default void afterRestart(){}
+    /**
+     * Propagate information throughout the constraint network, that is, apply decision and post dynamic cut (if any).
+     *
+     * @throws ContradictionException if a dead-end is encountered
+     */
+    void execute(SearchLoop searchLoop) throws ContradictionException;
 }

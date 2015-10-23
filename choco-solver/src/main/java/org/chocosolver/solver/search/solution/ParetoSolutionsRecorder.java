@@ -79,10 +79,6 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
                     solver.getEngine().flush();
                 }
             }
-
-            @Override
-            public void afterClose() {
-            }
         });
     }
 

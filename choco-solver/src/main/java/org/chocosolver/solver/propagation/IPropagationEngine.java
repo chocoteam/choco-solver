@@ -70,7 +70,7 @@ public interface IPropagationEngine extends Serializable {
                         COLOR?Chatterbox.ANSI_BLUE:"",
                         v,
                         COLOR?Chatterbox.ANSI_RESET:"",
-                        Chatterbox.ANSI_PURPLE,
+                        COLOR?Chatterbox.ANSI_PURPLE:"",
                         p,
                         COLOR?Chatterbox.ANSI_RESET:""
                 );
@@ -155,7 +155,6 @@ public interface IPropagationEngine extends Serializable {
      *
      * @param variable modified variable
      * @param type     type of modification event
-     * @throws ContradictionException
      */
     default void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
     }

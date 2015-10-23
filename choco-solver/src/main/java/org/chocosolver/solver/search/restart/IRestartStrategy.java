@@ -40,15 +40,7 @@ import java.io.Serializable;
  */
 public interface IRestartStrategy extends Serializable {
 
-    String getName();
-
-    int getScaleFactor();
-
-    void setScaleFactor(int scaleFactor);
-
-    double getGeometricalFactor();
-
-    void setGeometricalFactor(double geometricalFactor);
+    int getFirstCutOff();
 
     int getNextCutoff(int nbRestarts);
 }

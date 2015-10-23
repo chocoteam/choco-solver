@@ -37,5 +37,6 @@ package org.chocosolver.solver.search.loop.monitors;
  * @since 13/12/12
  */
 public interface IMonitorSolution extends ISearchMonitor {
+
     void onSolution();
 }

@@ -29,9 +29,9 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -39,12 +39,12 @@ import java.util.Random;
 
 /**
  * A Random LNS
- * <p/>
+ * <p>
  *
  * @author Charles Prud'homme
  * @since 18/04/13
  */
-public class RandomNeighborhood extends ANeighbor {
+public class RandomNeighborhood implements INeighbor {
 
     protected final int n;
     protected final IntVar[] vars;
@@ -57,9 +57,12 @@ public class RandomNeighborhood extends ANeighbor {
     private int level;
 
     protected BitSet fragment;  // index of variable to set unfrozen
+    IntMetaDecision decision;
+    Solver mSolver;
+
 
     public RandomNeighborhood(Solver aSolver, IntVar[] vars, int level, long seed) {
-        super(aSolver);
+        this.mSolver = aSolver;
         this.n = vars.length;
         this.vars = vars.clone();
         this.level = level;
@@ -68,6 +71,11 @@ public class RandomNeighborhood extends ANeighbor {
         this.bestSolution = new int[n];
         this.previous = new int[n];
         this.fragment = new BitSet(n);
+        this.decision = new IntMetaDecision();
+    }
+
+    @Override
+    public void init() {
     }
 
     @Override
@@ -87,21 +95,23 @@ public class RandomNeighborhood extends ANeighbor {
     }
 
     @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
+    public Decision fixSomeVariables() {
+        decision.free();
         nbCall++;
         restrictLess();
         fragment.set(0, n); // all variables are frozen
         for (int i = 0; i < nbFixedVariables - 1 && fragment.cardinality() > 0; i++) {
             int id = selectVariable();
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                impose(id, cause);
+                impose(id);
             }
             fragment.clear(id);
         }
+        return decision;
     }
 
-    protected void impose(int id, ICause cause) throws ContradictionException {
-        vars[id].instantiateTo(bestSolution[id], cause);
+    protected void impose(int id) {
+        decision.add(vars[id], bestSolution[id]);
     }
 
     protected int selectVariable() {

@@ -170,7 +170,7 @@ public class ObjectiveTest {
         Assert.assertEquals(iv.getValue(), 2);
 
         solver.getSearchLoop().reset();
-        solver.getSearchLoop().plugSearchMonitor((IMonitorSolution) () -> solver.post(ICF.arithm(iv, ">=", 6)));
+        solver.plugMonitor((IMonitorSolution) () -> solver.post(ICF.arithm(iv, ">=", 6)));
         solver.findSolution();
         Assert.assertEquals(iv.getValue(), 2);
 
@@ -230,11 +230,9 @@ public class ObjectiveTest {
 		Solver solver = new Solver();
 		IntVar a = VF.enumerated("a", -2, 2, solver);
 
-//		SMF.log(solver, true, true);
 		solver.set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
 				ISF.minDom_LB(a));
-		SMF.restartAfterEachSolution(solver);
 		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
 		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);

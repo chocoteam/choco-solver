@@ -38,11 +38,44 @@ package org.chocosolver.solver.search.loop.monitors;
  */
 public interface IMonitorDownBranch extends ISearchMonitor {
 
-    void beforeDownLeftBranch();
+    /**
+     * @deprecated replaced by {@link #beforeDownBranch(boolean)}
+     */
+    @Deprecated
+    default void beforeDownLeftBranch(){}
 
-    void afterDownLeftBranch();
+    /**
+     * @deprecated replaced by {@link #afterDownBranch(boolean)}
+     */
+    @Deprecated
+    default void afterDownLeftBranch(){}
 
-    void beforeDownRightBranch();
+    /**
+     * @deprecated replaced by {@link #beforeDownBranch(boolean)}
+     */
+    @Deprecated
+    default void beforeDownRightBranch(){}
 
-    void afterDownRightBranch();
+    /**
+     * @deprecated replaced by {@link #afterDownBranch(boolean)}
+     */
+    @Deprecated
+    default void afterDownRightBranch(){}
+
+    default void beforeDownBranch(boolean left){
+        if(left){
+            beforeDownLeftBranch();
+        }else{
+            beforeDownRightBranch();
+        }
+    }
+
+    default void afterDownBranch(boolean left){
+        if(left){
+            afterDownLeftBranch();
+        }else{
+            afterDownRightBranch();
+        }
+    }
+
 }

@@ -41,11 +41,16 @@ package org.chocosolver.solver.search.restart;
 public class GeometricalRestartStrategy extends AbstractRestartStrategy {
 
     public GeometricalRestartStrategy(int scaleFactor, double geometricalFactor) {
-        super("GEOM", scaleFactor, geometricalFactor);
+        super(scaleFactor, geometricalFactor);
     }
 
     @Override
     public int getNextCutoff(int nbRestarts) {
         return (int) Math.ceil(Math.pow(geometricalFactor, nbRestarts) * scaleFactor);
+    }
+
+    @Override
+    public String toString() {
+        return "GEOMETRICAL(" + scaleFactor + ',' + geometricalFactor + ')';
     }
 }

@@ -33,7 +33,7 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -109,11 +109,9 @@ public class SMPTSP extends AbstractProblem {
 		// bottom-up optimisation, then classical branching
 		solver.set(ISF.lexico_LB(nbValues), ISF.minDom_LB(assignment));
 		// displays the root lower bound
-		solver.plugMonitor(new IMonitorInitPropagation() {
-			public void beforeInitialPropagation() {
-			}
-
-			public void afterInitialPropagation() {
+		solver.plugMonitor(new IMonitorInitialize() {
+			@Override
+			public void afterInitialize() {
 				System.out.println("bound after initial propagation : " + nbValues);
 			}
 		});

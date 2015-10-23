@@ -49,7 +49,7 @@ public class LubyRestartStrategy extends AbstractRestartStrategy {
     private int divFactor;
 
     public LubyRestartStrategy(int scaleFactor, int geometricalFactor) {
-        super("LUBY", scaleFactor, geometricalFactor);
+        super(scaleFactor, geometricalFactor);
     }
 
     @Override
@@ -69,7 +69,12 @@ public class LubyRestartStrategy extends AbstractRestartStrategy {
     }
 
 
-    int getLasVegasCoef(int i) {
+    /**
+     * Returns the Las Vegas coefficient corresponding to the i^h calls.
+     * @param i number of calls
+     * @return the LV coefficient
+     */
+    private int getLasVegasCoef(int i) {
         //<hca> I round it to PRECISION because of issues between versions of the jvm on mac and pc
         final double log = MathUtils.roundedLog(i * divFactor + 1, geometricalIntFactor);
         final int k = (int) Math.floor(log);
@@ -81,9 +86,14 @@ public class LubyRestartStrategy extends AbstractRestartStrategy {
         }
     }
 
-
     @Override
     public int getNextCutoff(int nbRestarts) {
         return getLasVegasCoef(nbRestarts + 1) * scaleFactor;
+    }
+
+
+    @Override
+    public String toString() {
+        return "LUBY(" + scaleFactor + ',' + geometricalFactor + ')';
     }
 }

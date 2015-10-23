@@ -27,45 +27,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.limits;
+package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
 /**
- * A factory dedicated to counter actions; action to be performed when a counter reached its limit.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 07/06/13
+ * A move dedicated to run an Depth-bounded Discrepancy Search[1] (DDS) with binary decisions.
+ * <p>
+ * [1]:T. Walsh, Depth-bounded Discrepancy Search, IJCAI-97.
+ * <p>
+ * <p>
+ * Note that the depth is not maintained since it is useful only when max discrepancy is greater than max depth,
+ * which should not happen.
+ * Created by cprudhom on 07/10/15.
+ * Project: choco.
  */
-public class ActionCounterFactory {
+public class MoveBinaryDDS extends MoveBinaryLDS {
 
-    private ActionCounterFactory() {
+    /**
+     * Create a DFS with binary decisions
+     *
+     * @param strategy    how (binary) decisions are selected
+     * @param discrepancy maximum discrepancy
+     */
+    public MoveBinaryDDS(AbstractStrategy strategy, int discrepancy, IEnvironment environment) {
+        super(strategy, discrepancy, environment);
     }
 
-    private static ThreadLocal<ICounterAction> none;
-
-    static {
-        none = new ThreadLocal<ICounterAction>() {
-            @Override
-            protected ICounterAction initialValue() {
-                return () -> {
-                    // nothing
-                };
+    @Override
+    public boolean extend(SearchLoop searchLoop) {
+        boolean extended = false;
+        Decision tmp = searchLoop.decision;
+        searchLoop.decision = strategy.getDecision();
+        if (searchLoop.decision != null) { // null means there is no more decision
+            searchLoop.decision.setPrevious(tmp);
+            searchLoop.mSolver.getEnvironment().worldPush();
+            if (dis.get() == 1) {
+                searchLoop.decision.buildNext();
             }
-        };
-    }
-
-    public static ICounterAction none() {
-        return none.get();
-    }
-
-
-    public static ICounterAction interruptSearch(final ISearchLoop searchLoop, boolean voidable) {
-        return () -> searchLoop.reachLimit(voidable);
-    }
-
-    public static ICounterAction restartSearch(final ISearchLoop searchLoop) {
-        return searchLoop::restart;
+            dis.add(-1);
+            extended = true;
+        } else {
+            searchLoop.decision = tmp;
+        }
+        return extended;
     }
 }

@@ -33,7 +33,6 @@ import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
@@ -281,37 +280,32 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
 
     @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-        if (currentVar > -1) { // if the decision was computed by another strategy
-            if (asgntFailed) {
-                updateImpact(1.0d, currentVar, currentVal);
-            } else {
-                double sssz = searchSpaceSize();
-                updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
-                searchSpaceSize.set(sssz);
-            }
-            currentVar = -1;
-        }
-        asgntFailed = false; // to handle cases where a contradiction was thrown, but the decision was computed outside
-        reevaluateImpact();
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-        reevaluateImpact();
-    }
-
-    @Override
     public void onContradiction(ContradictionException cex) {
         asgntFailed = true;
+    }
+
+
+
+    @Override
+    public void beforeDownBranch(boolean left) {
+    }
+
+    @Override
+    public void afterDownBranch(boolean left) {
+        if(left){
+            if (currentVar > -1) { // if the decision was computed by another strategy
+                if (asgntFailed) {
+                    updateImpact(1.0d, currentVar, currentVal);
+                } else {
+                    double sssz = searchSpaceSize();
+                    updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
+                    searchSpaceSize.set(sssz);
+                }
+                currentVar = -1;
+            }
+            asgntFailed = false; // to handle cases where a contradiction was thrown, but the decision was computed outside
+        }
+        reevaluateImpact();
     }
 
     /**
@@ -450,11 +444,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             if (learnsAndFails) {
                 learnsAndFails = false;
-                solver.getSearchLoop().moveTo(ISearchLoop.UP_BRANCH);
-                //noinspection ThrowableResultOfMethodCallIgnored
-                solver.getSearchLoop().getSMList().onContradiction(
-						solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
-				);
             }
         }
     }

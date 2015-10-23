@@ -48,7 +48,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     List<IMonitorContradiction> mcont = new ArrayList<>();
     List<IMonitorDownBranch> mdbra = new ArrayList<>();
     List<IMonitorInitialize> minit = new ArrayList<>();
-    List<IMonitorInitPropagation> mipro = new ArrayList<>();
     List<IMonitorInterruption> minte = new ArrayList<>();
     List<IMonitorOpenNode> mopno = new ArrayList<>();
     List<IMonitorRestart> mrest = new ArrayList<>();
@@ -67,20 +66,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     public void afterInitialize() {
         for (int i = 0; i < minit.size(); i++) {
             minit.get(i).afterInitialize();
-        }
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-        for (int i = 0; i < mipro.size(); i++) {
-            mipro.get(i).beforeInitialPropagation();
-        }
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-        for (int i = 0; i < mipro.size(); i++) {
-            mipro.get(i).afterInitialPropagation();
         }
     }
 
@@ -106,30 +91,16 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     }
 
     @Override
-    public void beforeDownLeftBranch() {
+    public void beforeDownBranch(boolean left) {
         for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).beforeDownLeftBranch();
+            mdbra.get(i).beforeDownBranch(left);
         }
     }
 
     @Override
-    public void afterDownLeftBranch() {
+    public void afterDownBranch(boolean left) {
         for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).afterDownLeftBranch();
-        }
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-        for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).beforeDownRightBranch();
-        }
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-        for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).afterDownRightBranch();
+            mdbra.get(i).afterDownBranch(left);
         }
     }
 
@@ -203,9 +174,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
             if (sm instanceof IMonitorInitialize) {
                 minit.add((IMonitorInitialize) sm);
             }
-            if (sm instanceof IMonitorInitPropagation) {
-                mipro.add((IMonitorInitPropagation) sm);
-            }
             if (sm instanceof IMonitorInterruption) {
                 minte.add((IMonitorInterruption) sm);
             }
@@ -238,9 +206,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
             }
             if (sm instanceof IMonitorInitialize) {
                 isPluggedIn = minit.contains(sm);
-            }
-            if (sm instanceof IMonitorInitPropagation) {
-                isPluggedIn = mipro.contains(sm);
             }
             if (sm instanceof IMonitorInterruption) {
                 isPluggedIn = minte.contains(sm);
@@ -275,9 +240,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
             if (sm instanceof IMonitorInitialize) {
                 minit.remove(sm);
             }
-            if (sm instanceof IMonitorInitPropagation) {
-                mipro.remove(sm);
-            }
             if (sm instanceof IMonitorInterruption) {
                 minte.remove(sm);
             }
@@ -302,7 +264,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         mdbra.clear();
         minit.clear();
         minte.clear();
-        mipro.clear();
         mopno.clear();
         mrest.clear();
         msolu.clear();

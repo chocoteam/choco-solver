@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -50,7 +50,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
     }
 
     @Override
-    protected void update(ICause cause) throws ContradictionException {
+    protected void update() throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
             all.clear();
             // 1. pick a variable
@@ -60,7 +60,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
 
                 mSolver.getEnvironment().worldPush();
-                vars[id].instantiateTo(bestSolution[id], cause);
+                vars[id].instantiateTo(bestSolution[id], Cause.Null);
                 mSolver.propagate();
                 fragment.clear(id);
 
@@ -99,7 +99,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
         }
         for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
             if (vars[i].contains(bestSolution[i])) {
-                impose(i, cause);
+                impose(i);
             }
         }
         mSolver.propagate();

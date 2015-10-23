@@ -36,6 +36,7 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -77,7 +78,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.geometrical(solver, 2, 1.2, new NodeCounter(2), 2);
+        SearchMonitorFactory.geometrical(solver, 2, 1.1, new NodeCounter(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -88,7 +89,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.luby(solver, 2, 2, new NodeCounter(2), 2);
+        SearchMonitorFactory.luby(solver, 2, 2, new NodeCounter(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -139,7 +140,7 @@ public class RestartTest {
             for (int i = 0; i < n; i++) {
                 solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
             }
-            SMF.restartAfterEachSolution(solver);
+            SLF.restartOnSolutions(solver);
             solver.set(ISF.lexico_LB(X));
 //            SMF.log(solver, false, false);
             SMF.limitSolution(solver, 100);
@@ -151,7 +152,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart2() {
         Solver solver = buildQ(8);
-        SearchMonitorFactory.geometrical(solver, 10, 1.2, new FailCounter(10), 2);
+        SearchMonitorFactory.geometrical(solver, 10, 1.2, new FailCounter(solver, 10), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);

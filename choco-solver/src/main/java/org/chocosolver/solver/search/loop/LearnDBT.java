@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
@@ -35,7 +35,7 @@ import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -46,24 +46,22 @@ import java.util.ArrayDeque;
 import java.util.BitSet;
 
 /**
- * A dynamic backtracking algorithm.
- * <p>
- * Created by cprudhom on 11/12/14.
+ * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class DynamicBackTracking extends ConflictBackJumping {
-
+public class LearnDBT extends LearnCBJ {
 
     final DBTstrategy dbTstrategy;
     final RuleStore mRuleStore;  // required to continue the computation of the explanations
     final IEventStore mEventStore; // required to continue the computation of the explanations
 
-    public DynamicBackTracking(ExplanationEngine mExplainer, Solver mSolver, boolean nogoodFromConflict) {
-        super(mExplainer, mSolver, nogoodFromConflict);
+    public LearnDBT(Solver mSolver, boolean nogoodFromConflict) {
+        super(mSolver, nogoodFromConflict);
         dbTstrategy = new DBTstrategy(mSolver, mExplainer);
         mRuleStore = mExplainer.getRuleStore();
         mEventStore = mExplainer.getEventStore();
     }
+
 
     /**
      * Main reason of the class
@@ -74,7 +72,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
     void identifyRefutedDecision(int nworld, ICause cause) {
         dbTstrategy.clear();
         if (nworld == 1 || cause == mSolver.getObjectiveManager()) {
-            super.identifyRefutedDecision(nworld, cause);
+            super.identifyRefutedDecision(nworld);
             return;
         }
         // preliminary : compute where to jump back
@@ -125,7 +123,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
         }
         if (dec != RootDecision.ROOT) {
             if (!dec.hasNext()) {
-                throw new UnsupportedOperationException("DynamicBackTracking.identifyRefutedDecision should get to a POSITIVE decision " + dec);
+                throw new UnsupportedOperationException("LearnDBT.identifyRefutedDecision should get to a POSITIVE decision " + dec);
             }
             lastExplanation.remove(dec);
             mExplainer.storeDecisionExplanation(dec, lastExplanation);
@@ -162,7 +160,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("unchecked")
-    private static class DBTstrategy extends AbstractStrategy implements IMonitorInitPropagation {
+    private static class DBTstrategy extends AbstractStrategy implements IMonitorInitialize {
 
         private final ArrayDeque<Decision<IntVar>> decision_path;
         private final Solver mSolver;
@@ -228,12 +226,7 @@ public class DynamicBackTracking extends ConflictBackJumping {
         }
 
         @Override
-        public void beforeInitialPropagation() {
-
-        }
-
-        @Override
-        public void afterInitialPropagation() {
+        public void afterInitialize() {
             this.mainStrategy = mSolver.getStrategy();
             mSolver.set(this);
         }

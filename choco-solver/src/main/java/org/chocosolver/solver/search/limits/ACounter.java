@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,27 +29,45 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.measure.IMeasures;
 
 /**
+ * Overrides all but one services for ICounter and provides easy to implement counter based on {@link IMeasures}.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 29 juil. 2010
  */
-public abstract class ACounter implements ICounter, IMonitorInitialize {
+public abstract class ACounter implements ICounter {
 
-    protected long max, current;
-    protected ICounterAction action;
+    protected IMeasures measures;
+    protected long max;
 
-    public ACounter(long limit) {
-        max = limit;
-        current = 0;
-        this.action = ActionCounterFactory.none();
+    public ACounter(Solver solver, long limit) {
+        this.max = limit;
+        this.measures = solver.getMeasures();
     }
 
     @Override
     public void init() {
+        // nothing
+    }
+
+    @Override
+    public void update() {
+        // nothing
+    }
+
+    @Override
+    public boolean isMet() {
+        return isMet(max);
+    }
+
+    @Override
+    public boolean isMet(long value) {
+        update();
+        return currentValue()>= value;
     }
 
     @Override
@@ -57,47 +75,11 @@ public abstract class ACounter implements ICounter, IMonitorInitialize {
         max = newLimit;
     }
 
-    @Override
-    public void reset() {
-        current = 0;
-        init();
-    }
-
-    @Override
-    public final boolean isReached() {
-        return max - current <= 0;
-    }
 
     @Override
     public long getLimitValue() {
         return max;
     }
 
-    protected final void incCounter() {
-        current++;
-        if (isReached()) {
-            action.onLimitReached();
-        }
-    }
-
-    protected final void setCounter(long value) {
-        current = value;
-        if (isReached()) {
-            action.onLimitReached();
-        }
-    }
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-        this.init();
-    }
-
-    @Override
-    public void setAction(ICounterAction action) {
-        this.action = action;
-    }
+    public abstract long currentValue();
 }

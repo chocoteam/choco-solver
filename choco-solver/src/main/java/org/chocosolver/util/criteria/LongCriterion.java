@@ -27,43 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.lns.neighbors;
-
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.ACounter;
+package org.chocosolver.util.criteria;
 
 /**
- * An abstract class for neighbor, to manage the counter
- * <br/>
+ * An interface which defines a criterion with lambda
  *
- * @author Charles Prud'homme
- * @since 04/07/13
+ * Created by cprudhom on 04/09/15.
+ * Project: choco.
  */
-public abstract class ANeighbor implements INeighbor {
+public interface LongCriterion {
 
-    protected final Solver mSolver;
-    protected ACounter counter;
-
-    protected ANeighbor(Solver mSolver) {
-        this.mSolver = mSolver;
-    }
-
-
-    @Override
-    public void fastRestart(ACounter counter) {
-        this.counter = counter;
-    }
-
-    @Override
-    public void activeFastRestart() {
-        if (counter != null) {
-            counter.setAction(
-                    () -> {
-                        mSolver.getSearchLoop().restart();
-                        counter.reset();
-                    });
-            mSolver.plugMonitor(counter);
-        }
-    }
-
+    boolean isMet(long value);
 }

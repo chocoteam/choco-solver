@@ -64,8 +64,6 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
 					solver.getEngine().flush();
 				}
 			}
-			@Override
-			public void afterClose() {}
 		});
 	}
 

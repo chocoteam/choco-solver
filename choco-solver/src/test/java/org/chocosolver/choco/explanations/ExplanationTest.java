@@ -33,9 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
+import org.chocosolver.solver.search.loop.LearnCBJ;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
@@ -89,8 +89,8 @@ public class ExplanationTest {
         solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
         solver.set(ISF.lexico_LB(vars));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
-        ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, false);
+        SLF.learnCBJ(solver, false, true);
+        LearnCBJ cbj = (LearnCBJ) solver.getSearchLoop().getLearn();
         Assert.assertFalse(solver.findSolution());
         Explanation exp = cbj.getLastExplanation();
         Assert.assertEquals(2, exp.nbCauses());

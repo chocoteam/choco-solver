@@ -37,8 +37,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.ternary.Max;
-import org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch;
-import org.chocosolver.solver.search.loop.lns.neighbors.SubstructureNeighborhood;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -183,12 +183,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        Arrays.sort(planes, new Comparator<IntVar>() {
-            @Override
-            public int compare(IntVar o1, IntVar o2) {
-                return maxCost.get(o2) - maxCost.get(o1);
-            }
-        });
+        Arrays.sort(planes, (o1, o2) -> maxCost.get(o2) - maxCost.get(o1));
         solver.set(
                 IntStrategyFactory.random_bound(bVars, seed),
                 IntStrategyFactory.lexico_LB(planes)
@@ -198,9 +193,7 @@ public class AirPlaneLanding extends AbstractProblem {
     @Override
     public void solve() {
         IntVar[] ivars = solver.retrieveIntVars();
-//        LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(100));
-        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, new SubstructureNeighborhood(ivars, 0), true);
-        solver.getSearchLoop().plugSearchMonitor(lns);
+        LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(solver, 100));
         SMF.limitTime(solver, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
@@ -249,7 +242,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     /////////////////////////////////////////
 
-    static enum Data {
+    enum Data {
         airland1(" 10 10 \n" +
                 " 54 129 155 559 10.00 10.00\n" +
                 " 99999 3 15 15 15 15 15 15 \n" +

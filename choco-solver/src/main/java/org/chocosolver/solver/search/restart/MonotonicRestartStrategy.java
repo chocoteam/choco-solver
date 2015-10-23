@@ -27,18 +27,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.search.restart;
 
 /**
- * An interface to monitor restart instruction in the search loop
+ * Restart strategy to restart every <tt>gap</tt> restarts
+ * <p/>
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 13/12/12
+ * @author Charles Prud'homme, Arnaud Malapert
+ * @since 13/05/11
  */
-public interface IMonitorRestart extends ISearchMonitor {
+public class MonotonicRestartStrategy implements IRestartStrategy{
 
-    default void beforeRestart(){}
+    private final int gap;
 
-    default void afterRestart(){}
+    public MonotonicRestartStrategy(int gap) {
+        this.gap = gap;
+    }
+
+    @Override
+    public int getFirstCutOff() {
+        return gap;
+    }
+
+    @Override
+    public int getNextCutoff(int nbRestarts) {
+        return getFirstCutOff();
+    }
 }

@@ -220,16 +220,8 @@ public class Chatterbox {
                 printVersion(solver);
                 printFeatures(solver);
             }
-
-            @Override
-            public void afterInitialize() {
-            }
         });
         solver.plugMonitor(new IMonitorClose() {
-            @Override
-            public void beforeClose() {
-            }
-
             @Override
             public void afterClose() {
                 out.println(solver.getMeasures().toString());
@@ -249,10 +241,6 @@ public class Chatterbox {
             @Override
             public void beforeClose() {
                 out.println(solver.getMeasures().toOneShortLineString());
-            }
-
-            @Override
-            public void afterClose() {
             }
         });
     }
@@ -292,30 +280,13 @@ public class Chatterbox {
     public static void showDecisions(final Solver solver, final IMessage message) {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
-            public void beforeDownLeftBranch() {
-                out.printf("%s[L] %s%s ", pad("", solver.getEnvironment().getWorldIndex(), "."),
+            public void beforeDownBranch(boolean left) {
+                out.printf("%s[%s] %s%s ", pad("", solver.getEnvironment().getWorldIndex(), "."),
+                        left?"L":"R",
                         solver.getSettings().outputWithANSIColors()?ANSI_BLUE:"",
                         solver.getSearchLoop().getLastDecision().toString());
                 out.printf("%s // %s %s\n", solver.getSettings().outputWithANSIColors()?ANSI_GRAY:"",
                         message.print(), solver.getSettings().outputWithANSIColors()?ANSI_RESET:"");
-            }
-
-            @Override
-            public void afterDownLeftBranch() {
-            }
-
-            @Override
-            public void beforeDownRightBranch() {
-                out.printf("%s[R] %s%s ",
-                        pad("", solver.getEnvironment().getWorldIndex(), "."),
-                        solver.getSettings().outputWithANSIColors()?ANSI_PURPLE:"",
-                        solver.getSearchLoop().getLastDecision().toString());
-                out.printf("%s // %s %s\n", solver.getSettings().outputWithANSIColors()?ANSI_GRAY:"", message.print(),
-                        solver.getSettings().outputWithANSIColors()?ANSI_RESET:"");
-            }
-
-            @Override
-            public void afterDownRightBranch() {
             }
         });
     }

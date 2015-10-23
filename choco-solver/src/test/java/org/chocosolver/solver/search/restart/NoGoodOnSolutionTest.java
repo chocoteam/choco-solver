@@ -33,7 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -87,7 +87,7 @@ public class NoGoodOnSolutionTest {
     public void testRoS() {
         // restarts on solutions (infinite loop)
         Solver s = makeProblem();
-        SMF.restartAfterEachSolution(s);
+        SLF.restartOnSolutions(s);
         s.findAllSolutions();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
@@ -98,7 +98,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions with no goods on solutions (ok)
         Solver s = makeProblem();
         SMF.nogoodRecordingOnSolution(s.retrieveIntVars());
-        SMF.restartAfterEachSolution(s);
+        SLF.restartOnSolutions(s);
         s.findAllSolutions();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
@@ -142,7 +142,8 @@ public class NoGoodOnSolutionTest {
         }
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
         solver.set(ISF.random_value(vars, 0));
-        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+
+        SLF.restartOnSolutions(solver);
         solver.findAllSolutions();
         System.out.println(solver.getMeasures());
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
@@ -166,10 +167,10 @@ public class NoGoodOnSolutionTest {
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 0));
-        solver.plugMonitor((IMonitorSolution) () -> solver.getSearchLoop().restart());
+        SLF.restartOnSolutions(solver);
         solver.findAllSolutions();
         System.out.println(solver.getMeasures());
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups = "1s")

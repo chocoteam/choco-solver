@@ -70,8 +70,6 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 						solver.getEngine().flush();
 					}
 				}
-				@Override
-				public void afterClose() {}
 			});
 		}
 	}

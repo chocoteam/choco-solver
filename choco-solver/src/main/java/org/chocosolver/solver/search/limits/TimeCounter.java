@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.limits;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 
 /**
  * A limit over run time.
@@ -40,36 +39,19 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class TimeCounter extends ACounter implements IMonitorOpenNode {
-
-    private Solver solver;
-
-    private long offset;
+public class TimeCounter extends ACounter {
 
     /**
-     * @param solver a solver
-     * @param timeLimit in millisecond
+     * @param solver the solver to instrument
+     * @param timeLimitInNano in nanosecond
      */
-    public TimeCounter(Solver solver, long timeLimit) {
-        super(timeLimit);
-        this.solver = solver;
-    }
-
-
-    @Override
-    public void init() {
-        solver.getMeasures().updateTime();
-        long time = (long) (solver.getMeasures().getTimeCount()*1000f);
-        offset = System.currentTimeMillis() - time;
+    public TimeCounter(Solver solver, long timeLimitInNano) {
+        super(solver, timeLimitInNano);
     }
 
     @Override
-    public void beforeOpenNode() {
-        setCounter(System.currentTimeMillis() - offset);
+    public long currentValue() {
+        measures.updateTime();
+        return measures.getElapsedTimeInNanoseconds();
     }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
 }

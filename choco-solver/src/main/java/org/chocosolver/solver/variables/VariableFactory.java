@@ -68,8 +68,6 @@ public class VariableFactory {
      */
     public static final int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
 
-    //TODO : build domain in Variable
-
     //*************************************************************************************
     // INTEGER VARIABLES
     //*************************************************************************************

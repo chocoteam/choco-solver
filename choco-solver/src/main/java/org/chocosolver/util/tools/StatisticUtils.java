@@ -34,7 +34,6 @@ import java.util.Arrays;
 /**
  * <br/>
  * <p/>
- * TODO duplicate with {@code solver.probabilities.ProbaUtils}
  * <p/>
  *
  * @author Charles Prud'homme

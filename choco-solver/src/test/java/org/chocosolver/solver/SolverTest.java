@@ -256,11 +256,8 @@ public class SolverTest {
         for (int i = 0; i < n; i++) {
             solvers.add(knapsack());
         }
-        SMF.shareBestKnownBound(solvers);
-        solvers.parallelStream().forEach(s -> {
-            s.findSolution();
-            solvers.forEach(s1 -> s1.getSearchLoop().interrupt("Bye", false));
-        });
+        SMF.prepareForParallelResolution(solvers);
+        solvers.parallelStream().forEach(Solver::findSolution);
     }
 
     @Test(groups = "1s")
@@ -270,10 +267,7 @@ public class SolverTest {
         for (int i = 0; i < n; i++) {
             solvers.add(knapsack());
         }
-        SMF.shareBestKnownBound(solvers);
-        solvers.parallelStream().forEach(s -> {
-            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
-            solvers.forEach(s1 -> s1.getSearchLoop().interrupt("Bye", false));
-        });
+        SMF.prepareForParallelResolution(solvers);
+        solvers.parallelStream().forEach(s -> s.findOptimalSolution(ResolutionPolicy.MAXIMIZE));
     }
 }

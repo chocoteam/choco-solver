@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
+import org.chocosolver.solver.Solver;
 
 /**
  * Set a limit over the number of backtracks allowed during the search.
@@ -40,18 +40,14 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public final class BacktrackCounter extends ACounter implements IMonitorUpBranch {
+public final class BacktrackCounter extends ACounter {
 
-    public BacktrackCounter(long backtracklimit) {
-        super(backtracklimit);
+    public BacktrackCounter(Solver solver, long backtracklimit) {
+        super(solver, backtracklimit);
     }
 
     @Override
-    public void beforeUpBranch() {
-        incCounter();
-    }
-
-    @Override
-    public void afterUpBranch() {
+    public long currentValue() {
+        return measures.getBackTrackCount();
     }
 }

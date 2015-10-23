@@ -30,12 +30,11 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
@@ -55,17 +54,13 @@ public class NogoodTest {
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
-        final BacktrackCounter sc = new BacktrackCounter(30);
-        sc.setAction(() -> {
-            solver.getSearchLoop().restart();
-            sc.reset();
-        });
-        solver.getSearchLoop().plugSearchMonitor(sc);
-        SMF.limitTime(solver, 200000);
-//        Chatterbox.showSolutions(solver);
+        SLF.restart(solver,
+                new BacktrackCounter(solver, 0),
+                new MonotonicRestartStrategy(30), 3);
+        SMF.limitTime(solver, 2000);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 29);
-        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 53);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 27);
+        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 51);
     }
 
     @Test(groups = "1s")
@@ -74,70 +69,13 @@ public class NogoodTest {
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
-        final BacktrackCounter sc = new BacktrackCounter(32);
-        sc.setAction(() -> {
-            solver.getSearchLoop().restart();
-            sc.reset();
-        });
-        solver.getSearchLoop().plugSearchMonitor(sc);
+        SLF.restart(solver,
+                new BacktrackCounter(solver, 0),
+                new MonotonicRestartStrategy(30), 1000);
         SMF.limitTime(solver, 2000);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 75);
-        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 137);
-    }
-
-
-    @Test(groups = "1s")
-    public void test3() throws ContradictionException {
-        Solver solver = new Solver();
-        IntVar[] dv = VF.enumeratedArray("d", 7, 1, 2, solver);
-        SMF.nogoodRecordingFromRestarts(solver);
-
-        IntDecision d1 = new IntDecision(null);
-        d1.set(dv[0], 1, DecisionOperator.int_eq);
-        d1.buildNext();
-        d1.apply();
-        d1.setPrevious(solver.getSearchLoop().getLastDecision());
-
-        IntDecision d2 = new IntDecision(null);
-        d2.set(dv[1], 1, DecisionOperator.int_eq);
-        d2.buildNext();
-        d2.buildNext();
-        d2.apply();
-        d2.setPrevious(d1);
-
-        IntDecision d3 = new IntDecision(null);
-        d3.set(dv[2], 1, DecisionOperator.int_eq);
-        d3.buildNext();
-        d3.buildNext();
-        d3.apply();
-        d3.setPrevious(d2);
-
-
-        IntDecision d4 = new IntDecision(null);
-        d4.set(dv[3], 1, DecisionOperator.int_eq);
-        d4.buildNext();
-        d4.apply();
-        d4.setPrevious(d3);
-
-        IntDecision d5 = new IntDecision(null);
-        d5.set(dv[4], 1, DecisionOperator.int_eq);
-        d5.buildNext();
-        d5.buildNext();
-        d5.apply();
-        d5.setPrevious(d4);
-
-        IntDecision d6 = new IntDecision(null);
-        d6.set(dv[5], 1, DecisionOperator.int_eq);
-        d6.buildNext();
-        d6.buildNext();
-        d6.apply();
-        d6.setPrevious(d5);
-
-        solver.getSearchLoop().setLastDecision(d6);
-
-        solver.getSearchLoop().getSMList().beforeRestart();
-
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 64);
+        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 121);
     }
 
 }

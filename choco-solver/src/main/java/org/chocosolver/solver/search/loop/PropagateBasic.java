@@ -27,18 +27,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.search.loop;
+
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 
 /**
- * An interface to monitor restart instruction in the search loop
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 13/12/12
+ * Created by cprudhom on 02/09/15.
+ * Project: choco.
  */
-public interface IMonitorRestart extends ISearchMonitor {
+public class PropagateBasic implements Propagate {
 
-    default void beforeRestart(){}
-
-    default void afterRestart(){}
+    @Override
+    public void execute(SearchLoop searchLoop) throws ContradictionException {
+        Decision cd = searchLoop.decision;
+        cd.buildNext();
+        searchLoop.objectivemanager.apply(cd);
+        searchLoop.objectivemanager.postDynamicCut();
+        searchLoop.mSolver.getEngine().propagate();
+    }
 }

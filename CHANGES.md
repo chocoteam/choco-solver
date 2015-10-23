@@ -6,6 +6,8 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+Read [the migration guide](https://github.com/chocoteam/choco3/wiki/Choco-3.2.2-migration-guide) to help you migrating 
+your code from Choco-3.3.1 to Choco-3.3.2. 
 
 #### Solver: 
 
@@ -19,9 +21,11 @@ NEXT MILESTONE
 - remove deprecated classes: GenerateAndTest, LastConflict_old
 - add new API to Solver to declare eagerly the objective variable(s) and the precision
 - enable printing decisions and solutions in ANSI colors (see Settings.outputWithANSIColors())
+- add connection to [cp-profiler](https://github.com/cp-profiler/cp-profiler) (#341)
 
 #### Search:
 
+- Deeply revamp the search loop to offer more flexibility 
 - modify 'ISearchLoop.interrupt()', add new parameter 'voidable' to qualify the strength of the interruption (#304)
 - AbstractStrategy#init() cannot throw ContradictionException anymore but returns false instead
 - revamp decisions to enable MetaDecision 

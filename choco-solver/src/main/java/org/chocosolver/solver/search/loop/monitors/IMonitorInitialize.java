@@ -38,7 +38,7 @@ package org.chocosolver.solver.search.loop.monitors;
  */
 public interface IMonitorInitialize extends ISearchMonitor {
 
-    void beforeInitialize();
+    default void beforeInitialize(){}
 
-    void afterInitialize();
+    default void afterInitialize(){}
 }

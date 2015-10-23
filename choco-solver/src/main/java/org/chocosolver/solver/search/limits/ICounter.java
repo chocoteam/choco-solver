@@ -29,7 +29,8 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
+import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.criteria.LongCriterion;
 
 import java.io.Serializable;
 
@@ -37,25 +38,19 @@ import java.io.Serializable;
  * An interface to define count smth during search process
  *
  * @author Charles Prud'homme
- * @see ThreadTimeCounter
  * @see NodeCounter
  * @see BacktrackCounter
  * @see FailCounter
  * @see SolutionCounter
  * @since 15 juil. 2010
  */
-public interface ICounter extends Serializable, ISearchMonitor {
+public interface ICounter extends Criterion, LongCriterion, Serializable{
 
     void init();
 
-    boolean isReached();
+    void update();
 
     long getLimitValue();
 
-    void reset();
-
     void overrideLimit(long newLimit);
-
-    void setAction(ICounterAction action);
-
 }

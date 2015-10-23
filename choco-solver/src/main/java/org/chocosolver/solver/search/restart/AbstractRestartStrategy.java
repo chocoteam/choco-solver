@@ -37,18 +37,19 @@ package org.chocosolver.solver.search.restart;
  */
 public abstract class AbstractRestartStrategy implements IRestartStrategy {
 
-    private final String name;
-
     protected int scaleFactor = 1;
 
-    protected double geometricalFactor = 1;
+    protected double geometricalFactor = 1d;
 
-    protected AbstractRestartStrategy(String name, int scaleFactor, double geometricalFactor) {
-        this.name = name;
+    protected AbstractRestartStrategy(int scaleFactor, double geometricalFactor) {
         setScaleFactor(scaleFactor);
         setGeometricalFactor(geometricalFactor);
     }
 
+    @Override
+    public int getFirstCutOff() {
+        return scaleFactor;
+    }
 
     protected static void checkPositiveValue(double value) {
         if (value <= 0) {
@@ -56,38 +57,14 @@ public abstract class AbstractRestartStrategy implements IRestartStrategy {
         }
     }
 
-    @Override
-    public double getGeometricalFactor() {
-        return geometricalFactor;
-    }
-
-    @Override
-    public final String getName() {
-        return name;
-    }
-
-
-    @Override
-    public final int getScaleFactor() {
-        return scaleFactor;
-    }
-
-    @Override
-    public void setGeometricalFactor(double geometricalFactor) {
+    protected void setGeometricalFactor(double geometricalFactor) {
         checkPositiveValue(geometricalFactor);
         this.geometricalFactor = geometricalFactor;
-
     }
 
-    @Override
-    public final void setScaleFactor(int scaleFactor) {
+    protected final void setScaleFactor(int scaleFactor) {
         checkPositiveValue(scaleFactor);
         this.scaleFactor = scaleFactor;
-    }
-
-    @Override
-    public String toString() {
-        return getName() + '(' + getScaleFactor() + ',' + getGeometricalFactor() + ')';
     }
 
     public int[] getSequenceExample(int length) {

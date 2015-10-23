@@ -38,10 +38,7 @@ import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
-import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
-import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -56,7 +53,7 @@ import org.chocosolver.solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 03/07/13
  */
-public class ExplainingObjective extends ExplainingCut implements IMonitorInitPropagation, IMonitorUpBranch {
+public class ExplainingObjective extends ExplainingCut{
 
     private ObjectiveManager<IntVar, Integer> om;
     private IntVar objective;
@@ -91,7 +88,7 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         tmpDeductions.clear();
         tmpValueDeductions.clear();
         clusters.clear();
-        path.clear();
+        path.free();
 
         // 2. get anti domain of the objective variable
         readRemovedValues();
@@ -107,7 +104,6 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
         }
         unrelated.clear();
         unrelated.or(related);
-        unrelated.flip(path.get(0).getWorldIndex(), unrelated.length());
         forceCft = true;
     }
 
@@ -128,40 +124,30 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
 
 
     @Override
-    public void beforeInitialPropagation() {
-        // nothing to do
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void afterInitialPropagation() {
+    public void init() {
         om = mSolver.getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
-
         if (mExplanationEngine == null) {
             if (mSolver.getExplainer() == null) {
                 mSolver.set(new ExplanationEngine(mSolver, false, false));
             }
             this.mExplanationEngine = mSolver.getExplainer();
         }
-        if (mExplanationEngine.getCstrat() == null) {
-            new ConflictBackJumping(mExplanationEngine, mSolver, false);
-        }
     }
 
-    @Override
+    /*@Override
     public void beforeUpBranch() {
     }
 
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().getLastDecision()/*.getId()*/ == last/*.getId()*/) {
+        if (last != null && mSolver.getSearchLoop().getLastDecision()*//*.getId()*//* == last*//*.getId()*//*) {
             mSolver.getSearchLoop().restart();
         }
-    }
+    }*/
 
     ///////////////////////
 
@@ -326,7 +312,6 @@ public class ExplainingObjective extends ExplainingCut implements IMonitorInitPr
             tmpValueDeductions.add(b);
         }
 
-        assert tmpValueDeductions.size() > 0 : "E(" + value + ") is EMPTY";
         tmpValueDeductions.removeAll(tmpDeductions);
         //        assert tmpDeductions.size() == 0 || correct : "E(" + value + ") not INCLUDED in previous ones";
         if (tmpDeductions.addAll(tmpValueDeductions)) {

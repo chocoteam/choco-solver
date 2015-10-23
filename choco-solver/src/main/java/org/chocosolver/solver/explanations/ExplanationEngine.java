@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.store.ArrayEventStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
-import org.chocosolver.solver.explanations.strategies.ConflictStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.FilteringMonitor;
@@ -58,7 +57,6 @@ public class ExplanationEngine implements FilteringMonitor {
     private final boolean saveCauses; // save the clauses in Explanation
     private final boolean enablePartialExplanation;
     private final Solver mSolver;
-    private ConflictStrategy cstrat;
     PoolManager<Explanation> explanationPool;
 
 
@@ -77,20 +75,6 @@ public class ExplanationEngine implements FilteringMonitor {
         ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
         solver.set(this);
         this.explanationPool = new PoolManager<>();
-    }
-
-    /**
-     * Return the conflict strategy declared
-     */
-    public ConflictStrategy getCstrat() {
-        return cstrat;
-    }
-
-    /**
-     * Set the conflict strategy to use
-     */
-    public void setCstrat(ConflictStrategy cstrat) {
-        this.cstrat = cstrat;
     }
 
     /**

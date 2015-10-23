@@ -27,20 +27,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.limits;
+package org.chocosolver.solver.search.loop;
 
 /**
- * An interface to define action to be done when a counter has reached its limit
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 07/06/13
+ * Created by cprudhom on 02/09/15.
+ * Project: choco.
  */
-public interface ICounterAction {
+public class LearnNothing implements Learn {
+    @Override
+    public void record(SearchLoop searchLoop) {
 
-    /**
-     * Action to execute when a limit is reached
-     */
-    void onLimitReached();
+    }
 
+    @Override
+    public void forget(SearchLoop searchLoop) {
+
+    }
 }

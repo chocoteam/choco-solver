@@ -38,7 +38,7 @@ import java.util.Arrays;
  * Created by cprudhom on 20/10/2015.
  * Project: choco.
  */
-public class IntHash implements Serializable{
+public class IntMap implements Serializable{
 
     /**
      * Default initial capacity.
@@ -69,15 +69,15 @@ public class IntHash implements Serializable{
     int size;
 
 
-    public IntHash() {
+    public IntMap() {
         this(DEFAULT_CAPACITY, -1);
     }
 
-    public IntHash(int initialCapacity) {
+    public IntMap(int initialCapacity) {
         this(initialCapacity, -1);
     }
 
-    public IntHash(int initialCapacity, int no_value) {
+    public IntMap(int initialCapacity, int no_value) {
         this.elements = new int[initialCapacity];
         this.FREE = no_value;
         Arrays.fill(elements, FREE);

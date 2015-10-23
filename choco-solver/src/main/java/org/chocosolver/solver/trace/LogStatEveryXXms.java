@@ -31,7 +31,7 @@ package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 
 /**
  * A search monitor logger which prints statistics every XX ms.
@@ -40,7 +40,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorInitPropagation;
  * @author Charles Prud'homme
  * @since 18 aug. 2010
  */
-public class LogStatEveryXXms implements IMonitorInitPropagation, IMonitorClose {
+public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
 
     Thread printer;
     boolean alive;
@@ -68,17 +68,8 @@ public class LogStatEveryXXms implements IMonitorInitPropagation, IMonitorClose 
     }
 
     @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
+    public void afterInitialize() {
         printer.start();
-    }
-
-    @Override
-    public void beforeClose() {
-
     }
 
     @Override

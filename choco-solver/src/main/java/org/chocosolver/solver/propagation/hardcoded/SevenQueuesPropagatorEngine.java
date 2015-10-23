@@ -43,7 +43,7 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
-import org.chocosolver.util.objects.IntHash;
+import org.chocosolver.util.objects.IntMap;
 import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected IntHash p2i; // mapping between propagator ID and its absolute index
+    protected IntMap p2i; // mapping between propagator ID and its absolute index
     protected int notEmpty; // point out the no empty queues
     protected short[] scheduled; // also maintains the index of the queue!
     protected IntCircularQueue[] eventsets;
@@ -120,7 +120,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
             trigger.addAll(propagators);
 
-            p2i = new IntHash(propagators.length);
+            p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
                 p2i.put(propagators[j].getId(), j);
             }

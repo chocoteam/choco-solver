@@ -48,7 +48,7 @@ import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.search.loop.ISearchLoop;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.SearchLoop;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
@@ -59,16 +59,19 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.observers.FilteringMonitorList;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.criteria.Criterion;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The <code>Solver</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
  * and a <code>IPropagationEngine</code> to pilot the propagation.<br/>
- * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: apply decisions and propagate,
- * run backups and rollbacks and store solutions.
+ * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: applying decisions and propagating,
+ * running backups and rollbacks and storing solutions.
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
@@ -110,7 +113,18 @@ public class Solver implements Serializable {
     /**
      * Search loop of the solver
      */
-    protected ISearchLoop search;
+    protected SearchLoop search;
+
+    /**
+     * List of search monitors to plug before launching the search
+     */
+    protected List<ISearchMonitor> searchMonitors;
+
+
+    /**
+     * List of stop criteria to plug before launching the search
+     */
+    protected List<Criterion> stopCriteria;
 
     protected IPropagationEngine engine;
 
@@ -177,19 +191,21 @@ public class Solver implements Serializable {
     public Solver(IEnvironment environment, String name) {
         this.name = name;
         this.vars = new Variable[32];
-        vIdx = 0;
+        this.vIdx = 0;
         this.cstrs = new Constraint[32];
-        cIdx = 0;
+        this.cIdx = 0;
         this.environment = environment;
-        this.measures = new MeasuresRecorder(this); // must be created before calling search loop.
-        this.search = new SearchLoop(this);
+        this.measures = new MeasuresRecorder(this);
         this.eoList = new FilteringMonitorList();
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
-        set(ObjectiveManager.SAT());
+        SLF.dfs(this, null);
+        this.searchMonitors = new ArrayList<>();
+        this.stopCriteria = new ArrayList<>();
+        this.search.setObjectiveManager(ObjectiveManager.SAT());
         this.objectives = null;
+        this.solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
     }
 
     /**
@@ -221,10 +237,7 @@ public class Solver implements Serializable {
      */
     public BoolVar ZERO() {
         if (ZERO == null) {
-            ZERO = (BoolVar) VF.fixed(0, this);
-            ONE = (BoolVar) VF.fixed(1, this);
-            ZERO._setNot(ONE);
-            ONE._setNot(ZERO);
+            _zeroOne();
         }
         return ZERO;
     }
@@ -236,12 +249,16 @@ public class Solver implements Serializable {
      */
     public BoolVar ONE() {
         if (ONE == null) {
-            ZERO = (BoolVar) VF.fixed(0, this);
-            ONE = (BoolVar) VF.fixed(1, this);
-            ZERO._setNot(ONE);
-            ONE._setNot(ZERO);
+            _zeroOne();
         }
         return ONE;
+    }
+
+    private void _zeroOne(){
+        ZERO = (BoolVar) VF.fixed(0, this);
+        ONE = (BoolVar) VF.fixed(1, this);
+        ZERO._setNot(ONE);
+        ONE._setNot(ZERO);
     }
 
     /**
@@ -271,20 +288,27 @@ public class Solver implements Serializable {
 
     /**
      * Returns the unique and internal search loop.
+     * Set to null when this solver is created,
+     * it is lazily created (if needed) when a resolution is asked.
      *
-     * @return the unique and internal <code>AbstractSearchLoop</code> object.
+     * @return the unique and internal <code>SearchLoop</code> object.
      */
-    public ISearchLoop getSearchLoop() {
+    public SearchLoop getSearchLoop() {
         return search;
     }
 
     /**
-     * Get the objective manager
+     * Get the objective manager.
+     * @return the objective manager (can be <tt>null</tt>).
      */
     public ObjectiveManager getObjectiveManager() {
         return this.search.getObjectiveManager();
     }
 
+    /**
+     * The search strategy declared
+     * @return the search strategy declared (can be <tt>null</tt>).
+     */
     public AbstractStrategy getStrategy() {
         return search.getStrategy();
     }
@@ -492,7 +516,7 @@ public class Solver implements Serializable {
      *
      * @param searchLoop the search loop to use
      */
-    public void set(ISearchLoop searchLoop) {
+    public void set(SearchLoop searchLoop) {
         this.search = searchLoop;
     }
 
@@ -515,7 +539,6 @@ public class Solver implements Serializable {
         } else {
             search.set(ISF.sequencer(strategies));
         }
-
     }
 
     /**
@@ -552,13 +575,76 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Put a search monitor to react on search events (solutions, decisions, fails, ...)
+     * Put a search monitor to react on search events (solutions, decisions, fails, ...).
+     * Any search monitor is actually plugged just before the search starts.
+     *
+     * There is no check if there are any duplicates.
+     * A search monitor added during while the resolution has started will not be taken into account.
      *
      * @param sm a search monitor to be plugged in the solver
      */
     public void plugMonitor(ISearchMonitor sm) {
-        search.plugSearchMonitor(sm);
+        searchMonitors.add(sm);
     }
+
+    /**
+     * Removes a search monitors from the ones to plug when the search will start.
+     * @param sm a search monitor to be unplugged in the solver
+     */
+    public void unplugMonitor(ISearchMonitor sm){
+        searchMonitors.remove(sm);
+    }
+
+    /**
+     * Removes all search monitors from the list of search monitors to plug on the search loop.
+     */
+    public void unplugAllMonitors(){
+        searchMonitors.clear();
+    }
+
+    /**
+     * Adds a stop criterion, which, when met, stops the search loop.
+     * There can be multiple stop criteria, a logical OR is then applied.
+     * The stop criteria are declared to the search loop just before launching the search,
+     * the previously defined ones are erased.
+     *
+     * There is no check if there are any duplicates.
+     *
+     * <br/>
+     * Examples:
+     * <br/>
+     * With a built-in counter, stop after 20 seconds:
+     * <pre>
+     *         SMF.limitTime(solver, "20s");
+     * </pre>
+     * With lambda, stop when 10 nodes are visited:
+     * <pre>
+     *     () -> solver.getMeasures().getNodeCount() >= 10
+     * </pre>
+     *
+     * @param criterion a stop criterion to add.
+     * @see #removeStopCriterion(Criterion)
+     * @see #removeAllStopCriteria()
+     */
+    public void addStopCriterion(Criterion criterion){
+        stopCriteria.add(criterion);
+    }
+
+    /**
+     * Removes a stop criterion from the one to declare to the search loop.
+     * @param criterion criterion to remove
+     */
+    public void removeStopCriterion(Criterion criterion){
+        stopCriteria.remove(criterion);
+    }
+
+    /**
+     * Remove all declared stop criteria.
+     */
+    public void removeAllStopCriteria(){
+        stopCriteria.clear();
+    }
+
 
     /**
      * Override the default {@link org.chocosolver.solver.Settings} object.
@@ -1006,6 +1092,13 @@ public class Solver implements Serializable {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
+        // first declare the search monitors to the search
+        search.unplugAllSearchMonitors();
+        search.transferSearchMonitors(searchMonitors);
+        // then, declare the stop criterion
+        search.removeAllStopCriteria();
+        search.transferStopCriteria(stopCriteria);
+
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
     }
@@ -1168,13 +1261,6 @@ public class Solver implements Serializable {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * <b>This methods should not be called by the user.</b>
-     */
-    public int getNbIdElt() {
-        return id;
-    }
 
     /**
      * <b>This methods should not be called by the user.</b>

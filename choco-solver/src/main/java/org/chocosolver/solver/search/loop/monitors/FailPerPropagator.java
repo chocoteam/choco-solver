@@ -33,7 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.util.objects.IntHash;
+import org.chocosolver.util.objects.IntMap;
 
 /**
  * <br/>
@@ -43,11 +43,11 @@ import org.chocosolver.util.objects.IntHash;
  */
 public class FailPerPropagator implements IMonitorContradiction {
 
-    protected IntHash p2w;
+    protected IntMap p2w;
 
 
     public FailPerPropagator(Constraint[] constraints, Solver solver) {
-        p2w = new IntHash(10, 0);
+        p2w = new IntMap(10, 0);
         init(constraints);
         solver.plugMonitor(this);
     }

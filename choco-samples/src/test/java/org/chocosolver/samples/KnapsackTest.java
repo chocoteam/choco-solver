@@ -33,6 +33,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import org.chocosolver.samples.integer.Knapsack;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -142,10 +143,9 @@ public class KnapsackTest {
     public void testOPT15() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Solver s = ks.modelIt("k20", 15);
-//        SearchMonitorFactory.log(s, false, false);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 27, "nb sol");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 29, "nb sol");
 //        Assert.assertEquals(s.getMeasures().getNodeCount(), 1153919, "nb nod");
     }
 

@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -79,12 +79,8 @@ public class NogoodFromRestarts implements IMonitorRestart {
         extractNogoodFromPath();
     }
 
-    @Override
-    public void afterRestart() {
-    }
-
     private void extractNogoodFromPath() {
-        int d = png.getSolver().getSearchLoop().getCurrentDepth();
+        int d = (int) png.getSolver().getMeasures().getNodeCount();
         Decision<IntVar> decision = png.getSolver().getSearchLoop().getLastDecision();
         while (decision != RootDecision.ROOT) {
             decisions.addLast(decision);
@@ -94,18 +90,37 @@ public class NogoodFromRestarts implements IMonitorRestart {
         int i = 0;
         while (!decisions.isEmpty()) {
             decision = decisions.pollLast();
-            assert decision instanceof IntDecision : "NogoodStoreFromRestarts is only valid for integer variables (hence FastDecision)";
-            assert ((IntDecision) decision).getDecOp() == DecisionOperator.int_eq : "NogoodStoreFromRestarts is only valid for assignment decisions";
-            if (decision.hasNext()) {
-                lits[i++] = SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue()));
-            } else {
-                if (i == 0) {
-                    // value can be removed permanently from var!
-                    png.addLearnt(SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue())));
+            if (decision instanceof IntDecision) {
+                IntDecision id = (IntDecision) decision;
+                if (id.getDecOp() == DecisionOperator.int_eq) {
+                    if (id.hasNext()) {
+                        lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue()));
+                    } else {
+                        if (i == 0) {
+                            // value can be removed permanently from var!
+                            png.addLearnt(SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue())));
+                        } else {
+                            lits[i] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue()));
+                            png.addLearnt(Arrays.copyOf(lits, i + 1));
+                        }
+                    }
+                } else if (id.getDecOp() == DecisionOperator.int_neq) {
+                    if (id.hasNext()) {
+                        lits[i++] = png.Literal(id.getDecisionVariables(), id.getDecisionValue());
+                    } else {
+                        if (i == 0) {
+                            // value can be removed permanently from var!
+                            png.addLearnt(png.Literal(id.getDecisionVariables(), id.getDecisionValue()));
+                        } else {
+                            lits[i] = png.Literal(id.getDecisionVariables(), id.getDecisionValue());
+                            png.addLearnt(Arrays.copyOf(lits, i + 1));
+                        }
+                    }
                 } else {
-                    lits[i] = SatSolver.negated(png.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue()));
-                    png.addLearnt(Arrays.copyOf(lits, i + 1));
+                    throw new UnsupportedOperationException("NogoodStoreFromRestarts cannot deal with such operator: " + ((IntDecision) decision).getDecOp());
                 }
+            } else {
+                throw new UnsupportedOperationException("NogoodStoreFromRestarts can only deal with IntDecision.");
             }
         }
     }

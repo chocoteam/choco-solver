@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,8 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.BitSet;
+
 /**
  * A decision made of multiple instantiation.
  * Required for large neighborhood search, for example.
@@ -41,28 +43,65 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class IntMetaDecision extends Decision<IntVar[]> {
 
-    protected int idx;
+    protected int size;
     protected int[] val;
+    protected BitSet isAsgn; // is assignment?
 
     public IntMetaDecision() {
         super(1);
         var = new IntVar[64];
         val = new int[64];
+        isAsgn = new BitSet(64);
     }
 
     @Override
     public void apply() throws ContradictionException {
-        for (int i = 0; i < idx; i++) {
-            var[i].instantiateTo(val[i], this);
+        for (int i = 0; i < size; i++) {
+            if(isAsgn.get(i)){
+                var[i].instantiateTo(val[i], this);
+            }else{
+                var[i].removeValue(val[i], this);
+            }
         }
     }
 
     public void add(IntVar aVar, int aVal) {
-        if (idx >= var.length) {
+        add(aVar, aVal, true);
+    }
+
+    public void add(IntVar aVar, int aVal, boolean asgn) {
+        if (size >= var.length) {
             increase();
         }
-        var[idx] = aVar;
-        val[idx++] = aVal;
+        var[size] = aVar;
+        val[size] = aVal;
+        isAsgn.set(size++, asgn);
+    }
+
+    public IntVar getVar(int i) {
+        return var[i];
+    }
+
+    public int getVal(int i) {
+        return val[i];
+    }
+
+    public boolean isAssignement(int i){
+        return isAsgn.get(i);
+    }
+
+
+    public int size() {
+        return size;
+    }
+
+    public void remove(int from, int to){
+        System.arraycopy(var, to, var, from, size - to);
+        System.arraycopy(val, to, val, from, size - to);
+        for(int i = to; i < size; i++){
+            isAsgn.set(from + i - to, isAsgn.get(i));
+        }
+        size -= (to - from);
     }
 
     @Override
@@ -73,7 +112,7 @@ public class IntMetaDecision extends Decision<IntVar[]> {
 
     @Override
     public void free() {
-        idx = 0;
+        size = 0;
     }
 
     @Override
@@ -81,22 +120,22 @@ public class IntMetaDecision extends Decision<IntVar[]> {
         StringBuilder st = new StringBuilder();
         st.append("(");
         int i = 0;
-        switch (idx) {
+        switch (size) {
             case 0:
                 break;
             default:
             case 3:
-                st.append(var[i].getName()).append(" == ").append(val[i++]).append(" & ");
+                st.append(var[i].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[i++]).append(" & ");
             case 2:
-                st.append(var[i].getName()).append(" == ").append(val[i++]).append(" & ");
+                st.append(var[i].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[i++]).append(" & ");
             case 1:
-                st.append(var[i].getName()).append(" == ").append(val[i++]);
+                st.append(var[i].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[i++]);
         }
-        if (i < idx) {
-            if (idx > 4) {
+        if (i < size) {
+            if (size > 4) {
                 st.append(" & ...");
             }
-            st.append(" & ").append(var[idx - 1].getName()).append(" == ").append(val[idx - 1]);
+            st.append(" & ").append(var[size - 1].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[size - 1]);
         }
         st.append(')');
 

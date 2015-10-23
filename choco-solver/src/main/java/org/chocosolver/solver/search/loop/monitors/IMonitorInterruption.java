@@ -35,6 +35,7 @@ package org.chocosolver.solver.search.loop.monitors;
  *
  * @author Charles Prud'homme
  * @since 13/12/12
+ * @deprecated
  */
 public interface IMonitorInterruption extends ISearchMonitor {
     void afterInterrupt();

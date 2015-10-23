@@ -27,11 +27,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.explanations.strategies;
+package org.chocosolver.solver.search.loop;
+
+import java.io.Serializable;
 
 /**
- * Created by cprudhom on 28/01/15.
+ * The "Learn" component
+ * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
+ *
+ * The aim of the component is to make sure that the search mechanism will avoid (as much as possible) to get back to states that have been explored and proved to be solution-less.
+ *
+ * Created by cprudhom on 01/09/15.
  * Project: choco.
  */
-public interface ConflictStrategy {
+public interface Learn extends Serializable{
+
+    /**
+     * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
+     */
+    void record(SearchLoop searchLoop);
+
+    /**
+     * Forget some pieces of knowledge.
+     */
+    void forget(SearchLoop searchLoop);
+
 }

@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -128,21 +127,6 @@ public class CarSequencing extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.lexico_LB(cars));
-		solver.plugMonitor(new IMonitorOpenNode() {
-            int c = 0;
-
-            @Override
-            public void beforeOpenNode() {
-            }
-
-            @Override
-            public void afterOpenNode() {
-                c++;
-                if (c % 100 == 0) {
-                    System.out.println("# search nodes : " + c);
-                }
-            }
-        });
     }
 
     @Override
@@ -218,7 +202,7 @@ public class CarSequencing extends AbstractProblem {
 
     /////////////////////////////////// DATA //////////////////////////////////////////////////
 
-    static enum Data {
+    enum Data {
         myPb("10 5 6\n" +
                 "1 2 1 2 1\n" +
                 "2 3 3 5 5\n" +
