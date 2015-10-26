@@ -189,6 +189,16 @@ public interface Settings extends Serializable {
      * @return enable output with colors
      */
     default boolean outputWithANSIColors(){
-        return false;
+        return true;
+    }
+
+    /**
+     * If this setting is set to true (default value), a clone of the input variable array is made in any propagator constructors.
+     * This prevents, for instance, wrong behavior when permutations occurred on the input array (e.g., sorting variables).
+     * Setting this to false may limit the memory consumption during modelling.
+     * @return true if all propagators should clone the input variable array instead of simply referencing it.
+     */
+    default boolean cloneVariableArrayInPropagator(){
+        return true;
     }
 }

@@ -77,6 +77,6 @@ public class RealDecision extends Decision<RealVar> {
 
     @Override
     public String toString() {
-        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), "<=", value, branch);
+        return String.format("%s%s %s %s", (branch < 2 ? "" : "!"), var.getName(), "<=", value);
     }
 }

@@ -200,6 +200,7 @@ public final class SearchLoop implements Serializable {
                     break;
                 case propagate:
                     searchMonitors.beforeDownBranch(left);
+                    mMeasures.incDepth();
                     try {
                         P.execute(this);
                         action = extend;
@@ -227,6 +228,7 @@ public final class SearchLoop implements Serializable {
                     left = false;
                     L.record(this);
                     searchMonitors.beforeUpBranch();
+                    mMeasures.decDepth();
                     boolean repaired = M.repair(this);
                     searchMonitors.afterUpBranch();
                     if (!repaired) {

@@ -34,6 +34,7 @@ import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.Variable;
 
@@ -48,6 +49,8 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMonitorUpBranch,
         IMonitorClose, IMonitorSolution, IMonitorContradiction, IMonitorRestart {
+
+    public static boolean DEBUG = false;
 
     Solver mSolver;
 
@@ -103,8 +106,18 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     @Override
     public void beforeDownBranch(boolean left) {
         if (left) {
-            pid_stack.push(nc); // two child nodes will
-            pid_stack.push(nc); // have the same pid
+            Decision dec = mSolver.getSearchLoop().getLastDecision();
+            String pdec = pretty(dec.getPrevious());
+            int pid = pid_stack.peek();
+            int alt = alt_stack.pop();
+            int ari = dec.getArity();
+            if(DEBUG)System.out.printf(
+                    "connector.sendNode(%d, %d, %d, %d, Connector.NodeStatus.BRANCH, \"%s\", \"\");\n",
+                    nc, pid, alt, ari, pdec);
+            connector.sendNode(nc, pid, alt, dec.getArity(), Connector.NodeStatus.BRANCH, pdec, "");
+            for(int i = 0 ; i < ari; i++){
+                pid_stack.push(nc); // each child will have the same pid
+            }
             nc++;
             alt_stack.push(0);
         } else {
@@ -120,23 +133,24 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     @Override
     public void onSolution() {
-        connector.sendNode(nc,
-                pid_stack.peek(),
-                alt_stack.pop(), 0,
-                Connector.NodeStatus.SOLVED,
-                mSolver.getSearchLoop().getLastDecision().toString(),
-                solutionMessage.print());
+        String dec = pretty(mSolver.getSearchLoop().getLastDecision());
+        int pid = pid_stack.peek();
+        int alt = alt_stack.pop();
+        if(DEBUG)System.out.printf(
+                "connector.sendNode(%d, %d, %d, 0, Connector.NodeStatus.SOLVED, \"%s\", \"%s\");\n",
+                nc, pid, alt, dec, ""/*solutionMessage.print()*/);
+        connector.sendNode(nc, pid, alt, 0, Connector.NodeStatus.SOLVED, dec, ""/*solutionMessage.print()*/);
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        connector.sendNode(nc,
-                pid_stack.peek(),
-                alt_stack.pop(),
-                0,
-                Connector.NodeStatus.FAILED,
-                mSolver.getSearchLoop().getLastDecision().toString(),
-                cex.toString());
+        String dec = pretty(mSolver.getSearchLoop().getLastDecision());
+        int pid = pid_stack.peek();
+        int alt = alt_stack.pop();
+        if(DEBUG)System.out.printf(
+                "connector.sendNode(%d, %d, %d, 0, Connector.NodeStatus.FAILED, \"%s\", \"%s\");\n",
+                nc, pid, alt, dec, ""/*solutionMessage.print()*/);
+        connector.sendNode(nc, pid, alt, 0, Connector.NodeStatus.FAILED, dec, ""/*cex.toString()*/);
     }
 
     @Override
@@ -147,5 +161,22 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     @Override
     public void afterClose() {
         connector.disconnect();
+    }
+
+    private static String pretty(Decision dec) {
+        // to print decision correctly (since the previous one is sent)
+        int a = dec.getArity();
+        int b = dec.triesLeft();
+        dec.rewind();
+        while (dec.triesLeft() > b + 1) {
+            a--;
+            dec.buildNext();
+        }
+        String pretty = dec.toString();
+        while (a > b) {
+            b++;
+            dec.buildNext();
+        }
+        return pretty;
     }
 }

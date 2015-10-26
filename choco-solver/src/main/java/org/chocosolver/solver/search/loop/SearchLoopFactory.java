@@ -53,6 +53,7 @@ public class SearchLoopFactory {
     /**
      * Depth First Search algorithms with binary decisions and no learning.
      * The current search loop (if any) will be replaced by this one after that call.
+     * The current search strategy (if any) will also be replaced by the input one.
      *
      * @param aSolver         the target solver
      * @param aSearchStrategy the search strategy to apply
@@ -68,6 +69,8 @@ public class SearchLoopFactory {
      * [1]:W.D. Harvey and M.L.Ginsberg, Limited Discrepancy Search, IJCAI-95.
      *
      * The current search loop (if any) will be replaced by this one after that call.
+     * The current search strategy (if any) will also be replaced by the input one.
+     *
      * @param aSolver         the target solver
      * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
@@ -84,6 +87,7 @@ public class SearchLoopFactory {
      * [1]:T. Walsh, Depth-bounded Discrepancy Search, IJCAI-97.
      *
      * The current search loop (if any) will be replaced by this one after that call.
+     * The current search strategy (if any) will also be replaced by the input one.
      *
      * @param aSolver         the target solver
      * @param aSearchStrategy the search strategy to apply

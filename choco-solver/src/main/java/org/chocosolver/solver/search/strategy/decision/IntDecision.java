@@ -103,37 +103,32 @@ public class IntDecision extends Decision<IntVar> {
     @Override
     public String toString() {
         if (assignment.equals(DecisionOperator.int_eq)) {
-            return String.format("%s%s{%d} (%d/%d)",
+            return String.format("%s %s {%d}",
                     var.getName(),
                     branch < 1 ? "=":'\\',
-                    value,
-                    branch + 1, max_branching);
+                    value);
         } else if (assignment.equals(DecisionOperator.int_neq)) {
-            return String.format("%s%s{%d} (%d/%d)",
+            return String.format("%s %s {%d}",
                     var.getName(),
                     branch < 1 ? '\\':"=",
-                    value,
-                    branch + 1, max_branching);
+                    value);
         } else if (assignment.equals(DecisionOperator.int_split)) {
-            return String.format("%s in %s%d,%d] (%d/%d)",
+            return String.format("%s in %s%d,%d]",
                     var.getName(),
                     branch < 1 ? '[' : ']',
                     branch < 1 ? var.getLB() : value,
-                    branch < 1 ? value : var.getUB(),
-                    branch + 1, max_branching);
+                    branch < 1 ? value : var.getUB());
         } else if (assignment.equals(DecisionOperator.int_reverse_split)) {
-            return String.format("%s in [%d,%d%s (%d/%d)",
+            return String.format("%s in [%d,%d%s",
                     var.getName(),
                     branch < 1 ? value : var.getLB(),
                     branch < 1 ? var.getUB() : value,
-                    branch < 1 ? ']' : '[',
-                    branch + 1, max_branching);
+                    branch < 1 ? ']' : '[');
         } else {
-            return String.format("%s%s{%s} (%d/%d)",
+            return String.format("%s %s {%s}",
                     var.getName(),
                     branch < 1 ? assignment.toString(): assignment.opposite().toString(),
-                    value,
-                    branch + 1, max_branching);
+                    value);
         }
     }
 

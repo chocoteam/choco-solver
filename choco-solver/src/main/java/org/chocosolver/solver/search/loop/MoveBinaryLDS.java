@@ -69,6 +69,7 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     @Override
     public boolean repair(SearchLoop searchLoop) {
         searchLoop.mMeasures.incBackTrackCount();
+        searchLoop.mMeasures.incDepth();
         searchLoop.mSolver.getEnvironment().worldPop();
         boolean repaired = rewind(searchLoop);
         // increase the discrepancy max, if allowed, when the root node is reached

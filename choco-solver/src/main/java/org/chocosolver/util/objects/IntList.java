@@ -154,11 +154,11 @@ public class IntList implements Serializable{
      * @throws IndexOutOfBoundsException if the index is out of range
      *                                   (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    public void set(int index, int element) {
+    public void replace(int index, int element) {
         if (index < 0 || index >= size) {
             throw new ArrayIndexOutOfBoundsException(index);
         }
-        setQuick(index, element);
+        replaceQuick(index, element);
     }
 
     /**
@@ -171,7 +171,7 @@ public class IntList implements Serializable{
      * @throws IndexOutOfBoundsException if the index is out of range
      *                                   (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    public void setQuick(int index, int element) {
+    public void replaceQuick(int index, int element) {
         elements[index] = element;
     }
 
@@ -184,6 +184,18 @@ public class IntList implements Serializable{
     public boolean add(int element) {
         ensureCapacity(size + 1);
         elements[size++] = element;
+        return true;
+    }
+
+    /**
+     * Add the element at the specified position in this list.
+     *
+     * @param index   index of the element to put
+     * @param element element to be stored at the specified position
+     */
+    public boolean addAt(int index, int element) {
+        ensureCapacity(index);
+        elements[index] = element;
         return true;
     }
 

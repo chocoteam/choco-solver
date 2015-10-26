@@ -72,6 +72,7 @@ public class MoveBinaryDFS implements Move {
     @Override
     public boolean repair(SearchLoop searchLoop) {
         searchLoop.mMeasures.incBackTrackCount();
+        searchLoop.mMeasures.incDepth();
         searchLoop.mSolver.getEnvironment().worldPop();
         return rewind(searchLoop);
     }
@@ -104,8 +105,11 @@ public class MoveBinaryDFS implements Move {
         Decision tmp = searchLoop.decision;
         searchLoop.decision = searchLoop.decision.getPrevious();
         tmp.free();
+        searchLoop.searchMonitors.afterUpBranch(); // to make sure search monitors are correctly informed
         searchLoop.mMeasures.incBackTrackCount();
+        searchLoop.mMeasures.incDepth();
         searchLoop.mSolver.getEnvironment().worldPop();
+        searchLoop.searchMonitors.beforeUpBranch(); // to make sure search monitors are correctly informed
     }
 
     @Override

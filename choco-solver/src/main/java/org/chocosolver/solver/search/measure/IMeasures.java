@@ -136,6 +136,16 @@ public interface IMeasures extends Serializable, Cloneable {
     void incFailCount();
 
     /**
+     * Increments current depth
+     */
+    void incDepth();
+
+    /**
+     * Decrements current depth
+     */
+    void decDepth();
+
+    /**
      * @return the restart count
      */
     long getRestartCount();
@@ -154,6 +164,16 @@ public interface IMeasures extends Serializable, Cloneable {
      * increment solution counter
      */
     void incSolutionCount();
+
+    /**
+     * @return the maximum depth of the search tree
+     */
+    long getMaxDepth();
+
+    /**
+     * @return the current depth in the search tree
+     */
+    long getCurrentDepth();
 
     /**
      * indicates an objective variable

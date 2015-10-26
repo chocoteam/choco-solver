@@ -42,7 +42,7 @@ public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
 
     public RootDecision() {
-        super(0);
+        super(1);
     }
 
     // FOR SERIALIZATION

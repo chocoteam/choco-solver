@@ -50,6 +50,7 @@ and IntVar#updateBounds(int, int, ICause) (#270)
 - simplify and improve basic element propagator (#325)
 - remove aCause from Propagator
 - simplify Propagation.contradiction(...)
+- add new setting to Settings to allow to not clone variables array input to Propagator's constructor
 
 
 #### Explanations: 

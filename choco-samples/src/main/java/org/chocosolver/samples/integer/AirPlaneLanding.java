@@ -175,6 +175,7 @@ public class AirPlaneLanding extends AbstractProblem {
         solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, objective));
 
         solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
+        solver.setObjectives(objective);
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {

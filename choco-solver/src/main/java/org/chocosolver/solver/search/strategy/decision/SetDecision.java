@@ -83,6 +83,6 @@ public class SetDecision extends Decision<SetVar> {
 
     @Override
     public String toString() {
-        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), operator.toString(), value, branch);
+        return String.format("%s%s %s %s", (branch < 2 ? "" : "!"), var.getName(), operator.toString(), value);
     }
 }

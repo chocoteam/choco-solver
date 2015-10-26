@@ -91,7 +91,7 @@ public class PropagationTrigger implements Serializable {
                 perm_world.add(Integer.MAX_VALUE);
                 size++;
             } else {
-                perm_world.setQuick(pos, Integer.MAX_VALUE);
+                perm_world.replaceQuick(pos, Integer.MAX_VALUE);
             }
         }
     }
@@ -156,7 +156,7 @@ public class PropagationTrigger implements Serializable {
             for (int p = 0; p < perm_propagators.size(); p++) {
                 if (perm_world.getQuick(p) >= cw) {
                     execute(perm_propagators.get(p), engine);
-                    perm_world.set(p, cw);
+                    perm_world.replace(p, cw);
                     // TODO: add a test on the root world to clear the list
                 }
             }

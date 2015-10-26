@@ -138,7 +138,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.priority = priority;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
-        this.vars = vars;
+        if(solver.getSettings().cloneVariableArrayInPropagator()){
+            this.vars = vars.clone();
+        }else{
+            this.vars = vars;
+        }
         this.vindices = new int[vars.length];
         this.linkVariables();
         ID = solver.nextId();

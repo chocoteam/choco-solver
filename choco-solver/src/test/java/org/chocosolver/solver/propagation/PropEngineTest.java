@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.propagation;
 
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
@@ -38,6 +39,8 @@ import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -70,5 +73,21 @@ public class PropEngineTest {
         solver.unpost(CSTR);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+    }
+
+    // test clone in propagators
+    @Test(groups="1s", expectedExceptions = AssertionError.class)
+    public void testClone(){
+        Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public boolean cloneVariableArrayInPropagator() {
+                return false;
+            }
+        });
+        IntVar[] vars = VF.enumeratedArray("V", 3, 0,4, solver);
+        solver.post(ICF.alldifferent(vars));
+        Arrays.sort(vars, (o1, o2) -> o2.getId() - o1.getId());
+        solver.findAllSolutions();
     }
 }

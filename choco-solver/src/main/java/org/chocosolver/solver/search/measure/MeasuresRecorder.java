@@ -55,6 +55,7 @@ public final class MeasuresRecorder implements IMeasures {
     public long backtrackCount;
     public long failCount;
     public long restartCount;
+    public long maxDepth, depth;
 
     protected long startingTime;
 
@@ -83,6 +84,8 @@ public final class MeasuresRecorder implements IMeasures {
         mr.failCount = failCount;
         mr.restartCount = restartCount;
         mr.startingTime = startingTime;
+        mr.maxDepth = maxDepth;
+        mr.depth = depth;
         mr.cstrs = cstrs.clone();
         return mr;
     }
@@ -115,6 +118,8 @@ public final class MeasuresRecorder implements IMeasures {
         failCount = 0;
         solutionCount = 0;
         hasObjective = false;
+        depth = 0;
+        maxDepth = 0;
         cstrs = null;
     }
 
@@ -163,6 +168,16 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
+    public long getMaxDepth() {
+        return maxDepth;
+    }
+
+    @Override
+    public long getCurrentDepth() {
+        return depth;
+    }
+
+    @Override
     public boolean isObjectiveOptimal() {
         return objectiveOptimal;
     }
@@ -190,6 +205,9 @@ public final class MeasuresRecorder implements IMeasures {
     @Override
     public void incNodeCount() {
         nodeCount++;
+        if (depth > maxDepth) {
+            maxDepth = depth;
+        }
     }
 
     @Override
@@ -212,6 +230,15 @@ public final class MeasuresRecorder implements IMeasures {
         solutionCount++;
         updateTime();
     }
+
+    public void incDepth(){
+        depth++;
+    }
+
+    public void decDepth(){
+        depth--;
+    }
+
     @Override
     public void startStopwatch() {
         startingTime = System.nanoTime();

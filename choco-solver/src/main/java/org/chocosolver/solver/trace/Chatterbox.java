@@ -35,6 +35,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
 import java.io.PrintStream;
@@ -281,10 +282,11 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                out.printf("%s[%s] %s%s ", pad("", solver.getEnvironment().getWorldIndex(), "."),
-                        left?"L":"R",
+                Decision d = solver.getSearchLoop().getLastDecision();
+                out.printf("%s[%d/%d] %s%s ", pad("", solver.getEnvironment().getWorldIndex(), "."),
+                        d.getArity() - d.triesLeft() +1, d.getArity(),
                         solver.getSettings().outputWithANSIColors()?ANSI_BLUE:"",
-                        solver.getSearchLoop().getLastDecision().toString());
+                        d.toString());
                 out.printf("%s // %s %s\n", solver.getSettings().outputWithANSIColors()?ANSI_GRAY:"",
                         message.print(), solver.getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }
