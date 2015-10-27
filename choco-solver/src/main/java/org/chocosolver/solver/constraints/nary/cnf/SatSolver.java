@@ -369,87 +369,99 @@ public class SatSolver {
         while (qhead_ < trail_.size()) {
             int p = trail_.get(qhead_++);
             // Propagate the implies first.
-            TIntList to_add = implies_.get(p);
-            if (to_add != null) {
-                for (int i = 0; i < to_add.size(); ++i) {
-                    if (!enqueue(to_add.get(i))) {
-                        touched_variables_.add(to_add.get(i));
-                        return false;
+            if(!propagateImplies(p)){
+                return false;
+            }
+            result &= propagateClauses(p);
+        }
+        return result;
+    }
+
+    private boolean propagateClauses(int p) {
+        boolean result = true;
+        // 'p' is enqueued fact to propagate.
+        ArrayList<Watcher> ws = watches_.get(p);
+
+        int i = 0;
+        int j = 0;
+        while (ws != null && i < ws.size()) {
+            // Try to avoid inspecting the clause:
+            int blocker = ws.get(i).blocker;
+            if (valueLit(blocker) == Boolean.kTrue) {
+                ws.set(j++, ws.get(i++));
+                continue;
+            }
+
+            // Make sure the false literal is data[1]:
+            Clause cr = ws.get(i).clause;
+            final int false_lit = negated(p);
+            if (cr._g(0) == false_lit) {
+                cr._s(0, cr._g(1));
+                cr._s(1, false_lit);
+            }
+            assert (cr._g(1) == false_lit);
+            i++;
+
+            // If 0th watch is true, then clause is already satisfied.
+            final int first = cr._g(0);
+            Watcher w = new Watcher(cr, first);
+            if (first != blocker && valueLit(first) == Boolean.kTrue) {
+                ws.set(j++, w);
+                continue;
+            }
+
+            // Look for new watch:
+            boolean cont = false;
+            for (int k = 2; k < cr.size(); k++) {
+                if (valueLit(cr._g(k)) != Boolean.kFalse) {
+                    cr._s(1, cr._g(k));
+                    cr._s(k, false_lit);
+                    ArrayList<Watcher> lw = watches_.get(negated(cr._g(1)));
+                    if (lw == null) {
+                        lw = new ArrayList<>();
+                        watches_.put(negated(cr._g(1)), lw);
                     }
+                    lw.add(w);
+                    cont = true;
+                    break;
                 }
             }
 
-            // 'p' is enqueued fact to propagate.
-            ArrayList<Watcher> ws = watches_.get(p);
-
-            int i = 0;
-            int j = 0;
-            while (ws != null && i < ws.size()) {
-                // Try to avoid inspecting the clause:
-                int blocker = ws.get(i).blocker;
-                if (valueLit(blocker) == Boolean.kTrue) {
-                    ws.set(j++, ws.get(i++));
-                    continue;
-                }
-
-                // Make sure the false literal is data[1]:
-                Clause cr = ws.get(i).clause;
-                final int false_lit = negated(p);
-                if (cr._g(0) == false_lit) {
-                    cr._s(0, cr._g(1));
-                    cr._s(1, false_lit);
-                }
-                assert (cr._g(1) == false_lit);
-                i++;
-
-                // If 0th watch is true, then clause is already satisfied.
-                final int first = cr._g(0);
-                Watcher w = new Watcher(cr, first);
-                if (first != blocker && valueLit(first) == Boolean.kTrue) {
-                    ws.set(j++, w);
-                    continue;
-                }
-
-                // Look for new watch:
-                boolean cont = false;
-                for (int k = 2; k < cr.size(); k++) {
-                    if (valueLit(cr._g(k)) != Boolean.kFalse) {
-                        cr._s(1, cr._g(k));
-                        cr._s(k, false_lit);
-                        ArrayList<Watcher> lw = watches_.get(negated(cr._g(1)));
-                        if (lw == null) {
-                            lw = new ArrayList<>();
-                            watches_.put(negated(cr._g(1)), lw);
-                        }
-                        lw.add(w);
-                        cont = true;
-                        break;
+            // Did not find watch -- clause is unit under assignment:
+            if (!cont) {
+                ws.set(j++, w);
+                if (valueLit(first) == Boolean.kFalse) {
+                    result = false;
+                    qhead_ = trail_.size();
+                    // Copy the remaining watches_:
+                    while (i < ws.size()) {
+                        ws.set(j++, ws.get(i++));
                     }
-                }
-
-                // Did not find watch -- clause is unit under assignment:
-                if (!cont) {
-                    ws.set(j++, w);
-                    if (valueLit(first) == Boolean.kFalse) {
-                        result = false;
-                        qhead_ = trail_.size();
-                        // Copy the remaining watches_:
-                        while (i < ws.size()) {
-                            ws.set(j++, ws.get(i++));
-                        }
-                        touched_variables_.add(first);
-                    } else {
-                        uncheckedEnqueue(first);
-                    }
-                }
-            }
-            if (ws != null) {
-                for (int k = ws.size() - 1; k >= j; k--) {
-                    ws.remove(k);
+                    touched_variables_.add(first);
+                } else {
+                    uncheckedEnqueue(first);
                 }
             }
         }
+        if (ws != null) {
+            for (int k = ws.size() - 1; k >= j; k--) {
+                ws.remove(k);
+            }
+        }
         return result;
+    }
+
+    private boolean propagateImplies(int p) {
+        TIntList to_add = implies_.get(p);
+        if (to_add != null) {
+            for (int i = 0; i < to_add.size(); ++i) {
+                if (!enqueue(to_add.get(i))) {
+                    touched_variables_.add(to_add.get(i));
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 

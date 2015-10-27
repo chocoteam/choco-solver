@@ -30,6 +30,8 @@
 package org.chocosolver.solver.search.strategy;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
+import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
@@ -362,6 +364,38 @@ public class IntStrategyFactory {
      */
     public static IntStrategy maxReg_LB(IntVar... VARS) {
         return custom(maxRegret_var_selector(), min_value_selector(), VARS);
+    }
+
+    /**
+     * A branching strategy over the objective variable.
+     * It is activated on the first solution, and iterates over the domain in decreasing order (upper bound first).
+     * @param OBJECTIVE integer objective variable
+     * @return objective strategy
+     */
+    public static ObjectiveStrategy objective_bottom_up(IntVar OBJECTIVE){
+        return new ObjectiveStrategy(OBJECTIVE, OptimizationPolicy.BOTTOM_UP);
+    }
+
+
+    /**
+     * A branching strategy over the objective variable.
+     * It is activated on the first solution, and iterates over the domain in increasing order (lower bound first).
+     * @param OBJECTIVE integer objective variable
+     * @return objective strategy
+     */
+    public static ObjectiveStrategy objective_dichotomic(IntVar OBJECTIVE){
+        return new ObjectiveStrategy(OBJECTIVE, OptimizationPolicy.DICHOTOMIC);
+    }
+
+    /**
+     * A branching strategy over the objective variable.
+     * It is activated on the first solution, and splits the domain into two parts, and evaluates first
+     * the lower part in case of minimization and the upper part in case of maximization.
+     * @param OBJECTIVE integer objective variable
+     * @return objective strategy
+     */
+    public static ObjectiveStrategy objective_top_bottom(IntVar OBJECTIVE){
+        return new ObjectiveStrategy(OBJECTIVE, OptimizationPolicy.TOP_DOWN);
     }
 
     /**

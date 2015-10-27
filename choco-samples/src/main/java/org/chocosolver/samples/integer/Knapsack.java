@@ -33,8 +33,7 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.objective.ObjectiveStrategy;
-import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -117,7 +116,7 @@ public class Knapsack extends AbstractProblem {
     public void configureSearch() {
         AbstractStrategy strat = IntStrategyFactory.lexico_LB(objects);
         // trick : top-down maximization
-        solver.set(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN), strat);
+        solver.set(ISF.objective_top_bottom(power), strat);
         Chatterbox.showDecisions(solver);
     }
 

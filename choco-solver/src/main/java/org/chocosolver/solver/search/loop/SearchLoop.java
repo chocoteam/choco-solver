@@ -113,6 +113,7 @@ public final class SearchLoop implements Serializable {
     protected int rootWorldIndex = 0, searchWorldIndex = 0; // initial world and search world
     protected List<Criterion> criteria; // early end criterion
     protected boolean crit_met, kill, entire;
+    private boolean hasRestarted;
     protected SearchMonitorList searchMonitors;
     protected boolean defaultSearch = false; // is default search selected
     protected boolean completeSearch = false; // does complete search is required
@@ -236,7 +237,12 @@ public final class SearchLoop implements Serializable {
                         action = stop;
                     } else {
                         L.forget(this);
-                        action = propagate;
+                        if(hasRestarted){
+                            hasRestarted = false;
+                            action = extend;
+                        }else{
+                            action = propagate;
+                        }
                     }
                     break;
                 case validate:
@@ -392,6 +398,7 @@ public final class SearchLoop implements Serializable {
         restoreRootNode();
         mSolver.getEnvironment().worldPush();
         mSolver.getMeasures().incRestartCount();
+        hasRestarted = true;
         searchMonitors.afterRestart();
     }
 
