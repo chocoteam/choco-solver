@@ -46,7 +46,7 @@ and `IntVar.updateBounds(int, int, ICause) (#270)`
 
 - add `keysorting()` constraint
 - add `int_value_precede_chain()` constraint
-- add UCB1 option for `ICF.alldifferent()`
+- improve "DEFAULT" option for `ICF.alldifferent()`
 - revamp scalar and sum (#324)
 - fix lack of filtering in `PropMin`
 - simplify and improve basic element propagator (#325)

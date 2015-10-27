@@ -92,7 +92,7 @@ public class CostasArrays extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		SMF.limitTime(solver,20000);
+		SMF.limitTime(solver,"20s");
 		solver.set(ISF.lexico_LB(vectors));
 	}
 

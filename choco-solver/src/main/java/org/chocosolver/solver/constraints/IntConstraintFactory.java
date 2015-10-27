@@ -989,8 +989,8 @@ public class IntConstraintFactory {
         Propagator ip = allEnum ? new PropInverseChannelAC(VARS1, VARS2, OFFSET1, OFFSET2)
                 : new PropInverseChannelBC(VARS1, VARS2, OFFSET1, OFFSET2);
         return new Constraint("InverseChanneling", ArrayUtils.append(
-                alldifferent(VARS1, "UCB1").getPropagators(),
-                alldifferent(VARS2, "UCB1").getPropagators(),
+                alldifferent(VARS1, "").getPropagators(),
+                alldifferent(VARS2, "").getPropagators(),
                 new Propagator[]{ip}
         ));
     }

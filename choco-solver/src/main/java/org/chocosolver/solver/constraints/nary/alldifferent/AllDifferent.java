@@ -40,9 +40,11 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class AllDifferent extends Constraint {
 
-    public enum Type {
-        AC, BC, FC, NEQS, DEFAULT, UCB1
-    }
+    public static final String AC= "AC";
+    public static final String BC= "BC";
+    public static final String FC= "FC";
+    public static final String NEQS= "NEQS";
+    public static final String DEFAULT= "DEFAULT";
 
     public AllDifferent(IntVar[] vars, String type) {
         super("AllDifferent", createPropagators(vars, type));
@@ -52,7 +54,7 @@ public class AllDifferent extends Constraint {
         if (VARS.length <= 1) {
             return new Propagator[]{VARS[0].getSolver().TRUE().getPropagator(0)};
         }
-        switch (AllDifferent.Type.valueOf(consistency)) {
+        switch (consistency) {
             case NEQS: {
                 int s = VARS.length;
                 int k = 0;
@@ -70,19 +72,6 @@ public class AllDifferent extends Constraint {
                 return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS)};
             case AC:
                 return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS)};
-            case UCB1: {// adds a Probabilistic AC (only if at least some variables have an enumerated domain)
-                boolean enumDom = false;
-                for (int i = 0; i < VARS.length && !enumDom; i++) {
-                    if (VARS[i].hasEnumeratedDomain()) {
-                        enumDom = true;
-                    }
-                }
-                if (enumDom) {
-                    return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAdaptative2(VARS)};
-                } else {
-                    return createPropagators(VARS, "BC");
-                }
-            }
             case DEFAULT:
             default: {
                 // adds a Probabilistic AC (only if at least some variables have an enumerated domain)

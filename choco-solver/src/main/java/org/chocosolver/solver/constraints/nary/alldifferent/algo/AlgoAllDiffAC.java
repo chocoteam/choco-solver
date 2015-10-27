@@ -102,9 +102,9 @@ public class AlgoAllDiffAC {
     // PROPAGATION
     //***********************************************************************************
 
-    public void propagate() throws ContradictionException {
+    public boolean propagate() throws ContradictionException {
         findMaximumMatching();
-        filter();
+        return filter();
     }
 
     //***********************************************************************************
@@ -205,7 +205,8 @@ public class AlgoAllDiffAC {
         digraph.removeNode(n2);
     }
 
-    protected void filter() throws ContradictionException {
+    protected boolean filter() throws ContradictionException {
+        boolean filter =false;
         buildSCC();
         int j, ub;
         IntVar v;
@@ -216,9 +217,9 @@ public class AlgoAllDiffAC {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
                     if (matching[i] == j) {
-                        v.instantiateTo(k, aCause);
+                        filter |= v.instantiateTo(k, aCause);
                     } else {
-                        v.removeValue(k, aCause);
+                        filter |= v.removeValue(k, aCause);
                         digraph.removeArc(i, j);
                     }
                 }
@@ -231,17 +232,18 @@ public class AlgoAllDiffAC {
                 for (int k = v.getLB(); k <= ub; k++) {
                     j = map.get(k);
                     if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                        v.removeValue(k, aCause);
+                        filter |= v.removeValue(k, aCause);
                     }
                 }
                 int lb = v.getLB();
                 for (int k = v.getUB(); k >= lb; k--) {
                     j = map.get(k);
                     if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                        v.removeValue(k, aCause);
+                        filter |= v.removeValue(k, aCause);
                     }
                 }
             }
         }
+        return filter;
     }
 }

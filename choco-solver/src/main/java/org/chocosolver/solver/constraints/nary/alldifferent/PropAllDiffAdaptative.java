@@ -36,13 +36,13 @@ import java.util.Random;
 
 /**
  * Propagator for AllDifferent AC constraint for integer variables
- * <p/>
+ * <p>
  * Uses Regin algorithm
  * Runs in O(m.n) worst case time for the initial propagation
  * but has a good average behavior in practice
- * <p/>
+ * <p>
  * Runs incrementally for maintaining a matching
- * <p/>
+ * <p>
  *
  * @author Jean-Guillaume Fages
  */
@@ -53,7 +53,7 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
     //***********************************************************************************
 
     Random rd;
-    int period;
+    int calls, success;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -68,7 +68,7 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
     public PropAllDiffAdaptative(IntVar[] variables) {
         super(variables);
         rd = new Random(0);
-        period = -1;
+        calls = success = 1;
     }
 
     //***********************************************************************************
@@ -77,31 +77,15 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (period == -1) {
-            period = 1;
-            filter.propagate();
-        } else {
-            period = Math.max(period, 1);
-            if (rd.nextInt(period) == 0) {
-                int domSize = 0;
-                for (IntVar v : vars) {
-                    domSize += v.getDomainSize();
-                }
-                try {
-                    filter.propagate();
-                } catch (ContradictionException e) {
-                    // strongly decrease period if propagation triggers failure
-                    period = (period + 1) / 2;
-                    throw e;
-                }
-                for (IntVar v : vars) {
-                    domSize -= v.getDomainSize();
-                }
-                // slightly decrease / increase period if propagation triggers filtering / no filtering
-                if (domSize > 0) {
-                    period--;
-                } else {
-                    period++;
+        double p = (success * 1.d) / (calls * 1.d);
+        if (rd.nextFloat() < p) {
+            boolean rem = true;
+            try {
+                rem = filter.propagate();
+            } finally {
+                calls++;
+                if (rem) {
+                    success++;
                 }
             }
         }
