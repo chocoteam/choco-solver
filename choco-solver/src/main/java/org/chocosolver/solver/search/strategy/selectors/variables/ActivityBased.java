@@ -379,13 +379,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     SearchLoop sl = solver.getSearchLoop();
                     Move m = sl.getMove();
                     if(m == rfMove){
-                        sl.setMove(rfMove.getChildMove());
+                        sl.setMove(rfMove.getChildMoves().get(0));
                     }else{
-                        while(m.getChildMove()!= null && m.getChildMove()!= rfMove){
-                            m = m.getChildMove();
+                        while(m.getChildMoves()!= null && m.getChildMoves()!= rfMove){
+                            m = m.getChildMoves().get(0);
                         }
-                        if(m.getChildMove()!= rfMove){
-                            m.setChildMove(rfMove.getChildMove());
+                        if(m.getChildMoves()!= rfMove){
+                            m.setChildMoves(rfMove.getChildMoves());
                         }
                     }
                 }

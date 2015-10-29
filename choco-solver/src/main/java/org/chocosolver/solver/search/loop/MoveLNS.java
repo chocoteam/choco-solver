@@ -29,12 +29,15 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.criteria.Criterion;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This {@link Move}'s implementation defines a Lager Neighborhood Search.
@@ -44,18 +47,18 @@ import org.chocosolver.util.criteria.Criterion;
 public class MoveLNS implements Move {
 
     Move move; // the strategy required to complete the generated fragment
-
     INeighbor neighbor;
 
     long solutions; // nb solutions found so far
     boolean freshRestart;
-    Criterion criterion;
-    long limit;
+    ICounter counter;
+    long frequency;
 
-    public MoveLNS(Move move, INeighbor neighbor, Criterion restartCriterion) {
+    public MoveLNS(Move move, INeighbor neighbor, ICounter restartCounter) {
         this.move = move;
         this.neighbor = neighbor;
-        this.criterion = restartCriterion;
+        this.counter = restartCounter;
+        this.frequency = counter.getLimitValue();
         this.solutions = 0;
         this.freshRestart = true;
     }
@@ -112,7 +115,7 @@ public class MoveLNS implements Move {
                 extend = true;
             } else {
                 // if fast restart is on
-                if (criterion.isMet()) {
+                if (counter.isMet()) {
                     // then is restart is triggered
                     doRestart(searchLoop);
                     extend = true;
@@ -187,12 +190,17 @@ public class MoveLNS implements Move {
             }
         }
         // or a fast restart is on
-        else if (criterion.isMet()) {
+        else if (counter.isMet()) {
             // then is restart is triggered
             doRestart(searchLoop);
             repair = true;
         }
         return repair;
+    }
+
+    @Override
+    public void setTopDecision(Decision topDecision) {
+        this.move.setTopDecision(topDecision);
     }
 
     @Override
@@ -215,16 +223,21 @@ public class MoveLNS implements Move {
             neighbor.restrictLess();
         }
         freshRestart = true;
+        counter.overrideLimit(counter.getLimitValue() + frequency);
         searchLoop.restart();
     }
 
     @Override
-    public Move getChildMove() {
-        return move;
+    public List<Move> getChildMoves() {
+        return Collections.singletonList(move);
     }
 
     @Override
-    public void setChildMove(Move aMove) {
-        this.move = aMove;
+    public void setChildMoves(List<Move> someMoves) {
+        if(someMoves.size() == 1) {
+            this.move = someMoves.get(0);
+        }else{
+            throw new UnsupportedOperationException("Only one child move can be attached to it.");
+        }
     }
 }

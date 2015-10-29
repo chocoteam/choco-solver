@@ -41,6 +41,7 @@ import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
@@ -229,7 +230,6 @@ public final class SearchLoop implements Serializable {
                     left = false;
                     L.record(this);
                     searchMonitors.beforeUpBranch();
-                    mMeasures.decDepth();
                     boolean repaired = M.repair(this);
                     searchMonitors.afterUpBranch();
                     if (!repaired) {
@@ -237,10 +237,10 @@ public final class SearchLoop implements Serializable {
                         action = stop;
                     } else {
                         L.forget(this);
-                        if(hasRestarted){
+                        if (hasRestarted) {
                             hasRestarted = false;
                             action = extend;
-                        }else{
+                        } else {
                             action = propagate;
                         }
                     }
@@ -316,7 +316,7 @@ public final class SearchLoop implements Serializable {
             action = stop;
         }
         // call to HeuristicVal.update(Action.initial_propagation)
-        if (M.getStrategy() == null) {
+        if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
             defaultSearch = true;
             ISearchBinder binder = mSolver.getSettings().getSearchBinder();
             binder.configureSearch(mSolver);
@@ -335,10 +335,13 @@ public final class SearchLoop implements Serializable {
             entire = true;
             action = stop;
         }
+        // Indicates which decision was previously applied before selecting the move.
+        // Always sets to ROOT for the first move
+        M.setTopDecision(ROOT);
         mMeasures.updateTime();
-        for(Criterion c: criteria){
-            if(c instanceof ICounter){
-                ((ICounter)c).init();
+        for (Criterion c : criteria) {
+            if (c instanceof ICounter) {
+                ((ICounter) c).init();
             }
         }
     }
@@ -433,8 +436,8 @@ public final class SearchLoop implements Serializable {
      * @param searchMonitorList list of search monitors to add
      */
     public void transferSearchMonitors(List<ISearchMonitor> searchMonitorList) {
-        for(ISearchMonitor sm: searchMonitorList){
-                searchMonitors.add(sm);
+        for (ISearchMonitor sm : searchMonitorList) {
+            searchMonitors.add(sm);
         }
     }
 
@@ -471,7 +474,7 @@ public final class SearchLoop implements Serializable {
      * Empties the list of stop criteria declared.
      * This is not automatically called on {@link #reset()}.
      */
-    public void removeAllStopCriteria(){
+    public void removeAllStopCriteria() {
         this.criteria.clear();
     }
 
@@ -481,7 +484,7 @@ public final class SearchLoop implements Serializable {
      */
     private boolean metCriterion() {
         boolean ismet = false;
-        for(int i = 0 ; i < criteria.size() && !ismet; i++){
+        for (int i = 0; i < criteria.size() && !ismet; i++) {
             ismet = criteria.get(i).isMet();
         }
         return ismet;
@@ -489,10 +492,19 @@ public final class SearchLoop implements Serializable {
 
 
     public void set(AbstractStrategy strategy) {
-        M.setStrategy(strategy);
+        if (M.getChildMoves().size() > 1) {
+            throw new UnsupportedOperationException("The Move declared is composed of many Moves.\n" +
+                    "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
+                    "An iteration over it child moves is needed: this.getMove().getChildMoves().");
+        } else {
+            M.setStrategy(strategy);
+        }
     }
 
     public AbstractStrategy getStrategy() {
+        if(M.getChildMoves().size()>1 && mSolver.getSettings().warnUser()){
+            Chatterbox.err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
+        }
         return M.getStrategy();
     }
 
@@ -542,32 +554,31 @@ public final class SearchLoop implements Serializable {
         return completeSearch;
     }
 
-    
+
     public boolean isComplete() {
         return entire;
     }
 
-    
+
     public boolean hasEndedUnexpectedly() {
         return kill;
     }
 
-    
+
     public boolean hasReachedLimit() {
         return crit_met;
     }
 
-    
+
     public int getSearchWorldIndex() {
         return searchWorldIndex;
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////// USELESS ///////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    
+
     @Deprecated
     public int getTimeStamp() {
         return mSolver.getEnvironment().getTimeStamp();

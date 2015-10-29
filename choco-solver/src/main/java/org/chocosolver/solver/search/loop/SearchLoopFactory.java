@@ -31,13 +31,13 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.criteria.LongCriterion;
 
 /**
@@ -99,6 +99,17 @@ public class SearchLoopFactory {
                 new MoveBinaryDDS(aSearchStrategy, discrepancy, aSolver.getEnvironment())));
     }
 
+    /**
+     * Combines many Moves. They are considered sequentially.
+     * This is a work-in-progress and it may lead to unexpected behavior when repair() is applied.
+     * When the selected Move cannot be extended (resp. repaired), the following one (wrt to the input order) is selected.
+     * @param moves a list of moves.
+     * @param <V> type of variables
+     */
+    public static <V extends Variable> void seq(Solver aSolver, Move... moves){
+        aSolver.getSearchLoop().setMove(new MoveSeq(aSolver, moves));
+    }
+
     //****************************************************************************************************************//
     //***********************************  MOVE ***********************************************************************//
     //****************************************************************************************************************//
@@ -148,13 +159,29 @@ public class SearchLoopFactory {
      *
      * @param aSolver         the target solver
      * @param neighbor         the neighbor for the LNS
-     * @param restartCriterion the (fast) restart criterion
+     * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
-    public static void lns(Solver aSolver, INeighbor neighbor, Criterion restartCriterion) {
+    public static void lns(Solver aSolver, INeighbor neighbor, ICounter restartCounter) {
         Move currentMove = aSolver.getSearchLoop().getMove();
-        aSolver.getSearchLoop().setMove(new MoveLNS(currentMove, neighbor, restartCriterion));
+        aSolver.getSearchLoop().setMove(new MoveLNS(currentMove, neighbor, restartCounter));
     }
 
+
+    /**
+     * Fit the <code>aSearchLoop</code> with a Large Neighborhood Search.
+     * It encapsulates the current move within a LNS move.
+     * Anytime a solution is encountered, it is recorded and serves as a basis for the <code>neighbor</code>.
+     * The <code>neighbor</code> creates a <i>fragment</i>: selects variables to freeze/unfreeze wrt the last solution found.
+     * If a fragment cannot be extended to a solution, a new one is selected by restarting the search.
+     *
+     * @see #lns(Solver, INeighbor, ICounter)
+     * @param aSolver         the target solver
+     * @param neighbor         the neighbor for the LNS
+     */
+    public static void lns(Solver aSolver, INeighbor neighbor) {
+        Move currentMove = aSolver.getSearchLoop().getMove();
+        aSolver.getSearchLoop().setMove(new MoveLNS(currentMove, neighbor, ICounter.Impl.None));
+    }
 
     //****************************************************************************************************************//
     //***********************************  LEARN *********************************************************************//

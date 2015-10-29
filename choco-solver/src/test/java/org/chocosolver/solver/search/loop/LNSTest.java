@@ -74,11 +74,11 @@ public class LNSTest {
             case 0:
                 break;
             case 1:
-                SLF.lns(solver, new RandomNeighborhood(solver, objects, 200, 123456L), () -> false);
+                SLF.lns(solver, new RandomNeighborhood(solver, objects, 200, 123456L));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
             case 2:
-                SLF.lns(solver, new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10), () -> false);
+                SLF.lns(solver, new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
             case 3:
@@ -86,7 +86,7 @@ public class LNSTest {
                         new SequenceNeighborhood(
                                 new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10)
-                        ), () -> false);
+                        ));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
             case 4:
@@ -95,24 +95,24 @@ public class LNSTest {
                                 new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new RandomNeighborhood(solver, objects, 200, 123456L)
-                        ), () -> false);
+                        ));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
             case 5:
                 SLF.lns(solver,
-                        new ExplainingCut(solver, 200, 123456L), () -> false);
+                        new ExplainingCut(solver, 200, 123456L));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
             case 6:
                 SLF.lns(solver,
-                        new ExplainingObjective(solver, 200, 123456L), () -> false);
+                        new ExplainingObjective(solver, 200, 123456L));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
             case 7:
                 SLF.lns(solver, new SequenceNeighborhood(
                         new ExplainingObjective(solver, 200, 123456L),
                         new ExplainingCut(solver, 200, 123456L),
-                        new RandomNeighborhood(solver, objects, 200, 123456L)), () -> false);
+                        new RandomNeighborhood(solver, objects, 200, 123456L)));
                 SearchMonitorFactory.limitTime(solver, 10000);
                 break;
         }

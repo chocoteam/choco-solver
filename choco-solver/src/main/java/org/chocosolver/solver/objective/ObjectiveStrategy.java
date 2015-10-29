@@ -179,7 +179,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         if(solver.getSettings().warnUser()){
-            Chatterbox.out.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
+            Chatterbox.err.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
@@ -187,7 +187,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (dec == null) dec = new IntDecision(pool);
         dec.set(obj, target, decOperator);
         if(solver.getSettings().warnUser()){
-            Chatterbox.out.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
+            Chatterbox.err.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
         }
         return dec;
     }

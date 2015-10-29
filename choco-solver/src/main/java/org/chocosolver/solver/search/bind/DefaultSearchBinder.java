@@ -58,7 +58,7 @@ public class DefaultSearchBinder implements ISearchBinder {
     @Override
     public void configureSearch(Solver solver) {
         if(solver.getSettings().warnUser()) {
-            Chatterbox.out.printf("No search strategies defined.\nSet to default ones.");
+            Chatterbox.err.printf("No search strategies defined.\nSet to default ones.");
         }
 
         solver.set(getDefault(solver));

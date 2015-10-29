@@ -33,6 +33,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingObjective;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
@@ -68,7 +69,7 @@ public class ELNSTest {
                         new ExplainingCut(solver, 200, 123456L),
                         new RandomNeighborhood(solver, vars, 200, 123456L)
                 ),
-                () -> false);
+                ICounter.Impl.None);
         solver.set(IntStrategyFactory.random_bound(vars, seed));
 
 

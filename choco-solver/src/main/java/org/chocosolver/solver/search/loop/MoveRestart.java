@@ -30,9 +30,13 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.search.restart.IRestartStrategy;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This {@link Move} implementation enables restarting a search on certain conditions
@@ -95,6 +99,11 @@ public class MoveRestart implements Move {
     }
 
     @Override
+    public void setTopDecision(Decision topDecision) {
+        this.move.setTopDecision(topDecision);
+    }
+
+    @Override
     public <V extends Variable> AbstractStrategy<V> getStrategy() {
         return move.getStrategy();
     }
@@ -117,12 +126,16 @@ public class MoveRestart implements Move {
     }
 
     @Override
-    public Move getChildMove() {
-        return move;
+    public List<Move> getChildMoves() {
+        return Collections.singletonList(move);
     }
 
     @Override
-    public void setChildMove(Move aMove) {
-        this.move = aMove;
+    public void setChildMoves(List<Move> someMoves) {
+        if(someMoves.size() == 1) {
+            this.move = someMoves.get(0);
+        }else{
+            throw new UnsupportedOperationException("Only one child move can be attached to it.");
+        }
     }
 }

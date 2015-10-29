@@ -33,8 +33,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
-import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
-
 /**
  * A move dedicated to run an Limited Discrepancy Search[1] (LDS) with binary decisions.
  * <p>
@@ -73,7 +71,8 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
         searchLoop.mSolver.getEnvironment().worldPop();
         boolean repaired = rewind(searchLoop);
         // increase the discrepancy max, if allowed, when the root node is reached
-        if (searchLoop.decision == ROOT && canExtend(searchLoop)) {
+        if (searchLoop.decision == topDecision && dis.get() < DIS) {
+//            searchLoop.restart();  // TODO: deal with "intermediate" restarts.
             dis.add(1);
             searchLoop.mSolver.getEnvironment().worldPush();
             return extend(searchLoop);
@@ -81,14 +80,10 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
         return repaired;
     }
 
-    protected boolean canExtend(SearchLoop searchLoop) {
-        return dis.get() < DIS;
-    }
-
     @Override
     protected boolean rewind(SearchLoop searchLoop) {
         boolean repaired = false;
-        while (!repaired && searchLoop.decision != ROOT) {
+        while (!repaired && searchLoop.decision != topDecision) {
             searchLoop.jumpTo--;
             if (dis.get() > 0 && searchLoop.jumpTo <= 0 && searchLoop.decision.hasNext()) {
                 searchLoop.mSolver.getEnvironment().worldPush();

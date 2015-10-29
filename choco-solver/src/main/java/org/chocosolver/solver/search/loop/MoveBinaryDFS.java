@@ -33,7 +33,8 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
-import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A move dedicated to run a Depth First Search with binary decisions.
@@ -44,6 +45,8 @@ import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 public class MoveBinaryDFS implements Move {
 
     AbstractStrategy strategy;
+    Decision topDecision; // the decision taken just before selecting this move.
+
 
     public MoveBinaryDFS(AbstractStrategy strategy) {
         this.strategy = strategy;
@@ -78,6 +81,11 @@ public class MoveBinaryDFS implements Move {
     }
 
     @Override
+    public void setTopDecision(Decision topDecision) {
+        this.topDecision = topDecision;
+    }
+
+    @Override
     public <V extends Variable> AbstractStrategy<V> getStrategy() {
         return strategy;
     }
@@ -89,7 +97,7 @@ public class MoveBinaryDFS implements Move {
 
     protected boolean rewind(SearchLoop searchLoop) {
         boolean repaired = false;
-        while (!repaired && searchLoop.decision != ROOT) {
+        while (!repaired && searchLoop.decision != topDecision) {
             searchLoop.jumpTo--;
             if (searchLoop.jumpTo <= 0 && searchLoop.decision.hasNext()) {
                 searchLoop.mSolver.getEnvironment().worldPush();
@@ -105,20 +113,23 @@ public class MoveBinaryDFS implements Move {
         Decision tmp = searchLoop.decision;
         searchLoop.decision = searchLoop.decision.getPrevious();
         tmp.free();
-        searchLoop.searchMonitors.afterUpBranch(); // to make sure search monitors are correctly informed
+        // goes up in the search tree and makes sure search monitors are correctly informed
+        searchLoop.searchMonitors.afterUpBranch();
         searchLoop.mMeasures.incBackTrackCount();
-        searchLoop.mMeasures.incDepth();
+        searchLoop.mMeasures.decDepth();
         searchLoop.mSolver.getEnvironment().worldPop();
-        searchLoop.searchMonitors.beforeUpBranch(); // to make sure search monitors are correctly informed
+        searchLoop.searchMonitors.beforeUpBranch();
     }
 
     @Override
-    public Move getChildMove() {
-        return null;
+    public List<Move> getChildMoves() {
+        return Collections.emptyList();
     }
 
     @Override
-    public void setChildMove(Move aMove) {
-        throw new UnsupportedOperationException("This is a terminal Move.");
+    public void setChildMoves(List<Move> someMoves) {
+        if(someMoves.size() > 0) {
+            throw new UnsupportedOperationException("This is a terminal Move. No child move can be attached to it.");
+        }
     }
 }

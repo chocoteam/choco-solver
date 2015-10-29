@@ -29,10 +29,12 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * The "Move" component
@@ -47,48 +49,60 @@ public interface Move extends Serializable {
 
     /**
      * Called before the search starts.
-     * Also initialize the search strategy.
+     * Also initializes the search strategy.
      * @return false if something goes wrong, true otherwise
      */
     boolean init();
 
     /**
-     * Perform a move when the CSP associated to the current node of the search space is not proven to be not consistent.
+     * Performs a move when the CSP associated to the current node of the search space is not proven to be not consistent.
      *
      * @return <code>true</code> if an extension can be done, <code>false</code> when no more extension is possible.
      */
     boolean extend(SearchLoop searchLoop);
 
     /**
-     * Perform a move when the CSP associated to the current node of the search space is proven to be not consistent.
+     * Performs a move when the CSP associated to the current node of the search space is proven to be not consistent.
      *
      * @return <code>true</code> if a reparation can be done, <code>false</code> when no more reparation is possible.
      */
     boolean repair(SearchLoop searchLoop);
 
     /**
-     * Return the search strategy in use.
+     * Returns the search strategy in use.
      * @param <V> the type of variable managed by the strategy
      * @return the current search strategy
      */
     <V extends Variable> AbstractStrategy<V> getStrategy();
 
     /**
-     * Define a search strategy, that is, a service which computes and returns decisions.
+     * Defines a search strategy, that is, a service which computes and returns decisions.
      * @param aStrategy a search strategy
      * @param <V> the type of variable managed by the strategy
      */
     <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy);
 
     /**
-     * Return the child move or <tt>null</tt>
-     * @return the child move or <tt>null</tt>
+     * Returns the child moves or <tt>null</tt>
+     * Some Move only accepts one single move as child.
+     * @return the child moves
      */
-    Move getChildMove();
+    List<Move> getChildMoves();
 
     /**
-     * Override this child move (if possible and if any).
-     * @param aMove a new child move
+     * Overrides this child moves (if possible and if any).
+     * Some Move only accepts one single move as child.
+     * @param someMoves a new child move
+     * @throws UnsupportedOperationException when the size of Move expected is not respected.
      */
-    void setChildMove(Move aMove);
+    void setChildMoves(List<Move> someMoves);
+
+    /**
+     * Indicates which decision has been made just before selecting this move.
+     * When only one "terminal" move is declared, the top decision is ROOT.
+     * When dealing with a sequence of Move, the top decision is the last one of the previous move.
+     * In consequence, when backtracking, the right move can be applied or stopped when needed.
+     * This has to be declared on the first call to {@link #extend(SearchLoop)} and is checked on {@link #repair(SearchLoop)}.
+     */
+    void setTopDecision(Decision topDecision);
 }

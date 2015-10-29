@@ -121,7 +121,7 @@ public class Solution implements Serializable, ICause {
             }
         }
         if (warn && solver.getSettings().warnUser()) {
-            Chatterbox.out.printf("Some non decision variables are not instantiated in the current solution.");
+            Chatterbox.err.printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
 

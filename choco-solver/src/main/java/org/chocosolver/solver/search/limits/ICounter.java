@@ -53,4 +53,39 @@ public interface ICounter extends Criterion, LongCriterion, Serializable{
     long getLimitValue();
 
     void overrideLimit(long newLimit);
+
+    enum Impl implements ICounter{
+        None {
+            @Override
+            public boolean isMet(long value) {
+                return false;
+            }
+
+            @Override
+            public boolean isMet() {
+                return false;
+            }
+
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public void update() {
+
+            }
+
+            @Override
+            public long getLimitValue() {
+                return 0;
+            }
+
+            @Override
+            public void overrideLimit(long newLimit) {
+
+            }
+        }
+    }
+
 }

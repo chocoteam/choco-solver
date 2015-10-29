@@ -218,7 +218,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * Builds your own search strategy
+     * Builds your own search strategy based on <b>binary</b> decisions.
      *
      * @param VAR_SELECTOR defines how to select a variable to branch on.
      * @param VAL_SELECTOR defines how to select a value in the domain of the selected variable
@@ -234,7 +234,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Builds your own assignment strategy :
+     * Builds your own assignment strategy based on <b>binary</b> decisions.
      * Selects a variable X and a value V to make the decision X = V.
      * Note that value assignments are the default decision operators.
      * Therefore, they are not mentioned in the search heuristic name.
@@ -259,7 +259,7 @@ public class IntStrategyFactory {
      * @param VAR_SELECTOR a variable selector
      * @param LOWERFIRST set to true to select first the left interval, false otherwise
      * @param VARS variables to branch on
-     * @return
+     * @return a dichotomic strategy for IntVar
      */
     public static IntStrategy dichotomic(VariableSelector<IntVar> VAR_SELECTOR, boolean LOWERFIRST, IntVar... VARS){
         if(LOWERFIRST){
@@ -269,6 +269,38 @@ public class IntStrategyFactory {
         }
     }
 
+    /**
+     * Builds your own search strategy based on <b>unary</b> decisions, that is, decisions can be applied but not refuted.
+     *
+     * @param VAR_SELECTOR defines how to select a variable to branch on.
+     * @param VAL_SELECTOR defines how to select a value in the domain of the selected variable
+     * @param DEC_OPERATOR defines how to modify the domain of the selected variable with the selected value
+     * @param VARS         variables to branch on
+     * @return a custom search strategy
+     */
+    public static IntStrategy once(VariableSelector<IntVar> VAR_SELECTOR,
+                                   IntValueSelector VAL_SELECTOR,
+                                   DecisionOperator<IntVar> DEC_OPERATOR,
+                                   IntVar... VARS){
+        return new Once(VARS, VAR_SELECTOR, VAL_SELECTOR, DEC_OPERATOR);
+    }
+
+    /**
+     * Builds your own assignment strategy based on <b>unary</b> decisions, that is, decisions can be applied but not refuted.
+     * Selects a variable X and a value V to make the decision X = V.
+     * Note that value assignments are the default decision operators.
+     * Therefore, they are not mentioned in the search heuristic name.
+     *
+     * @param VAR_SELECTOR defines how to select a variable to branch on.
+     * @param VAL_SELECTOR defines how to select a value in the domain of the selected variable
+     * @param VARS         variables to branch on
+     * @return a custom search strategy
+     */
+    public static IntStrategy once(VariableSelector<IntVar> VAR_SELECTOR,
+                                   IntValueSelector VAL_SELECTOR,
+                                   IntVar... VARS){
+        return new Once(VARS, VAR_SELECTOR, VAL_SELECTOR, assign());
+    }
     // ************************************************************************************
     // SOME EXAMPLES OF STRATEGIES YOU CAN BUILD
     // ************************************************************************************
