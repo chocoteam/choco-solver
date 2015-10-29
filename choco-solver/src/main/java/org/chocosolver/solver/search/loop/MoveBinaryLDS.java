@@ -72,10 +72,9 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
         boolean repaired = rewind(searchLoop);
         // increase the discrepancy max, if allowed, when the root node is reached
         if (searchLoop.decision == topDecision && dis.get() < DIS) {
-//            searchLoop.restart();  // TODO: deal with "intermediate" restarts.
             dis.add(1);
-            searchLoop.mSolver.getEnvironment().worldPush();
-            return extend(searchLoop);
+            searchLoop.restart();
+            repaired = true;
         }
         return repaired;
     }

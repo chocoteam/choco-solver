@@ -114,7 +114,6 @@ public final class SearchLoop implements Serializable {
     protected int rootWorldIndex = 0, searchWorldIndex = 0; // initial world and search world
     protected List<Criterion> criteria; // early end criterion
     protected boolean crit_met, kill, entire;
-    private boolean hasRestarted;
     protected SearchMonitorList searchMonitors;
     protected boolean defaultSearch = false; // is default search selected
     protected boolean completeSearch = false; // does complete search is required
@@ -230,6 +229,9 @@ public final class SearchLoop implements Serializable {
                     left = false;
                     L.record(this);
                     searchMonitors.beforeUpBranch();
+                    // this is done before the reparation,
+                    // since restart is a move which can stop the search if the cut fails
+                    action = extend;
                     boolean repaired = M.repair(this);
                     searchMonitors.afterUpBranch();
                     if (!repaired) {
@@ -237,12 +239,6 @@ public final class SearchLoop implements Serializable {
                         action = stop;
                     } else {
                         L.forget(this);
-                        if (hasRestarted) {
-                            hasRestarted = false;
-                            action = extend;
-                        } else {
-                            action = propagate;
-                        }
                     }
                     break;
                 case validate:
@@ -401,7 +397,15 @@ public final class SearchLoop implements Serializable {
         restoreRootNode();
         mSolver.getEnvironment().worldPush();
         mSolver.getMeasures().incRestartCount();
-        hasRestarted = true;
+        try {
+            objectivemanager.postDynamicCut();
+            P.execute(this);
+            action = extend;
+        } catch (ContradictionException e) {
+            // trivial inconsistency is detected, due to the cut
+            action = stop;
+        }
+
         searchMonitors.afterRestart();
     }
 

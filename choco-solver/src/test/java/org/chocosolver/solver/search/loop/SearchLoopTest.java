@@ -110,7 +110,7 @@ public class SearchLoopTest {
         lds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 4);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 140);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 144);
     }
 
     @Test(groups = "1s")
@@ -120,7 +120,7 @@ public class SearchLoopTest {
         dds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 4);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 66);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 70);
     }
 
     @Test(groups = "1s")
@@ -140,7 +140,7 @@ public class SearchLoopTest {
         lds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 4);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 201);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 205);
     }
 
     @Test(groups = "1s")
@@ -150,7 +150,7 @@ public class SearchLoopTest {
         dds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 5);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 125);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 130);
     }
 
     @Test(groups = "1s")
