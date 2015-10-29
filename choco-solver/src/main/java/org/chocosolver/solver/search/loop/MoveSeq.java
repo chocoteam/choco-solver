@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.measure.MeasuresRecorder;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
@@ -55,6 +55,7 @@ public class MoveSeq implements Move {
     List<Move> moves;
     IStateInt index;
     AbstractStrategy seqStrat;
+    TransitionDecision[] tds;
 
     public MoveSeq(Solver solver, Move... moves) {
         this.moves = Arrays.asList(moves);
@@ -62,6 +63,10 @@ public class MoveSeq implements Move {
         AbstractStrategy[] strats = new AbstractStrategy[moves.length];
         for (int i = 0; i < moves.length; i++) {
             strats[i] = moves[i].getStrategy();
+        }
+        tds = new TransitionDecision[moves.length - 1];
+        for (int i = 0; i < tds.length; i++) {
+            tds[i] = new TransitionDecision();
         }
         this.seqStrat = new StrategiesSequencer(strats);
     }
@@ -87,7 +92,11 @@ public class MoveSeq implements Move {
         while (i < moves.size() - 1 && !extend) {
             // first, store the world index in which the first decision of this move is taken.
             i++;
-            moves.get(i).setTopDecision(searchLoop.decision);
+            Decision tmp = searchLoop.decision;
+            searchLoop.decision = tds[i - 1];
+            searchLoop.decision.setPrevious(tmp);
+            searchLoop.mSolver.getEnvironment().worldPush();
+            moves.get(i).setTopDecision(tds[i - 1]);
             extend = moves.get(i).extend(searchLoop);
         }
         index.set(i);
@@ -100,14 +109,10 @@ public class MoveSeq implements Move {
         int i = index.get() + 1;
         while (i > 0 && !repair) {
             repair = moves.get(--i).repair(searchLoop);
-            if(!repair && i> 0){
-                // UGLY PATCH:
-                // since Move.repair() method of terminal Moves starts by popping a world
-                // and end with a pop too, when tere are two or more Moves in this
-                // intermediate move can pop too much.
-                searchLoop.mSolver.getEnvironment().worldPush();
-                ((MeasuresRecorder)searchLoop.mMeasures).depth++;
-                ((MeasuresRecorder)searchLoop.mMeasures).backtrackCount--;
+            if (i > 0) {
+                Decision tmp = searchLoop.decision;
+                searchLoop.decision = searchLoop.decision.getPrevious();
+                tmp.free();
             }
         }
         index.set(i);
@@ -140,5 +145,32 @@ public class MoveSeq implements Move {
     @Override
     public void setChildMoves(List<Move> someMoves) {
         this.moves = someMoves;
+    }
+
+    private static class TransitionDecision extends Decision {
+
+        public TransitionDecision() {
+            super(1);
+        }
+
+        @Override
+        public void apply() throws ContradictionException {
+            // do nothing
+        }
+
+        @Override
+        public Object getDecisionValue() {
+            return null;
+        }
+
+        @Override
+        public void free() {
+
+        }
+
+        @Override
+        public String toString() {
+            return "Transition";
+        }
     }
 }
