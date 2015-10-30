@@ -197,7 +197,7 @@ public class SearchLoopTest {
         SMF.limitSearch(solver, () -> solver.getMeasures().getNodeCount() >= 1000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
         Chatterbox.printShortStatistics(solver);
-        Assert.assertEquals(solver.getMeasures().getRestartCount(), 991);
+        Assert.assertEquals(solver.getMeasures().getRestartCount(), 314);
     }
 
     @Test(groups = "1s")
@@ -210,7 +210,7 @@ public class SearchLoopTest {
         solver.addStopCriterion(() -> solver.getMeasures().getNodeCount() >= 1000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
         Chatterbox.printShortStatistics(solver);
-        Assert.assertEquals(solver.getMeasures().getRestartCount(), 783);
+        Assert.assertEquals(solver.getMeasures().getRestartCount(), 972);
     }
 
 
