@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -57,10 +57,12 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     // Stacks of 'Parent Id' and 'Alternative' used when backtrack
     TIntStack pid_stack = new TIntArrayStack();
     TIntStack alt_stack = new TIntArrayStack();
-
+     // Stacks of current node, to deal with jumps
+    TIntStack last_stack = new TIntArrayStack();
     // Node count: different from measures.getNodeCount() as we count failure nodes as well
     int nc = 0;
-
+    int rid; // restart id
+    int last; // last node index sent
     // Used to communicate every node
     Connector connector = new Connector();
 
@@ -97,10 +99,14 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     @Override
     public void afterInitialize() {
+        if (DEBUG) System.out.printf(
+                "connector.restart(%d);\n",
+                mSolver.getMeasures().getRestartCount());
         connector.connect(6565); // 6565 is the port used by cpprofiler by default
-        connector.restart(); // starting a new tree (also used in case of a restart)
+        connector.restart(0); // starting a new tree (also used in case of a restart)
         alt_stack.push(-1); // -1 is alt for the root node
         pid_stack.push(-1); // -1 is pid for the root node
+        last_stack.push(-1);
     }
 
     @Override
@@ -108,54 +114,67 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
         if (left) {
             Decision dec = mSolver.getSearchLoop().getLastDecision();
             String pdec = pretty(dec.getPrevious());
-            int pid = pid_stack.peek();
-            int alt = alt_stack.pop();
             int ari = dec.getArity();
-            if(DEBUG)System.out.printf(
-                    "connector.sendNode(%d, %d, %d, %d, Connector.NodeStatus.BRANCH, \"%s\", \"\");\n",
-                    nc, pid, alt, ari, pdec);
-            connector.sendNode(nc, pid, alt, dec.getArity(), Connector.NodeStatus.BRANCH, pdec, "");
-            for(int i = 0 ; i < ari; i++){
+            send(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, Connector.NodeStatus.BRANCH, pdec, "");
+            for (int i = 0; i < ari; i++) {
                 pid_stack.push(nc); // each child will have the same pid
             }
             nc++;
-            alt_stack.push(0);
+            alt_stack.push(dec.triesLeft() - 2);
+            last_stack.push(nc-1);
         } else {
             nc++;
             alt_stack.push(1);
+            last_stack.push(last);
         }
     }
 
     @Override
     public void beforeUpBranch() {
+        last = last_stack.pop();
+        while(pid_stack.peek() != last){
+            pid_stack.pop();
+        }
         pid_stack.pop();
     }
 
     @Override
     public void onSolution() {
         String dec = pretty(mSolver.getSearchLoop().getLastDecision());
-        int pid = pid_stack.peek();
-        int alt = alt_stack.pop();
-        if(DEBUG)System.out.printf(
-                "connector.sendNode(%d, %d, %d, 0, Connector.NodeStatus.SOLVED, \"%s\", \"%s\");\n",
-                nc, pid, alt, dec, ""/*solutionMessage.print()*/);
-        connector.sendNode(nc, pid, alt, 0, Connector.NodeStatus.SOLVED, dec, ""/*solutionMessage.print()*/);
+        send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.SOLVED, dec, solutionMessage.print());
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
         String dec = pretty(mSolver.getSearchLoop().getLastDecision());
-        int pid = pid_stack.peek();
-        int alt = alt_stack.pop();
-        if(DEBUG)System.out.printf(
-                "connector.sendNode(%d, %d, %d, 0, Connector.NodeStatus.FAILED, \"%s\", \"%s\");\n",
-                nc, pid, alt, dec, ""/*solutionMessage.print()*/);
-        connector.sendNode(nc, pid, alt, 0, Connector.NodeStatus.FAILED, dec, ""/*cex.toString()*/);
+        send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.FAILED, dec, cex.toString());
     }
 
     @Override
     public void afterRestart() {
-        connector.restart((int) mSolver.getMeasures().getRestartCount());
+        if (DEBUG) System.out.printf(
+                "connector.restart(%d);\n",
+                mSolver.getMeasures().getRestartCount());
+        connector.restart(++rid);
+        pid_stack.clear();
+        alt_stack.clear();
+        alt_stack.push(-1); // -1 is alt for the root node
+        pid_stack.push(-1); // -1 is pid for the root node
+        last_stack.push(-1);
+        nc = 0;
+    }
+
+    private void send(int nc, int pid, int alt, int kid, int rid, Connector.NodeStatus status, String label, String info) {
+        if (DEBUG) {
+            System.out.printf(
+                    "connector.sendNode(%d, %d, %d, 0, %s, %d, \"%s\", \"%s\");\n",
+                    nc, pid, alt, status.toString(), rid, label, info);
+        }
+        connector.createNode(nc, pid, alt, kid, status)
+                .setRestartId(rid)
+                .setLabel(label)
+                .setInfo(info)
+                .send();
     }
 
     @Override

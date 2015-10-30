@@ -231,7 +231,7 @@ public final class SearchLoop implements Serializable {
                     searchMonitors.beforeUpBranch();
                     // this is done before the reparation,
                     // since restart is a move which can stop the search if the cut fails
-                    action = extend;
+                    action = propagate;
                     boolean repaired = M.repair(this);
                     searchMonitors.afterUpBranch();
                     if (!repaired) {
