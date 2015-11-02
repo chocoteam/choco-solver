@@ -173,4 +173,8 @@ public abstract class Decision<E> implements ICause {
     public Decision duplicate() {
         throw new UnsupportedOperationException();
     }
+
+    public boolean isEquivalentTo(Decision dec){
+        return false;
+    }
 }

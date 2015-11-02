@@ -100,6 +100,28 @@ public class SearchLoopFactory {
     }
 
     /**
+     * Hybrid Best-First Search[1] algorithms with binary decisions and no learning.
+     * <p>
+     * [1]:D. Allouche, S. de Givry, G. Katsirelos, T. Schiex, M. Zytnicki,
+     * Anytime Hybrid Best-First Search with Tree Decomposition for Weighted CSP, CP-2015.
+     *
+     * The current search loop (if any) will be replaced by this one after that call.
+     * The current search strategy (if any) will also be replaced by the input one.
+     *
+     * @param aSolver         the target solver
+     * @param aSearchStrategy the search strategy to apply
+     * @param a               lower bound to limit the rate of redundantly propagated decisions
+     * @param b               upper bound to limit the rate of redundantly propagated decisions.
+     * @param N backtrack limit for each DFS try
+     * @param <V>             the type of variables
+     */
+    public static <V extends Variable> void hbfs(Solver aSolver, AbstractStrategy<V> aSearchStrategy,
+                                                 double a, double b, long N) {
+        aSolver.set(new SearchLoop(aSolver, new PropagateBasic(), new LearnNothing(),
+                new MoveBinaryHBFS(aSolver, aSearchStrategy, a, b, N)));
+    }
+
+    /**
      * Combines many Moves. They are considered sequentially.
      * This is a work-in-progress and it may lead to unexpected behavior when repair() is applied.
      * When the selected Move cannot be extended (resp. repaired), the following one (wrt to the input order) is selected.

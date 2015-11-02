@@ -96,6 +96,20 @@ public class IntDecision extends Decision<IntVar> {
         return d;
     }
 
+    @Override
+    public boolean isEquivalentTo(Decision dec) {
+        if (dec instanceof IntDecision) {
+            IntDecision id = (IntDecision) dec;
+            return (id.var == this.var
+                    && id.assignment == this.assignment
+                    && id.value == this.value
+                    && id.max_branching == this.max_branching
+                    && id.branch == this.branch);
+        } else {
+            return false;
+        }
+    }
+
     public DecisionOperator<IntVar> getDecOp() {
         return assignment;
     }
@@ -105,12 +119,12 @@ public class IntDecision extends Decision<IntVar> {
         if (assignment.equals(DecisionOperator.int_eq)) {
             return String.format("%s %s {%d}",
                     var.getName(),
-                    branch < 1 ? "=":'\\',
+                    branch < 1 ? "=" : '\\',
                     value);
         } else if (assignment.equals(DecisionOperator.int_neq)) {
             return String.format("%s %s {%d}",
                     var.getName(),
-                    branch < 1 ? '\\':"=",
+                    branch < 1 ? '\\' : "=",
                     value);
         } else if (assignment.equals(DecisionOperator.int_split)) {
             return String.format("%s in %s%d,%d]",
@@ -127,7 +141,7 @@ public class IntDecision extends Decision<IntVar> {
         } else {
             return String.format("%s %s {%s}",
                     var.getName(),
-                    branch < 1 ? assignment.toString(): assignment.opposite().toString(),
+                    branch < 1 ? assignment.toString() : assignment.opposite().toString(),
                     value);
         }
     }

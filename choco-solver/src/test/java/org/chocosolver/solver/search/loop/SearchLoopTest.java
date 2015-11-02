@@ -123,6 +123,16 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 70);
     }
 
+    @Test(groups = "10s")
+    public void test1HBFS() {
+        Solver solver = new Solver();
+        golomb(solver, 8);
+        hbfs(solver, ISF.lexico_LB(solver.retrieveIntVars()), .05, .1, 11);
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 271231);
+    }
+
     @Test(groups = "1s")
     public void test2DFS() {
         Solver solver = new Solver();
