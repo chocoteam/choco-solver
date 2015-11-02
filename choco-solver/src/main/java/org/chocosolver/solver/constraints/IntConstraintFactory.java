@@ -1057,7 +1057,7 @@ public class IntConstraintFactory {
     public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar TOTAL_WEIGHT, IntVar TOTAL_ENERGY,
                                       int[] WEIGHT, int[] ENERGY) {
         return new Constraint("Knapsack", ArrayUtils.append(
-                scalar(OCCURRENCES, WEIGHT, TOTAL_WEIGHT).propagators,
+                scalar(OCCURRENCES, WEIGHT, "<=",TOTAL_WEIGHT).propagators,
                 scalar(OCCURRENCES, ENERGY, TOTAL_ENERGY).propagators,
                 new Propagator[]{new PropKnapsack(OCCURRENCES, TOTAL_WEIGHT, TOTAL_ENERGY, WEIGHT, ENERGY)}
         ));

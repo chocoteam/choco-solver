@@ -33,8 +33,12 @@ import gnu.trove.list.array.TFloatArrayList;
 import org.chocosolver.samples.integer.Knapsack;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -147,6 +151,40 @@ public class KnapsackTest {
         Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 29, "nb sol");
 //        Assert.assertEquals(s.getMeasures().getNodeCount(), 1153919, "nb nod");
+    }
+
+    @Test(groups="1s")
+    public void testBeyer(){
+        int limit = 12;
+        int[] weight = { 5, 2, 3, 5, 3 };
+        int[] energy = { 2, 3, 4, 4, 1 };
+
+        Solver global = new Solver("global");
+        int og, od;
+        {
+            BoolVar[] vars = VariableFactory.boolArray("x", weight.length, global);
+            IntVar energyVar = VF.integer("energy", 0, VariableFactory.MAX_INT_BOUND, global);
+
+            global.post(ICF.knapsack(vars, VF.fixed(limit, global), energyVar, weight, energy));
+            global.setObjectives(energyVar);
+            Chatterbox.showSolutions(global);
+            global.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            og = global.getSolutionRecorder().getLastSolution().getIntVal(energyVar);
+        }
+        Solver decomp = new Solver("decomp");
+        {
+            BoolVar[] vars = VariableFactory.boolArray("x", weight.length, decomp);
+            IntVar energyVar = VF.integer("energy", 0, VariableFactory.MAX_INT_BOUND, decomp);
+
+            decomp.post(ICF.scalar(vars, weight, "<=", VF.fixed(limit, decomp)));
+            decomp.post(ICF.scalar(vars, energy, "=", energyVar));
+            decomp.setObjectives(energyVar);
+            Chatterbox.showSolutions(decomp);
+            decomp.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            od = decomp.getSolutionRecorder().getLastSolution().getIntVal(energyVar);
+        }
+        Assert.assertEquals(og, od);
+
     }
 
 }
