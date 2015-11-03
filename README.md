@@ -62,8 +62,11 @@ In order to ease the process, we established a [contribution guide](CONTRIBUTION
 that should be reviewed before starting any contribution as
 it lists the requirements and good practices to ease the contribution process.
 
-Promoting is contributing ! Following are code snippets to add on your website to help us promoting Choco3. 
+##### Promoting is contributing !  
+
 [![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+
+Following are code snippets to add on your website to help us promoting Choco3.
 
 **html**:
 
