@@ -57,10 +57,27 @@ As far as possible, provide a [Minimal Working Example](https://en.wikipedia.org
 <a name="con"></a>
 ## Contributing
 
-Anyone can contribute to the project, from the source code to the documentation.
+Anyone can contribute to the project, from the **source code** to the **documentation**.
 In order to ease the process, we established a [contribution guide](CONTRIBUTION.md)
 that should be reviewed before starting any contribution as
 it lists the requirements and good practices to ease the contribution process.
+
+Promoting is contributing ! Following are code snippets to add on your website to help us promoting Choco3. 
+[![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+
+**html**:
+
+```html
+<a href="http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge">
+<img border="0" alt="Choco3" src="http://choco-solver.org/sites/default/files/banner.svg" width="160" height="18">
+</a>
+```
+
+**Markdown**:
+
+```md
+[![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+```
 
 
 <a name="dow"></a>

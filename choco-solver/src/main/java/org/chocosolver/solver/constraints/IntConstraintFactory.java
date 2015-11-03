@@ -1035,9 +1035,9 @@ public class IntConstraintFactory {
 
     /**
      * Ensures that :
-     * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; TOTAL_WEIGHT
-     * <br/>- OCCURRENCES[i] * ENERGY[i] = TOTAL_ENERGY
-     * <br/>and maximizing the value of TOTAL_ENERGY.
+     * <br/>- OCCURRENCES[i] * WEIGHT[i] = SUM_WEIGHT
+     * <br/>- OCCURRENCES[i] * ENERGY[i] = SUM_ENERGY
+     * <br/>and maximizing the value of SUM_ENERGY.
      * <p>
      * <p>
      * A knapsack constraint
@@ -1047,19 +1047,23 @@ public class IntConstraintFactory {
      * the total weight is less than or equal to a given limit and the total value is as large as possible.
      * It derives its name from the problem faced by someone who is constrained by a fixed-size knapsack
      * and must fill it with the most useful items."
+     * The limit over SUM_WEIGHT has to be specified either in its domain or with an additional constraint:
+     * <pre>
+     *     solver.post(ICF.arithm(SUM_WEIGHT, "<=", limit);
+     * </pre>
      *
      * @param OCCURRENCES  number of occurrences of an item
-     * @param TOTAL_WEIGHT capacity of the knapsack
-     * @param TOTAL_ENERGY variable to maximize
+     * @param SUM_WEIGHT capacity of the knapsack
+     * @param SUM_ENERGY variable to maximize
      * @param WEIGHT       weight of each item
      * @param ENERGY       energy of each item
      */
-    public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar TOTAL_WEIGHT, IntVar TOTAL_ENERGY,
+    public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar SUM_WEIGHT, IntVar SUM_ENERGY,
                                       int[] WEIGHT, int[] ENERGY) {
         return new Constraint("Knapsack", ArrayUtils.append(
-                scalar(OCCURRENCES, WEIGHT, "<=",TOTAL_WEIGHT).propagators,
-                scalar(OCCURRENCES, ENERGY, TOTAL_ENERGY).propagators,
-                new Propagator[]{new PropKnapsack(OCCURRENCES, TOTAL_WEIGHT, TOTAL_ENERGY, WEIGHT, ENERGY)}
+                scalar(OCCURRENCES, WEIGHT, "=",SUM_WEIGHT).propagators,
+                scalar(OCCURRENCES, ENERGY, "=", SUM_ENERGY).propagators,
+                new Propagator[]{new PropKnapsack(OCCURRENCES, SUM_WEIGHT, SUM_ENERGY, WEIGHT, ENERGY)}
         ));
     }
 
