@@ -50,7 +50,7 @@ public enum ExplanationFactory {
         }
     },
     /**
-     * add a Conflict-based jumping policy on contradiction to an explained solver.
+     * add a Conflict-based Backjumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
      * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnCBJ(Solver, boolean, boolean)
      */
@@ -62,7 +62,7 @@ public enum ExplanationFactory {
     },
     /**
      * add a Dynamic-Backtracking policy on contradiction to an explained solver.
-     * It backtracks up to most recent decision involved in the explanation.
+     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
      * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnDBT(Solver, boolean, boolean)
      */
     DBT {

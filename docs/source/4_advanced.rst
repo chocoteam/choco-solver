@@ -466,7 +466,23 @@ Indeed, the search loop is composed of three parts, each of them with a specific
 .. [#PLM] Narendra Jussien and Olivier Lhomme. Unifying search algorithms for CSP. Technical report 02-3-INFO, EMN.
 
 Any component can be freely implemented and attached to the search loop in order to customize its behavior.
-There exists some pre-defined `Move` and `Learn` implementations, avaiable in :ref:`550_slf`.  
+There exists some pre-defined `Move` and `Learn` implementations, avaiable in :ref:`550_slf`.
+
+**Move**:
+
+:ref:`550_slfdfs`,
+:ref:`550_slflds`,
+:ref:`550_slfdds`,
+:ref:`550_slfhbfs`,
+:ref:`550_slfseq`,
+:ref:`550_slfrestart`,
+:ref:`550_slfrestartonsol`,
+:ref:`550_slflns`.
+
+**Learn**:
+
+:ref:`550_slfcbj`,
+:ref:`550_slfdbt`,
 
 One can also define its own `Move` or `Learn` implementation, more details are given in :ref:`48_plm`.
 

@@ -51,7 +51,7 @@ public class SearchLoopFactory {
     }
 
     /**
-     * Depth First Search algorithms with binary decisions and no learning.
+     * Depth-First Search algorithm with binary decisions and no learning.
      * The current search loop (if any) will be replaced by this one after that call.
      * The current search strategy (if any) will also be replaced by the input one.
      *
@@ -105,6 +105,7 @@ public class SearchLoopFactory {
      * [1]:D. Allouche, S. de Givry, G. Katsirelos, T. Schiex, M. Zytnicki,
      * Anytime Hybrid Best-First Search with Tree Decomposition for Weighted CSP, CP-2015.
      *
+     *
      * The current search loop (if any) will be replaced by this one after that call.
      * The current search strategy (if any) will also be replaced by the input one.
      *
@@ -112,7 +113,7 @@ public class SearchLoopFactory {
      * @param aSearchStrategy the search strategy to apply
      * @param a               lower bound to limit the rate of redundantly propagated decisions
      * @param b               upper bound to limit the rate of redundantly propagated decisions.
-     * @param N backtrack limit for each DFS try
+     * @param N               backtrack limit for each DFS try, should be large enough to limit redundancy
      * @param <V>             the type of variables
      */
     public static <V extends Variable> void hbfs(Solver aSolver, AbstractStrategy<V> aSearchStrategy,
@@ -211,7 +212,7 @@ public class SearchLoopFactory {
 
     /**
      * Conflict-based Backjumping (CBJ) explanation strategy.
-     * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
+     * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
      * @param aSolver         the target solver
      * @param nogoodsOn set to true to extract nogoods from failures
      * @param userFeedbackOn set to true to record the propagation in conflict
@@ -228,8 +229,8 @@ public class SearchLoopFactory {
     }
 
     /**
-     * Conflict-based Backjumping (CBJ) explanation strategy.
-     * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
+     * Dynamic ExplanConflict-based Backjumping (CBJ) explanation strategy.
+     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
      * @param aSolver         the target solver
      * @param nogoodsOn set to true to extract nogoods from failures
      * @param userFeedbackOn set to true to record the propagation in conflict

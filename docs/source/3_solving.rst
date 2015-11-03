@@ -397,7 +397,10 @@ Available strategies
 
     For integer variables
 
-:ref:`51_sstrat_cus`, :ref:`51_sstrat_seq`.
+:ref:`51_sstrat_cus`,
+:ref:`51_sstrat_dic`,
+:ref:`51_sstrat_once`,
+:ref:`51_sstrat_seq`.
 
 :ref:`51_sstrat_lexlb`,
 :ref:`51_sstrat_lexnlb`,
@@ -408,6 +411,9 @@ Available strategies
 :ref:`51_sstrat_maxspl`,
 :ref:`51_sstrat_minub`,
 :ref:`51_sstrat_maxrlb`,
+:ref:`51_sstrat_objbu`,
+:ref:`51_sstrat_objdi`,
+:ref:`51_sstrat_objtd`,
 :ref:`51_sstrat_rndb`,
 :ref:`51_sstrat_rndv`.
 
@@ -594,13 +600,9 @@ will return false if the second option is used.
 Resolution statistics
 =====================
 
-Choco |version| distinguishes *developer trace* and *user trace*.
-*Developer trace* is only dedicated to developers for debugging purpose (Choco depends on SLF4J, as described in :ref:`Note about logging <1_log>`).
-*User trace* is dedicated to users (and developers) to print information related to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
-
-Resolution data are available thanks to the ``Chatterbox`` class, which outputs to ``System.out``.
-It centralises widely used methods to have comprehensive feedbacks about the resolution process.
-There two main types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
+Resolution data are available thanks to the ``Chatterbox`` class, which outputs by default to ``System.out``.
+It centralises widely used methods to have comprehensive feedback about the resolution process.
+There are two types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
 
 For instance, one can indicate to print the solutions all resolution long: ::
 

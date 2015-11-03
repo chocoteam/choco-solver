@@ -656,7 +656,7 @@ On a call to any methods of ``solver.constraints.SatFactory``, the SAT constrain
 
 How to add clauses
 ^^^^^^^^^^^^^^^^^^
-Clauses can be added with calls to the ``solver.constraints.SatFactory``.
+Clauses can be added with calls to the ``SatFactory``.
 
 
     On one boolean variable
@@ -693,6 +693,13 @@ Clauses can be added with calls to the ``solver.constraints.SatFactory``.
 :ref:`51_lcstr_maxboolarraylesseqvar`,
 :ref:`51_lcstr_sumboolarraygreatereqvar`,
 :ref:`51_lcstr_sumboolarraylesseqvar`.
+
+
+Even if ``SatFactory`` should be the first factory to use when dealing with clauses
+(see for instance :ref:`51_lcstr_clauses` to create complex expressions), there exists a alternative: :ref:`51_lcstr_main`.
+
+
+
 
 .. _542_complex_clauses:
 
