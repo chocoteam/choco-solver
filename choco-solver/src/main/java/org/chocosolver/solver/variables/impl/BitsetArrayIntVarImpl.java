@@ -493,7 +493,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 assert index >= 0 && VALUES[index] <= value;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = ub; i > -1; i = INDICES.prevSetBit(i - 1)) {
+                    for (int i = ub; i >=0 && i > index; i = INDICES.prevSetBit(i - 1)) {
                         delta.add(VALUES[i], cause);
                     }
                 }
