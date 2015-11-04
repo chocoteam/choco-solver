@@ -133,12 +133,12 @@ public class ObjectiveTest {
         solver.post(ICF.arithm(iv, ">=", 2));
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-        Assert.assertEquals(iv.getValue(), 2);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
         solver.getSearchLoop().reset();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-        Assert.assertEquals(iv.getValue(), 2);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
     @Test(groups = "1s")
@@ -187,12 +187,9 @@ public class ObjectiveTest {
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
-        Assert.assertEquals(ESat.TRUE, solver.isSatisfied());
-
         solver.getSearchLoop().reset();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
-        Assert.assertEquals(ESat.TRUE, solver.isSatisfied());
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 

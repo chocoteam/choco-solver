@@ -27,24 +27,71 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.variables.events;
+package org.chocosolver.solver.search.loop;
+
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.Variable;
+
+import java.util.List;
 
 /**
- * An interface to define event to categorize the filtering algorithm to apply.
- * <br/>Event can promoted or strengthened (cf. "CHOCO : implementing a CP kernel" -- F. Laburthe, 2000).
- * <br/>
+ * A combination of Move and Learn which results in tabu Decision-repair[1] (TDR) with binary decisions.
+ * <p>
+ * [1]: N. Jussien, O. Lhomme, Local search with constraint propagation and conflict-based heuristics, AI-139 (2002).
  *
- * @author Charles Prud'homme
- * @since 01/12/11
+ * Created by cprudhom on 04/11/2015.
+ * Project: choco.
  */
-public interface IEventType {
+public class MoveLearnBinaryTDR implements Move, Learn {
 
-	int ALL_EVENTS = 255;
+    @Override
+    public boolean init() {
+        return false;
+    }
 
-    /**
-     * Return the value of the mask associated with the event.
-     *
-     * @return the mask of the event.
-     */
-    int getMask();
+    @Override
+    public boolean extend(SearchLoop searchLoop) {
+        return false;
+    }
+
+    @Override
+    public boolean repair(SearchLoop searchLoop) {
+        return false;
+    }
+
+    @Override
+    public <V extends Variable> AbstractStrategy<V> getStrategy() {
+        return null;
+    }
+
+    @Override
+    public <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy) {
+
+    }
+
+    @Override
+    public List<Move> getChildMoves() {
+        return null;
+    }
+
+    @Override
+    public void setChildMoves(List<Move> someMoves) {
+
+    }
+
+    @Override
+    public void setTopDecision(Decision topDecision) {
+
+    }
+
+    @Override
+    public void record(SearchLoop searchLoop) {
+
+    }
+
+    @Override
+    public void forget(SearchLoop searchLoop) {
+
+    }
 }

@@ -92,11 +92,11 @@ public class PropScalar extends Propagator<IntVar> {
     public int getPropagationConditions(int vIdx) {
         switch (o) {
             case NQ:
-                return IntEventType.INSTANTIATE.getMask();
+                return IntEventType.instantiation();
             case LE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.INCLOW.getMask() : IntEventType.DECUPP.getMask());
+                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.INCLOW : IntEventType.DECUPP);
             case GE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx < pos ? IntEventType.DECUPP.getMask() : IntEventType.INCLOW.getMask());
+                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.DECUPP : IntEventType.INCLOW);
             default:
                 return IntEventType.boundAndInst();
         }

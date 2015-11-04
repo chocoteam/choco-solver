@@ -164,7 +164,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 }
             }
             // filtering
-            evtmask = PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask();
+            evtmask = PropagatorEventType.CUSTOM_PROPAGATION.getMask();
         } while (filter());
     }
 

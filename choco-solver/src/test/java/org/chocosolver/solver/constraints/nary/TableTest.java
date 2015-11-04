@@ -187,7 +187,7 @@ public class TableTest {
             }
             System.out.println("\n" + "obj = " + sum.getValue() + ", backtracks = " + solver.getMeasures().getBackTrackCount());
         }
-        Assert.assertEquals(sum.getValue(), 5);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
     }
 
     @Test(groups = "1s")

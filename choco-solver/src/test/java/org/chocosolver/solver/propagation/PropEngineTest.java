@@ -29,11 +29,13 @@
  */
 package org.chocosolver.solver.propagation;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -76,8 +78,8 @@ public class PropEngineTest {
     }
 
     // test clone in propagators
-    @Test(groups="1s", expectedExceptions = AssertionError.class)
-    public void testClone(){
+    @Test(groups = "1s", expectedExceptions = AssertionError.class)
+    public void testClone() throws ContradictionException {
         Solver solver = new Solver();
         solver.set(new Settings() {
             @Override
@@ -85,9 +87,20 @@ public class PropEngineTest {
                 return false;
             }
         });
-        IntVar[] vars = VF.enumeratedArray("V", 3, 0,4, solver);
+        IntVar[] vars = VF.enumeratedArray("V", 3, 0, 4, solver);
         solver.post(ICF.alldifferent(vars));
         Arrays.sort(vars, (o1, o2) -> o2.getId() - o1.getId());
-        solver.findAllSolutions();
+
+        solver.propagate();
+        vars[0].instantiateTo(0, Cause.Null);
+        solver.propagate();
+        Assert.assertFalse(vars[0].isInstantiatedTo(0));
+    }
+
+    public static void main(String[] args) {
+        for(int i =1; i < 15; i++) {
+            System.out.printf("%d -> %d \n", i, Integer.lowestOneBit(i));
+            System.out.printf("%d -> %d \n", i, Integer.lowestOneBit(i>>2));
+        }
     }
 }

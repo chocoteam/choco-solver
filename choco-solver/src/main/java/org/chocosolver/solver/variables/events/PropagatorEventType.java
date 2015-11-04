@@ -41,26 +41,19 @@ package org.chocosolver.solver.variables.events;
  */
 public enum PropagatorEventType implements IEventType {
 
-	VOID(0,0),
-	CUSTOM_PROPAGATION(1, 1),
-	FULL_PROPAGATION(2, 3);
+	VOID(0),
+	CUSTOM_PROPAGATION(1),
+	FULL_PROPAGATION(2);
 
 	private final int mask;
-	private final int strengthened_mask;
 
-	PropagatorEventType(int mask, int fullmask) {
+	PropagatorEventType(int mask) {
 		this.mask = mask;
-		this.strengthened_mask = fullmask;
 	}
 
 	@Override
 	public int getMask() {
 		return mask;
-	}
-
-	@Override
-	public int getStrengthenedMask() {
-		return strengthened_mask;
 	}
 
 	//******************************************************************************************************************

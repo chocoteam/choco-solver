@@ -281,7 +281,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         if (DEBUG) {
             IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
         }
-        lastProp.propagate(evt.getStrengthenedMask());
+        lastProp.propagate(evt.getMask());
     }
 
 
@@ -342,7 +342,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                     int aid = p2i.get(prop.getId());
                     if (prop.reactToFineEvent()) {
                         boolean needSched = (eventmasks[aid][pindice] == 0);
-                        eventmasks[aid][pindice] |= type.getStrengthenedMask();
+                        eventmasks[aid][pindice] |= type.getMask();
                         if (needSched) {
                             //assert !event_f[aid].get(pindice);
                             if (DEBUG) {

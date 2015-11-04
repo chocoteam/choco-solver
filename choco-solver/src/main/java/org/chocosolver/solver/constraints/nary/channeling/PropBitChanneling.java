@@ -69,11 +69,7 @@ public class PropBitChanneling extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) { // OCTET
-            return IntEventType.INSTANTIATE.getMask();
-        } else { // BITS
-            return IntEventType.INSTANTIATE.getMask();
-        }
+        return IntEventType.instantiation();
     }
 
     @Override
