@@ -33,8 +33,6 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.nary.cnf.PropSat;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -64,22 +62,6 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
         vals = new int[n];
         lits = new int[n];
         bvars = new BoolVar[n];
-        solver.plugMonitor(new IMonitorClose() {
-            @Override
-            public void beforeClose() {
-                Solution last = getLastSolution();
-                if (last != null) {
-                    try {
-                        solver.getSearchLoop().restoreRootNode();
-                        solver.getEnvironment().worldPush();
-                        last.restore(solver);
-                    } catch (ContradictionException e) {
-                        throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-                    }
-                    solver.getEngine().flush();
-                }
-            }
-        });
     }
 
     @Override

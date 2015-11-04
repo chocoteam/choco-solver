@@ -270,4 +270,19 @@ public class SolverTest {
         SMF.prepareForParallelResolution(solvers);
         solvers.parallelStream().forEach(s -> s.findOptimalSolution(ResolutionPolicy.MAXIMIZE));
     }
+
+    @Test(groups="1s")
+    public void testJL300(){
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", -5, 5, s);
+        s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, i);
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(s.getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
+
+        s.getEngine().flush();
+        s.getSearchLoop().reset();
+
+        s.findAllSolutions();
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 11);
+    }
 }

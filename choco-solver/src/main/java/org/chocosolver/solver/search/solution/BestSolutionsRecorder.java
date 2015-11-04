@@ -29,8 +29,6 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -49,22 +47,6 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
 	public BestSolutionsRecorder(final IntVar objective){
 		super(objective.getSolver());
 		this.objective = objective;
-		solver.plugMonitor(new IMonitorClose() {
-			@Override
-			public void beforeClose() {
-				Solution last = getLastSolution();
-				if(last!=null){
-					try{
-						solver.getSearchLoop().restoreRootNode();
-						solver.getEnvironment().worldPush();
-						last.restore(solver);
-					}catch (ContradictionException e){
-						throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-					}
-					solver.getEngine().flush();
-				}
-			}
-		});
 	}
 
 	@Override

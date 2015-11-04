@@ -133,15 +133,24 @@ Others
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 | **Method**                                        | **Definition**                                                                                                                       |
 +===================================================+======================================================================================================================================+
-| ``Solver duplicateModel()``                       | Duplicate the model associated with a solver, ie only variables and constraints, and return a new solver.                            |
+| ``void makeCompleteSearch(boolean isComplete)``   | Adds a strategy to the declared one in order to ensure that all variables are covered by (at least) one strategy.                    |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-| ``void makeCompleteSearch(boolean isComplete)``   | Add a strategy to the declared one in order to ensure that all variables are covered by (at least) one strategy.                     |
+| ``void plugMonitor(ISearchMonitor sm)``           | Puts a :ref:`search monitor <44_monitors_label>` to react on search events (solutions, decisions, fails, ...).                       |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-| ``void plugMonitor(ISearchMonitor sm)``           | Put a :ref:`search monitor <44_monitors_label>` to react on search events (solutions, decisions, fails, ...).                        |
+| ``void unplugMonitor(ISearchMonitor sm)``         | Removes a declared :ref:`search monitor <44_monitors_label>` from the list of active ones.                                           |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-| ``void plugMonitor(FilteringMonitor fm)``         | Add an filtering monitor, that is an object that is kept informed of all (propagation) events generated during the resolution.       |
+| ``void unplugAllMonitors()``                      | Removes all declared :ref:`search monitor <44_monitors_label>`.                                                                      |
 +---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
-
+| ``void addStopCriterion(Criterion criterion)``    | Puts a stop criterion which will end the search when met.                                                                            |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void removeStopCriterion(Criterion criterion)`` | Removes a declared stop criterion from the list of active ones.                                                                      |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void removeAllStopCriteria()``                  | Removes all declared stop criteria.                                                                                                  |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void plugMonitor(FilteringMonitor fm)``         | Adds an filtering monitor, that is an object that is kept informed of all (propagation) events generated during the resolution.      |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| ``void plugMonitor(FilteringMonitor fm)``         | Adds an filtering monitor, that is an object that is kept informed of all (propagation) events generated during the resolution.      |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _22_variables_label:
 

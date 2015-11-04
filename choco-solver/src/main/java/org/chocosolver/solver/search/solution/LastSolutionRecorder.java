@@ -30,8 +30,6 @@
 package org.chocosolver.solver.search.solution;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 
 import java.util.LinkedList;
@@ -48,30 +46,11 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 
 	Solution solution;
 	Solver solver;
-	boolean restoreOnClose;
 
-	public LastSolutionRecorder(final Solution solution, boolean restoreOnClose, final Solver solver){
+	public LastSolutionRecorder(final Solution solution,  final Solver solver){
 		this.solver = solver;
 		this.solution = solution;
-		this.restoreOnClose = restoreOnClose;
 		solver.plugMonitor((IMonitorSolution) () -> solution.record(solver));
-		if(restoreOnClose){
-			solver.plugMonitor(new IMonitorClose() {
-				@Override
-				public void beforeClose() {
-					if(solution.hasBeenFound()){
-						try{
-							solver.getSearchLoop().restoreRootNode();
-							solver.getEnvironment().worldPush();
-							solution.restore(solver);
-						}catch (ContradictionException e){
-							throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-						}
-						solver.getEngine().flush();
-					}
-				}
-			});
-		}
 	}
 
 	@Override

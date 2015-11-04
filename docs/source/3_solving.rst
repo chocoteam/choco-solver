@@ -124,11 +124,7 @@ For instance::
 states that the variable ``OBJ`` must be maximized.
 
 The method does not return any value.
-However, the best solution found so far is restored.
-
-.. important::
-
- Because the best solution is restored, all variables are instantiated after a call to ``solver.findOptimalSolution(...)``.
+However, the best solution found so far can be restored (see below).
 
 The best solution found is the optimal one if the entire search space has been explored.
 
@@ -171,8 +167,6 @@ The underlying approach is naive, but it simplifies the process.
 Anytime a solution is found, a cut is posted which states that at least one of the objective variables must be better.
 Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n` where :math:`X_i` is the ith objective variable and :math:`b_i`
 its best known value.
-
-The method ends by restoring the last solution found so far, if any.
 
 Here is a simple illustration:
 
@@ -222,7 +216,6 @@ There exists many built-in solution recorders:
 
 ``LastSolutionRecorder`` only keeps variable values of the last solution found. It is the default solution recorder.
 Furthermore, it is possible to restore that solution after the search process ends.
-This is used by default when seeking an optimal solution.
 
 
 ``AllSolutionsRecorder`` records all solutions that are found.
@@ -249,20 +242,16 @@ Solution restoration
 --------------------
 
 A ``Solution`` object can be restored, i.e. variables are fixed back to their values in that solution.
-For this purpose, we recommend to restore initial domains and then restore the solution,
-with the following code: ::
+This is achieved through the `Solver` by the calling one of the two following methods: ::
 
-    try{
-       solver.getSearchLoop().restoreRootNode();
-       solver.getEnvironment().worldPush();
-       solution.restore();
-    }catch (ContradictionException e){
-       throw new UnsupportedOperationException("restoring the solution ended in a failure");
-    }
-    solver.getEngine().flush();
+    solver.restoreLastSolution();
+    // or
+    Solution aSolution= ...;
+    solver.restoreSolution(aSolution);
 
-Note that if initial domains are not restored, then the solution restoration may lead to a failure.
-This would happen when trying to restore out of the current domain.
+.. note::
+
+    The restoration may detect inconsistency, for instance when the model has been externally modified since the solution to be restored to has been found.
 
 Search Strategies
 =================

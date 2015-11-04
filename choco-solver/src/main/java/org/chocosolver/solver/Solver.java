@@ -205,7 +205,7 @@ public class Solver implements Serializable {
         this.stopCriteria = new ArrayList<>();
         this.search.setObjectiveManager(ObjectiveManager.SAT());
         this.objectives = null;
-        this.solutionRecorder = new LastSolutionRecorder(new Solution(), false, this);
+        this.solutionRecorder = new LastSolutionRecorder(new Solution(), this);
     }
 
     /**
@@ -987,7 +987,6 @@ public class Solver implements Serializable {
                 } else {
                     set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
                 }
-                set(new LastSolutionRecorder(new Solution(), true, this));
             } else {
                 // BEWARE the usual optimization manager is only defined for mono-objective optimization
                 // so we use a satisfaction manager by default (it does nothing)
@@ -1149,6 +1148,52 @@ public class Solver implements Serializable {
         }
         return ESat.FALSE;
     }
+
+    /**
+     * Restores the last solution found (if any) in this solver.
+     * That is, after calling this method:
+     * <ol>
+     * <li>the search backtracks to the ROOT node in order to restore the initial state of variables, constraints and any other backtrackable structures</li>
+     * <li>the initial state is then saved (by calling : {@code this.getEnvironment().worldPush();}).</li>
+     * <li>each variable is then instantiated to its value in the last recorded solution.</li>
+     * </ol>
+     *
+     * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
+     * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
+     * @throws ContradictionException when inconsistency is detected while restoring the solution.
+     */
+    public boolean restoreLastSolution() throws ContradictionException {
+        return restoreSolution(solutionRecorder.getLastSolution());
+    }
+
+    /**
+     * Restores a given solution in this solver.
+     * That is, after calling this method:
+     * <ol>
+     * <li>the search backtracks to the ROOT node in order to restore the initial state of variables, constraints and any other backtrackable structures</li>
+     * <li>the initial state is then saved (by calling : {@code this.getEnvironment().worldPush();}).</li>
+     * <li>each variable is then instantiated to its value in the solution.</li>
+     * </ol>
+     *
+     * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
+     * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
+     * @throws ContradictionException when inconsistency is detected while restoring the solution.
+     */
+    public boolean restoreSolution(Solution solution) throws ContradictionException {
+        boolean restore = false;
+        if(solution!=null){
+            try{
+                search.restoreRootNode();
+                environment.worldPush();
+                solution.restore(this);
+            }catch (ContradictionException e){
+                throw new UnsupportedOperationException("restoring the solution ended in a failure");
+            }
+            engine.flush();
+        }
+        return restore;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

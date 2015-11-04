@@ -8,6 +8,8 @@ NEXT MILESTONE
 
 #### Solver: 
 
+- `ISolutionRecorder` implementations do not restore automatically the last/best solution found on exit.
+This now has to be done calling either `solver.restoreLastSolution()` or `solver.restoreSolution(Solution)`.
 - remove `MasterSolver` and `SlaveSolver` (#293)
 - `Solver.duplicate()`, `Propagator.duplicate(Solver solver, THashMap<Object, Object> identitymap)` 
 and `Variable.duplicate(Solver solver, THashMap<Object, Object> identitymap)` has been removed. 
