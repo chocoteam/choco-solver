@@ -54,20 +54,22 @@ public class IntEvtScheduler implements EvtScheduler<IntEventType> {
 
     @Override
     public int select(int mask) {
-        switch (mask) {
-            case 8: // instantiate
-                return 0;
-            case 10: // lb or more
-                return 1;
-            case 12: // ub or more
-                return 2;
-            case 14: // bound or more
-                return 3;
-            case 15: // all
-            case 255: // all
-                return 4;
+        int b = Integer.lowestOneBit(mask);
+        switch (b) {
             default:
-                throw new UnsupportedOperationException("Unknown case");
+            case 1:  // REMOVE or more
+                return 4;
+            case 2: // INCLOW (and DECUPP) or more
+                b = Integer.lowestOneBit(b >> 2);
+                if(b == 1){ // DECUPP too
+                    return 3;
+                }else{
+                    return 1;
+                }
+            case 4: // DECUPP and more
+                return 2;
+            case 8: // INSTANTIATE
+                return 0;
         }
     }
 

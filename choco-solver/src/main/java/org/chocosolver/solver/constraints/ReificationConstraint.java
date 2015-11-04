@@ -121,7 +121,7 @@ public class ReificationConstraint extends Constraint {
             assert (propagators[p].isReifiedAndSilent());
             propagators[p].setReifiedTrue();
             solver.getEventObserver().activePropagator(bool, propagators[p]);
-            propagators[p].propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());
+            propagators[p].propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
             solver.getEngine().onPropagatorExecution(propagators[p]);
         }
     }

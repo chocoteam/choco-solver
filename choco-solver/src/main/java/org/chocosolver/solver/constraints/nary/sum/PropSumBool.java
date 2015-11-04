@@ -86,9 +86,9 @@ public class PropSumBool extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.INSTANTIATE.getMask();
             case LE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx == l ? IntEventType.DECUPP.getMask() : 0);
+                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l ? IntEventType.DECUPP : IntEventType.VOID);
             case GE:
-                return IntEventType.INSTANTIATE.getMask() + (vIdx == l ? IntEventType.INCLOW.getMask() : 0);
+                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l ? IntEventType.INCLOW : IntEventType.VOID);
             default:
                 return IntEventType.boundAndInst();
         }

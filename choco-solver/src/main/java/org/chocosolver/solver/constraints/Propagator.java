@@ -138,9 +138,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.priority = priority;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
-        if(solver.getSettings().cloneVariableArrayInPropagator()){
+        if (solver.getSettings().cloneVariableArrayInPropagator()) {
             this.vars = vars.clone();
-        }else{
+        } else {
             this.vars = vars;
         }
         this.vindices = new int[vars.length];
@@ -211,7 +211,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
-    protected void linkVariables(){
+    protected void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }
@@ -229,12 +229,39 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
-     * <i>Checks are made applying bitwise AND between the mask and the event.</i>
+     * Returns the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
+     * A mask is a bitwise OR operations over {@link IEventType} this can react on.
+     *
+     * For example, consider a propagator that can deduce filtering based on the lower bound of the integer variable X.
+     * Then, for this variable, the mask should be equal to :
+     * <pre>
+     *     int mask = IntEvtType.INCLOW.getMask() | IntEvtType.INSTANTIATE.getMask();
+     * </pre>
+     * or, in a more convenient way:
+     * <pre>
+     *     int mask = IntEvtType.combine(IntEvtType.INCLOW,IntEvtType.INSTANTIATE);
+     * </pre>
+     *
+     * That indicates the following behavior:
+     * <ol>
+     *     <li>if X is instantiated, this propagator will be executed,</li>
+     *     <li>if the lower bound of X is modified, this propagator will be executed,</li>
+     *     <li>if the lower bound of X is removed, the event is promoted from REMOVE to INCLOW and this propagator will NOT be executed,</li>
+     *     <li>otherwise, this propagator will NOT be executed</li>
+     * </ol>
+     *
+     * Some combinations are valid.
+     * For example, a propagator which reacts on REMOVE and INSTANTIATE should also declare INCLOW and DECUPP as conditions.
+     * Indeed INCLOW (resp. DECUPP), for efficiency purpose, removing the lower bound (resp. upper bound) of an integer variable
+     * will automatically be <i>promoted</i> into INCLOW (resp. DECUPP).
+     * So, ignoring INCLOW and/or DECUPP in that case may result in a lack of filtering.
+     *
+     * The same goes with events of other variable types, but most of the time, there are only few combinations.
+     *
      * Reacts to any kind of event by default.
      *
      * @param vIdx index of the variable within the propagator
-     * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
+     * @return an int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     public int getPropagationConditions(int vIdx) {
@@ -275,7 +302,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
                     "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
         }
-        propagate(CUSTOM_PROPAGATION.getStrengthenedMask());
+        propagate(CUSTOM_PROPAGATION.getMask());
     }
 
     /**
@@ -587,7 +614,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean nrules = ruleStore.addPropagatorActivationRule(this);
         for (int i = 0; i < vars.length; i++) {
-            if(vars[i]!= var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
+            if (vars[i] != var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
         }
         return nrules;
     }

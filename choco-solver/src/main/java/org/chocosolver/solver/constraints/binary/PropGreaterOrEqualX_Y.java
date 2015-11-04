@@ -61,9 +61,9 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0) {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.DECUPP.getMask();
+            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.DECUPP);
         } else {
-            return IntEventType.INSTANTIATE.getMask() + IntEventType.INCLOW.getMask();
+            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.INCLOW);
         }
     }
 

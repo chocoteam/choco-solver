@@ -46,21 +46,14 @@ public enum SetEventType implements IEventType {
 	REMOVE_FROM_ENVELOPE(2);
 
 	private final int mask;
-	private final int strengthened_mask;
 
 	SetEventType(int mask) {
 		this.mask = mask;
-		this.strengthened_mask = mask;
 	}
 
 	@Override
 	public int getMask() {
 		return mask;
-	}
-
-	@Override
-	public int getStrengthenedMask() {
-		return strengthened_mask;
 	}
 
 	//******************************************************************************************************************

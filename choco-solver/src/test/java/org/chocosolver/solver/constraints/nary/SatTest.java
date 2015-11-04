@@ -215,7 +215,7 @@ public class SatTest {
         solver.set(ISF.lexico_LB(var));
 
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, var);
-        Assert.assertEquals(var.getValue(), 2);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
 
     }
 }

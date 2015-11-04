@@ -252,7 +252,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     int aid = p2i.get(prop.getId());
                     if (prop.reactToFineEvent()) {
                         boolean needSched = (eventmasks[aid][pindice] == 0);
-                        eventmasks[aid][pindice] |= type.getStrengthenedMask();
+                        eventmasks[aid][pindice] |= type.getMask();
                         if (needSched) {
                             if (DEBUG) {
                                 IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
@@ -282,7 +282,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             if (DEBUG) {
                 IPropagationEngine.Trace.printPropagation(null, propagator, COLOR);
             }
-            propagator.propagate(type.getStrengthenedMask());
+            propagator.propagate(type.getMask());
         }
     }
 

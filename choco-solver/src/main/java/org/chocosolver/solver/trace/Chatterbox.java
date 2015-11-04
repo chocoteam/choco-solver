@@ -185,7 +185,7 @@ public class Chatterbox {
         ISolutionRecorder solrec = solver.getSolutionRecorder();
         for (Solution sol : solrec.getSolutions()) {
             try {
-                sol.restore(solver);
+                solver.restoreSolution(sol);
                 out.println(message.print());
             } catch (ContradictionException e) {
                 throw new SolverException("Unable to restore a found solution");

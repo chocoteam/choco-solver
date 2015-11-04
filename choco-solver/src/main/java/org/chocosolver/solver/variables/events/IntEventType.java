@@ -43,66 +43,67 @@ package org.chocosolver.solver.variables.events;
  */
 public enum IntEventType implements IEventType {
 
-	VOID(0,0),
-	REMOVE(1,1),
-	INCLOW(2,3),
-	DECUPP(4,5),
-	BOUND(6,7),
-	INSTANTIATE(8,15);
+    VOID(0),
+    REMOVE(1),
+    INCLOW(2),
+    DECUPP(4),
+    BOUND(6),
+    INSTANTIATE(8);
 
-	private final int mask;
-	private final int strengthened_mask;
+    private final int mask;
 
-	IntEventType(int mask, int fullmask) {
-		this.mask = mask;
-		this.strengthened_mask = fullmask;
-	}
+    IntEventType(int mask) {
+        this.mask = mask;
+    }
 
-	@Override
-	public int getMask() {
-		return mask;
-	}
+    @Override
+    public int getMask() {
+        return mask;
+    }
 
-	@Override
-	public int getStrengthenedMask() {
-		return strengthened_mask;
-	}
+    //******************************************************************************************************************
+    //******************************************************************************************************************
 
-	//******************************************************************************************************************
-	//******************************************************************************************************************
+    public static int combine(IntEventType... evts) {
+        int mask = 0;
+        for (int i = 0; i < evts.length; i++) {
+            mask |= evts[i].mask;
+        }
+        return mask;
+    }
 
-	public static int all() {
-		return INSTANTIATE.getStrengthenedMask();
-	}
+    public static int all() {
+        return 15; // combine(REMOVE, INCLOW, DECUPP, INSTANTIATE);
+    }
 
-	public static int boundAndInst() {
-		return INSTANTIATE.getStrengthenedMask()-REMOVE.getStrengthenedMask();
-	}
+    public static int boundAndInst() {
+        return 14;//combine(INCLOW, DECUPP, INSTANTIATE);
+    }
 
-	public static int instantiation() {
-		return INSTANTIATE.getMask();
-	}
+    public static int instantiation() {
+        return INSTANTIATE.mask;
+    }
 
-	//******************************************************************************************************************
-	//******************************************************************************************************************
+    //******************************************************************************************************************
+    //******************************************************************************************************************
 
-	public static boolean isInstantiate(int mask) {
-		return (mask & INSTANTIATE.mask) != 0;
-	}
+    public static boolean isInstantiate(int mask) {
+        return (mask & INSTANTIATE.mask) != 0;
+    }
 
-	public static boolean isRemove(int mask) {
-		return (mask & REMOVE.mask) != 0;
-	}
+    public static boolean isRemove(int mask) {
+        return (mask & REMOVE.mask) != 0;
+    }
 
-	public static boolean isBound(int mask) {
-		return (mask & BOUND.mask) != 0;
-	}
+    public static boolean isBound(int mask) {
+        return (mask & BOUND.mask) != 0;
+    }
 
-	public static boolean isInclow(int mask) {
-		return (mask & INCLOW.mask) != 0;
-	}
+    public static boolean isInclow(int mask) {
+        return (mask & INCLOW.mask) != 0;
+    }
 
-	public static boolean isDecupp(int mask) {
-		return (mask & DECUPP.mask) != 0;
-	}
+    public static boolean isDecupp(int mask) {
+        return (mask & DECUPP.mask) != 0;
+    }
 }

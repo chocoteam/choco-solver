@@ -190,10 +190,10 @@ public class PropagationTrigger implements Serializable {
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
         if (toPropagate.isStateLess()) {
             toPropagate.setActive();
-            toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());
+            toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
             engine.onPropagatorExecution(toPropagate);
         } else if (toPropagate.isActive()) { // deal with updated propagator
-            toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getStrengthenedMask());
+            toPropagate.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
             engine.onPropagatorExecution(toPropagate);
         }
     }

@@ -61,7 +61,7 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.INSTANTIATE.getMask() + IntEventType.INCLOW.getMask();
+        return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.INCLOW);
     }
 
     @Override

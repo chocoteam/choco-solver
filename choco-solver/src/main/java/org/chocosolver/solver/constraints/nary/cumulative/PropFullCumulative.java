@@ -126,7 +126,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (idx == vars.length - 1) {
-            return IntEventType.DECUPP.getMask() + IntEventType.INSTANTIATE.getMask();
+            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.DECUPP);
         }
         // awakes on instantiations only when FAST mode is set to true
         return fast ? IntEventType.instantiation() : IntEventType.boundAndInst();
