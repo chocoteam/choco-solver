@@ -221,12 +221,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             value = values.nextValue(value);
         }
         if (hasRemoved) {
-            SIZE.set(count);
-            IntEventType e = IntEventType.REMOVE;
-            if (count == 1) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
+            notifyOnRemovals(count, cause);
         }
         return hasRemoved || hasChanged;
     }
@@ -266,14 +261,19 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
         }
         if (hasRemoved) {
-            SIZE.set(count);
-            IntEventType e = IntEventType.REMOVE;
-            if (count == 1) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
+            notifyOnRemovals(count, cause);
         }
         return hasRemoved || hasChanged;
+    }
+
+
+    private void notifyOnRemovals(int count, ICause cause) throws ContradictionException {
+        SIZE.set(count);
+        IntEventType e = IntEventType.REMOVE;
+        if (count == 1) {
+            e = IntEventType.INSTANTIATE;
+        }
+        this.notifyPropagators(e, cause);
     }
 
     /**
@@ -414,16 +414,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 this.contradiction(cause, MSG_LOW);
             } else {
                 IntEventType e = IntEventType.INCLOW;
-                int index = V2I.get(value); // if aValue is known
-                if (index == -1 || !INDICES.get(index)) {
-                    //otherwise, a dichotomic search of the closest value greater than key
-                    index = ArrayUtils.binarySearchInc(VALUES, lb, ub, value, true);
-                    if (index < lb || index > ub) {
-                        index = -1;
-                    } else {
-                        index = INDICES.nextSetBit(index);
-                    }
-                }
+                int index = indexOfLowerBound(value, lb, ub);
                 assert index >= 0 && VALUES[index] >= value;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
@@ -480,20 +471,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 this.contradiction(cause, MSG_UPP);
             } else {
                 IntEventType e = IntEventType.DECUPP;
-                int index = V2I.get(value);// if aValue is known
-                if (index == -1 || !INDICES.get(index)) {
-                    //otherwise, a dichotomic search of the closest value smaller than key
-                    index = ArrayUtils.binarySearchInc(VALUES, lb, ub, value, false);
-                    if (index < lb || index > ub) {
-                        index = -1;
-                    } else {
-                        index = INDICES.prevSetBit(index);
-                    }
-                }
+                int index = indexOfUpperBound(value, lb, ub);
                 assert index >= 0 && VALUES[index] <= value;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = ub; i > -1; i = INDICES.prevSetBit(i - 1)) {
+                    for (int i = ub; i >= 0 && i > index; i = INDICES.prevSetBit(i - 1)) {
                         delta.add(VALUES[i], cause);
                     }
                 }
@@ -533,16 +515,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else if (olb < aLB) {
                 e = IntEventType.INCLOW;
                 b = LB.get();
-                index = V2I.get(aLB); // if aValue is known
-                if (index == -1 || !INDICES.get(index)) {
-                    //otherwise, a dichotomic search of the closest value greater than key
-                    index = ArrayUtils.binarySearchInc(VALUES, lb, ub, aLB, true);
-                    if (index < lb || index > ub) {
-                        index = -1;
-                    } else {
-                        index = INDICES.nextSetBit(index);
-                    }
-                }
+                index = indexOfLowerBound(aLB, lb, ub);
                 assert index >= 0 && VALUES[index] >= aLB;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
@@ -562,20 +535,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             } else if (oub > aUB) {
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 b = UB.get();
-                index = V2I.get(aUB);// if aValue is known
-                if (index == -1 || !INDICES.get(index)) {
-                    //otherwise, a dichotomic search of the closest value smaller than key
-                    index = ArrayUtils.binarySearchInc(VALUES, lb, ub, aUB, false);
-                    if (index < lb || index > ub) {
-                        index = -1;
-                    } else {
-                        index = INDICES.prevSetBit(index);
-                    }
-                }
+                index = indexOfUpperBound(aUB, lb, ub);
                 assert index >= 0 && VALUES[index] <= aUB;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
-                    for (int i = b; i > index; i = INDICES.prevSetBit(i - 1)) {
+                    for (int i = b; i >= 0 && i > index; i = INDICES.prevSetBit(i - 1)) {
                         delta.add(VALUES[i], cause);
                     }
                 }
@@ -595,6 +559,34 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             update = true;
         }
         return update;
+    }
+
+    private int indexOfLowerBound(int aLB, int lb, int ub) {
+        int index = V2I.get(aLB); // if aValue is known
+        if (index == -1 || !INDICES.get(index)) {
+            //otherwise, a dichotomic search of the closest value greater than key
+            index = ArrayUtils.binarySearchInc(VALUES, lb, ub, aLB, true);
+            if (index < lb || index > ub) {
+                index = -1;
+            } else {
+                index = INDICES.nextSetBit(index);
+            }
+        }
+        return index;
+    }
+
+    private int indexOfUpperBound(int value, int lb, int ub) {
+        int index = V2I.get(value);// if aValue is known
+        if (index == -1 || !INDICES.get(index)) {
+            //otherwise, a dichotomic search of the closest value smaller than key
+            index = ArrayUtils.binarySearchInc(VALUES, lb, ub, value, false);
+            if (index < lb || index > ub) {
+                index = -1;
+            } else {
+                index = INDICES.prevSetBit(index);
+            }
+        }
+        return index;
     }
 
     @Override

@@ -29,16 +29,20 @@
  */
 package org.chocosolver.solver.variables.fast;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.impl.BitsetArrayIntVarImpl;
 import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -645,5 +649,61 @@ public class BitsetArrayIntVarImplTest {
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), 2);
         Assert.assertEquals(x.getUB(), 2);
+    }
+
+    @Test(groups="1s")
+    public void testJL01() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{0,98,99}, s);
+        IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+        i.updateUpperBound(98, Cause.Null);
+        d.freeze();
+        TIntArrayList remvals= new TIntArrayList(1);
+        d.forEachRemVal((IntProcedure) remvals::add);
+        d.unfreeze();
+        Assert.assertEquals(remvals.size(), 1);
+        Assert.assertEquals(remvals.get(0), 99);
+    }
+
+    @Test(groups="1s")
+    public void testJL02() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{0,98,99}, s);
+        IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+        i.updateBounds(0,98, Cause.Null);
+        d.freeze();
+        TIntArrayList remvals= new TIntArrayList(1);
+        d.forEachRemVal((IntProcedure) remvals::add);
+        d.unfreeze();
+        Assert.assertEquals(remvals.size(), 1);
+        Assert.assertEquals(remvals.get(0), 99);
+    }
+
+    @Test(groups="1s")
+    public void testJL03() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{2,3,99}, s);
+        IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+        i.updateLowerBound(3, Cause.Null);
+        d.freeze();
+        TIntArrayList remvals= new TIntArrayList(1);
+        d.forEachRemVal((IntProcedure) remvals::add);
+        d.unfreeze();
+        Assert.assertEquals(remvals.size(), 1);
+        Assert.assertEquals(remvals.get(0), 2);
+    }
+
+    @Test(groups="1s")
+    public void testJL04() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar i = VF.enumerated("i", new int[]{2,3,99}, s);
+        IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+        i.updateBounds(3,99, Cause.Null);
+        d.freeze();
+        TIntArrayList remvals= new TIntArrayList(1);
+        d.forEachRemVal((IntProcedure) remvals::add);
+        d.unfreeze();
+        Assert.assertEquals(remvals.size(), 1);
+        Assert.assertEquals(remvals.get(0), 2);
     }
 }
