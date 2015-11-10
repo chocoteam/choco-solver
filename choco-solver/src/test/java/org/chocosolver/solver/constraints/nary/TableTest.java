@@ -185,7 +185,7 @@ public class TableTest {
             for (int i = 0; i < reified.length; i++) {
                 System.out.print(reified[i].getValue() + "\t");
             }
-            System.out.println("\n" + "obj = " + sum.getValue() + ", backtracks = " + solver.getMeasures().getBackTrackCount());
+            System.out.println("\n" + "obj = " + solver.getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + solver.getMeasures().getBackTrackCount());
         }
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
     }
