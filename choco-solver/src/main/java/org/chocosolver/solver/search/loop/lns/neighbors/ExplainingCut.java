@@ -33,7 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
@@ -198,11 +197,19 @@ public class ExplainingCut implements INeighbor {
         if (dec instanceof IntMetaDecision) {
             IntMetaDecision imd = (IntMetaDecision) dec;
             for (int j = 0; j < imd.size(); j++) {
-                path.add(imd.getVar(j), imd.getVal(j), imd.isAssignement(j));
+                path.add(imd.getVar(j), imd.getVal(j), imd.getDop(j));
             }
         } else {
-            IntDecision d = (IntDecision) dec;
-            path.add(d.getDecisionVariables(), d.getDecisionValue(), d.hasNext());
+            IntDecision id = (IntDecision) dec;
+            boolean tofree = false;
+            if(!id.hasNext()){
+                id = id.flip();
+                tofree = true;
+            }
+            path.add(id.getDecisionVariables(), id.getDecisionValue(), id.getDecOp());
+            if(tofree){
+                id.free();
+            }
         }
     }
 
@@ -226,7 +233,7 @@ public class ExplainingCut implements INeighbor {
                 if ((d = decisionPool.getE()) == null) {
                     d = new IntDecision(decisionPool);
                 }
-                d.set(path.getVar(i), path.getVal(i), path.isAssignement(i) ? DecisionOperator.int_eq : DecisionOperator.int_neq);
+                d.set(path.getVar(i), path.getVal(i), path.getDop(i));
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();

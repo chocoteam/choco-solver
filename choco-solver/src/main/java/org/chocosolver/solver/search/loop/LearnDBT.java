@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -46,17 +45,41 @@ import java.util.ArrayDeque;
 import java.util.BitSet;
 
 /**
+ * Dynamic Backtracking[1] (DBT) explanation stategy.
+ * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
+ * <p>
+ * [1]: M.L. Ginsberg, Dynamic Backtracking, JAIR (1993).
+ * <p>
  * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
 public class LearnDBT extends LearnCBJ {
 
+    /**
+     * The strategy which provides already computed decisions unrelated to the last conflict.
+     */
     final DBTstrategy dbTstrategy;
-    final RuleStore mRuleStore;  // required to continue the computation of the explanations
-    final IEventStore mEventStore; // required to continue the computation of the explanations
 
-    public LearnDBT(Solver mSolver, boolean nogoodFromConflict) {
-        super(mSolver, nogoodFromConflict);
+    /**
+     * Because computing explanation can be lazy, a {@link RuleStore} is needed to continue computing partial explanations.
+     * A reference to the one used by the explanation engine is thus needed.
+     */
+    final RuleStore mRuleStore;
+
+    /**
+     * Because computing explanation can be lazy, a {@link IEventStore} is needed to continue computing partial explanations.
+     * A reference to the one used by the explanation engine is thus needed.
+     */
+    final IEventStore mEventStore;
+
+    /**
+     * Create a Dynamic Backtracking strategy.
+     * @param mSolver the solver to instrument
+     * @param nogoodFromConflict set to <tt>true</tt> to extract nogoods from explanations.
+     * @param userFeedbackOn set to <tt>true</tt> to record causes in explanations (required for user feedback mainly).
+     */
+    public LearnDBT(Solver mSolver, boolean nogoodFromConflict, boolean userFeedbackOn) {
+        super(mSolver, nogoodFromConflict, userFeedbackOn);
         dbTstrategy = new DBTstrategy(mSolver, mExplainer);
         mRuleStore = mExplainer.getRuleStore();
         mEventStore = mExplainer.getEventStore();
@@ -69,9 +92,10 @@ public class LearnDBT extends LearnCBJ {
      * @param nworld index of the world to backtrack to
      */
     @SuppressWarnings("unchecked")
-    void identifyRefutedDecision(int nworld, ICause cause) {
+    @Override
+    void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
-        if (nworld == 1 || cause == mSolver.getObjectiveManager()) {
+        if (nworld == 1 || mSolver.getEngine().getContradictionException().c == mSolver.getObjectiveManager()) {
             super.identifyRefutedDecision(nworld);
             return;
         }
@@ -137,11 +161,8 @@ public class LearnDBT extends LearnCBJ {
      * @param decIdx        index, in the event store, of the decision to refute
      */
     private void keepUp(Explanation anExplanation, int decIdx) {
-        //Rules oRules = mRuleStore.getRules(); // temporary store the set of rules of the rule store
         int i = anExplanation.getEvtstrIdx() - 1; // skip the last known one
-//        mRuleStore.setRules(anExplanation.getRules()); // replace the rules by the one related to the explanation
         mRuleStore.init(anExplanation);
-        // while (i > -1) { // force to compute entirely the explanation, but inefficient in practice
         while (i >= decIdx) { // we continue while we did not reach at least 'decIdx'
             if (mRuleStore.match(i, mEventStore)) {
                 mRuleStore.update(i, mEventStore, anExplanation);
@@ -152,7 +173,6 @@ public class LearnDBT extends LearnCBJ {
         if (i == 0) {
             anExplanation.getRules().clear(); // only if we're sure the explanation is complete
         }
-//        mRuleStore.setRules(oRules); // store the set of rules of the rule store
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,6 +206,13 @@ public class LearnDBT extends LearnCBJ {
         @Override
         public boolean init(){
             return mainStrategy.init();
+        }
+
+        @Override
+        public void afterInitialize() {
+            this.mainStrategy = mSolver.getStrategy();
+            // put this strategy before any other ones.
+            mSolver.set(this);
         }
 
         @Override
@@ -223,12 +250,6 @@ public class LearnDBT extends LearnCBJ {
             if (decision_path.size() > 0) str.append(decision_path.toString());
             str.append(mainStrategy.toString());
             return str.toString();
-        }
-
-        @Override
-        public void afterInitialize() {
-            this.mainStrategy = mSolver.getStrategy();
-            mSolver.set(this);
         }
     }
 }

@@ -62,15 +62,14 @@ public class ExplanationEngine implements FilteringMonitor {
 
     /**
      * Create an explanation engine based on a rule store
-     *
      * @param solver                   a solver
-     * @param userFeedback             does user require feedback, ie, keep trace of the constraints in conflict ?
-     * @param enablePartialExplanation do explanations need to be complete (for DBT or nogood extraction) ?
+     * @param partialExplanationsOn set to <tt>true</tt> to enable partial explanations, <tt>false</tt> otherwise
+     * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
      */
-    public ExplanationEngine(Solver solver, boolean userFeedback, boolean enablePartialExplanation) {
+    public ExplanationEngine(Solver solver, boolean partialExplanationsOn, boolean recordCauses) {
         this.mSolver = solver;
-        this.saveCauses = userFeedback;
-        this.enablePartialExplanation = enablePartialExplanation;
+        this.saveCauses = recordCauses;
+        this.enablePartialExplanation = partialExplanationsOn;
         eventStore = new ArrayEventStore(solver.getEnvironment());
         ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
         solver.set(this);

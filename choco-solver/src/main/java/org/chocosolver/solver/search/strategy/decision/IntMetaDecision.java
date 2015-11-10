@@ -30,9 +30,8 @@
 package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.IntVar;
-
-import java.util.BitSet;
 
 /**
  * A decision made of multiple instantiation.
@@ -45,37 +44,34 @@ public class IntMetaDecision extends Decision<IntVar[]> {
 
     protected int size;
     protected int[] val;
-    protected BitSet isAsgn; // is assignment?
+    protected DecisionOperator<IntVar>[] dop; // is assignment?
 
     public IntMetaDecision() {
         super(1);
         var = new IntVar[64];
         val = new int[64];
-        isAsgn = new BitSet(64);
+        dop = new DecisionOperator[64];
     }
 
     @Override
     public void apply() throws ContradictionException {
         for (int i = 0; i < size; i++) {
-            if(isAsgn.get(i)){
-                var[i].instantiateTo(val[i], this);
-            }else{
-                var[i].removeValue(val[i], this);
-            }
+            dop[i].apply(var[i], val[i], this);
         }
     }
 
     public void add(IntVar aVar, int aVal) {
-        add(aVar, aVal, true);
+        add(aVar, aVal, DecisionOperator.int_eq);
     }
 
-    public void add(IntVar aVar, int aVal, boolean asgn) {
+    public void add(IntVar aVar, int aVal, DecisionOperator<IntVar> aDop) {
         if (size >= var.length) {
             increase();
         }
         var[size] = aVar;
         val[size] = aVal;
-        isAsgn.set(size++, asgn);
+
+        this.dop[size++] = aDop;
     }
 
     public IntVar getVar(int i) {
@@ -86,10 +82,9 @@ public class IntMetaDecision extends Decision<IntVar[]> {
         return val[i];
     }
 
-    public boolean isAssignement(int i){
-        return isAsgn.get(i);
+    public DecisionOperator<IntVar> getDop(int i){
+        return dop[i];
     }
-
 
     public int size() {
         return size;
@@ -98,10 +93,22 @@ public class IntMetaDecision extends Decision<IntVar[]> {
     public void remove(int from, int to){
         System.arraycopy(var, to, var, from, size - to);
         System.arraycopy(val, to, val, from, size - to);
-        for(int i = to; i < size; i++){
-            isAsgn.set(from + i - to, isAsgn.get(i));
-        }
+        System.arraycopy(dop, to, dop, from, size - to);
         size -= (to - from);
+    }
+
+    /**
+     * Flip the decision at position i
+     * @param idx
+     */
+    public void flip(int idx){
+        if(dop[idx] == DecisionOperator.int_split){
+            val[idx]++;
+        }
+        else if(dop[idx] == DecisionOperator.int_reverse_split){
+            val[idx]--;
+        }
+        dop[idx].opposite();
     }
 
     @Override
@@ -125,17 +132,17 @@ public class IntMetaDecision extends Decision<IntVar[]> {
                 break;
             default:
             case 3:
-                st.append(var[i].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[i++]).append(" & ");
+                st.append(var[i].getName()).append(dop[i]).append(val[i++]).append(" & ");
             case 2:
-                st.append(var[i].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[i++]).append(" & ");
+                st.append(var[i].getName()).append(dop[i]).append(val[i++]).append(" & ");
             case 1:
-                st.append(var[i].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[i++]);
+                st.append(var[i].getName()).append(dop[i]).append(val[i++]);
         }
         if (i < size) {
             if (size > 4) {
                 st.append(" & ...");
             }
-            st.append(" & ").append(var[size - 1].getName()).append(isAsgn.get(i)?" == ":" != ").append(val[size - 1]);
+            st.append(" & ").append(var[size - 1].getName()).append(dop[i]).append(val[size - 1]);
         }
         st.append(')');
 

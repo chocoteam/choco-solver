@@ -134,7 +134,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return isOptimization() && ruleStore.addFullDomainRule((IntVar) objective);
+        return isOptimization() && ruleStore.addBoundsRule((IntVar) objective);
     }
 
     @Override

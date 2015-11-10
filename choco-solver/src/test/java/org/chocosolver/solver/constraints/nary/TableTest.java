@@ -179,7 +179,7 @@ public class TableTest {
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
         if (solver.getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
-                System.out.print(vars[i].getValue() + "\t");
+                System.out.print(solver.getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
             }
             System.out.println("");
             for (int i = 0; i < reified.length; i++) {
@@ -192,44 +192,23 @@ public class TableTest {
 
     @Test(groups = "1s")
     public void testtpetit() {
-        test("AC3");
-        test("AC3rm");
-        test("AC3bit+rm");
-        test("AC2001");
-        test("FC");
+        for(String s : ALGOS) {
+            test(s);
+        }
     }
 
     @Test(groups = "1s")
     public static void testThierry1() {
+        String[] ALGOS = {"FC", "GAC2001", "GAC3rm"};
+        for(String s : ALGOS){
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, "FC"));
+        solver.post(ICF.table(vars, t, s));
         solver.findSolution();
-    }
-
-    @Test(groups = "1s")
-    public static void testThierry2() {
-        Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
-        Tuples t = new Tuples(false);
-        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, "GAC3rm"));
-        solver.findSolution();
-    }
-
-    @Test(groups = "1s")
-    public static void testThierry3() {
-        Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
-        Tuples t = new Tuples(false);
-        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, "GAC2001"));
-        solver.findSolution();
+        }
     }
 
     @Test(groups = "1s")

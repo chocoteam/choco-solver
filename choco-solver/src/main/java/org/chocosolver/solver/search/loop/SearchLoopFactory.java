@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
@@ -129,7 +128,7 @@ public class SearchLoopFactory {
      * @param moves a list of moves.
      * @param <V> type of variables
      */
-    public static <V extends Variable> void seq(Solver aSolver, Move... moves){
+    public static <V extends Variable> void seq(Solver aSolver, Move... moves) {
         aSolver.getSearchLoop().setMove(new MoveSeq(aSolver, moves));
     }
 
@@ -206,6 +205,26 @@ public class SearchLoopFactory {
         aSolver.getSearchLoop().setMove(new MoveLNS(currentMove, neighbor, ICounter.Impl.None));
     }
 
+    /**
+     * Equips the <code>aSearchLoop</code> with a tabu decision-repair (TDR) algorithm.
+     * It encapsulates the current move into a TDR algorithm and add a learn component to explain failure.
+     * Anytime a conflict occurred, its explanation is computed and the decision sub-path in conflict is recorded
+     * into a tabu list of size <code>tabuListSize</code>.
+     * Then, a neighbor of the decision path is computed in order to be compatible with the conflicts stored in the tabu list.
+     *
+     * If no neighbor can be found, the search ends; the search may not be complete though.
+     *
+     * @param aSolver the target solver
+     * @param tabuListSize the size of the tabu list which records conflicts.
+     */
+    private static void tabuDecisionRepair(Solver aSolver, int tabuListSize) {
+        // TODO: incomplete, have to deal with gamma when extending
+//        Move currentMove = aSolver.getSearchLoop().getMove();
+//        MoveLearnBinaryTDR tdr = new MoveLearnBinaryTDR(aSolver, currentMove, tabuListSize);
+//        aSolver.getSearchLoop().setMove(tdr);
+//        aSolver.getSearchLoop().setLearn(tdr);
+    }
+
     //****************************************************************************************************************//
     //***********************************  LEARN *********************************************************************//
     //****************************************************************************************************************//
@@ -220,11 +239,8 @@ public class SearchLoopFactory {
      * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
      */
     public static void learnCBJ(Solver aSolver, boolean nogoodsOn, boolean userFeedbackOn) {
-        if (aSolver.getExplainer() == null) {
-            aSolver.set(new ExplanationEngine(aSolver, userFeedbackOn, !nogoodsOn));
-        }
         if (!(aSolver.getSearchLoop().getLearn() instanceof LearnCBJ)) {
-            aSolver.getSearchLoop().setLearn(new LearnCBJ(aSolver, nogoodsOn));
+            aSolver.getSearchLoop().setLearn(new LearnCBJ(aSolver, nogoodsOn, userFeedbackOn));
         }
     }
 
@@ -238,11 +254,8 @@ public class SearchLoopFactory {
      * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
      */
     public static void learnDBT(Solver aSolver, boolean nogoodsOn, boolean userFeedbackOn) {
-        if (aSolver.getExplainer() == null) {
-            aSolver.set(new ExplanationEngine(aSolver, userFeedbackOn, !nogoodsOn));
-        }
         if (!(aSolver.getSearchLoop().getLearn() instanceof LearnDBT)) {
-            aSolver.getSearchLoop().setLearn(new LearnDBT(aSolver, nogoodsOn));
+            aSolver.getSearchLoop().setLearn(new LearnDBT(aSolver, nogoodsOn, userFeedbackOn));
         }
     }
 }

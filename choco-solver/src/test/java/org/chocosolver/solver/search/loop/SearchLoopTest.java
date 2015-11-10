@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -228,8 +228,8 @@ public class SearchLoopTest {
     public void test7() {
         Solver solver = new Solver();
         int n = 3;
-        BoolVar[] B = VF.boolArray("b", n-1, solver);
-        SLF.lds(solver,ISF.lexico_UB(B), 1);
+        BoolVar[] B = VF.boolArray("b", n - 1, solver);
+        SLF.lds(solver, ISF.lexico_UB(B), 1);
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -242,11 +242,11 @@ public class SearchLoopTest {
         Solver solver = new Solver();
         int n = 3;
         IntVar[] X = VF.enumeratedArray("X", n, 0, n, solver);
-        BoolVar[] B = VF.boolArray("b", n-1, solver);
-        for (int i = 0; i < n-1; i++) {
+        BoolVar[] B = VF.boolArray("b", n - 1, solver);
+        for (int i = 0; i < n - 1; i++) {
             ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
-        SLF.lds(solver,ISF.sequencer(ISF.lexico_UB(B), ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)), 1);
+        SLF.lds(solver, ISF.sequencer(ISF.lexico_UB(B), ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)), 1);
         Chatterbox.showSolutions(solver);
 //        Chatterbox.showDecisions(solver);
         SMF.limitSolution(solver, 10);
@@ -260,8 +260,8 @@ public class SearchLoopTest {
         Solver solver = new Solver();
         int n = 3;
         IntVar[] X = VF.enumeratedArray("X", n, 0, n, solver);
-        BoolVar[] B = VF.boolArray("b", n-1, solver);
-        for (int i = 0; i < n-1; i++) {
+        BoolVar[] B = VF.boolArray("b", n - 1, solver);
+        for (int i = 0; i < n - 1; i++) {
             ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
         SLF.seq(solver,

@@ -114,6 +114,22 @@ public class IntDecision extends Decision<IntVar> {
         return assignment;
     }
 
+    public IntDecision flip(){
+        IntDecision d = poolManager.getE();
+        if (d == null) {
+            d = new IntDecision(poolManager);
+        }
+        int val = value;
+        if(assignment == DecisionOperator.int_split){
+            val++;
+        }
+        else if(assignment == DecisionOperator.int_reverse_split){
+            val--;
+        }
+        d.set(var, val, assignment.opposite());
+        return d;
+    }
+
     @Override
     public String toString() {
         if (assignment.equals(DecisionOperator.int_eq)) {

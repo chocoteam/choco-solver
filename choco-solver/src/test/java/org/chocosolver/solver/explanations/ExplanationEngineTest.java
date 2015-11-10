@@ -700,7 +700,7 @@ public class ExplanationEngineTest {
         }
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -725,7 +725,7 @@ public class ExplanationEngineTest {
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
         SatFactory.addBoolNot(bs[0], bs[1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -752,7 +752,7 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -779,7 +779,7 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
         SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();

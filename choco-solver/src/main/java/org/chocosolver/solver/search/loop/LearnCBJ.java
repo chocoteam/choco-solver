@@ -33,90 +33,49 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
 /**
+ * Conflict-based Backjumping[1] (CBJ) explanation strategy.
+ * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
+ * <p>
+ * [1]: P. Prosser, Hybrid algorithms for the constraint satisfaction problem, Computational Intelligence (93).
+ * <p>
  * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class LearnCBJ implements Learn {
+public class LearnCBJ extends LearnExplained {
 
-    // The explanation engine
-    final ExplanationEngine mExplainer;
-    final Solver mSolver;
-    private final boolean saveCauses, nogoodFromConflict;
-    private final PropNogoods ngstore;
+    /**
+     * Indicates if nogoods must be extracted from explanations.
+     */
+    final boolean nogoodFromConflict;
+
+    /**
+     * The nogood store, if needed.
+     */
+    private PropNogoods ngstore;
+
+    /**
+     * A temporary int list to compute the nogood.
+     */
     private TIntList ps;
-    private long nbsol = 0;
-
-    // The last explanation computed, for user only
-    Explanation lastExplanation;
-
-    public LearnCBJ(Solver mSolver, boolean nogoodFromConflict) {
-        this.mSolver = mSolver;
-        this.mExplainer = mSolver.getExplainer();
-        this.saveCauses = mExplainer.isSaveCauses();
-        this.nogoodFromConflict = nogoodFromConflict;
-        this.ngstore = mSolver.getNogoodStore().getPropNogoods();
-        this.ps = new TIntArrayList();
-    }
 
 
-    @Override
-    public void record(SearchLoop searchLoop) {
-        if (nbsol == searchLoop.mSolver.getMeasures().getSolutionCount()) {
-            onFailure(searchLoop);
-        } else {
-            nbsol++;
-            onSolution(searchLoop);
+    /**
+     * Create a Conflict-based Backjumping strategy.
+     * @param mSolver the solver to instrument
+     * @param nogoodFromConflict set to <tt>true</tt> to extract nogoods from explanations.
+     * @param userFeedbackOn set to <tt>true</tt> to record causes in explanations (required for user feedback mainly).
+     */
+    public LearnCBJ(Solver mSolver, boolean nogoodFromConflict, boolean userFeedbackOn) {
+        super(mSolver, !nogoodFromConflict, userFeedbackOn);
+        if(this.nogoodFromConflict = nogoodFromConflict) {
+            this.ngstore = mSolver.getNogoodStore().getPropNogoods();
+            this.ps = new TIntArrayList();
         }
-    }
-
-    @Override
-    public void forget(SearchLoop searchLoop) {
-        // TODO: forget some learnt nogoods
-    }
-
-    private void onSolution(SearchLoop searchLoop) {
-        // we need to prepare a "false" backtrack on this decision
-        Decision dec = mSolver.getSearchLoop().getLastDecision();
-        while ((dec != ROOT) && (!dec.hasNext())) {
-            dec = dec.getPrevious();
-        }
-        if (dec != ROOT) {
-            Explanation explanation = mExplainer.makeExplanation(saveCauses);
-            // 1. skip the current one which is refuted...
-            Decision d = dec.getPrevious();
-            while ((d != ROOT)) {
-                if (d.hasNext()) {
-                    explanation.addDecicion(d);
-                }
-                d = d.getPrevious();
-            }
-            mExplainer.storeDecisionExplanation(dec, explanation);
-        }
-        searchLoop.jumpTo = 1;
-    }
-
-    private void onFailure(SearchLoop searchLoop) {
-        ContradictionException cex = mSolver.getEngine().getContradictionException();
-        assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
-        lastExplanation = mExplainer.explain(cex);
-
-        if (this.nogoodFromConflict) {
-            lastExplanation.postNogood(ngstore, ps);
-        }
-
-        int upto = compute(mSolver.getEnvironment().getWorldIndex());
-        assert upto > 0;
-        searchLoop.jumpTo = upto;
-
-        identifyRefutedDecision(upto);
     }
 
     /**
@@ -140,6 +99,17 @@ public class LearnCBJ implements Learn {
         }
     }
 
+    @Override
+    void onFailure(SearchLoop searchLoop) {
+       super.onFailure(searchLoop);
+        if (this.nogoodFromConflict) {
+            lastExplanation.postNogood(ngstore, ps);
+        }
+        int upto = compute(mSolver.getEnvironment().getWorldIndex());
+        assert upto > 0;
+        searchLoop.jumpTo = upto;
+        identifyRefutedDecision(upto);
+    }
 
     /**
      * Compute the world to backtrack to
@@ -150,15 +120,5 @@ public class LearnCBJ implements Learn {
     int compute(int currentWorldIndex) {
         assert currentWorldIndex >= lastExplanation.getDecisions().length();
         return currentWorldIndex - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
-    }
-
-
-    /**
-     * Return the explanation of the last conflict
-     *
-     * @return an explanation
-     */
-    public Explanation getLastExplanation() {
-        return lastExplanation;
     }
 }
