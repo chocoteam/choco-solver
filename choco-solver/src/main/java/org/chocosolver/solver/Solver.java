@@ -974,9 +974,6 @@ public class Solver implements Serializable {
      * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      */
     public void findOptimalSolution(ResolutionPolicy policy) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            throw new SolverException("Solver.findOptimalSolution(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-        }
         if (objectives == null || objectives.length == 0) {
             throw new SolverException("No objective variable has been defined");
         }
