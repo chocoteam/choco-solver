@@ -14,8 +14,8 @@
     </description>
     <licenses>
         <license>
-            <name>BSD 3-Clause License</name>
-            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+            <name>BSD 4-Clause License</name>
+            <url>https://spdx.org/licenses/BSD-4-Clause.html</url>
         </license>
     </licenses>
     <developers>
