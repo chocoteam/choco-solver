@@ -60,7 +60,7 @@ public class MoveLNS implements Move {
         this.counter = restartCounter;
         this.frequency = counter.getLimitValue();
         this.solutions = 0;
-        this.freshRestart = true;
+        this.freshRestart = false;
     }
 
     @Override
@@ -168,32 +168,36 @@ public class MoveLNS implements Move {
     @Override
     public boolean repair(SearchLoop searchLoop) {
         boolean repair;
-        // the detection of a new solution can only be met here
-        if (solutions < searchLoop.mSolver.getMeasures().getSolutionCount()) {
-            assert solutions == searchLoop.mSolver.getMeasures().getSolutionCount() - 1;
-            solutions++;
-            neighbor.recordSolution();
-            doRestart(searchLoop);
-            repair = true;
-        }
-        // when posting the cut directly at root node fails
-        else if (freshRestart) {
-            repair = false;
-        }
-        // the current sub-tree has been entirely explored
-        else if (!(repair = move.repair(searchLoop))) {
-            // but the neighbor cannot ensure completeness
-            if (!neighbor.isSearchComplete()) {
-                // then a restart is triggered
+        if(solutions > 0) {
+            // the detection of a new solution can only be met here
+            if (solutions < searchLoop.mSolver.getMeasures().getSolutionCount()) {
+                assert solutions == searchLoop.mSolver.getMeasures().getSolutionCount() - 1;
+                solutions++;
+                neighbor.recordSolution();
                 doRestart(searchLoop);
                 repair = true;
             }
-        }
-        // or a fast restart is on
-        else if (counter.isMet()) {
-            // then is restart is triggered
-            doRestart(searchLoop);
-            repair = true;
+            // when posting the cut directly at root node fails
+            else if (freshRestart) {
+                repair = false;
+            }
+            // the current sub-tree has been entirely explored
+            else if (!(repair = move.repair(searchLoop))) {
+                // but the neighbor cannot ensure completeness
+                if (!neighbor.isSearchComplete()) {
+                    // then a restart is triggered
+                    doRestart(searchLoop);
+                    repair = true;
+                }
+            }
+            // or a fast restart is on
+            else if (counter.isMet()) {
+                // then is restart is triggered
+                doRestart(searchLoop);
+                repair = true;
+            }
+        }else{
+            repair = move.repair(searchLoop);
         }
         return repair;
     }
