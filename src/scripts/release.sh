@@ -6,6 +6,7 @@ function getVersionToRelease() {
 }
 
 VERSION=$(getVersionToRelease)
+git branch -d release 2> /dev/null
 git checkout -b release || exit 1
 
 #Establish the version, maven side, misc. side
