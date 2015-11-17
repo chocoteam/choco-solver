@@ -73,4 +73,6 @@ then
     make latexpdf
     make latexpdf
 
+else
+    sedInPlace "s%branch=master%branch=develop%g"  README.md
 fi
