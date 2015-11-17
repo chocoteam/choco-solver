@@ -86,13 +86,15 @@ public class PropCountVar extends Propagator<IntVar> {
         StringBuilder st = new StringBuilder();
         st.append("PropCountVar_(");
         int i = 0;
-        for (; i < Math.min(4, vars.length); i++) {
+        for (; i < Math.min(4, vars.length-1); i++) {
             st.append(vars[i].getName()).append(", ");
         }
         if (i < vars.length - 2) {
-            st.append("...,");
+            st.append("..., ");
         }
-        st.append(vars[vars.length - 1].getName()).append(")");
+        st.append(vars[vars.length - 1].getName());
+	    st.append(", value=").append(val.getName());
+	    st.append(", cardinality=").append(card.getName());
         return st.toString();
     }
 

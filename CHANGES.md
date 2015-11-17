@@ -6,6 +6,10 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+
+3.3.2 - 17 Nov 2015
+-------------------
+
 #### Solver: 
 
 - `ISolutionRecorder` implementations do not restore automatically the last/best solution found on exit.
