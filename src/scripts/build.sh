@@ -44,17 +44,6 @@ if [ ${BRANCH} = "release" ]; then
     git push --tags ||quit "Unable to push the tag ${TAG}"
     git push origin master ||quit "Unable to push master"
 
-#   Test logback
-    echo "test jar with dep"
-    mvn -q clean install -DskipTests || quit "Unable to build the code"
-    rm choco-samples/target/test-classes/logback-test.xml || quit "Unable to delete logback-test.xml"
-    cd choco-samples/target/test-classes/
-    D = $(java -cp ./:../../../choco-solver/target/choco-solver-${VERSION}-with-dependencies.jar org.chocosolver.docs.Overview | grep DEBUG | wc -l)
-    if [ $D  -gt 0 ]; then
-        quit "Error in with-dep.xml"
-    fi
-    cd ../../../
-
 #    #Deploy the artifacts
     echo "** Deploying the artifacts **"
     mvn -q -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"

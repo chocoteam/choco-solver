@@ -18,6 +18,7 @@ script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
     - develop
+    - master
     - /^feature.*$/
 notifications:
   recipients:
