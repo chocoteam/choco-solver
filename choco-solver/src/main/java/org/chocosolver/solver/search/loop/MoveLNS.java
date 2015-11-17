@@ -168,7 +168,9 @@ public class MoveLNS implements Move {
     @Override
     public boolean repair(SearchLoop searchLoop) {
         boolean repair;
-        if(solutions > 0) {
+        if(solutions > 0
+                // the second condition is only here for intiale calls, when solutions is not already up to date
+                || searchLoop.mSolver.getMeasures().getSolutionCount() > 0) {
             // the detection of a new solution can only be met here
             if (solutions < searchLoop.mSolver.getMeasures().getSolutionCount()) {
                 assert solutions == searchLoop.mSolver.getMeasures().getSolutionCount() - 1;

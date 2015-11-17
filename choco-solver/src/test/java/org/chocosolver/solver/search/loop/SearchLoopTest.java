@@ -200,7 +200,6 @@ public class SearchLoopTest {
     public void test5() {
         Solver solver = new Solver();
         golomb(solver, 5);
-        Chatterbox.showDecisions(solver);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
         lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(), 15, 0),
                 new NodeCounter(solver, 10));
