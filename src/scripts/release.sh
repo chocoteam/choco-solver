@@ -13,4 +13,4 @@ git checkout -b release || exit 1
 ./src/scripts/set_version.sh ${VERSION}
 git commit -m "initiate release ${VERSION}" -a
 git push origin release || exit 1
-git checkout -
+# git checkout -
