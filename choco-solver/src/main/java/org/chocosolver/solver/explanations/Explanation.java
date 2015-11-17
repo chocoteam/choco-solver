@@ -1,22 +1,25 @@
 /**
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -35,6 +38,7 @@ import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.PoolManager;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -50,15 +54,18 @@ import java.util.Set;
 public class Explanation {
 
     private final boolean saveCauses;
-    private Rules rules; // null when explanation is complete
+    private Rules rules;
     private final THashSet<ICause> causes;
     private final BitSet decisions;
     private int evtstrIdx;  // event store index of the last analysis
+    private final PoolManager<Explanation> explanationPool;
 
-    public Explanation(boolean saveCauses) {
+    Explanation(PoolManager<Explanation> explanationPool, boolean saveCauses) {
         this.causes = new THashSet<>();
         this.decisions = new BitSet();
         this.saveCauses = saveCauses;
+        this.explanationPool = explanationPool;
+        this.rules = new Rules(16, 16);
     }
 
     /**
@@ -119,11 +126,7 @@ public class Explanation {
      * @param someRules the rules to add
      */
     public void addRules(Rules someRules) {
-        if (rules != null && someRules != null) {
-            rules.or(someRules);
-        } else if (rules == null && someRules != null) {
-            rules = someRules.duplicate();
-        }
+        rules.or(someRules);
     }
 
     /**
@@ -168,19 +171,6 @@ public class Explanation {
     }
 
     /**
-     * Copy the rules
-     * The rules define which events should be filtered from the event store.
-     *
-     * @param rules set of rules (when not complete)
-     */
-    public void copyRules(Rules rules, int i) {
-        if (rules != this.rules) { // small improvement
-            addRules(rules);
-        }
-        setEvtstrIdx(i);
-    }
-
-    /**
      * Get the event store idx at which the last analysis ends
      *
      * @return an event store index
@@ -213,21 +203,13 @@ public class Explanation {
      * @return a new explanation
      */
     public Explanation duplicate() {
-        Explanation explanation = new Explanation(this.saveCauses);
+        Explanation explanation = explanationPool.getE();
+        if (explanation == null) {
+            explanation = new Explanation(explanationPool, saveCauses);
+        }
         explanation.addCausesAndDecisions(this);
         explanation.addRules(this.rules);
         return explanation;
-    }
-
-    /**
-     * Clear the explanation, to enable reusing it.
-     */
-    public void clear() {
-        causes.clear();
-        decisions.clear();
-        if (rules != null) {
-            rules.clear();
-        }
     }
 
     @Override
@@ -252,11 +234,19 @@ public class Explanation {
             while (decision != RootDecision.ROOT) {
                 if (decisions.get(decision.getWorldIndex())) {
                     assert decision.hasNext();
-                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(), (Integer) decision.getDecisionValue())));
+                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue())));
                 }
                 decision = decision.getPrevious();
             }
             ngstore.addLearnt(ps.toArray());
         }
+    }
+
+    public void recycle() {
+        evtstrIdx = 0;
+        causes.clear();
+        decisions.clear();
+        rules.clear();
+        explanationPool.returnE(this);
     }
 }

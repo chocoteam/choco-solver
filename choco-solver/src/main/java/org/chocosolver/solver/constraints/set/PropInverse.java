@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -35,8 +36,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -88,8 +87,8 @@ public class PropInverse extends Propagator<SetVar> {
         for (int i = 0; i < n + n2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> toFilter[element - offSet].addToKernel(idx, aCause);
-        elementRemoved = element -> toFilter[element - offSet].removeFromEnvelope(idx, aCause);
+        elementForced = element -> toFilter[element - offSet].addToKernel(idx, this);
+        elementRemoved = element -> toFilter[element - offSet].removeFromEnvelope(idx, this);
     }
 
     //***********************************************************************************
@@ -101,21 +100,21 @@ public class PropInverse extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].envelopeContains(i + offSet1)) {
-                    sets[i].removeFromEnvelope(j, aCause);
+                    sets[i].removeFromEnvelope(j, this);
                 }
             }
             for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
-                invsets[j - offSet2].addToKernel(i + offSet1, aCause);
+                invsets[j - offSet2].addToKernel(i + offSet1, this);
             }
         }
         for (int i = 0; i < n2; i++) {
             for (int j=invsets[i].getEnvelopeFirst(); j!=SetVar.END; j=invsets[i].getEnvelopeNext()) {
                 if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].envelopeContains(i + offSet2)) {
-                    invsets[i].removeFromEnvelope(j, aCause);
+                    invsets[i].removeFromEnvelope(j, this);
                 }
             }
             for (int j=invsets[i].getKernelFirst(); j!=SetVar.END; j=invsets[i].getKernelNext()) {
-                sets[j - offSet1].addToKernel(i + offSet2, aCause);
+                sets[j - offSet1].addToKernel(i + offSet2, this);
             }
         }
         for (int i = 0; i < n + n2; i++) {
@@ -164,24 +163,4 @@ public class PropInverse extends Propagator<SetVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int s1 = sets.length;
-            SetVar[] set1 = new SetVar[s1];
-            for (int i = 0; i < s1; i++) {
-                sets[i].duplicate(solver, identitymap);
-                set1[i] = (SetVar) identitymap.get(sets[i]);
-            }
-
-            int s2 = invsets.length;
-            SetVar[] set2 = new SetVar[s2];
-            for (int i = 0; i < s2; i++) {
-                invsets[i].duplicate(solver, identitymap);
-                set2[i] = (SetVar) identitymap.get(invsets[i]);
-            }
-
-            identitymap.put(this, new PropInverse(set1, set2, offSet1, offSet2));
-        }
-    }
 }

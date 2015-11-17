@@ -7,6 +7,74 @@ NEXT MILESTONE
 -------------------
 
 
+3.3.2 - 17 Nov 2015
+-------------------
+
+#### Solver: 
+
+- `ISolutionRecorder` implementations do not restore automatically the last/best solution found on exit.
+This now has to be done calling either `solver.restoreLastSolution()` or `solver.restoreSolution(Solution)`.
+- remove `MasterSolver` and `SlaveSolver` (#293)
+- `Solver.duplicate()`, `Propagator.duplicate(Solver solver, THashMap<Object, Object> identitymap)` 
+and `Variable.duplicate(Solver solver, THashMap<Object, Object> identitymap)` has been removed. 
+The expected way to duplicate a model is to create a method which creates a `Solver`, fills it with variables and contraints
+and returns it. Doing so, the models are sure to the same and reduces the risk of errors
+- add a search monitor helper for parallel resolution with Java8 lambda (#293)
+- lazy creation of ZERO, ONE, TRUE and FALSE through methods of `Solver` (#293)
+- refactor `Solution` (#306)
+- improve propagator iteration in propagation engine
+- revamp `IMeasures` to avoid declaring its concrete class as monitor
+- remove deprecated classes: `GenerateAndTest`, `LastConflict_old`
+- add new API to `Solver` to declare eagerly the objective variable(s) and the precision
+- enable printing decisions and solutions in ANSI colors (see `Settings.outputWithANSIColors()`)
+- add connection to [cp-profiler](https://github.com/cp-profiler/cp-profiler) (#341)
+
+#### Search:
+
+- Deeply revamp the search loop to offer more flexibility 
+- `SearchLoop.interrupt()`is now forbidden
+- `AbstractStrategy.init()` cannot throw `ContradictionException` anymore but returns false instead
+- revamp decisions to enable `IntMetaDecision` 
+- change Decision's API, `getDecisionVariable()` becomes `getDecisionVariables()`
+- move `FastDecision` to `../IntDecision`
+- revamp `IntDecision.toString()`
+- set `DecisionOperator` as an interface (instead of an abstract class)
+- `org.chocosolver.solver.search.limits.ICounter` and its concrete class have been revisited, a `Solver` is now needed to create them.
+
+#### Variables:
+
+- add `IntVar.removeValues(IntIterableSet, ICause)`, `IntVar.removeAllValuesBut(IntIterableSet, ICause)`
+and `IntVar.updateBounds(int, int, ICause) (#270)`
+- improve `IntVar.removeInterval(int, int, ICause)` for enumerated domain integer variables
+- prevent the user from using `ISF.random_value` on bounded vars
+
+#### Constraints:
+
+- add `keysorting()` constraint
+- add `int_value_precede_chain()` constraint
+- improve "DEFAULT" option for `ICF.alldifferent()`
+- revamp scalar and sum (#324)
+- fix lack of filtering in `PropMin`
+- simplify and improve basic element propagator (#325)
+- remove `aCause` from `Propagator`, should be replaced by `this`
+- simplify `Propagation.contradiction(...)`
+- add new setting to Settings to allow to not clone variables array input to Propagator's constructor
+- `Propagator.getPropagationConditions()` becomes public
+
+
+#### Explanations: 
+
+- deal with unary decision (when once is set to true)
+- add `PoolManager` for `Rules` and `Propagators`
+- explain `PropCount_AC`
+- fix lack of explanations in `SatSolver`
+- fix `PropLessOrEqualXY_C` to add the right rule
+
+#### Bug fixes: 
+
+\#152, #153, #164, #176, #296, #297, #298, #301, #303, #309, #311, #313, #314, #317, #320, #323, #326, #327, 
+\#331, #333, #334, #337, #338, #342
+
 3.3.1 - 11 May 2015
 -------------------
 

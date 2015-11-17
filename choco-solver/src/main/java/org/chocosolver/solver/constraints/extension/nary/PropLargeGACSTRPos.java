@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,16 +29,15 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -67,7 +67,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     /**
      * Variables that are not proved to be GAC yet
      */
-    protected TIntList futureVars;
+    protected BitSet futureVars;
 
     /**
      * Values that have found a support for each variable
@@ -83,19 +83,25 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     protected IStateInt last;
     int[] listuples;
 
+    IntIterableSet vrms;
+
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
         super(vs, relation);
         this.arity = vs.length;
-        this.futureVars = new TIntLinkedList();
+        this.futureVars = new BitSet(arity);
         this.gacValues = new BitSet[arity];
         this.nbGacValues = new int[arity];
 
         this.offsets = new int[arity];
+        int min = Integer.MAX_VALUE;
         for (int i = 0; i < arity; i++) {
             this.offsets[i] = vs[i].getLB();
             this.gacValues[i] = new BitSet(vs[i].getDomainSize());
+            min = Math.min(min, offsets[i]);
         }
+        vrms = new IntIterableBitSet();
+        vrms.setOffset(min);
         listuples = new int[this.relation.getTupleTable().length];
         for (int i = 0; i < listuples.length; i++) {
             listuples[i] = i;
@@ -149,35 +155,27 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
 
     public void initializeData() {
         //INITIALIZATION
-        futureVars.clear();
+        Arrays.fill(nbGacValues, 0);
+        futureVars.set(0, arity);
         for (int i = 0; i < arity; i++) {
             gacValues[i].clear();
-            nbGacValues[i] = 0;
-            futureVars.add(i);
         }
     }
 
     public void pruningPhase() throws ContradictionException {
-        for (int i = 0; i < futureVars.size(); i++) {
-            int vIdx = futureVars.get(i);
-            IntVar v = vars[vIdx];
+        for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
+            IntVar v = vars[i];
             DisposableValueIterator it3 = v.getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
             try {
                 while (it3.hasNext()) {
                     int val = it3.next();
-                    if (!gacValues[vIdx].get(val - offsets[vIdx])) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            v.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                    if (!gacValues[i].get(val - offsets[i])) {
+                        vrms.add(val);
                         //                        v.removeVal(val, this, false);
                     }
                 }
-                v.removeInterval(left, right, this);
+                v.removeValues(vrms, this);
             } finally {
                 it3.dispose();
             }
@@ -200,14 +198,12 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
 
             if (valcheck.isValid(tuple/*,idx*/)) {
                 //extract the supports
-                for (int i = 0; i < futureVars.size(); i++) {
-                    int vIdx = futureVars.get(i);
-                    if (!gacValues[vIdx].get(tuple[vIdx] - offsets[vIdx])) {
-                        gacValues[vIdx].set(tuple[vIdx] - offsets[vIdx]);
-                        nbGacValues[vIdx]++;
-                        if (nbGacValues[vIdx] == vars[vIdx].getDomainSize()) {
-                            futureVars.removeAt(i);
-                            i--;
+                for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
+                    if (!gacValues[i].get(tuple[i] - offsets[i])) {
+                        gacValues[i].set(tuple[i] - offsets[i]);
+                        nbGacValues[i]++;
+                        if (nbGacValues[i] == vars[i].getDomainSize()) {
+                            futureVars.clear(i);
                         }
                     }
                 }
@@ -255,16 +251,4 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         //constAwake(false);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeGACSTRPos(aVars, (TuplesList) relation.duplicate()));
-        }
-    }
 }

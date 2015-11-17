@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,9 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -64,7 +63,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
     protected CumulFilter[] filters;
     protected ISet allTasks;
     protected final boolean fast;
-    protected final int awakeningMask;
     protected final IStateInt lastCapaMax;
     protected final Cumulative.Filter[] _filters;
 
@@ -93,10 +91,10 @@ public class PropFullCumulative extends Propagator<IntVar> {
         for (int f = 0; f < filters.length; f++) {
             this.filters[f] = filters[f].make(n, this);
         }
-        // awakes on instantiations only when FAST mode is set to true
-        awakeningMask = fast ? IntEventType.instantiation() : IntEventType.boundAndInst();
+
         lastCapaMax = solver.getEnvironment().makeInt(capa.getUB() + 1);
         allTasks = SetFactory.makeFullSet(n);
+        super.linkVariables();
     }
 
     /**
@@ -116,16 +114,22 @@ public class PropFullCumulative extends Propagator<IntVar> {
         this(s, d, e, h, capa, false, fast, filters);
     }
 
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
+    }
+
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int idx) {
-        if (idx >= 4 * n) {
-            return IntEventType.DECUPP.getMask() + IntEventType.INSTANTIATE.getMask();
+        if (idx == vars.length - 1) {
+            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.DECUPP);
         }
-        return awakeningMask;
+        // awakes on instantiations only when FAST mode is set to true
+        return fast ? IntEventType.instantiation() : IntEventType.boundAndInst();
     }
 
     @Override
@@ -137,21 +141,13 @@ public class PropFullCumulative extends Propagator<IntVar> {
         filter(allTasks);
     }
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-    }
-
     protected void propIni() throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            d[i].updateLowerBound(0, aCause); // should even be 1
-            h[i].updateLowerBound(0, aCause);
-            s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), aCause);
-            s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), aCause);
-            e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), aCause);
-            e[i].updateLowerBound(s[i].getLB() + d[i].getLB(), aCause);
-            d[i].updateUpperBound(e[i].getUB() - s[i].getLB(), aCause);
-            d[i].updateLowerBound(e[i].getLB() - s[i].getUB(), aCause);
+            d[i].updateLowerBound(0, this); // should even be 1
+            h[i].updateLowerBound(0, this);
+            s[i].updateBounds(e[i].getLB() - d[i].getUB(), e[i].getUB() - d[i].getLB(), this);
+            e[i].updateBounds(s[i].getLB() + d[i].getLB(), s[i].getUB() + d[i].getUB(), this);
+            d[i].updateBounds(e[i].getLB() - s[i].getUB(), e[i].getUB() - s[i].getLB(), this);
         }
     }
 
@@ -160,7 +156,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
             int capaMax = capa.getUB();
             lastCapaMax.set(capaMax);
             for (int i = 0; i < n; i++) {
-                h[i].updateUpperBound(capaMax, aCause);
+                h[i].updateUpperBound(capaMax, this);
             }
         }
     }
@@ -227,29 +223,4 @@ public class PropFullCumulative extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            // IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
-            // boolean fast, Cumulative.Filter... filters
-
-            IntVar[] sVars = new IntVar[n];
-            IntVar[] dVars = new IntVar[n];
-            IntVar[] eVars = new IntVar[n];
-            IntVar[] hVars = new IntVar[n];
-            for (int i = 0; i < this.n; i++) {
-                this.s[i].duplicate(solver, identitymap);
-                sVars[i] = (IntVar) identitymap.get(this.s[i]);
-                this.d[i].duplicate(solver, identitymap);
-                dVars[i] = (IntVar) identitymap.get(this.d[i]);
-                this.e[i].duplicate(solver, identitymap);
-                eVars[i] = (IntVar) identitymap.get(this.e[i]);
-                this.h[i].duplicate(solver, identitymap);
-                hVars[i] = (IntVar) identitymap.get(this.h[i]);
-            }
-            this.capa.duplicate(solver, identitymap);
-            IntVar cVar = (IntVar) identitymap.get(this.capa);
-            identitymap.put(this, new PropFullCumulative(sVars, dVars, eVars, hVars, cVar, fast, _filters.clone()));
-        }
-    }
 }

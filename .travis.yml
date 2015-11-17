@@ -1,14 +1,19 @@
 language: java
+sudo: false
 jdk:
 - oraclejdk8
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov
 before_script:
   - export MAVEN_OPTS="-Xmx4096m -Xms128m -Xss64m -server"
 env:
   - GROUP=1s
   - GROUP=10s
-  - GROUP=1m
-  - GROUP="correctness.*"
-  - GROUP="consistency.*"
+#  - GROUP=1m
+#  - GROUP="correctness.*"
+#  - GROUP="consistency.*"
 script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:

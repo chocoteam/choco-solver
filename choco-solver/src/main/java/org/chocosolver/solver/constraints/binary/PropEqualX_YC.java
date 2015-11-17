@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -58,7 +57,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     // incremental filtering of enumerated domains
     private boolean bothEnumerated;
     private IIntDeltaMonitor[] idms;
-    private RemProc rem_proc;
+    private IntProcedure rem_proc;
     private int indexToFilter;
     private int offSet;
 
@@ -73,13 +72,13 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             idms = new IIntDeltaMonitor[2];
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
-            rem_proc = new RemProc();
+            rem_proc = i -> vars[indexToFilter].removeValue(i + offSet, this);
         }
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (bothEnumerated)
+        if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain())
             return IntEventType.all();
         else
             return IntEventType.boundAndInst();
@@ -93,13 +92,13 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(val - cste)) {
-                    x.removeValue(val, aCause);
+                    x.removeValue(val, this);
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!x.contains(val + cste)) {
-                    y.removeValue(val, aCause);
+                    y.removeValue(val, this);
                 }
             }
             idms[0].unfreeze();
@@ -133,8 +132,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(y.getLB() + cste, aCause) | y.updateLowerBound(x.getLB() - cste, aCause)) ;
-        while (x.updateUpperBound(y.getUB() + cste, aCause) | y.updateUpperBound(x.getUB() - cste, aCause)) ;
+        while (x.updateLowerBound(y.getLB() + cste, this) | y.updateLowerBound(x.getLB() - cste, this)) ;
+        while (x.updateUpperBound(y.getUB() + cste, this) | y.updateUpperBound(x.getUB() - cste, this)) ;
     }
 
     @Override
@@ -168,50 +167,38 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             IntEventType ievt = (IntEventType) evt;
             switch (ievt) {
                 case REMOVE:
-                    newrules |=ruleStore.addRemovalRule(y, value - cste);
+                    newrules |= ruleStore.addRemovalRule(y, value - cste);
                     break;
                 case DECUPP:
-                    newrules |=ruleStore.addUpperBoundRule(y);
+                    newrules |= ruleStore.addUpperBoundRule(y);
                     break;
                 case INCLOW:
-                    newrules |=ruleStore.addLowerBoundRule(y);
+                    newrules |= ruleStore.addLowerBoundRule(y);
                     break;
                 case INSTANTIATE:
-                    newrules |=ruleStore.addFullDomainRule(y);
+                    newrules |= ruleStore.addFullDomainRule(y);
                     break;
             }
         } else if (var.equals(y)) {
             IntEventType ievt = (IntEventType) evt;
             switch (ievt) {
                 case REMOVE:
-                    newrules |=ruleStore.addRemovalRule(x, value + cste);
+                    newrules |= ruleStore.addRemovalRule(x, value + cste);
                     break;
                 case DECUPP:
-                    newrules |=ruleStore.addUpperBoundRule(x);
+                    newrules |= ruleStore.addUpperBoundRule(x);
                     break;
                 case INCLOW:
-                    newrules |=ruleStore.addLowerBoundRule(x);
+                    newrules |= ruleStore.addLowerBoundRule(x);
                     break;
                 case INSTANTIATE:
-                    newrules |=ruleStore.addFullDomainRule(x);
+                    newrules |= ruleStore.addFullDomainRule(x);
                     break;
             }
         } else {
-            newrules |=super.why(ruleStore, var, evt, value);
+            newrules |= super.why(ruleStore, var, evt, value);
         }
         return newrules;
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropEqualX_YC(new IntVar[]{X, Y}, this.cste));
-        }
     }
 
     @Override
@@ -223,12 +210,5 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
         }
         bf.append(")");
         return bf.toString();
-    }
-
-    private class RemProc implements IntProcedure {
-        @Override
-        public void execute(int i) throws ContradictionException {
-            vars[indexToFilter].removeValue(i + offSet, aCause);
-        }
     }
 }

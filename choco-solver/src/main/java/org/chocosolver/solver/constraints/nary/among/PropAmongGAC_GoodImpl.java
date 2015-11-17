@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,11 +29,9 @@
  */
 package org.chocosolver.solver.constraints.nary.among;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -143,10 +142,10 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                 if (nb == var.getDomainSize()) {
                     nbSure.add(1);
                     poss.remove(vidx);
-                    vars[nb_vars].updateLowerBound(nbSure.get(), aCause);
+                    vars[nb_vars].updateLowerBound(nbSure.get(), this);
                 } else if (nb == 0) {
                     poss.remove(vidx);
-                    vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), aCause);
+                    vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), this);
                 }
             }
             forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
@@ -156,8 +155,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = nbSure.get();
         int ub = poss.getSize() + lb;
-        vars[nb_vars].updateLowerBound(lb, aCause);
-        vars[nb_vars].updateUpperBound(ub, aCause);
+        vars[nb_vars].updateBounds(lb, ub, this);
         if (vars[nb_vars].isInstantiated() && lb < ub) {
             if (vars[nb_vars].getValue() == lb) {
                 backPropRemPoss();
@@ -192,8 +190,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                         break;
                     }
                 }
-                v.updateLowerBound(newLB, this);
-                v.updateUpperBound(newUB, this);
+                v.updateBounds(newLB, newUB, this);
                 if (newLB > values[values.length - 1] || newUB < values[0]) {
                     poss.remove(i);
                 }
@@ -213,8 +210,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                 poss.remove(i);
                 nbSure.add(1);
             } else {
-                v.updateLowerBound(values[0], this);
-                v.updateUpperBound(values[values.length - 1], this);
+                v.updateBounds(values[0], values[values.length - 1], this);
                 int newLB = v.getLB();
                 int newUB = v.getUB();
                 for (int val = v.getLB(); val <= newUB; val = v.nextValue(val)) {
@@ -231,8 +227,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
                         break;
                     }
                 }
-                v.updateLowerBound(newLB, this);
-                v.updateUpperBound(newUB, this);
+                v.updateBounds(newLB, newUB, this);
                 if (v.isInstantiated()) {
                     poss.remove(i);
                     nbSure.add(1);
@@ -293,16 +288,4 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAmongGAC_GoodImpl(aVars, this.values));
-        }
-    }
 }

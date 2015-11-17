@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -39,11 +40,12 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 
@@ -64,7 +66,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private IntVar obj;
     private long nbSols;
     private Solver solver;
-    private PoolManager<FastDecision> pool;
+    private PoolManager<IntDecision> pool;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private OptimizationPolicy optPolicy;
@@ -103,7 +105,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         this.coefLB = coefs[0];
         this.coefUB = coefs[1];
         this.optPolicy = policy;
-		SMF.restartAfterEachSolution(solver);
+		SLF.restartOnSolutions(solver);
         if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
             throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
         }
@@ -148,11 +150,10 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     // METHODS
     //***********************************************************************************
 
-    @Override
-    public void init() {
+    public boolean init() {
         decOperator = getOperator(optPolicy, solver.getObjectiveManager().getPolicy());
+        return true;
     }
-
     @Override
     public Decision getDecision() {
         if (solver.getMeasures().getSolutionCount() == 0
@@ -176,15 +177,18 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (globalLB > globalUB) {
             return null;
         }
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("% objective in [" + globalLB + ", " + globalUB + "]");
+
+        if(solver.getSettings().warnUser()){
+            Chatterbox.err.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
+        }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
-        FastDecision dec = pool.getE();
-        if (dec == null) dec = new FastDecision(pool);
+        IntDecision dec = pool.getE();
+        if (dec == null) dec = new IntDecision(pool);
         dec.set(obj, target, decOperator);
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("% trying " + obj+" "+(decOperator==decUB?"<=":">=")+" "+target);
+        if(solver.getSettings().warnUser()){
+            Chatterbox.err.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
+        }
         return dec;
     }
 

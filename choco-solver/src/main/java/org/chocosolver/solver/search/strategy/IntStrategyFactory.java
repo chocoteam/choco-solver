@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -29,6 +30,8 @@
 package org.chocosolver.solver.search.strategy;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
+import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
@@ -117,14 +120,17 @@ public class IntStrategyFactory {
 
     /**
      * Selects a value at the middle between the variable lower and upper bounds
-     * <p/>
+     * <p>
      * BEWARE: this should not be used within assignments and/or value removals if variables
      * have a bounded domain.
      *
+     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
+     *              set to false, return the closest value greater or equal to the middle value.
+     *              Can lead to infinite loop when not correctly selected.
      * @return a value selector
      */
-    public static IntValueSelector mid_value_selector() {
-        return new IntDomainMiddle();
+    public static IntValueSelector mid_value_selector(boolean floor) {
+        return new IntDomainMiddle(floor);
     }
 
     /**
@@ -149,7 +155,7 @@ public class IntStrategyFactory {
     /**
      * Selects randomly a value in the variable domain.
      * Takes an arbitrary value in [LB,UB]
-     * <p/>
+     * <p>
      * BEWARE: this should not be used within assignments and/or value removals if variables
      * have a bounded domain.
      *
@@ -212,7 +218,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * Builds your own search strategy
+     * Builds your own search strategy based on <b>binary</b> decisions.
      *
      * @param VAR_SELECTOR defines how to select a variable to branch on.
      * @param VAL_SELECTOR defines how to select a value in the domain of the selected variable
@@ -221,14 +227,14 @@ public class IntStrategyFactory {
      * @return a custom search strategy
      */
     public static IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
-                                                  IntValueSelector VAL_SELECTOR,
-                                                  DecisionOperator<IntVar> DEC_OPERATOR,
-                                                  IntVar... VARS) {
+                                     IntValueSelector VAL_SELECTOR,
+                                     DecisionOperator<IntVar> DEC_OPERATOR,
+                                     IntVar... VARS) {
         return new IntStrategy(VARS, VAR_SELECTOR, VAL_SELECTOR, DEC_OPERATOR);
     }
 
     /**
-     * Builds your own assignment strategy :
+     * Builds your own assignment strategy based on <b>binary</b> decisions.
      * Selects a variable X and a value V to make the decision X = V.
      * Note that value assignments are the default decision operators.
      * Therefore, they are not mentioned in the search heuristic name.
@@ -239,11 +245,62 @@ public class IntStrategyFactory {
      * @return a custom search strategy
      */
     public static IntStrategy custom(VariableSelector<IntVar> VAR_SELECTOR,
-                                                  IntValueSelector VAL_SELECTOR,
-                                                  IntVar... VARS) {
+                                     IntValueSelector VAL_SELECTOR,
+                                     IntVar... VARS) {
         return custom(VAR_SELECTOR, VAL_SELECTOR, assign(), VARS);
     }
 
+    /**
+     * Create a search strategy which selects the variables to branch on with <code>VAR_SELECTOR</code>,
+     * then select the value closest to the middle value of its domain,
+     * and split its domain into two intervals (binary decisions will be used).
+     * If <code>LOWERFIRST</code> is set to true, the domain is restricted to the left interval first.
+     * If <code>LOWERFIRST</code> is set to false, the domain is restricted to the right interval first.
+     * @param VAR_SELECTOR a variable selector
+     * @param LOWERFIRST set to true to select first the left interval, false otherwise
+     * @param VARS variables to branch on
+     * @return a dichotomic strategy for IntVar
+     */
+    public static IntStrategy dichotomic(VariableSelector<IntVar> VAR_SELECTOR, boolean LOWERFIRST, IntVar... VARS){
+        if(LOWERFIRST){
+            return custom(VAR_SELECTOR, ISF.mid_value_selector(LOWERFIRST), DecisionOperator.int_split, VARS);
+        }else{
+            return custom(VAR_SELECTOR, ISF.mid_value_selector(LOWERFIRST), DecisionOperator.int_reverse_split, VARS);
+        }
+    }
+
+    /**
+     * Builds your own search strategy based on <b>unary</b> decisions, that is, decisions can be applied but not refuted.
+     *
+     * @param VAR_SELECTOR defines how to select a variable to branch on.
+     * @param VAL_SELECTOR defines how to select a value in the domain of the selected variable
+     * @param DEC_OPERATOR defines how to modify the domain of the selected variable with the selected value
+     * @param VARS         variables to branch on
+     * @return a custom search strategy
+     */
+    public static IntStrategy once(VariableSelector<IntVar> VAR_SELECTOR,
+                                   IntValueSelector VAL_SELECTOR,
+                                   DecisionOperator<IntVar> DEC_OPERATOR,
+                                   IntVar... VARS){
+        return new Once(VARS, VAR_SELECTOR, VAL_SELECTOR, DEC_OPERATOR);
+    }
+
+    /**
+     * Builds your own assignment strategy based on <b>unary</b> decisions, that is, decisions can be applied but not refuted.
+     * Selects a variable X and a value V to make the decision X = V.
+     * Note that value assignments are the default decision operators.
+     * Therefore, they are not mentioned in the search heuristic name.
+     *
+     * @param VAR_SELECTOR defines how to select a variable to branch on.
+     * @param VAL_SELECTOR defines how to select a value in the domain of the selected variable
+     * @param VARS         variables to branch on
+     * @return a custom search strategy
+     */
+    public static IntStrategy once(VariableSelector<IntVar> VAR_SELECTOR,
+                                   IntValueSelector VAL_SELECTOR,
+                                   IntVar... VARS){
+        return new Once(VARS, VAR_SELECTOR, VAL_SELECTOR, assign());
+    }
     // ************************************************************************************
     // SOME EXAMPLES OF STRATEGIES YOU CAN BUILD
     // ************************************************************************************
@@ -269,13 +326,13 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Splits the domain of the first non-instantiated variable.
-     *
+     * Splits the domain of the first non-instantiated variable in the middle and
+     * branch first on the left interval
      * @param VARS list of variables
      * @return int strategy based on domain splits
      */
     public static IntStrategy lexico_Split(IntVar... VARS) {
-        return custom(lexico_var_selector(), mid_value_selector(), split(), VARS);
+        return dichotomic(ISF.lexico_var_selector(), true, VARS);
     }
 
     /**
@@ -301,11 +358,14 @@ public class IntStrategyFactory {
     /**
      * Assigns the non-instantiated variable of smallest domain size to a value at the middle of its domain.
      *
+     * @param floor the rounding policy: set to true, return the closest value less than or equal to the middle value
+     *              set to false, return the closest value greater or equal to the middle value.
+     *              Can lead to infinite loop when not correctly selected.
      * @param VARS list of variables
      * @return assignment strategy
      */
-    public static IntStrategy minDom_MidValue(IntVar... VARS) {
-        return custom(minDomainSize_var_selector(), mid_value_selector(), VARS);
+    public static IntStrategy minDom_MidValue(boolean floor, IntVar... VARS) {
+        return custom(minDomainSize_var_selector(), mid_value_selector(floor), VARS);
     }
 
     /**
@@ -315,7 +375,7 @@ public class IntStrategyFactory {
      * @return an int strategy based on domain splits
      */
     public static IntStrategy maxDom_Split(IntVar... VARS) {
-        return custom(maxDomainSize_var_selector(), mid_value_selector(), split(), VARS);
+        return dichotomic(maxDomainSize_var_selector(), true, VARS);
     }
 
     /**
@@ -336,6 +396,60 @@ public class IntStrategyFactory {
      */
     public static IntStrategy maxReg_LB(IntVar... VARS) {
         return custom(maxRegret_var_selector(), min_value_selector(), VARS);
+    }
+
+    /**
+     * A branching strategy over the objective variable.
+     * It is activated on the first solution, and iterates over the domain in decreasing order (upper bound first).
+     * @param OBJECTIVE integer objective variable
+     * @return objective strategy
+     */
+    public static ObjectiveStrategy objective_bottom_up(IntVar OBJECTIVE){
+        return new ObjectiveStrategy(OBJECTIVE, OptimizationPolicy.BOTTOM_UP);
+    }
+
+
+    /**
+     * A branching strategy over the objective variable.
+     * It is activated on the first solution, and iterates over the domain in increasing order (lower bound first).
+     * @param OBJECTIVE integer objective variable
+     * @return objective strategy
+     */
+    public static ObjectiveStrategy objective_dichotomic(IntVar OBJECTIVE){
+        return new ObjectiveStrategy(OBJECTIVE, OptimizationPolicy.DICHOTOMIC);
+    }
+
+    /**
+     * A branching strategy over the objective variable.
+     * It is activated on the first solution, and splits the domain into two parts, and evaluates first
+     * the lower part in case of minimization and the upper part in case of maximization.
+     * @param OBJECTIVE integer objective variable
+     * @return objective strategy
+     */
+    public static ObjectiveStrategy objective_top_bottom(IntVar OBJECTIVE){
+        return new ObjectiveStrategy(OBJECTIVE, OptimizationPolicy.TOP_DOWN);
+    }
+
+    /**
+     * Randomly selects a variable and assigns it to a value randomly taken in
+     * - the domain in case the variable has an enumerated domain
+     * - {LB,UB} (one of the two bounds) in case the domain is bounded
+     *
+     * @param VARS list of variables
+     * @param SEED a seed for random
+     * @return assignment strategy
+     */
+    public static IntStrategy random(IntVar[] VARS, long SEED) {
+        IntValueSelector value = random_value_selector(SEED);
+        IntValueSelector bound = randomBound_value_selector(SEED);
+        IntValueSelector selector = (IntValueSelector) var -> {
+            if (var.hasEnumeratedDomain()) {
+                return value.selectValue(var);
+            } else {
+                return bound.selectValue(var);
+            }
+        };
+        return custom(random_var_selector(SEED), selector, VARS);
     }
 
     /**
@@ -363,13 +477,21 @@ public class IntStrategyFactory {
     }
 
     /**
-     * Randomly selects a variable and assigns it to a value randomly taken in [LB,UB]
+     * Randomly selects a variable and assigns it to a value randomly taken in the domain.
+     * This is dedicated to enumerated domains.
+     * In case some variables have bounded domains, please use random_valueOrBound instead
      *
      * @param VARS list of variables
      * @param SEED a seed for random
      * @return assignment strategy
      */
     public static IntStrategy random_value(IntVar[] VARS, long SEED) {
+        for (IntVar v : VARS) {
+            if (!v.hasEnumeratedDomain()) {
+                throw new UnsupportedOperationException("Some variables have bounded domains, " +
+                        "please use random heuristic instead");
+            }
+        }
         return custom(random_var_selector(SEED), random_value_selector(SEED), VARS);
     }
 
@@ -472,7 +594,7 @@ public class IntStrategyFactory {
 
     /**
      * Create an Activity based search strategy.
-     * <p/>
+     * <p>
      * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
      * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
      * <br/>
@@ -487,7 +609,7 @@ public class IntStrategyFactory {
 
     /**
      * Create an Impact-based search strategy.
-     * <p/>
+     * <p>
      * <b>"Impact-Based Search Strategies for Constraint Programming",
      * Philippe Refalo, CP2004.</b>
      *
@@ -504,7 +626,7 @@ public class IntStrategyFactory {
 
     /**
      * Create an Impact-based search strategy.
-     * <p/>
+     * <p>
      * <b>"Impact-Based Search Strategies for Constraint Programming",
      * Philippe Refalo, CP2004.</b>
      * Uses default parameters (ALPHA=2,SPLIT=3,NODEIMPACT=10,INITONLY=true)
@@ -560,9 +682,11 @@ public class IntStrategyFactory {
      * @param SOLVER the solver
      * @return a Generate-And-Test search strategy
      * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#generateAndTest(org.chocosolver.solver.Solver, org.chocosolver.solver.search.strategy.strategy.AbstractStrategy, int)
+     * @deprecated may be removed in the next releases
      */
+    @Deprecated
     public static AbstractStrategy<IntVar> generateAndTest(Solver SOLVER) {
-        return new GenerateAndTest(SOLVER);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -580,8 +704,10 @@ public class IntStrategyFactory {
      * @param searchSpaceLimit the size of search space which triggers the Generate-And-Test strategy.
      * @return a Generate-And-Test search strategy
      * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#generateAndTest(org.chocosolver.solver.Solver)
+     * @deprecated may be removed in the next releases
      */
+    @Deprecated
     public static AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy, int searchSpaceLimit) {
-        return new GenerateAndTest(SOLVER, mainStrategy, searchSpaceLimit);
+        throw new UnsupportedOperationException();
     }
 }

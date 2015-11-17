@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -35,8 +36,6 @@
 
 package org.chocosolver.solver.variables;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -154,19 +153,6 @@ public class Task {
         }
 
         @Override
-        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-            if (!identitymap.containsKey(this)) {
-                S.duplicate(solver, identitymap);
-                IntVar s = (IntVar) identitymap.get(this.S);
-                D.duplicate(solver, identitymap);
-                IntVar d = (IntVar) identitymap.get(this.D);
-                E.duplicate(solver, identitymap);
-                IntVar e = (IntVar) identitymap.get(this.E);
-                identitymap.put(this, new TaskMonitorEnum(s, d, e));
-            }
-        }
-
-        @Override
         public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
             boolean nrules = false;
             if (var == S) {
@@ -221,27 +207,11 @@ public class Task {
         @Override
         public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
             // start
-            S.updateLowerBound(E.getLB() - D.getUB(), this);
-            S.updateUpperBound(E.getUB() - D.getLB(), this);
+            S.updateBounds(E.getLB() - D.getUB(), E.getUB() - D.getLB(), this);
             // end
-            E.updateLowerBound(S.getLB() + D.getLB(), this);
-            E.updateUpperBound(S.getUB() + D.getUB(), this);
+            E.updateBounds(S.getLB() + D.getLB(), S.getUB() + D.getUB(), this);
             // duration
-            D.updateLowerBound(E.getLB() - S.getUB(), this);
-            D.updateUpperBound(E.getUB() - S.getLB(), this);
-        }
-
-        @Override
-        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-            if (!identitymap.containsKey(this)) {
-                S.duplicate(solver, identitymap);
-                IntVar s = (IntVar) identitymap.get(this.S);
-                D.duplicate(solver, identitymap);
-                IntVar d = (IntVar) identitymap.get(this.D);
-                E.duplicate(solver, identitymap);
-                IntVar e = (IntVar) identitymap.get(this.E);
-                identitymap.put(this, new TaskMonitorEnum(s, d, e));
-            }
+            D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
         }
 
         @Override

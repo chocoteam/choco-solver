@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -34,6 +35,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * A MiniSat solver.
@@ -63,14 +65,14 @@ public class SatSolver {
     // there if literal becomes true).
     TIntObjectHashMap<ArrayList<Watcher>> watches_;
     // implies_[lit] is a list of literals to set to true if 'lit' becomes true.
-    TIntObjectHashMap<TIntList> implies_;
+    TIntObjectHashMap<TIntArrayList> implies_;
     // The current assignments.
     TIntObjectHashMap<Boolean> assignment_;
     // Assignment stack; stores all assigments made in the order they
     // were made.
-    TIntList trail_;
+    TIntArrayList trail_;
     // Separator indices for different decision levels in 'trail_'.
-    TIntList trail_markers_;
+    TIntArrayList trail_markers_;
     // Head of queue(as index into the trail_.
     int qhead_;
     // Number of variables
@@ -150,14 +152,14 @@ public class SatSolver {
             case 2:
                 int l0 = ps.get(0);
                 int l1 = ps.get(1);
-                TIntList i0 = implies_.get(negated(l0));
+                TIntArrayList i0 = implies_.get(negated(l0));
                 if (i0 == null) {
                     i0 = new TIntArrayList();
                     implies_.put(negated(l0), i0);
                 }
                 i0.add(l1);
 
-                TIntList i1 = implies_.get(negated(l1));
+                TIntArrayList i1 = implies_.get(negated(l1));
                 if (i1 == null) {
                     i1 = new TIntArrayList();
                     implies_.put(negated(l1), i1);
@@ -193,20 +195,20 @@ public class SatSolver {
 
     // Add the empty clause, making the solver contradictory.
     boolean addEmptyClause() {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         return addClause(temporary_add_vector_);
     }
 
     // Add a unit clause to the solver.
     boolean addClause(int l) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(l);
         return addClause(temporary_add_vector_);
     }
 
     // Add a binary clause to the solver.
     boolean addClause(int p, int q) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(p);
         temporary_add_vector_.add(q);
         return addClause(temporary_add_vector_);
@@ -214,7 +216,7 @@ public class SatSolver {
 
     // Add a ternary clause to the solver.
     boolean addClause(int p, int q, int r) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(p);
         temporary_add_vector_.add(q);
         temporary_add_vector_.add(r);
@@ -223,7 +225,7 @@ public class SatSolver {
 
     // Incremental propagation.
     boolean initPropagator() {
-        touched_variables_.clear();
+        touched_variables_.resetQuick();
         return !ok_;
     }
 
@@ -270,7 +272,7 @@ public class SatSolver {
     // of failure.
     boolean propagateOneLiteral(int lit) {
         assert ok_;
-        touched_variables_.clear();
+        touched_variables_.resetQuick();
         if (!propagate()) {
             return false;
         }
@@ -367,85 +369,99 @@ public class SatSolver {
         while (qhead_ < trail_.size()) {
             int p = trail_.get(qhead_++);
             // Propagate the implies first.
-            TIntList to_add = implies_.get(p);
-            if (to_add != null) {
-                for (int i = 0; i < to_add.size(); ++i) {
-                    if (!enqueue(to_add.get(i))) {
-                        return false;
+            if(!propagateImplies(p)){
+                return false;
+            }
+            result &= propagateClauses(p);
+        }
+        return result;
+    }
+
+    private boolean propagateClauses(int p) {
+        boolean result = true;
+        // 'p' is enqueued fact to propagate.
+        ArrayList<Watcher> ws = watches_.get(p);
+
+        int i = 0;
+        int j = 0;
+        while (ws != null && i < ws.size()) {
+            // Try to avoid inspecting the clause:
+            int blocker = ws.get(i).blocker;
+            if (valueLit(blocker) == Boolean.kTrue) {
+                ws.set(j++, ws.get(i++));
+                continue;
+            }
+
+            // Make sure the false literal is data[1]:
+            Clause cr = ws.get(i).clause;
+            final int false_lit = negated(p);
+            if (cr._g(0) == false_lit) {
+                cr._s(0, cr._g(1));
+                cr._s(1, false_lit);
+            }
+            assert (cr._g(1) == false_lit);
+            i++;
+
+            // If 0th watch is true, then clause is already satisfied.
+            final int first = cr._g(0);
+            Watcher w = new Watcher(cr, first);
+            if (first != blocker && valueLit(first) == Boolean.kTrue) {
+                ws.set(j++, w);
+                continue;
+            }
+
+            // Look for new watch:
+            boolean cont = false;
+            for (int k = 2; k < cr.size(); k++) {
+                if (valueLit(cr._g(k)) != Boolean.kFalse) {
+                    cr._s(1, cr._g(k));
+                    cr._s(k, false_lit);
+                    ArrayList<Watcher> lw = watches_.get(negated(cr._g(1)));
+                    if (lw == null) {
+                        lw = new ArrayList<>();
+                        watches_.put(negated(cr._g(1)), lw);
                     }
+                    lw.add(w);
+                    cont = true;
+                    break;
                 }
             }
 
-            // 'p' is enqueued fact to propagate.
-            ArrayList<Watcher> ws = watches_.get(p);
-
-            int i = 0;
-            int j = 0;
-            while (ws != null && i < ws.size()) {
-                // Try to avoid inspecting the clause:
-                int blocker = ws.get(i).blocker;
-                if (valueLit(blocker) == Boolean.kTrue) {
-                    ws.set(j++, ws.get(i++));
-                    continue;
-                }
-
-                // Make sure the false literal is data[1]:
-                Clause cr = ws.get(i).clause;
-                final int false_lit = negated(p);
-                if (cr._g(0) == false_lit) {
-                    cr._s(0, cr._g(1));
-                    cr._s(1, false_lit);
-                }
-                assert (cr._g(1) == false_lit);
-                i++;
-
-                // If 0th watch is true, then clause is already satisfied.
-                final int first = cr._g(0);
-                Watcher w = new Watcher(cr, first);
-                if (first != blocker && valueLit(first) == Boolean.kTrue) {
-                    ws.set(j++, w);
-                    continue;
-                }
-
-                // Look for new watch:
-                boolean cont = false;
-                for (int k = 2; k < cr.size(); k++) {
-                    if (valueLit(cr._g(k)) != Boolean.kFalse) {
-                        cr._s(1, cr._g(k));
-                        cr._s(k, false_lit);
-                        ArrayList<Watcher> lw = watches_.get(negated(cr._g(1)));
-                        if (lw == null) {
-                            lw = new ArrayList<>();
-                            watches_.put(negated(cr._g(1)), lw);
-                        }
-                        lw.add(w);
-                        cont = true;
-                        break;
+            // Did not find watch -- clause is unit under assignment:
+            if (!cont) {
+                ws.set(j++, w);
+                if (valueLit(first) == Boolean.kFalse) {
+                    result = false;
+                    qhead_ = trail_.size();
+                    // Copy the remaining watches_:
+                    while (i < ws.size()) {
+                        ws.set(j++, ws.get(i++));
                     }
-                }
-
-                // Did not find watch -- clause is unit under assignment:
-                if (!cont) {
-                    ws.set(j++, w);
-                    if (valueLit(first) == Boolean.kFalse) {
-                        result = false;
-                        qhead_ = trail_.size();
-                        // Copy the remaining watches_:
-                        while (i < ws.size()) {
-                            ws.set(j++, ws.get(i++));
-                        }
-                    } else {
-                        uncheckedEnqueue(first);
-                    }
-                }
-            }
-            if (ws != null) {
-                for (int k = ws.size() - 1; k >= j; k--) {
-                    ws.remove(k);
+                    touched_variables_.add(first);
+                } else {
+                    uncheckedEnqueue(first);
                 }
             }
         }
+        if (ws != null) {
+            for (int k = ws.size() - 1; k >= j; k--) {
+                ws.remove(k);
+            }
+        }
         return result;
+    }
+
+    private boolean propagateImplies(int p) {
+        TIntList to_add = implies_.get(p);
+        if (to_add != null) {
+            for (int i = 0; i < to_add.size(); ++i) {
+                if (!enqueue(to_add.get(i))) {
+                    touched_variables_.add(to_add.get(i));
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 
@@ -532,6 +548,10 @@ public class SatSolver {
             }
             return i;
         }
+
+        public String toString() {
+            return Arrays.toString(literals_);
+        }
     }
 
     /**
@@ -560,7 +580,7 @@ public class SatSolver {
      * @author Charles Prud'homme, Laurent Perron
      * @since 12/07/13
      */
-    static enum Boolean {
+    enum Boolean {
 
         kTrue((byte) 0),
         kFalse((byte) 1),
@@ -583,6 +603,64 @@ public class SatSolver {
             else return kUndefined;
         }
 
+    }
+
+    public void copyFrom(SatSolver o) {
+        // Then, copy all data structures:
+        this.ok_ = o.ok_;
+        this.qhead_ = o.qhead_;
+        this.num_vars_ = o.num_vars_;
+        this.trail_.resetQuick();
+        this.trail_.addAll(o.trail_);
+        this.trail_markers_.resetQuick();
+        this.trail_markers_.addAll(o.trail_markers_);
+        this.touched_variables_.resetQuick();
+        this.touched_variables_.addAll(o.touched_variables_);
+        this.temporary_add_vector_.resetQuick();
+        this.temporary_add_vector_.addAll(o.temporary_add_vector_);
+        for (int k : o.assignment_.keys()) {
+            this.assignment_.putIfAbsent(k, o.assignment_.get(k));
+        }
+        for (int k : o.implies_.keys()) {
+            TIntArrayList tl = this.implies_.get(k);
+            if(tl == null){
+                tl = new TIntArrayList();
+                this.implies_.put(k, tl);
+            }else{
+                tl.resetQuick();
+            }
+            tl.addAll(o.implies_.get(k));
+        }
+        final HashMap<Clause, Clause> map = new HashMap<>();
+        this.clauses.clear();
+        for (Clause cl : o.clauses) {
+            Clause _cl = new Clause(cl.literals_);
+            map.put(cl, _cl);
+            this.clauses.add(_cl);
+        }
+        this.learnts.clear();
+        for (Clause cl : o.learnts) {
+            Clause _cl = new Clause(cl.literals_);
+            map.put(cl, _cl);
+            this.learnts.add(_cl);
+        }
+        this.watches_.clear();
+        for (int k : o.watches_.keys()) {
+            ArrayList<Watcher> ws = o.watches_.get(k);
+            ArrayList<Watcher> _ws = new ArrayList<>(ws.size());
+            for (Watcher w : ws) {
+                _ws.add(new Watcher(map.get(w.clause), w.blocker));
+            }
+            this.watches_.put(k, _ws);
+        }
+    }
+
+    public long nbclauses() {
+        return clauses.size() + learnts.size() + implies_.size() / 2;
+    }
+
+    public long numvars() {
+        return num_vars_;
     }
 
 }

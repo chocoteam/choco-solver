@@ -868,6 +868,84 @@ It also automatically imposes one `alldifferent` constraints on each array of va
    - `X[0] = 2, X[1] = 0, X[2] = 1, Y[0] = 2, Y[1] = 3, Y[2] = 1`
    - `X[0] = 2, X[1] = 1, X[2] = 0, Y[0] = 3, Y[1] = 2, Y[2] = 1`
 
+.. _51_icstr_nvpc
+
+int_value_precede_chain
+=======================
+
+The `int_value_precede_chain` constraint involves an array of integer variables `X` and
+
+- either two integers `S` and `T`
+- or an array of distinct integers.
+
+It ensures that if there exists j such that X[j] = T, then, there must exist i < j such that X[i] = S.
+Or it ensures that, for each pair of V[k] and V[l] of values in V, such that k < l, if there exists j such that
+X[j] = V[l], then, there must exist i < j such that X[i] = V[k].
+
+**See also**: `int_value_precede <http://sofdem.github.io/gccat/gccat/Cint_value_precede.htmll>`_ in the Global Constraint Catalog.
+
+**Implementation based on**: :cite:`YatChiuLawJimmyLee04`.
+
+** API**: ::
+
+    Constraint int_value_precede_chain(IntVar[] X, int S, int T)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
+          :language: java
+          :lines: 86-88,90
+          :emphasize-lines: 88
+          :linenos:
+
+   The solutions of the problems are:
+
+   - `X[0] = 2 X[1] = 2 X[2] = 2`
+   - `X[0] = 2 X[1] = 2 X[2] = 3`
+   - `X[0] = 2 X[1] = 3 X[2] = 1`
+   - `X[0] = 2 X[1] = 3 X[2] = 2`
+   - `X[0] = 2 X[1] = 3 X[2] = 3`
+
+
+.. _51_icstr_ksor:
+
+keysorting
+==========
+
+The `keysorting` constraint involves three matrices of integer variables `VARS` and `SORTEDVARS`,
+an array of integer variables `PERMVARS` and an integer `K`.
+It ensures that the variables of `SORTEDVARS` correspond to the variables of `VARS` according to a permutation.
+Moreover, the variable of `SORTEDVARS` are sorted in increasing order wrt to K-tuple and PERMVARS store the permutations.
+
+.. **See also**: `sort <http://sofdem.github.io/gccat/gccat/Csort.html>`_ in the Global Constraint Catalog.
+
+.. **Implementation based on**: :cite:`MehlhornT00`.
+
+**API**: ::
+
+    Constraint keysorting(IntVar[][] VARS, IntVar[] PERMVARS, IntVar[][] SORTEDVARS, int K)
+
+.. admonition:: Example
+
+    .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/IntConstraintExamples2.java
+          :language: java
+          :lines: 77-81,83
+          :emphasize-lines: 81
+          :linenos:
+
+    Some solutions of the problem are :
+
+     - `X[0][0] = 2 X[0][1] = 1 X[0][2] = 1 X[1][0] = 1 X[1][1] = 1 X[1][2] = 1`
+     `Y[0][0] = 1 Y[0][1] = 1 Y[0][2] = 1 Y[1][0] = 2 Y[1][1] = 1 Y[1][2] = 1`
+     `P[0] = 2 P[1] = 1 P[2] = 0`
+
+     - `X[0][0] = 2 X[0][1] = 1 X[0][2] = 1 X[1][0] = 1 X[1][1] = 3 X[1][2] = 2`
+     `Y[0][0] = 1 Y[0][1] = 3 Y[0][2] = 2 Y[1][0] = 2 Y[1][1] = 1 Y[1][2] = 1`
+     `P[0] = 2 P[1] = 1 P[2] = 2`
+
+     - `X[0][0] = 2 X[0][1] = 1 X[0][2] = 3 X[1][0] = 1 X[1][1] = 1 X[1][2] = 2`
+     `Y[0][0] = 1 Y[0][1] = 1 Y[0][2] = 2 Y[1][0] = 2 Y[1][1] = 1 Y[1][2] = 3`
+     `P[0] = 2 P[1] = 1 P[2] = 1`
 
 .. _51_icstr_kna:
 
@@ -2248,64 +2326,6 @@ A complete list is available in the documentation of IBEX.
 
 
 
-.. _51_lcstr_main:
-
-*******************
-Logical constraints
-*******************
-
-The ``LogicalConstraintFactory`` (or ``LCF``) provides various interesting constraints to manipulate other constraints.
-These constraints are based on the concept of reification.
-We say a constraint ``C`` is reified with a boolean variable ``b`` when we maintain
-the equivalence betwen ``b`` being equal to true and ``C`` being satisfied.
-This means the ``C`` constraint may be not satisfied, hence it should not be posted to the solver.
-
-.. _51_lcstr_not:
-
-not
-===
-
-Creates the opposite constraint of the input constraint.
-
-While this works for any kind of constraint (including globals), it might be a bit naive and slow.
-
-.. _51_lcstr_it:
-
-ifThen
-======
-
-Creates and automatically post a constraint ensuring that if the IF statement is true
-then the THEN statement must be true as well.
-
-A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
-
-Note that the method returns void (you cannot reify that constraint which is automatically posted).
-If you wish to reify it, use ``ifThen_reifiable`` (whose implementation differ)
-
-.. _51_lcstr_ite:
-
-ifThenElse
-==========
-
-Creates and automatically post a constraint ensuring that if the IF statement is true
-then the THEN statement must be true as well. Otherwise, the ELSE statement must be true.
-
-A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
-
-Note that the method returns void (you cannot reify that constraint which is automatically posted).
-If you wish to reify it, use ``ifThenElse_reifiable`` (whose implementation differ)
-
-.. _51_lcstr_rei:
-
-reification
-===========
-
-Creates and automatically post a constraint maintaining the equivalent between
-a binary variable being equal to 1 and a constraint being satisfied.
-
-Note that the method returns void (you cannot reify that constraint which is automatically posted).
-If you wish to reify it, use ``reification_reifiable`` (whose implementation differ)
-
 .. _51_satsolver:
 
 **********
@@ -2779,7 +2799,7 @@ Adding a clause involved either:
 - a logical operator `TREE` and an instance of the solver,
 - or, two arrays of boolean variables.
 
-The two methods add a clause to the SAT constraint.
+The two methods add clauses to the SAT constraint.
 
 - The first method adds one or more clauses defined by a ``LogOp``. ``LopOp`` aims at simplifying the declaration of clauses by providing some static methods. However, it should be considered as a last resort, due to the verbosity it comes with.
 - The second API add one or more clauses defined by two arrays `POSLITS` and `NEGLITS`. The first array declares positive boolean variables, those who should be satisfied; the second array declares negative boolean variables, those who should not be satisfied.
@@ -2952,6 +2972,266 @@ Add a unit clause to the SAT constraint which states that the boolean variable `
 
         - `B = 1`
 
+.. _51_lcstr_main:
+
+*******************
+Logical constraints
+*******************
+
+The ``LogicalConstraintFactory`` (or ``LCF``) provides various interesting constraints to manipulate other constraints.
+These constraints are based on the concept of reification.
+We say a constraint ``C`` is reified with a boolean variable ``b`` when we maintain
+the equivalence betwen ``b`` being equal to true and ``C`` being satisfied.
+This means the ``C`` constraint may be not satisfied, hence it should not be posted to the solver.
+
+.. note::
+
+    It is highly recommended to use that factory only when ``SatFactory`` does not meet requirements.
+
+.. _51_lcstr_and:
+
+and
+===
+
+Creates a logical AND constraint on the input constraints.
+Each constraint is first reified and then the logical AND is made over the reified variables
+(a sum constraint is returned).
+
+Alternatively, the AND constraint can be directly declared with an array of boolean variables as input.
+
+.. _51_lcstr_or:
+
+or
+==
+
+Creates a logical OR constraint on the input constraints.
+Each constraint is first reified and then the logical OR is made over the reified variables
+(a sum constraint is returned).
+
+Alternatively, the OR constraint can be directly declared with an array of boolean variables as input.
+
+.. _51_lcstr_not:
+
+not
+===
+
+Creates the opposite constraint of the input constraint.
+
+While this works for any kind of constraint (including globals), it might be a bit naive and slow.
+
+.. _51_lcstr_it:
+
+ifThen
+======
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThen_reifiable`` (whose implementation differ)
+
+.. _51_lcstr_ite:
+
+ifThenElse
+==========
+
+Creates and automatically post a constraint ensuring that if the IF statement is true
+then the THEN statement must be true as well. Otherwise, the ELSE statement must be true.
+
+A statement is either a binary variable (0/1) or a reified constraint (satisfied/violated)
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``ifThenElse_reifiable`` (whose implementation differ)
+
+.. _51_lcstr_rei:
+
+reification
+===========
+
+Creates and automatically post a constraint maintaining the equivalent between
+a binary variable being equal to 1 and a constraint being satisfied.
+
+Note that the method returns void (you cannot reify that constraint which is automatically posted).
+If you wish to reify it, use ``reification_reifiable`` (whose implementation differ)
+
+.. _550_slf:
+
+*******************
+Search loop factory
+*******************
+
+The ``SearchLoopFactory`` (or ``SLF``) provides pre-defined methods to drive the search.
+By default, a ``Solver`` is created with a Depth-Frist Search algorithm and no learning.
+Those two components can be modified, though.
+
+.. _550_slfdfs:
+
+dfs
+===
+
+On a call to this method, the current search loop is equipped with a Depth-First Search algorithm with binary decisions and no learning.
+*The previous settings are automatically erased by the new ones.*
+
+**API**: ::
+
+    void dfs(Solver aSolver, AbstractStrategy<V> aSearchStrategy)
+
+*Even if ``aSearchStrategy`` can be set to null, it is recommended to declare a convenient search strategy.*
+
+
+.. _550_slflds:
+
+lds
+===
+
+On a call to this method, the current search loop is set with a Limited Discrepancy Search algorithm with binary decisions and no learning.
+*The previous settings are automatically erased by the new ones.*
+Using LDS is relevant when the search strategy carefully adapted to the problem treated and few decisions are wrong,
+bottom decisions are refuted first, within the incremental limit given by the discrepancy.
+
+**API**: ::
+
+    void lds(Solver aSolver, AbstractStrategy<V> aSearchStrategy, int discrepancy)
+
+The *discrepancy* parameter specifies the maximum discrepancy to allowed.
+In practice, it starts from 0 to *discrepancy*, with a step of 1.
+
+Even if ``aSearchStrategy`` can be set to null, it is recommended to declare a convenient search strategy.
+
+.. _550_slfdds:
+
+dds
+===
+
+On a call to this method, the current search loop is set with a Depth-bounded Discrepancy Search algorithm with binary decisions and no learning.
+*The previous settings are automatically erased by the new ones.*
+DDS is an alternative to LDS wherein top decisions are refuted first.
+
+**API**: ::
+
+    void dds(Solver aSolver, AbstractStrategy<V> aSearchStrategy, int discrepancy)
+
+The *discrepancy* parameter specifies the maximum discrepancy to allowed.
+In practice, it starts from 0 to *discrepancy*, with a step of 1.
+
+*Even if ``aSearchStrategy`` can be set to null, it is recommended to declare a convenient search strategy.*
+
+.. _550_slfhbfs:
+
+hbfs
+====
+
+On a call to this method, the current search loop is set with a Hybrid Best-First Search algorithm with binary decisions and no learning.
+*The previous settings are automatically erased by the new ones.*
+HBFS is relevant when an optimization problem is treated and a good approximation of the lower bound (resp. upper bound)
+in minimization (resp. maximization) can be computed.
+Recall that it hybrids DFS and Best-First Search, the memory consumption should be carefully monitored.
+
+**API**: ::
+
+    void hbfs(Solver aSolver, AbstractStrategy<V> aSearchStrategy, double a, double b, long N)
+
+*a* and *b* indicates the range which bounds the rate of redundantly propagated decisions.
+*N* is the backtrack limit allocated to each DFS try, it should be large enough to limit redundancy.
+
+*Even if ``aSearchStrategy`` can be set to null, it is recommended to declare a convenient search strategy.*
+
+
+.. _550_slfseq:
+
+seq
+===
+
+This method gives the possibility to combine many moves, considered then sequentially.
+When the selected Move cannot be extended (resp. repaired), the following one (wrt to the input order) is selected.
+*The previous settings are automatically erased by the new ones.*
+This is a work-in-progress and it may lead to unexpected behavior when repair() is applied.
+
+**API**: ::
+
+    void seq(Solver aSolver, Move... moves)
+
+*Even if ``aSearchStrategy`` can be set to null, it is recommended to declare a convenient search strategy.*
+
+
+.. _550_slfrestart:
+
+restart
+=======
+
+Equips a ``aSearchLoop`` with a restart strategy.
+It encapsulates the current move within a restart move.
+Every time the ``restartCriterion`` is met, a restart is done, the new restart limit is updated thanks to ``restartStrategy``.
+There will be at most ``restartsLimit`` restarts.
+
+**API**: ::
+
+    void restart(Solver aSolver, LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit)
+
+
+.. _550_slfrestartonsol:
+
+restartOnSolutions
+==================
+
+Equips a ``aSearchLoop`` with a restart strategy triggered on solutions.
+It encapsulates the current move within a restart move.
+Every time a solution is found, a restart is done.
+
+**API**: ::
+
+    restartOnSolutions(Solver aSolver)
+
+.. _550_slflns:
+
+lns
+===
+
+Equips a ``aSearchLoop`` with a Large Neighborhood Search move.
+It encapsulates the current move within a LNS move.
+Anytime a solution is encountered, it is recorded and serves as a basis for the ``neighbor``.
+The ``neighbor`` creates a *fragment*: selects variables to freeze/unfreeze wrt the last solution found.
+If a fragment cannot be extended to a solution, a new one is selected by restarting the search.
+If a fragment induces a search space which a too big to be entirely evaluated, restarting the search can be forced
+using the ``restartCriterion``.
+A fast restart strategy is often a good choice.
+
+**API**: ::
+
+    void lns(Solver aSolver, INeighbor neighbor)
+    void lns(Solver aSolver, INeighbor neighbor, ICounter restartCounter)
+
+
+.. _550_slfcbj:
+
+learnCBJ
+========
+
+Equips a ``aSearchLoop`` with a Conflict-based Backjumping (CBJ) explanation strategy (learn).
+It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
+Set ``nogoodsOn`` to true to extract nogoods from failures.
+Set ``userFeedbackOn``to true to record the propagation in conflict (only relevant when one wants to interpret the explanation of a failure).
+
+**API**: ::
+
+    void learnCBJ(Solver aSolver, boolean nogoodsOn, boolean userFeedbackOn)
+
+.. _550_slfdbt:
+
+learnDBT
+========
+
+Equips a ``aSearchLoop`` with a Dynamic-Backtracking (DBT) explanation strategy (learn).
+It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
+Set ``nogoodsOn`` to true to extract nogoods from failures.
+Set ``userFeedbackOn``to true to record the propagation in conflict (only relevant when one wants to interpret the explanation of a failure).
+
+**API**: ::
+
+    void learnDBT(Solver aSolver, boolean nogoodsOn, boolean userFeedbackOn)
+
 .. _51_svarsel:
 
 ******************
@@ -3066,9 +3346,9 @@ mid_value_selector
 ==================
 
 A built-in value selector which selects the value in the variable domain closest to the mean of its current bounds.
-It computes the middle value of the domain. Then checks if the mean is contained in the domain.
-If not, the closest value to the middle is chosen.
-Rounding policy is floor. It could be override by creating a new instance of ``IntDomainMiddle`` with ``false`` as parameter.
+It computes the middle value of the domain. Then checks if the value is contained in the domain.
+If not and if ``floor`` is set to ``true`` (resp. ``false``)
+the closest integer larger (resp. smaller) than the value is selected.
 
 .. important::
 
@@ -3081,7 +3361,7 @@ Rounding policy is floor. It could be override by creating a new instance of ``I
 
 **API**: ::
 
-    IntValueSelector mid_value_selector()
+    IntValueSelector mid_value_selector(boolean floor)
 
 .. _51_svalsel_maxv:
 
@@ -3221,9 +3501,9 @@ custom
 ======
 
 To build a specific strategy based on ``IntVar`` or ``SetVar``.
-A strategy is based on a variable selector, a value selector and an optional decision operator.
+A strategy is based on a variable selector, a value selector, an optional decision operator and a set of variables.
 
-**Scope**: ``IntVar``
+**Scope**: ``IntVar``, ``SetVar``
 
 **Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
 
@@ -3240,6 +3520,53 @@ A strategy is based on a variable selector, a value selector and an optional dec
 
     SetStrategy custom(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst,
                        SetVar... sets)
+
+
+.. _51_sstrat_dic:
+
+dichtotomic
+===========
+
+To build a specific strategy based on ``IntVar``.
+A strategy is based on a variable selector, a boolean and a set of variables.
+It builds a dichotomic search strategy which selects a variable thanks to VAR_SELECTOR,
+selects the value closest to the middle of the domain and either removes the second half interval (if LOWERFIRST is true)
+or the first half interval (otherwise).
+
+**Scope**: ``IntVar``
+
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy dichotomic(VariableSelector<IntVar> VAR_SELECTOR,
+                                                        boolean LOWERFIRST,
+                                                        IntVar... VARS)
+
+.. _51_sstrat_once:
+
+once
+====
+
+To build a specific strategy based on ``IntVar``.
+A strategy is based on a variable selector, a value selector, an optional decision operator and a set of variables.
+Unlike ``custom``, it builds unary decisions, that is, decisions which can be applied but not be refuted.
+
+**Scope**: ``IntVar``
+
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    IntStrategy once(VariableSelector<IntVar> VAR_SELECTOR,
+                                   IntValueSelector VAL_SELECTOR,
+                                   DecisionOperator<IntVar> DEC_OPERATOR,
+                                   IntVar... VARS)
+
+    IntStrategy once(VariableSelector<IntVar> VAR_SELECTOR,
+                                   IntValueSelector VAL_SELECTOR,
+                                   IntVar... VARS)
+
 
 .. _51_sstrat_lexfi:
 
@@ -3367,6 +3694,8 @@ minDom_MidValue
 ===============
 
 A built-in strategy which chooses the first non-instantiated variable with the smallest domain size, and assigns it to the value closest to its middle of its domain.
+When ``floor`` is set to true, it selects the closest value less than or equal to the middle value.
+Set to false, it selects the closest value greater or equal to the middle value.
 
 **Scope**: ``IntVar``
 
@@ -3374,7 +3703,7 @@ A built-in strategy which chooses the first non-instantiated variable with the s
 
 **API**: ::
 
-    IntStrategy minDom_MidValue(IntVar... VARS)
+    IntStrategy minDom_MidValue(boolean floor, IntVar... VARS)
 
 .. _51_sstrat_maxspl:
 
@@ -3420,6 +3749,55 @@ A built-in strategy which chooses the first non-instantiated variable with the l
 **API**: ::
 
     IntStrategy maxReg_LB(IntVar... VARS)
+
+.. _51_sstrat_objbu:
+
+objective_bottom_up
+===================
+
+A branching strategy over the objective variable.
+It is activated on the first solution, and iterates over the domain in decreasing order (upper bound first).
+
+**Scope**: ``IntVar``
+
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    ObjectiveStrategy objective_bottom_up(IntVar OBJECTIVE)
+
+.. _51_sstrat_objdi:
+
+objective_dichotomic
+====================
+
+A branching strategy over the objective variable.
+It is activated on the first solution, and iterates over the domain in increasing order (lower bound first).
+
+**Scope**: ``IntVar``
+
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    ObjectiveStrategy objective_dichotomic(IntVar OBJECTIVE)
+
+.. _51_sstrat_objtd:
+
+objective_top_bottom
+====================
+
+A branching strategy over the objective variable.
+It is activated on the first solution, and splits the domain into two parts, and evaluates first
+the lower part in case of minimization and the upper part in case of maximization.
+
+**Scope**: ``IntVar``
+
+**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
+
+**API**: ::
+
+    ObjectiveStrategy objective_dichotomic(IntVar OBJECTIVE)
 
 .. _51_sstrat_rndb:
 
@@ -3571,28 +3949,6 @@ After each conflict, the last assigned variable is selected in priority, so long
     AbstractStrategy lastConflict(Solver SOLVER)
     AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT)
     AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT)
-
-.. _51_sstrat_gat:
-
-generateAndTest
-===============
-
-A strategy that simulate a `Generate and Test` behavior through a specific internal decision.
-The main idea is, from all the variables of a problem,  to generate and test the satisfiability of a complete instantiation.
-The process does not rely on propagation anymore, but on satisfaction only.
-
-Such strategy can be triggered when the search space reached a given limit.
-
-
-**Scope**: ``IntVar``
-
-**Factory**: ``org.chocosolver.solver.search.strategy.IntStrategyFactory``
-
-**API**: ::
-
-    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER)
-    AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy,
-                                             int searchSpaceLimit)
 
 
 
@@ -3770,3 +4126,14 @@ Record nogoods from restarts, that is, anytime the search restarts, one or more 
 
     void nogoodRecordingFromRestarts(Solver solver)
 
+shareBestKnownBound
+===================
+
+A method which prepares the solvers in the list to be run in parallel.
+It plugs tools to share between solvers the best known bound when dealing with an optimization problem.
+
+**Factory**: ``org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory``
+
+**API**: ::
+
+    void shareBestKnownBound(List<Solver> solvers)

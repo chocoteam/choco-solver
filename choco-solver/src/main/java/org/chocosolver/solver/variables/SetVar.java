@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -52,7 +53,7 @@ public interface SetVar extends Variable {
 	 *     // something
 	 * }</code>
 	 */
-	public final static int END = Integer.MIN_VALUE;
+	int END = Integer.MIN_VALUE;
 
 	/**
 	 * Get the first element currently in the kernel domain of <code>this</code>.
@@ -65,7 +66,7 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the first element in the kernel or <code>END</code> if it is empty.
 	 */
-	public int getKernelFirst();
+	int getKernelFirst();
 
 	/**
 	 * Get the next element in the kernel domain of <code>this</code>.
@@ -77,21 +78,21 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the next element in the kernel, if any, or <code>END</code> otherwise.
 	 */
-	public int getKernelNext();
+	int getKernelNext();
 
 	/**
 	 * Get the number of elements in the kernel domain of <code>this</code>.
 	 *
 	 * @return the number of elements currently present in the kernel.
 	 */
-	public int getKernelSize();
+	int getKernelSize();
 
 	/**
 	 * Test whether element is present or not in the kernel
 	 * @param element value to test
 	 * @return true iff element is present in the kernel
 	 */
-	public boolean kernelContains(int element);
+	boolean kernelContains(int element);
 
 	/**
 	 * Get the first element currently in the envelope domain of <code>this</code>.
@@ -105,7 +106,7 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the first element in the envelope or <code>END</code> if it is empty.
 	 */
-	public int getEnvelopeFirst();
+	int getEnvelopeFirst();
 
 	/**
 	 * Get the next element in the envelope domain of <code>this</code>.
@@ -118,21 +119,21 @@ public interface SetVar extends Variable {
 	 *
 	 * @return the next element in the envelope, if any, or <code>END</code> otherwise.
 	 */
-	public int getEnvelopeNext();
+	int getEnvelopeNext();
 
 	/**
 	 * Get the number of elements in the envelope domain of <code>this</code>.
 	 *
 	 * @return the number of elements currently present in the envelope.
 	 */
-	public int getEnvelopeSize();
+	int getEnvelopeSize();
 
 	/**
 	 * Test whether element is present or not in the envelope
 	 * @param element value to test
 	 * @return true iff element is present in the envelope
 	 */
-	public boolean envelopeContains(int element);
+	boolean envelopeContains(int element);
 
     /**
      * Adds element to the kernel, i.e. enforces that the set variable
@@ -178,5 +179,5 @@ public interface SetVar extends Variable {
      * @param propagator observer
      * @return a new SetDeltaMonitor
      */
-    public ISetDeltaMonitor monitorDelta(ICause propagator);
+	ISetDeltaMonitor monitorDelta(ICause propagator);
 }

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,9 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 
 /**
  * An interface defining services required for the LNS to select variables to freeze-unfreeze.
@@ -41,6 +40,7 @@ import org.chocosolver.solver.search.limits.ACounter;
  */
 public interface INeighbor {
 
+    void init();
 
     /**
      * Record values of decision variables to freeze some ones during the next LNS run
@@ -50,14 +50,8 @@ public interface INeighbor {
     /**
      * Freezes some variables in order to have a fast computation
      *
-     * @param cause the LNS
-     * @throws org.chocosolver.solver.exception.ContradictionException
-     *          if variables have been fixed to inconsistent values
-     *          this can happen if fixed variables cannot yield to a better solution than the last one
-     *          a contradiction is raised because a cut has been posted on the objective function
-     *          Notice that it could be used to generate a no-good
      */
-    void fixSomeVariables(ICause cause) throws ContradictionException;
+    Decision fixSomeVariables();
 
     /**
      * Use less restriction at the beginning of a LNS run
@@ -66,22 +60,8 @@ public interface INeighbor {
      */
     void restrictLess();
 
-
     /**
      * @return true iff the search is in a complete mode (no fixed variable)
      */
     boolean isSearchComplete();
-
-    /**
-     * Plug a fast restart strategy to the neighborhood
-     *
-     * @param counter a counter
-     */
-    void fastRestart(ACounter counter);
-
-    /**
-     * This method is called by {@link org.chocosolver.solver.search.loop.lns.LargeNeighborhoodSearch} on the first solution,
-     * it activates the fast restart strategy
-     */
-    void activeFastRestart();
 }

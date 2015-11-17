@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -36,18 +37,19 @@ package org.chocosolver.solver.search.restart;
  */
 public abstract class AbstractRestartStrategy implements IRestartStrategy {
 
-    private final String name;
-
     protected int scaleFactor = 1;
 
-    protected double geometricalFactor = 1;
+    protected double geometricalFactor = 1d;
 
-    protected AbstractRestartStrategy(String name, int scaleFactor, double geometricalFactor) {
-        this.name = name;
+    protected AbstractRestartStrategy(int scaleFactor, double geometricalFactor) {
         setScaleFactor(scaleFactor);
         setGeometricalFactor(geometricalFactor);
     }
 
+    @Override
+    public int getFirstCutOff() {
+        return scaleFactor;
+    }
 
     protected static void checkPositiveValue(double value) {
         if (value <= 0) {
@@ -55,38 +57,14 @@ public abstract class AbstractRestartStrategy implements IRestartStrategy {
         }
     }
 
-    @Override
-    public double getGeometricalFactor() {
-        return geometricalFactor;
-    }
-
-    @Override
-    public final String getName() {
-        return name;
-    }
-
-
-    @Override
-    public final int getScaleFactor() {
-        return scaleFactor;
-    }
-
-    @Override
-    public void setGeometricalFactor(double geometricalFactor) {
+    protected void setGeometricalFactor(double geometricalFactor) {
         checkPositiveValue(geometricalFactor);
         this.geometricalFactor = geometricalFactor;
-
     }
 
-    @Override
-    public final void setScaleFactor(int scaleFactor) {
+    protected final void setScaleFactor(int scaleFactor) {
         checkPositiveValue(scaleFactor);
         this.scaleFactor = scaleFactor;
-    }
-
-    @Override
-    public String toString() {
-        return getName() + '(' + getScaleFactor() + ',' + getGeometricalFactor() + ')';
     }
 
     public int[] getSequenceExample(int length) {

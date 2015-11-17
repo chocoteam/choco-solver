@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -31,11 +32,10 @@ package org.chocosolver.solver.propagation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -48,26 +48,60 @@ import java.io.Serializable;
  */
 public interface IPropagationEngine extends Serializable {
 
-    final Logger LOGGER = LoggerFactory.getLogger(IPropagationEngine.class);
+    enum Trace {;
 
-    public enum Trace {
-        ;
-
-        public static void printPropagation(Variable v, Propagator p) {
-            LOGGER.debug("[P] {}", "(" + v + "::" + p + ")");
+        public static void printFirstPropagation(Propagator p, boolean COLOR) {
+            Chatterbox.out.printf("[A] %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    p,
+                    COLOR?Chatterbox.ANSI_RESET:""
+            );
         }
 
-        public static void printModification(Variable v, IEventType e, ICause c) {
-            LOGGER.debug("\t[M] {} {} ({})", v, e, c);
+        public static void printPropagation(Variable v, Propagator p, boolean COLOR) {
+            if (v == null) {
+                Chatterbox.out.printf("[P] %s%s%s\n",
+                        COLOR?Chatterbox.ANSI_PURPLE:"",
+                        p,
+                        COLOR?Chatterbox.ANSI_RESET:""
+                );
+            } else {
+                Chatterbox.out.printf("[P] %s%s%s on %s%s%s\n",
+                        COLOR?Chatterbox.ANSI_BLUE:"",
+                        v,
+                        COLOR?Chatterbox.ANSI_RESET:"",
+                        COLOR?Chatterbox.ANSI_PURPLE:"",
+                        p,
+                        COLOR?Chatterbox.ANSI_RESET:""
+                );
+            }
+        }
+
+        public static void printModification(Variable v, IEventType e, ICause c, boolean COLOR) {
+            Chatterbox.out.printf("\t[M] %s%s%s %s b/c %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_BLUE:"",
+                    v,
+                    COLOR?Chatterbox.ANSI_RESET:"",
+                    e,
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    c,
+                    COLOR?Chatterbox.ANSI_RESET:""
+            );
         }
 
 
-        public static void printSchedule(Propagator p) {
-            LOGGER.debug("\t\t[S] {}", p);
+        public static void printFineSchedule(Propagator p, boolean COLOR) {
+            Chatterbox.out.printf("\t\t[FS] %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    p,
+                    COLOR?Chatterbox.ANSI_RESET:"");
         }
 
-        public static void printAlreadySchedule(Propagator p) {
-            LOGGER.debug("\t\t[s] {}", p);
+        public static void printCoarseSchedule(Propagator p, boolean COLOR) {
+            Chatterbox.out.printf("\t\t[CS] %s%s%s\n",
+                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    p,
+                    COLOR?Chatterbox.ANSI_RESET:"");
         }
     }
 
@@ -121,9 +155,8 @@ public interface IPropagationEngine extends Serializable {
      *
      * @param variable modified variable
      * @param type     type of modification event
-     * @throws ContradictionException
      */
-    default void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
+    default void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
     }
 
     default void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {

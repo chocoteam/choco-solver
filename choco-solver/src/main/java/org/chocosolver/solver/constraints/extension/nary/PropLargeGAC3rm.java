@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,12 +29,12 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -59,6 +60,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     protected DisposableValueIterator[] seekIter;
 
+    protected final IntIterableSet vrms;
+
 
     private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);
@@ -82,6 +85,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             seekIter[i] = vars[i].getValueIterator(true);
         }
         Arrays.fill(supports, Integer.MIN_VALUE);
+        vrms = new IntIterableBitSet();
     }
 
     public PropLargeGAC3rm(IntVar[] vs, Tuples tuples) {
@@ -138,8 +142,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         int val;
         if (vars[indexVar].hasEnumeratedDomain()) {
             DisposableValueIterator it = vars[indexVar].getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[indexVar].getLB());
             try {
                 while (it.hasNext()) {
                     val = it.next();
@@ -148,17 +152,12 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
                         if (currentSupport != null) {
                             setSupport(currentSupport);
                         } else {
-                            if (val == right + 1) {
-                                right = val;
-                            } else {
-                                vars[indexVar].removeInterval(left, right, this);
-                                left = right = val;
-                            }
+                            vrms.add(val);
                             //                        vars[indexVar].removeVal(val, this, false);
                         }
                     }
                 }
-                vars[indexVar].removeInterval(left, right, this);
+                vars[indexVar].removeValues(vrms, this);
             } finally {
                 it.dispose();
             }
@@ -189,8 +188,8 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         int val;
         if (vars[indexVar].hasEnumeratedDomain()) {
             DisposableValueIterator it = vars[indexVar].getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(vars[indexVar].getLB());
             try {
                 while (it.hasNext()) {
                     val = it.next();
@@ -199,17 +198,12 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
                         if (currentSupport != null) {
                             setSupport(currentSupport);
                         } else {
-                            if (val == right + 1) {
-                                right = val;
-                            } else {
-                                vars[indexVar].removeInterval(left, right, this);
-                                left = right = val;
-                            }
+                            vrms.add(val);
                             //                            vars[indexVar].removeVal(val, this, false);
                         }
                     }
                 }
-                vars[indexVar].removeInterval(left, right, this);
+                vars[indexVar].removeValues(vrms, this);
             } finally {
                 it.dispose();
             }
@@ -330,16 +324,4 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         return null;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropLargeGAC3rm(aVars, relation.duplicate()));
-        }
-    }
 }

@@ -31,7 +31,7 @@
     <parent>
         <artifactId>choco</artifactId>
         <groupId>org.choco-solver</groupId>
-        <version>3.3.1</version>
+        <version>3.3.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>choco-solver</artifactId>
@@ -50,15 +50,14 @@
             <version>0.9.3</version>
         </dependency>
         <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <version>3.3.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>args4j</groupId>
             <artifactId>args4j</artifactId>
             <version>2.32</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.cp-profiler</groupId>
+            <artifactId>cpprof-java</artifactId>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -134,6 +133,25 @@
                 </executions>
             </plugin>
             -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.5.201505241946</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

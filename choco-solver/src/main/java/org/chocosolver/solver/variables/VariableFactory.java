@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -53,7 +54,7 @@ public class VariableFactory {
     VariableFactory() {
     }
 
-    private static final String CSTE_NAME = "cste -- ";
+    public static final String CSTE_NAME = "cste -- ";
 
     /**
      * Provide a minimum value for integer variable lower bound.
@@ -66,8 +67,6 @@ public class VariableFactory {
      * Do not prevent from overflow, but may avoid it, somehow.
      */
     public static final int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
-
-    //TODO : build domain in Variable
 
     //*************************************************************************************
     // INTEGER VARIABLES
@@ -322,6 +321,8 @@ public class VariableFactory {
         checkIntVar(NAME, VALUES[0], VALUES[VALUES.length - 1]);
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
+        } else if (VALUES.length == 2 && VALUES[0] == 0 && VALUES[1] == 1) {
+            return bool(NAME, SOLVER);
         } else {
             int gap = VALUES[VALUES.length - 1] - VALUES[0];
             if (gap > 30 && gap / VALUES.length > 5) {
@@ -643,7 +644,7 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static BoolVar zero(Solver SOLVER) {
-        return SOLVER.ZERO;
+        return SOLVER.ZERO();
     }
 
     /**
@@ -653,7 +654,7 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static BoolVar one(Solver SOLVER) {
-        return SOLVER.ONE;
+        return SOLVER.ONE();
     }
 
     //*************************************************************************************
@@ -692,11 +693,11 @@ public class VariableFactory {
      * @param VALUE  its value
      * @param SOLVER the solver to build the integer variable in.
      */
-    public static IntVar fixed(boolean VALUE, Solver SOLVER) {
+    public static BoolVar fixed(boolean VALUE, Solver SOLVER) {
         if (VALUE) {
-            return SOLVER.ONE;
+            return SOLVER.ONE();
         } else {
-            return SOLVER.ZERO;
+            return SOLVER.ZERO();
         }
     }
 
@@ -729,7 +730,7 @@ public class VariableFactory {
             return VAR;
         }
         if (VAR.getSolver().getSettings().enableViews()) {
-            return new OffsetView(VAR, CSTE, VAR.getSolver());
+            return new OffsetView(VAR, CSTE);
         } else {
             Solver s = VAR.getSolver();
             int lb = VAR.getLB() + CSTE;
@@ -777,7 +778,7 @@ public class VariableFactory {
 
     private static IntVar eqint(IntVar ivar) {
         if (ivar.getSolver().getSettings().enableViews()) {
-            return new EqView(ivar, ivar.getSolver());
+            return new EqView(ivar);
         } else {
             IntVar ov = ivar.duplicate();
             ivar.getSolver().post(ICF.arithm(ov, "=", ivar));
@@ -787,7 +788,7 @@ public class VariableFactory {
 
     private static BoolVar eqbool(BoolVar BOOL) {
         if (BOOL.getSolver().getSettings().enableViews()) {
-            return new BoolEqView(BOOL, BOOL.getSolver());
+            return new BoolEqView(BOOL);
 
         } else {
             BoolVar ov = BOOL.duplicate();
@@ -810,7 +811,7 @@ public class VariableFactory {
      */
     public static BoolVar not(BoolVar BOOL) {
         if (BOOL.getSolver().getSettings().enableViews()) {
-            return new BoolNotView(BOOL, BOOL.getSolver());
+            return new BoolNotView(BOOL);
         } else {
             if (BOOL.hasNot()) {
                 return BOOL.not();
@@ -837,7 +838,7 @@ public class VariableFactory {
      */
     public static IntVar minus(IntVar VAR) {
         if (VAR.getSolver().getSettings().enableViews()) {
-            return new MinusView(VAR, VAR.getSolver());
+            return new MinusView(VAR);
         } else {
             Solver s = VAR.getSolver();
             int ub = -VAR.getLB();
@@ -883,7 +884,7 @@ public class VariableFactory {
                 var = VAR;
             } else {
                 if (VAR.getSolver().getSettings().enableViews()) {
-                    var = new ScaleView(VAR, CSTE, VAR.getSolver());
+                    var = new ScaleView(VAR, CSTE);
                 } else {
                     Solver s = VAR.getSolver();
                     int lb = VAR.getLB() * CSTE;
@@ -985,4 +986,20 @@ public class VariableFactory {
         }
         return reals;
     }
+
+    /**
+     * Convert ivars into an array of boolean variables
+     *
+     * @param ivars an array of IntVar
+     * @return an array of BoolVar
+     * @throws java.lang.ClassCastException if one variable is not a BoolVar
+     */
+    public static BoolVar[] toBoolVar(IntVar[] ivars) {
+        BoolVar[] bvars = new BoolVar[ivars.length];
+        for (int i = ivars.length - 1; i >= 0; i--) {
+            bvars[i] = (BoolVar) ivars[i];
+        }
+        return bvars;
+    }
+
 }

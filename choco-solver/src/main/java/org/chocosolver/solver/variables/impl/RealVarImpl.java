@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,7 +29,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
@@ -84,7 +84,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (old < value) {
             if (this.getUB() < value) {
 //                TODO solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                this.contradiction(cause, RealEventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, MSG_LOW);
             } else {
                 LB.set(value);
                 this.notifyPropagators(RealEventType.INCLOW, cause);
@@ -104,7 +104,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (old > value) {
             if (this.getLB() > value) {
 //                TODO solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, RealEventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, MSG_UPP);
             } else {
                 UB.set(value);
                 this.notifyPropagators(RealEventType.DECUPP, cause);
@@ -124,7 +124,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (oldlb < lowerbound || oldub > upperbound) {
             if (oldub < lowerbound || oldlb > upperbound) {
 //                TODO solver.getExplainer()...
-                this.contradiction(cause, RealEventType.BOUND, MSG_BOUND);
+                this.contradiction(cause, MSG_BOUND);
             } else {
 				RealEventType e = RealEventType.VOID;
                 if (oldlb < lowerbound) {
@@ -180,7 +180,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }
@@ -192,18 +192,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public RealVar duplicate() {
-        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            RealVarImpl clone = new RealVarImpl(this.name, this.LB.get(), this.UB.get(), this.precision, solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, solver);
     }
 
     @Override

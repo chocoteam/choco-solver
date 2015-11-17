@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,12 +29,12 @@
  */
 package org.chocosolver.solver.constraints.nary.count;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
@@ -70,8 +71,8 @@ public class PropCount_AC extends Propagator<IntVar> {
      * Propagator for Count Constraint for integer variables
      * Performs Arc Consistency
      *
-     * @param decvars array of integer variables
-     * @param restrictedValue int
+     * @param decvars          array of integer variables
+     * @param restrictedValue  int
      * @param valueCardinality integer variable
      */
     public PropCount_AC(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
@@ -143,18 +144,17 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        vars[n].updateLowerBound(mandatories.getSize(), aCause);
-        vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), aCause);
+        vars[n].updateBounds(mandatories.getSize(), mandatories.getSize() + possibles.getSize(), this);
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    vars[j].instantiateTo(value, aCause);
+                    vars[j].instantiateTo(value, this);
                 }
                 setPassive();
             } else if (mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    if (vars[j].removeValue(value, aCause)) {
+                    if (vars[j].removeValue(value, this)) {
                         possibles.remove(j);
                     }
                 }
@@ -172,7 +172,7 @@ public class PropCount_AC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx >= n) {// cardinality variables
+        if (vIdx == vars.length - 1) {// cardinality variables
             return IntEventType.boundAndInst();
         }
         return IntEventType.all();
@@ -204,17 +204,33 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == vars[n]) {
+            boolean isDecUpp = evt == IntEventType.DECUPP;
+            for (int i = 0; i < n; i++) {
+                if (vars[i].contains(value)) {
+                    if (vars[i].isInstantiated()) {
+                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
+                } else if (isDecUpp) {
+                    nrules |= ruleStore.addRemovalRule(vars[i], value);
+                }
             }
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropCount_AC(aVars, this.value, aVar));
+        } else {
+            nrules |= ruleStore.addBoundsRule(vars[n]);
+            if (evt == IntEventType.REMOVE) {
+                for (int i = 0; i < n; i++) {
+                    if (vars[i].isInstantiatedTo(value)) {
+                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
+                }
+            } else {
+                for (int i = 0; i < n; i++) {
+                    nrules |= ruleStore.addFullDomainRule(vars[i]);
+                }
+            }
         }
+        return nrules;
     }
 }

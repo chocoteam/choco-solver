@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -35,8 +36,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -46,6 +45,8 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+
+import static org.chocosolver.solver.variables.SetVar.END;
 
 /**
  * Propagator for Member constraint: iv is in set
@@ -98,17 +99,16 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
         int maxVal = set.getEnvelopeFirst();
         int minVal = maxVal;
-        for (int j = maxVal; j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j = maxVal; j != END; j = set.getEnvelopeNext()) {
             maxVal = j;
         }
-        iv.updateUpperBound(maxVal, aCause);
-        iv.updateLowerBound(minVal, aCause);
+        iv.updateBounds(minVal, maxVal, this);
         minVal = iv.getLB();
         maxVal = iv.getUB();
         while (minVal <= maxVal && !set.envelopeContains(minVal)) {
@@ -118,13 +118,13 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
             iv.updateUpperBound(--maxVal, this);
         }
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), aCause);
+            set.addToKernel(iv.getValue(), this);
             setPassive();
             return;
         }
         // search for watch literals
         int i = set.getEnvelopeFirst(), wl = 0, cnt = 0;
-        while (i != SetVar.END && wl < 2) {
+        while (i != END && wl < 2) {
             if (!iv.contains(i)) {
                 cnt++;
             } else {
@@ -145,7 +145,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 1) {
             if (iv.isInstantiated()) {
-                set.addToKernel(iv.getValue(), aCause);
+                set.addToKernel(iv.getValue(), this);
                 setPassive();
             } else if (!iv.contains(watchLit1)) {
                 setWatchLiteral(watchLit2);
@@ -185,8 +185,8 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         if (cnt == set.getEnvelopeSize()) {
             this.contradiction(iv, "Inconsistent");
         }
-        set.addToKernel(otherWL, aCause);
-        iv.instantiateTo(otherWL, aCause);
+        set.addToKernel(otherWL, this);
+        iv.instantiateTo(otherWL, this);
         setPassive();
     }
 
@@ -224,16 +224,4 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(set);
-
-            iv.duplicate(solver, identitymap);
-            IntVar I = (IntVar) identitymap.get(iv);
-
-            identitymap.put(this, new PropIntBoundedMemberSet(S, I));
-        }
-    }
 }

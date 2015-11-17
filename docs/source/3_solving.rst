@@ -124,11 +124,7 @@ For instance::
 states that the variable ``OBJ`` must be maximized.
 
 The method does not return any value.
-However, the best solution found so far is restored.
-
-.. important::
-
- Because the best solution is restored, all variables are instantiated after a call to ``solver.findOptimalSolution(...)``.
+However, the best solution found so far can be restored (see below).
 
 The best solution found is the optimal one if the entire search space has been explored.
 
@@ -171,8 +167,6 @@ The underlying approach is naive, but it simplifies the process.
 Anytime a solution is found, a cut is posted which states that at least one of the objective variables must be better.
 Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n` where :math:`X_i` is the ith objective variable and :math:`b_i`
 its best known value.
-
-The method ends by restoring the last solution found so far, if any.
 
 Here is a simple illustration:
 
@@ -222,7 +216,6 @@ There exists many built-in solution recorders:
 
 ``LastSolutionRecorder`` only keeps variable values of the last solution found. It is the default solution recorder.
 Furthermore, it is possible to restore that solution after the search process ends.
-This is used by default when seeking an optimal solution.
 
 
 ``AllSolutionsRecorder`` records all solutions that are found.
@@ -249,20 +242,16 @@ Solution restoration
 --------------------
 
 A ``Solution`` object can be restored, i.e. variables are fixed back to their values in that solution.
-For this purpose, we recommend to restore initial domains and then restore the solution,
-with the following code: ::
+This is achieved through the `Solver` by the calling one of the two following methods: ::
 
-    try{
-       solver.getSearchLoop().restoreRootNode();
-       solver.getEnvironment().worldPush();
-       solution.restore();
-    }catch (ContradictionException e){
-       throw new UnsupportedOperationException("restoring the solution ended in a failure");
-    }
-    solver.getEngine().flush();
+    solver.restoreLastSolution();
+    // or
+    Solution aSolution= ...;
+    solver.restoreSolution(aSolution);
 
-Note that if initial domains are not restored, then the solution restoration may lead to a failure.
-This would happen when trying to restore out of the current domain.
+.. note::
+
+    The restoration may detect inconsistency, for instance when the model has been externally modified since the solution to be restored to has been found.
 
 Search Strategies
 =================
@@ -397,7 +386,10 @@ Available strategies
 
     For integer variables
 
-:ref:`51_sstrat_cus`, :ref:`51_sstrat_seq`.
+:ref:`51_sstrat_cus`,
+:ref:`51_sstrat_dic`,
+:ref:`51_sstrat_once`,
+:ref:`51_sstrat_seq`.
 
 :ref:`51_sstrat_lexlb`,
 :ref:`51_sstrat_lexnlb`,
@@ -408,6 +400,9 @@ Available strategies
 :ref:`51_sstrat_maxspl`,
 :ref:`51_sstrat_minub`,
 :ref:`51_sstrat_maxrlb`,
+:ref:`51_sstrat_objbu`,
+:ref:`51_sstrat_objdi`,
+:ref:`51_sstrat_objtd`,
 :ref:`51_sstrat_rndb`,
 :ref:`51_sstrat_rndv`.
 
@@ -594,13 +589,9 @@ will return false if the second option is used.
 Resolution statistics
 =====================
 
-Choco |version| distinguishes *developer trace* and *user trace*.
-*Developer trace* is only dedicated to developers for debugging purpose (Choco depends on SLF4J, as described in :ref:`Note about logging <1_log>`).
-*User trace* is dedicated to users (and developers) to print information related to the resolution of a problem, such as statistics (execution time, nodes, etc.) or solutions.
-
-Resolution data are available thanks to the ``Chatterbox`` class, which outputs to ``System.out``.
-It centralises widely used methods to have comprehensive feedbacks about the resolution process.
-There two main types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
+Resolution data are available thanks to the ``Chatterbox`` class, which outputs by default to ``System.out``.
+It centralises widely used methods to have comprehensive feedback about the resolution process.
+There are two types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
 
 For instance, one can indicate to print the solutions all resolution long: ::
 
@@ -617,7 +608,7 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
 
 .. code-block:: none
 
-    ** Choco 3.3.1 (2015-05) : Constraint Programming Solver, Copyleft (c) 2010-2015
+    ** Choco 3.3.2 (2015-11) : Constraint Programming Solver, Copyleft (c) 2010-2015
 
 On a call to ``Chatterbox.printVersion()``, the following message will be printed:
 
@@ -629,17 +620,14 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
      [  Maximize = {1}  ]
      [  Minimize = {2}  ]
         Building time : {3}s
-        Initialisation : {4}s
-        Initial propagation : {5}s
         Resolution : {6}s
-        Nodes: {7}
+        Nodes: {7} ({7}/{6} n/s)
         Backtracks: {8}
         Fails: {9}
         Restarts: {10}
         Max depth: {11}
-        Memory: {12}mb
-        Variables: {13}
-        Constraints: {14}
+        Variables: {12}
+        Constraints: {13}
 
 Curly brackets *{instruction | }* indicate alternative instructions
 
@@ -662,9 +650,8 @@ Curly braces *{value}* indicate search statistics:
 9. number of failures that occurred
 10. number of restarts operated
 11. maximum depth reached in the binary tree search
-12. estimation of the memory used
-13. number of variables in the model
-14. number of constraints in the model
+12. number of variables in the model
+13. number of constraints in the model
 
 
 If the resolution process reached a limit before ending *naturally*, the title of the message is set to :

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -29,7 +30,6 @@
 package org.chocosolver.solver.constraints;
 
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -43,8 +43,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -100,7 +98,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     //***********************************************************************************
 
     private static final long serialVersionUID = 2L;
-    protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
 
     // propagator attributes
@@ -108,7 +105,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private short state;  // 0 : new -- 1 : active -- 2 : passive
     private Operation[] operations; // propagator state operations
     private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
-    protected Propagator aCause; // cause of variable modifications. The default value is 'this"
     protected final PropagatorPriority priority;
     protected final boolean reactToFineEvt;
     // references
@@ -140,14 +136,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
-        this.aCause = this;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
-        this.vars = vars;
-        this.vindices = new int[vars.length];
-        for (int v = 0; v < vars.length; v++) {
-            vindices[v] = vars[v].link(this, v);
+        if (solver.getSettings().cloneVariableArrayInPropagator()) {
+            this.vars = vars.clone();
+        } else {
+            this.vars = vars;
         }
+        this.vindices = new int[vars.length];
+        this.linkVariables();
         ID = solver.nextId();
         operations = new Operation[]{
                 new Operation() {
@@ -197,7 +194,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected final void addVariable(V... nvars) {
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
-        arraycopy(tmp, 0, vars, 0, tmp.length);
         arraycopy(nvars, 0, vars, tmp.length, nvars.length);
         int[] itmp = this.vindices;
         vindices = new int[vars.length];
@@ -215,6 +211,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
+    protected void linkVariables() {
+        for (int v = 0; v < vars.length; v++) {
+            vindices[v] = vars[v].link(this, v);
+        }
+    }
+
     /**
      * Informs this propagator the (unique) constraint it filters.
      * The constraint reference will be overwritten in case of reification.
@@ -227,15 +229,42 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
-     * <i>Checks are made applying bitwise AND between the mask and the event.</i>
+     * Returns the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
+     * A mask is a bitwise OR operations over {@link IEventType} this can react on.
+     *
+     * For example, consider a propagator that can deduce filtering based on the lower bound of the integer variable X.
+     * Then, for this variable, the mask should be equal to :
+     * <pre>
+     *     int mask = IntEvtType.INCLOW.getMask() | IntEvtType.INSTANTIATE.getMask();
+     * </pre>
+     * or, in a more convenient way:
+     * <pre>
+     *     int mask = IntEvtType.combine(IntEvtType.INCLOW,IntEvtType.INSTANTIATE);
+     * </pre>
+     *
+     * That indicates the following behavior:
+     * <ol>
+     *     <li>if X is instantiated, this propagator will be executed,</li>
+     *     <li>if the lower bound of X is modified, this propagator will be executed,</li>
+     *     <li>if the lower bound of X is removed, the event is promoted from REMOVE to INCLOW and this propagator will NOT be executed,</li>
+     *     <li>otherwise, this propagator will NOT be executed</li>
+     * </ol>
+     *
+     * Some combinations are valid.
+     * For example, a propagator which reacts on REMOVE and INSTANTIATE should also declare INCLOW and DECUPP as conditions.
+     * Indeed INCLOW (resp. DECUPP), for efficiency purpose, removing the lower bound (resp. upper bound) of an integer variable
+     * will automatically be <i>promoted</i> into INCLOW (resp. DECUPP).
+     * So, ignoring INCLOW and/or DECUPP in that case may result in a lack of filtering.
+     *
+     * The same goes with events of other variable types, but most of the time, there are only few combinations.
+     *
      * Reacts to any kind of event by default.
      *
      * @param vIdx index of the variable within the propagator
-     * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
+     * @return an int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
      * and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
-    protected int getPropagationConditions(int vIdx) {
+    public int getPropagationConditions(int vIdx) {
         return ALL_EVENTS;
     }
 
@@ -252,21 +281,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
     public abstract void propagate(int evtmask) throws ContradictionException;
-
-    /**
-     * Advise a propagator of a modification occurring on one of its variables,
-     * and decide if <code>this</code> should be scheduled.
-     * At least, this method SHOULD check the propagation condition of the event received.
-     * In addition, this method can be used to update internal state of <code>this</code>.
-     * This method can returns <code>true</code> even if the propagator is already scheduled.
-     *
-     * @param idxVarInProp index of the modified variable
-     * @param mask         modification event mask
-     * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
-     */
-    public boolean advise(int idxVarInProp, int mask) {
-        return (mask & getPropagationConditions(idxVarInProp)) != 0;
-    }
 
     /**
      * Incremental filtering algorithm defined within the <code>Propagator</code>, called whenever the variable
@@ -288,7 +302,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
                     "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
         }
-        propagate(CUSTOM_PROPAGATION.getStrengthenedMask());
+        propagate(CUSTOM_PROPAGATION.getMask());
     }
 
     /**
@@ -422,6 +436,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
+     * Throws a contradiction exception
+     *
+     * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
+     */
+    public void fails() throws ContradictionException {
+        solver.getEngine().fails(this, null, null);
+    }
+
+    /**
      * Throws a contradiction exception based on <variable, message>
      *
      * @param variable involved variable
@@ -429,7 +452,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(aCause, variable, message);
+        solver.getEngine().fails(this, variable, message);
     }
 
     @Override
@@ -587,23 +610,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return st.toString();
     }
 
-    /**
-     * Duplicate the current propagator.
-     * A restriction is that the resolution process should have not begun yet.
-     * That's why state of the propagator may not be duplicated.
-     *
-     * @param solver      the target solver
-     * @param identitymap a map to ensure uniqueness of objects
-     */
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        throw new SolverException("The propagator cannot be duplicated: the method is not defined.");
-    }
-
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean nrules = ruleStore.addPropagatorActivationRule(this);
         for (int i = 0; i < vars.length; i++) {
-            if(vars[i]!= var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
+            if (vars[i] != var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
         }
         return nrules;
     }

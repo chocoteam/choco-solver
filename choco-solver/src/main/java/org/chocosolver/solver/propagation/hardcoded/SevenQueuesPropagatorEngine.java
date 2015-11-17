@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -37,15 +38,13 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.propagation.hardcoded.util.IId2AbId;
-import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
+import org.chocosolver.util.objects.IntMap;
 import org.chocosolver.util.objects.queues.CircularQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,18 +61,17 @@ import java.util.List;
  */
 public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
-    final Logger LOGGER = LoggerFactory.getLogger(SevenQueuesPropagatorEngine.class);
-
     private static final int WORD_MASK = 0xffffffff;
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     private final Solver solver;
     protected Propagator[] propagators;
+    private final boolean DEBUG,COLOR;
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected IId2AbId p2i; // mapping between propagator ID and its absolute index
+    protected IntMap p2i; // mapping between propagator ID and its absolute index
     protected int notEmpty; // point out the no empty queues
     protected short[] scheduled; // also maintains the index of the queue!
     protected IntCircularQueue[] eventsets;
@@ -92,6 +90,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
         this.solver = solver;
         pro_queue = new CircularQueue[8];
+        this.DEBUG = solver.getSettings().debugPropagation();
+        this.COLOR = solver.getSettings().outputWithANSIColors();
 
     }
 
@@ -111,23 +111,18 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = solver.getCstrs();
             int nbProp = 0;
-            int m = Integer.MAX_VALUE, M = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();
                 for (int j = 0; j < cprops.length; j++, nbProp++) {
                     _propagators.add(cprops[j]);
-                    int id = cprops[j].getId();
-                    m = Math.min(m, id);
-                    M = Math.max(M, id);
                 }
             }
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
             trigger.addAll(propagators);
 
-            //p2i = new AId2AbId(m, M, -1);
-            p2i = new MId2AbId(M - m + 1, -1);
+            p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
-                p2i.set(propagators[j].getId(), j);
+                p2i.put(propagators[j].getId(), j);
             }
             for (int i = 0; i < 8; i++) {
                 pro_queue[i] = new CircularQueue<>(16);
@@ -172,8 +167,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     while (evtset.size() > 0) {
                         int v = evtset.pollFirst();
                         assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                        if (LOGGER.isDebugEnabled()) {
-                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp, COLOR);
                         }
                         // clear event
                         mask = eventmasks[aid][v];
@@ -184,8 +179,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     }
                 } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                    if (LOGGER.isDebugEnabled()) {
-                        IPropagationEngine.Trace.printPropagation(null, lastProp);
+                    if (DEBUG) {
+                        IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
                     }
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
@@ -209,76 +204,73 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
-        int aid;
-        IntCircularQueue evtset;
         if (lastProp != null) {
-            aid = p2i.get(lastProp.getId());
-            if (lastProp.reactToFineEvent()) {
-                evtset = eventsets[aid];
-                while (evtset.size() > 0) {
-                    int v = evtset.pollFirst();
-                    eventmasks[aid][v] = 0;
-                }
-                evtset.clear();
-                lastProp.flushPendingEvt();
-            }
-            scheduled[aid] = 0;
+            flush(p2i.get(lastProp.getId()));
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
                 lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
-                aid = p2i.get(lastProp.getId());
-                if (lastProp.reactToFineEvent()) {
-                    evtset = eventsets[aid];
-                    while (evtset.size() > 0) {
-                        int v = evtset.pollFirst();
-                        eventmasks[aid][v] = 0;
-                    }
-                    evtset.clear();
-                    lastProp.flushPendingEvt();
-                }
-                scheduled[aid] = 0;
+                flush(p2i.get(lastProp.getId()));
             }
             notEmpty = notEmpty & ~(1 << i);
         }
     }
 
+    private void flush(int aid) {
+        IntCircularQueue evtset;
+        if (lastProp.reactToFineEvent()) {
+            evtset = eventsets[aid];
+            while (evtset.size() > 0) {
+                int v = evtset.pollFirst();
+                eventmasks[aid][v] = 0;
+            }
+            evtset.clear();
+            lastProp.flushPendingEvt();
+        }
+        scheduled[aid] = 0;
+    }
+
     @Override
-    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        if (LOGGER.isDebugEnabled()) {
-            IPropagationEngine.Trace.printModification(variable, type, cause);
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
+        if (DEBUG) {
+            IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
         }
         Propagator[] vpropagators = variable.getPropagators();
-        int nbp = vpropagators.length;
         int[] vindices = variable.getPIndices();
         Propagator prop;
         int pindice;
-
-        for (int p = nbp - 1; p >= 0; p--) {
-            prop = vpropagators[p];
-            pindice = vindices[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
-                int aid = p2i.get(prop.getId());
-                if (prop.reactToFineEvent()) {
-                    boolean needSched = (eventmasks[aid][pindice] == 0);
-                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
-                    if (needSched) {
-                        if (LOGGER.isDebugEnabled()) {
-                            IPropagationEngine.Trace.printSchedule(prop);
+        EvtScheduler si = variable._schedIter();
+        si.init(type);
+        while (si.hasNext()) {
+            int p = variable.getDindex(si.next());
+            int t = variable.getDindex(si.next());
+            for (; p < t; p++) {
+                prop = vpropagators[p];
+                pindice = vindices[p];
+                if (prop.isActive() && cause != prop) {
+                    int aid = p2i.get(prop.getId());
+                    if (prop.reactToFineEvent()) {
+                        boolean needSched = (eventmasks[aid][pindice] == 0);
+                        eventmasks[aid][pindice] |= type.getMask();
+                        if (needSched) {
+                            if (DEBUG) {
+                                IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
+                            }
+                            prop.incNbPendingEvt();
+                            eventsets[aid].addLast(pindice);
                         }
-                        prop.incNbPendingEvt();
-                        eventsets[aid].addLast(pindice);
-                    } else if (LOGGER.isDebugEnabled()) {
-                        IPropagationEngine.Trace.printAlreadySchedule(prop);
                     }
-                }
-                if (scheduled[aid] == 0) {
-                    int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
-                    pro_queue[prio].addLast(prop);
-                    scheduled[aid] = (short) (prio + 1);
+                    if (scheduled[aid] == 0) {
+                        int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
+                        pro_queue[prio].addLast(prop);
+                        scheduled[aid] = (short) (prio + 1);
 //                    notEmpty.set(prio);
-                    notEmpty = notEmpty | (1 << prio);
+                        notEmpty = notEmpty | (1 << prio);
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printCoarseSchedule(prop, COLOR);
+                        }
+                    }
                 }
             }
         }
@@ -287,10 +279,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
         if (propagator.getNbPendingEvt() == 0) {
-            if (LOGGER.isDebugEnabled()) {
-                IPropagationEngine.Trace.printPropagation(null, propagator);
+            if (DEBUG) {
+                IPropagationEngine.Trace.printPropagation(null, propagator, COLOR);
             }
-            propagator.propagate(type.getStrengthenedMask());
+            propagator.propagate(type.getMask());
         }
     }
 
@@ -343,7 +335,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(_propagators, 0, propagators, 0, osize);
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
-            p2i.set(propagators[j].getId(), j);
+            p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
         }
 
@@ -425,7 +417,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             // 4. copy data
             if (idtd < nsize) {
                 propagators[idtd] = toMove;
-                p2i.set(toMove.getId(), idtd);
+                p2i.put(toMove.getId(), idtd);
                 scheduled[idtd] = stm;
                 eventsets[idtd] = estm;
                 eventmasks[idtd] = emtm;

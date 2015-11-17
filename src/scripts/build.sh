@@ -49,7 +49,7 @@ if [ ${BRANCH} = "release" ]; then
     mvn -q clean install -DskipTests || quit "Unable to build the code"
     rm choco-samples/target/test-classes/logback-test.xml || quit "Unable to delete logback-test.xml"
     cd choco-samples/target/test-classes/
-    D = $(java -cp ./:../../../choco-solver/target/choco-solver-3.3.1-SNAPSHOT-with-dependencies.jar org.chocosolver.docs.Overview | grep DEBUG | wc -l)
+    D = $(java -cp ./:../../../choco-solver/target/choco-solver-${VERSION}-with-dependencies.jar org.chocosolver.docs.Overview | grep DEBUG | wc -l)
     if [ $D  -gt 0 ]; then
         quit "Error in with-dep.xml"
     fi

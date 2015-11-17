@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,13 +29,13 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -61,6 +62,8 @@ public class PropBinAC3rm extends PropBinCSP {
     protected int initDomSize0;
     protected int initDomSize1;
 
+    protected final IntIterableSet vrms;
+
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
@@ -68,6 +71,7 @@ public class PropBinAC3rm extends PropBinCSP {
 
     private PropBinAC3rm(IntVar x, IntVar y, CouplesBitSetTable table) {
         super(x, y, table);
+        vrms = new IntIterableBitSet();
     }
 
 
@@ -88,18 +92,6 @@ public class PropBinAC3rm extends PropBinCSP {
             reviseV1();
         } else {
             reviseV0();
-        }
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropBinAC3rm(X, Y, (CouplesBitSetTable) relation.duplicate()));
         }
     }
 
@@ -163,8 +155,8 @@ public class PropBinAC3rm extends PropBinCSP {
         int v0Size = v0.getDomainSize();
         if (minS1 <= (initDomSize0 - v0Size)) {
             DisposableValueIterator itv1 = v1.getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(v1.getLB());
             try {
                 while (itv1.hasNext()) {
                     int y = itv1.next();
@@ -182,17 +174,12 @@ public class PropBinAC3rm extends PropBinCSP {
                             if (found) {
                                 storeSupportV1(support, y);
                             } else {
-                                if (y == right + 1) {
-                                    right = y;
-                                } else {
-                                    v1.removeInterval(left, right, this);
-                                    left = right = y;
-                                }
+                                vrms.add(y);
                             }
                         }
                     }
                 }
-                v1.removeInterval(left, right, this);
+                v1.removeValues(vrms, this);
             } finally {
                 itv1.dispose();
             }
@@ -208,8 +195,8 @@ public class PropBinAC3rm extends PropBinCSP {
         int v1Size = v1.getDomainSize();
         if (minS0 <= (initDomSize1 - v1Size)) {
             DisposableValueIterator itv0 = v0.getValueIterator(true);
-            int left = Integer.MIN_VALUE;
-            int right = left;
+            vrms.clear();
+            vrms.setOffset(v0.getLB());
             try {
                 while (itv0.hasNext()) {
                     int x = itv0.next();
@@ -226,17 +213,12 @@ public class PropBinAC3rm extends PropBinCSP {
                             if (found) {
                                 storeSupportV0(support, x);
                             } else {
-                                if (x == right + 1) {
-                                    right = x;
-                                } else {
-                                    v0.removeInterval(left, right, this);
-                                    left = right = x;
-                                }
+                                vrms.add(x);
                             }
                         }
                     }
                 }
-                v0.removeInterval(left, right, this);
+                v0.removeValues(vrms, this);
             } finally {
                 itv0.dispose();
             }
@@ -272,8 +254,8 @@ public class PropBinAC3rm extends PropBinCSP {
         fastInitNbSupports(Integer.MAX_VALUE, Integer.MAX_VALUE);
         //else fastInitNbSupports(80,80);
         DisposableValueIterator itv0 = v0.getValueIterator(true);
-        int left = Integer.MIN_VALUE;
-        int right = left;
+        vrms.clear();
+        vrms.setOffset(v0.getLB());
         int support = 0;
         boolean found = false;
         try {
@@ -290,24 +272,20 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 itv1.dispose();
                 if (!found) {
-                    if (val0 == right + 1) {
-                        right = val0;
-                    } else {
-                        v0.removeInterval(left, right, this);
-                        left = right = val0;
-                    }
+                    vrms.add(val0);
                 } else {
                     storeSupportV0(support, val0);
                 }
                 found = false;
             }
-            v0.removeInterval(left, right, this);
+            v0.removeValues(vrms, this);
         } finally {
             itv0.dispose();
         }
         found = false;
         DisposableValueIterator itv1 = v1.getValueIterator(true);
-        left = right = Integer.MIN_VALUE;
+        vrms.clear();
+        vrms.setOffset(v1.getLB());
         try {
             while (itv1.hasNext()) {
                 itv0 = v0.getValueIterator(true);
@@ -322,18 +300,13 @@ public class PropBinAC3rm extends PropBinCSP {
                 }
                 itv0.dispose();
                 if (!found) {
-                    if (val1 == right + 1) {
-                        right = val1;
-                    } else {
-                        v1.removeInterval(left, right, this);
-                        left = right = val1;
-                    }
+                    vrms.add(val1);
                 } else {
                     storeSupportV1(support, val1);
                 }
                 found = false;
             }
-            v1.removeInterval(left, right, this);
+            v1.removeValues(vrms, this);
         } finally {
             itv1.dispose();
         }
@@ -341,44 +314,35 @@ public class PropBinAC3rm extends PropBinCSP {
     }
 
     public void onInstantiationOf(int idx) throws ContradictionException {
-        int left, right;
         if (idx == 0) {
             int value = v0.getValue();
             DisposableValueIterator iterator = v1.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(v1.getLB());
             try {
                 while (iterator.hasNext()) {
                     int val = iterator.next();
                     if (!relation.isConsistent(value, val)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else {
-                            v1.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                     }
                 }
-                v1.removeInterval(left, right, this);
+                v1.removeValues(vrms, this);
             } finally {
                 iterator.dispose();
             }
         } else {
             int value = v1.getValue();
             DisposableValueIterator iterator = v0.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(v0.getLB());
             try {
                 while (iterator.hasNext()) {
                     int val = iterator.next();
                     if (!relation.isConsistent(val, value)) {
-                        if (val == right + 1) {
-                            right = val;
-                        } else if (val > right + 1) {
-                            v0.removeInterval(left, right, this);
-                            left = right = val;
-                        }
+                        vrms.add(val);
                     }
                 }
-                v0.removeInterval(left, right, this);
+                v0.removeValues(vrms, this);
             } finally {
                 iterator.dispose();
             }

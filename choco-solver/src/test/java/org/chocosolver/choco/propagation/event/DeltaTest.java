@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -30,12 +31,18 @@ package org.chocosolver.choco.propagation.event;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.delta.EnumDelta;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -75,7 +82,7 @@ public class DeltaTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s")
     public void testJL() {
         Solver solver = new Solver();
         final SetVar s0 = VF.set("s0", 0, 1, solver);
@@ -91,4 +98,115 @@ public class DeltaTest {
         solver.findSolution();
     }
 
+
+    @Test(groups = "1s")
+    public void testJL2() {
+        for (int k = 0; k < 50; k++) {
+            Solver s = new Solver();
+            final IntVar i = VF.enumerated("i", -2, 2, s);
+            final IntVar j = VF.enumerated("j", -2, 2, s);
+            //Chatterbox.showDecisions(s);
+            //Chatterbox.showSolutions(s);
+            s.set(ISF.random_value(new IntVar[]{i, j}));
+            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.findAllSolutions();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testJL3() {
+        for (int k = 0; k < 10; k++) {
+            Solver s = new Solver();
+            final IntVar i = VF.bounded("i", -2, 2, s);
+            final IntVar j = VF.bounded("j", -2, 2, s);
+            //Chatterbox.showDecisions(s);
+            //Chatterbox.showSolutions(s);
+            s.set(ISF.random_bound(new IntVar[]{i, j}));
+            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.findAllSolutions();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testJL4() {
+        for (int k = 0; k < 10; k++) {
+            Solver s = new Solver();
+            final IntVar i = VF.bool("i", s);
+            final IntVar j = VF.bool("j", s);
+            //Chatterbox.showDecisions(s);
+            //Chatterbox.showSolutions(s);
+            s.set(ISF.random_value(new IntVar[]{i, j}));
+            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.findAllSolutions();
+        }
+    }
+
+    private static class PropTestDM1 extends Propagator<IntVar> {
+        IntVar i, j;
+        IIntDeltaMonitor iD;
+        IIntDeltaMonitor jD;
+
+        private PropTestDM1(IntVar i, IntVar j) {
+            super(new IntVar[]{i, j}, PropagatorPriority.UNARY, true);
+            this.i = i;
+            this.j = j;
+            iD = i.monitorDelta(this);
+            jD = j.monitorDelta(this);
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            iD.unfreeze();
+            jD.unfreeze();
+        }
+
+        @Override
+        public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+            if (idxVarInProp == 0) {
+                iD.freeze();
+                iD.forEachRemVal((IntProcedure) x -> {
+                    if (i.contains(x)) {
+                        Assert.fail();
+                    }
+                });
+                iD.unfreeze();
+            } else {
+                jD.freeze();
+                jD.forEachRemVal((IntProcedure) x -> {
+                    if (j.contains(x)) {
+                        Assert.fail();
+                    }
+                });
+                jD.unfreeze();
+            }
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.TRUE;
+        }
+    }
+
+    private static class PropTestDM2 extends Propagator<IntVar> {
+        IntVar i, j;
+
+        private PropTestDM2(IntVar i, IntVar j) {
+            super(new IntVar[]{i, j}, PropagatorPriority.UNARY, false);
+            this.i = i;
+            this.j = j;
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            if (j.isInstantiatedTo(1)) {
+                i.removeValue(1, this);
+            }
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.TRUE;
+        }
+
+    }
 }

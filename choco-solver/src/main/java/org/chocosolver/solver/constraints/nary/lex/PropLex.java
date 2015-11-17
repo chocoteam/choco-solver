@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,10 +29,8 @@
  */
 package org.chocosolver.solver.constraints.nary.lex;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -115,25 +114,6 @@ public class PropLex extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.x.length;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.x[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.x[i]);
-            }
-            size = this.y.length;
-            IntVar[] Y = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.y[i].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.y[i]);
-            }
-            identitymap.put(this, new PropLex(X, Y, this.strict));
-        }
-    }
-
     /////////////////////
     public boolean groundEq(IntVar x1, IntVar y1) {
         return x1.isInstantiated() && y1.isInstantiated() && x1.getValue() == y1.getValue();
@@ -164,22 +144,22 @@ public class PropLex extends Propagator<IntVar> {
     }
 
     public void ACleq(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB(), aCause);
-        y[i].updateLowerBound(x[i].getLB(), aCause);
+        x[i].updateUpperBound(y[i].getUB(), this);
+        y[i].updateLowerBound(x[i].getLB(), this);
     }
 
     public void ACless(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB() - 1, aCause);
-        y[i].updateLowerBound(x[i].getLB() + 1, aCause);
+        x[i].updateUpperBound(y[i].getUB() - 1, this);
+        y[i].updateLowerBound(x[i].getLB() + 1, this);
     }
 
     public void updateAlpha(int i) throws ContradictionException {
         if (i == beta.get()) {
-            this.contradiction(null, "");
+            fails();
         }
         if (i == n) {
             if (strict) {
-                this.contradiction(null, "");
+                fails();
             } else {
                 entailed = true;
                 setPassive();
@@ -196,7 +176,7 @@ public class PropLex extends Propagator<IntVar> {
 
     public void updateBeta(int i) throws ContradictionException {
         if ((i + 1) == alpha.get()) {
-            this.contradiction(null, "");
+            fails();
         }
         if (x[i].getLB() < y[i].getUB()) {
             beta.set(i + 1);
@@ -225,7 +205,7 @@ public class PropLex extends Propagator<IntVar> {
                 entailed = true;
                 setPassive();
             } else {
-                this.contradiction(null, "");
+                fails();
             }
         } else {
             a = i;
@@ -252,7 +232,7 @@ public class PropLex extends Propagator<IntVar> {
                 b = i;
             }
             if (a >= b) {
-                this.contradiction(null, "");
+                fails();
             }
             alpha.set(a);
             beta.set(b);

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -34,7 +35,10 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
+
+import java.io.PrintStream;
 
 import static org.chocosolver.util.tools.StringUtils.pad;
 
@@ -49,8 +53,45 @@ import static org.chocosolver.util.tools.StringUtils.pad;
  * @since 12/11/14
  */
 public class Chatterbox {
+
+    // http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_GRAY = "\u001B[37m";
+
     private Chatterbox() {
     }
+
+    /**
+     * The standard output stream (default: System.out)
+     */
+    public static PrintStream out = System.out;
+
+    /**
+     * The standard error stream (default: System.err)
+     */
+    public static PrintStream err = System.err;
+
+    /**
+     * Set the current output stream (default is System.out)
+     *
+     * @param printStream a print stream
+     */
+    public static void setOut(PrintStream printStream) {
+        out = printStream;
+    }
+
+    /**
+     * Set the current error stream (default is System.err)
+     *
+     * @param printStream a print stream
+     */
+    public static void setErr(PrintStream printStream) {
+        err = printStream;
+    }
+
 
     /**
      * Print the version message.
@@ -58,7 +99,7 @@ public class Chatterbox {
      * @param solver the solver
      */
     public static void printVersion(Solver solver) {
-        System.out.println(solver.getSettings().getWelcomeMessage());
+        out.println(solver.getSettings().getWelcomeMessage());
     }
 
     /**
@@ -86,13 +127,15 @@ public class Chatterbox {
      * <p>
      * Equivalent to:
      * <pre>
-     *     System.out.println(solver.getMeasures().toString());
+     *     out.println(solver.getMeasures().toString());
      * </pre>
      *
      * @param solver the solver to evaluate
      */
     public static void printStatistics(Solver solver) {
-        System.out.println(solver.getMeasures().toString());
+        printVersion(solver);
+        printFeatures(solver);
+        out.println(solver.getMeasures().toString());
     }
 
     /**
@@ -102,13 +145,13 @@ public class Chatterbox {
      * <p>
      * Equivalent to:
      * <pre>
-     *     System.out.println(solver.getMeasures().toOneLineString());
+     *     out.println(solver.getMeasures().toOneLineString());
      * </pre>
      *
      * @param solver the solver to evaluate
      */
     public static void printShortStatistics(Solver solver) {
-        System.out.println(solver.getMeasures().toOneLineString());
+        out.println(solver.getMeasures().toOneLineString());
     }
 
     /**
@@ -120,13 +163,13 @@ public class Chatterbox {
      * <p>
      * Equivalent to:
      * <pre>
-     *     System.out.println(solver.getMeasures().toCSV());
+     *     out.println(solver.getMeasures().toCSV());
      * </pre>
      *
      * @param solver the solver to evaluate
      */
     public static void printCSVStatistics(Solver solver) {
-        System.out.println(solver.getMeasures().toCSV());
+        out.println(solver.getMeasures().toCSV());
     }
 
 
@@ -142,8 +185,8 @@ public class Chatterbox {
         ISolutionRecorder solrec = solver.getSolutionRecorder();
         for (Solution sol : solrec.getSolutions()) {
             try {
-                sol.restore();
-                System.out.println(message.print());
+                solver.restoreSolution(sol);
+                out.println(message.print());
             } catch (ContradictionException e) {
                 throw new SolverException("Unable to restore a found solution");
             }
@@ -178,20 +221,11 @@ public class Chatterbox {
                 printVersion(solver);
                 printFeatures(solver);
             }
-
-            @Override
-            public void afterInitialize() {
-            }
         });
         solver.plugMonitor(new IMonitorClose() {
             @Override
-            public void beforeClose() {
-                printStatistics(solver);
-            }
-
-            @Override
             public void afterClose() {
-
+                out.println(solver.getMeasures().toString());
             }
         });
     }
@@ -207,11 +241,7 @@ public class Chatterbox {
         solver.plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                System.out.println(solver.getMeasures().toOneShortLineString());
-            }
-
-            @Override
-            public void afterClose() {
+                out.println(solver.getMeasures().toOneShortLineString());
             }
         });
     }
@@ -225,7 +255,7 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showSolutions(Solver solver, final IMessage message) {
-        solver.plugMonitor((IMonitorSolution) () -> System.out.println(message.print()));
+        solver.plugMonitor((IMonitorSolution) () -> out.println(message.print()));
     }
 
     /**
@@ -251,27 +281,14 @@ public class Chatterbox {
     public static void showDecisions(final Solver solver, final IMessage message) {
         solver.plugMonitor(new IMonitorDownBranch() {
             @Override
-            public void beforeDownLeftBranch() {
-                System.out.println(String.format("%s[L]%s //%s",
-                        pad("", solver.getEnvironment().getWorldIndex(), "."),
-                        solver.getSearchLoop().getLastDecision().toString(),
-                        message.print()));
-            }
-
-            @Override
-            public void afterDownLeftBranch() {
-            }
-
-            @Override
-            public void beforeDownRightBranch() {
-                System.out.println(String.format("%s[R]%s //%s",
-                        pad("", solver.getEnvironment().getWorldIndex(), "."),
-                        solver.getSearchLoop().getLastDecision().toString(),
-                        message.print()));
-            }
-
-            @Override
-            public void afterDownRightBranch() {
+            public void beforeDownBranch(boolean left) {
+                Decision d = solver.getSearchLoop().getLastDecision();
+                out.printf("%s[%d/%d] %s%s ", pad("", solver.getEnvironment().getWorldIndex(), "."),
+                        d.getArity() - d.triesLeft() +1, d.getArity(),
+                        solver.getSettings().outputWithANSIColors()?ANSI_BLUE:"",
+                        d.toString());
+                out.printf("%s // %s %s\n", solver.getSettings().outputWithANSIColors()?ANSI_GRAY:"",
+                        message.print(), solver.getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }
         });
     }
@@ -294,7 +311,7 @@ public class Chatterbox {
      * @param solver the solver to evaluate
      */
     public static void showContradiction(Solver solver) {
-        solver.plugMonitor((IMonitorContradiction) cex -> System.out.println(String.format("\t/!\\ %s", cex.toString())));
+        solver.plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**
@@ -325,10 +342,12 @@ public class Chatterbox {
 
         @Override
         public String print() {
-            return String.format("- Solution #%s found. %s \n\t%s.",
+            return String.format("%s- Solution #%s found. %s \n\t%s.%s",
+                    solver.getSettings().outputWithANSIColors()?ANSI_GREEN:"",
                     solver.getMeasures().getSolutionCount(),
                     solver.getMeasures().toOneShortLineString(),
-                    print(solver.getStrategy().getVariables())
+                    print(solver.getStrategy().getVariables()),
+                    solver.getSettings().outputWithANSIColors()?ANSI_RESET:""
             );
         }
 

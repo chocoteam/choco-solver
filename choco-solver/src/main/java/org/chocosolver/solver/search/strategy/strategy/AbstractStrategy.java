@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,29 +29,19 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
 /**
- * An <code>AbstractStrategy</code> does <b>not</b> implicitly advance to the next decision on
- * <code>getDecision()</code> (or <code>getOppositeDecision()</code>) invokation.
- * <br/>
- * See also Gamma et al. "Design Patterns: Elements of Reusable Object-Oriented Software",
- * Behavioral patterns : Command, Iterator.
- * todo: comment
- * <br/>
+ * A search strategy provides decisions to go down in the search space.
+ * The main method is {@link #computeDecision(Variable)} which returns the next decision to apply.
  *
  * @author Charles Prud'homme
  * @since 1 juil. 2010
  */
 public abstract class AbstractStrategy<V extends Variable> implements Serializable {
-
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     protected final V[] vars;
 
@@ -60,8 +51,9 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
 
     /**
      * Prepare <code>this</code> to be used in a search loop
+     * The initialization can detect inconsistency, in that case, it returns false
      */
-    public abstract void init() throws ContradictionException;
+    public boolean init(){return true;}
 
     /**
      * Provides access to the current decision in the strategy.
@@ -91,7 +83,7 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
      * @param var a variable
      * @return a decision to be applied to variable var
      */
-    public Decision<V> computeDecision(V var) {
+    protected Decision<V> computeDecision(V var) {
         return null;
     }
 

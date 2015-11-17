@@ -118,7 +118,7 @@ Who contributes to Choco ?
 ==========================
 
 +------------------------------------+-----------------------------------------------------------------------------------------------------------+
-|**Core developers**                 |  Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241) and Jean-Guillaume Fages (COSLING S.A.S.).   |
+|**Core developers**                 |  Charles Prud'homme and Jean-Guillaume Fages                                                              |
 +------------------------------------+-----------------------------------------------------------------------------------------------------------+
 +------------------------------------+-----------------------------------------------------------------------------------------------------------+
 |**Main contributors**               |  Xavier Lorca, Narendra Jussien, Fabien Hermenier, Jimmy Liang.                                           |
@@ -183,7 +183,8 @@ Extensions
 ^^^^^^^^^^
 
 There are also official extensions, thus maintained by the Choco team. They are provided apart from the zip file.
-The available extensions are: :ref:`61_ext_pars`, :ref:`61_ext_gui`, :ref:`61_ext_cpviz`, :ref:`61_ext_graph`, :ref:`61_ext_geost`, :ref:`61_ext_exppar`, :ref:`61_ext_eps`.
+The available extensions are: :ref:`61_ext_pars`, :ref:`61_ext_gui`, :ref:`61_ext_cpviz`, :ref:`61_ext_graph`, :ref:`61_ext_geost`, :ref:`61_ext_exppar`.
+.., :ref:`61_ext_eps`.
 
 .. note::
     Each of those extensions include all dependencies but choco-solver classes, which ease their usage.
@@ -240,91 +241,6 @@ Eclipse
 
    mvn eclipse:eclipse
 
-.. _1_log:
-
-Note about logging
-------------------
-
-In Choco, we distinguish *user trace* and *developer trace*.
-*User trace* is mainly dedicated to printing resolution statistics and solutions (and other useful services).
-The ``Chatterbox`` class is devoted to such aim, it centralises (almost) all messaging services.
-*Developer trace* is for debugging purpose.
-In order to avoid imposing a logging framework on end-user [#flog]_, Choco |version| relies on `SLF4J <http://www.slf4j.org/>`_ for the logging system.
-
-    "SLF4J is a simple facade for logging systems allowing the end-user to plug-in the desired logging system at deployment time."
-    -- http://www.slf4j.org/faq.html
-
-SLF4J is only a facade, meaning that it does not provide a complete logging solution, and a logging framework must be bound.
-Otherwise, you'll get the following error:
-
-.. parsed-literal::
-
-    SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-    SLF4J: Defaulting to no-operation (NOP) logger implementation
-    SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-
-
-Choco is developed using `Logback <http://logback.qos.ch/>`_,
-but other framework are available such as `log4j <http://logging.apache.org/log4j/1.2/index.html>`_
-(a exhaustive list is given on `SL4J <http://www.slf4j.org/manual.html>`_).
-Declaring a logging framework is as simple as adding jar files to the classpath of your application:
-
-.. [#flog] Indeed, Choco |version| is not a stand-alone application but a library likely to be embedded in an application.
-
-
-Command-line
-^^^^^^^^^^^^
-
-For logback:
-
-    .. parsed-literal::
-
-        java \\
-        -cp .:choco-solver-|release|.jar\\
-        :logback-core-1.0.13.jar\\
-        :logback-classic-1.0.13.jar \\
-        my.project.Main
-
-.. note::
-
-    Logback relies on property file, namely `logback.xml`, provided in the zip file.
-    `Where should the configuration files such as logback.groovy, logback-test.xml or logback.xml be located on the classpath? <http://logback.qos.ch/faq.html#configFileLocation>`_
-
-
-For log4j:
-
-    .. parsed-literal::
-
-        java -cp .:choco-solver-|release|.jar\\
-        :slf4j-log4j12-1.7.7.jar \\
-        my.project.Main
-
-
-Maven
-^^^^^
-
-For logback:
-
-    .. code-block:: xml
-
-        <dependency>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-          <version>1.0.13</version>
-        </dependency>
-
-For log4j:
-
-    .. code-block:: xml
-
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>1.7.7</version>
-        </dependency>
-
-More details can be found on http://www.slf4j.org/manual.html.
-
 
 .. _12_overview_label:
 
@@ -375,7 +291,7 @@ Here is a short example which illustrates the main steps of a CSP modeling and r
 
 .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/Overview.java
       :language: java
-      :lines: 47-59
+      :lines: 48-60
       :linenos:
 
 
@@ -493,6 +409,21 @@ Explanations are disabled by default.
 
 Choco |version| : changes
 =========================
+
+3.3.2
+-----
+
+- Addition:
+    - :ref:`440_loops_label`
+    - :ref:`51_icstr_nvpc`
+    - :ref:`51_icstr_ksor`
+    - :ref:`55_smf`
+    - :ref:`51_sstrat_dic`
+
+
+
+-  Major modification:
+    - :ref:`44_multithreading_label`
 
 3.3.1
 -----

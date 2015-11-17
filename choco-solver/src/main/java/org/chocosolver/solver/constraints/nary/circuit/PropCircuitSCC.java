@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.circuit;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -101,8 +100,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		if (PropagatorEventType.isFullPropagation(evtmask)) {
 			for (int i = 0; i < n; i++) {
-				vars[i].updateLowerBound(offSet, aCause);
-				vars[i].updateUpperBound(n - 1 + offSet, aCause);
+				vars[i].updateBounds(offSet, n - 1 + offSet, this);
 			}
 		}
 		switch (conf){
@@ -127,23 +125,23 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		for (int i = 0; i < n_R; i++) {
 			if (G_R.getPredOf(i).isEmpty()) {
 				if(first!=-1){
-					contradiction(vars[0],"");
+					fails();
 				}
 				first = i;
 			}
 			if (G_R.getSuccOf(i).isEmpty()) {
 				if(last!=-1){
-					contradiction(vars[0],"");
+					fails();
 				}
 				last = i;
 			}
 		}
 		if (first == -1 || last == -1 || first == last) {
-			contradiction(vars[0], "");
+			fails();
 		}
 		// compute hamiltonian path and filter skipping arcs
 		if (visit(first, last, source) != n_R) {
-			contradiction(vars[0], "");
+			fails();
 		}
 		// additional filter (based on instantiated arcs)
 		filterFromInst(source);
@@ -196,7 +194,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 
 	private int visit(int node, int last, int source) throws ContradictionException {
 		if (node == -1) {
-			contradiction(vars[0], "G_R disconnected");
+			fails();
 		}
 		if (node == last) {
 			return 1;
@@ -222,7 +220,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				if(to==n){
 					to=source;
 				}
-				vars[from].removeValue(to+offSet,aCause);
+				vars[from].removeValue(to+offSet, this);
 				mates[node].remove(e);
 			}
 		}
@@ -246,7 +244,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 							if(val==n){
 								val = source;
 							}
-							vars[a/n2-1].removeValue(val+offSet,aCause);
+							vars[a/n2-1].removeValue(val+offSet, this);
 						}
 					}
 					mates[x].clear();
@@ -298,7 +296,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 						size++;
 					}
 					if(size>2){
-						vars[in].removeValue(outDoor+offSet,aCause);
+						vars[in].removeValue(outDoor+offSet, this);
 					}
 				}
 			}
@@ -309,7 +307,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int sx = sccOf[x];
 		for(int i=0; i<n; i++){
 			if(sccOf[i]==sx){
-				vars[i].removeValue(x+offSet,aCause);
+				vars[i].removeValue(x+offSet, this);
 			}
 		}
 	}
@@ -320,21 +318,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int ub = vars[x].getUB();
 		for(int v=lb;v<=ub;v=vars[x].nextValue(v)){
 			if(sccOf[v-offSet]==sx){
-				vars[x].removeValue(v,aCause);
+				vars[x].removeValue(v, this);
 			}
 		}
 	}
 
-	@Override
-	public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-		if (!identitymap.containsKey(this)) {
-			int size = this.vars.length;
-			IntVar[] aVars = new IntVar[size];
-			for (int i = 0; i < size; i++) {
-				this.vars[i].duplicate(solver, identitymap);
-				aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-			}
-			identitymap.put(this, new PropCircuitSCC(aVars, this.offSet, this.conf));
-		}
-	}
 }

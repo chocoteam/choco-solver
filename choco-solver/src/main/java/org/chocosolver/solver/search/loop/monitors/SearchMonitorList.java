@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -47,7 +48,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     List<IMonitorContradiction> mcont = new ArrayList<>();
     List<IMonitorDownBranch> mdbra = new ArrayList<>();
     List<IMonitorInitialize> minit = new ArrayList<>();
-    List<IMonitorInitPropagation> mipro = new ArrayList<>();
     List<IMonitorInterruption> minte = new ArrayList<>();
     List<IMonitorOpenNode> mopno = new ArrayList<>();
     List<IMonitorRestart> mrest = new ArrayList<>();
@@ -66,20 +66,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     public void afterInitialize() {
         for (int i = 0; i < minit.size(); i++) {
             minit.get(i).afterInitialize();
-        }
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-        for (int i = 0; i < mipro.size(); i++) {
-            mipro.get(i).beforeInitialPropagation();
-        }
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-        for (int i = 0; i < mipro.size(); i++) {
-            mipro.get(i).afterInitialPropagation();
         }
     }
 
@@ -105,30 +91,16 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     }
 
     @Override
-    public void beforeDownLeftBranch() {
+    public void beforeDownBranch(boolean left) {
         for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).beforeDownLeftBranch();
+            mdbra.get(i).beforeDownBranch(left);
         }
     }
 
     @Override
-    public void afterDownLeftBranch() {
+    public void afterDownBranch(boolean left) {
         for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).afterDownLeftBranch();
-        }
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-        for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).beforeDownRightBranch();
-        }
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-        for (int i = 0; i < mdbra.size(); i++) {
-            mdbra.get(i).afterDownRightBranch();
+            mdbra.get(i).afterDownBranch(left);
         }
     }
 
@@ -202,9 +174,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
             if (sm instanceof IMonitorInitialize) {
                 minit.add((IMonitorInitialize) sm);
             }
-            if (sm instanceof IMonitorInitPropagation) {
-                mipro.add((IMonitorInitPropagation) sm);
-            }
             if (sm instanceof IMonitorInterruption) {
                 minte.add((IMonitorInterruption) sm);
             }
@@ -238,9 +207,6 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
             if (sm instanceof IMonitorInitialize) {
                 isPluggedIn = minit.contains(sm);
             }
-            if (sm instanceof IMonitorInitPropagation) {
-                isPluggedIn = mipro.contains(sm);
-            }
             if (sm instanceof IMonitorInterruption) {
                 isPluggedIn = minte.contains(sm);
             }
@@ -260,13 +226,44 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         return isPluggedIn;
     }
 
+    public void remove(ISearchMonitor sm) {
+        if (sm != null) {
+            if (sm instanceof IMonitorClose) {
+                mclos.remove(sm);
+            }
+            if (sm instanceof IMonitorContradiction) {
+                mcont.remove(sm);
+            }
+            if (sm instanceof IMonitorDownBranch) {
+                mdbra.remove(sm);
+            }
+            if (sm instanceof IMonitorInitialize) {
+                minit.remove(sm);
+            }
+            if (sm instanceof IMonitorInterruption) {
+                minte.remove(sm);
+            }
+            if (sm instanceof IMonitorOpenNode) {
+                mopno.remove(sm);
+            }
+            if (sm instanceof IMonitorRestart) {
+                mrest.remove(sm);
+            }
+            if (sm instanceof IMonitorSolution) {
+                msolu.remove(sm);
+            }
+            if (sm instanceof IMonitorUpBranch) {
+                mubra.remove(sm);
+            }
+        }
+    }
+
     public void reset() {
         mclos.clear();
         mcont.clear();
         mdbra.clear();
         minit.clear();
         minte.clear();
-        mipro.clear();
         mopno.clear();
         mrest.clear();
         msolu.clear();

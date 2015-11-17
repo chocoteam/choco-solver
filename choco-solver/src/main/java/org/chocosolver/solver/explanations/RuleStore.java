@@ -1,22 +1,25 @@
 /**
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -29,7 +32,6 @@ package org.chocosolver.solver.explanations;
 import gnu.trove.set.TIntSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
@@ -38,8 +40,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 
@@ -55,14 +55,13 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
 public class RuleStore {
 
     private static final int NO_ENTRY = Integer.MIN_VALUE;
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuleStore.class);
     static final int DM = 15;
     static final int BD = 7;
     static final int UB = 5;
     static final int LB = 3;
     static final int RM = 1;
 
-    private Rules mRules;
+    private Rules cRules;
     private Explanation[] decRefut; // store refuted decisions
     private final boolean saveCauses; // does user require feedback, ie, keep trace of the constraints in conflict ?
     private final boolean enablePartialExplanation; //do explanations need to be complete (for DBT or nogood extraction) ?
@@ -86,31 +85,14 @@ public class RuleStore {
         this.mSolver = solver;
         this.saveCauses = saveCauses;
         this.enablePartialExplanation = enablePartialExplanation;
-        int _p = -1;
-        for (Constraint c : solver.getCstrs()) {
-            for (Propagator p : c.getPropagators()) {
-                if (_p < p.getId()) {
-                    _p = p.getId();
-                }
-            }
-        }
-        _p++;
-        int _v = -1;
-        for (Variable v : solver.getVars()) {
-            if (_v < v.getId()) {
-                _v = v.getId();
-            }
-        }
-        _v++;
-        mRules = new Rules(_p, _v);
         decRefut = new Explanation[16];
     }
 
     /**
      * Initialize the rulestore for a new explanation
      */
-    public void init() {
-        mRules.clear();
+    public void init(Explanation expl) {
+        this.cRules = expl.getRules();
         preemptedStop = false;
         swi = mSolver.getSearchLoop().getSearchWorldIndex();
     }
@@ -130,11 +112,6 @@ public class RuleStore {
      * @throws org.chocosolver.solver.exception.SolverException when the type of the variable is neither {@link Variable#BOOL} or {@link Variable#INT}.
      */
     public boolean match(final int idx, final IEventStore eventStore) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MATCH? < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
-                    eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
-        }
-
         lastVar = eventStore.getVariable(idx);
         lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
         lastEvt = eventStore.getEventType(idx);
@@ -142,7 +119,7 @@ public class RuleStore {
         if (lastEvt != FULL_PROPAGATION) {
             // the event is a variable modification
             int lastVid = lastVar.getId();
-            int lastMask = mRules.getVmRules(lastVid);
+            int lastMask = cRules.getVmRules(lastVid);
 
             if (lastMask == DM) { // only to speed up the entire process
                 return true;
@@ -153,7 +130,7 @@ public class RuleStore {
             return false;
         } else {
             // Does it match a propagator activation known rule?
-            return mRules.getPaRules(lastValue);
+            return cRules.getPaRules(lastValue);
         }
     }
 
@@ -207,13 +184,13 @@ public class RuleStore {
                 if (ivar.hasEnumeratedDomain()) {
                     switch (evt) {
                         case INSTANTIATE:
-                            return mRules.intersect(i2, i3, vid);
+                            return cRules.intersect(i2, i3, vid);
                         case DECUPP:
-                            return mRules.intersect(i1, i2, vid);
+                            return cRules.intersect(i1, i2, vid);
                         case INCLOW:
-                            return mRules.intersect(i2, i1, vid);
+                            return cRules.intersect(i2, i1, vid);
                         case REMOVE:
-                            return mRules.getVmRemval(vid).contains(i1);
+                            return cRules.getVmRemval(vid).contains(i1);
                     }
                 }
         }
@@ -230,10 +207,6 @@ public class RuleStore {
      */
     @SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
     public void update(final int idx, final IEventStore eventStore, Explanation explanation) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("UPDATE < {} / {} / {} / {} / {} >", eventStore.getVariable(idx), eventStore.getCause(idx), eventStore.getEventType(idx),
-                    eventStore.getFirstValue(idx), eventStore.getSecondValue(idx), eventStore.getThirdValue(idx));
-        }
         assert lastVar == eventStore.getVariable(idx) : "Wrong variable loaded";
         assert lastEvt == eventStore.getEventType(idx) : "Wrong event loaded";
         if (!lastEvt.equals(FULL_PROPAGATION)) {
@@ -247,15 +220,15 @@ public class RuleStore {
                 if (decision.hasNext()) {
                     explanation.addDecicion(decision);
                     // if partial explanation is enabled, finding the first decision in conflict is enough
-                    if (preemptedStop |= enablePartialExplanation) { // and the rules have to be stored
-                        explanation.copyRules(mRules, idx);
+                    if (preemptedStop |= enablePartialExplanation) {
+                        explanation.setEvtstrIdx(idx);
                     }
-                } else {
+                } else if (decision.getArity() > 1) { //  to deal with unary decision (once = true)
                     // Otherwise, get the explanation of the refutation
                     Explanation drr = getDecisionRefutation(decision);
                     assert drr != null : "No explanation for decision refutation :" + decision.toString();
                     explanation.addCausesAndDecisions(drr); //update decisions and causes into the current explanation
-                    addRules(drr.getRules());
+                    explanation.addRules(drr.getRules());
                 }
                 // if no user feedback is required, ie, no conflict constraints are needed, then..
                 if (!saveCauses) {
@@ -278,35 +251,10 @@ public class RuleStore {
             // 1. add a new rule: explanation of the variable instantiation
             addFullDomainRule(lastVar);
             // 2. remove the propagator activation rule, now we know it depends on the variable
-            mRules.paRulesClear(lastValue);
+            cRules.paRulesClear(lastValue);
         }
     }
 
-    /**
-     * Update the current rules with the one in 'rules'
-     *
-     * @param someRules some rules
-     */
-    public void addRules(Rules someRules) {
-        mRules.or(someRules);
-    }
-
-    /**
-     * Return the current rules, for copy only.
-     *
-     * @return a set of rules
-     */
-    public Rules getRules() {
-        return mRules;
-    }
-
-    /**
-     * Replace the rules by a new one.
-     * This should be done carefully since the set of rules are cleared on each contradiction.
-     */
-    public void setRules(Rules someRules) {
-        this.mRules = someRules;
-    }
 
     /**
      * Add a value removal rule, that is, the event which remove the value needs to be retained.
@@ -319,8 +267,8 @@ public class RuleStore {
     public boolean addRemovalRule(IntVar var, int value) {
         if (var.hasEnumeratedDomain()) {
             int vid = var.getId();
-            mRules.putMask(vid, RM);
-            TIntSet remvals = mRules.getVmRemval(vid);
+            cRules.putMask(vid, RM);
+            TIntSet remvals = cRules.getVmRemval(vid);
             return remvals.add(value);
         } else {
             if (value <= var.getLB()) {
@@ -344,7 +292,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addFullDomainRule(IntVar var) {
-        return mRules.putMask(var.getId(), DM);
+        return cRules.putMask(var.getId(), DM);
     }
 
     /**
@@ -354,7 +302,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addLowerBoundRule(IntVar var) {
-        return mRules.putMask(var.getId(), LB);
+        return cRules.putMask(var.getId(), LB);
     }
 
     /**
@@ -364,7 +312,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addUpperBoundRule(IntVar var) {
-        return mRules.putMask(var.getId(), UB);
+        return cRules.putMask(var.getId(), UB);
     }
 
     /**
@@ -374,7 +322,7 @@ public class RuleStore {
      * @return true if a new rule has been added (false = already existing rule)
      */
     public boolean addBoundsRule(IntVar var) {
-        return mRules.putMask(var.getId(), BD);
+        return cRules.putMask(var.getId(), BD);
     }
 
     /**
@@ -384,7 +332,7 @@ public class RuleStore {
      * @return the current mask or NO_ENTRY
      */
     public int getMask(Variable var) {
-        return mRules.getVmRules(var.getId());
+        return cRules.getVmRules(var.getId());
     }
 
     /**
@@ -394,7 +342,7 @@ public class RuleStore {
      * @return true if a new rule has been adde
      */
     public boolean addPropagatorActivationRule(Propagator propagator) {
-        mRules.addPaRules(propagator.getId());
+        cRules.addPaRules(propagator.getId());
         return false;
     }
 
@@ -427,6 +375,23 @@ public class RuleStore {
         if (to < decision.getWorldIndex()) {
             decRefut[to] = decRefut[decision.getWorldIndex()];
             decRefut[decision.getWorldIndex()] = null;
+        }
+    }
+
+    /**
+     * Free the explanation related to the decision (for efficiency purpose only)
+     *
+     * @param decision the decision which is going to be forgotten
+     */
+    public void freeDecisionExplanation(Decision decision) {
+        int w = decision.getWorldIndex();
+        // when dealing with parallel portfolio, the cut given by another worker
+        // may lead to free a decision which was not explained yet
+        if (w < decRefut.length) {
+            if (decRefut[w] != null) {
+                decRefut[w].recycle();
+                decRefut[w] = null;
+            }
         }
     }
 

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -38,8 +39,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -176,15 +177,15 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "verylong")
+    @Test(groups = "10s")
     public void test6() {
         Random rand;
-        for (int seed = 0; seed < 4; seed++) {
+        for (int seed = 0; seed < 10; seed++) {
             rand = new Random(seed);
             for (double d = 0.25; d <= 1.0; d += 0.25) {
                 for (int h = 0; h <= 1; h++) {
                     for (int b = 0; b <= 1; b++) {
-                        int n = 1 + rand.nextInt(3);
+                        int n = 1 + rand.nextInt(5);
                         int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2 * n, rand, d, h == 0);
 
                         Solver neqs = alldiffs(domains, 0, b == 0);
@@ -204,10 +205,6 @@ public class AllDifferentTest {
                         ac.findAllSolutions();
                         Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
                         Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
-                        Assert.assertTrue(ac.getMeasures().getFailCount() == 0 || b == 0, "nb nod incorrect" + seed);
-
-                        LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
-                                bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount());
                     }
                 }
             }
@@ -312,7 +309,7 @@ public class AllDifferentTest {
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 23);
     }
 
     @Test(groups = "1s")
@@ -328,5 +325,49 @@ public class AllDifferentTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+    }
+
+    @Test(groups = "1s")
+    public void testB1() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[32];
+        X[0] = VF.enumerated("V0", new int[]{-1, 19, 24, 25}, solver);
+        X[1] = VF.enumerated("V1", new int[]{-13, 1, 12}, solver);
+        X[2] = VF.enumerated("V2", new int[]{-9, -8, 9, 19}, solver);
+        X[3] = VF.enumerated("V3", new int[]{6}, solver);
+        X[4] = VF.enumerated("V4", new int[]{-3, 4, 11, 12}, solver);
+        X[5] = VF.enumerated("V5", new int[]{-6, 25}, solver);
+        X[6] = VF.enumerated("V6", new int[]{7, 12, 21}, solver);
+        X[7] = VF.enumerated("V7", new int[]{4, 7, 11, 12}, solver);
+        X[8] = VF.enumerated("V8", new int[]{-8, -4, 0, 21}, solver);
+        X[9] = VF.enumerated("V9", new int[]{-3, 12}, solver);
+        X[10] = VF.enumerated("X10", new int[]{0}, solver);
+        X[11] = VF.enumerated("X11", new int[]{-15, -3, 3}, solver);
+        X[12] = VF.enumerated("X12", new int[]{-5, 3, 21, 24}, solver);
+        X[13] = VF.enumerated("X13", new int[]{3}, solver);
+        X[14] = VF.enumerated("X14", new int[]{-16, 13, 16}, solver);
+        X[15] = VF.enumerated("X15", new int[]{-14, -12, 0, 20}, solver);
+        X[16] = VF.enumerated("X16", new int[]{-9, 11}, solver);
+        X[17] = VF.enumerated("X17", new int[]{-15, 13}, solver);
+        X[18] = VF.enumerated("X18", new int[]{-12, -4, 21}, solver);
+        X[19] = VF.enumerated("X19", new int[]{-1}, solver);
+        X[20] = VF.enumerated("X20", new int[]{2, 11, 14}, solver);
+        X[21] = VF.enumerated("X21", new int[]{-9, 7, 21}, solver);
+        X[22] = VF.enumerated("X22", new int[]{-16, 10, 15}, solver);
+        X[23] = VF.enumerated("X23", new int[]{20, 24}, solver);
+        X[24] = VF.enumerated("X24", new int[]{23}, solver);
+        X[25] = VF.enumerated("X25", new int[]{-7, 5}, solver);
+        X[26] = VF.enumerated("X26", new int[]{-2, 1, 10, 12}, solver);
+        X[27] = VF.enumerated("X27", new int[]{-16, -6, 12, 15}, solver);
+        X[28] = VF.enumerated("X28", new int[]{-9}, solver);
+        X[29] = VF.enumerated("X29", new int[]{-6, -4}, solver);
+        X[30] = VF.enumerated("X30", new int[]{-15, -2, -1, 3}, solver);
+        X[31] = VF.enumerated("X31", new int[]{1, 10, 14}, solver);
+
+        solver.post(ICF.alldifferent(X, "AC"));
+        solver.propagate();
+        Assert.assertEquals(X[14].getUB(), 16);
+        Assert.assertEquals(X[14].getLB(), -16);
+        Assert.assertEquals(X[14].getDomainSize(), 2);
     }
 }

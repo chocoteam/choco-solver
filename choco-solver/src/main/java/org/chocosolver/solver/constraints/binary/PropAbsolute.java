@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,7 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -56,11 +56,13 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected IIntDeltaMonitor[] idms;
     protected IntVar X, Y;
     protected boolean bothEnumerated;
+    protected ICause cause;
 
     public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
         this.X = vars[0];
         this.Y = vars[1];
+        this.cause = this;
         bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();
         if (bothEnumerated) {
             rem_proc = new RemProc();
@@ -73,7 +75,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (bothEnumerated) {
+        if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
             return IntEventType.all();
         } else {
             return IntEventType.boundAndInst();
@@ -113,7 +115,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        X.updateLowerBound(0, aCause);
+        X.updateLowerBound(0, this);
         setBounds();
         if (bothEnumerated) {
             enumeratedFiltering();
@@ -137,27 +139,24 @@ public class PropAbsolute extends Propagator<IntVar> {
         // X = |Y|
         int max = X.getUB();
         int min = X.getLB();
-        Y.updateUpperBound(max, aCause);
-        Y.updateLowerBound(-max, aCause);
-        Y.removeInterval(1 - min, min - 1, aCause);
+        Y.updateBounds(-max, max, this);
+        Y.removeInterval(1 - min, min - 1, this);
         /////////////////////////////////////////////////
         int prevLB = X.getLB();
         int prevUB = X.getUB();
         min = Y.getLB();
         max = Y.getUB();
         if (max <= 0) {
-            X.updateLowerBound(-max, aCause);
-            X.updateUpperBound(-min, aCause);
+            X.updateBounds(-max, -min, this);
         } else if (min >= 0) {
-            X.updateLowerBound(min, aCause);
-            X.updateUpperBound(max, aCause);
+            X.updateBounds(min, max, this);
         } else {
             if (Y.hasEnumeratedDomain()) {
                 int mP = Y.nextValue(-1);
                 int mN = -Y.previousValue(1);
-                X.updateLowerBound(Math.min(mP, mN), aCause);
+                X.updateLowerBound(Math.min(mP, mN), this);
             }
-            X.updateUpperBound(Math.max(-min, max), aCause);
+            X.updateUpperBound(Math.max(-min, max), this);
         }
         if (prevLB != X.getLB() || prevUB != X.getUB()) setBounds();
     }
@@ -167,14 +166,14 @@ public class PropAbsolute extends Propagator<IntVar> {
         int max = X.getUB();
         for (int v = min; v <= max; v = X.nextValue(v)) {
             if (!(Y.contains(v) || Y.contains(-v))) {
-                X.removeValue(v, aCause);
+                X.removeValue(v, this);
             }
         }
         min = Y.getLB();
         max = Y.getUB();
         for (int v = min; v <= max; v = Y.nextValue(v)) {
             if (!(X.contains(Math.abs(v)))) {
-                Y.removeValue(v, aCause);
+                Y.removeValue(v, this);
             }
         }
     }
@@ -191,11 +190,11 @@ public class PropAbsolute extends Propagator<IntVar> {
         @Override
         public void execute(int val) throws ContradictionException {
             if (var == 0) {
-                vars[1].removeValue(val, aCause);
-                vars[1].removeValue(-val, aCause);
+                vars[1].removeValue(val, cause);
+                vars[1].removeValue(-val, cause);
             } else {
                 if (!vars[1].contains(-val))
-                    vars[0].removeValue(Math.abs(val), aCause);
+                    vars[0].removeValue(Math.abs(val), cause);
             }
         }
     }
@@ -218,15 +217,4 @@ public class PropAbsolute extends Propagator<IntVar> {
         return newrules;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.vars[0].duplicate(solver, identitymap);
-            IntVar X = (IntVar) identitymap.get(this.vars[0]);
-            this.vars[1].duplicate(solver, identitymap);
-            IntVar Y = (IntVar) identitymap.get(this.vars[1]);
-
-            identitymap.put(this, new PropAbsolute(X, Y));
-        }
-    }
 }

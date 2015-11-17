@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -38,12 +39,11 @@ import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -761,7 +761,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram)parameters));
+            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram) parameters));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -769,6 +769,113 @@ public interface Modeler {
         @Override
         public String name() {
             return "modelmddAC";
+        }
+    };
+
+    Modeler modelivpcAC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("ivpc" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.int_value_precede_chain(vars, 1, 2));
+            s.set(ISF.random_value(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelivpcAC";
+        }
+    };
+
+    Modeler modelmaxbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("max" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.maximum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
+        }
+    };
+
+    Modeler modelminbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("min" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.minimum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
+        }
+    };
+
+    Modeler modelmaxbbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("maxb" + n);
+            BoolVar[] vars = new BoolVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = domains[i].length > 1 ? VariableFactory.bool("X_" + i, s) :
+                        domains[i][0] == 0 ? VF.fixed(false, s) : VF.fixed(true, s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.maximum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
+        }
+    };
+
+    Modeler modelminbbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("minb" + n);
+            BoolVar[] vars = new BoolVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = domains[i].length > 1 ? VariableFactory.bool("X_" + i, s) :
+                        domains[i][0] == 0 ? VF.fixed(false, s) : VF.fixed(true, s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.minimum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelmaxbc";
         }
     };
 }

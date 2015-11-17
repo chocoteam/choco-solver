@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,7 +29,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
@@ -43,6 +43,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.StringUtils;
@@ -94,24 +95,24 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         LENGTH = capacity;
     }
 
-    public BitsetIntVarImpl(String name, int offset, BitSet values, Solver solver) {
+    private BitsetIntVarImpl(String name, int offset, BitSet values, Solver solver) {
         super(name, solver);
-        IEnvironment env = solver.getEnvironment();
+        IEnvironment env = this.solver.getEnvironment();
         OFFSET = offset;
-        int cardinality = values.cardinality();
+        int cardinality = values.previousSetBit(values.size());
         this.VALUES = env.makeBitSet(cardinality);
-        for (int i = 0; i > -1; i = values.nextSetBit(i+1)) {
+        for (int i = values.nextSetBit(0); i > -1; i = values.nextSetBit(i + 1)) {
             this.VALUES.set(i);
         }
-        this.LB = env.makeInt(0);
+        this.LB = env.makeInt(VALUES.nextSetBit(0));
         this.UB = env.makeInt(VALUES.prevSetBit(VALUES.size()));
-        this.SIZE = env.makeInt(cardinality);
+        this.SIZE = env.makeInt(values.cardinality());
         LENGTH = this.UB.get();
     }
 
     public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
-        IEnvironment env = solver.getEnvironment();
+        IEnvironment env = this.solver.getEnvironment();
         this.OFFSET = min;
         int capacity = max - min + 1;
         this.VALUES = env.makeBitSet(capacity);
@@ -155,14 +156,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (_plugexpl) {
                     solver.getEventObserver().removeValue(this, value, cause);
                 }
-//            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
-                this.contradiction(cause, IntEventType.REMOVE, MSG_REMOVE);
+                this.contradiction(cause, MSG_REMOVE);
             }
-			IntEventType e = IntEventType.REMOVE;
+            IntEventType e = IntEventType.REMOVE;
             this.VALUES.clear(aValue);
             this.SIZE.add(-1);
             if (reactOnRemoval) {
-                delta.add(aValue + OFFSET, cause);
+                delta.add(value, cause);
             }
 
             if (value == getLB()) {
@@ -188,16 +188,148 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * {@inheritDoc}
      */
     @Override
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        if (nlb > oub || nub < olb) {
+            return false;
+        }
+        int i;
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                i = VALUES.nextSetBit(olb - OFFSET + 1);
+                olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+                nlb = values.nextValue(olb - 1);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                i = VALUES.prevSetBit(oub - OFFSET - 1);
+                oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
+                nub = values.previousValue(oub + 1);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+        }
+        // the new bounds are now known, delegate to the right method
+        boolean hasChanged = updateBounds(olb, oub, cause);
+        // now deal with holes
+        int value = nlb;
+        int to = nub;
+        boolean hasRemoved = false;
+        int count = SIZE.get();
+        while (value <= to) {
+            int aValue = value - OFFSET;
+            if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
+                if (count == 1) {
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, value, cause);
+                    }
+                    this.contradiction(cause, MSG_REMOVE);
+                }
+                count--;
+                hasRemoved = true;
+                VALUES.clear(aValue);
+                if (reactOnRemoval) {
+                    delta.add(value, cause);
+                }
+                if (_plugexpl) {
+                    solver.getEventObserver().removeValue(this, value, cause);
+                }
+            }
+            value = values.nextValue(value);
+        }
+        if (hasRemoved) {
+            SIZE.set(count);
+            IntEventType e = IntEventType.REMOVE;
+            if (count == 1) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        // the new bounds are now known, delegate to the right method
+        boolean hasChanged = updateBounds(nlb, nub, cause);
+        // now deal with holes
+        int from = nlb + 1 - OFFSET;
+        int to = nub - 1 - OFFSET;
+        boolean hasRemoved = false;
+        int count = SIZE.get();
+        int value;
+        // iterate over the values in the domain, remove the ones that are not in values
+        for (int aValue = VALUES.nextSetBit(from); aValue > -1 && aValue <= to; aValue = VALUES.nextSetBit(aValue + 1)) {
+            value = aValue + OFFSET;
+            if (!values.contains(value)) {
+                if (count == 1) {
+                    if (_plugexpl) {
+                        solver.getEventObserver().removeValue(this, value, cause);
+                    }
+                    this.contradiction(cause, MSG_REMOVE);
+                }
+                count--;
+                hasRemoved = true;
+                VALUES.clear(aValue);
+                if (reactOnRemoval) {
+                    delta.add(value, cause);
+                }
+                if (_plugexpl) {
+                    solver.getEventObserver().removeValue(this, value, cause);
+                }
+            }
+        }
+        if (hasRemoved) {
+            SIZE.set(count);
+            IntEventType e = IntEventType.REMOVE;
+            if (count == 1) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else {     // TODO: really ugly .........
+        else {
             boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+            int i = VALUES.nextSetBit(from - OFFSET);
+            to -= OFFSET;
+            int count = SIZE.get();
+            // the iteration is mandatory for delta and observers
+            for (; i > -1 && i <= to; i = VALUES.nextSetBit(i + 1)) {
+                int aValue = i + OFFSET;
+                anyChange = true;
+                count--;
+                this.VALUES.clear(i);
+                if (reactOnRemoval) {
+                    delta.add(aValue, cause);
+                }
+                if (_plugexpl) {
+                    solver.getEventObserver().removeValue(this, aValue, cause);
+                }
+            }
+            if (anyChange) {
+                SIZE.set(count);
+                this.notifyPropagators(IntEventType.REMOVE, cause);
             }
             return anyChange;
         }
@@ -229,7 +361,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -258,7 +390,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_EMPTY);
+                this.contradiction(cause, MSG_EMPTY);
             }
             if (_plugexpl) {
                 solver.getEventObserver().instantiateTo(this, value, cause, oldLB, oldUB);
@@ -269,7 +401,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             if (_plugexpl) {
                 solver.getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             }
-            this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+            this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
     }
@@ -301,9 +433,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (_plugexpl) {
                     solver.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
-                this.contradiction(cause, IntEventType.INCLOW, MSG_LOW);
+                this.contradiction(cause, MSG_LOW);
             } else {
-				IntEventType e = IntEventType.INCLOW;
+                IntEventType e = IntEventType.INCLOW;
 
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
@@ -357,9 +489,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (_plugexpl) {
                     solver.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
                 }
-                this.contradiction(cause, IntEventType.DECUPP, MSG_UPP);
+                this.contradiction(cause, MSG_UPP);
             } else {
-				IntEventType e = IntEventType.DECUPP;
+                IntEventType e = IntEventType.DECUPP;
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
@@ -382,6 +514,65 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = this.getLB();
+        int oub = this.getUB();
+        boolean update = false;
+        if (olb < lb || oub > ub) {
+            IntEventType e = null;
+            if (oub < lb) {
+                if (_plugexpl) {
+                    solver.getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
+                }
+                this.contradiction(cause, MSG_LOW);
+            } else if (olb < lb) {
+                e = IntEventType.INCLOW;
+                int aLB = lb - OFFSET;
+                if (reactOnRemoval) {
+                    //BEWARE: this loop significantly decreases performances
+                    for (int i = olb - OFFSET; i < aLB; i = VALUES.nextSetBit(i + 1)) {
+                        delta.add(i + OFFSET, cause);
+                    }
+                }
+                VALUES.clear(olb - OFFSET, aLB);
+                olb = VALUES.nextSetBit(aLB); // olb is used as a temporary variable
+                LB.set(olb);
+                olb += OFFSET; // required because we will treat upper bound just after
+            }
+            if (olb > ub) {
+                if (_plugexpl) {
+                    solver.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
+                }
+                this.contradiction(cause, MSG_UPP);
+            } else if (oub > ub) {
+                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                int aUB = ub - OFFSET;
+                if (reactOnRemoval) {
+                    //BEWARE: this loop significantly decreases performances
+                    for (int i = oub - OFFSET; i > aUB; i = VALUES.prevSetBit(i - 1)) {
+                        delta.add(i + OFFSET, cause);
+                    }
+                }
+                VALUES.clear(aUB + 1, oub - OFFSET + 1);
+                UB.set(VALUES.prevSetBit(aUB));
+            }
+            assert SIZE.get() > VALUES.cardinality();
+            SIZE.set(VALUES.cardinality());
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+            if (_plugexpl) {
+                if (olb < lb) solver.getEventObserver().updateLowerBound(this, lb, olb, cause);
+                if (oub > ub) solver.getEventObserver().updateUpperBound(this, ub, oub, cause);
+            }
+            update = true;
+        }
+        return update;
     }
 
     @Override
@@ -517,7 +708,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
@@ -530,18 +721,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), this.getSolver());
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            BitsetIntVarImpl clone = new BitsetIntVarImpl(this.name, this.OFFSET, this.VALUES.copyToBitSet(), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.channeling;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -84,10 +83,8 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < n; i++) {
-                X[i].updateLowerBound(minX, aCause);
-                X[i].updateUpperBound(n - 1 + minX, aCause);
-                Y[i].updateLowerBound(minY, aCause);
-                Y[i].updateUpperBound(n - 1 + minY, aCause);
+                X[i].updateBounds(minX, n - 1 + minX, this);
+                Y[i].updateBounds(minY, n - 1 + minY, this);
             }
             toCompute.clear();
             for (int i = 0; i < n; i++) {
@@ -123,7 +120,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         int max = X[var].getUB();
         for (int v = min; v <= max; v = X[var].nextValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
-                X[var].removeValue(v, aCause);
+                X[var].removeValue(v, this);
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -131,7 +128,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         }
         for (int v = max; v >= min; v = X[var].previousValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
-                X[var].removeValue(v, aCause);
+                X[var].removeValue(v, this);
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -145,7 +142,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         int max = Y[var].getUB();
         for (int v = min; v <= max; v = Y[var].nextValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
-                Y[var].removeValue(v, aCause);
+                Y[var].removeValue(v, this);
                 toCompute.set(v - minY);
             } else {
                 break;
@@ -153,7 +150,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         }
         for (int v = max; v >= min; v = Y[var].previousValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
-                Y[var].removeValue(v, aCause);
+                Y[var].removeValue(v, this);
                 toCompute.set(v - minY);
             } else {
                 break;
@@ -184,21 +181,4 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         return "Inverse_BC({" + X[0] + "...}{" + Y[0] + "...})";
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.n;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            IntVar[] Y = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i + n].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
-            }
-            identitymap.put(this, new PropInverseChannelBC(X, Y, this.minX, this.minY));
-        }
-    }
 }

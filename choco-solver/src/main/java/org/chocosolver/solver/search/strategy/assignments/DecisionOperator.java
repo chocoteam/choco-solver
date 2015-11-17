@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -42,15 +43,15 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public abstract class DecisionOperator<V extends Variable> implements Serializable {
+public interface DecisionOperator<V extends Variable> extends Serializable {
 
-    public abstract void apply(V var, int value, ICause cause) throws ContradictionException;
+    void apply(V var, int value, ICause cause) throws ContradictionException;
 
-    public abstract void unapply(V var, int value, ICause cause) throws ContradictionException;
+    void unapply(V var, int value, ICause cause) throws ContradictionException;
 
-    public abstract DecisionOperator opposite();
+    DecisionOperator opposite();
 
-    public abstract String toString();
+    String toString();
 
     /**
      * Evaluate the possible effect of the decision and return a boolean indicating whether or not
@@ -60,10 +61,10 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
      * @param value a value
      * @return true if this has an effect on var
      */
-    public abstract boolean isValid(V var, int value);
+    boolean isValid(V var, int value);
 
     // INTEGERS
-    public static DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -91,7 +92,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         }
     };
 
-    public static DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -119,7 +120,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         }
     };
 
-    public static DecisionOperator<IntVar> int_split = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_split = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -148,7 +149,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
     };
 
-    public static DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
+    DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -178,7 +179,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
 
     // SETS
-    public static DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
+    DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
@@ -206,7 +207,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         }
     };
 
-    public static DecisionOperator<SetVar> set_remove = new DecisionOperator<SetVar>() {
+    DecisionOperator<SetVar> set_remove = new DecisionOperator<SetVar>() {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {

@@ -1,22 +1,25 @@
-/*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -34,19 +37,20 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
+import org.chocosolver.solver.search.loop.LearnCBJ;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
+import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -59,6 +63,13 @@ import java.util.Arrays;
 public class ExplanationEngineTest {
 
 
+    public void model1(Solver solver, int n) {
+        IntVar[] vs = VF.enumeratedArray("V", n, 1, n - 1, solver);
+        for (int i = 0; i < n - 1; i++) {
+            solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
+        }
+    }
+
     /**
      * This test evaluates the case where half of the generated events are useless.
      * Only one branch is evaluated.
@@ -68,11 +79,9 @@ public class ExplanationEngineTest {
         for (int n = 6; n < 1001; n *= 2) {
             System.out.printf("n = %d : ", n);
             Solver solver = new Solver();
-            IntVar[] vs = VF.enumeratedArray("V", n, 1, n - 1, solver);
-            for (int i = 0; i < n - 1; i++) {
-                solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
-            }
-            Solver expl = solver.duplicateModel();
+            model1(solver, n);
+            Solver expl = new Solver();
+            model1(expl, n);
 
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
@@ -87,6 +96,12 @@ public class ExplanationEngineTest {
         }
     }
 
+    private void model2(Solver solver, int n) {
+        IntVar[] vs = VF.enumeratedArray("V", 2, 0, n, solver);
+        solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
+        solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
+    }
+
     /**
      * This test evaluates the case where only two constraints are in conflict, the remaining ones are useless.
      */
@@ -95,12 +110,10 @@ public class ExplanationEngineTest {
         for (int n = 100; n < 12801; n *= 2) {
             System.out.printf("n = %d : ", n);
             Solver solver = new Solver();
-            IntVar[] vs = VF.enumeratedArray("V", 2, 0, n, solver);
-            solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
-            solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
+            model2(solver, n);
 
-            Solver expl = solver.duplicateModel();
-
+            Solver expl = new Solver();
+            model2(expl, n);
 
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
@@ -115,6 +128,12 @@ public class ExplanationEngineTest {
         }
     }
 
+    private void model3(Solver solver, int n) {
+        IntVar[] vs = VF.boundedArray("V", n, 2, n + 2, solver);
+        solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
+        solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
+    }
+
     /**
      * This test evaluates the case where a subset of the constraints are in conflict
      */
@@ -123,11 +142,9 @@ public class ExplanationEngineTest {
         for (int n = 3; n < 64000; n *= 2) {
             System.out.printf("n = %d : ", n);
             Solver solver = new Solver();
-            IntVar[] vs = VF.boundedArray("V", n, 2, n + 2, solver);
-            solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
-            solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
-
-            Solver expl = solver.duplicateModel();
+            model3(solver, n);
+            Solver expl = new Solver();
+            model3(expl, n);
 
             IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
@@ -189,10 +206,8 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
             Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
@@ -208,10 +223,8 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
             Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
@@ -227,10 +240,8 @@ public class ExplanationEngineTest {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
@@ -247,10 +258,8 @@ public class ExplanationEngineTest {
             }
             solver.set(ISF.lexico_LB(vars));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
             Assert.assertFalse(solver.findSolution());
-            LoggerFactory.getLogger("test").info("\t{}", solver.getMeasures().toOneShortLineString());
 
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
@@ -273,8 +282,7 @@ public class ExplanationEngineTest {
             solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
             solver.set(ISF.random_value(p, seed));
 
-            ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-            new ConflictBackJumping(ee, solver, false);
+            SLF.learnCBJ(solver, false, false);
 
             Chatterbox.showShortStatistics(solver);
             Assert.assertFalse(solver.findSolution());
@@ -296,8 +304,7 @@ public class ExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-        new ConflictBackJumping(ee, solver, false);
+        SLF.learnCBJ(solver, false, false);
 
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -321,8 +328,7 @@ public class ExplanationEngineTest {
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
-        new ConflictBackJumping(ee, solver, false);
+        SLF.learnCBJ(solver, false, false);
 
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -567,7 +573,7 @@ public class ExplanationEngineTest {
         solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
         solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
-        solver.set(IntStrategyFactory.minDom_MidValue(vars));
+        solver.set(IntStrategyFactory.minDom_MidValue(true, vars));
 
         configure(solver, a);
         Chatterbox.showShortStatistics(solver);
@@ -694,7 +700,7 @@ public class ExplanationEngineTest {
         }
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -719,7 +725,7 @@ public class ExplanationEngineTest {
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
         SatFactory.addBoolNot(bs[0], bs[1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -746,7 +752,7 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -773,7 +779,7 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
         SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, true);
+        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
         Explanation r = null;
         try {
             solver.propagate();
@@ -852,13 +858,30 @@ public class ExplanationEngineTest {
         Constraint xE1 = ICF.arithm(x, "=", one);
         s.post(xE1);
 
-        ExplanationEngine ee = new ExplanationEngine(s, true, true);
-        ConflictBackJumping cbj = new ConflictBackJumping(ee, s, false);
+        SLF.learnCBJ(s, false, true);
+        LearnCBJ cbj = (LearnCBJ)s.getSearchLoop().getLearn();
         Chatterbox.showDecisions(s);
         Assert.assertFalse(s.findSolution());
         // If the problem has no solution, the end-user explanation can be retrieved
         System.out.println(cbj.getLastExplanation());
         Assert.assertEquals(cbj.getLastExplanation().nbCauses(), 3);
+    }
+
+
+    @Test(groups="1s")
+    public void testOnce1(){
+        Solver solver = new Solver();
+        int n = 4;
+        IntVar[] X = VF.enumeratedArray("X", 4, 1, 2, solver);
+        BoolVar[] B = VF.boolArray("B", 4, solver);
+        for(int i = 0 ; i < n; i++){
+            ICF.arithm(X[i], ">", i).reifyWith(B[i]);
+        }
+        ExplanationFactory.CBJ.plugin(solver, false, false);
+        solver.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
+        Chatterbox.showDecisions(solver);
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
     }
 
 }

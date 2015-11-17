@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -29,13 +30,11 @@
 package org.chocosolver.solver.constraints.nary.automata;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -46,10 +45,13 @@ import org.chocosolver.solver.constraints.nary.automata.structure.multicostregul
 import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
 import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
@@ -80,6 +82,9 @@ import java.util.*;
  * Resource constrained  shortest/longest path problems
  */
 public final class PropMultiCostRegular extends Propagator<IntVar> {
+
+    private static final boolean DEBUG = false;
+
     /**
      * Maximum number of iteration during a bound computation
      */
@@ -202,7 +207,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     protected final RemProc rem_proc;
 
     public final double _MCR_DECIMAL_PREC;
-    
+
+    protected final IntIterableSet vrms;
 
     /**
      * Constructs a multi-cost-regular propagator
@@ -243,8 +249,14 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         this.boundUpdate = new TIntHashSet();
         this.pi = cauto;
         rem_proc = new RemProc(this);
+        vrms = new IntIterableBitSet();
+        super.linkVariables();
     }
 
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {
@@ -262,21 +274,16 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         checkBounds();
         initGraph();
         this.slp = graph.getPathFinder();
-        int left, right;
         for (int i = 0; i < offset; i++) {
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(vs[i].getLB());
             for (int j = vs[i].getLB(); j <= vs[i].getUB(); j = vs[i].nextValue(j)) {
                 StoredIndexedBipartiteSet sup = graph.getUBport(i, j);
                 if (sup == null || sup.isEmpty()) {
-                    if (j == right + 1) {
-                        right = j;
-                    } else {
-                        vs[i].removeInterval(left, right, aCause);//, false);
-                        left = right = j;
-                    }
+                    vrms.add(j);
                 }
             }
-            vs[i].removeInterval(left, right, aCause);//, false);
+            vs[i].removeValues(vrms, this);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
     }
@@ -698,12 +705,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     protected void filterDown(final double realsp) throws ContradictionException {
 
         if (realsp - z[0].getUB() >= _MCR_DECIMAL_PREC) {
-            this.contradiction(null, "cost variable domain is emptied");
+            // "cost variable domain is emptied"
+            fails();
         }
         if (realsp - z[0].getLB() >= _MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
             double rsp = (realsp - mr <= _MCR_DECIMAL_PREC) ? mr : realsp;
-            z[0].updateLowerBound((int) Math.ceil(rsp), aCause);//, false);
+            z[0].updateLowerBound((int) Math.ceil(rsp), this);//, false);
             modifiedBound[0] = true;
         }
     }
@@ -716,12 +724,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     protected void filterUp(final double reallp) throws ContradictionException {
         if (reallp - z[0].getLB() <= -_MCR_DECIMAL_PREC) {
-            this.contradiction(null, "cost variable domain is emptied");
+            // "cost variable domain is emptied"
+            fails();
         }
         if (reallp - z[0].getUB() <= -_MCR_DECIMAL_PREC) {
             double mr = Math.round(reallp);
             double rsp = (reallp - mr <= _MCR_DECIMAL_PREC) ? mr : reallp;
-            z[0].updateUpperBound((int) Math.floor(rsp), aCause);//, false);
+            z[0].updateUpperBound((int) Math.floor(rsp), this);//, false);
             modifiedBound[1] = true;
         }
     }
@@ -830,8 +839,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < nbCounters; i++) {
             IntVar z = this.z[i];
             Bounds bounds = counters.get(i).bounds();
-            z.updateLowerBound(bounds.min.value, aCause);//, false);
-            z.updateUpperBound(bounds.max.value, aCause);//, false);
+            z.updateBounds(bounds.min.value, bounds.max.value, this);//, false);
 
         }
     }
@@ -938,10 +946,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                LOGGER.error("z[" + i + "] in MCR should be instantiated : " + z[i]);
+                if(DEBUG) Chatterbox.out.printf("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
             } else if (z[i].getValue() != gcost[i]) {
-                LOGGER.error("cost: " + gcost[i] + " != z:" + z[i].getValue());
+                if(DEBUG)Chatterbox.out.printf("cost: " + gcost[i] + " != z:" + z[i].getValue());
                 return false;
             }
 
@@ -1023,26 +1031,4 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            IntVar[] aVars = new IntVar[this.vs.length];
-            for (int i = 0; i < this.vs.length; i++) {
-                this.vs[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vs[i]);
-            }
-            IntVar[] cVars = new IntVar[this.z.length];
-            for (int i = 0; i < this.z.length; i++) {
-                this.z[i].duplicate(solver, identitymap);
-                cVars[i] = (IntVar) identitymap.get(this.z[i]);
-            }
-            ICostAutomaton nauto = null;
-            try {
-                nauto = (ICostAutomaton) pi.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            identitymap.put(this, new PropMultiCostRegular(aVars, cVars, nauto));
-        }
-    }
 }

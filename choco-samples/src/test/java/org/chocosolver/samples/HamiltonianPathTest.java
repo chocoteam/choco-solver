@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -32,13 +33,12 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.graph.input.GraphGenerator;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
  */
 public class HamiltonianPathTest {
 
-	private final static long TIME_LIMIT = 2000;
+	private final static long TIME_LIMIT = 1000;
 
 	@Test(groups = "1m")
 	public static void test() {
@@ -116,7 +116,8 @@ public class HamiltonianPathTest {
 		solver.findSolution();
 		IMeasures mes = solver.getMeasures();
 		// the problem has at least one solution
-		Assert.assertFalse(mes.getSolutionCount() == 0 && mes.getTimeCount() < TIME_LIMIT/1000);
+		Assert.assertTrue(mes.getSolutionCount() == 1 || solver.hasReachedLimit(),
+				"sol count:"+mes.getSolutionCount()+ ", has reached limit: "+solver.hasReachedLimit());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {
@@ -131,7 +132,7 @@ public class HamiltonianPathTest {
 
 	private static class ConstructorIntHeur extends AbstractStrategy<IntVar> {
 		int n, offset;
-		PoolManager<FastDecision> pool;
+		PoolManager<IntDecision> pool;
 
 		public ConstructorIntHeur(IntVar[] v, int off) {
 			super(v);
@@ -139,9 +140,6 @@ public class HamiltonianPathTest {
 			n = v.length;
 			pool = new PoolManager<>();
 		}
-
-		@Override
-		public void init() throws ContradictionException {}
 
 		@Override
 		public Decision<IntVar> getDecision() {
@@ -152,8 +150,8 @@ public class HamiltonianPathTest {
 					return null;
 				}
 			}
-			FastDecision d = pool.getE();
-			if(d==null)d=new FastDecision(pool);
+			IntDecision d = pool.getE();
+			if(d==null)d=new IntDecision(pool);
 			d.set(vars[x], vars[x].getLB(), DecisionOperator.int_eq);
 			return d;
 		}

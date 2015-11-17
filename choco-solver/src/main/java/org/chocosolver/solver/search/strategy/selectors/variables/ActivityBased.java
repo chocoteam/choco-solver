@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -32,21 +33,25 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.Move;
+import org.chocosolver.solver.search.loop.MoveRestart;
+import org.chocosolver.solver.search.loop.SLF;
+import org.chocosolver.solver.search.loop.SearchLoop;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.IntMap;
 
 import java.util.BitSet;
 import java.util.Comparator;
@@ -112,7 +117,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     //////////////////////////////
 
     final Solver solver;
-    final TIntIntHashMap v2i;
+    final IntMap v2i;
     final IntVar[] vars;
 
     final double[] A; // activity of all variables
@@ -133,13 +138,15 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     java.util.Random random; //  a random object for the sampling phase
 
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
     int currentVar = -1, currentVal = -1;
 
     TIntList bests = new TIntArrayList();
 
 	boolean restartAfterEachFail = true;
+
+    Move rfMove;
 
     public ActivityBased(final Solver solver, IntVar[] vars, double g, double d, int a, int samplingIterationForced, long seed) {
         super(vars);
@@ -151,7 +158,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         vAct = new IVal[vars.length];
         affected = new BitSet(vars.length);
 
-        this.v2i = new TIntIntHashMap(vars.length);
+        this.v2i = new IntMap(vars.length);
         for (int i = 0; i < vars.length; i++) {
             v2i.put(vars[i].getId(), i);
             vars[i].addMonitor(this);
@@ -168,20 +175,21 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-		SMF.restartAfterEachSolution(solver);
-		solver.plugMonitor((IMonitorContradiction) cex -> {
-            if(restartAfterEachFail){
-                solver.getSearchLoop().restart();
-            }
-        });
-
-        solver.getSearchLoop().plugSearchMonitor(this);
+        SLF.restartOnSolutions(solver);
+        if(restartAfterEachFail){
+            rfMove = new MoveRestart(solver.getSearchLoop().getMove(),
+                    new MonotonicRestartStrategy(1),
+                    new FailCounter(solver.getSearchLoop().getSolver(), 1),
+                    Integer.MAX_VALUE);
+            solver.getSearchLoop().setMove(rfMove);
+        }
+        solver.plugMonitor(this);
         decisionPool = new PoolManager<>();
 //        init(vars);
     }
 
     @Override
-    public void init() {
+    public boolean init() {
         for (int i = 0; i < vars.length; i++) {
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
@@ -191,6 +199,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i] = new ArrayVal(ampl, vars[i].getLB());
             }
         }
+        return true;
     }
 
     @Override
@@ -245,9 +254,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                         lb : ub;
             }
         }
-        FastDecision currrent = decisionPool.getE();
+        IntDecision currrent = decisionPool.getE();
         if (currrent == null) {
-            currrent = new FastDecision(decisionPool);
+            currrent = new IntDecision(decisionPool);
         }
         currrent.set(variable, currentVal, DecisionOperator.int_eq);
 //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
@@ -299,7 +308,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     public double getActivity(IntVar var) {
-        if (v2i.contains(var.getId())) {
+        if (v2i.containsKey(var.getId())) {
             return A[v2i.get(var.getId())] / var.getDomainSize();
         } else {
             return 0.0d;
@@ -312,19 +321,16 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         affected.set(v2i.get(var.getId()));
     }
 
-
     @Override
-    public void beforeDownLeftBranch() {
-        affected.clear();
+    public void beforeDownBranch(boolean left) {
+        if (left) {
+            affected.clear();
+        }
     }
 
     @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-        if (currentVar > -1) {  // if the decision was computed by another strategy
+    public void afterDownBranch(boolean left) {
+        if (left && currentVar > -1) {  // if the decision was computed by another strategy
             for (int i = 0; i < A.length; i++) {
                 if (vars[i].getDomainSize() > 1) {
                     A[i] *= sampling ? ONE : g;
@@ -341,10 +347,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             }
             currentVar = -1;
         }
-    }
-
-    @Override
-    public void afterDownRightBranch() {
     }
 
     @Override
@@ -373,7 +375,22 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             //BEWARE: when it fails very soon (after 1 node), it is worth forcing sampling
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
+                if(restartAfterEachFail){
+                    SearchLoop sl = solver.getSearchLoop();
+                    Move m = sl.getMove();
+                    if(m == rfMove){
+                        sl.setMove(rfMove.getChildMoves().get(0));
+                    }else{
+                        while(m.getChildMoves()!= null && m.getChildMoves()!= rfMove){
+                            m = m.getChildMoves().get(0);
+                        }
+                        if(m.getChildMoves()!= rfMove){
+                            m.setChildMoves(rfMove.getChildMoves());
+                        }
+                    }
+                }
                 restartAfterEachFail = false;
+
                 // then copy values estimated
                 System.arraycopy(mA, 0, A, 0, mA.length);
                 for (int i = 0; i < A.length; i++) {
@@ -401,7 +418,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static interface IVal {
+    private interface IVal {
 
         double activity(int value);
 

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,12 +29,10 @@
  */
 package org.chocosolver.solver.constraints.nary.among;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -41,6 +40,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.procedure.UnarySafeIntProcedure;
@@ -79,6 +80,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     protected boolean needFilter;
 
+    protected final IntIterableSet vrms;
+
     public PropAmongGAC(IntVar[] variables, int[] values) {
         super(variables, PropagatorPriority.LINEAR, true);
         nb_vars = variables.length - 1;
@@ -98,6 +101,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
             occs[i] = environment.makeInt(0);
         }
         rem_proc = new RemProc(this);
+        vrms = new IntIterableBitSet();
     }
 
     @Override
@@ -106,38 +110,6 @@ public class PropAmongGAC extends Propagator<IntVar> {
             return IntEventType.boundAndInst();
         }
         return IntEventType.all();
-    }
-
-    @Override
-    public boolean advise(int varIdx, int mask) {
-        if (super.advise(varIdx, mask)) {
-            if (varIdx == nb_vars) {
-                return true;
-            } else {
-                needFilter = false;
-                if (IntEventType.isInstantiate(mask)) {
-                    if (both.get(varIdx)) {
-                        IntVar var = vars[varIdx];
-                        int val = var.getValue();
-                        if (setValues.contains(val)) {
-                            LB.add(1);
-                            both.set(varIdx, false);
-                            needFilter = true;
-                        } else {
-                            UB.add(-1);
-                            both.set(varIdx, false);
-                            needFilter = true;
-                        }
-                    }
-                } else {
-                    idms[varIdx].freeze();
-                    idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-                    idms[varIdx].unfreeze();
-                }
-                return needFilter;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -172,13 +144,12 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = LB.get();
         int ub = UB.get();
-        vars[nb_vars].updateLowerBound(lb, aCause);
-        vars[nb_vars].updateUpperBound(ub, aCause);
+        vars[nb_vars].updateBounds(lb, ub, this);
 
         int min = Math.max(vars[nb_vars].getLB(), lb);
         int max = Math.min(vars[nb_vars].getUB(), ub);
 
-        if (max < min) this.contradiction(null, "impossible");
+        if (max < min) fails();
 
         if (lb == min && lb == max) {
             removeOnlyValues();
@@ -204,7 +175,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
-                    if (v.removeValue(value, aCause)) {
+                    if (v.removeValue(value, this)) {
                         occs[i].add(-1);
                     }
                 }
@@ -219,7 +190,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     k1++;
                 }
                 // and bottom-up shaving
-                while (k1 <= k2 && v.removeValue(values[k1], aCause)) {
+                while (k1 <= k2 && v.removeValue(values[k1], this)) {
                     occs[i].add(-1);
                     k1++;
                 }
@@ -228,7 +199,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     k2--;
                 }
                 // and top bottom shaving
-                while (k2 >= k1 && v.removeValue(values[k2], aCause)) {
+                while (k2 >= k1 && v.removeValue(values[k2], this)) {
                     occs[i].add(-1);
                     k2--;
                 }
@@ -242,23 +213,18 @@ public class PropAmongGAC extends Propagator<IntVar> {
      * @throws ContradictionException if contradiction occurs.
      */
     private void removeButValues() throws ContradictionException {
-        int left, right;
         for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
             IntVar v = vars[i];
             DisposableValueIterator it = v.getValueIterator(true);
-            left = right = Integer.MIN_VALUE;
+            vrms.clear();
+            vrms.setOffset(v.getLB());
             while (it.hasNext()) {
                 int value = it.next();
                 if (!setValues.contains(value)) {
-                    if (value == right + 1) {
-                        right = value;
-                    } else {
-                        v.removeInterval(left, right, aCause);
-                        left = right = value;
-                    }
+                    vrms.add(value);
                 }
             }
-            v.removeInterval(left, right, aCause);
+            v.removeValues(vrms, this);
             it.dispose();
         }
     }
@@ -328,19 +294,6 @@ public class PropAmongGAC extends Propagator<IntVar> {
         sb.append("},");
         sb.append(vars[nb_vars].toString()).append(")");
         return sb.toString();
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            identitymap.put(this, new PropAmongGAC(aVars, this.values));
-        }
     }
 
 }

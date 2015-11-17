@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -29,9 +30,7 @@
 package org.chocosolver.solver.constraints.nary.globalcardinality;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -77,7 +76,7 @@ public class PropFastGCC extends Propagator<IntVar> {
      * @param valueCardinalities array of integer variables
      */
     public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities) {
-        super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, false);
         if (restrictedValues.length != valueCardinalities.length) {
             throw new UnsupportedOperationException();
         }
@@ -98,6 +97,12 @@ public class PropFastGCC extends Propagator<IntVar> {
                 boundVar.add(i);
             }
         }
+        super.linkVariables();
+    }
+
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     @Override
@@ -159,31 +164,26 @@ public class PropFastGCC extends Propagator<IntVar> {
                 }
             }
             // filtering
-            evtmask = PropagatorEventType.CUSTOM_PROPAGATION.getStrengthenedMask();
+            evtmask = PropagatorEventType.CUSTOM_PROPAGATION.getMask();
         } while (filter());
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     private boolean filter() throws ContradictionException {
         boolean again = false;
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
-            again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
-            again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
+            again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), this);
+            again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), this);
             if (vars[n + i].isInstantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
-                        again |= vars[j].instantiateTo(values[i], aCause);
+                        again |= vars[j].instantiateTo(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].getSize() == vars[n + i].getUB()) {
                     for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
-                        again |= vars[var].removeValue(values[i], aCause);
+                        again |= vars[var].removeValue(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
@@ -213,7 +213,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 boolean b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
                 while (b) {
                     useful = true;
-                    vars[var].removeValue(lb, aCause);
+                    vars[var].removeValue(lb, this);
                     lb = vars[var].getLB();
                     index = -1;
                     if (map.containsKey(lb)) {
@@ -229,7 +229,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
                 while (b) {
                     useful = true;
-                    vars[var].removeValue(ub, aCause);
+                    vars[var].removeValue(ub, this);
                     ub = vars[var].getUB();
                     index = -1;
                     if (map.containsKey(ub)) {
@@ -299,22 +299,4 @@ public class PropFastGCC extends Propagator<IntVar> {
         return ESat.TRUE;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.n;
-            IntVar[] X = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            size = this.n2;
-            IntVar[] Y = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i + n].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
-            }
-            identitymap.put(this, new PropFastGCC(X, this.values.clone(), new TIntIntHashMap(this.map), Y));
-        }
-    }
 }

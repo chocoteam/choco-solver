@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -422,6 +423,76 @@ public class TestConsistency {
                     }, true, doms);
             checkConsistency(Modeler.modelmddcAC, 5, -4, 3, new MultivaluedDecisionDiagram(doms, tuples), seed + i, "ac");
         }
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testIVPC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelivpcAC, 5, -5, 5, null, seed + i, "ac");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testIVPC2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelivpcAC, 10, -2, 3, null, seed + i, "ac");
+    }
+
+    @Test(groups = "consistency.1m")
+     public void testMAX1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbc, 5, -5, 5, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMAX2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbc, 10, -2, 3, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMIN1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbc, 5, -5, 5, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMIN2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbc, 10, -2, 3, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMAXB1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbbc, 5, 0, 1, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMAXB2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelmaxbbc, 10, 0, 1, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMINB1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbbc, 5, 0, 1, null, seed + i, "bc");
+    }
+
+    @Test(groups = "consistency.1m")
+    public void testMINB2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelminbbc, 10, 0, 1, null, seed + i, "bc");
     }
 
     /*@Test

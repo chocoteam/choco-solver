@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -42,66 +43,70 @@ package org.chocosolver.solver.variables.events;
  */
 public enum IntEventType implements IEventType {
 
-	VOID(0,0),
-	REMOVE(1,1),
-	INCLOW(2,3),
-	DECUPP(4,5),
-	BOUND(6,7),
-	INSTANTIATE(8,15);
+    VOID(0),
+    REMOVE(1),
+    INCLOW(2),
+    DECUPP(4),
+    BOUND(6),
+    INSTANTIATE(8);
 
-	private final int mask;
-	private final int strengthened_mask;
+    private final int mask;
 
-	private IntEventType(int mask, int fullmask) {
-		this.mask = mask;
-		this.strengthened_mask = fullmask;
-	}
+    IntEventType(int mask) {
+        this.mask = mask;
+    }
 
-	@Override
-	public int getMask() {
-		return mask;
-	}
+    @Override
+    public int getMask() {
+        return mask;
+    }
 
-	@Override
-	public int getStrengthenedMask() {
-		return strengthened_mask;
-	}
+    //******************************************************************************************************************
+    //******************************************************************************************************************
 
-	//******************************************************************************************************************
-	//******************************************************************************************************************
+    private static final int RIDI = combine(REMOVE, INCLOW, DECUPP, INSTANTIATE);
+    private static final int IDI = combine(INCLOW, DECUPP, INSTANTIATE);
 
-	public static int all() {
-		return INSTANTIATE.getStrengthenedMask();
-	}
+    public static int combine(IntEventType... evts) {
+        int mask = 0;
+        for (int i = 0; i < evts.length; i++) {
+            mask |= evts[i].mask;
+        }
+        return mask;
+    }
 
-	public static int boundAndInst() {
-		return INSTANTIATE.getStrengthenedMask()-REMOVE.getStrengthenedMask();
-	}
+    public static int all() {
+        return RIDI;
+    }
 
-	public static int instantiation() {
-		return INSTANTIATE.getMask();
-	}
+    public static int boundAndInst() {
+        return IDI;
+    }
 
-	//******************************************************************************************************************
-	//******************************************************************************************************************
+    public static int instantiation() {
+        return INSTANTIATE.mask;
+    }
 
-	public static boolean isInstantiate(int mask) {
-		return (mask & INSTANTIATE.mask) != 0;
-	}
+    //******************************************************************************************************************
+    //******************************************************************************************************************
 
-	public static boolean isRemove(int mask) {
-		return (mask & REMOVE.mask) != 0;
-	}
+    public static boolean isInstantiate(int mask) {
+        return (mask & INSTANTIATE.mask) != 0;
+    }
 
-	public static boolean isBound(int mask) {
-		return (mask & BOUND.mask) != 0;
-	}
+    public static boolean isRemove(int mask) {
+        return (mask & REMOVE.mask) != 0;
+    }
 
-	public static boolean isInclow(int mask) {
-		return (mask & INCLOW.mask) != 0;
-	}
+    public static boolean isBound(int mask) {
+        return (mask & BOUND.mask) != 0;
+    }
 
-	public static boolean isDecupp(int mask) {
-		return (mask & DECUPP.mask) != 0;
-	}
+    public static boolean isInclow(int mask) {
+        return (mask & INCLOW.mask) != 0;
+    }
+
+    public static boolean isDecupp(int mask) {
+        return (mask & DECUPP.mask) != 0;
+    }
 }

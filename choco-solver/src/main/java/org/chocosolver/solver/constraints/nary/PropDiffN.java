@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -71,6 +70,12 @@ public class PropDiffN extends Propagator<IntVar> {
         }
         overlappingBoxes = new UndirectedGraph(solver, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, solver);
+        super.linkVariables();
+    }
+
+    @Override
+    protected void linkVariables() {
+        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     //***********************************************************************************
@@ -185,14 +190,14 @@ public class PropDiffN extends Propagator<IntVar> {
         int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
         if (S_i < e_i || S_j < e_j) {
             if (e_j > S_i) {
-                vars[j + offSet].updateLowerBound(e_i, aCause);
-                vars[i + offSet].updateUpperBound(S_j - vars[i + 2 * n + offSet].getLB(), aCause);
-                vars[i + offSet + 2 * n].updateUpperBound(S_j - vars[i + offSet].getLB(), aCause);
+                vars[j + offSet].updateLowerBound(e_i, this);
+                vars[i + offSet].updateUpperBound(S_j - vars[i + 2 * n + offSet].getLB(), this);
+                vars[i + offSet + 2 * n].updateUpperBound(S_j - vars[i + offSet].getLB(), this);
             }
             if (S_j < e_i) {
-                vars[i + offSet].updateLowerBound(e_j, aCause);
-                vars[j + offSet].updateUpperBound(S_i - vars[j + 2 * n + offSet].getLB(), aCause);
-                vars[j + offSet + 2 * n].updateUpperBound(S_i - vars[j + offSet].getLB(), aCause);
+                vars[i + offSet].updateLowerBound(e_j, this);
+                vars[j + offSet].updateUpperBound(S_i - vars[j + 2 * n + offSet].getLB(), this);
+                vars[j + offSet + 2 * n].updateUpperBound(S_i - vars[j + offSet].getLB(), this);
             }
         }
     }
@@ -235,25 +240,4 @@ public class PropDiffN extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.n;
-            IntVar[] X = new IntVar[size];
-            IntVar[] Y = new IntVar[size];
-            IntVar[] dX = new IntVar[size];
-            IntVar[] dY = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                X[i] = (IntVar) identitymap.get(this.vars[i]);
-                this.vars[i + n].duplicate(solver, identitymap);
-                Y[i] = (IntVar) identitymap.get(this.vars[i + n]);
-                this.vars[i + 2 * n].duplicate(solver, identitymap);
-                dX[i] = (IntVar) identitymap.get(this.vars[i + 2 * n]);
-                this.vars[i + 3 * n].duplicate(solver, identitymap);
-                dY[i] = (IntVar) identitymap.get(this.vars[i + 3 * n]);
-            }
-            identitymap.put(this, new PropDiffN(X, Y, dX, dY, this.fast));
-        }
-    }
 }

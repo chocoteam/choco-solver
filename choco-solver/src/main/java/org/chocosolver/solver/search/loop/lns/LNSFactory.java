@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -30,8 +31,10 @@ package org.chocosolver.solver.search.loop.lns;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.criteria.Criterion;
 
 /**
  * A Factory for Large Neighborhood Search, with pre-defined configurations.
@@ -48,34 +51,28 @@ public class LNSFactory {
     /**
      * Create a random neighborhood
      *
-     * @param solver    the solver concerned
-     * @param vars      the pool of variables to choose from
-     * @param level     the number of tries for each size of fragment
-     * @param seed      a seed for the random selection
-     * @param frcounter a fast restart counter (can be null)
+     * @param solver the solver concerned
+     * @param vars   the pool of variables to choose from
+     * @param level  the number of tries for each size of fragment
+     * @param seed   a seed for the random selection
      * @return a random neighborhood
      */
-    public static INeighbor random(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
-        INeighbor neighbor = new RandomNeighborhood(solver, vars, level, seed);
-        neighbor.fastRestart(frcounter);
-        return neighbor;
+    public static INeighbor random(Solver solver, IntVar[] vars, int level, long seed) {
+        return new RandomNeighborhood(solver, vars, level, seed);
     }
 
     /**
      * Create a propagation guided neighborhood
      *
-     * @param solver    the solver concerned
-     * @param vars      the pool of variables to choose from
-     * @param fgmtSize  fragment size (evaluated against log value)
-     * @param listSize  size of the list
-     * @param seed      a seed for the random selection
-     * @param frcounter a fast restart counter (can be null)
+     * @param solver   the solver concerned
+     * @param vars     the pool of variables to choose from
+     * @param fgmtSize fragment size (evaluated against log value)
+     * @param listSize size of the list
+     * @param seed     a seed for the random selection
      * @return a propagation-guided neighborhood
      */
-    public static INeighbor pg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
-        INeighbor neighbor = new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
-        neighbor.fastRestart(frcounter);
-        return neighbor;
+    public static INeighbor pg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        return new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
     }
 
     /**
@@ -86,13 +83,10 @@ public class LNSFactory {
      * @param fgmtSize  the limit size for PG and RPG
      * @param listSize  size of the list
      * @param seed      a seed for the random selection
-     * @param frcounter a fast restart counter (can be null)
      * @return a reverse propagation-guided neighborhood
      */
-    public static INeighbor rpg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
-        INeighbor neighbor = new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
-        neighbor.fastRestart(frcounter);
-        return neighbor;
+    public static INeighbor rpg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        return new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
     }
 
     // PREDEFINED LNS
@@ -105,13 +99,12 @@ public class LNSFactory {
      * @param level     the number of tries for each size of fragment
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @return a Random LNS
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Solver, INeighbor, Criterion)
      */
-    public static LargeNeighborhoodSearch rlns(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
-        INeighbor neighbor = random(solver, vars, level, seed, frcounter);
-        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
-        solver.getSearchLoop().plugSearchMonitor(lns);
-        return lns;
+    public static void rlns(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
+        SLF.lns(solver,
+                new RandomNeighborhood(solver, vars, level, seed),
+                frcounter);
     }
 
     /**
@@ -124,18 +117,16 @@ public class LNSFactory {
      * @param level     the number of tries for each size of fragment
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @return a Propagation-Guided LNS
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Solver, INeighbor, Criterion)
      */
-    public static LargeNeighborhoodSearch pglns(Solver solver, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
-        INeighbor neighbor = new SequenceNeighborhood(
-                pg(solver, vars, fgmtSize, listSize, seed, frcounter),
-                rpg(solver, vars, fgmtSize, listSize, seed, frcounter),
-//                random(solver, vars, level, seed, frcounter)
-                pg(solver, vars, fgmtSize, 0, seed, frcounter) // <= state of the art configuration
-        );
-        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
-        solver.getSearchLoop().plugSearchMonitor(lns);
-        return lns;
+    public static void pglns(Solver solver, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
+        SLF.lns(solver,
+                new SequenceNeighborhood(
+                        pg(solver, vars, fgmtSize, listSize, seed),
+                        rpg(solver, vars, fgmtSize, listSize, seed),
+                        pg(solver, vars, fgmtSize, 0, seed) // <= state of the art configuration
+                ),
+                frcounter);
     }
 
     /**
@@ -145,89 +136,17 @@ public class LNSFactory {
      * @param vars   the pool of variables to choose from
      * @param level  the number of tries for each size of fragment
      * @param seed   a seed for the random selection
-     * @param fr4exp a fast restart counter (can be null) for explained neighborhoods
-     * @param fr4rnd a fast restart counter (can be null) for random neighborhoods
-     * @return an Explanation based LNS
+     * @param frcounter a fast restart counter (can be null) for neighborhoods
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Solver, INeighbor, Criterion)
      */
-    public static LargeNeighborhoodSearch elns(Solver solver, IntVar[] vars, int level, long seed,
-                                               ACounter fr4exp, ACounter fr4rnd) {
+    public static void elns(Solver solver, IntVar[] vars, int level, long seed,
+                            ACounter frcounter) {
         INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new ExplainingCut(solver, level, seed);
-        neighbor2.fastRestart(fr4exp);
-        INeighbor neighbor3 = new RandomNeighborhood4Explanation(solver, vars, level, seed);
-        neighbor3.fastRestart(fr4rnd);
+        INeighbor neighbor3 = new RandomNeighborhood(solver, vars, level, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
-        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
-        solver.getSearchLoop().plugSearchMonitor(lns);
-        return lns;
-    }
-
-    /**
-     * Create a combination of PGLNS and ELNS (an Explanation based LNS)
-     *
-     * @param solver   the solver
-     * @param vars     the pool of variables to choose from
-     * @param level    the number of tries for each size of fragment
-     * @param seed     a seed for the random selection
-     * @param fgmtSize fragment size (evaluated against log value)
-     * @param listSize size of the list
-     * @param fr4exp   a fast restart counter (can be null) for explained neighborhoods
-     * @param fr4rnd   a fast restart counter (can be null) for random neighborhoods
-     * @return an Explanation based LNS
-     */
-    public static LargeNeighborhoodSearch pgelns(Solver solver, IntVar[] vars, int level, long seed,
-                                                 int fgmtSize, int listSize,
-                                                 ACounter fr4exp, ACounter fr4rnd) {
-        INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        neighbor1.fastRestart(fr4exp);
-        INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor2.fastRestart(fr4rnd);
-        INeighbor neighbor3 = new RPGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor3.fastRestart(fr4rnd);
-        INeighbor neighbor4 = new ExplainingCut(solver, level, seed);
-        neighbor4.fastRestart(fr4exp);
-        INeighbor neighbor5 = new PGN4Explanation(solver, vars, seed, fgmtSize, 0);
-        neighbor5.fastRestart(fr4rnd);
-
-        INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
-        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
-        solver.getSearchLoop().plugSearchMonitor(lns);
-        return lns;
-    }
-
-    /**
-     * Create a combination of PGLNS and ELNS (an Explanation based LNS), with adaptive neighborhood selection
-     *
-     * @param solver   the solver
-     * @param vars     the pool of variables to choose from
-     * @param level    the number of tries for each size of fragment
-     * @param seed     a seed for the random selection
-     * @param fgmtSize fragment size (evaluated against log value)
-     * @param listSize size of the list
-     * @param fr4exp   a fast restart counter (can be null) for explained neighborhoods
-     * @param fr4rnd   a fast restart counter (can be null) for random neighborhoods
-     * @return an Explanation based LNS
-     */
-    public static LargeNeighborhoodSearch apgelns(Solver solver, IntVar[] vars, int level, long seed,
-                                                  int fgmtSize, int listSize,
-                                                  ACounter fr4exp, ACounter fr4rnd) {
-        INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        neighbor1.fastRestart(fr4exp);
-        INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor2.fastRestart(fr4rnd);
-        INeighbor neighbor3 = new RPGN4Explanation(solver, vars, seed, fgmtSize, listSize);
-        neighbor3.fastRestart(fr4rnd);
-        INeighbor neighbor4 = new ExplainingCut(solver, level, seed);
-        neighbor4.fastRestart(fr4exp);
-        INeighbor neighbor5 = new PGN4Explanation(solver, vars, seed, fgmtSize, 0);
-        neighbor5.fastRestart(fr4rnd);
-
-        INeighbor neighbor = new AdaptiveNeighborhood(seed, neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
-        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
-        solver.getSearchLoop().plugSearchMonitor(lns);
-        return lns;
+        SLF.lns(solver, neighbor, frcounter);
     }
 
 

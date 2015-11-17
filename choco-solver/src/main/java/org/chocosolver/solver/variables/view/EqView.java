@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,14 +29,13 @@
  */
 package org.chocosolver.solver.variables.view;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
@@ -48,8 +48,8 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class EqView extends IntView {
 
-    public EqView(IntVar var, Solver solver) {
-        super("eq(" + var.getName() + ")", var, solver);
+    public EqView(IntVar var) {
+        super("eq(" + var.getName() + ")", var);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class EqView extends IntView {
         int inf = getLB();
         int sup = getUB();
         if (inf <= value && value <= sup) {
-			IntEventType e = IntEventType.REMOVE;
+            IntEventType e = IntEventType.REMOVE;
 
             boolean done = var.removeValue(value, this);
             if (done) {
@@ -83,6 +83,50 @@ public class EqView extends IntView {
     }
 
     @Override
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        if (nlb > oub || nub < olb) {
+            return false;
+        }
+        if (nlb == olb) {
+            // look for the new lb
+            do {
+                olb = nextValue(olb);
+                nlb = values.nextValue(olb - 1);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+        }
+        if (nub == oub) {
+            // look for the new ub
+            do {
+                oub = previousValue(oub);
+                nub = values.previousValue(oub + 1);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+        }
+        // the new bounds are now known, delegate to the right method
+        boolean hasChanged = updateBounds(olb, oub, cause);
+        // now deal with holes
+        int value = nlb;
+        int to = nub;
+        boolean hasRemoved = false;
+        while (value <= to) {
+            hasRemoved |= var.removeValue(value, cause);
+            value = values.nextValue(value);
+        }
+        if (hasRemoved) {
+            IntEventType e = IntEventType.REMOVE;
+            if (var.isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
+    }
+
+    @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
         if (from <= getLB()) {
@@ -96,6 +140,34 @@ public class EqView extends IntView {
             }
             return done;
         }
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        int olb = getLB();
+        int oub = getUB();
+        int nlb = values.nextValue(olb - 1);
+        int nub = values.previousValue(oub + 1);
+        // the new bounds are now known, delegate to the right method
+        boolean hasChanged = updateBounds(nlb, nub, cause);
+        // now deal with holes
+        int to = previousValue(nub);
+        boolean hasRemoved = false;
+        int value = nextValue(nlb);
+        // iterate over the values in the domain, remove the ones that are not in values
+        for (; value <= to; value = nextValue(value)) {
+            if (!values.contains(value)) {
+                hasRemoved |= var.removeValue(value, cause);
+            }
+        }
+        if (hasRemoved) {
+            IntEventType e = IntEventType.REMOVE;
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+        }
+        return hasRemoved || hasChanged;
     }
 
     @Override
@@ -115,7 +187,7 @@ public class EqView extends IntView {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-			IntEventType e = IntEventType.INCLOW;
+            IntEventType e = IntEventType.INCLOW;
             boolean done = var.updateLowerBound(value, this);
             if (isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
@@ -134,7 +206,7 @@ public class EqView extends IntView {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-			IntEventType e = IntEventType.DECUPP;
+            IntEventType e = IntEventType.DECUPP;
             boolean done = var.updateUpperBound(value, this);
             if (isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
@@ -145,6 +217,33 @@ public class EqView extends IntView {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = this.getLB();
+        int oub = this.getUB();
+        boolean hasChanged = false;
+        if (olb < lb || oub > ub) {
+            IntEventType e = null;
+
+            if (olb < lb) {
+                e = IntEventType.INCLOW;
+                hasChanged = var.updateLowerBound(lb, this);
+            }
+            if (oub > ub) {
+                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                hasChanged |= var.updateUpperBound(ub, this);
+            }
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            if (hasChanged) {
+                this.notifyPropagators(e, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override
@@ -190,18 +289,6 @@ public class EqView extends IntView {
     @Override
     public IntVar duplicate() {
         return VariableFactory.eq(this.var);
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            this.var.duplicate(solver, identitymap);
-            EqView clone = new EqView((IntVar) identitymap.get(this.var), solver);
-            identitymap.put(this, clone);
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
     }
 
     @Override

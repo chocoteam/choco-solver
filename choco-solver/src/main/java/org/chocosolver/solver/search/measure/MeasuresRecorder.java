@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -31,17 +32,13 @@ package org.chocosolver.solver.search.measure;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.*;
 
 /**
  * Object which stores resolution information to get statistics
  *
  * @author Charles Prud'Homme
  */
-public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonitorContradiction, IMonitorDownBranch,
-        IMonitorInitialize, IMonitorInitPropagation, IMonitorOpenNode, IMonitorRestart,
-        IMonitorSolution, IMonitorUpBranch {
+public final class MeasuresRecorder implements IMeasures {
 
     //***********************************************************************************
     // VARIABLES
@@ -54,16 +51,13 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     public long solutionCount;
     public long timeCount;
     public long readingTimeCount;
-    public long initialisationTimeCount;
-    public long initialPropagationTimeCount;
     public long nodeCount;
     public long backtrackCount;
     public long failCount;
     public long restartCount;
     public long maxDepth, depth;
-    public long usedMemory;
 
-    protected long startingTime, startingMemory;
+    protected long startingTime;
 
     protected Solver solver;
     protected Constraint[] cstrs;
@@ -85,17 +79,13 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         mr.solutionCount = solutionCount;
         mr.timeCount = timeCount;
         mr.readingTimeCount = readingTimeCount;
-        mr.initialisationTimeCount = initialisationTimeCount;
-        mr.initialPropagationTimeCount = initialPropagationTimeCount;
         mr.nodeCount = nodeCount;
         mr.backtrackCount = backtrackCount;
         mr.failCount = failCount;
         mr.restartCount = restartCount;
+        mr.startingTime = startingTime;
         mr.maxDepth = maxDepth;
         mr.depth = depth;
-        mr.usedMemory = usedMemory;
-        mr.startingTime = startingTime;
-        mr.startingMemory = startingMemory;
         mr.cstrs = cstrs.clone();
         return mr;
     }
@@ -128,9 +118,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         failCount = 0;
         solutionCount = 0;
         hasObjective = false;
-        readingTimeCount = 0;
-        initialisationTimeCount = 0;
-        initialPropagationTimeCount = 0;
+        depth = 0;
         maxDepth = 0;
         cstrs = null;
     }
@@ -160,6 +148,11 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     }
 
     @Override
+    public long getElapsedTimeInNanoseconds() {
+        return timeCount;
+    }
+
+    @Override
     public float getReadingTimeCount() {
         return readingTimeCount / IN_SEC;
     }
@@ -167,16 +160,6 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     @Override
     public void setReadingTimeCount(long time) {
         this.readingTimeCount = time;
-    }
-
-    @Override
-    public float getInitialisationTimeCount() {
-        return initialisationTimeCount / IN_SEC;
-    }
-
-    @Override
-    public float getInitialPropagationTimeCount() {
-        return initialPropagationTimeCount / IN_SEC;
     }
 
     @Override
@@ -195,18 +178,6 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     }
 
     @Override
-    @Deprecated
-    public long getPropagationsCount() {
-        return 0;
-    }
-
-    @Override
-    @Deprecated
-    public long getEventsCount() {
-        return 0;
-    }
-
-    @Override
     public boolean isObjectiveOptimal() {
         return objectiveOptimal;
     }
@@ -222,31 +193,6 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     }
 
     @Override
-    public long getUsedMemory() {
-        return usedMemory;
-    }
-
-    static long memoryUsedInMB() {
-        return Runtime.getRuntime().freeMemory() / 1024 / 1024;
-    }
-
-    @Override
-    public void updateMemoryUsed() {
-        usedMemory = memoryUsedInMB() - startingMemory;
-    }
-
-    @Override
-    @Deprecated
-    public void updatePropagationCount() {
-    }
-
-    @Override
-    public void updateTimeCount() {
-//        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
-        timeCount = System.nanoTime() - startingTime;
-    }
-
-    @Override
     public long timestamp() {
         return nodeCount + backtrackCount;
     }
@@ -255,29 +201,9 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     //**************************************** INCREMENTERS **********************************************************//
     //****************************************************************************************************************//
 
-    @Override
-    public void beforeInitialize() {
-        startingMemory = memoryUsedInMB();
-        startingTime = System.nanoTime();
-    }
 
     @Override
-    public void afterInitialize() {
-        initialisationTimeCount = System.nanoTime() - startingTime;
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-        initialPropagationTimeCount = System.nanoTime() - startingTime;
-    }
-
-    @Override
-    public void beforeOpenNode() {
-//        updateTimeCount();
+    public void incNodeCount() {
         nodeCount++;
         if (depth > maxDepth) {
             maxDepth = depth;
@@ -285,68 +211,42 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     }
 
     @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
-        solutionCount++;
-        updateTimeCount();
-//        updatePropagationCount();
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-        depth++;
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-        depth++;
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
+    public void incBackTrackCount() {
         backtrackCount++;
-        depth--;
     }
 
     @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex) {
+    public void incFailCount() {
         failCount++;
     }
 
     @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
+    public void incRestartCount() {
         restartCount++;
-        depth = 0;
     }
 
     @Override
-    public void beforeClose() {
-        updateTimeCount();
-        updateMemoryUsed();
-        updatePropagationCount();
+    public void incSolutionCount() {
+        solutionCount++;
+        updateTime();
+    }
+
+    public void incDepth(){
+        depth++;
+    }
+
+    public void decDepth(){
+        depth--;
     }
 
     @Override
-    public void afterClose() {
+    public void startStopwatch() {
+        startingTime = System.nanoTime();
+    }
+
+    @Override
+    public void updateTime() {
+        timeCount = System.nanoTime() - startingTime;
     }
 
     //****************************************************************************************************************//
@@ -358,8 +258,6 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         return new Number[]{
                 getSolutionCount(),
                 getReadingTimeCount(),
-                getInitialisationTimeCount(),
-                getInitialPropagationTimeCount(),
                 getTimeCount(),
                 hasObjective() ? getBestSolutionValue() : 0,
                 getNodeCount(),
@@ -371,17 +269,19 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toOneLineString() {
-        beforeClose();
+        updateTime();
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Building time : %,.3fs, Initialisation : %,.3fs, Initial propagation : %,.3fs, " +
-                        "Total %,.3fs, %d Nodes (%,.1f n/s), %,d Backtracks, %,d Fails, %,d Restarts",
+        st.append(String.format("Building time : %,.3fs, " +
+                        "Resolution time %,.3fs, " +
+                        "%d Nodes (%,.1f n/s), " +
+                        "%,d Backtracks, " +
+                        "%,d Fails, " +
+                        "%,d Restarts",
                 getReadingTimeCount(),
-                getInitialisationTimeCount(),
-                getInitialPropagationTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
@@ -393,13 +293,13 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toOneShortLineString() {
-        beforeClose();
+        updateTime();
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Resolution %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
+        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
@@ -411,7 +311,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toString() {
-        beforeClose();
+        updateTime();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
 
@@ -434,20 +334,16 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         if (hasObjective()) {
             st.append("\t").append(solver.getObjectiveManager()).append(",\n");
         }
-        st.append(String.format("\tBuilding time : %,.3fs\n\tInitialisation : %,.3fs\n\tInitial propagation : %,.3fs" +
-                        "\n\tResolution : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                        "Restarts: %,d\n\tMax depth: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d",
+        st.append(String.format("\tBuilding time : %,.3fs" +
+                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                        "Restarts: %,d\n\tVariables: %,d\n\tConstraints: %,d",
                 getReadingTimeCount(),
-                getInitialisationTimeCount(),
-                getInitialPropagationTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getFailCount(),
                 getRestartCount(),
-                getMaxDepth(),
-                getUsedMemory(),
                 solver.getNbVars(),
                 solver.getNbCstrs()
         ));
@@ -456,13 +352,11 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
 
     @Override
     public String toCSV() {
-        beforeClose();
+        updateTime();
         // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
-        return String.format("%d;%.3f;%.3f;%.3f;%.3f;%e;%d;%d;%d;%d;",
+        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
                 getSolutionCount(),
                 getReadingTimeCount(),
-                getInitialisationTimeCount(),
-                getInitialPropagationTimeCount(),
                 getTimeCount(),
                 hasObjective() ? getBestSolutionValue().doubleValue() : 0,
                 getNodeCount(),

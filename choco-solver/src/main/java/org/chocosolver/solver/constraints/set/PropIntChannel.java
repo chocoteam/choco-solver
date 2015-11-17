@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -35,8 +36,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -97,9 +96,9 @@ public class PropIntChannel extends Propagator<Variable> {
             this.sdm[i] = this.sets[i].monitorDelta(this);
         }
         // procedures
-        elementForced = element -> ints[element - offSet2].instantiateTo(idx, aCause);
-        elementRemoved = element -> ints[element - offSet2].removeValue(idx, aCause);
-        valRem = element -> sets[element - offSet1].removeFromEnvelope(idx, aCause);
+        elementForced = element -> ints[element - offSet2].instantiateTo(idx, this);
+        elementRemoved = element -> ints[element - offSet2].removeValue(idx, this);
+        valRem = element -> sets[element - offSet1].removeFromEnvelope(idx, this);
     }
 
     //***********************************************************************************
@@ -109,28 +108,27 @@ public class PropIntChannel extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < nInts; i++) {
-            ints[i].updateLowerBound(offSet1, aCause);
-            ints[i].updateUpperBound(nSets - 1 + offSet1, aCause);
+            ints[i].updateBounds(offSet1, nSets - 1 + offSet1, this);
         }
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();
             for (int j = ints[i].getLB(); j <= ub; j = ints[i].nextValue(j)) {
                 if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
-                    ints[i].removeValue(j, aCause);
+                    ints[i].removeValue(j, this);
                 }
             }
             if (ints[i].isInstantiated()) {
-                sets[ints[i].getValue() - offSet1].addToKernel(i + offSet2, aCause);
+                sets[ints[i].getValue() - offSet1].addToKernel(i + offSet2, this);
             }
         }
         for (int i = 0; i < nSets; i++) {
             for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
                 if (j < offSet2 || j > nInts - 1 + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
-                    sets[i].removeFromEnvelope(j, aCause);
+                    sets[i].removeFromEnvelope(j, this);
                 }
             }
             for (int j = sets[i].getKernelFirst(); j != SetVar.END; j = sets[i].getKernelNext()) {
-                ints[j - offSet2].instantiateTo(i + offSet1, aCause);
+                ints[j - offSet2].instantiateTo(i + offSet1, this);
             }
         }
         for (int i = 0; i < nSets; i++) {
@@ -153,7 +151,7 @@ public class PropIntChannel extends Propagator<Variable> {
         } else {
             idx -= nSets;
             if (ints[idx].isInstantiated()) {
-                sets[ints[idx].getValue() - offSet1].addToKernel(idx + offSet2, aCause);
+                sets[ints[idx].getValue() - offSet1].addToKernel(idx + offSet2, this);
             }
             idx += offSet2;
             idm[idxVarInProp - nSets].freeze();
@@ -185,24 +183,4 @@ public class PropIntChannel extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.nSets;
-            SetVar[] svars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(this.vars[i]);
-            }
-
-            int si = nInts;
-            IntVar[] ivars = new IntVar[si];
-            for (int i = 0; i < si; i++) {
-                ints[i].duplicate(solver, identitymap);
-                ivars[i] = (IntVar) identitymap.get(ints[i]);
-            }
-
-            identitymap.put(this, new PropIntChannel(svars, ivars, offSet1, offSet2));
-        }
-    }
 }

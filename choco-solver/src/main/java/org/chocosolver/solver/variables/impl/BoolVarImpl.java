@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,7 +29,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
@@ -43,6 +43,7 @@ import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -92,7 +93,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     public BoolVarImpl(String name, Solver solver) {
         super(name, solver);
-        notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
+        notInstanciated = this.solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = notInstanciated.add();
         mValue = 0;
     }
@@ -126,23 +127,50 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         return false;
     }
 
+    @Override
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        if (values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (!values.contains(0)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        if (!values.contains(1)) {
+            hasChanged = instantiateTo(0, cause);
+        }
+        return hasChanged;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        assert cause != null;
-        if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
-        else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
-        else {
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+        boolean hasChanged = false;
+        if (from <= to && from <= 1 && to >= 0) {
+            if (from == 1) {
+                hasChanged = instantiateTo(0, cause);
+            } else if (to == 0) {
+                hasChanged = instantiateTo(1, cause);
+            } else {
+                if (_plugexpl) {
+                    solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                }
+                this.contradiction(cause, MSG_UNKNOWN);
+
             }
-            return anyChange;
         }
+        return hasChanged;
     }
 
     /**
@@ -172,7 +200,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_INST);
+                this.contradiction(cause, MSG_INST);
             }
             return false;
         } else {
@@ -193,7 +221,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 if (_plugexpl) {
                     solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
-                this.contradiction(cause, IntEventType.INSTANTIATE, MSG_UNKNOWN);
+                this.contradiction(cause, MSG_UNKNOWN);
                 return false;
             }
         }
@@ -243,6 +271,24 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         return value < 1 && instantiateTo(value, cause);
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (lb > 1 || ub < 0) {
+            if (_plugexpl) {
+                solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+            }
+            this.contradiction(cause, MSG_UNKNOWN);
+        } else {
+            if (lb == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (ub == 0) {
+                hasChanged = instantiateTo(0, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override
@@ -388,7 +434,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
@@ -401,23 +447,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), this.getSolver());
-    }
-
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            BoolVarImpl clone = new BoolVarImpl(this.name, solver);
-            identitymap.put(this, clone);
-            if (this.not != null) {
-                this.not.duplicate(solver, identitymap);
-                clone._setNot((BoolVar) identitymap.get(this.not));
-                clone.not._setNot(clone);
-            }
-            for (int i = mIdx - 1; i >= 0; i--) {
-                monitors[i].duplicate(solver, identitymap);
-            }
-        }
+        return VariableFactory.bool(StringUtils.randomName(this.name), solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,22 +1,25 @@
-/*
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -61,6 +64,7 @@ public class RuleStoreTest {
     public void testEnumFullDom() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(E);
 
@@ -81,6 +85,7 @@ public class RuleStoreTest {
     public void testEnumLow() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(E);
 
@@ -109,6 +114,7 @@ public class RuleStoreTest {
     public void testEnumUpp() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addUpperBoundRule(E);
 
@@ -137,6 +143,7 @@ public class RuleStoreTest {
     public void testEnumBound() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(E);
         rs.addUpperBoundRule(E);
@@ -167,6 +174,7 @@ public class RuleStoreTest {
     public void testEnumRem() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addRemovalRule(E, 8);
         rs.addRemovalRule(E, -2);
@@ -205,6 +213,7 @@ public class RuleStoreTest {
     public void testBoundFullDom() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(I);
 
@@ -226,6 +235,7 @@ public class RuleStoreTest {
     public void testBoundLow() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(I);
         int rmask = rs.getMask(I);
@@ -253,6 +263,7 @@ public class RuleStoreTest {
     public void testBoundUpp() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addUpperBoundRule(I);
         int rmask = rs.getMask(I);
@@ -281,6 +292,7 @@ public class RuleStoreTest {
     public void testBoundBound() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(I);
         rs.addUpperBoundRule(I);
@@ -310,6 +322,7 @@ public class RuleStoreTest {
     public void testBoundRem() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
         rs.addRemovalRule(I, 8);
         rs.addRemovalRule(I, -2);
 
@@ -335,6 +348,7 @@ public class RuleStoreTest {
     public void testBoundRem2() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
         rs.matchDomain(RuleStore.RM, I, IntEventType.REMOVE, 7, -1, -1);
     }
 
@@ -342,6 +356,7 @@ public class RuleStoreTest {
     public void testBoolFullDom() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(B);
         // simulates the test of an instantiation event
@@ -355,6 +370,7 @@ public class RuleStoreTest {
     public void testDecRefutation() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
+        rs.init(new Explanation(null, false));
 
         IntStrategy is = ISF.lexico_LB(E, I, B);
         Decision d1 = null, d2 = null, d3 = null;
@@ -377,7 +393,7 @@ public class RuleStoreTest {
             Assert.fail();
         }
 
-        Explanation r = new Explanation(false);
+        Explanation r = new Explanation(null, false);
         r.addDecicion(d1);
         r.addDecicion(d2);
 

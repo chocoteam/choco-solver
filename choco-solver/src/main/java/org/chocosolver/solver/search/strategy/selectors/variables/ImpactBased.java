@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,23 +29,22 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.ISearchLoop;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.fast.FastDecision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.IntList;
 
 import java.util.Random;
 
@@ -71,13 +71,13 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     protected int currentVar = -1, currentVal = -1;
 
-    TIntList bests = new TIntArrayList();
+    IntList bests = new IntList();
 
     java.util.Random random; //  a random object to break ties
 
     protected int nodeImpact;
 
-    PoolManager<FastDecision> decisionPool;
+    PoolManager<IntDecision> decisionPool;
 
     protected Solver solver;
 
@@ -152,9 +152,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             currentVal = random.nextBoolean() ? lb : ub;
         }
 
-        FastDecision currrent = decisionPool.getE();
+        IntDecision currrent = decisionPool.getE();
         if (currrent == null) {
-            currrent = new FastDecision(decisionPool);
+            currrent = new IntDecision(decisionPool);
         }
         currrent.set(variable, currentVal, DecisionOperator.int_eq);
         //System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
@@ -194,7 +194,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     @Override
-    public void init() throws ContradictionException {
+    public boolean init(){
         long tl = System.currentTimeMillis() + this.timeLimit;
         // 0. Data structure construction
         Ilabel = new double[vars.length][];
@@ -260,9 +260,10 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         if (learnsAndFails) {
             // If the initialisation detects a failure, then the problem has no solution!
             learnsAndFails = false;
-            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
+//            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
+            return false;
         } else if (System.currentTimeMillis() > tl) {
-            LOGGER.debug("impact Search stops its init phase -- reach time limit!");
+            if(solver.getSettings().warnUser()) Chatterbox.err.printf("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();
@@ -274,41 +275,37 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 }
             }
         }
+        return true;
     }
 
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-        if (currentVar > -1) { // if the decision was computed by another strategy
-            if (asgntFailed) {
-                updateImpact(1.0d, currentVar, currentVal);
-            } else {
-                double sssz = searchSpaceSize();
-                updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
-                searchSpaceSize.set(sssz);
-            }
-            currentVar = -1;
-        }
-        asgntFailed = false; // to handle cases where a contradiction was thrown, but the decision was computed outside
-        reevaluateImpact();
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-        reevaluateImpact();
-    }
 
     @Override
     public void onContradiction(ContradictionException cex) {
         asgntFailed = true;
+    }
+
+
+
+    @Override
+    public void beforeDownBranch(boolean left) {
+    }
+
+    @Override
+    public void afterDownBranch(boolean left) {
+        if(left){
+            if (currentVar > -1) { // if the decision was computed by another strategy
+                if (asgntFailed) {
+                    updateImpact(1.0d, currentVar, currentVal);
+                } else {
+                    double sssz = searchSpaceSize();
+                    updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
+                    searchSpaceSize.set(sssz);
+                }
+                currentVar = -1;
+            }
+            asgntFailed = false; // to handle cases where a contradiction was thrown, but the decision was computed outside
+        }
+        reevaluateImpact();
     }
 
     /**
@@ -447,11 +444,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             if (learnsAndFails) {
                 learnsAndFails = false;
-                solver.getSearchLoop().moveTo(ISearchLoop.UP_BRANCH);
-                //noinspection ThrowableResultOfMethodCallIgnored
-                solver.getSearchLoop().getSMList().onContradiction(
-						solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::reevaluate:: detect failures")
-				);
             }
         }
     }

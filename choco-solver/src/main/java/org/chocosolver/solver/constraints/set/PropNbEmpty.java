@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,10 +29,8 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -69,7 +68,7 @@ public class PropNbEmpty extends Propagator<Variable> {
      * Restricts the number of empty sets
      * |{s in sets such that |s|=0}| = nbEmpty
      *
-     * @param sets array of set variables
+     * @param sets    array of set variables
      * @param nbEmpty integer variable
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
@@ -80,7 +79,7 @@ public class PropNbEmpty extends Propagator<Variable> {
             this.sets[i] = (SetVar) vars[i];
         }
         this.nbEmpty = (IntVar) vars[n];
-		IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = solver.getEnvironment();
         this.canBeEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
         this.isEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
         this.nbAlreadyEmpty = environment.makeInt();
@@ -93,13 +92,8 @@ public class PropNbEmpty extends Propagator<Variable> {
 
 
     @Override
-    public boolean advise(int idxVarInProp, int mask) {
-        return super.advise(idxVarInProp, mask) && (idxVarInProp >= n || canBeEmpty.contain(idxVarInProp));
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx < n) {
+        if (vIdx < vars.length - 1) {
             return SetEventType.all();
         } else {
             return IntEventType.boundAndInst();
@@ -133,16 +127,17 @@ public class PropNbEmpty extends Propagator<Variable> {
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
         if (v < n) {
-            assert canBeEmpty.contain(v);
-            if (sets[v].getKernelSize() > 0) {
-                canBeEmpty.remove(v);
-                nbMaybeEmpty.add(-1);
-            } else {
-                if (sets[v].getEnvelopeSize() == 0) {
-                    isEmpty.add(v);
+            if (canBeEmpty.contain(v)) {
+                if (sets[v].getKernelSize() > 0) {
                     canBeEmpty.remove(v);
                     nbMaybeEmpty.add(-1);
-                    nbAlreadyEmpty.add(1);
+                } else {
+                    if (sets[v].getEnvelopeSize() == 0) {
+                        isEmpty.add(v);
+                        canBeEmpty.remove(v);
+                        nbMaybeEmpty.add(-1);
+                        nbAlreadyEmpty.add(1);
+                    }
                 }
             }
         }
@@ -152,14 +147,13 @@ public class PropNbEmpty extends Propagator<Variable> {
     public void filter() throws ContradictionException {
         int nbMin = nbAlreadyEmpty.get();
         int nbMax = nbMin + nbMaybeEmpty.get();
-        nbEmpty.updateLowerBound(nbMin, aCause);
-        nbEmpty.updateUpperBound(nbMax, aCause);
+        nbEmpty.updateBounds(nbMin, nbMax, this);
         ///////////////////////////////////////
         if (nbEmpty.isInstantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
-                        sets[i].removeFromEnvelope(j, aCause);
+                        sets[i].removeFromEnvelope(j, this);
                     }
                     canBeEmpty.remove(i);
                     isEmpty.add(i);
@@ -170,7 +164,7 @@ public class PropNbEmpty extends Propagator<Variable> {
                 boolean allFixed = true;
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     if (sets[i].getEnvelopeSize() == 1) {
-                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), aCause);
+                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), this);
                         canBeEmpty.remove(i);
                     } else {
                         allFixed = false;
@@ -204,19 +198,4 @@ public class PropNbEmpty extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = sets.length;
-            SetVar[] svars = new SetVar[size];
-            for (int i = 0; i < size; i++) {
-                sets[i].duplicate(solver, identitymap);
-                svars[i] = (SetVar) identitymap.get(sets[i]);
-            }
-            nbEmpty.duplicate(solver, identitymap);
-            IntVar C = (IntVar) identitymap.get(nbEmpty);
-
-            identitymap.put(this, new PropNbEmpty(svars, C));
-        }
-    }
 }

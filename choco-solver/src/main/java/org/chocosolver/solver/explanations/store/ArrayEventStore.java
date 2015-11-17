@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -33,8 +34,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by cprudhom on 13/11/14.
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory;
 public class ArrayEventStore implements IEventStore {
 
     private static final int SIZE = 128;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArrayEventStore.class);
 
     //*****************************************//
     // STRUCTURES DEDICATED TO EVENT RECORDING //
@@ -75,10 +73,6 @@ public class ArrayEventStore implements IEventStore {
         if (idx >= varChunks.length) {
             increase();
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("WRITE in {} ({}): < {} / {} / {} / {} / {} >", idx, size.getEnvironment().getWorldIndex(), var, cause, mask, one, two, three);
-        }
-
         varChunks[idx] = var;
         cauChunks[idx] = cause;
         masChunks[idx] = mask;
@@ -89,29 +83,31 @@ public class ArrayEventStore implements IEventStore {
     }
 
     private void increase() {
-        int _size = varChunks.length;
-        IntVar[] varBigger = new IntVar[_size + SIZE];
-        System.arraycopy(varChunks, 0, varBigger, 0, _size);
+        int oldCapacity = varChunks.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+
+        IntVar[] varBigger = new IntVar[newCapacity];
+        System.arraycopy(varChunks, 0, varBigger, 0, oldCapacity);
         varChunks = varBigger;
 
-        ICause[] cauBigger = new ICause[_size + SIZE];
-        System.arraycopy(cauChunks, 0, cauBigger, 0, _size);
+        ICause[] cauBigger = new ICause[newCapacity];
+        System.arraycopy(cauChunks, 0, cauBigger, 0, oldCapacity);
         cauChunks = cauBigger;
 
-        IEventType[] masBigger = new IEventType[_size + SIZE];
-        System.arraycopy(masChunks, 0, masBigger, 0, _size);
+        IEventType[] masBigger = new IEventType[newCapacity];
+        System.arraycopy(masChunks, 0, masBigger, 0, oldCapacity);
         masChunks = masBigger;
 
-        int[] valBigger = new int[_size + SIZE];
-        System.arraycopy(val1Chunks, 0, valBigger, 0, _size);
+        int[] valBigger = new int[newCapacity];
+        System.arraycopy(val1Chunks, 0, valBigger, 0, oldCapacity);
         val1Chunks = valBigger;
 
-        valBigger = new int[_size + SIZE];
-        System.arraycopy(val2Chunks, 0, valBigger, 0, _size);
+        valBigger = new int[newCapacity];
+        System.arraycopy(val2Chunks, 0, valBigger, 0, oldCapacity);
         val2Chunks = valBigger;
 
-        valBigger = new int[_size + SIZE];
-        System.arraycopy(val3Chunks, 0, valBigger, 0, _size);
+        valBigger = new int[newCapacity];
+        System.arraycopy(val3Chunks, 0, valBigger, 0, oldCapacity);
         val3Chunks = valBigger;
     }
 

@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -33,8 +34,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.limits.TimeCounter;
+import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -76,7 +78,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.geometrical(solver, 2, 1.2, new NodeCounter(2), 2);
+        SearchMonitorFactory.geometrical(solver, 2, 1.1, new NodeCounter(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -87,7 +89,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.luby(solver, 2, 2, new NodeCounter(2), 2);
+        SearchMonitorFactory.luby(solver, 2, 2, new NodeCounter(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -138,7 +140,7 @@ public class RestartTest {
             for (int i = 0; i < n; i++) {
                 solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
             }
-            SMF.restartAfterEachSolution(solver);
+            SLF.restartOnSolutions(solver);
             solver.set(ISF.lexico_LB(X));
 //            SMF.log(solver, false, false);
             SMF.limitSolution(solver, 100);
@@ -150,7 +152,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart2() {
         Solver solver = buildQ(8);
-        SearchMonitorFactory.geometrical(solver, 10, 1.2, new TimeCounter(solver, 10), 2);
+        SearchMonitorFactory.geometrical(solver, 10, 1.2, new FailCounter(solver, 10), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);

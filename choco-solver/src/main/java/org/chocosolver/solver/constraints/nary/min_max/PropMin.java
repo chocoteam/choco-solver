@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -46,95 +45,97 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropMin extends Propagator<IntVar> {
 
-	final int n;
+    final int n;
 
-	public PropMin(IntVar[] variables, IntVar maxVar) {
-		super(ArrayUtils.append(variables,new IntVar[]{maxVar}), PropagatorPriority.LINEAR, false);
-		n = variables.length;
-		assert n>0;
-	}
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return IntEventType.boundAndInst();
-	}
-
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int idx = -1;
-		int ub = vars[n].getUB()+1;
-		int lb = ub;
-		// update min
-		for(int i=0; i<n; i++){
-			lb = Math.min(lb,vars[i].getLB());
-			ub = Math.min(ub,vars[i].getUB());
-		}
-		vars[n].updateLowerBound(lb,aCause);
-		vars[n].updateUpperBound(ub,aCause);
-		lb = vars[n].getLB();
-		// back-propagation
-		for(int i=0; i<n; i++){
-			if(vars[i].getLB()<=ub){
-				idx=idx==-1?i:-2;
-				vars[i].updateLowerBound(lb,aCause);
-			}
-		}
-		if(idx>=0){
-			if(vars[idx].updateUpperBound(ub,aCause) && lb==ub){ // entailed
-				setPassive();
-			}
-		}
-	}
-
-	@Override
-	public ESat isEntailed() {
-		int lb = vars[n].getLB();
-		for(int i=0; i<n; i++){
-			if(vars[i].getUB()<lb){
-				return ESat.FALSE;
-			}
-		}
-		for(int i=0; i<n; i++){
-			if(vars[i].getLB()<lb){
-				return ESat.UNDEFINED;
-			}
-		}
-		if(vars[n].isInstantiated()){
-			for(int i=0; i<n; i++){
-				if(vars[i].isInstantiatedTo(lb)){
-					return ESat.TRUE;
-				}
-			}
-		}
-		return ESat.UNDEFINED;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("PropMin ");
-		sb.append(vars[n]).append(" = min({");
-		sb.append(vars[0]);
-		for (int i = 1; i < n; i++) {
-			sb.append(", ");
-			sb.append(vars[i]);
-		}
-		sb.append("})");
-		return sb.toString();
-
-	}
+    public PropMin(IntVar[] variables, IntVar maxVar) {
+        super(ArrayUtils.append(variables, new IntVar[]{maxVar}), PropagatorPriority.LINEAR, false);
+        n = variables.length;
+        assert n > 0;
+    }
 
     @Override
-        public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-            if (!identitymap.containsKey(this)) {
-                int size = this.vars.length - 1;
-                IntVar[] aVars = new IntVar[size];
-                for (int i = 0; i < size; i++) {
-                    this.vars[i].duplicate(solver, identitymap);
-                    aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-                }
-                this.vars[size].duplicate(solver, identitymap);
-                IntVar M = (IntVar) identitymap.get(this.vars[size]);
-                identitymap.put(this, new PropMin(aVars, M));
-            }
+    public int getPropagationConditions(int vIdx) {
+        return IntEventType.boundAndInst();
     }
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        boolean filter;
+        do {
+            filter = false;
+            int lb = Integer.MAX_VALUE;
+            int ub = Integer.MAX_VALUE;
+            int min = vars[n].getLB();
+            // update min
+            for (int i = 0; i < n; i++) {
+                filter |= vars[i].updateLowerBound(min, this);
+                lb = Math.min(lb, vars[i].getLB());
+                ub = Math.min(ub, vars[i].getUB());
+            }
+            filter |= vars[n].updateLowerBound(lb, this);
+            filter |= vars[n].updateUpperBound(ub, this);
+            ub = Math.min(ub, vars[n].getUB()); // to deal with holes in vars[n] or its instantiation
+            // back-propagation
+            int c = 0, idx = -1;
+            for (int i = 0; i < n; i++) {
+                if (vars[i].getLB() > ub) {
+                    c++;
+                } else {
+                    idx = i;
+                }
+            }
+            if (c == vars.length - 2) {
+                filter = false;
+                vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
+                if (vars[n].isInstantiated()) {
+                    setPassive();
+                } else if (vars[idx].hasEnumeratedDomain()) {
+                    // for enumerated variables only
+                    while (vars[n].getLB() != vars[idx].getLB()
+                            || vars[n].getUB() != vars[idx].getUB()) {
+                        vars[n].updateBounds(vars[idx].getLB(), vars[idx].getUB(), this);
+                        vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
+                    }
+                }
+            }
+        } while (filter);
+    }
+
+    @Override
+    public ESat isEntailed() {
+        int lb = vars[n].getLB();
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getUB() < lb) {
+                return ESat.FALSE;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (vars[i].getLB() < lb) {
+                return ESat.UNDEFINED;
+            }
+        }
+        if (vars[n].isInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                if (vars[i].isInstantiatedTo(lb)) {
+                    return ESat.TRUE;
+                }
+            }
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("PropMin ");
+        sb.append(vars[n]).append(" = min({");
+        sb.append(vars[0]);
+        for (int i = 1; i < n; i++) {
+            sb.append(", ");
+            sb.append(vars[i]);
+        }
+        sb.append("})");
+        return sb.toString();
+
+    }
+
 }

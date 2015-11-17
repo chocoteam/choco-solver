@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -34,6 +35,7 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
@@ -222,27 +224,27 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 162);
     }
 
-	@Test(groups = "1s", expectedExceptions = SolverException.class)
-	public void testNeg(){
-		Solver solver = new Solver();
-		IntVar[] CS = VF.enumeratedArray("CS", 4, -10, 10, solver);
-		solver.post(ICF.regular(CS, new FiniteAutomaton("<-9>1*")));
-		Chatterbox.showSolutions(solver);
-		solver.findAllSolutions();
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    public void testNeg() {
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 4, -10, 10, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("<-9>1*")));
+        Chatterbox.showSolutions(solver);
+        solver.findAllSolutions();
 
-		final List<Solution> solutions = solver.getSolutionRecorder().getSolutions();
+        final List<Solution> solutions = solver.getSolutionRecorder().getSolutions();
 
-		System.out.println(solutions);
+        System.out.println(solutions);
 
-		Assert.assertEquals(1, solutions.size());
-		Assert.assertEquals(-9, (int)solutions.get(0).getIntVal(CS[0]));
-		Assert.assertEquals(1, (int)solutions.get(0).getIntVal(CS[1]));
-		Assert.assertEquals(1, (int)solutions.get(0).getIntVal(CS[2]));
-		Assert.assertEquals(-5,(int) solutions.get(0).getIntVal(CS[3]));
-	}
+        Assert.assertEquals(1, solutions.size());
+        Assert.assertEquals(-9, (int) solutions.get(0).getIntVal(CS[0]));
+        Assert.assertEquals(1, (int) solutions.get(0).getIntVal(CS[1]));
+        Assert.assertEquals(1, (int) solutions.get(0).getIntVal(CS[2]));
+        Assert.assertEquals(-5, (int) solutions.get(0).getIntVal(CS[3]));
+    }
 
     @Test(groups = "1s")
-    public void testregExp1(){
+    public void testregExp1() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
         solver.post(ICF.regular(CS, new FiniteAutomaton("[12]*")));
@@ -251,7 +253,7 @@ public class RegularTest {
     }
 
     @Test(groups = "1s")
-    public void testregExp2(){
+    public void testregExp2() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
         solver.post(ICF.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)));
@@ -260,10 +262,10 @@ public class RegularTest {
     }
 
     @Test(groups = "1s")
-    public void testregExp3(){
+    public void testregExp3() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("3?.3?", 0,3)));
+        solver.post(ICF.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -271,7 +273,7 @@ public class RegularTest {
     }
 
     @Test(groups = "1s")
-    public void testregExp4(){
+    public void testregExp4() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
         solver.post(ICF.regular(CS, new FiniteAutomaton(".*", 0, 3)));
@@ -280,7 +282,7 @@ public class RegularTest {
     }
 
     @Test(groups = "1s")
-    public void testregExp5(){
+    public void testregExp5() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
         solver.post(ICF.regular(CS, new FiniteAutomaton("1{2}")));
@@ -291,7 +293,7 @@ public class RegularTest {
     }
 
     @Test(groups = "1s")
-    public void testregExp6(){
+    public void testregExp6() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 4, 0, 3, solver);
         solver.post(ICF.regular(CS, new FiniteAutomaton("0{2,3}1*")));
@@ -300,4 +302,36 @@ public class RegularTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
+
+    @Test(groups = "1s")
+    public void testregExp7() {
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 10, 0, 2, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")));
+        Chatterbox.showSolutions(solver, () -> {
+            for (int i = 0; i < 10; i++) {
+                System.out.printf("%d", CS[i].getValue());
+            }
+//            System.out.printf("\n");
+            return "";
+        });
+        solver.set(ISF.lexico_LB(CS));
+//        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 84);
+    }
+
+
+    @Test(groups = "1s")
+    public void testregExp8() {
+        Solver solver = new Solver();
+        IntVar[] CS = VF.enumeratedArray("CS", 3, new int[]{43, 59, 117}, solver);
+        solver.post(ICF.regular(CS, new FiniteAutomaton("<43><59><117>")));
+        solver.set(ISF.lexico_LB(CS));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+
+    }
+
+
 }

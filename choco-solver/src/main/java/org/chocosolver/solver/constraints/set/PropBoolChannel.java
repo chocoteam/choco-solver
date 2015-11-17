@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -35,8 +36,6 @@
 
 package org.chocosolver.solver.constraints.set;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -89,8 +88,8 @@ public class PropBoolChannel extends Propagator<Variable> {
         this.sdm = this.set.monitorDelta(this);
         this.offSet = offSet;
         // PROCEDURES
-        setForced = element -> bools[element - offSet].setToTrue(aCause);
-        setRemoved = element -> bools[element - offSet].setToFalse(aCause);
+        setForced = element -> bools[element - offSet].setToTrue(this);
+        setRemoved = element -> bools[element - offSet].setToFalse(this);
     }
 
     //***********************************************************************************
@@ -102,21 +101,21 @@ public class PropBoolChannel extends Propagator<Variable> {
         for (int i = 0; i < n; i++) {
             if (bools[i].isInstantiated()) {
                 if (bools[i].getValue() == 0) {
-                    set.removeFromEnvelope(i + offSet, aCause);
+                    set.removeFromEnvelope(i + offSet, this);
                 } else {
-                    set.addToKernel(i + offSet, aCause);
+                    set.addToKernel(i + offSet, this);
                 }
             } else if (!set.envelopeContains(i + offSet)) {
-                bools[i].setToFalse(aCause);
+                bools[i].setToFalse(this);
             }
         }
         for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
             if (j < offSet || j >= n + offSet) {
-                set.removeFromEnvelope(j, aCause);
+                set.removeFromEnvelope(j, this);
             }
         }
         for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
-            bools[j - offSet].setToTrue(aCause);
+            bools[j - offSet].setToTrue(this);
         }
         sdm.unfreeze();
     }
@@ -125,9 +124,9 @@ public class PropBoolChannel extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         if (i < n) {
             if (bools[i].getValue() == 0) {
-                set.removeFromEnvelope(i + offSet, aCause);
+                set.removeFromEnvelope(i + offSet, this);
             } else {
-                set.addToKernel(i + offSet, aCause);
+                set.addToKernel(i + offSet, this);
             }
         } else {
             sdm.freeze();
@@ -158,18 +157,4 @@ public class PropBoolChannel extends Propagator<Variable> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.bools.length;
-            BoolVar[] aVars = new BoolVar[size];
-            for (int i = 0; i < size; i++) {
-                this.bools[i].duplicate(solver, identitymap);
-                aVars[i] = (BoolVar) identitymap.get(this.bools[i]);
-            }
-            this.set.duplicate(solver, identitymap);
-            SetVar S = (SetVar) identitymap.get(this.set);
-            identitymap.put(this, new PropBoolChannel(S, aVars, this.offSet));
-        }
-    }
 }

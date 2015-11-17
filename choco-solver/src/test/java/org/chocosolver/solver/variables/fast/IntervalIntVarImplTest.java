@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -30,8 +31,13 @@ package org.chocosolver.solver.variables.fast;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
@@ -187,6 +193,214 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(2, rit.max());
         rit.previous();
         Assert.assertFalse(rit.hasPrevious());
+    }
 
+    @Test(groups = "1s")
+    public void testRemVals1() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(-3, -1, 1, 2, 4);
+        x.removeValues(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), -2);
+        Assert.assertEquals(x.getUB(), 3);
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals21() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(-3, -2);
+        Assert.assertTrue(x.removeValues(rems, Cause.Null));
+        Assert.assertEquals(x.getLB(), -1);
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals22() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-4);
+        rems.add(-4);
+        Assert.assertFalse(x.removeValues(rems, Cause.Null));
+        Assert.assertEquals(x.getLB(), -3);
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(1, 2, 3);
+        Assert.assertTrue(x.removeValues(rems, Cause.Null));
+        Assert.assertEquals(x.getUB(), 0);
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals31() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(4);
+        Assert.assertFalse(x.removeValues(rems, Cause.Null));
+        Assert.assertEquals(x.getUB(), 3);
+    }
+
+
+    @Test(groups = "1s")
+    public void testRemVals41() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(-1, 0, 1);
+        Assert.assertFalse(x.removeValues(rems, Cause.Null));
+    }
+
+    @Test(groups = "1s")
+    public void testRemVals42() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(0);
+        Assert.assertFalse(x.removeValues(rems, Cause.Null));
+    }
+
+    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    public void testRemVals5() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -1, 1, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-1);
+        rems.add(-1, 0, 1);
+        x.removeValues(rems, Cause.Null);
+        Assert.fail();
+    }
+
+    @Test(groups = "1s")
+    public void testUpdBounds1() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        x.updateBounds(-2, 2, Cause.Null);
+        Assert.assertEquals(x.getLB(), -2);
+        Assert.assertEquals(x.getUB(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testUpdBounds2() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        x.updateBounds(-2, 4, Cause.Null);
+        Assert.assertEquals(x.getLB(), -2);
+        Assert.assertEquals(x.getUB(), 3);
+    }
+
+    @Test(groups = "1s")
+    public void testUpdBounds3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        x.updateBounds(-4, 2, Cause.Null);
+        Assert.assertEquals(x.getLB(), -3);
+        Assert.assertEquals(x.getUB(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testUpdBounds4() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        x.updateBounds(0, 0, Cause.Null);
+        Assert.assertTrue(x.isInstantiatedTo(0));
+    }
+
+    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    public void testUpdBounds5() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        x.updateBounds(4, -2, Cause.Null);
+    }
+
+    @Test(groups = "1s")
+    public void testRemValsBut1() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(-1, 1, 2, 4);
+        x.removeAllValuesBut(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), -1);
+        Assert.assertEquals(x.getUB(), 2);
+
+    }
+
+    @Test(groups = "1s")
+    public void testRemValsBut21() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(-3, -2);
+        Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
+        Assert.assertEquals(x.getLB(), -3);
+        Assert.assertEquals(x.getUB(), -2);
+    }
+
+    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    public void testRemValsBut22() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-4);
+        rems.add(-4);
+        x.removeAllValuesBut(rems, Cause.Null);
+    }
+
+    @Test(groups = "1s")
+    public void testRemValsBut3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(1, 2, 3);
+        Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
+        Assert.assertEquals(x.getLB(), 1);
+        Assert.assertEquals(x.getUB(), 3);
+    }
+
+    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    public void testRemValsBut31() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(4);
+        x.removeAllValuesBut(rems, Cause.Null);
+    }
+
+
+    @Test(groups = "1s")
+    public void testRemValsBut41() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -1, 1, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(-1, 0, 1);
+        Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
+    }
+
+    @Test(groups = "1s")
+    public void testRemValsBut42() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("X", -3, 3, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-3);
+        rems.add(0);
+        Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
+        Assert.assertTrue(x.isInstantiatedTo(0));
     }
 }

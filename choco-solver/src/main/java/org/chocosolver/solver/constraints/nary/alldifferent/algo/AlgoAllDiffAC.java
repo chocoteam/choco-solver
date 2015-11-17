@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -101,9 +102,9 @@ public class AlgoAllDiffAC {
     // PROPAGATION
     //***********************************************************************************
 
-    public void propagate() throws ContradictionException {
+    public boolean propagate() throws ContradictionException {
         findMaximumMatching();
-        filter();
+        return filter();
     }
 
     //***********************************************************************************
@@ -204,7 +205,8 @@ public class AlgoAllDiffAC {
         digraph.removeNode(n2);
     }
 
-    protected void filter() throws ContradictionException {
+    protected boolean filter() throws ContradictionException {
+        boolean filter =false;
         buildSCC();
         int j, ub;
         IntVar v;
@@ -215,9 +217,9 @@ public class AlgoAllDiffAC {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
                     if (matching[i] == j) {
-                        v.instantiateTo(k, aCause);
+                        filter |= v.instantiateTo(k, aCause);
                     } else {
-                        v.removeValue(k, aCause);
+                        filter |= v.removeValue(k, aCause);
                         digraph.removeArc(i, j);
                     }
                 }
@@ -230,17 +232,18 @@ public class AlgoAllDiffAC {
                 for (int k = v.getLB(); k <= ub; k++) {
                     j = map.get(k);
                     if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                        v.removeValue(k, aCause);
+                        filter |= v.removeValue(k, aCause);
                     }
                 }
                 int lb = v.getLB();
                 for (int k = v.getUB(); k >= lb; k--) {
                     j = map.get(k);
                     if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                        v.removeValue(k, aCause);
+                        filter |= v.removeValue(k, aCause);
                     }
                 }
             }
         }
+        return filter;
     }
 }

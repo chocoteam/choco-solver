@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -33,8 +34,6 @@ import org.chocosolver.choco.checker.Modeler;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,8 +57,6 @@ public class ConsistencyChecker {
     enum Consistency {
         ac, bc
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("test");
 
     public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
@@ -98,18 +95,16 @@ public class ConsistencyChecker {
                             Solver test = modeler.model(nbVar, _domains, map, parameters);
                             try {
                                 if (!test.findSolution()) {
-                                    LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                            ds, ide, h, rvars[d], val, loop, seed);
-                                    LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                                    System.out.println(
+                                            String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
+                                            ds, ide, h, rvars[d], val, loop, seed));
+                                    System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
                                     writeDown(ref);
                                     fail("no solution found");
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                LOGGER.error(e.getMessage());
-                                LOGGER.error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
-                                        ds, ide, h, rvars[d], val, loop, seed);
-                                LOGGER.error("REF:\n{}\nTEST:\n{}", ref, test);
+                                System.out.println(e.getMessage());
                                 writeDown(ref);
                                 fail();
                             }
@@ -127,12 +122,12 @@ public class ConsistencyChecker {
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LOGGER.debug("Pas de solution pour ce probleme => rien a tester !");
+//            System.out.printf("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
             writeDown(ref);
-            LOGGER.error(e.getMessage());
-            LOGGER.error("REF:\n{}\n", ref);
+            System.out.println(e.getMessage());
+            System.out.println(String.format("REF:\n%s\n", ref));
             fail();
         }
         return ref;
@@ -160,6 +155,6 @@ public class ConsistencyChecker {
         } catch (IOException ee) {
             ee.printStackTrace();
         }
-        LOGGER.error("{}", f.getAbsolutePath());
+        System.out.println(""+ f.getAbsolutePath());
     }
 }

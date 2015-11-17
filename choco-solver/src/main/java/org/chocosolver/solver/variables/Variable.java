@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,7 +29,6 @@
  */
 package org.chocosolver.solver.variables;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Solver;
@@ -37,28 +37,34 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 import java.io.Serializable;
 
 /**
+ *
+ * To developers: any constructor of variable must pass in parameter
+ * the back-end ISolver, that is, in decreasing order:
+ * - the solver portfolio,
+ * - the solver (or portfolio workers but fes).
  * Created by IntelliJ IDEA.
- * User: xlorca
+ * User: xlorca, Charles Prud'homme
  */
 public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
     // TYPE (exclusive)
-    public static final int VAR = 1;
-    public static final int CSTE = 1 << 1;
-    public static final int VIEW = 1 << 2;
-    public static final int TYPE = (1 << 3) - 1;
+    int VAR = 1;
+    int CSTE = 1 << 1;
+    int VIEW = 1 << 2;
+    int TYPE = (1 << 3) - 1;
     // KIND (exclusive)
-    public static final int INT = 1 << 3;
-    public static final int BOOL = INT | (1 << 4);
-    public static final int SET = 1 << 5;
-    public static final int REAL = 1 << 6;
-    public static final int KIND = (1 << 7) - 1 - TYPE;
+    int INT = 1 << 3;
+    int BOOL = INT | (1 << 4);
+    int SET = 1 << 5;
+    int REAL = 1 << 6;
+    int KIND = (1 << 10) - 1 - TYPE;
 
     /**
      * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
@@ -97,6 +103,8 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     int getNbProps();
 
     int[] getPIndices();
+
+    int getDindex(int i);
 
     /**
      * Return the position of the variable in the propagator at position pidx
@@ -192,11 +200,10 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
     /**
      * Throws a contradiction exception based on <cause, message>
-     *  @param cause   ICause causing the exception
-     * @param event   event causing the contradiction
-	 * @param message the detailed message  @throws ContradictionException expected behavior
-	 */
-    void contradiction(ICause cause, IEventType event, String message) throws ContradictionException;
+     * @param cause   ICause causing the exception
+     * @param message the detailed message  @throws ContradictionException expected behavior
+     */
+    void contradiction(ICause cause, String message) throws ContradictionException;
 
     /**
      * Return the associated solver
@@ -240,9 +247,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     <V extends Variable> V duplicate();
 
     /**
-     * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
-     * @param solver target solver
-     * @param identitymap a map to guarantee uniqueness of objects
+     * For scheduling purpose only
      */
-    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
+    EvtScheduler _schedIter();
 }

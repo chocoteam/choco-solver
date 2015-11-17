@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,7 +29,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
@@ -40,7 +40,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.tools.StringUtils;
 
@@ -117,7 +116,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         if (!kernelContains(element)) {
-            contradiction(cause, SetEventType.ADD_TO_KER, "");
+            contradiction(cause, "");
         }
         return false;
     }
@@ -125,7 +124,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
         if (envelopeContains(element)) {
-            contradiction(cause, SetEventType.REMOVE_FROM_ENVELOPE, "");
+            contradiction(cause, "");
         }
         return false;
     }
@@ -133,11 +132,11 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
         if (value.length != this.values.length) {
-            contradiction(cause, null, "");
+            contradiction(cause, "");
         }
         for (int v : value) {
             if (!kernelContains(v)) {
-                contradiction(cause, null, "");
+                contradiction(cause, "");
             }
         }
         return false;
@@ -196,7 +195,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public void contradiction(ICause cause, IEventType event, String message) throws ContradictionException {
+    public void contradiction(ICause cause, String message) throws ContradictionException {
         solver.getEngine().fails(cause, this, message);
     }
 
@@ -207,15 +206,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public SetVar duplicate() {
-        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), this.getSolver());
+        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), solver);
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            FixedSetVarImpl clone = new FixedSetVarImpl(this.name, this.values, solver);
-            identitymap.put(this, clone);
-            assert mIdx == 0;
-        }
-    }
 }

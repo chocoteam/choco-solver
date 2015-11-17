@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.count;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -39,6 +38,10 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} = occVar
@@ -101,7 +104,7 @@ public class PropCountVar extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int minCard = Integer.MAX_VALUE / 10;
+        int minCard = MAX_VALUE / 10;
         int maxCard = -minCard;
         int cardLB = card.getLB();
         int cardUB = card.getUB();
@@ -118,21 +121,20 @@ public class PropCountVar extends Propagator<IntVar> {
                 }
             }
             if (cardLB > max || cardUB < min) {
-                val.removeValue(value, aCause);
+                val.removeValue(value, this);
             } else {
-                minCard = Math.min(minCard, min);
-                maxCard = Math.max(maxCard, max);
+                minCard = min(minCard, min);
+                maxCard = max(maxCard, max);
             }
         }
-        card.updateLowerBound(minCard, aCause);
-        card.updateUpperBound(maxCard, aCause);
+        card.updateBounds(minCard, maxCard, this);
         if (val.isInstantiated() && card.isInstantiated()) {
             int nb = card.getValue();
             int value = val.getValue();
             if (maxCard == nb) {
                 for (int i = 0; i < n; i++) {
                     if (vars[i].contains(value)) {
-                        vars[i].instantiateTo(value, aCause);
+                        vars[i].instantiateTo(value, this);
                     }
                 }
                 setPassive();
@@ -143,11 +145,11 @@ public class PropCountVar extends Propagator<IntVar> {
                         if (vars[i].isInstantiated()) {
                             nbInst++;
                         } else {
-                            vars[i].removeValue(value, aCause);
+                            vars[i].removeValue(value, this);
                         }
                     }
                 }
-                card.instantiateTo(nbInst, aCause);
+                card.instantiateTo(nbInst, this);
             }
         }
     }
@@ -158,7 +160,7 @@ public class PropCountVar extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == n) {// cardinality variables
+        if (vIdx == vars.length - 2) {// cardinality variables
             return IntEventType.boundAndInst();
         }
         return IntEventType.all();
@@ -204,7 +206,7 @@ public class PropCountVar extends Propagator<IntVar> {
             assert evt == IntEventType.REMOVE;
             // "value" is the removed value:
             // either not enough variable has "value" in their domain,
-            // or too much has not "value"
+            // or too many has not "value"
             for (int i = 0; i < n; i++) {
                 if (vars[i].isInstantiatedTo(value)) {
                     nrules |= ruleStore.addFullDomainRule(vars[i]);
@@ -214,6 +216,7 @@ public class PropCountVar extends Propagator<IntVar> {
             }
             nrules |= ruleStore.addBoundsRule(card);
         } else if (var == card) { // deal with "card" variable
+            assert IntEventType.isBound(evt.getMask()) || IntEventType.isInstantiate(evt.getMask());
             for (int i = 0; i < n; i++) {
                 nrules |= ruleStore.addFullDomainRule(vars[i]);
             }
@@ -235,20 +238,4 @@ public class PropCountVar extends Propagator<IntVar> {
         return nrules;
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 2;
-            IntVar[] aVars = new IntVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (IntVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size - 1].duplicate(solver, identitymap);
-            IntVar aVar1 = (IntVar) identitymap.get(this.vars[size - 1]);
-            this.vars[size].duplicate(solver, identitymap);
-            IntVar aVar2 = (IntVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropCountVar(aVars, aVar2, aVar1));
-        }
-    }
 }

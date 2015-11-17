@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -39,14 +40,12 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.propagation.hardcoded.util.IId2AbId;
-import org.chocosolver.solver.propagation.hardcoded.util.MId2AbId;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.chocosolver.util.objects.IntMap;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -75,15 +74,14 @@ import java.util.List;
  */
 public class TwoBucketPropagationEngine implements IPropagationEngine {
 
-    final Logger LOGGER = LoggerFactory.getLogger(TwoBucketPropagationEngine.class);
-
     private static final int WORD_MASK = 0xffffffff;
 
     protected final Solver solver;
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected Propagator[] propagators;
-
+    private final boolean DEBUG,COLOR;
+    
 
     private final short[] match_f;
     private final short[] match_c;
@@ -91,7 +89,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private short max_f;
     private short max_c;
 
-    protected IId2AbId p2i; // mapping between propagator ID and its absolute index
+    protected IntMap p2i; // mapping between propagator ID and its absolute index
 
     protected Propagator lastProp;
     protected int notEmpty; // point out the no empty queues
@@ -120,6 +118,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         match_f = solver.getSettings().getFineEventPriority();
         match_c = solver.getSettings().getCoarseEventPriority();
 
+        this.DEBUG = solver.getSettings().debugPropagation();
+        this.COLOR = solver.getSettings().outputWithANSIColors();
     }
 
     @Override
@@ -128,21 +128,16 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = solver.getCstrs();
             int nbProp = 0;
-            int m = Integer.MAX_VALUE, M = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();
                 for (int j = 0; j < cprops.length; j++, nbProp++) {
                     _propagators.add(cprops[j]);
-                    int id = cprops[j].getId();
-                    m = Math.min(m, id);
-                    M = Math.max(M, id);
                 }
             }
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-            //p2i = new AId2AbId(m, M, -1);
-            p2i = new MId2AbId(M - m + 1, -1);
+            p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
-                p2i.set(propagators[j].getId(), j);
+                p2i.put(propagators[j].getId(), j);
             }
             trigger.addAll(propagators);
 
@@ -252,8 +247,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             while (!evtset.isEmpty()) {
                 int v = evtset.pollFirst();
                 assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                if (LOGGER.isDebugEnabled()) {
-                    Trace.printPropagation(lastProp.getVar(v), lastProp);
+                if (DEBUG) {
+                    IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp, COLOR);
                 }
                 // clear event
                 int mask = eventmasks[aid][v];
@@ -263,8 +258,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             }
         } else if (lastProp.isActive()) { // need to be checked due to views
             //assert lastProp.isActive() : "propagator is not active:" + lastProp;
-            if (LOGGER.isDebugEnabled()) {
-                Trace.printPropagation(null, lastProp);
+            if (DEBUG) {
+                IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
             }
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
@@ -283,10 +278,10 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         PropagatorEventType evt = event_c[aid];
         event_c[aid] = PropagatorEventType.VOID;
         assert lastProp.isActive() : "propagator is not active:" + lastProp;
-        if (LOGGER.isDebugEnabled()) {
-            Trace.printPropagation(null, lastProp);
+        if (DEBUG) {
+            IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
         }
-        lastProp.propagate(evt.getStrengthenedMask());
+        lastProp.propagate(evt.getMask());
     }
 
 
@@ -331,39 +326,44 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) throws ContradictionException {
-        if (LOGGER.isDebugEnabled()) {
-            Trace.printModification(variable, type, cause);
+    public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
+        if (DEBUG) {
+            IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
         }
-        int nbp = variable.getNbProps();
-        for (int p = 0; p < nbp; p++) {
-            Propagator prop = variable.getPropagator(p);
-            int pindice = variable.getIndexInPropagator(p);
-            if (cause != prop && prop.isActive() && prop.advise(pindice, type.getMask())) {
-                int aid = p2i.get(prop.getId());
-                if (prop.reactToFineEvent()) {
-                    boolean needSched = (eventmasks[aid][pindice] == 0);
-                    eventmasks[aid][pindice] |= type.getStrengthenedMask();
-                    if (needSched) {
-                        //assert !event_f[aid].get(pindice);
-                        if (LOGGER.isDebugEnabled()) {
-                            Trace.printSchedule(prop);
+        EvtScheduler si = variable._schedIter();
+        si.init(type);
+        while (si.hasNext()) {
+            int p = variable.getDindex(si.next());
+            int t = variable.getDindex(si.next());
+            for (; p < t; p++) {
+                Propagator prop = variable.getPropagator(p);
+                int pindice = variable.getIndexInPropagator(p);
+                if (cause != prop && prop.isActive()) {
+                    int aid = p2i.get(prop.getId());
+                    if (prop.reactToFineEvent()) {
+                        boolean needSched = (eventmasks[aid][pindice] == 0);
+                        eventmasks[aid][pindice] |= type.getMask();
+                        if (needSched) {
+                            //assert !event_f[aid].get(pindice);
+                            if (DEBUG) {
+                                IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
+                            }
+                            event_f[aid].addLast(pindice);
                         }
-                        event_f[aid].addLast(pindice);
-                    } else if (LOGGER.isDebugEnabled()) {
-                        Trace.printAlreadySchedule(prop);
                     }
-                }
-                if (!schedule_f[aid]) {
-                    PropagatorPriority prio = prop.getPriority();
-                    int q = match_f[prio.priority - 1];
-                    pro_queue_f[q].addLast(prop);
-                    schedule_f[aid] = true;
-                    notEmpty = notEmpty | (1 << q);
+                    if (!schedule_f[aid]) {
+                        PropagatorPriority prio = prop.getPriority();
+                        int q = match_f[prio.priority - 1];
+                        pro_queue_f[q].addLast(prop);
+                        schedule_f[aid] = true;
+                        notEmpty = notEmpty | (1 << q);
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printCoarseSchedule(prop, COLOR);
+                        }
+                    }
                 }
             }
         }
-
     }
 
     @Override
@@ -422,7 +422,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         System.arraycopy(_propagators, 0, propagators, 0, osize);
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
-            p2i.set(propagators[j].getId(), j);
+            p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
         }
 
@@ -527,7 +527,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             // 6. copy data
             if (idtd < nsize) {
                 propagators[idtd] = toMove;
-                p2i.set(toMove.getId(), idtd);
+                p2i.put(toMove.getId(), idtd);
                 schedule_f[idtd] = sftm;
                 schedule_c[idtd] = sctm;
                 event_f[idtd] = icqtm;

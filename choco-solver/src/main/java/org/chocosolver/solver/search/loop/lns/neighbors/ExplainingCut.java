@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,22 +29,18 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.strategies.ConflictBackJumping;
-import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
+import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.tools.StatisticUtils;
 
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -60,13 +57,16 @@ import java.util.Random;
  *
  * @author Charles Prud'homme
  * @since 03/07/13
+ * <p>
+ * TODO: fix some variables
+ * TODO: catch up case when the sub tree is closed and this imposes a fragment
  */
-public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
+public class ExplainingCut implements INeighbor {
 
     protected ExplanationEngine mExplanationEngine; // the explanation engine -- it works faster when it's a lazy one
     protected final Random random;
 
-    ArrayList<Decision> path; // decision path that leads to a solution
+    IntMetaDecision path; // decision path that leads to a solution
 
     BitSet related; // a bitset indicating which decisions of the path are related to the cut
     BitSet unrelated; // a bitset to indicate which decisions of the path are NOT related to the cut
@@ -78,18 +78,25 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     int nbCall, limit;
     final int level; // relaxing factor
 
-    Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
-
+    Solver mSolver;
+    IntMetaDecision decision;
+    PoolManager<IntDecision> decisionPool;
 
     public ExplainingCut(Solver aSolver, int level, long seed) {
-        super(aSolver);
+        this.mSolver = aSolver;
         this.level = level;
         this.random = new Random(seed);
-        path = new ArrayList<>(16);
+        path = new IntMetaDecision();
         related = new BitSet(16);
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
-        mSolver.getSearchLoop().plugSearchMonitor(this);
+        this.decision = new IntMetaDecision();
+        this.decisionPool = new PoolManager<>();
+    }
+
+    @Override
+    public void init() {
+
     }
 
     @Override
@@ -100,35 +107,27 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             }
             this.mExplanationEngine = mSolver.getExplainer();
         }
-        if (mExplanationEngine.getCstrat() == null) {
-            new ConflictBackJumping(mExplanationEngine, mSolver, false);
-        }
         clonePath();
         forceCft = true;
     }
 
     @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
+    public Decision fixSomeVariables() {
         // this is called after restart
         // if required, force the cut and explain the cut
         if (forceCft) {
             explain();
         }
+        decision.free();
         // then fix variables
         _fixVar();
         assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
         // add unrelated
         notFrozen.or(unrelated);
-        // then build the fake decision path
-        last = null;
-        int wi = path.get(0).getWorldIndex();
-//        LOGGER.debug("relax cut {}", notFrozen.cardinality());
         for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
-//            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
-            assert path.get(id - wi).hasNext();
-            last = path.get(id - wi).duplicate();
-            imposeDecisionPath(mSolver, last);
+            decision.add(path.getVar(id), path.getVal(id));
         }
+        return decision;
     }
 
     protected void _fixVar() {
@@ -149,24 +148,11 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             nbFixedVariables = random.nextDouble() * related.cardinality();
             increaseLimit();
         }
-        last = null;
     }
 
     @Override
     public boolean isSearchComplete() {
         return isTerminated;
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-        // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mSolver.getSearchLoop().getLastDecision().getId() == last.getId()) {
-            mSolver.getSearchLoop().restart();
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,12 +178,13 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
      * Compute the initial fragment, ie set of decisions to keep.
      */
     void clonePath() {
+        path.free();
         Decision dec = mSolver.getSearchLoop().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();
         }
-        Collections.reverse(path);
+//        Collections.reverse(path);
     }
 
 
@@ -207,11 +194,22 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
      * @param dec a decision of the current decision path
      */
     private void addToPath(Decision dec) {
-        Decision clone = dec.duplicate();
-        clone.setWorldIndex(dec.getWorldIndex());
-        path.add(clone);
-        if (!dec.hasNext()) {
-            clone.reverse();
+        if (dec instanceof IntMetaDecision) {
+            IntMetaDecision imd = (IntMetaDecision) dec;
+            for (int j = 0; j < imd.size(); j++) {
+                path.add(imd.getVar(j), imd.getVal(j), imd.getDop(j));
+            }
+        } else {
+            IntDecision id = (IntDecision) dec;
+            boolean tofree = false;
+            if(!id.hasNext()){
+                id = id.flip();
+                tofree = true;
+            }
+            path.add(id.getDecisionVariables(), id.getDecisionValue(), id.getDecOp());
+            if(tofree){
+                id.free();
+            }
         }
     }
 
@@ -223,7 +221,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         forceCft = false;
         // 1. make a backup
         mSolver.getEnvironment().worldPush();
-        Decision d;
+        IntDecision d;
         int i = 0;
         try {
 
@@ -231,8 +229,11 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
             mExplanationEngine.getSolver().getObjectiveManager().postDynamicCut();
-            for (i = 0; i < path.size(); i++) {
-                d = path.get(i);
+            for (i = path.size() - 1; i >= 0; i--) {
+                if ((d = decisionPool.getE()) == null) {
+                    d = new IntDecision(decisionPool);
+                }
+                d.set(path.getVar(i), path.getVal(i), path.getDop(i));
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
@@ -255,24 +256,14 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
                 related.clear();
                 related.or(explanation.getDecisions());
+                explanation.recycle();
 
                 unrelated.clear();
                 unrelated.or(related);
-                unrelated.flip(path.get(0).getWorldIndex(), unrelated.length());
+                unrelated.flip(0, i);
 
                 // 4. remove all decisions above i in path
-                int j = path.size() - 1;
-                while (j > i) {
-                    path.remove(j);
-                    j--;
-                }
-                // 5. rewind all other decisions
-                while (j >= 0) {
-                    Decision dec = path.get(j);
-                    dec.setPrevious(null); // useless .. but ... you know
-                    dec.rewind();
-                    j--;
-                }
+                path.remove(0, i);
 
             } else {
                 throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
@@ -286,33 +277,4 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         increaseLimit();
 
     }
-
-    /**
-     * Simulate a decision path, with backup
-     *
-     * @param aSolver  the concerned solver
-     * @param decision the decision to apply
-     * @throws ContradictionException
-     */
-    private static void imposeDecisionPath(Solver aSolver, Decision decision) throws ContradictionException {
-        IEnvironment environment = aSolver.getEnvironment();
-        ObjectiveManager objectiveManager = aSolver.getObjectiveManager();
-        // 1. simulates open node
-        Decision current = aSolver.getSearchLoop().getLastDecision();
-        decision.setPrevious(current);
-        decision.setWorldIndex(environment.getWorldIndex());
-        aSolver.getSearchLoop().setLastDecision(decision);
-        if (decision.triesLeft() == 2) {
-            aSolver.getSearchLoop().getSMList().beforeDownLeftBranch();
-        } else {
-            aSolver.getSearchLoop().getSMList().beforeDownRightBranch();
-        }
-        // 2. simulates down branch
-        environment.worldPush();
-        decision.buildNext();
-        objectiveManager.apply(decision);
-        objectiveManager.postDynamicCut();
-//        aSolver.getEngine().propagate();
-    }
-
 }

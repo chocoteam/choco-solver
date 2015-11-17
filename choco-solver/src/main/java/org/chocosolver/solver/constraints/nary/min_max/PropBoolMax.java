@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -28,9 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -47,29 +45,29 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropBoolMax extends Propagator<BoolVar> {
 
     final int n;
-    final IStateInt x1, x2;
+    int x1, x2;
 
     public PropBoolMax(BoolVar[] variables, BoolVar maxVar) {
         super(ArrayUtils.append(variables, new BoolVar[]{maxVar}), PropagatorPriority.UNARY, true);
         n = variables.length;
-        x1 = solver.getEnvironment().makeInt(-1);
-        x2 = solver.getEnvironment().makeInt(-1);
+        x1 = -1;
+        x2 = -1;
         assert n > 0;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x1.set(-1);
-        x2.set(-1);
+        x1 = -1;
+        x2 = -1;
         for (int i = 0; i < n; i++) {
             if (!vars[i].isInstantiated()) {
-                if (x1.get() == -1) {
-                    x1.set(i);
-                } else if (x2.get() == -1) {
-                    x2.set(i);
+                if (x1 == -1) {
+                    x1 = i;
+                } else if (x2 == -1) {
+                    x2 = i;
                 }
             } else if (vars[i].getValue() == 1) {
-                if (vars[n].instantiateTo(1, aCause)) {
+                if (vars[n].instantiateTo(1, this)) {
                     setPassive();
                     return;
                 }
@@ -83,17 +81,17 @@ public class PropBoolMax extends Propagator<BoolVar> {
             filter();
         } else {
             if (vars[idxVarInProp].isInstantiatedTo(1)) {
-                if (vars[n].instantiateTo(1, aCause)) {
+                if (vars[n].instantiateTo(1, this)) {
                     setPassive();
                 }
-            } else if (idxVarInProp == x1.get() || idxVarInProp == x2.get()) {
-                if (idxVarInProp == x1.get()) {
-                    x1.set(x2.get());
+            } else if (idxVarInProp == x1 || idxVarInProp == x2) {
+                if (idxVarInProp == x1) {
+                    x1 = x2;
                 }
-                x2.set(-1);
+                x2 = -1;
                 for (int i = 0; i < n; i++) {
-                    if (i != x1.get() && !vars[i].isInstantiated()) {
-                        x2.set(i);
+                    if (i != x1 && !vars[i].isInstantiated()) {
+                        x2 = i;
                         break;
                     }
                 }
@@ -103,21 +101,21 @@ public class PropBoolMax extends Propagator<BoolVar> {
     }
 
     public void filter() throws ContradictionException {
-        if (x1.get() == -1) {
-            if (vars[n].instantiateTo(0, aCause)) {
+        if (x1 == -1) {
+            if (vars[n].instantiateTo(0, this)) {
                 setPassive();
                 return;
             }
         }
-        if (x2.get() == -1 && vars[n].isInstantiatedTo(1)) {
-            if (vars[x1.get()].instantiateTo(1, aCause)) {
+        if (x2 == -1 && vars[n].isInstantiatedTo(1)) {
+            if (vars[x1].instantiateTo(1, this)) {
                 setPassive();
                 return;
             }
         }
         if (vars[n].isInstantiatedTo(0)) {
             for (int i = 0; i < n; i++) {
-                vars[i].instantiateTo(0, aCause);
+                vars[i].instantiateTo(0, this);
             }
         }
     }
@@ -159,18 +157,4 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     }
 
-    @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
-        if (!identitymap.containsKey(this)) {
-            int size = this.vars.length - 1;
-            BoolVar[] aVars = new BoolVar[size];
-            for (int i = 0; i < size; i++) {
-                this.vars[i].duplicate(solver, identitymap);
-                aVars[i] = (BoolVar) identitymap.get(this.vars[i]);
-            }
-            this.vars[size].duplicate(solver, identitymap);
-            BoolVar M = (BoolVar) identitymap.get(this.vars[size]);
-            identitymap.put(this, new PropBoolMax(aVars, M));
-        }
-    }
 }

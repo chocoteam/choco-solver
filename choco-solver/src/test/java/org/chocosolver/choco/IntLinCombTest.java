@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -30,20 +31,23 @@ package org.chocosolver.choco;
 
 import org.chocosolver.choco.checker.DomainBuilder;
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.*;
+import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
+import org.chocosolver.solver.constraints.nary.sum.PropScalar;
+import org.chocosolver.solver.constraints.nary.sum.PropSum;
+import org.chocosolver.solver.constraints.nary.sum.PropSumBool;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -197,8 +201,6 @@ public class IntLinCombTest {
             intlincomb.findAllSolutions();
             Assert.assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
             Assert.assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
-            LoggerFactory.getLogger("test").info("({}) {}ms vs {}ms",
-                    op, sum.getMeasures().getTimeCount(), intlincomb.getMeasures().getTimeCount());
         }
     }
 
@@ -218,14 +220,13 @@ public class IntLinCombTest {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
         PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
-        int offSet = 2;// ZERO and ONE constants
-        ((IntVar) vars[offSet]).instantiateTo(-2, Cause.Null);
-        ((IntVar) vars[1 + offSet]).instantiateTo(-1, Cause.Null);
+        ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
+        ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);
         sum.propagate();
 //        sum.getSearchLoop().timeStamp++;
-        ((IntVar) vars[2 + offSet]).removeValue(-2, Cause.Null);
+        ((IntVar) vars[2]).removeValue(-2, Cause.Null);
         sum.propagate();
-        Assert.assertTrue(vars[2 + offSet].isInstantiated());
+        Assert.assertTrue(vars[2].isInstantiated());
     }
 
     @Test(groups = "1s")
@@ -235,6 +236,496 @@ public class IntLinCombTest {
         solver.post(ICF.scalar(bs, new int[]{1, 2, 3}, "=", VF.fixed(2, solver)));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testS1_coeff_null() {
+        Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        int[] coeffs = new int[]{1, 0, 0, 2};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropScalar);
+        Assert.assertEquals(3, p.getNbVars());
+    }
+
+    @Test(groups = "1s")
+    public void testS2_coeff_null() {
+        Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        ivars[2] = ivars[1];
+        int[] coeffs = new int[]{1, 1, -1, 2};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropScalar);
+        Assert.assertEquals(3, p.getNbVars());
+    }
+
+    @Test(groups = "1s")
+    public void testD1() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        int[] coeffs = new int[]{1, 1, 1, 1};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSum);
+    }
+
+    @Test(groups = "1s")
+    public void testD2() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{1, 1, 1, 1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSumBool);
+    }
+
+    @Test(groups = "1s")
+    public void testD3() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{-1, -1, -1, -1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSumBool);
+    }
+
+    @Test(groups = "1s")
+    public void testD4() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{1, -1, 1, 1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSumBool);
+    }
+
+    @Test(groups = "1s")
+    public void testD5() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.boolArray("V", 4, solver);
+        int[] coeffs = new int[]{-1, 1, -1, -1};
+        IntVar res = VF.fixed("R", 0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSumBool);
+    }
+
+    @Test(groups = "1s")
+    public void testD6() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[1] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{1, -1, 1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSumBool);
+    }
+
+    @Test(groups = "1s")
+    public void testD7() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[1] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{-1, 1, -1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSum);
+    }
+
+    @Test(groups = "1s")
+    public void testD8() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[2] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{1, -1, 1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSum);
+    }
+
+    @Test(groups = "1s")
+    public void testD9() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
+        ivars[2] = VF.enumerated("X", 0, 2, solver);
+        int[] coeffs = new int[]{-1, 1, -1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropSumBool);
+    }
+
+    @Test(groups = "1s")
+    public void testD10() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD11() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD12() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{-1, 1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD13() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
+        int[] coeffs = new int[]{-1, -1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD14() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD15() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{-1};
+        IntVar res = VF.fixed(0, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertTrue(c instanceof Arithmetic);
+    }
+
+    @Test(groups = "1s")
+    public void testD16() {
+        Solver solver = new Solver();
+        IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
+        int[] coeffs = new int[]{1};
+        Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testD20() {
+        Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
+        int[] coeffs = new int[]{1, 2, 2, 1};
+        IntVar res = VF.enumerated("R", 0, 10, solver);
+        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Assert.assertEquals(c.getPropagators().length, 1);
+        Propagator p = c.getPropagator(0);
+        Assert.assertTrue(p instanceof PropScalar);
+    }
+
+    @Test(groups = "1s")
+    public void testExt1() {
+        Solver s1 = new Solver();
+        s1.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s1);
+            s1.post(ICF.sum(bs, "!=", VF.fixed(3, s1)));
+        }
+        Solver s2 = new Solver();
+        s2.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 1000;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s2);
+            s2.post(ICF.sum(bs, "!=", VF.fixed(3, s2)));
+        }
+        s1.findAllSolutions();
+        s2.findAllSolutions();
+        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "1s")
+    public void testExt2() {
+        Solver s1 = new Solver();
+        s1.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s1);
+            s1.post(ICF.sum(bs, "<=", VF.fixed(3, s1)));
+        }
+        Solver s2 = new Solver();
+        s2.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 1000;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 5, s2);
+            s2.post(ICF.sum(bs, "<=", VF.fixed(3, s2)));
+        }
+        s1.findAllSolutions();
+        s2.findAllSolutions();
+        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "1s")
+    public void testExt3() {
+        Solver s1 = new Solver();
+        s1.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 0;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 3, s1);
+            BoolVar r = VF.bool("r", s1);
+            ICF.scalar(bs, new int[]{-1, -1, -1}, "<=", VF.fixed(-2, s1)).reifyWith(r);
+        }
+        Solver s2 = new Solver();
+        s2.set(new Settings() {
+            @Override
+            public int getMaxTupleSizeForSubstitution() {
+                return 1000;
+            }
+        });
+        {
+            BoolVar[] bs = VF.boolArray("b", 3, s2);
+            BoolVar r = VF.bool("r", s2);
+            ICF.scalar(bs, new int[]{-1, -1, -1}, "<=", VF.fixed(-2, s2)).reifyWith(r);
+        }
+        Chatterbox.showDecisions(s1);
+        Chatterbox.showDecisions(s2);
+        s1.findAllSolutions();
+        s2.findAllSolutions();
+        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "1s")
+    public void testB1() {
+        Solver solver = new Solver();
+        int n = 23;
+        BoolVar[] bs = VF.boolArray("b", n, solver);
+        int[] cs = new int[n];
+        int k = (int) (n * .7);
+        Arrays.fill(cs, 0, n, 1);
+        Arrays.fill(cs, k, n, -1);
+        IntVar sum = VF.bounded("S", -n / 2, n / 2, solver);
+        solver.post(ICF.scalar(bs, cs, "=", sum));
+        solver.set(ISF.lexico_LB(bs));
+//        Chatterbox.showDecisions(solver);
+        solver.findAllSolutions();
+    }
+
+
+    @Test(groups = "1s")
+    public void testB2() throws ContradictionException {
+        Solver solver = new Solver();
+        int n = 3;
+        BoolVar[] bs = VF.boolArray("b", n, solver);
+        int[] cs = new int[n];
+        Arrays.fill(cs, 0, n, -1);
+        IntVar sum = VF.fixed("S", -2, solver);
+        solver.post(ICF.scalar(bs, cs, "<=", sum));
+        solver.propagate();
+        bs[2].setToFalse(Cause.Null);
+        bs[0].setToTrue(Cause.Null);
+        solver.propagate();
+        Assert.assertTrue(bs[1].isInstantiatedTo(1));
+    }
+
+
+    @Test(groups = "1s")
+    public void testB3() {
+        Solver solver = new Solver();
+        solver.post(ICF.scalar(new IntVar[]{VF.fixed(1, solver), VF.fixed(3, solver)}, new int[]{1, -1}, "!=", VF.fixed(0, solver)));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testB4() {
+        Solver solver = new Solver();
+        IntVar[] X = VF.enumeratedArray("X", 1, 1, 3, solver);
+        solver.post(ICF.scalar(X, new int[]{-1}, "<=", VF.fixed(2, solver)));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+
+    }
+
+    @Test(groups = "1s")
+    public void testB5() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[3];
+        X[0] = VF.enumerated("X1", 6, 46, solver);
+        X[1] = VF.enumerated("X2", 6, 56, solver);
+        X[2] = VF.bounded("X3", -1140, 1140, solver);
+        solver.post(ICF.scalar(X, new int[]{1, -1, -1}, "=", VF.fixed(0, solver)));
+        solver.propagate();
+        X[1].updateUpperBound(46, Cause.Null);
+        solver.propagate();
+        Assert.assertEquals(X[2].getLB(), -40);
+        Assert.assertEquals(X[2].getUB(), 40);
+
+    }
+
+
+    @Test(groups = "1s")
+    public void testB6() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 1, 3, solver);
+        X[1] = VF.enumerated("X2", 2, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{2, 3}, "<=", VF.fixed(10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 1);
+        Assert.assertEquals(X[0].getUB(), 2);
+        Assert.assertEquals(X[1].getLB(), 2);
+        Assert.assertEquals(X[1].getUB(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testB61() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 1, 3, solver);
+        X[1] = VF.enumerated("X2", 2, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{-2, -3}, ">=", VF.fixed(-10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 1);
+        Assert.assertEquals(X[0].getUB(), 2);
+        Assert.assertEquals(X[1].getLB(), 2);
+        Assert.assertEquals(X[1].getUB(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testB7() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 0, 3, solver);
+        X[1] = VF.enumerated("X2", 1, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{2, 3}, ">=", VF.fixed(10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 0);
+        Assert.assertEquals(X[0].getUB(), 3);
+        Assert.assertEquals(X[1].getLB(), 2);
+        Assert.assertEquals(X[1].getUB(), 5);
+    }
+
+    @Test(groups = "1s")
+    public void testB71() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] X = new IntVar[2];
+        X[0] = VF.enumerated("X1", 0, 3, solver);
+        X[1] = VF.enumerated("X2", 1, 5, solver);
+        solver.post(ICF.scalar(X, new int[]{-2, -3}, ">=", VF.fixed(-10, solver)));
+        solver.propagate();
+        Assert.assertEquals(X[0].getLB(), 0);
+        Assert.assertEquals(X[0].getUB(), 3);
+        Assert.assertEquals(X[1].getLB(), 1);
+        Assert.assertEquals(X[1].getUB(), 3);
+    }
+
+    @Test(groups="1s")
+    public void testJL1(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(3, solver), VF.fixed(-4, solver)}, "<", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
+    @Test(groups="1s")
+    public void testJL2(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(3, solver), VF.fixed(-4, solver)}, "<=", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
+    @Test(groups="1s")
+    public void testJL3(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(-3, solver), VF.fixed(4, solver)}, ">", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
+    }
+
+    @Test(groups="1s")
+    public void testJL4(){
+        Solver solver = new Solver();
+        solver.post(ICF.sum(new IntVar[]{VF.fixed(-3, solver), VF.fixed(4, solver)}, ">=", VF.fixed(0, solver)));
+        Assert.assertTrue(solver.findSolution());
     }
 
 }

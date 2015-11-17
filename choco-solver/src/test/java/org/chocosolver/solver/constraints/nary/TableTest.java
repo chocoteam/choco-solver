@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2014,
- *       Charles Prud'homme (TASC, INRIA Rennes, LINA CNRS UMR 6241),
- *       Jean-Guillaume Fages (COSLING S.A.S.).
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -26,7 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 /**
  * @author Jean-Guillaume Fages
  * @since 10/04/14
@@ -50,7 +50,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -103,7 +102,7 @@ public class TableTest {
                     Solver tsolver = new Solver(ALGOS[a]);
                     IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allEquals(tsolver, tvars, a);
-                    tsolver.set(ISF.random_value(tvars));
+                    tsolver.set(ISF.random_value(tvars, s));
                     Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                     if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
 //                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
@@ -136,7 +135,7 @@ public class TableTest {
                     Solver tsolver = new Solver(ALGOS[a]);
                     IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allDifferent(tsolver, tvars, a);
-                    tsolver.set(ISF.random_value(tvars));
+                    tsolver.set(ISF.random_value(tvars, s));
                     Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                     if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
 //                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
@@ -180,57 +179,36 @@ public class TableTest {
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
         if (solver.getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
-                System.out.print(vars[i].getValue() + "\t");
+                System.out.print(solver.getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
             }
             System.out.println("");
             for (int i = 0; i < reified.length; i++) {
                 System.out.print(reified[i].getValue() + "\t");
             }
-            System.out.println("\n" + "obj = " + sum.getValue() + ", backtracks = " + solver.getMeasures().getBackTrackCount());
+            System.out.println("\n" + "obj = " + solver.getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + solver.getMeasures().getBackTrackCount());
         }
-        Assert.assertEquals(sum.getValue(), 5);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
     }
 
     @Test(groups = "1s")
     public void testtpetit() {
-        test("AC3");
-        test("AC3rm");
-        test("AC3bit+rm");
-        test("AC2001");
-        test("FC");
+        for(String s : ALGOS) {
+            test(s);
+        }
     }
 
     @Test(groups = "1s")
     public static void testThierry1() {
+        String[] ALGOS = {"FC", "GAC2001", "GAC3rm"};
+        for(String s : ALGOS){
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, "FC"));
+        solver.post(ICF.table(vars, t, s));
         solver.findSolution();
-    }
-
-    @Test(groups = "1s")
-    public static void testThierry2() {
-        Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
-        Tuples t = new Tuples(false);
-        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, "GAC3rm"));
-        solver.findSolution();
-    }
-
-    @Test(groups = "1s")
-    public static void testThierry3() {
-        Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
-        Tuples t = new Tuples(false);
-        t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, "GAC2001"));
-        solver.findSolution();
+        }
     }
 
     @Test(groups = "1s")
@@ -269,19 +247,17 @@ public class TableTest {
                 rnd.setSeed(seed);
                 Tuples tuples = TuplesFactory.generateTuples(values -> rnd.nextBoolean(), true, vars);
                 solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
-                solver.set(ISF.random_value(vars));
+                solver.set(ISF.random_value(vars, seed));
                 long nbs = solver.findAllSolutions();
                 long nbn = solver.getMeasures().getNodeCount();
-                LoggerFactory.getLogger("test").info("{}", solver.getMeasures().toOneLineString());
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Solver tsolver = new Solver(ALGOS[a]);
                         IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                         tsolver.post(ICF.table(tvars, tuples, ALGOS[a]));
-                        tsolver.set(ISF.random_value(tvars));
+                        tsolver.set(ISF.random_value(tvars, s));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
-                        LoggerFactory.getLogger("test").info("{}", tsolver.getMeasures().toOneLineString());
                     }
                 }
             }

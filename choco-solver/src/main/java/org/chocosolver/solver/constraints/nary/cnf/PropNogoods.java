@@ -1,22 +1,25 @@
-/*
- * Copyright (c) 1999-2015, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -29,6 +32,7 @@ package org.chocosolver.solver.constraints.nary.cnf;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IStateInt;
@@ -42,6 +46,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 
@@ -70,8 +75,11 @@ public class PropNogoods extends Propagator<IntVar> {
 
     TIntStack fp;  // lit instantiated -> fix point
 
+    // For #why() method only, lazily initialized
+    TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
+
     public PropNogoods(Solver solver) {
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.VERY_SLOW, true);
+        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);
         this.vars = new IntVar[0];// erase solver.ONE from the variable scope
 
         int k = 16;
@@ -92,7 +100,7 @@ public class PropNogoods extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (!sat_.ok_) contradiction(null, "inconsistent");
+        if (!sat_.ok_) fails();
         fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
         storeEarlyDeductions();
@@ -251,21 +259,14 @@ public class PropNogoods extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     void VariableBound(int var, boolean new_value) throws ContradictionException {
-        if (sat_trail_.get() < sat_.trailMarker()) {
-            sat_.cancelUntil(sat_trail_.get());
-            assert (sat_trail_.get() == sat_.trailMarker());
-        }
-        int lit = makeLiteral(var, new_value);
-        if (!sat_.propagateOneLiteral(lit)) {
-            // force failure by removing the last value, required for explanations
-            IntVar iv = vars[lit2pos[var]];
-            if (sign(lit)) {
-                iv.removeValue(lit2val[var], this);
-            } else {
-                iv.instantiateTo(lit2val[var], this);
+        try {
+            if (sat_trail_.get() < sat_.trailMarker()) {
+                sat_.cancelUntil(sat_trail_.get());
+                assert (sat_trail_.get() == sat_.trailMarker());
             }
-
-        } else {
+            int lit = makeLiteral(var, new_value);
+            boolean fail = !sat_.propagateOneLiteral(lit);
+            // Remark: explanations require to instantiated variables even if fail is set to true
             sat_trail_.set(sat_.trailMarker());
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
                 lit = sat_.touched_variables_.get(i);
@@ -284,6 +285,18 @@ public class PropNogoods extends Propagator<IntVar> {
                     }
                 }
             }
+            if (fail) {
+                // force failure by removing the last value
+                IntVar iv = vars[lit2pos[var]];
+                if (sign(lit)) {
+                    iv.removeValue(lit2val[var], this);
+                } else {
+                    iv.instantiateTo(lit2val[var], this);
+                }
+
+            }
+        } finally {
+            sat_.touched_variables_.resetQuick(); // issue#327
         }
     }
 
@@ -306,7 +319,7 @@ public class PropNogoods extends Propagator<IntVar> {
         sat_.learnClause(lits);
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
-
+        this.getSolver().getEngine().propagateOnBacktrack(this); // issue#327
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {
@@ -336,7 +349,7 @@ public class PropNogoods extends Propagator<IntVar> {
             int lit = sat_.touched_variables_.get(i);
             early_deductions_.add(lit);
         }
-        sat_.touched_variables_.clear();
+        sat_.touched_variables_.resetQuick();
     }
 
     void applyEarlyDeductions() throws ContradictionException {
@@ -357,6 +370,9 @@ public class PropNogoods extends Propagator<IntVar> {
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar ivar, IEventType evt, int ivalue) {
+        if (inClauses == null) {
+            fillInClauses();
+        }
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
         // When we got here, there are multiple cases:
         // 1. the propagator fails, at least one clause or implication cannot be satisfied
@@ -373,20 +389,33 @@ public class PropNogoods extends Propagator<IntVar> {
         int neg = negated(lit);
         // A. implications:
         // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(neg);
+        TIntList implies = sat_.implies_.get(lit);
         if (implies != null) {
             for (int i = implies.size() - 1; i >= 0; i--) {
                 int l = implies.get(i);
                 newrules |= _why(l, ruleStore);
             }
         }
-
+        implies = sat_.implies_.get(neg);
+        if (implies != null) {
+            for (int i = implies.size() - 1; i >= 0; i--) {
+                int l = implies.get(i);
+                newrules |= _why(l, ruleStore);
+            }
+        }
         // B. clauses:
         // We need to find the fully instantiated clauses where bvar appears
-        // we cannot rely on watches_ because is not backtrackable
-        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            newrules |= _why(neg, lit, sat_.clauses.get(k), ruleStore);
+        ArrayList<SatSolver.Clause> mClauses = inClauses.get(lit);
+        if (mClauses != null) {
+            for (int i = mClauses.size() - 1; i >= 0; i--) {
+                newrules |= _why(mClauses.get(i), ruleStore);
+            }
+        }
+        mClauses = inClauses.get(neg);
+        if (mClauses != null) {
+            for (int i = mClauses.size() - 1; i >= 0; i--) {
+                newrules |= _why(mClauses.get(i), ruleStore);
+            }
         }
         // C. learnt clauses:
         // We need to find the fully instantiated clauses where bvar appears
@@ -394,6 +423,33 @@ public class PropNogoods extends Propagator<IntVar> {
         // So, we iterate over clauses where the two first literal are valued AND which contains bvar
         for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
             newrules |= _why(neg, lit, sat_.learnts.get(k), ruleStore);
+        }
+        return newrules;
+    }
+
+    private void fillInClauses() {
+        inClauses = new TIntObjectHashMap<>();
+        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
+            SatSolver.Clause cl = sat_.clauses.get(k);
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                int l = cl._g(d);
+                ArrayList<SatSolver.Clause> mcls = inClauses.get(l);
+                if (mcls == null) {
+                    mcls = new ArrayList<>();
+                    inClauses.put(l, mcls);
+                }
+                mcls.add(cl);
+            }
+        }
+    }
+
+    private boolean _why(SatSolver.Clause cl, RuleStore ruleStore) {
+        boolean newrules = false;
+        // if the watched literals are instantiated
+        if (litIsKnown(cl._g(0)) && litIsKnown(cl._g(1))) {
+            for (int d = cl.size() - 1; d >= 0; d--) {
+                newrules |= _why(cl._g(d), ruleStore);
+            }
         }
         return newrules;
     }
