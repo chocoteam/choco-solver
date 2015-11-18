@@ -23,5 +23,12 @@ cd ../../
 
 zip choco-${VERSION}.zip ./choco-${VERSION}/*
 
+# copy the apidocs and the html version of the user guide to the website:
+rm -r /Volumes/htdocs/apidocs/*
+cp -r ./target/site/apidocs/* /Volumes/htdocs/apidocs/
+rm -r /Volumes/htdocs/user_guide/*
+cd ./docs/ && make html && cd ..
+cp -r ../Choco3-docs/html/ /Volumes/htdocs/user_guide/
+
 git checkout develop
 rmdir choco-${VERSION}
