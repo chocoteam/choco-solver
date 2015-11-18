@@ -27,13 +27,14 @@
 
 package org.chocosolver.parser.flatzinc.ast.constraints;
 
+import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.nary.sum.Scalar;
+import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -58,11 +59,15 @@ public class IntLinNeReifBuilder implements IBuilder {
         BoolVar r = exps.get(3).boolVarValue(solver);
 
         if (bs.length > 0) {
-            int[] tmp = Scalar.getScalarBounds(bs, as);
-            IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
-            Constraint cstr = ICF.scalar(bs, as, "=", scal);
-            ICF.arithm(scal, "!=", c).reifyWith(r);
-            solver.post(cstr);
+            if (((FznSettings) solver.getSettings()).enableDecompositionOfLinearCombination()) {
+                int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
+                IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
+                Constraint cstr = ICF.scalar(bs, as, "=", scal);
+                ICF.arithm(scal, "!=", c).reifyWith(r);
+                solver.post(cstr);
+            } else {
+                ICF.scalar(bs, as, "!=", c).reifyWith(r);
+            }
         }
     }
 }

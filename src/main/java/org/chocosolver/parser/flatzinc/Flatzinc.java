@@ -1,32 +1,31 @@
 /**
- *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * <p>
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Ecole des Mines de Nantes nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.chocosolver.parser.flatzinc;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.ParserListener;
@@ -203,19 +202,14 @@ public class Flatzinc extends RegParser {
         if (mSolver.getObjectiveManager().isOptimization()) { // optimization problem
             // To deal with Portfolios, we need to get policy and objective
             ResolutionPolicy policy = mSolver.getObjectiveManager().getPolicy();
-            IntVar objective = (IntVar) mSolver.getObjectiveManager().getObjective();
             if (nb_cores > 1) {
-                THashMap<Solver, IntVar> objs = new THashMap<>();
-                for (int i = 0; i < solvers.size(); i++) {
-                    objs.put(solvers.get(i), (IntVar) solvers.get(i).getObjectiveManager().getObjective());
-                }
                 solvers.parallelStream().forEach(solver -> {
-                    solver.findOptimalSolution(policy, objs.get(solver));
+                    solver.findOptimalSolution(policy);
                     sprinter.imdone(solver);
                     solvers.forEach(other -> other.getSearchLoop().interrupt("Loose thread race", false));
                 });
             } else {
-                mSolver.findOptimalSolution(policy, objective);
+                mSolver.findOptimalSolution(policy);
             }
         } else {
             if (all) {
@@ -264,14 +258,14 @@ public class Flatzinc extends RegParser {
             case 2: {
 //                System.out.printf("%% worker %d: wdeg + LNS + LC\n", w);
                 solver.set(ISF.lastConflict(solver, ISF.domOverWDeg(vars, w)));
-                SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(100));
+                SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
+                LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
             }
             break;
             case 3:
 //                System.out.printf("%% worker %d: abs + LC\n", w);
                 solver.set(ISF.lastConflict(solver, ISF.activity(vars, w)));
-                SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(0), 1000);
+                SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
                 SMF.nogoodRecordingFromRestarts(solver);
                 break;
             case 4: {
@@ -285,13 +279,13 @@ public class Flatzinc extends RegParser {
                 switch (policy) {
                     case SATISFACTION: {
                         solver.set(ISF.lastConflict(solver, ISF.activity(vars, w)));
-                        SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(0), 1000);
+                        SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
                         SMF.nogoodRecordingFromRestarts(solver);
                     }
                     break;
                     default: {
                         solver.set(ISF.lastConflict(solver));
-                        LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(100));
+                        LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
                     }
                     break;
                 }
@@ -301,13 +295,13 @@ public class Flatzinc extends RegParser {
                 switch (policy) {
                     case SATISFACTION: {
                         solver.set(ISF.lastConflict(solver, ISF.activity(vars, w)));
-                        SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(0), 1000);
+                        SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
                         SMF.nogoodRecordingFromRestarts(solver);
                     }
                     break;
                     default: {
                         solver.set(ISF.lastConflict(solver));
-                        LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(100));
+                        LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
                     }
                     break;
                 }

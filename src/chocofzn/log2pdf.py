@@ -2,6 +2,7 @@ __author__ = 'kyzrsoze'
 
 from extractFromLog import read
 import argparse
+import os
 from pylatex import Document, Section, Subsection, Table, TikZ, Axis, \
     Plot, Package, Subsubsection
 
@@ -10,22 +11,31 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2014.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2015.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2014'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2015/20151113'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'fix1707','cbj'
+        'C2015','SNA322'
+        ]
+)
+parser.add_argument(
+    "-of", "--oldformat",
+    help='Output format type: true is when version < 3.3.2, false otherwise, \'name:options\'',
+    nargs='+',
+    default=[
+        True,False
         ]
 )
 
+maxtime=300.
 
 def addPlots(doc, options, coords):
     with doc.create(Subsection('Plot')):
@@ -41,6 +51,7 @@ args = parser.parse_args()
 optPerSol = {}
 fnames = []
 options = args.configurations
+oldformat = args.oldformat
 best = {}  # store the best know values
 # analyse all solutions from all configurations
 with open(args.filelist, 'r') as f:
@@ -49,8 +60,8 @@ with open(args.filelist, 'r') as f:
         fnames.append(fname)
         optPerSol[fname] = []
         best[fname] = 999999999
-        for opt in options:
-            solution = read(args.directory, fname, opt)
+        for o in range(len(options)):
+            solution = read(args.directory, fname, options[o],oldformat[o])
             optPerSol[fname].append(solution)
             print(solution)
             if solution[3] != 'SAT':
@@ -70,11 +81,11 @@ for fname in fnames:
         tim = solution[1]
         if solution[3] != 'SAT':
             if best[fname] == 999999999:
-                tim =900.
+                tim =maxtime
             elif solution[3] == 'MIN' and best[fname] < solution[4]:
-                tim =900.
+                tim =maxtime
             elif solution[3] == 'MAX' and best[fname] > solution[4]:
-                tim =900.
+                tim =maxtime
         timPerOpt[solution[6]].append(tim)
 
 
@@ -168,7 +179,7 @@ for fname in fnames:
             if solutions[i][4] == best:
                 coords[solutions[i][6]].append((k, solutions[i][1]))
             else:
-                coords[solutions[i][6]].append((k, 900.0))
+                coords[solutions[i][6]].append((k, maxtime))
         table.add_hline()
     k += 1
 if k > 0:
@@ -177,6 +188,8 @@ if k > 0:
         coords[o].clear()
     k = 0
 
+name = os.path.basename(args.filelist)
+print(name)
 doc.generate_pdf(
-    # filename='results',
+    filepath=name[:-4],
     clean=True)

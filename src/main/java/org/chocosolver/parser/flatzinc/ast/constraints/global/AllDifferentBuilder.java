@@ -49,7 +49,7 @@ public class AllDifferentBuilder implements IBuilder {
     public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         if (vars.length > 1) {
-            solver.post(IntConstraintFactory.alldifferent(vars, "UCB1"));
+            solver.post(IntConstraintFactory.alldifferent(vars, ""));
         }
     }
 }

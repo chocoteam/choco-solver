@@ -71,12 +71,11 @@ public class FGoal {
 
     public static void define_goal(Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
-        IntVar obj = null;
         if (type != ResolutionPolicy.SATISFACTION) {
-            obj = expr.intVarValue(aSolver);
+            IntVar obj = expr.intVarValue(aSolver);
+            aSolver.setObjectives(obj);
+            aSolver.set(new ObjectiveManager<IntVar, Integer>(obj, type, true));
         }
-        aSolver.set(new ObjectiveManager<IntVar, Integer>(obj, type, true));
-
         // Then define search goal
         Variable[] vars = aSolver. getVars();
         IntVar[] ivars = new IntVar[vars.length];

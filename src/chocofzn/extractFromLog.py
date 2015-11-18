@@ -12,8 +12,9 @@ unsa = '=====UNSATISFIABLE=====\n'
 unkn = '=====UNKNOWN=====\n'
 unbo = '=====UNBOUNDED=====\n'
 
+maxtime=300.
 
-def read(dir, fname, opt):
+def read(dir, fname, opt, old):
     """
     Read the log file, in dir, postfixed by 'opt'
     :return: a list:
@@ -28,7 +29,7 @@ def read(dir, fname, opt):
     try:
         logfile = open(os.path.join(dir, fname + '+' + opt + '.log'), 'r', encoding='utf8')
     except FileNotFoundError:
-        return [0, 900., 999999999, 'UNK', 0, 'unknown', opt]
+        return [0, maxtime, 999999999, 'UNK', 0, 'unknown', opt]
     sndlast = ""
     last = ""
     rstat = ""
@@ -50,8 +51,12 @@ def read(dir, fname, opt):
         solution = [parts[1]]
         if re.search(ropt, last):
             # extract values
-            solution.append(float(parts[8][:-1].replace(',', '.')))  # time
-            solution.append(parts[9])  # nodes
+            if old is True:
+                solution.append(float(parts[8][:-1].replace(',', '.')))  # time
+                solution.append(parts[9])  # nodes
+            else:
+                solution.append(float(parts[9][:-1].replace(',', '.')))  # time
+                solution.append(parts[10])  # nodes
             if parts[3] == 'Minimize':
                 solution.append('MIN')
             else:
@@ -59,8 +64,12 @@ def read(dir, fname, opt):
             solution.append(int(parts[6].replace(',', '')))  # obj
         else:
             # extract values
-            solution.append(float(parts[4][:-1].replace(',', '.')))  # time
-            solution.append(parts[5])  # nodes
+            if old is True:
+                solution.append(float(parts[4][:-1].replace(',', '.')))  # time
+                solution.append(parts[5])  # nodes
+            else:
+                solution.append(float(parts[5][:-1].replace(',', '.')))  # time
+                solution.append(parts[6])  # nodes
             solution.append('SAT')
             solution.append(int(0))  # obj
         solution.append('unknown')
@@ -75,12 +84,10 @@ def read(dir, fname, opt):
 
         solution.append(opt)
 
-        if solution[1] >= 900.:
-            solution[1] = float(900.)
+        if solution[1] >= maxtime:
+            solution[1] = float(maxtime)
     else:
-        solution = [0, 900., 999999999, 'UNK', 0, 'unknown', opt]
+        solution = [0, maxtime, 999999999, 'UNK', 0, 'unknown', opt]
 
     print(solution)
     return solution
-
-

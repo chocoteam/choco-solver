@@ -147,15 +147,10 @@ public class FznSearchBinder extends DefaultSearchBinder {
      * @param ivars remaining variables
      */
     private static AbstractStrategy makeComplementarySearch(IntVar[] ivars) {
-        Arrays.sort(ivars, new Comparator<IntVar>() {
-            @Override
-            public int compare(IntVar o1, IntVar o2) {
-                return o1.getDomainSize() - o2.getDomainSize();
-            }
-        });
+        Arrays.sort(ivars, (o1, o2) -> o1.getDomainSize() - o2.getDomainSize());
         return new AbstractStrategy<IntVar>(ivars) {
             boolean created = false;
-            Decision d = new Decision<IntVar>() {
+            Decision d = new Decision<IntVar>(1) {
 
                 @Override
                 public void apply() throws ContradictionException {
@@ -188,10 +183,6 @@ public class FznSearchBinder extends DefaultSearchBinder {
                     return st.toString();
                 }
             };
-
-            @Override
-            public void init() throws ContradictionException {
-            }
 
             @Override
             public Decision<IntVar> getDecision() {

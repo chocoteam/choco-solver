@@ -83,9 +83,18 @@ parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
     default='.:'
-            '/Users/cprudhom/.m2/repository/org/choco-solver/choco-solver/3.3.2-SNAPSHOT/choco-solver-3.3.2-SNAPSHOT-jar-with-dependencies.jar:'
-            '/Users/cprudhom/.m2/repository/org/choco-solver/choco-parsers/3.3.2-SNAPSHOT/choco-parsers-3.3.2-SNAPSHOT-with-dependencies.jar',
+    # '/Users/cprudhom/.m2/repository/org/choco-solver/choco-parsers/3.3.2-SNAPSHOT/choco-parsers-3.3.2-SNAPSHOT-with-dependencies.jar',
+    #         '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20151110/choco-parsers.jar',
+    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/SNAPSHOT/snap-alldiffD.jar',
 )
+
+parser.add_argument(
+    "-y", "--year",
+    help='Challenge year',
+    default='2012',
+)
+
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to solve.',
@@ -94,12 +103,12 @@ parser.add_argument(
 parser.add_argument(
     "-d", "--directory",
     help="Flatzinc files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/2012/'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/'
 )
 parser.add_argument(
     "-o", "--outputdirectory",
     help="Output files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2012/'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/'
 )
 parser.add_argument(
     "-p", "--process",
@@ -112,29 +121,45 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-       'fixed:-stat'
+        'SNA322:-stat'
+        # 'SADAC:-stat'
     ]
 )
 parser.add_argument(
     "-tl", "--timelimit",
     help='Time limit in seconds for the resolutions.',
     type=int,
-    default=900
+    default=300
 )
 parser.add_argument(
     "-jargs",
     help='Java Virtual Machine arguments (eg: -Xss64m -Xms64m -Xmx4096m -server)',
     default='-Xss64m -Xms64m -Xmx4096m -server'
 )
+parser.add_argument(
+    "-print",
+    help='Print the command to the console and exit',
+    default=False
+)
 
 cmd = 'java %s -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -tl %s %s %s'
+
+# start here
 args = parser.parse_args()
 
+if args.print:
+    print("python3.4 ./benchmark_fzn.py -cp %s -y %s -fl %s -p %s -c %s -tl %s;" %
+          (args.classpath, args.year, args.filelist, args.process, args.configurations, args.timelimit)
+          )
+    exit(0)
+
 date = time.strftime("%Y%m%d")
-if not os.path.exists(os.path.join(args.outputdirectory, date)):
-    os.makedirs(os.path.join(args.outputdirectory, date))
-if not os.path.exists(os.path.join(args.outputdirectory, date, 'error')):
-    os.makedirs(os.path.join(args.outputdirectory, date, 'error'))
+fdir = os.path.join(args.directory, args.year)
+ldir = os.path.join(args.outputdirectory, args.year, date)
+if not os.path.exists(ldir):
+    os.makedirs(ldir)
+if not os.path.exists(os.path.join(ldir, 'error')):
+    os.makedirs(os.path.join(ldir, 'error'))
 
 # generate commands to run
 commands = []
@@ -144,15 +169,15 @@ with open(args.filelist, 'r') as f:
         for conf in args.configurations:
             cc = conf.split(':')
             commands.append(
-                (cmd % (args.jargs, args.classpath, args.timelimit * 1000, cc[1], args.directory + fznfile),
-                 os.path.join(args.outputdirectory, date, fznfile) + '+' + cc[0] + '.log',
-                 os.path.join(args.outputdirectory, date, 'error', fznfile) + '+' + cc[0] + '.err.log',
+                (cmd % (args.jargs, args.classpath, args.timelimit * 1000, cc[1], os.path.join(fdir, fznfile)),
+                 os.path.join(ldir, fznfile) + '+' + cc[0] + '.log',
+                 os.path.join(ldir, 'error', fznfile) + '+' + cc[0] + '.err.log',
                  args.timelimit
                  )
             )
 # run commands
-# for cm in commands:
-# print(cm)
+for cm in commands:
+    print(cm)
 if args.process == 1:
     for cm in commands:
         work1(cm)

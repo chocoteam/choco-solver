@@ -35,7 +35,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.sum.Scalar;
+import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -62,7 +62,7 @@ public class IntLinLeReifBuilder implements IBuilder {
         IntVar c = exps.get(2).intVarValue(solver);
         BoolVar r = exps.get(3).boolVarValue(solver);
         if (bs.length > 0) {
-            if (((FznSettings)solver.getSettings()).adhocReification() && c.isInstantiatedTo(0)) {
+            if (((FznSettings) solver.getSettings()).adhocReification() && c.isInstantiatedTo(0)) {
                 // detect boolSumLeq 0 reified
                 int n = bs.length;
                 boolean boolSum = c.isBool();
@@ -101,11 +101,15 @@ public class IntLinLeReifBuilder implements IBuilder {
                     }
                 }
             }
-            int[] tmp = Scalar.getScalarBounds(bs, as);
-            IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
-            Constraint cstr = ICF.scalar(bs, as, "=", scal);
-            ICF.arithm(scal, "<=", c).reifyWith(r);
-            solver.post(cstr);
+            if (((FznSettings) solver.getSettings()).enableDecompositionOfLinearCombination()) {
+                int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
+                IntVar scal = VF.bounded(StringUtils.randomName(), tmp[0], tmp[1], solver);
+                Constraint cstr = ICF.scalar(bs, as, "=", scal);
+                ICF.arithm(scal, "<=", c).reifyWith(r);
+                solver.post(cstr);
+            } else {
+                ICF.scalar(bs, as, "<=", c).reifyWith(r);
+            }
         }
     }
 

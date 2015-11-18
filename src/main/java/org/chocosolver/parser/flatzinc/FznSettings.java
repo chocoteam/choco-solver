@@ -66,4 +66,13 @@ public class FznSettings implements Settings {
     public ISearchBinder getSearchBinder() {
         return new FznSearchBinder();
     }
+
+    @Override
+    public int getMaxTupleSizeForSubstitution() {
+        return 10000;
+    }
+
+    public boolean enableDecompositionOfLinearCombination(){
+        return false;
+    }
 }

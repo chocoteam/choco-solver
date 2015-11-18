@@ -97,7 +97,7 @@ public class IntSearch {
                 valSelector = new IntDomainMax();
                 break;
             case indomain_middle:
-                valSelector = new IntDomainMiddle();
+                valSelector = new IntDomainMiddle(IntDomainMiddle.FLOOR);
                 break;
             case indomain_median:
                 valSelector = new IntDomainMedian();
