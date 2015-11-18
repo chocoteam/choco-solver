@@ -82,27 +82,50 @@ import java.util.List;
  */
 public class Solver implements Serializable {
 
+    /**
+     * For serialization purpose
+     */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Settings to use with this solver
+     */
     private Settings settings = new Settings() {
     };
 
+    /**
+     * An explanation engine
+     */
     private ExplanationEngine explainer;
 
+    /**
+     * A list of filtering monitors to be informed on any variable events
+     */
     private FilteringMonitorList eoList;
 
     /**
      * Variables of the solver
      */
     Variable[] vars;
+
+    /**
+     * Index of the last added variable
+     */
     int vIdx;
 
     /**
      * Constraints of the solver
      */
     Constraint[] cstrs;
+
+    /**
+     * Index of the last added constraint
+     */
     int cIdx;
 
+    /**
+     * A map to cache constants (considered as fixed variables)
+     */
     public TIntObjectHashMap<IntVar> cachedConstants;
 
     /**
@@ -126,6 +149,9 @@ public class Solver implements Serializable {
      */
     protected List<Criterion> stopCriteria;
 
+    /**
+     * The propagation engine to use
+     */
     protected IPropagationEngine engine;
 
     /**
@@ -133,10 +159,19 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
+    /**
+     * Array of variable to optimize.
+     */
     protected Variable[] objectives;
 
+    /**
+     * Precision to consider when optimizing a RealVariable
+     */
     protected double precision = 0.00D;
 
+    /**
+     * A solution recorder
+     */
     protected ISolutionRecorder solutionRecorder;
 
     /**
@@ -152,19 +187,36 @@ public class Solver implements Serializable {
      */
     ESat feasible = ESat.UNDEFINED;
 
+    /**
+     * Stores this solver's creation time
+     */
     protected long creationTime;
 
+    /**
+     * Counter used to set ids to variables and propagators
+     */
     protected int id = 1;
 
     /**
-     * Two basic constraints TRUE and FALSE, cached to avoid multiple useless occurrences
+     * Basic TRUE constraint, cached to avoid multiple useless occurrences
      */
-    private Constraint TRUE, FALSE;
+    private Constraint TRUE;
 
     /**
-     * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
+     * Basic FALSE constraint, cached to avoid multiple useless occurrences
      */
-    private BoolVar ZERO, ONE;
+    private Constraint FALSE;
+
+    /**
+     * Basic ZERO constant, cached to avoid multiple useless occurrences.
+     */
+    private BoolVar ZERO;
+
+    /**
+     * Basic ONE constant, cached to avoid multiple useless occurrences.
+     */
+    private BoolVar ONE;
+
 
     /**
      * A MiniSat instance, useful to deal with clauses
@@ -220,6 +272,7 @@ public class Solver implements Serializable {
     /**
      * Create a solver object with default parameters, named <code>name</code>.
      *
+     * @param name name attributed to this solver
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
      */
     public Solver(String name) {
@@ -439,6 +492,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the name, if any, of <code>this</code>.
+     * @return this solver's name
      */
     public String getName() {
         return name;
@@ -446,6 +500,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the backtracking environment of <code>this</code>.
+     * @return the backtracking environment of this solver
      */
     public IEnvironment getEnvironment() {
         return environment;
@@ -454,6 +509,7 @@ public class Solver implements Serializable {
     /**
      * Return a reference to the measures recorder.
      * This enables to get, for instance, the number of solutions found, time count, etc.
+     * @return this solver's measure recorder
      */
     public IMeasures getMeasures() {
         return measures;
@@ -461,6 +517,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the explanation engine plugged into <code>this</code>.
+     * @return this solver's explanation engine
      */
     public ExplanationEngine getExplainer() {
         return explainer;
@@ -468,6 +525,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the solution recorder
+     * @return this solver's solution recorder
      */
     public ISolutionRecorder getSolutionRecorder() {
         return solutionRecorder;
@@ -485,6 +543,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the current event observer list
+     * @return this solver's events observer
      */
     public FilteringMonitor getEventObserver() {
         return this.eoList;
@@ -553,6 +612,7 @@ public class Solver implements Serializable {
 
     /**
      * Override the explanation engine.
+     * @param explainer the explanation to use
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
@@ -561,6 +621,7 @@ public class Solver implements Serializable {
 
     /**
      * Override the objective manager
+     * @param om the objective manager to use
      */
     public void set(ObjectiveManager om) {
         this.search.setObjectiveManager(om);
@@ -569,6 +630,7 @@ public class Solver implements Serializable {
     /**
      * Override the solution recorder.
      * Beware : multiple recorders which restore a solution might create a conflict.
+     * @param sr the solution recorder to use
      */
     public void set(ISolutionRecorder sr) {
         this.solutionRecorder = sr;
@@ -760,6 +822,7 @@ public class Solver implements Serializable {
      * Post a constraint temporary, that is, it will be unposted upon backtrack.
      *
      * @param c constraint to add
+     * @throws ContradictionException if the addition of the constraint <code>c</code> detects inconsistency.
      */
     public void postTemp(Constraint c) throws ContradictionException {
         _post(false, c);
@@ -923,6 +986,7 @@ public class Solver implements Serializable {
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}: the optimal solution has been found and
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
+     * @return <tt>true</tt> if the resolution stops before having explored the entire search space, <tt>false</tt> otherwise
      */
     public boolean hasReachedLimit() {
         return search.hasReachedLimit();
@@ -1071,6 +1135,7 @@ public class Solver implements Serializable {
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
+     * @param precision to consider that <code>objective</code> is instantiated.
      */
     public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
         setObjectives(objective);
@@ -1080,6 +1145,7 @@ public class Solver implements Serializable {
 
     /**
      * This method should not be called externally. It launches the resolution process.
+     * @param stopAtFirst set to <tt>true</tt> to stop the search when the first solution is found, <tt>false</tt> otherwise.
      */
     protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
@@ -1103,7 +1169,7 @@ public class Solver implements Serializable {
      * Propagate constraints and related events through the constraint network until a fix point is find, or a contradiction
      * is detected.
      *
-     * @throws ContradictionException
+     * @throws ContradictionException inconsistency is detected, the problem has no solution with the current set of domains and constraints.
      */
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
@@ -1124,6 +1190,9 @@ public class Solver implements Serializable {
      * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
      * <p>
      * Presumably, not all variables are instantiated.
+     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
+     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
+     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
      */
     public ESat isSatisfied() {
         if (isFeasible() != ESat.FALSE) {
@@ -1173,6 +1242,7 @@ public class Solver implements Serializable {
      * </ol>
      *
      * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
+     * @param solution the solution to restore
      * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
      * @throws ContradictionException when inconsistency is detected while restoring the solution.
      */
@@ -1183,6 +1253,7 @@ public class Solver implements Serializable {
                 search.restoreRootNode();
                 environment.worldPush();
                 solution.restore(this);
+                restore = true;
             }catch (ContradictionException e){
                 throw new UnsupportedOperationException("restoring the solution ended in a failure");
             }
@@ -1264,6 +1335,7 @@ public class Solver implements Serializable {
      * @throws IOException            if an I/O exception occurs.
      * @throws ClassNotFoundException if wrong flattened object.
      */
+    @SuppressWarnings("unused")
     public static Solver readFromFile(final String file) throws IOException, ClassNotFoundException {
         FileInputStream fis;
         ObjectInputStream in;
@@ -1274,38 +1346,12 @@ public class Solver implements Serializable {
         return model;
     }
 
-
-    /**
-     * @deprecated To duplicate a model, the variables addition and constraints declaration must be done in a specific
-     * method called with a solver as parameter:
-     * <pre> {@code
-     * <p>
-     *              public void modelIt(Solver solver){
-     *                  // declare variables, for example:
-     *                  IntVar a = VF.enumerated("A", 0, 10, solver);
-     *                  // post constraints, for example:
-     *                  solver.post(ICF.arithm(a, ">=", 3));
-     *              }
-     * <p>
-     *              public void main(){
-     *                  Solver s = new Solver();
-     *                  modelIt(s);
-     *                  Solver clone = new Solver();
-     *                  modelIt(clone);
-     *              }
-     *              }</pre>
-     */
-    @Deprecated
-    public Solver duplicateModel() {
-        throw new SolverException("To duplicate a model, the variables addition and constraints declaration must be done in a specific\n" +
-                "method called with a solver as parameter.");
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * <b>This methods should not be called by the user.</b>
+     * @return a free id to use
      */
     public int nextId() {
         return id++;

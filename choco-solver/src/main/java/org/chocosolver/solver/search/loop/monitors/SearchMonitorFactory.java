@@ -53,9 +53,15 @@ import java.util.regex.Pattern;
  * @since 09/05/11
  */
 public class SearchMonitorFactory {
+    /**
+     * Constructor
+     */
     SearchMonitorFactory() {
     }
 
+    /**
+     * To convert milliseconds in nanoseconds
+     */
     private static final long MILLISECONDS_IN_NANOSECONDS = 1000 * 1000;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +133,6 @@ public class SearchMonitorFactory {
      *
      * @param solver the solver subject to the time limit
      * @param limit  maximal resolution time in millisecond
-     * @see SearchMonitorFactory#limitThreadTime(org.chocosolver.solver.Solver, long)
      */
     public static void limitTime(Solver solver, long limit) {
         TimeCounter counter = new TimeCounter(solver, limit * MILLISECONDS_IN_NANOSECONDS);
@@ -145,7 +150,6 @@ public class SearchMonitorFactory {
      *
      * @param solver the solver to instrument
      * @param duration a String which states the duration like "WWd XXh YYm ZZs".
-     * @see SearchMonitorFactory#limitThreadTime(org.chocosolver.solver.Solver, long)
      * @see SearchMonitorFactory#convertInMilliseconds(String)
      */
     public static void limitTime(Solver solver, String duration) {
@@ -153,36 +157,23 @@ public class SearchMonitorFactory {
     }
 
     /**
-     * Defines a limit over the run time, set in a thread.
-     * When the limit is reached, the resolution is stopped.
-     *
-     * @param limit maximal resolution time in millisecond
-     * @see SearchMonitorFactory#limitTime(org.chocosolver.solver.Solver, long)
-     * @see SearchMonitorFactory#convertInMilliseconds(String)
-     * @deprecated use {@link #limitTime(Solver, long)} instead. Will removed in release > 3.2.2.
+     * Pattern for days
      */
-    @Deprecated
-    public static void limitThreadTime(Solver solver, long limit) {
-        limitTime(solver, limit);
-    }
+    private static Pattern Dp = Pattern.compile("(\\d+)d");
 
     /**
-     * Defines a limit over the run time, set in a thread.
-     * When the limit is reached, the resolution is stopped.
-     *
-     * @param duration a String which states the duration like "WWd XXh YYm ZZs".
-     * @see SearchMonitorFactory#limitTime(org.chocosolver.solver.Solver, String)
-     * @see SearchMonitorFactory#convertInMilliseconds(String)
-     * @deprecated  {@link #limitTime(Solver, String)} instead. Will removed in release > 3.2.2.
+     * Pattern for hours
      */
-    @Deprecated
-    public static void limitThreadTime(Solver solver, String duration) {
-        limitTime(solver, convertInMilliseconds(duration));
-    }
-
-    private static Pattern Dp = Pattern.compile("(\\d+)d");
     private static Pattern Hp = Pattern.compile("(\\d+)h");
+
+    /**
+     * Pattern for minutes
+     */
     private static Pattern Mp = Pattern.compile("(\\d+)m");
+
+    /**
+     * Pattern for seconds
+     */
     private static Pattern Sp = Pattern.compile("(\\d+(\\.\\d+)?)s");
 
 
@@ -305,16 +296,6 @@ public class SearchMonitorFactory {
     }
 
     /**
-     * Force the resolution to restart at root node after each solution.
-     *
-     * @param solver main solver
-     *                  @deprecated see {@link SearchLoopFactory#restartOnSolutions(Solver)}
-     */
-    public static void restartAfterEachSolution(final Solver solver) {
-        SLF.restartOnSolutions(solver);
-    }
-
-    /**
      * Record nogoods from solution, that is, anytime a solution is found, a nogood is produced to prevent from
      * finding the same solution later during the search.
      * <code>vars</code> are the decision variables (to reduce ng size).
@@ -395,6 +376,7 @@ public class SearchMonitorFactory {
      * This requires to have installed the library and to start it before launching the resolution.
      * @param aSolver solver to visualize
      */
+    @SuppressWarnings("unused")
     public static void connectocpprofiler(Solver aSolver){
         aSolver.plugMonitor(new CPProfiler(aSolver));
     }
