@@ -50,6 +50,9 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class IntStrategyFactory {
 
+    /**
+     * Private constructor of this factory
+     */
     IntStrategyFactory() {
     }
 
@@ -146,6 +149,7 @@ public class IntStrategyFactory {
      * Selects randomly either the lower bound or the upper bound of the variable
      * Takes an arbitrary value in {LB,UB}
      *
+     * @param SEED the seed for randomness
      * @return a value selector
      */
     public static IntValueSelector randomBound_value_selector(long SEED) {
@@ -159,6 +163,7 @@ public class IntStrategyFactory {
      * BEWARE: this should not be used within assignments and/or value removals if variables
      * have a bounded domain.
      *
+     * @param SEED the seed for randomness
      * @return a value selector
      */
     public static IntValueSelector random_value_selector(long SEED) {
@@ -562,33 +567,10 @@ public class IntStrategyFactory {
      * @param ALPHA          forget parameter
      * @param FORCE_SAMPLING minimal number of iteration for sampling phase
      * @param SEED           the seed for random
+     * @return an Activity based search strategy.
      */
     public static AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
                                                     int FORCE_SAMPLING, long SEED) {
-        return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, FORCE_SAMPLING, SEED);
-    }
-
-    /**
-     * (Deprecated)
-     * Create an Activity based search strategy.
-     * <p>
-     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
-     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
-     * <br/>
-     *
-     * @param VARS           collection of variables
-     * @param GAMMA          aging parameters
-     * @param DELTA          for interval domain size estimation
-     * @param ALPHA          forget parameter
-     * @param RESTART        restart parameter -- not used
-     * @param FORCE_SAMPLING minimal number of iteration for sampling phase
-     * @param SEED           the seed for random
-     * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#activity(org.chocosolver.solver.variables.IntVar[], double, double, int, int, long)
-     * @deprecated
-     */
-    @Deprecated
-    public static AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
-                                                    double RESTART, int FORCE_SAMPLING, long SEED) {
         return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, FORCE_SAMPLING, SEED);
     }
 
@@ -602,6 +584,7 @@ public class IntStrategyFactory {
      *
      * @param VARS collection of variables
      * @param SEED the seed for random
+     * @return an Activity based search strategy.
      */
     public static AbstractStrategy<IntVar> activity(IntVar[] VARS, long SEED) {
         return activity(VARS, 0.999d, 0.2d, 8, 1, SEED);
@@ -619,6 +602,7 @@ public class IntStrategyFactory {
      * @param NODEIMPACT force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
      * @param SEED       a seed for random
      * @param INITONLY   only apply the initialisation phase, do not update impact thereafter
+     * @return an Impact-based search strategy
      */
     public static AbstractStrategy<IntVar> impact(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
         return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
@@ -633,6 +617,7 @@ public class IntStrategyFactory {
      *
      * @param VARS variables of the problem (should be integers)
      * @param SEED a seed for random
+     * @return an Impact-based search strategy
      */
     public static AbstractStrategy<IntVar> impact(IntVar[] VARS, long SEED) {
         return impact(VARS, 2, 3, 10, SEED, true);
@@ -664,50 +649,11 @@ public class IntStrategyFactory {
      * Considers the K last conflicts
      *
      * @param SOLVER the solver
+     * @param K number of coblicts to consider
      * @param STRAT  the main strategy
      * @return last conflict strategy
      */
     public static AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT) {
         return new LastConflict(SOLVER, STRAT, K);
-    }
-
-    /**
-     * Create a Generate-And-Test search strategy which evaluate each remaining complete instantiation and
-     * check its satisfiability. This does not rely on propagation but only on propagator entailment.
-     * <br/>
-     * This can be smoothly combined with other (IntVar) strategies, but they should be used first because this one
-     * does not let non instantiated int var.
-     * <br/>
-     *
-     * @param SOLVER the solver
-     * @return a Generate-And-Test search strategy
-     * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#generateAndTest(org.chocosolver.solver.Solver, org.chocosolver.solver.search.strategy.strategy.AbstractStrategy, int)
-     * @deprecated may be removed in the next releases
-     */
-    @Deprecated
-    public static AbstractStrategy<IntVar> generateAndTest(Solver SOLVER) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Create a Generate-And-Test search strategy which evaluate each remaining complete instantiation and
-     * check its satisfiability. This does not rely on propagation but only on propagator entailment.
-     * <br/>
-     * This can be smoothly combined with other (IntVar) strategies, but they should be used first because this one
-     * does not let non instantiated int var.
-     * <br/>
-     * This signature enables to trigger Generate-And-Test only when the search space is small enough (below {@code searchSpaceLimit},
-     * and a main strategy otherwise.
-     *
-     * @param SOLVER           the solver
-     * @param mainStrategy     the strategy to apply first
-     * @param searchSpaceLimit the size of search space which triggers the Generate-And-Test strategy.
-     * @return a Generate-And-Test search strategy
-     * @see org.chocosolver.solver.search.strategy.IntStrategyFactory#generateAndTest(org.chocosolver.solver.Solver)
-     * @deprecated may be removed in the next releases
-     */
-    @Deprecated
-    public static AbstractStrategy<IntVar> generateAndTest(Solver SOLVER, AbstractStrategy<IntVar> mainStrategy, int searchSpaceLimit) {
-        throw new UnsupportedOperationException();
     }
 }

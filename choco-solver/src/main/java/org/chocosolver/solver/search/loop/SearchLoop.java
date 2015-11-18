@@ -80,6 +80,7 @@ import static org.chocosolver.util.ESat.*;
  * <p>
  * Created by cprudhom on 01/09/15.
  * Project: choco.
+ * @author Charles Prud'homme
  */
 public final class SearchLoop implements Serializable {
 
@@ -87,36 +88,122 @@ public final class SearchLoop implements Serializable {
      * Define the possible actions of SearchLoop
      */
     protected enum Action {
+        /**
+         * initialization step
+         */
         initialize,
+        /**
+         * propagation step
+         */
         propagate,
+        /**
+         * extension step
+         */
         extend,
+        /**
+         * validation step
+         */
         validate,
+        /**
+         * reparation step
+         */
         repair,
+        /**
+         * ending step
+         */
         stop,
     }
 
     /**
-     * The three main components of SearchLoop
+     * The propagate component of this search loop
      */
     protected Propagate P;
+
+    /**
+     * The learning component of this search loop
+     */
     protected Learn L;
+
+    /**
+     * The moving component of this search loop
+     */
     protected Move M;
 
     /**
-     * The internal variables
+     * The declaring solver
      */
-    protected Solver mSolver; // the solver
-    protected ObjectiveManager objectivemanager; // the objective manager
-    protected Action action; // the action to execute in the search loop
-    protected IMeasures mMeasures; // the resolutions measures
-    protected Decision decision; // the current decisions
-    protected int jumpTo; // counter that indicates the number of world to backtrack to
-    protected int rootWorldIndex = 0, searchWorldIndex = 0; // initial world and search world
-    protected List<Criterion> criteria; // early end criterion
-    protected boolean crit_met, kill, entire;
+    protected Solver mSolver;
+    /**
+     * The objective manager declare
+     */
+    protected ObjectiveManager objectivemanager;
+
+    /**
+     * The next action to execute in the search <u>loop</u>
+     */
+    protected Action action;
+
+    /**
+     * The measure recorder to keep up to date
+     */
+    protected IMeasures mMeasures;
+
+    /**
+     * The current decision
+     */
+    protected Decision decision;
+
+    /**
+     * Counter that indicates how many world should be rolled back when backtracking
+     */
+    protected int jumpTo;
+
+    /**
+     * Index of the initial world, before initialization.
+     * May be different from 0 if some external backups have been made.
+     */
+    protected int rootWorldIndex = 0;
+
+    /**
+     * Index of the world where the search starts, after initialization.
+     */
+    protected int searchWorldIndex = 0;
+
+    /**
+     * List of stopping criteria.
+     * When at least one is satisfied, the search loop ends.
+     */
+    protected List<Criterion> criteria;
+
+    /**
+     * Indicates if a stop criterion is satisfied (set to <tt>true</tt> in that case).
+     */
+    protected boolean crit_met;
+
+    /**
+     * Indicates if the search loops unexpectedly ends (set to <tt>true</tt> in that case).
+     */
+    protected boolean kill;
+
+    /**
+     * Indicates if the entire search space has been explored (set to <tt>true</tt> in that case).
+     */
+    protected boolean entire;
+
+    /**
+     * List of search monitors attached to this search loop
+     */
     protected SearchMonitorList searchMonitors;
-    protected boolean defaultSearch = false; // is default search selected
-    protected boolean completeSearch = false; // does complete search is required
+
+    /**
+     * Indicates if the default search loop is in use (set to <tt>true</tt> in that case).
+     */
+    protected boolean defaultSearch = false;
+
+    /**
+     * Indicates if a complementary search strategy has been added (set to <tt>true</tt> in that case).
+     */
+    protected boolean completeSearch = false;
 
     /**
      * Create a search loop based on three components.
@@ -424,14 +511,6 @@ public final class SearchLoop implements Serializable {
     }
 
     /**
-     * @deprecated see {@link Solver#plugMonitor(ISearchMonitor)} instead. Will be removed in release > 3.2.2.
-     */
-    @Deprecated
-    public void plugSearchMonitor(ISearchMonitor sm) {
-        mSolver.plugMonitor(sm);
-    }
-
-    /**
      * Add all search monitors in the list to the current this search loop.
      *
      * There is no check if there are any duplicates.
@@ -495,7 +574,12 @@ public final class SearchLoop implements Serializable {
     }
 
 
-    public void set(AbstractStrategy strategy) {
+    /**
+     * Declares the search strategy to use.
+     * @param strategy a search strategy to use instead of the declared one (if any)
+     * @param <V> kind of variables the search strategy deals with
+     */
+    public <V extends Variable>  void set(AbstractStrategy<V> strategy) {
         if (M.getChildMoves().size() > 1) {
             throw new UnsupportedOperationException("The Move declared is composed of many Moves.\n" +
                     "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
@@ -505,18 +589,34 @@ public final class SearchLoop implements Serializable {
         }
     }
 
-    public AbstractStrategy getStrategy() {
+    /**
+     * Returns the search strategy in use
+     * @param <V> kind of variables the search strategy deals with
+     * @return the current search strategy
+     */
+    public <V extends Variable>  AbstractStrategy<V> getStrategy() {
         if(M.getChildMoves().size()>1 && mSolver.getSettings().warnUser()){
             Chatterbox.err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
         }
         return M.getStrategy();
     }
 
+    /**
+     * Declares an objective manager to use.
+     * @param om the objective manager to use instead of the declared one (if any).
+     */
     public void setObjectiveManager(ObjectiveManager om) {
         this.objectivemanager = om;
         if (objectivemanager.isOptimization()) {
             mMeasures.declareObjective();
         }
+    }
+
+    /**
+     * @return the currently used objective manager
+     */
+    public ObjectiveManager getObjectiveManager() {
+        return objectivemanager;
     }
 
     /**
@@ -528,14 +628,17 @@ public final class SearchLoop implements Serializable {
         this.completeSearch = isComplete;
     }
 
-    public ObjectiveManager getObjectiveManager() {
-        return objectivemanager;
-    }
-
+    /**
+     * @return the downmost taken decision
+     */
     public Decision getLastDecision() {
         return decision;
     }
 
+    /**
+     * Replaces the downmost taken decision by <code>cobdec</code>.
+     * @param cobdec the new downmost decision
+     */
     public void setLastDecision(Decision cobdec) {
         this.decision = cobdec;
     }
@@ -559,75 +662,35 @@ public final class SearchLoop implements Serializable {
     }
 
 
+    /**
+     * @return <tt>true</tt> if the search loops explores the entire search space, <tt>false</tt> otherwise.
+     */
     public boolean isComplete() {
         return entire;
     }
 
 
+    /**
+     * @return <tt>true</tt> if the search loops ends unexpectedly (externally killed, for instance).
+     */
     public boolean hasEndedUnexpectedly() {
         return kill;
     }
 
 
+    /**
+     * @return <tt>true</tt> if the search loops encountered at least one of the stop criteria declared.
+     */
     public boolean hasReachedLimit() {
         return crit_met;
     }
 
 
+    /**
+     * @return the index of the world where the search starts, after initialization.
+     */
     public int getSearchWorldIndex() {
         return searchWorldIndex;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////// USELESS ///////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Deprecated
-    public int getTimeStamp() {
-        return mSolver.getEnvironment().getTimeStamp();
-    }
-
-
-    @Deprecated
-    public void interrupt(String msgNgood, boolean voidable) {
-        throw new UnsupportedOperationException();
-    }
-
-
-    @Deprecated
-    public void reachLimit(boolean voidable) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    public boolean canBeResumed() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    public int getCurrentDepth() {
-        throw new UnsupportedOperationException();
-    }
-
-
-    public SearchMonitorList getSMList() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    public void forceAlive(boolean b) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    public void moveTo(int nextState) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Deprecated
-    public void overridePreviousWorld(int gap) {
-        this.jumpTo = gap;
     }
 
 }

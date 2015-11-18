@@ -50,22 +50,47 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     // VARIABLES
     //***********************************************************************************
 
+    /**
+     * The target solver
+     */
     protected Solver solver;
+
+    /**
+     * The main strategy declared in the solver
+     */
     protected AbstractStrategy<Variable> mainStrategy;
+
+    /**
+     * Set to <tt>true</tt> when this strategy is active
+     */
     protected boolean active;
+
+    /**
+     * Number of conflicts stored
+     */
     protected int nbCV;
+
+    /**
+     * Variables related to decision in conflicts
+     */
     protected Variable[] conflictingVariables;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
+    /**
+     * Creates a last conflict heuristic
+     * @param solver the solver to attach this to
+     * @param mainStrategy the main strategy declared
+     * @param k the maximum number of conflicts to store
+     */
     public LastConflict(Solver solver, AbstractStrategy<Variable> mainStrategy, int k) {
         super(mainStrategy.vars);
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.solver = solver;
         this.mainStrategy = mainStrategy;
-        solver.getSearchLoop().plugSearchMonitor(this);
+        solver.plugMonitor(this);
         conflictingVariables = new Variable[k];
         nbCV = 0;
         active = false;
@@ -81,7 +106,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     }
 
     @Override
-    public Decision getDecision() {
+    public Decision<Variable> getDecision() {
         if (active) {
             Variable decVar = firstNotInst();
             if (decVar != null) {
