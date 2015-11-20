@@ -48,8 +48,7 @@ import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.SearchLoop;
+import org.chocosolver.solver.search.loop.*;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
@@ -238,6 +237,18 @@ public class Solver implements Serializable {
     private Map<String,Object> hooks;
 
     /**
+     * For autonumbering anonymous solvers.
+     */
+    private static int solverInitNumber;
+
+    /**
+     * @return next solver's number, for anonymous solvers.
+     */
+    private static synchronized int nextSolverNum() {
+        return solverInitNumber++;
+    }
+
+    /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
@@ -271,7 +282,7 @@ public class Solver implements Serializable {
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
      */
     public Solver() {
-        this(Environments.DEFAULT.make(), "");
+        this(Environments.DEFAULT.make(), "Solver-" + nextSolverNum());
     }
 
     /**
@@ -805,6 +816,14 @@ public class Solver implements Serializable {
     public void removeAllHooks(){
         this.hooks.clear();
     }
+
+    /**
+     * Changes the name of this solver to be equal to the argument <code>name</code>.
+     * @param name the new name of this solver.
+     */
+    public void setName(String name){
+        this.name = name;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1320,7 +1339,7 @@ public class Solver implements Serializable {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
-        st.append(String.format("\n Solver %s\n", name));
+        st.append(String.format("\n Solver[%s]\n", name));
         st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
         st.append(String.format("Feasability: %s\n", feasible));
         st.append("== variables ==\n");

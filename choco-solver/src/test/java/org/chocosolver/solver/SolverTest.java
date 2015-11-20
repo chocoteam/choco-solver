@@ -391,4 +391,12 @@ public class SolverTest {
         solver.removeAllHooks();
         Assert.assertEquals(solver.getHooks().size(), 0);
     }
+
+    @Test(groups="1s")
+    public void testName(){
+        Solver solver = new Solver();
+        Assert.assertTrue(solver.getName().startsWith("Solver-"));
+        solver.setName("Revlos");
+        Assert.assertEquals(solver.getName(), "Revlos");
+    }
 }

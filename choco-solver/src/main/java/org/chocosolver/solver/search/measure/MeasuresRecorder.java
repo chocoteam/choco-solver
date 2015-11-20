@@ -31,8 +31,6 @@ package org.chocosolver.solver.search.measure;
 
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-
 /**
  * Object which stores resolution information to get statistics
  *
@@ -40,32 +38,80 @@ import org.chocosolver.solver.constraints.Constraint;
  */
 public final class MeasuresRecorder implements IMeasures {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
+    /**
+     * To transform time from nanoseconds to seconds
+     */
     private static final float IN_SEC = 1000 * 1000 * 1000f;
 
+    /**
+     * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
+     */
     public boolean hasObjective;
-    public boolean objectiveOptimal;
-    public long solutionCount;
-    public long timeCount;
-    public long readingTimeCount;
-    public long nodeCount;
-    public long backtrackCount;
-    public long failCount;
-    public long restartCount;
-    public long maxDepth, depth;
 
+    /**
+     * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
+     */
+    public boolean objectiveOptimal;
+
+    /**
+     * Counts the number of solutions found so far.
+     */
+    public long solutionCount;
+
+    /**
+     * Counts the time spent so far, starting from solver construction call.
+     */
+    public long timeCount;
+
+    /**
+     * Counts the time spent into reading the model
+     */
+    public long readingTimeCount;
+
+    /**
+     * Counts the number of nodes opened so far.
+     */
+    public long nodeCount;
+
+    /**
+     * Counts the number of backtracks done so far.
+     */
+    public long backtrackCount;
+
+    /**
+     * Counts the number of failures encountered so far.
+     */
+    public long failCount;
+
+    /**
+     * Counts the number of restarts done so far.
+     */
+    public long restartCount;
+
+    /**
+     * Stores the overall maximum depth
+     */
+    public long maxDepth;
+
+    /**
+     * Stores the current depth
+     */
+    public long depth;
+
+    /**
+     * When the clock watch starts
+     */
     protected long startingTime;
 
+    /**
+     * The solver to measure
+     */
     protected Solver solver;
-    protected Constraint[] cstrs;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
-
+    /**
+     * Create a measures recorder observing a <code>solver</code>
+     * @param solver the solver to observe
+     */
     public MeasuresRecorder(Solver solver) {
         super();
         this.solver = solver;
@@ -86,7 +132,6 @@ public final class MeasuresRecorder implements IMeasures {
         mr.startingTime = startingTime;
         mr.maxDepth = maxDepth;
         mr.depth = depth;
-        mr.cstrs = cstrs.clone();
         return mr;
     }
 
@@ -120,7 +165,6 @@ public final class MeasuresRecorder implements IMeasures {
         hasObjective = false;
         depth = 0;
         maxDepth = 0;
-        cstrs = null;
     }
 
     //****************************************************************************************************************//
@@ -271,6 +315,7 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
+        st.append("Solver[").append(solver.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
@@ -295,6 +340,7 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneShortLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
+        st.append("Solver[").append(solver.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
             st.append(solver.getObjectiveManager()).append(", ");
@@ -314,7 +360,6 @@ public final class MeasuresRecorder implements IMeasures {
         updateTime();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
-
         if (solver.hasReachedLimit()) {
             st.append("- Incomplete search - Limit reached.\n");
         } else if (solver.getSearchLoop().hasEndedUnexpectedly()) {
@@ -330,6 +375,7 @@ public final class MeasuresRecorder implements IMeasures {
             }
             st.append('\n');
         }
+        st.append("\tSolver[").append(solver.getName()).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
             st.append("\t").append(solver.getObjectiveManager()).append(",\n");

@@ -12,6 +12,7 @@ NEXT MILESTONE
 #### Solver:
 
 - update javadoc (in particular: #347)
+- add default name to Solver + setter, modify measures printing to include the name.
 
 #### Bug fixes: 
 
